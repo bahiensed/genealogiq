@@ -16,6 +16,7 @@ enum Role {
   COMERCIAL
   FINANCE
   USER
+  APP_USER
 }
 
 enum EmailTokenType {
@@ -121,8 +122,11 @@ model User {
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
 
-  addressId String?  @unique @map("address_id")
-  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  addressId  String?   @unique @map("address_id")
+  address    Address?  @relation(fields: [addressId], references: [id], onDelete: SetNull)
+
+  customerId String?   @map("customer_id")
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -137,14 +141,18 @@ model User {
 
 model SupplierCategory {
   id          String  @id @default(cuid())
-  name        String  @unique
+  name        String
   description String?
   isActive    Boolean @default(true) @map("is_active")
+
+  tenantId String?   @map("tenant_id")
+  tenant   Customer? @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
   suppliers Supplier[]
 
+  @@unique([tenantId, name])
   @@map("supplier_categories")
 }
 
@@ -166,6 +174,9 @@ model Supplier {
   categoryId String?           @map("category_id")
   category   SupplierCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
+  tenantId String?   @map("tenant_id")
+  tenant   Customer? @relation("SupplierTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
 
@@ -179,14 +190,18 @@ model Supplier {
 
 model CustomerCategory {
   id          String  @id @default(cuid())
-  name        String  @unique
+  name        String
   description String?
   isActive    Boolean @default(true) @map("is_active")
 
+  tenantId String?   @map("tenant_id")
+  tenant   Customer? @relation("CustomerCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
-  customers Customer[]
+  customers Customer[] @relation("CustomerCategory")
 
+  @@unique([tenantId, name])
   @@map("customer_categories")
 }
 
@@ -206,13 +221,22 @@ model Customer {
   isActive              Boolean    @default(true) @map("is_active")
 
   categoryId String?           @map("category_id")
-  category   CustomerCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  category   CustomerCategory? @relation("CustomerCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+
+  tenantId String?   @map("tenant_id")
+  tenant   Customer? @relation("CustomerTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  users         User[]
+  subCustomers  Customer[]        @relation("CustomerTenant")
+  suppliers     Supplier[]        @relation("SupplierTenant")
+  supplierCats  SupplierCategory[] @relation("SupplierCategoryTenant")
+  customerCats  CustomerCategory[] @relation("CustomerCategoryTenant")
 
   @@map("customers")
 }
