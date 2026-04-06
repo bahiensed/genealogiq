@@ -1,12 +1,13 @@
 import 'server-only'
 
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyTenantSession } from '@/lib/dal'
 
 export async function getCustomerCategories() {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   return prisma.customerCategory.findMany({
+    where: { tenantId: customerId },
     select: {
       id:          true,
       name:        true,
@@ -19,10 +20,10 @@ export async function getCustomerCategories() {
 }
 
 export async function getCustomerCategory(id: string) {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   return prisma.customerCategory.findUnique({
-    where: { id },
+    where: { id, tenantId: customerId },
     select: {
       id:          true,
       name:        true,

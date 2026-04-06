@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyTenantSession } from '@/lib/dal'
 
 const addressSelect = {
   zip:          true,
@@ -15,9 +15,10 @@ const addressSelect = {
 } as const
 
 export async function getUsers() {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   return prisma.user.findMany({
+    where: { customerId },
     select: {
       id:        true,
       firstName: true,
@@ -32,10 +33,10 @@ export async function getUsers() {
 }
 
 export async function getUser(id: string) {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   return prisma.user.findUnique({
-    where: { id },
+    where: { id, customerId },
     select: {
       id:               true,
       firstName:        true,

@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyTenantSession } from '@/lib/dal'
 
 const addressSelect = {
   zip:          true,
@@ -15,12 +15,13 @@ const addressSelect = {
 } as const
 
 export async function getCompany() {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
-  return prisma.company.findFirst({
+  const customer = await prisma.customer.findUnique({
+    where: { id: customerId },
     select: {
       id:                    true,
-      legalName:             true,
+      name:                  true,
       tradeName:             true,
       taxId:                 true,
       stateRegistration:     true,
@@ -32,4 +33,10 @@ export async function getCompany() {
       address:               { select: addressSelect },
     },
   })
+
+  if (!customer) return null
+
+  // Map Customer.name → legalName to match the company form schema
+  const { name: legalName, ...rest } = customer
+  return { legalName, ...rest }
 }
