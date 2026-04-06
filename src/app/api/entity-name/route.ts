@@ -1,34 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyTenantSession } from '@/lib/dal'
 
 const ENTITY_TYPES = ['users', 'customers', 'suppliers'] as const
 type EntityType = (typeof ENTITY_TYPES)[number]
 
-async function resolveName(type: EntityType, id: string): Promise<string | null> {
+async function resolveName(type: EntityType, id: string, customerId: string): Promise<string | null> {
   if (type === 'users') {
-    const record = await prisma.user.findUnique({ where: { id }, select: { firstName: true } })
-    return record?.firstName ?? null
+    const record = await prisma.user.findUnique({ where: { id, customerId }, select: { firstName: true, lastName: true } })
+    if (!record) return null
+    return `${record.firstName} ${record.lastName}`.trim() || null
   }
   if (type === 'customers') {
-    const record = await prisma.customer.findUnique({ where: { id }, select: { name: true, firstName: true, lastName: true, entityType: true } })
-    if (!record) return null
-    return record.entityType === 'INDIVIDUAL'
-      ? [record.firstName, record.lastName].filter(Boolean).join(' ') || null
-      : record.name ?? null
+    const record = await prisma.customer.findUnique({ where: { id, tenantId: customerId }, select: { name: true } })
+    return record?.name ?? null
   }
   if (type === 'suppliers') {
-    const record = await prisma.supplier.findUnique({ where: { id }, select: { name: true, firstName: true, lastName: true, entityType: true } })
-    if (!record) return null
-    return record.entityType === 'INDIVIDUAL'
-      ? [record.firstName, record.lastName].filter(Boolean).join(' ') || null
-      : record.name ?? null
+    const record = await prisma.supplier.findUnique({ where: { id, tenantId: customerId }, select: { name: true } })
+    return record?.name ?? null
   }
   return null
 }
 
 export async function GET(req: NextRequest) {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   const { searchParams } = req.nextUrl
   const type = searchParams.get('type') as EntityType | null
@@ -38,7 +33,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid params' }, { status: 400 })
   }
 
-  const name = await resolveName(type, id)
+  const name = await resolveName(type, id, customerId)
   if (!name) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   return NextResponse.json({ name })

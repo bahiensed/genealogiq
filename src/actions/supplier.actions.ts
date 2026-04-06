@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyTenantSession } from '@/lib/dal'
 import { supplierSchema, type SupplierFormValues } from '@/schemas/supplier.schema'
 
 type ActionError = { error: string }
@@ -18,7 +18,7 @@ function buildAddressWrite(address: SupplierFormValues['address']): any {
 }
 
 export async function createSupplier(data: SupplierFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   const validated = supplierSchema.safeParse(data)
   if (!validated.success) return { error: 'Dados inválidos' }
@@ -31,6 +31,7 @@ export async function createSupplier(data: SupplierFormValues): Promise<ActionEr
         ...rest,
         birthDate:  birthDate ? new Date(birthDate) : null,
         categoryId: categoryId || null,
+        tenantId:   customerId,
         address:    buildAddressWrite(address),
       },
     })
@@ -46,7 +47,7 @@ export async function createSupplier(data: SupplierFormValues): Promise<ActionEr
 }
 
 export async function updateSupplier(id: string, data: SupplierFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   const validated = supplierSchema.safeParse(data)
   if (!validated.success) return { error: 'Dados inválidos' }
@@ -55,7 +56,7 @@ export async function updateSupplier(id: string, data: SupplierFormValues): Prom
 
   try {
     await prisma.supplier.update({
-      where: { id },
+      where: { id, tenantId: customerId },
       data: {
         ...rest,
         birthDate:  birthDate ? new Date(birthDate) : null,
@@ -75,10 +76,10 @@ export async function updateSupplier(id: string, data: SupplierFormValues): Prom
 }
 
 export async function deleteSupplier(id: string): Promise<ActionError | void> {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   try {
-    await prisma.supplier.delete({ where: { id } })
+    await prisma.supplier.delete({ where: { id, tenantId: customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return { error: 'Fornecedor não encontrado.' }
@@ -90,9 +91,9 @@ export async function deleteSupplier(id: string): Promise<ActionError | void> {
 }
 
 export async function toggleSupplierActive(id: string): Promise<ActionError | void> {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
-  const supplier = await prisma.supplier.findUnique({ where: { id }, select: { isActive: true } })
+  const supplier = await prisma.supplier.findUnique({ where: { id, tenantId: customerId }, select: { isActive: true } })
   if (!supplier) return { error: 'Fornecedor não encontrado.' }
 
   await prisma.supplier.update({ where: { id }, data: { isActive: !supplier.isActive } })

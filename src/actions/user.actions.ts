@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyTenantSession } from '@/lib/dal'
 import { sendWelcomeEmail } from '@/lib/email'
 import { userSchema, type UserFormValues } from '@/schemas/user.schema'
 
@@ -20,7 +20,7 @@ function buildAddressWrite(address: UserFormValues['address']): any {
 }
 
 export async function createUser(data: UserFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   const validated = userSchema.safeParse(data)
   if (!validated.success) return { error: 'Dados inválidos' }
@@ -33,10 +33,11 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
       const user = await tx.user.create({
         data: {
           ...rest,
-          birthDate:    birthDate ? new Date(birthDate) : null,
-          password:     null,
+          customerId,
+          birthDate:     birthDate ? new Date(birthDate) : null,
+          password:      null,
           emailVerified: new Date(),
-          address:      buildAddressWrite(address),
+          address:       buildAddressWrite(address),
         },
         select: { id: true },
       })
@@ -60,7 +61,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
 }
 
 export async function updateUser(id: string, data: UserFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
   const validated = userSchema.safeParse(data)
   if (!validated.success) return { error: 'Dados inválidos' }
@@ -72,7 +73,7 @@ export async function updateUser(id: string, data: UserFormValues): Promise<Acti
     if (existing && existing.id !== id) return { error: 'Este e-mail já está em uso' }
 
     await prisma.user.update({
-      where: { id },
+      where: { id, customerId },
       data: {
         ...rest,
         birthDate: birthDate ? new Date(birthDate) : null,
@@ -91,12 +92,12 @@ export async function updateUser(id: string, data: UserFormValues): Promise<Acti
 }
 
 export async function deleteUser(userId: string): Promise<ActionError | void> {
-  const session = await verifySession()
+  const session = await verifyTenantSession()
 
   if (session.user!.id === userId) return { error: 'Você não pode excluir sua própria conta.' }
 
   try {
-    await prisma.user.delete({ where: { id: userId } })
+    await prisma.user.delete({ where: { id: userId, customerId: session.customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return { error: 'Usuário não encontrado.' }
@@ -108,11 +109,11 @@ export async function deleteUser(userId: string): Promise<ActionError | void> {
 }
 
 export async function toggleUserActive(userId: string): Promise<ActionError | void> {
-  const session = await verifySession()
+  const session = await verifyTenantSession()
 
   if (session.user!.id === userId) return { error: 'Você não pode desativar sua própria conta.' }
 
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { isActive: true } })
+  const user = await prisma.user.findUnique({ where: { id: userId, customerId: session.customerId }, select: { isActive: true } })
   if (!user) return { error: 'Usuário não encontrado.' }
 
   await prisma.user.update({ where: { id: userId }, data: { isActive: !user.isActive } })
@@ -120,9 +121,9 @@ export async function toggleUserActive(userId: string): Promise<ActionError | vo
 }
 
 export async function resendWelcomeEmail(userId: string): Promise<ActionError | void> {
-  await verifySession()
+  const { customerId } = await verifyTenantSession()
 
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, password: true } })
+  const user = await prisma.user.findUnique({ where: { id: userId, customerId }, select: { email: true, password: true } })
   if (!user) return { error: 'Usuário não encontrado.' }
   if (user.password) return { error: 'Este usuário já definiu sua senha.' }
 
