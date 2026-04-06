@@ -31,6 +31,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Usuário convidado que ainda não definiu senha
         if (!user.password) return null
 
+        // Bloqueia usuários sem customerId (usuários BMS não podem logar no Sequoia)
+        if (!user.customerId) return null
+
         const match = await bcrypt.compare(password, user.password)
         if (!match) return null
 
@@ -42,10 +45,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         return {
-          id: user.id,
-          email: user.email,
-          name: `${user.firstName} ${user.lastName}`,
-          role: user.role,
+          id:         user.id,
+          email:      user.email,
+          name:       `${user.firstName} ${user.lastName}`,
+          role:       user.role,
+          customerId: user.customerId,
         }
       },
     }),
@@ -54,15 +58,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig.callbacks,
     jwt({ token, user }) {
       if (user) {
-        token.id = user.id
-        token.name = user.name
-        token.role = user.role
+        token.id         = user.id
+        token.name       = user.name
+        token.role       = user.role
+        token.customerId = user.customerId
       }
       return token
     },
     session({ session, token }) {
-      if (token.id) session.user.id = token.id as string
-      if (token.role) session.user.role = token.role as string
+      if (token.id)         session.user.id         = token.id as string
+      if (token.role)       session.user.role       = token.role as string
+      if (token.customerId) session.user.customerId = token.customerId as string
       return session
     },
   },

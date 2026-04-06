@@ -16,7 +16,7 @@ export const authConfig = {
         "/suppliers", "/licenses", "/products", "/services", "/customers",
         "/purchasing", "/inventory", "/sales", "/finance",
       ].some((r) => pathname.startsWith(r))
-      const isAuthRoute = ["/sign-in", "/setup", "/forgot-password"].some((r) =>
+      const isAuthRoute = ["/sign-in", "/forgot-password"].some((r) =>
         pathname.startsWith(r)
       )
 
