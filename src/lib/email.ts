@@ -60,6 +60,21 @@ export async function sendWelcomeEmail(to: string, token: string): Promise<void>
   })
 }
 
+export async function sendAppWelcomeEmail(to: string, token: string): Promise<void> {
+  const url = `${process.env.B2C_URL}/reset-password?token=${token}`
+  await resend.emails.send({
+    from: "no-reply@rohling.com.br",
+    to,
+    subject: "Bem-vindo! Configure seu acesso ao app",
+    html: `
+      <p>Sua conta de acesso foi criada.</p>
+      <p>Clique no link abaixo para criar sua senha e acessar o app (expira em 72h):</p>
+      <p><a href="${url}">Configurar senha</a></p>
+      <p>Se você não esperava este e-mail, entre em contato conosco.</p>
+    `,
+  })
+}
+
 export async function sendPasswordResetEmail(to: string, token: string): Promise<void> {
   const url = `${process.env.APP_URL}/reset-password?token=${token}`
   await resend.emails.send({
