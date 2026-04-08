@@ -1,4 +1,4 @@
-import { verifySession } from '@/lib/dal'
+import { verifyTenantSession, getCustomerModules } from '@/lib/dal'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { AppBreadcrumb } from '@/components/breadcrumb/breadcrumb'
@@ -11,7 +11,8 @@ export default async function ProtectPagesLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const session = await verifySession()
+  const session = await verifyTenantSession()
+  const modules = await getCustomerModules()
 
   return (
     <SidebarProvider
@@ -22,7 +23,7 @@ export default async function ProtectPagesLayout({
         } as React.CSSProperties
       }
     >
-    <AppSidebar />
+    <AppSidebar modules={modules} />
         <div className="flex flex-col w-full min-h-screen">
           <div className="flex border-b items-center justify-between px-4 py-2">
             <div className="flex items-center gap-2">

@@ -3,6 +3,7 @@ import "server-only"
 import { cache } from "react"
 import { redirect, forbidden } from "next/navigation"
 import { auth } from "@/auth"
+import { prisma } from "@/lib/prisma"
 
 export const verifySession = cache(async () => {
   const session = await auth()
@@ -15,6 +16,19 @@ export const verifyTenantSession = cache(async () => {
   const customerId = session.user.customerId
   if (!customerId) redirect("/sign-in")
   return { ...session, customerId }
+})
+
+export const getCustomerModules = cache(async () => {
+  const session = await verifyTenantSession()
+  return prisma.customer.findUnique({
+    where: { id: session.customerId },
+    select: {
+      moduleRecords:    true,
+      modulePurchasing: true,
+      moduleInventory:  true,
+      moduleFinance:    true,
+    },
+  })
 })
 
 const ADMIN_ROLES = ["SUPER_ADMIN", "OWNER", "ADMIN"]

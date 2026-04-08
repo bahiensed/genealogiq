@@ -3,7 +3,7 @@ import { Resend } from "resend"
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function sendVerificationEmail(to: string, token: string): Promise<void> {
-  const url = `${process.env.APP_URL}/verify-email?token=${token}`
+  const url = `${process.env.SEQUOIA_URL}/verify-email?token=${token}`
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
@@ -18,7 +18,7 @@ export async function sendVerificationEmail(to: string, token: string): Promise<
 }
 
 export async function sendEmailChangeEmail(to: string, token: string): Promise<void> {
-  const url = `${process.env.APP_URL}/verify-email?token=${token}`
+  const url = `${process.env.SEQUOIA_URL}/verify-email?token=${token}`
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
@@ -46,7 +46,7 @@ export async function sendAccountDeletionEmail(to: string): Promise<void> {
 }
 
 export async function sendWelcomeEmail(to: string, token: string): Promise<void> {
-  const url = `${process.env.APP_URL}/reset-password?token=${token}`
+  const url = `${process.env.SEQUOIA_URL}/reset-password?token=${token}`
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
@@ -61,7 +61,7 @@ export async function sendWelcomeEmail(to: string, token: string): Promise<void>
 }
 
 export async function sendAppWelcomeEmail(to: string, token: string): Promise<void> {
-  const url = `${process.env.B2C_URL}/reset-password?token=${token}`
+  const url = `${process.env.APP_URL}/reset-password?token=${token}`
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
@@ -76,7 +76,7 @@ export async function sendAppWelcomeEmail(to: string, token: string): Promise<vo
 }
 
 export async function sendPasswordResetEmail(to: string, token: string): Promise<void> {
-  const url = `${process.env.APP_URL}/reset-password?token=${token}`
+  const url = `${process.env.SEQUOIA_URL}/reset-password?token=${token}`
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,

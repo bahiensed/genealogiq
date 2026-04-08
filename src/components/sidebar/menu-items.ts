@@ -6,7 +6,6 @@ import {
   IdCardIcon,
   LayoutDashboard,
   QrCodeIcon,
-  ShoppingBagIcon,
   ShoppingCartIcon,
   StoreIcon,
   TagIcon,

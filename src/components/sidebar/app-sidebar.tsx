@@ -26,17 +26,28 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-const groups = [
-  { label: 'System', items: system },
-  { label: 'Records', items: records },
-  { label: 'Purchasing', items: purchasing },
-  { label: 'Inventory', items: inventory },
-  { label: 'Sales', items: sales },
-  { label: 'Finance', items: finance },
-]
+interface Modules {
+  moduleRecords:    boolean
+  modulePurchasing: boolean
+  moduleInventory:  boolean
+  moduleFinance:    boolean
+}
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  modules: Modules | null
+}
+
+export function AppSidebar({ modules }: AppSidebarProps) {
   const pathname = usePathname()
+
+  const groups = [
+    { label: 'System',     items: system,     enabled: true },
+    { label: 'Records',    items: records,    enabled: modules?.moduleRecords    ?? false },
+    { label: 'Purchasing', items: purchasing, enabled: modules?.modulePurchasing ?? false },
+    { label: 'Inventory',  items: inventory,  enabled: modules?.moduleInventory  ?? false },
+    { label: 'Sales',      items: sales,      enabled: true },
+    { label: 'Finance',    items: finance,    enabled: modules?.moduleFinance    ?? false },
+  ].filter(g => g.enabled)
 
   return (
     <Sidebar>
@@ -44,7 +55,6 @@ export function AppSidebar() {
         <span className="font-bold text-sm">Sequoia</span>
       </SidebarHeader>
       <SidebarContent>
-        {/* Main — standalone items above all groups */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -62,7 +72,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Grouped sections */}
         {groups.map((group) => (
           <Collapsible key={group.label} className="group/collapsible" defaultOpen={group.items.some((item) => pathname.startsWith(item.url))}>
             <SidebarGroup>
