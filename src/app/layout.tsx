@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { CookieConsent } from '@/components/cookies/cookie-consent'
 
 export const metadata: Metadata = {
-  title: "Sequoia | BMS",
+  title: "Genealogiq | Sequoia",
   description: "Sequoia Business Management System",
 }
 
