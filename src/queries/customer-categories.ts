@@ -6,8 +6,8 @@ import { verifyTenantSession } from '@/lib/dal'
 export async function getCustomerCategories() {
   const { customerId } = await verifyTenantSession()
 
-  return prisma.customerCategory.findMany({
-    where: { tenantId: customerId },
+  return prisma.appUserCategory.findMany({
+    where:   { tenantId: customerId },
     select: {
       id:          true,
       name:        true,
@@ -22,8 +22,8 @@ export async function getCustomerCategories() {
 export async function getCustomerCategory(id: string) {
   const { customerId } = await verifyTenantSession()
 
-  return prisma.customerCategory.findUnique({
-    where: { id, tenantId: customerId },
+  return prisma.appUserCategory.findUnique({
+    where:  { id, tenantId: customerId },
     select: {
       id:          true,
       name:        true,

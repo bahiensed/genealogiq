@@ -16,7 +16,7 @@ export async function createCustomerCategory(data: CustomerCategoryFormValues): 
   if (!validated.success) return { error: 'Dados inválidos' }
 
   try {
-    await prisma.customerCategory.create({ data: { ...validated.data, tenantId: customerId } })
+    await prisma.appUserCategory.create({ data: { ...validated.data, tenantId: customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
       return { error: 'Já existe uma categoria com este nome' }
@@ -35,13 +35,13 @@ export async function updateCustomerCategory(id: string, data: CustomerCategoryF
   if (!validated.success) return { error: 'Dados inválidos' }
 
   try {
-    const existing = await prisma.customerCategory.findUnique({
-      where: { tenantId_name: { tenantId: customerId, name: validated.data.name } },
+    const existing = await prisma.appUserCategory.findUnique({
+      where:  { tenantId_name: { tenantId: customerId, name: validated.data.name } },
       select: { id: true },
     })
     if (existing && existing.id !== id) return { error: 'Já existe uma categoria com este nome' }
 
-    await prisma.customerCategory.update({ where: { id, tenantId: customerId }, data: validated.data })
+    await prisma.appUserCategory.update({ where: { id, tenantId: customerId }, data: validated.data })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return { error: 'Categoria não encontrada.' }
@@ -57,7 +57,7 @@ export async function deleteCustomerCategory(id: string): Promise<ActionError | 
   const { customerId } = await verifyTenantSession()
 
   try {
-    await prisma.customerCategory.delete({ where: { id, tenantId: customerId } })
+    await prisma.appUserCategory.delete({ where: { id, tenantId: customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return { error: 'Categoria não encontrada.' }
@@ -71,9 +71,12 @@ export async function deleteCustomerCategory(id: string): Promise<ActionError | 
 export async function toggleCustomerCategoryActive(id: string): Promise<ActionError | void> {
   const { customerId } = await verifyTenantSession()
 
-  const category = await prisma.customerCategory.findUnique({ where: { id, tenantId: customerId }, select: { isActive: true } })
+  const category = await prisma.appUserCategory.findUnique({
+    where:  { id, tenantId: customerId },
+    select: { isActive: true },
+  })
   if (!category) return { error: 'Categoria não encontrada.' }
 
-  await prisma.customerCategory.update({ where: { id }, data: { isActive: !category.isActive } })
+  await prisma.appUserCategory.update({ where: { id }, data: { isActive: !category.isActive } })
   revalidatePath('/customer-categories')
 }

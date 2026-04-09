@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useForm, Controller, useWatch } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
-import { customerResolver, customerDefaultValues, type CustomerFormValues } from '@/schemas/customer.schema'
-import { createCustomer, updateCustomer } from '@/actions/customer.actions'
-import { maskCpf, maskCnpj, maskPhone } from '@/lib/masks'
+import { appUserResolver, appUserDefaultValues, type AppUserFormValues, GENDERS } from '@/schemas/app-user.schema'
+import { updateCustomer } from '@/actions/customer.actions'
+import { maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -35,34 +34,34 @@ interface Category {
 }
 
 interface CustomerFormProps {
-  id?: string
-  defaultValues?: CustomerFormValues
+  id: string
+  defaultValues?: AppUserFormValues
   categories?: Category[]
 }
 
-export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFormProps) {
-  const isEditing = !!id
-  const [serverError, setServerError] = useState<string | null>(null)
-  const router = useRouter()
+const GENDER_LABELS: Record<string, string> = {
+  MALE:   'Masculino',
+  FEMALE: 'Feminino',
+  OTHER:  'Outro',
+}
 
-  const form = useForm<CustomerFormValues>({
-    resolver: customerResolver,
-    defaultValues: defaultValues ?? customerDefaultValues,
+export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFormProps) {
+  const [serverError, setServerError] = useState<string | null>(null)
+
+  const form = useForm<AppUserFormValues>({
+    resolver: appUserResolver,
+    defaultValues: defaultValues ?? appUserDefaultValues,
   })
 
   const { control, handleSubmit, setValue, formState: { isSubmitting, errors } } = form
 
-  const entityType = useWatch({ control, name: 'entityType' })
-  const isIndividual = entityType === 'INDIVIDUAL'
-
-  async function onSubmit(data: CustomerFormValues) {
+  async function onSubmit(data: AppUserFormValues) {
     setServerError(null)
-    const result = isEditing ? await updateCustomer(id, data) : await createCustomer(data)
+    const result = await updateCustomer(id, data)
     if ('error' in result) {
       setServerError(result.error)
     } else {
       toast.success(result.success)
-      if (!isEditing) router.push('/customers')
     }
   }
 
@@ -70,132 +69,106 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-2xl">
       {serverError && <FieldError>{serverError}</FieldError>}
 
+      {/* ── Dados pessoais ── */}
+      <p className="text-sm font-medium">Dados pessoais</p>
       <FieldGroup>
-        {/* Tipo */}
         <div className="grid grid-cols-12 gap-3">
           <Controller
-            name="entityType"
+            name="firstName"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field className="col-span-6" data-invalid={fieldState.invalid}>
+                <FieldLabel>Nome:</FieldLabel>
+                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+          <Controller
+            name="lastName"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field className="col-span-6" data-invalid={fieldState.invalid}>
+                <FieldLabel>Sobrenome:</FieldLabel>
+                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-12 gap-3">
+          <Controller
+            name="gender"
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Tipo:</FieldLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
+                <FieldLabel>Gênero:</FieldLabel>
+                <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="COMPANY">Pessoa Jurídica</SelectItem>
-                    <SelectItem value="INDIVIDUAL">Pessoa Física</SelectItem>
+                    {GENDERS.map((g) => (
+                      <SelectItem key={g} value={g}>{GENDER_LABELS[g]}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </Field>
             )}
           />
+          <Controller
+            name="birthDate"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field className="col-span-4" data-invalid={fieldState.invalid}>
+                <FieldLabel>Data de Nascimento:</FieldLabel>
+                <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
         </div>
 
-        {/* Nome principal + Nome secundário (labels mudam por tipo) */}
         <div className="grid grid-cols-12 gap-3">
           <Controller
-            name="name"
+            name="birthCity"
             control={control}
-            render={({ field, fieldState }) => (
-              <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>{isIndividual ? 'Nome:' : 'Razão Social:'}</FieldLabel>
-                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            render={({ field }) => (
+              <Field className="col-span-4">
+                <FieldLabel>Cidade natal:</FieldLabel>
+                <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
           />
           <Controller
-            name="tradeName"
+            name="birthState"
             control={control}
-            render={({ field, fieldState }) => (
-              <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>{isIndividual ? 'Sobrenome:' : 'Nome Fantasia:'}</FieldLabel>
-                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            render={({ field }) => (
+              <Field className="col-span-4">
+                <FieldLabel>Estado natal:</FieldLabel>
+                <Input {...field} value={field.value ?? ''} autoComplete="off" />
+              </Field>
+            )}
+          />
+          <Controller
+            name="birthCountry"
+            control={control}
+            render={({ field }) => (
+              <Field className="col-span-4">
+                <FieldLabel>País natal:</FieldLabel>
+                <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
           />
         </div>
+      </FieldGroup>
 
-        {/* Documento fiscal + campos específicos por tipo */}
-        {isIndividual ? (
-          <div className="grid grid-cols-12 gap-3">
-            <Controller
-              name="taxId"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>CPF:</FieldLabel>
-                  <MaskedInput
-                    value={field.value}
-                    onChange={field.onChange}
-                    maskFn={maskCpf}
-                    autoComplete="off"
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-            <Controller
-              name="birthDate"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Data de Nascimento:</FieldLabel>
-                  <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-          </div>
-        ) : (
-          <div className="grid grid-cols-12 gap-3">
-            <Controller
-              name="taxId"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>CNPJ:</FieldLabel>
-                  <MaskedInput
-                    value={field.value}
-                    onChange={field.onChange}
-                    maskFn={maskCnpj}
-                    autoComplete="off"
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-            <Controller
-              name="stateRegistration"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Insc. Estadual:</FieldLabel>
-                  <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-            <Controller
-              name="municipalRegistration"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Insc. Municipal:</FieldLabel>
-                  <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-          </div>
-        )}
+      <FieldSeparator />
 
-        {/* E-mail + DDI + Telefone */}
+      {/* ── Contato ── */}
+      <p className="text-sm font-medium">Contato</p>
+      <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
           <Controller
             name="email"
@@ -215,9 +188,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               <Field className="col-span-2">
                 <FieldLabel>DDI:</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {PHONE_COUNTRY_CODES.map((c) => (
                       <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
@@ -234,7 +205,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
                 <FieldLabel>Telefone:</FieldLabel>
                 <MaskedInput
-                  value={field.value}
+                  value={field.value ?? ''}
                   onChange={field.onChange}
                   maskFn={maskPhone}
                   autoComplete="off"
@@ -246,15 +217,14 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
           />
         </div>
 
-        {/* Categoria */}
         <Controller
           name="categoryId"
           control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
+          render={({ field }) => (
+            <Field>
               <FieldLabel>Categoria:</FieldLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger aria-invalid={fieldState.invalid}>
+              <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
+                <SelectTrigger>
                   <SelectValue placeholder="Selecione uma categoria" />
                 </SelectTrigger>
                 <SelectContent>
@@ -263,44 +233,36 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                   ))}
                 </SelectContent>
               </Select>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
 
-        {/* Notas */}
         <Controller
           name="notes"
           control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
+          render={({ field }) => (
+            <Field>
               <FieldLabel>Notas:</FieldLabel>
-              <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              <Textarea {...field} value={field.value ?? ''} rows={3} />
             </Field>
           )}
         />
 
-        {isEditing && (
-          <Controller
-            name="isActive"
-            control={control}
-            render={({ field }) => (
-              <Field orientation="horizontal">
-                <Switch
-                  id="isActive"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-                <FieldLabel htmlFor="isActive" className="cursor-pointer">Cliente ativo:</FieldLabel>
-              </Field>
-            )}
-          />
-        )}
+        <Controller
+          name="isActive"
+          control={control}
+          render={({ field }) => (
+            <Field orientation="horizontal">
+              <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
+              <FieldLabel htmlFor="isActive" className="cursor-pointer">Cliente ativo</FieldLabel>
+            </Field>
+          )}
+        />
       </FieldGroup>
 
       <FieldSeparator />
 
+      {/* ── Endereço ── */}
       <p className="text-sm font-medium">Endereço</p>
       <AddressSection
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -310,9 +272,31 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
         prefix="address"
       />
 
+      <FieldSeparator />
+
+      {/* ── Redes sociais ── */}
+      <p className="text-sm font-medium">Redes sociais</p>
+      <FieldGroup>
+        <div className="grid grid-cols-12 gap-3">
+          {(['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'website'] as const).map((key) => (
+            <Controller
+              key={key}
+              name={key}
+              control={control}
+              render={({ field }) => (
+                <Field className="col-span-6">
+                  <FieldLabel className="capitalize">{key === 'fb' ? 'Facebook' : key === 'x' ? 'X (Twitter)' : key.charAt(0).toUpperCase() + key.slice(1)}:</FieldLabel>
+                  <Input {...field} value={field.value ?? ''} autoComplete="off" />
+                </Field>
+              )}
+            />
+          ))}
+        </div>
+      </FieldGroup>
+
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar cliente'}
+          {isSubmitting ? 'Salvando…' : 'Salvar alterações'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
           Limpar

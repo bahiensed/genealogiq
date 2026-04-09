@@ -1,7 +1,8 @@
 import { getCustomerCategories } from '@/queries/customer-categories'
-import { CustomerForm } from '@/components/customers/customer-form'
+import { CustomerWizard } from '@/components/customers/customer-wizard'
 
 export default async function NewCustomerPage() {
+
   const categories = await getCustomerCategories()
 
   return (
@@ -9,7 +10,7 @@ export default async function NewCustomerPage() {
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
         Novo cliente
       </h1>
-      <CustomerForm categories={categories} />
+      <CustomerWizard categories={categories} />
     </div>
   )
 }

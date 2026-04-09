@@ -4,6 +4,7 @@ import { CustomerCategoriesDataTable } from '@/components/customer-categories/cu
 import { Button } from '@/components/ui/button'
 
 export default async function CustomerCategoriesPage() {
+
   const categories = await getCustomerCategories()
 
   return (

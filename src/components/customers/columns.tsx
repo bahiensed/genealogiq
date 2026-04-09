@@ -21,9 +21,8 @@ import { toggleCustomerActive, deleteCustomer } from '@/actions/customer.actions
 
 export type CustomerRow = {
   id: string
-  entityType: string
-  name: string
-  tradeName: string
+  firstName: string
+  lastName: string
   email: string
   isActive: boolean
   createdAt: Date
@@ -33,6 +32,7 @@ export type CustomerRow = {
 function ActionsCell({ row }: { row: { original: CustomerRow } }) {
   const [isPending, startTransition] = useTransition()
   const customer = row.original
+  const fullName = `${customer.firstName} ${customer.lastName}`
 
   return (
     <DropdownMenu>
@@ -61,7 +61,7 @@ function ActionsCell({ row }: { row: { original: CustomerRow } }) {
         <DropdownMenuSeparator />
         <ConfirmDeleteDialog
           isPending={isPending}
-          description={`O cliente "${customer.name}" será excluído permanentemente.`}
+          description={`O cliente "${fullName}" será excluído permanentemente.`}
           onConfirm={() => startTransition(async () => {
             const result = await deleteCustomer(customer.id)
             if (result?.error) toast.error(result.error)
@@ -75,18 +75,14 @@ function ActionsCell({ row }: { row: { original: CustomerRow } }) {
 
 export const customerColumns: ColumnDef<CustomerRow>[] = [
   {
-    accessorKey: 'name',
+    id: 'name',
+    accessorFn: (row) => `${row.firstName} ${row.lastName}`,
     header: ({ column }) => <DataTableColumnHeader column={column} title="Nome" />,
     cell: ({ row }) => (
       <Link href={`/customers/${row.original.id}`} className="hover:underline">
-        {row.original.name}
+        {row.original.firstName} {row.original.lastName}
       </Link>
     ),
-  },
-  {
-    accessorKey: 'entityType',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Tipo" />,
-    cell: ({ row }) => row.original.entityType === 'INDIVIDUAL' ? 'PF' : 'PJ',
   },
   {
     id: 'category',

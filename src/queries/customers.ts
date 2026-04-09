@@ -17,17 +17,16 @@ const addressSelect = {
 export async function getCustomers() {
   const { customerId } = await verifyTenantSession()
 
-  return prisma.customer.findMany({
-    where: { tenantId: customerId },
+  return prisma.appUser.findMany({
+    where:   { tenantId: customerId },
     select: {
-      id:         true,
-      entityType: true,
-      name:       true,
-      tradeName:  true,
-      email:      true,
-      isActive:   true,
-      createdAt:  true,
-      category:   { select: { id: true, name: true } },
+      id:        true,
+      firstName: true,
+      lastName:  true,
+      email:     true,
+      isActive:  true,
+      createdAt: true,
+      category:  { select: { id: true, name: true } },
     },
     orderBy: { createdAt: 'asc' },
   })
@@ -36,24 +35,45 @@ export async function getCustomers() {
 export async function getCustomer(id: string) {
   const { customerId } = await verifyTenantSession()
 
-  return prisma.customer.findUnique({
-    where: { id, tenantId: customerId },
+  return prisma.appUser.findUnique({
+    where:  { id, tenantId: customerId },
     select: {
-      id:                    true,
-      entityType:            true,
-      name:                  true,
-      tradeName:             true,
-      taxId:                 true,
-      stateRegistration:     true,
-      municipalRegistration: true,
-      birthDate:             true,
-      email:                 true,
-      phoneCountryCode:      true,
-      phone:                 true,
-      notes:                 true,
-      categoryId:            true,
-      isActive:              true,
-      address:               { select: addressSelect },
+      id:              true,
+      firstName:       true,
+      lastName:        true,
+      gender:          true,
+      birthDate:       true,
+      birthCity:       true,
+      birthState:      true,
+      birthCountry:    true,
+      email:           true,
+      phoneCountryCode: true,
+      phone:           true,
+      categoryId:      true,
+      notes:           true,
+      isActive:        true,
+      fb:              true,
+      instagram:       true,
+      linkedin:        true,
+      tiktok:          true,
+      x:               true,
+      youtube:         true,
+      website:         true,
+      address:         { select: addressSelect },
+      guardianships: {
+        select: {
+          isPrimary: true,
+          deceased: {
+            select: {
+              id:        true,
+              firstName: true,
+              lastName:  true,
+              birthDate: true,
+              deathDate: true,
+            },
+          },
+        },
+      },
     },
   })
 }

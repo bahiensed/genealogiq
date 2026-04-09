@@ -4,6 +4,7 @@ import { CustomerCategoryForm } from '@/components/customer-categories/customer-
 
 export default async function EditCustomerCategoryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+
   const category = await getCustomerCategory(id)
   if (!category) notFound()
 

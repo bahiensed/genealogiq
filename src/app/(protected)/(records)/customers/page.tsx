@@ -4,6 +4,7 @@ import { CustomersDataTable } from '@/components/customers/customers-data-table'
 import { Button } from '@/components/ui/button'
 
 export default async function CustomersPage() {
+
   const customers = await getCustomers()
 
   return (

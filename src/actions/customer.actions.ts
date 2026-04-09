@@ -6,52 +6,86 @@ import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail } from '@/lib/email'
-import { customerSchema, type CustomerFormValues } from '@/schemas/customer.schema'
+import { appUserSchema, type AppUserFormValues } from '@/schemas/app-user.schema'
+import { deceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildAddressWrite(address: CustomerFormValues['address']): any {
+function buildAddressWrite(address: AppUserFormValues['address']): any {
   if (!address) return undefined
   const hasData = Object.entries(address).some(([k, v]) => k !== 'country' && v)
   if (!hasData && !address.country) return undefined
   return { upsert: { create: address, update: address } }
 }
 
-export async function createCustomer(data: CustomerFormValues): Promise<ActionError | ActionSuccess> {
+function toDate(value: string | null | undefined): Date | null {
+  return value ? new Date(value) : null
+}
+
+export async function createCustomerWithDeceased(
+  appUserData: AppUserFormValues,
+  deceasedData: DeceasedFormValues,
+): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
-  const validated = customerSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  const validatedUser = appUserSchema.safeParse(appUserData)
+  if (!validatedUser.success) return { error: 'Dados do cliente inválidos' }
 
-  const { address, birthDate, categoryId, ...rest } = validated.data
+  const validatedDeceased = deceasedSchema.safeParse(deceasedData)
+  if (!validatedDeceased.success) return { error: 'Dados do falecido inválidos' }
+
+  const { address, birthDate, categoryId, ...userRest } = validatedUser.data
+  const { birthDate: dBirthDate, deathDate, burialDate, burialLatitude, burialLongitude, ...deceasedRest } = validatedDeceased.data
 
   let appUserToken: string | null = null
 
   try {
     ;({ appUserToken } = await prisma.$transaction(async (tx) => {
-      await tx.customer.create({
+      const appUser = await tx.appUser.create({
         data: {
-          ...rest,
-          birthDate:  birthDate ? new Date(birthDate) : null,
+          ...userRest,
+          birthDate:  toDate(birthDate),
           categoryId: categoryId || null,
           tenantId:   customerId,
           address:    buildAddressWrite(address),
         },
+        select: { id: true },
+      })
+
+      const deceased = await tx.deceased.create({
+        data: {
+          ...deceasedRest,
+          birthDate:       toDate(dBirthDate),
+          deathDate:       toDate(deathDate),
+          burialDate:      toDate(burialDate),
+          burialLatitude:  burialLatitude ?? null,
+          burialLongitude: burialLongitude ?? null,
+          tenantId:        customerId,
+        },
+        select: { id: true },
+      })
+
+      await tx.deceasedGuardian.create({
+        data: {
+          appUserId:  appUser.id,
+          deceasedId: deceased.id,
+          isPrimary:  true,
+        },
       })
 
       const existingUser = await tx.user.findUnique({
-        where: { email: rest.email },
+        where: { email: userRest.email },
         select: { id: true },
       })
       if (existingUser) return { appUserToken: null }
 
-      const appUser = await tx.user.create({
+      const authUser = await tx.user.create({
         data: {
-          firstName:     rest.name,
-          lastName:      rest.tradeName,
-          email:         rest.email,
+          firstName:     userRest.firstName,
+          lastName:      userRest.lastName,
+          email:         userRest.email,
           role:          'APP_USER',
           customerId,
           password:      null,
@@ -60,9 +94,14 @@ export async function createCustomer(data: CustomerFormValues): Promise<ActionEr
         select: { id: true },
       })
 
+      await tx.appUser.update({
+        where: { id: appUser.id },
+        data:  { userId: authUser.id },
+      })
+
       const t = randomBytes(32).toString('hex')
       await tx.passwordResetToken.create({
-        data: { token: t, userId: appUser.id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
+        data: { token: t, userId: authUser.id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
       })
 
       return { appUserToken: t }
@@ -75,27 +114,27 @@ export async function createCustomer(data: CustomerFormValues): Promise<ActionEr
   }
 
   if (appUserToken) {
-    await sendAppWelcomeEmail(rest.email, appUserToken)
+    await sendAppWelcomeEmail(userRest.email, appUserToken)
   }
 
   revalidatePath('/customers')
   return { success: 'Cliente criado com sucesso.' }
 }
 
-export async function updateCustomer(id: string, data: CustomerFormValues): Promise<ActionError | ActionSuccess> {
+export async function updateCustomer(id: string, data: AppUserFormValues): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
-  const validated = customerSchema.safeParse(data)
+  const validated = appUserSchema.safeParse(data)
   if (!validated.success) return { error: 'Dados inválidos' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data
 
   try {
-    await prisma.customer.update({
+    await prisma.appUser.update({
       where: { id, tenantId: customerId },
       data: {
         ...rest,
-        birthDate:  birthDate ? new Date(birthDate) : null,
+        birthDate:  toDate(birthDate),
         categoryId: categoryId || null,
         address:    buildAddressWrite(address),
       },
@@ -115,7 +154,7 @@ export async function deleteCustomer(id: string): Promise<ActionError | void> {
   const { customerId } = await verifyTenantSession()
 
   try {
-    await prisma.customer.delete({ where: { id, tenantId: customerId } })
+    await prisma.appUser.delete({ where: { id, tenantId: customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return { error: 'Cliente não encontrado.' }
@@ -129,9 +168,12 @@ export async function deleteCustomer(id: string): Promise<ActionError | void> {
 export async function toggleCustomerActive(id: string): Promise<ActionError | void> {
   const { customerId } = await verifyTenantSession()
 
-  const customer = await prisma.customer.findUnique({ where: { id, tenantId: customerId }, select: { isActive: true } })
-  if (!customer) return { error: 'Cliente não encontrado.' }
+  const appUser = await prisma.appUser.findUnique({
+    where:  { id, tenantId: customerId },
+    select: { isActive: true },
+  })
+  if (!appUser) return { error: 'Cliente não encontrado.' }
 
-  await prisma.customer.update({ where: { id }, data: { isActive: !customer.isActive } })
+  await prisma.appUser.update({ where: { id }, data: { isActive: !appUser.isActive } })
   revalidatePath('/customers')
 }
