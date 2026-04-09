@@ -6,10 +6,13 @@ import {
   main,
   system,
   records,
+  categories,
   purchasing,
   inventory,
   sales,
   finance,
+  type MenuItem,
+  type ModuleKey,
 } from '@/components/sidebar/menu-items'
 import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
@@ -26,33 +29,39 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-interface Modules {
-  moduleRecords:    boolean
-  modulePurchasing: boolean
-  moduleInventory:  boolean
-  moduleFinance:    boolean
-}
+type Modules = Record<ModuleKey, boolean>
 
 interface AppSidebarProps {
   modules: Modules | null
 }
 
+function visibleItems(items: MenuItem[], modules: Modules | null): MenuItem[] {
+  return items.filter((item) => !item.moduleKey || (modules?.[item.moduleKey] ?? false))
+}
+
 export function AppSidebar({ modules }: AppSidebarProps) {
   const pathname = usePathname()
 
+  const recordsItems    = visibleItems(records,    modules)
+  const categoriesItems = visibleItems(categories, modules)
+  const purchasingItems = visibleItems(purchasing, modules)
+  const inventoryItems  = visibleItems(inventory,  modules)
+  const financeItems    = visibleItems(finance,    modules)
+
   const groups = [
-    { label: 'System',     items: system,     enabled: true },
-    { label: 'Records',    items: records,    enabled: modules?.moduleRecords    ?? false },
-    { label: 'Purchasing', items: purchasing, enabled: modules?.modulePurchasing ?? false },
-    { label: 'Inventory',  items: inventory,  enabled: modules?.moduleInventory  ?? false },
-    { label: 'Sales',      items: sales,      enabled: true },
-    { label: 'Finance',    items: finance,    enabled: modules?.moduleFinance    ?? false },
-  ].filter(g => g.enabled)
+    { label: 'System',      items: system,          show: true                       },
+    { label: 'Records',     items: recordsItems,    show: recordsItems.length > 0    },
+    { label: 'Categories',  items: categoriesItems, show: categoriesItems.length > 0 },
+    { label: 'Purchasing',  items: purchasingItems, show: true                       },
+    { label: 'Inventory',   items: inventoryItems,  show: true                       },
+    { label: 'Sales',       items: sales,           show: true                       },
+    { label: 'Finance',     items: financeItems,    show: financeItems.length > 0    },
+  ].filter((g) => g.show)
 
   return (
     <Sidebar>
       <SidebarHeader className="border-b p-4">
-        <span className="font-bold text-sm">Sequoia</span>
+        <span className="font-bold text-sm">Genealogiq | Sequoia</span>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -73,7 +82,11 @@ export function AppSidebar({ modules }: AppSidebarProps) {
         </SidebarGroup>
 
         {groups.map((group) => (
-          <Collapsible key={group.label} className="group/collapsible" defaultOpen={group.items.some((item) => pathname.startsWith(item.url))}>
+          <Collapsible
+            key={group.label}
+            className="group/collapsible"
+            defaultOpen={group.items.some((item) => pathname.startsWith(item.url))}
+          >
             <SidebarGroup>
               <SidebarGroupLabel asChild>
                 <CollapsibleTrigger>

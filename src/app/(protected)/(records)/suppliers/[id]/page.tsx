@@ -1,10 +1,14 @@
-import { notFound } from 'next/navigation'
+import { notFound, forbidden } from 'next/navigation'
+import { getCustomerModules } from '@/lib/dal'
 import { getSupplier } from '@/queries/suppliers'
 import { getSupplierCategories } from '@/queries/supplier-categories'
 import { SupplierForm } from '@/components/suppliers/supplier-form'
 
 export default async function EditSupplierPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const modules = await getCustomerModules()
+  if (!modules?.moduleRecordsSuppliers) forbidden()
+
   const [supplier, categories] = await Promise.all([
     getSupplier(id),
     getSupplierCategories(),

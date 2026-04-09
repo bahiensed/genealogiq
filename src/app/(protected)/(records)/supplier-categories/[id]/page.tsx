@@ -1,9 +1,13 @@
-import { notFound } from 'next/navigation'
+import { notFound, forbidden } from 'next/navigation'
+import { getCustomerModules } from '@/lib/dal'
 import { getSupplierCategory } from '@/queries/supplier-categories'
 import { SupplierCategoryForm } from '@/components/supplier-categories/supplier-category-form'
 
 export default async function EditSupplierCategoryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const modules = await getCustomerModules()
+  if (!modules?.moduleCategoriesSuppliers) forbidden()
+
   const category = await getSupplierCategory(id)
   if (!category) notFound()
 

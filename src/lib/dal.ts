@@ -23,10 +23,16 @@ export const getCustomerModules = cache(async () => {
   return prisma.customer.findUnique({
     where: { id: session.customerId },
     select: {
-      moduleRecords:    true,
-      modulePurchasing: true,
-      moduleInventory:  true,
-      moduleFinance:    true,
+      moduleRecordsSuppliers:    true,
+      moduleRecordsProducts:     true,
+      moduleRecordsServices:     true,
+      moduleCategoriesSuppliers: true,
+      moduleCategoriesProducts:  true,
+      moduleCategoriesServices:  true,
+      modulePurchasingProducts:  true,
+      modulePurchasingServices:  true,
+      moduleInventoryProducts:   true,
+      moduleFinance:             true,
     },
   })
 })
