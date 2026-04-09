@@ -2,7 +2,6 @@ import { verifySession } from '@/lib/dal'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { AppBreadcrumb } from '@/components/breadcrumb/breadcrumb'
-import { SearchInput } from '@/components/search/search-input'
 import { ModeToggle } from '@/components/theme/mode-toggle'
 import { UserMenu } from '@/components/users/user-menu'
 
@@ -30,7 +29,6 @@ export default async function ProtectPagesLayout({
               <AppBreadcrumb />
             </div>
             <div className="flex gap-4 items-center">
-              <SearchInput />
               <ModeToggle />
               <UserMenu
                 name={session?.user?.name}
