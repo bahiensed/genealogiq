@@ -12,6 +12,14 @@ type ActionError = { error: string }
 type ActionSuccess = { success: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildAddressCreate(address: UserFormValues['address']): any {
+  if (!address) return undefined
+  const hasData = Object.entries(address).some(([k, v]) => k !== 'country' && v)
+  if (!hasData && !address.country) return undefined
+  return { create: address }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildAddressWrite(address: UserFormValues['address']): any {
   if (!address) return undefined
   const hasData = Object.entries(address).some(([k, v]) => k !== 'country' && v)
@@ -33,11 +41,11 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
       const user = await tx.user.create({
         data: {
           ...rest,
-          customerId,
+          customer:      { connect: { id: customerId } },
           birthDate:     birthDate ? new Date(birthDate) : null,
           password:      null,
           emailVerified: new Date(),
-          address:       buildAddressWrite(address),
+          address:       buildAddressCreate(address),
         },
         select: { id: true },
       })

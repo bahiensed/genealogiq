@@ -1,16 +1,22 @@
 'use server'
 
-import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
-import { sendAppWelcomeEmail } from '@/lib/email'
 import { appUserSchema, type AppUserFormValues } from '@/schemas/app-user.schema'
 import { deceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildAddressCreate(address: AppUserFormValues['address']): any {
+  if (!address) return undefined
+  const hasData = Object.entries(address).some(([k, v]) => k !== 'country' && v)
+  if (!hasData && !address.country) return undefined
+  return { create: address }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildAddressWrite(address: AppUserFormValues['address']): any {
@@ -39,17 +45,15 @@ export async function createCustomerWithDeceased(
   const { address, birthDate, categoryId, ...userRest } = validatedUser.data
   const { birthDate: dBirthDate, deathDate, burialDate, burialLatitude, burialLongitude, ...deceasedRest } = validatedDeceased.data
 
-  let appUserToken: string | null = null
-
   try {
-    ;({ appUserToken } = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const appUser = await tx.appUser.create({
         data: {
           ...userRest,
-          birthDate:  toDate(birthDate),
-          categoryId: categoryId || null,
-          tenantId:   customerId,
-          address:    buildAddressWrite(address),
+          birthDate: toDate(birthDate),
+          tenant:    { connect: { id: customerId } },
+          category:  categoryId ? { connect: { id: categoryId } } : undefined,
+          address:   buildAddressCreate(address),
         },
         select: { id: true },
       })
@@ -79,42 +83,32 @@ export async function createCustomerWithDeceased(
         where: { email: userRest.email },
         select: { id: true },
       })
-      if (existingUser) return { appUserToken: null }
 
-      const authUser = await tx.user.create({
-        data: {
-          firstName:     userRest.firstName,
-          lastName:      userRest.lastName,
-          email:         userRest.email,
-          role:          'APP_USER',
-          customerId,
-          password:      null,
-          emailVerified: new Date(),
-        },
-        select: { id: true },
-      })
+      const userId = existingUser
+        ? existingUser.id
+        : (await tx.user.create({
+            data: {
+              firstName:     userRest.firstName,
+              lastName:      userRest.lastName,
+              email:         userRest.email,
+              role:          'APP_USER',
+              customerId,
+              password:      null,
+              emailVerified: new Date(),
+            },
+            select: { id: true },
+          })).id
 
       await tx.appUser.update({
         where: { id: appUser.id },
-        data:  { userId: authUser.id },
+        data:  { user: { connect: { id: userId } } },
       })
-
-      const t = randomBytes(32).toString('hex')
-      await tx.passwordResetToken.create({
-        data: { token: t, userId: authUser.id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
-      })
-
-      return { appUserToken: t }
-    }))
+    })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
       return { error: 'Dados duplicados detectados' }
     }
     throw e
-  }
-
-  if (appUserToken) {
-    await sendAppWelcomeEmail(userRest.email, appUserToken)
   }
 
   revalidatePath('/customers')
@@ -134,9 +128,9 @@ export async function updateCustomer(id: string, data: AppUserFormValues): Promi
       where: { id, tenantId: customerId },
       data: {
         ...rest,
-        birthDate:  toDate(birthDate),
-        categoryId: categoryId || null,
-        address:    buildAddressWrite(address),
+        birthDate: toDate(birthDate),
+        category:  categoryId ? { connect: { id: categoryId } } : { disconnect: true },
+        address:   buildAddressWrite(address),
       },
     })
   } catch (e) {
