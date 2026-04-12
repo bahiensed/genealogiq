@@ -1,18 +1,4 @@
-import {
-  BarChart2,
-  BoxIcon,
-  BuildingIcon,
-  FolderIcon,
-  HandPlatterIcon,
-  IdCardIcon,
-  LayoutDashboard,
-  QrCodeIcon,
-  ShoppingCartIcon,
-  StoreIcon,
-  TagIcon,
-  UsersIcon,
-  type LucideIcon,
-} from 'lucide-react'
+import { BarChart2, BoxIcon, BuildingIcon, FolderIcon, HandPlatterIcon, IdCardIcon, LayoutDashboard, QrCodeIcon, ShoppingCartIcon, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
 
 export type ModuleKey =
   | 'moduleRecordsSuppliers'
@@ -38,7 +24,7 @@ export interface MenuItem {
 export const main: MenuItem[] = [
   { name: 'Dashboard',     url: '/dashboard',           icon: LayoutDashboard  },
   { name: 'Buy Licenses',  url: '/purchasing/licenses', icon: QrCodeIcon       },
-  { name: 'View Licenses', url: '/inventory/licenses',  icon: QrCodeIcon       },
+  { name: 'My Licenses', url: '/inventory/licenses',    icon: QrCodeIcon       },
   { name: 'Customers',     url: '/customers',           icon: UsersIcon        },
   { name: 'Sales',         url: '/sales',               icon: ShoppingCartIcon },
 ]
@@ -71,15 +57,15 @@ export const categories: MenuItem[] = [
 // ─── Purchasing (Licenses always-on) ─────────────────────────────────────────
 
 export const purchasing: MenuItem[] = [
-  { name: 'Licenses', url: '/purchasing/licenses', icon: QrCodeIcon      },
-  { name: 'Products', url: '/purchasing/products', icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
-  { name: 'Services', url: '/purchasing/services', icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
+  { name: 'Buy Licenses', url: '/purchasing/licenses', icon: QrCodeIcon      },
+  { name: 'Products', url: '/purchasing/products',    icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
+  { name: 'Services', url: '/purchasing/services',    icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
 ]
 
 // ─── Inventory (Licenses always-on) ──────────────────────────────────────────
 
 export const inventory: MenuItem[] = [
-  { name: 'Licenses', url: '/inventory/licenses', icon: QrCodeIcon },
+  { name: 'My Licenses', url: '/inventory/licenses', icon: QrCodeIcon },
   { name: 'Products', url: '/inventory/products', icon: BoxIcon,    moduleKey: 'moduleInventoryProducts' },
 ]
 

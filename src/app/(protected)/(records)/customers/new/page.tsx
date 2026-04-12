@@ -8,7 +8,7 @@ export default async function NewCustomerPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Novo cliente
+        New Customer
       </h1>
       <CustomerWizard categories={categories} />
     </div>

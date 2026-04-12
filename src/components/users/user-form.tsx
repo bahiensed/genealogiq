@@ -64,9 +64,14 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
     }
   }
 
+  function scrollToFirstError() {
+    requestAnimationFrame(() => {
+      document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-2xl">
-      {serverError && <FieldError>{serverError}</FieldError>}
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-2xl">
 
       <FieldGroup>
         <div className="grid grid-cols-2 gap-3">
@@ -228,6 +233,8 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
         errors={errors}
         prefix="address"
       />
+
+      {serverError && <FieldError>{serverError}</FieldError>}
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>

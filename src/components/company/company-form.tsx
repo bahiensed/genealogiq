@@ -46,9 +46,14 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
     }
   }
 
+  function scrollToFirstError() {
+    requestAnimationFrame(() => {
+      document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-2xl">
-      {serverError && <FieldError>{serverError}</FieldError>}
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-2xl">
 
       <FieldGroup>
         <Controller
@@ -197,6 +202,8 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
         errors={errors}
         prefix="address"
       />
+
+      {serverError && <FieldError>{serverError}</FieldError>}
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>

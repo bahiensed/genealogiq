@@ -19,8 +19,8 @@ export function ResetPasswordForm({ token }: Props) {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Redefinir senha</CardTitle>
-        <CardDescription>Digite sua nova senha abaixo</CardDescription>
+        <CardTitle>Define password</CardTitle>
+        <CardDescription>Type your new password</CardDescription>
       </CardHeader>
 
       <form action={dispatch}>

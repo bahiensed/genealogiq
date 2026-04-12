@@ -11,7 +11,7 @@ export default async function CustomersPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Clientes
+          Customers
         </h1>
         <Button asChild>
           <Link href="/customers/new">Novo cliente</Link>

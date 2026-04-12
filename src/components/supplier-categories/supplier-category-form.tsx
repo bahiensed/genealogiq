@@ -42,9 +42,14 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
     }
   }
 
+  function scrollToFirstError() {
+    requestAnimationFrame(() => {
+      document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-lg">
-      {serverError && <FieldError>{serverError}</FieldError>}
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-lg">
 
       <FieldGroup>
         <Controller
@@ -88,6 +93,8 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
           />
         )}
       </FieldGroup>
+
+      {serverError && <FieldError>{serverError}</FieldError>}
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>

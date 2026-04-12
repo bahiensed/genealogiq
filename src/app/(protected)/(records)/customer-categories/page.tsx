@@ -11,7 +11,7 @@ export default async function CustomerCategoriesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Categorias de Clientes
+          Customer Categories
         </h1>
         <Button asChild>
           <Link href="/customer-categories/new">Nova categoria</Link>

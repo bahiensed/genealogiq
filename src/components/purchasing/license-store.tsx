@@ -28,7 +28,7 @@ export interface LicensePackage {
   }
 }
 
-const brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
 export function LicenseStore({ packages }: { packages: LicensePackage[] }) {
   if (packages.length === 0) {
@@ -79,7 +79,7 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
 
       <CardContent className="flex flex-1 flex-col gap-4">
         <div>
-          <p className="text-3xl font-bold">{brl.format(pkg.price)}</p>
+          <p className="text-3xl font-bold">{usd.format(pkg.price)}</p>
           <p className="text-sm text-muted-foreground">
             {pkg.quantity} {pkg.quantity === 1 ? 'licença' : 'licenças'} por pacote
           </p>
@@ -104,7 +104,7 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
 
         {qty > 1 && (
           <p className="text-sm text-muted-foreground">
-            {totalLicenses} licenças · {brl.format(totalPrice)}
+            {totalLicenses} licenças · {usd.format(totalPrice)}
           </p>
         )}
       </CardContent>

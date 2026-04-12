@@ -66,9 +66,14 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
     }
   }
 
+  function scrollToFirstError() {
+    requestAnimationFrame(() => {
+      document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-2xl">
-      {serverError && <FieldError>{serverError}</FieldError>}
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-2xl">
 
       <FieldGroup>
         {/* Tipo */}
@@ -309,6 +314,8 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
         errors={errors}
         prefix="address"
       />
+
+      {serverError && <FieldError>{serverError}</FieldError>}
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>

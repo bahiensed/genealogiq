@@ -15,7 +15,7 @@ export default async function InventoryLicensesPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Licenças
+        Available Licenses
       </h1>
 
       <div className="rounded-md border">
