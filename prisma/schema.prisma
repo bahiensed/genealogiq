@@ -135,13 +135,32 @@ model User {
   customerId String?   @map("customer_id")
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
+  createdById String? @map("created_by_id")
+  createdBy   User?   @relation("CreatedByUser", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("UpdatedByUser", fields: [updatedById], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   emailTokens         EmailToken[]
   passwordResetTokens PasswordResetToken[]
   sales               Sale[]
+  appSales            AppSale[]
   appUser             AppUser?
+
+  createdUsers        User[]             @relation("CreatedByUser")
+  updatedUsers        User[]             @relation("UpdatedByUser")
+  createdAppUsers     AppUser[]          @relation("CreatedByAppUser")
+  updatedAppUsers     AppUser[]          @relation("UpdatedByAppUser")
+  createdDeceaseds    Deceased[]         @relation("CreatedByDeceased")
+  updatedDeceaseds    Deceased[]         @relation("UpdatedByDeceased")
+  createdSuppliers    Supplier[]         @relation("CreatedBySupplier")
+  updatedSuppliers    Supplier[]         @relation("UpdatedBySupplier")
+  createdSupplierCats SupplierCategory[] @relation("CreatedBySupplierCategory")
+  updatedSupplierCats SupplierCategory[] @relation("UpdatedBySupplierCategory")
+  createdAppUserCats  AppUserCategory[]  @relation("CreatedByAppUserCategory")
+  updatedAppUserCats  AppUserCategory[]  @relation("UpdatedByAppUserCategory")
 
   @@map("users")
 }
@@ -156,6 +175,11 @@ model SupplierCategory {
 
   tenantId String?   @map("tenant_id")
   tenant   Customer? @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdById String? @map("created_by_id")
+  createdBy   User?   @relation("CreatedBySupplierCategory", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("UpdatedBySupplierCategory", fields: [updatedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
@@ -188,6 +212,11 @@ model Supplier {
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+
+  createdById String? @map("created_by_id")
+  createdBy   User?   @relation("CreatedBySupplier", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("UpdatedBySupplier", fields: [updatedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -253,12 +282,13 @@ model Customer {
   moduleFinance             Boolean @default(false) @map("module_finance")
 
   users         User[]
-  subCustomers  Customer[]        @relation("CustomerTenant")
-  suppliers     Supplier[]        @relation("SupplierTenant")
+  subCustomers  Customer[]         @relation("CustomerTenant")
+  suppliers     Supplier[]         @relation("SupplierTenant")
   supplierCats  SupplierCategory[] @relation("SupplierCategoryTenant")
   customerCats  CustomerCategory[] @relation("CustomerCategoryTenant")
   licenses      CustomerLicense[]
   sales         Sale[]
+  appSales      AppSale[]          @relation("AppSaleTenant")
   appUsers      AppUser[]          @relation("AppUserTenant")
   appUserCats   AppUserCategory[]  @relation("AppUserCategoryTenant")
   deceaseds     Deceased[]         @relation("DeceasedTenant")
@@ -279,6 +309,7 @@ model License {
 
   packages         Package[]
   customerLicenses CustomerLicense[]
+  appSales         AppSale[]
 
   @@map("licenses")
 }
@@ -339,6 +370,29 @@ model CustomerLicense {
   @@map("customer_licenses")
 }
 
+model AppSale {
+  id        String   @id @default(cuid())
+  value     Decimal  @db.Decimal(10, 2)
+
+  appUserId String   @map("app_user_id")
+  appUser   AppUser  @relation(fields: [appUserId], references: [id], onDelete: Cascade)
+
+  licenseId String  @map("license_id")
+  license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
+
+  tenantId  String   @map("tenant_id")
+  tenant    Customer @relation("AppSaleTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  soldById  String   @map("sold_by_id")
+  soldBy    User     @relation(fields: [soldById], references: [id], onDelete: Restrict)
+
+  soldAt    DateTime @default(now()) @map("sold_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_sales")
+}
+
 // ─── AppUser / Deceased ───────────────────────────────────────────────────────
 
 model AppUserCategory {
@@ -349,6 +403,11 @@ model AppUserCategory {
 
   tenantId String?   @map("tenant_id")
   tenant   Customer? @relation("AppUserCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdById String? @map("created_by_id")
+  createdBy   User?   @relation("CreatedByAppUserCategory", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("UpdatedByAppUserCategory", fields: [updatedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -378,6 +437,7 @@ model AppUser {
   tiktok           String?
   x                String?
   youtube          String?
+  outro            String?
   website          String?
 
   tenantId   String?          @map("tenant_id")
@@ -395,10 +455,16 @@ model AppUser {
   deceasedProfileId String?   @unique @map("deceased_profile_id")
   deceasedProfile   Deceased? @relation("AppUserDeceasedProfile", fields: [deceasedProfileId], references: [id])
 
+  createdById String? @map("created_by_id")
+  createdBy   User?   @relation("CreatedByAppUser", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("UpdatedByAppUser", fields: [updatedById], references: [id], onDelete: SetNull)
+
   createdAt  DateTime         @default(now()) @map("created_at")
   updatedAt  DateTime         @updatedAt @map("updated_at")
 
   guardianships DeceasedGuardian[]
+  appSales      AppSale[]
 
   @@map("app_users")
 }
@@ -435,11 +501,17 @@ model Deceased {
   tiktok             String?
   x                  String?
   youtube            String?
+  outro              String?
   website            String?
   notes              String?
 
   tenantId String?   @map("tenant_id")
   tenant   Customer? @relation("DeceasedTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdById String? @map("created_by_id")
+  createdBy   User?   @relation("CreatedByDeceased", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String? @map("updated_by_id")
+  updatedBy   User?   @relation("UpdatedByDeceased", fields: [updatedById], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
