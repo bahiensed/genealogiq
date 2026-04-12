@@ -58,8 +58,15 @@ export async function getCustomer(id: string) {
       tiktok:          true,
       x:               true,
       youtube:         true,
+      outro:           true,
       website:         true,
       address:         { select: addressSelect },
+      _count: {
+        select: {
+          appSales:     true,
+          guardianships: true,
+        },
+      },
       guardianships: {
         select: {
           isPrimary: true,

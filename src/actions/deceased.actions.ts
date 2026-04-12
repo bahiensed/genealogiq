@@ -19,6 +19,16 @@ export async function createDeceased(
 ): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
+  // Verify the appUser belongs to this tenant and check license availability
+  const appUser = await prisma.appUser.findUnique({
+    where:  { id: appUserId, tenantId: customerId },
+    select: { id: true, _count: { select: { appSales: true, guardianships: true } } },
+  })
+  if (!appUser) return { error: 'Cliente não encontrado.' }
+
+  const available = appUser._count.appSales - appUser._count.guardianships
+  if (available <= 0) return { error: 'Sem licenças disponíveis para este cliente.' }
+
   const validated = deceasedSchema.safeParse(data)
   if (!validated.success) return { error: 'Dados inválidos' }
 
@@ -51,7 +61,7 @@ export async function createDeceased(
   }
 
   revalidatePath(`/customers/${appUserId}`)
-  return { success: 'Falecido adicionado com sucesso.' }
+  return { success: 'Perfil memorializado criado com sucesso.' }
 }
 
 export async function updateDeceased(id: string, data: DeceasedFormValues): Promise<ActionError | ActionSuccess> {
