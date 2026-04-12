@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 
-const ENTITY_TYPES = ['users', 'customers', 'suppliers'] as const
+const ENTITY_TYPES = ['users', 'customers', 'suppliers', 'memorialized'] as const
 type EntityType = (typeof ENTITY_TYPES)[number]
 
 async function resolveName(type: EntityType, id: string, customerId: string): Promise<string | null> {
@@ -12,12 +12,18 @@ async function resolveName(type: EntityType, id: string, customerId: string): Pr
     return `${record.firstName} ${record.lastName}`.trim() || null
   }
   if (type === 'customers') {
-    const record = await prisma.customer.findUnique({ where: { id, tenantId: customerId }, select: { name: true } })
-    return record?.name ?? null
+    const record = await prisma.appUser.findUnique({ where: { id, tenantId: customerId }, select: { firstName: true, lastName: true } })
+    if (!record) return null
+    return `${record.firstName} ${record.lastName}`.trim() || null
   }
   if (type === 'suppliers') {
     const record = await prisma.supplier.findUnique({ where: { id, tenantId: customerId }, select: { name: true } })
     return record?.name ?? null
+  }
+  if (type === 'memorialized') {
+    const record = await prisma.deceased.findUnique({ where: { id, tenantId: customerId }, select: { firstName: true, lastName: true } })
+    if (!record) return null
+    return `${record.firstName} ${record.lastName}`.trim() || null
   }
   return null
 }
