@@ -65,9 +65,14 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
     }
   }
 
+  function scrollToFirstError() {
+    requestAnimationFrame(() => {
+      document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-2xl">
-      {serverError && <FieldError>{serverError}</FieldError>}
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-2xl">
 
       {/* ── Dados pessoais ── */}
       <p className="text-sm font-medium">Dados pessoais</p>
@@ -278,14 +283,14 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
       <p className="text-sm font-medium">Redes sociais</p>
       <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
-          {(['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'website'] as const).map((key) => (
+          {(['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'outro', 'website'] as const).map((key) => (
             <Controller
               key={key}
               name={key}
               control={control}
               render={({ field }) => (
-                <Field className="col-span-6">
-                  <FieldLabel className="capitalize">{key === 'fb' ? 'Facebook' : key === 'x' ? 'X (Twitter)' : key.charAt(0).toUpperCase() + key.slice(1)}:</FieldLabel>
+                <Field className="col-span-6 md:col-span-4">
+                  <FieldLabel>{key === 'fb' ? 'Facebook' : key === 'x' ? 'X (Twitter)' : key === 'outro' ? 'Outro' : key.charAt(0).toUpperCase() + key.slice(1)}:</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )}
@@ -293,6 +298,8 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
           ))}
         </div>
       </FieldGroup>
+
+      {serverError && <FieldError>{serverError}</FieldError>}
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
