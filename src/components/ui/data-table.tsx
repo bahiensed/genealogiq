@@ -32,6 +32,7 @@ interface DataTableProps<TData, TValue> {
   filterPlaceholder?: string
   emptyMessage?: string
   columnLabels?: Record<string, string>
+  initialColumnVisibility?: VisibilityState
 }
 
 export function DataTable<TData, TValue>({
@@ -41,10 +42,11 @@ export function DataTable<TData, TValue>({
   filterPlaceholder = 'Filtrar por nome…',
   emptyMessage = 'Nenhum registro encontrado.',
   columnLabels,
+  initialColumnVisibility,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility ?? {})
 
   const table = useReactTable({
     data,

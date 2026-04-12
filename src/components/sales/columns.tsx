@@ -77,27 +77,31 @@ export const saleColumns: ColumnDef<SaleRow>[] = [
   },
   {
     accessorKey: 'quantity',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Package Qtd." />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Qtd.</>} />,
     cell: ({ row }) => row.original.quantity,
   },
   {
     id: 'totalLicenses',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="License Total Qtd." />,
+    accessorFn: (row) => row.quantity * row.package.quantity,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Total Qtd.</>} />,
     cell: ({ row }) => (row.original.quantity * row.original.package.quantity).toLocaleString('en-US'),
   },
   {
     id: 'packagePrice',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Package Price" />,
+    accessorFn: (row) => row.package.price,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Price</>} />,
     cell: ({ row }) => usd.format(row.original.package.price),
   },
   {
     id: 'licenseUnitPrice',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="License Unity Price" />,
+    accessorFn: (row) => row.package.price / row.package.quantity,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Un. Price</>} />,
     cell: ({ row }) => usd.format(row.original.package.price / row.original.package.quantity),
   },
   {
     id: 'totalPrice',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Total Price" />,
+    accessorFn: (row) => row.quantity * row.package.price,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={<>Total<br/>Price</>} />,
     cell: ({ row }) => usd.format(row.original.quantity * row.original.package.price),
   },
   {
