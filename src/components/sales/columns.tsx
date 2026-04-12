@@ -59,10 +59,9 @@ const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' })
 
 export const saleColumns: ColumnDef<SaleRow>[] = [
   {
-    id: 'package',
-    accessorFn: (row) => row.package.name,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Package" />,
-    cell: ({ row }) => row.original.package.name,
+    accessorKey: 'soldAt',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Date" />,
+    cell: ({ row }) => date.format(new Date(row.original.soldAt)),
   },
   {
     id: 'customer',
@@ -71,29 +70,40 @@ export const saleColumns: ColumnDef<SaleRow>[] = [
     cell: ({ row }) => row.original.customer.name,
   },
   {
+    id: 'package',
+    accessorFn: (row) => row.package.name,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Package Name" />,
+    cell: ({ row }) => row.original.package.name,
+  },
+  {
     accessorKey: 'quantity',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Qtd. Packages" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Package Qtd." />,
     cell: ({ row }) => row.original.quantity,
   },
   {
     id: 'totalLicenses',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Licenças totais" />,
-    cell: ({ row }) => row.original.quantity * row.original.package.quantity,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="License Total Qtd." />,
+    cell: ({ row }) => (row.original.quantity * row.original.package.quantity).toLocaleString('en-US'),
+  },
+  {
+    id: 'packagePrice',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Package Price" />,
+    cell: ({ row }) => usd.format(row.original.package.price),
+  },
+  {
+    id: 'licenseUnitPrice',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="License Unity Price" />,
+    cell: ({ row }) => usd.format(row.original.package.price / row.original.package.quantity),
   },
   {
     id: 'totalPrice',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Valor total" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Total Price" />,
     cell: ({ row }) => usd.format(row.original.quantity * row.original.package.price),
-  },
-  {
-    accessorKey: 'soldAt',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Data" />,
-    cell: ({ row }) => date.format(new Date(row.original.soldAt)),
   },
   {
     id: 'seller',
     accessorFn: (row) => `${row.soldBy.firstName} ${row.soldBy.lastName}`,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Vendedor" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Seller" />,
     cell: ({ row }) => `${row.original.soldBy.firstName} ${row.original.soldBy.lastName}`,
   },
   {
