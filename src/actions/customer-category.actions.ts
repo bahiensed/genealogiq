@@ -8,15 +8,20 @@ import { customerCategorySchema, type CustomerCategoryFormValues } from '@/schem
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
+type CreateCategorySuccess = { category: { id: string; name: string } }
 
-export async function createCustomerCategory(data: CustomerCategoryFormValues): Promise<ActionError | ActionSuccess> {
+export async function createCustomerCategory(data: CustomerCategoryFormValues): Promise<ActionError | CreateCategorySuccess> {
   const { customerId } = await verifyTenantSession()
 
   const validated = customerCategorySchema.safeParse(data)
   if (!validated.success) return { error: 'Dados inválidos' }
 
+  let category: { id: string; name: string }
   try {
-    await prisma.appUserCategory.create({ data: { ...validated.data, tenantId: customerId } })
+    category = await prisma.appUserCategory.create({
+      data:   { ...validated.data, tenantId: customerId },
+      select: { id: true, name: true },
+    })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
       return { error: 'Já existe uma categoria com este nome' }
@@ -25,7 +30,7 @@ export async function createCustomerCategory(data: CustomerCategoryFormValues): 
   }
 
   revalidatePath('/customer-categories')
-  return { success: 'Categoria criada com sucesso.' }
+  return { category }
 }
 
 export async function updateCustomerCategory(id: string, data: CustomerCategoryFormValues): Promise<ActionError | ActionSuccess> {

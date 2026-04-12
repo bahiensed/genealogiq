@@ -37,14 +37,19 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
     if ('error' in result) {
       setServerError(result.error)
     } else {
-      toast.success(result.success)
+      toast.success('Categoria salva com sucesso.')
       if (!isEditing) router.push('/customer-categories')
     }
   }
 
+  function scrollToFirstError() {
+    requestAnimationFrame(() => {
+      document.querySelector('[aria-invalid="true"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-lg">
-      {serverError && <FieldError>{serverError}</FieldError>}
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-lg">
 
       <FieldGroup>
         <Controller
@@ -88,6 +93,8 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
           />
         )}
       </FieldGroup>
+
+      {serverError && <FieldError>{serverError}</FieldError>}
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
