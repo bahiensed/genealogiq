@@ -1,16 +1,19 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useState, useActionState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import { login } from '@/actions/auth'
 
 export function SignInForm() {
   const [state, dispatch, isPending] = useActionState(login, undefined)
+  const [showPassword, setShowPassword] = useState(false)
 
   return (
     <div className="flex flex-col w-full max-w-sm">
@@ -39,8 +42,8 @@ export function SignInForm() {
         <CardHeader>
           <CardTitle>Entrar</CardTitle>
           <CardDescription>
-              Digite seu e-mail e senha para acessar sua conta.
-            </CardDescription>
+            Digite seu e-mail e senha para acessar sua conta.
+          </CardDescription>
         </CardHeader>
 
         <form action={dispatch}>
@@ -61,21 +64,31 @@ export function SignInForm() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Senha:</Label>
+              <Label htmlFor="password">Senha:</Label>
+              <InputGroup>
+                <InputGroupInput
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupButton
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  >
+                    {showPassword ? <EyeOff /> : <Eye />}
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
+              <div className="flex justify-end">
                 <Link
                   href="/forgot-password"
                   className="text-xs text-muted-foreground underline underline-offset-4 hover:no-underline"
                 >
-                  Esqueceu a senha?
+                  Forgot password?
                 </Link>
               </div>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-              />
             </div>
           </CardContent>
 
