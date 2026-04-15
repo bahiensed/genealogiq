@@ -14,51 +14,6 @@ export default async function Layout({
   const currentYear = getCurrentYear()
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="flex border-b items-center justify-between px-4 py-2">
-        B2C Boilerplate
-        <div className="flex gap-4 items-center">
-          <SearchInput />
-          <ModeToggle />
-          {session ? (
-            <Button variant="outline" asChild>
-              <Link href="/dashboard">Dashboard</Link>
-            </Button>
-          ) : (
-            <>
-              <Button variant="outline" asChild>
-                <Link href="/sign-in">Entrar</Link>
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-
-      <main className="flex-1 overflow-y-auto p-4">
-        {children}
-      </main>
-
-      <footer className="border-t flex flex-col gap-2 p-4 text-center text-muted-foreground text-xs">
-        <div>
-          <Link href="/privacy" className="underline-offset-4 hover:underline">
-            Política de Privacidade
-          </Link>
-
-          {" | "}
-
-          <Link href="/terms" className="underline-offset-4 hover:underline">
-            Termos de Uso
-          </Link>
-        </div>
-
-        <div>
-          © &nbsp;
-          <Link href="/privacy" className="underline-offset-4 hover:underline">
-            Bahien.se
-          </Link>
-          , {currentYear}
-        </div>
-      </footer>
-    </div>
+    <h1>Genealogiq</h1>
   )
 }
