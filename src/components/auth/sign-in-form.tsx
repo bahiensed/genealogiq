@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,54 +13,79 @@ export function SignInForm() {
   const [state, dispatch, isPending] = useActionState(login, undefined)
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Entrar</CardTitle>
-        <CardDescription>Digite seu e-mail e senha para acessar sua conta.</CardDescription>
-      </CardHeader>
+    <div className="flex flex-col w-full max-w-sm">
+      <div className="relative h-50 w-full">
+        <Link href="/" className="relative block h-full w-full">
+          <Image
+            src="/logo/logo-dark.png"
+            alt="Logo"
+            fill
+            sizes="(max-width: 400px) 100vw, 400px"
+            className="object-contain dark:hidden"
+            priority
+          />
+          <Image
+            src="/logo/logo-light.png"
+            alt="Logo"
+            fill
+            sizes="(max-width: 400px) 100vw, 400px"
+            className="hidden object-contain dark:block"
+            priority
+          />
+        </Link>
+      </div>
 
-      <form action={dispatch}>
-        <CardContent className="flex flex-col gap-4">
-          {state?.error && (
-            <p className="text-sm text-destructive">{state.error}</p>
-          )}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Entrar</CardTitle>
+          <CardDescription>
+              Digite seu e-mail e senha para acessar sua conta.
+            </CardDescription>
+        </CardHeader>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">E-mail:</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="seu@email.com"
-              autoComplete="email"
-            />
-          </div>
+        <form action={dispatch}>
+          <CardContent className="flex flex-col gap-4">
+            {state?.error && (
+              <p className="text-sm text-destructive">{state.error}</p>
+            )}
 
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Senha:</Label>
-              <Link
-                href="/forgot-password"
-                className="text-xs text-muted-foreground underline underline-offset-4 hover:no-underline"
-              >
-                Esqueceu a senha?
-              </Link>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email">E-mail:</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="seu@email.com"
+                autoComplete="email"
+              />
             </div>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-            />
-          </div>
-        </CardContent>
 
-        <CardFooter className="mt-6 flex flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? "Entrando…" : "Entrar"}
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Senha:</Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-muted-foreground underline underline-offset-4 hover:no-underline"
+                >
+                  Esqueceu a senha?
+                </Link>
+              </div>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+              />
+            </div>
+          </CardContent>
+
+          <CardFooter className="mt-6 flex flex-col gap-3">
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Entrando…" : "Entrar"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
   )
 }
