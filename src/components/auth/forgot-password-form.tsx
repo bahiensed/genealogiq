@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,47 +13,70 @@ export function ForgotPasswordForm() {
   const [state, dispatch, isPending] = useActionState(forgotPassword, undefined)
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Esqueceu a senha?</CardTitle>
-        <CardDescription>
-          Digite seu e-mail e enviaremos um link para redefinir sua senha.
-        </CardDescription>
-      </CardHeader>
+    <div className="flex flex-col w-full max-w-sm">
+      <div className="relative h-50 w-full">
+        <Link href="/" className="relative block h-full w-full">
+          <Image
+            src="/logo/logo-dark.png"
+            alt="Logo"
+            fill
+            sizes="(max-width: 400px) 100vw, 400px"
+            className="object-contain dark:hidden"
+            priority
+          />
+          <Image
+            src="/logo/logo-light.png"
+            alt="Logo"
+            fill
+            sizes="(max-width: 400px) 100vw, 400px"
+            className="hidden object-contain dark:block"
+            priority
+          />
+        </Link>
+      </div>
 
-      <form action={dispatch}>
-        <CardContent className="flex flex-col gap-4">
-          {state?.error && (
-            <p className="text-sm text-destructive">{state.error}</p>
-          )}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Esqueceu a senha?</CardTitle>
+          <CardDescription>
+            Digite seu e-mail e enviaremos um link para redefinir sua senha.
+          </CardDescription>
+        </CardHeader>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">E-mail:</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="seu@email.com"
-              autoComplete="email"
-            />
-          </div>
-        </CardContent>
+        <form action={dispatch}>
+          <CardContent className="flex flex-col gap-4">
+            {state?.error && (
+              <p className="text-sm text-destructive">{state.error}</p>
+            )}
 
-        <CardFooter className="mt-6 flex flex-col gap-3">
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? "Enviando…" : "Enviar link"}
-          </Button>
-          <p className="text-sm text-muted-foreground text-center">
-            Lembrou a senha?{" "}
-            <Link
-              href="/sign-in"
-              className="text-foreground underline underline-offset-4 hover:no-underline"
-            >
-              Entrar
-            </Link>
-          </p>
-        </CardFooter>
-      </form>
-    </Card>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="email">E-mail:</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                placeholder="seu@email.com"
+                autoComplete="email"
+              />
+            </div>
+          </CardContent>
+
+          <CardFooter className="mt-6 flex flex-col gap-3">
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Enviando…" : "Enviar link"}
+            </Button>
+            <p className="text-sm text-muted-foreground text-center">
+              Lembrou a senha?{" "}
+              <Link
+                href="/sign-in"
+                className="text-foreground underline underline-offset-4 hover:no-underline"
+              >
+                Entrar
+              </Link>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
   )
 }

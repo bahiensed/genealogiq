@@ -10,7 +10,7 @@ export default function AuthLayout({
       <div className="flex justify-end p-2">
         <ModeToggle />
       </div>
-      <main className="flex flex-1 items-center justify-center p-4">
+      <main className="flex flex-1 flex-col items-center justify-center">
         {children}
       </main>
     </div>
