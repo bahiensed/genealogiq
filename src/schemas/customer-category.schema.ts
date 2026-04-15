@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 export const customerCategorySchema = z.object({
-  name:        z.string().min(2, 'Mínimo 2 caracteres'),
+  name:        z.string().min(2, 'Must be at least 2 characters'),
   description: z.string().optional(),
   isActive:    z.boolean(),
 })

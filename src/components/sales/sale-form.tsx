@@ -66,7 +66,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-lg">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Nova venda
+        New sale
       </h1>
 
       <FieldGroup>
@@ -78,7 +78,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
               <FieldLabel>Package:</FieldLabel>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Selecione um package" />
+                  <SelectValue placeholder="Select a package" />
                 </SelectTrigger>
                 <SelectContent>
                   {packages.map((p) => (
@@ -101,7 +101,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
               <FieldLabel>Customer:</FieldLabel>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Selecione um customer" />
+                  <SelectValue placeholder="Select a customer" />
                 </SelectTrigger>
                 <SelectContent>
                   {customers.map((c) => (
@@ -119,7 +119,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Quantidade:</FieldLabel>
+              <FieldLabel>Quantity:</FieldLabel>
               <Input
                 type="number"
                 step="1"
@@ -133,7 +133,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               {selectedPkg && selectedQty > 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {selectedQty * selectedPkg.quantity} licenças · {usd.format(selectedQty * selectedPkg.price)}
+                  {selectedQty * selectedPkg.quantity} licenses · {usd.format(selectedQty * selectedPkg.price)}
                 </p>
               )}
             </Field>
@@ -145,7 +145,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Data da venda:</FieldLabel>
+              <FieldLabel>Sale date:</FieldLabel>
               <Input {...field} type="date" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -156,10 +156,10 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
       {serverError && <FieldError>{serverError}</FieldError>}
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Registrando…' : 'Registrar venda'}
+          {isSubmitting ? 'Recording…' : 'Record sale'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset({ ...saleDefaultValues, soldAt: today })}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

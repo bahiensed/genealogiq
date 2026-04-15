@@ -52,7 +52,7 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Nome:</FieldLabel>
+              <FieldLabel>Name:</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -64,7 +64,7 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Descrição:</FieldLabel>
+              <FieldLabel>Description:</FieldLabel>
               <Textarea {...field} rows={3} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -82,7 +82,7 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <FieldLabel htmlFor="isActive" className="cursor-pointer">Categoria ativa:</FieldLabel>
+                <FieldLabel htmlFor="isActive" className="cursor-pointer">Active category:</FieldLabel>
               </Field>
             )}
           />
@@ -91,10 +91,10 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar categoria'}
+          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create category'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

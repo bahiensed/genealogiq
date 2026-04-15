@@ -59,7 +59,7 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-lg">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          {isEditing ? 'Editar package' : 'Novo package'}
+          {isEditing ? 'Edit package' : 'New package'}
         </h1>
         {isEditing && (
           <Controller
@@ -68,7 +68,7 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
             render={({ field }) => (
               <div className="flex items-center gap-2">
                 <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-                <label htmlFor="isActive" className="text-sm cursor-pointer">Ativo?</label>
+                <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
               </div>
             )}
           />
@@ -81,10 +81,10 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Licença:</FieldLabel>
+              <FieldLabel>License:</FieldLabel>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Selecione uma licença" />
+                  <SelectValue placeholder="Select a license" />
                 </SelectTrigger>
                 <SelectContent>
                   {licenses.map((l) => (
@@ -102,7 +102,7 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Nome do Pacote:</FieldLabel>
+              <FieldLabel>Package Name:</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -114,7 +114,7 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Quantidade de Licenças:</FieldLabel>
+              <FieldLabel>License Quantity:</FieldLabel>
               <Input
                 type="number"
                 step="1"
@@ -135,7 +135,7 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Descrição:</FieldLabel>
+              <FieldLabel>Description:</FieldLabel>
               <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -171,10 +171,10 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
       {serverError && <FieldError>{serverError}</FieldError>}
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar package'}
+          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create package'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

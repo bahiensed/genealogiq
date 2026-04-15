@@ -10,7 +10,7 @@ export default async function EditSupplierCategoryPage({ params }: { params: Pro
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Editar categoria de fornecedor
+        Edit supplier category
       </h1>
       <SupplierCategoryForm
         id={id}

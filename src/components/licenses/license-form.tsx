@@ -46,7 +46,7 @@ export function LicenseForm({ id, defaultValues }: LicenseFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-lg">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          {isEditing ? 'Editar licença' : 'Nova licença'}
+          {isEditing ? 'Edit license' : 'New license'}
         </h1>
         {isEditing && (
           <Controller
@@ -55,7 +55,7 @@ export function LicenseForm({ id, defaultValues }: LicenseFormProps) {
             render={({ field }) => (
               <div className="flex items-center gap-2">
                 <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-                <label htmlFor="isActive" className="text-sm cursor-pointer">Ativo?</label>
+                <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
               </div>
             )}
           />
@@ -68,7 +68,7 @@ export function LicenseForm({ id, defaultValues }: LicenseFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Componente:</FieldLabel>
+              <FieldLabel>Component:</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -80,7 +80,7 @@ export function LicenseForm({ id, defaultValues }: LicenseFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Descrição:</FieldLabel>
+              <FieldLabel>Description:</FieldLabel>
               <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -91,10 +91,10 @@ export function LicenseForm({ id, defaultValues }: LicenseFormProps) {
       {serverError && <FieldError>{serverError}</FieldError>}
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar licença'}
+          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create license'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

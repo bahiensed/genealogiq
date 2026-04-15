@@ -83,7 +83,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          {isEditing ? 'Editar cliente' : 'Novo cliente'}
+          {isEditing ? 'Edit customer' : 'New customer'}
         </h1>
         {isEditing && (
           <Controller
@@ -92,7 +92,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             render={({ field }) => (
               <div className="flex items-center gap-2">
                 <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-                <label htmlFor="isActive" className="text-sm cursor-pointer">Ativo?</label>
+                <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
               </div>
             )}
           />
@@ -107,14 +107,14 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Tipo:</FieldLabel>
+                <FieldLabel>Type:</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="COMPANY">Pessoa Jurídica</SelectItem>
-                    <SelectItem value="INDIVIDUAL">Pessoa Física</SelectItem>
+                    <SelectItem value="COMPANY">Company</SelectItem>
+                    <SelectItem value="INDIVIDUAL">Individual</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -129,7 +129,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>{isIndividual ? 'Nome:' : 'Razão Social:'}</FieldLabel>
+                <FieldLabel>{isIndividual ? 'Name:' : 'Company Name:'}</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -140,7 +140,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>{isIndividual ? 'Sobrenome:' : 'Nome Fantasia:'}</FieldLabel>
+                <FieldLabel>{isIndividual ? 'Last Name:' : 'Trade Name:'}</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -173,7 +173,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               control={control}
               render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Data de Nascimento:</FieldLabel>
+                  <FieldLabel>Date of Birth:</FieldLabel>
                   <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -204,7 +204,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               control={control}
               render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Insc. Estadual:</FieldLabel>
+                  <FieldLabel>State Registration:</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -215,7 +215,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               control={control}
               render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Insc. Municipal:</FieldLabel>
+                  <FieldLabel>Municipal Registration:</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -231,7 +231,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>E-mail:</FieldLabel>
+                <FieldLabel>Email:</FieldLabel>
                 <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -242,7 +242,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field }) => (
               <Field className="col-span-2">
-                <FieldLabel>DDI:</FieldLabel>
+                <FieldLabel>Country Code:</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
                     <SelectValue />
@@ -261,7 +261,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Telefone:</FieldLabel>
+                <FieldLabel>Phone:</FieldLabel>
                 <MaskedInput
                   value={field.value}
                   onChange={field.onChange}
@@ -282,7 +282,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <div className="flex items-center justify-between">
-                <FieldLabel>Categoria:</FieldLabel>
+                <FieldLabel>Category:</FieldLabel>
                 <AddCustomerCategoryDialog onCreated={(cat) => {
                   setLocalCategories(prev => [...prev, cat])
                   field.onChange(cat.id)
@@ -290,7 +290,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               </div>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Selecione uma categoria" />
+                  <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
                   {localCategories.map((cat) => (
@@ -309,7 +309,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Notas:</FieldLabel>
+              <FieldLabel>Notes:</FieldLabel>
               <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -320,7 +320,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
       <FieldSeparator />
 
-      <p className="text-sm font-medium">Endereço</p>
+      <p className="text-sm font-medium">Address</p>
       <AddressSection
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         control={control as any}
@@ -333,9 +333,9 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
         <>
           <FieldSeparator />
 
-          <p className="text-sm font-medium">Administrador</p>
+          <p className="text-sm font-medium">Administrator</p>
           <p className="text-sm text-muted-foreground -mt-4">
-            Dados de acesso ao sistema Sequoia para o responsável por esta empresa.
+            Access credentials for the Sequoia system for the person responsible for this company.
           </p>
 
           <FieldGroup>
@@ -345,7 +345,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Nome:</FieldLabel>
+                    <FieldLabel>First Name:</FieldLabel>
                     <Input {...field} autoComplete="given-name" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -356,7 +356,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Sobrenome:</FieldLabel>
+                    <FieldLabel>Last Name:</FieldLabel>
                     <Input {...field} autoComplete="family-name" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -368,7 +368,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>E-mail:</FieldLabel>
+                  <FieldLabel>Email:</FieldLabel>
                   <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -380,9 +380,9 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
       <FieldSeparator />
 
-      <p className="text-sm font-medium">Módulos do Sequoia</p>
+      <p className="text-sm font-medium">Sequoia Modules</p>
       <p className="text-sm text-muted-foreground -mt-4">
-        Itens marcados em cinza são sempre acessíveis e não podem ser desativados.
+        Items marked in gray are always accessible and cannot be disabled.
       </p>
 
       {/* Always-on — 3 colunas, 2 linhas */}
@@ -495,10 +495,10 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
       {serverError && <FieldError>{serverError}</FieldError>}
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar cliente'}
+          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create customer'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

@@ -4,7 +4,7 @@ export default function NewSupplierCategoryPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Nova categoria de fornecedor
+        New supplier category
       </h1>
       <SupplierCategoryForm />
     </div>
