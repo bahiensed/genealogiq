@@ -5,16 +5,17 @@ import { getColumns, type UserRow } from './columns'
 
 interface UsersDataTableProps {
   currentUserId: string
+  currentUserRole: string
   data: UserRow[]
 }
 
-export function UsersDataTable({ currentUserId, data }: UsersDataTableProps) {
-  const columns = getColumns(currentUserId)
+export function UsersDataTable({ currentUserId, currentUserRole, data }: UsersDataTableProps) {
+  const columns = getColumns({ currentUserId, currentUserRole })
   return (
     <DataTable
       columns={columns}
       data={data}
-      emptyMessage="Nenhum usuário encontrado."
+      emptyMessage="No users found."
     />
   )
 }

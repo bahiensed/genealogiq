@@ -27,22 +27,22 @@ export function ConfirmDeleteDialog({ onConfirm, isPending, description }: Confi
           className="text-destructive focus:text-destructive"
           onSelect={(e) => e.preventDefault()}
         >
-          Excluir
+          Delete
         </DropdownMenuItem>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirmar exclusão</DialogTitle>
+          <DialogTitle>Confirm deletion</DialogTitle>
           <DialogDescription>
-            {description ?? 'Esta ação não pode ser desfeita.'}
+            {description ?? 'This action cannot be undone.'}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancelar</Button>
+            <Button variant="outline">Cancel</Button>
           </DialogClose>
           <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
-            {isPending ? 'Excluindo…' : 'Excluir'}
+            {isPending ? 'Deleting…' : 'Delete'}
           </Button>
         </DialogFooter>
       </DialogContent>

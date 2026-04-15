@@ -39,8 +39,8 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   filterColumn = 'name',
-  filterPlaceholder = 'Filtrar por nome…',
-  emptyMessage = 'Nenhum registro encontrado.',
+  filterPlaceholder = 'Search...',
+  emptyMessage = 'No records found.',
   columnLabels,
   initialColumnVisibility,
 }: DataTableProps<TData, TValue>) {

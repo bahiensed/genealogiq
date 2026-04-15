@@ -27,7 +27,7 @@ export type LicenseRow = {
   createdAt: Date
 }
 
-function ActionsCell({ row }: { row: { original: LicenseRow } }) {
+function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; currentUserRole: string }) {
   const [isPending, startTransition] = useTransition()
   const license = row.original
 
@@ -36,74 +36,80 @@ function ActionsCell({ row }: { row: { original: LicenseRow } }) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" disabled={isPending}>
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Abrir menu</span>
+          <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/licenses/${license.id}`}>Editar</Link>
+          <Link href={`/licenses/${license.id}`}>Edit</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => startTransition(async () => {
             const result = await toggleLicenseActive(license.id)
             if (result?.error) toast.error(result.error)
-            else toast.success(license.isActive ? 'Licença desativada.' : 'Licença reativada.')
+            else toast.success(license.isActive ? 'License deactivated.' : 'License reactivated.')
           })}
         >
-          {license.isActive ? 'Desativar' : 'Reativar'}
+          {license.isActive ? 'Deactivate' : 'Reactivate'}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <ConfirmDeleteDialog
-          isPending={isPending}
-          description={`A licença "${license.component}" será excluída permanentemente.`}
-          onConfirm={() => startTransition(async () => {
-            const result = await deleteLicense(license.id)
-            if (result?.error) toast.error(result.error)
-            else toast.success('Licença excluída com sucesso.')
-          })}
-        />
+        {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+          <>
+            <DropdownMenuSeparator />
+            <ConfirmDeleteDialog
+              isPending={isPending}
+              description={`The license "${license.component}" will be permanently deleted.`}
+              onConfirm={() => startTransition(async () => {
+                const result = await deleteLicense(license.id)
+                if (result?.error) toast.error(result.error)
+                else toast.success('License deleted successfully.')
+              })}
+            />
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-export const licenseColumns: ColumnDef<LicenseRow>[] = [
-  {
-    accessorKey: 'component',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Componente" />,
-    cell: ({ row }) => (
-      <Link href={`/licenses/${row.original.id}`} className="hover:underline">
-        {row.original.component}
-      </Link>
-    ),
-  },
-  {
-    accessorKey: 'description',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Descrição" />,
-    cell: ({ row }) => row.original.description ?? '—',
-  },
-  {
-    accessorKey: 'isActive',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
-    cell: ({ row }) =>
-      row.original.isActive ? (
-        <Badge variant="default">Ativa</Badge>
-      ) : (
-        <Badge variant="destructive">Inativa</Badge>
+export function getColumns(currentUserRole: string): ColumnDef<LicenseRow>[] {
+  return [
+    {
+      accessorKey: 'component',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Component" />,
+      cell: ({ row }) => (
+        <Link href={`/licenses/${row.original.id}`} className="hover:underline">
+          {row.original.component}
+        </Link>
       ),
-  },
-  {
-    accessorKey: 'createdAt',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Criado em" />,
-    cell: ({ row }) =>
-      new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(row.original.createdAt),
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: ({ row }) => <ActionsCell row={row} />,
-  },
-]
+    },
+    {
+      accessorKey: 'description',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+      cell: ({ row }) => row.original.description ?? '—',
+    },
+    {
+      accessorKey: 'isActive',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      cell: ({ row }) =>
+        row.original.isActive ? (
+          <Badge variant="default">Active</Badge>
+        ) : (
+          <Badge variant="destructive">Inactive</Badge>
+        ),
+    },
+    {
+      accessorKey: 'createdAt',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+      cell: ({ row }) =>
+        new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} />,
+    },
+  ]
+}

@@ -1,18 +1,19 @@
 'use client'
 
 import { DataTable } from '@/components/ui/data-table'
-import { packageColumns, type PackageRow } from './columns'
+import { getColumns, type PackageRow } from './columns'
 
 interface PackagesDataTableProps {
+  currentUserRole: string
   data: PackageRow[]
 }
 
-export function PackagesDataTable({ data }: PackagesDataTableProps) {
+export function PackagesDataTable({ currentUserRole, data }: PackagesDataTableProps) {
   return (
     <DataTable
-      columns={packageColumns}
+      columns={getColumns(currentUserRole)}
       data={data}
-      emptyMessage="Nenhum package encontrado."
+      emptyMessage="No packages found."
     />
   )
 }

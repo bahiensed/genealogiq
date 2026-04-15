@@ -30,7 +30,7 @@ export type PackageRow = {
   license: { component: string }
 }
 
-function ActionsCell({ row }: { row: { original: PackageRow } }) {
+function ActionsCell({ row, currentUserRole }: { row: { original: PackageRow }; currentUserRole: string }) {
   const [isPending, startTransition] = useTransition()
   const pkg = row.original
 
@@ -39,35 +39,39 @@ function ActionsCell({ row }: { row: { original: PackageRow } }) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" disabled={isPending}>
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Abrir menu</span>
+          <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/packages/${pkg.id}`}>Editar</Link>
+          <Link href={`/packages/${pkg.id}`}>Edit</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => startTransition(async () => {
             const result = await togglePackageActive(pkg.id)
             if (result?.error) toast.error(result.error)
-            else toast.success(pkg.isActive ? 'Package desativado.' : 'Package reativado.')
+            else toast.success(pkg.isActive ? 'Package deactivated.' : 'Package reactivated.')
           })}
         >
-          {pkg.isActive ? 'Desativar' : 'Reativar'}
+          {pkg.isActive ? 'Deactivate' : 'Reactivate'}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <ConfirmDeleteDialog
-          isPending={isPending}
-          description={`O package "${pkg.name}" será excluído permanentemente.`}
-          onConfirm={() => startTransition(async () => {
-            const result = await deletePackage(pkg.id)
-            if (result?.error) toast.error(result.error)
-            else toast.success('Package excluído com sucesso.')
-          })}
-        />
+        {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+          <>
+            <DropdownMenuSeparator />
+            <ConfirmDeleteDialog
+              isPending={isPending}
+              description={`The package "${pkg.name}" will be permanently deleted.`}
+              onConfirm={() => startTransition(async () => {
+                const result = await deletePackage(pkg.id)
+                if (result?.error) toast.error(result.error)
+                else toast.success('Package deleted successfully.')
+              })}
+            />
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -75,50 +79,52 @@ function ActionsCell({ row }: { row: { original: PackageRow } }) {
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
-export const packageColumns: ColumnDef<PackageRow>[] = [
-  {
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Nome" />,
-    cell: ({ row }) => (
-      <Link href={`/packages/${row.original.id}`} className="hover:underline">
-        {row.original.name}
-      </Link>
-    ),
-  },
-  {
-    id: 'license',
-    accessorFn: (row) => row.license.component,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Licença" />,
-    cell: ({ row }) => row.original.license.component,
-  },
-  {
-    accessorKey: 'quantity',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Qtd. Licenças" />,
-    cell: ({ row }) => row.original.quantity,
-  },
-  {
-    accessorKey: 'price',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Preço" />,
-    cell: ({ row }) => usd.format(row.original.price),
-  },
-  {
-    accessorKey: 'description',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Descrição" />,
-    cell: ({ row }) => row.original.description ?? '—',
-  },
-  {
-    accessorKey: 'isActive',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
-    cell: ({ row }) =>
-      row.original.isActive ? (
-        <Badge variant="default">Ativo</Badge>
-      ) : (
-        <Badge variant="destructive">Inativo</Badge>
+export function getColumns(currentUserRole: string): ColumnDef<PackageRow>[] {
+  return [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      cell: ({ row }) => (
+        <Link href={`/packages/${row.original.id}`} className="hover:underline">
+          {row.original.name}
+        </Link>
       ),
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: ({ row }) => <ActionsCell row={row} />,
-  },
-]
+    },
+    {
+      id: 'license',
+      accessorFn: (row) => row.license.component,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="License" />,
+      cell: ({ row }) => row.original.license.component,
+    },
+    {
+      accessorKey: 'quantity',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="License Qty." />,
+      cell: ({ row }) => row.original.quantity,
+    },
+    {
+      accessorKey: 'price',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Price" />,
+      cell: ({ row }) => usd.format(row.original.price),
+    },
+    {
+      accessorKey: 'description',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+      cell: ({ row }) => row.original.description ?? '—',
+    },
+    {
+      accessorKey: 'isActive',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      cell: ({ row }) =>
+        row.original.isActive ? (
+          <Badge variant="default">Active</Badge>
+        ) : (
+          <Badge variant="destructive">Inactive</Badge>
+        ),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} />,
+    },
+  ]
+}

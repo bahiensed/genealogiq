@@ -14,11 +14,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 const DEFAULT_COLUMN_LABELS: Record<string, string> = {
-  name:      'Nome',
+  name:      'Name',
   email:     'E-mail',
   role:      'Role',
   isActive:  'Status',
-  createdAt: 'Criado em',
+  createdAt: 'Created at',
 }
 
 export function DataTableViewOptions<TData>({
@@ -33,11 +33,11 @@ export function DataTableViewOptions<TData>({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="ml-auto hidden h-8 lg:flex">
           <Settings2 />
-          Colunas
+          Columns
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[150px]">
-        <DropdownMenuLabel>Exibir colunas</DropdownMenuLabel>
+        <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {table
           .getAllColumns()

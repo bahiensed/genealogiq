@@ -25,7 +25,7 @@ export type SaleRow = {
   soldBy:   { firstName: string; lastName: string }
 }
 
-function ActionsCell({ row }: { row: { original: SaleRow } }) {
+function ActionsCell({ row, currentUserRole }: { row: { original: SaleRow }; currentUserRole: string }) {
   const [isPending, startTransition] = useTransition()
   const sale = row.original
 
@@ -34,85 +34,91 @@ function ActionsCell({ row }: { row: { original: SaleRow } }) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" disabled={isPending}>
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Abrir menu</span>
+          <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Ações</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <ConfirmDeleteDialog
-          isPending={isPending}
-          description={`A venda do package "${sale.package.name}" para "${sale.customer.name}" será excluída e as licenças serão devolvidas ao inventário.`}
-          onConfirm={() => startTransition(async () => {
-            const result = await deleteSale(sale.id)
-            if (result?.error) toast.error(result.error)
-            else toast.success('Venda excluída com sucesso.')
-          })}
-        />
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+          <>
+            <DropdownMenuSeparator />
+            <ConfirmDeleteDialog
+              isPending={isPending}
+              description={`The sale of package "${sale.package.name}" to "${sale.customer.name}" will be deleted and licenses will be returned to inventory.`}
+              onConfirm={() => startTransition(async () => {
+                const result = await deleteSale(sale.id)
+                if (result?.error) toast.error(result.error)
+                else toast.success('Sale deleted successfully.')
+              })}
+            />
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
 const usd  = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-const date = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' })
+const date = new Intl.DateTimeFormat('en-US', { dateStyle: 'short' })
 
-export const saleColumns: ColumnDef<SaleRow>[] = [
-  {
-    accessorKey: 'soldAt',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Date" />,
-    cell: ({ row }) => date.format(new Date(row.original.soldAt)),
-  },
-  {
-    id: 'customer',
-    accessorFn: (row) => row.customer.name,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
-    cell: ({ row }) => row.original.customer.name,
-  },
-  {
-    id: 'package',
-    accessorFn: (row) => row.package.name,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Package Name" />,
-    cell: ({ row }) => row.original.package.name,
-  },
-  {
-    accessorKey: 'quantity',
-    header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Qtd.</>} />,
-    cell: ({ row }) => <div className="text-right">{row.original.quantity}</div>,
-  },
-  {
-    id: 'totalLicenses',
-    accessorFn: (row) => row.quantity * row.package.quantity,
-    header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Total Qtd.</>} />,
-    cell: ({ row }) => <div className="text-right">{(row.original.quantity * row.original.package.quantity).toLocaleString('en-US')}</div>,
-  },
-  {
-    id: 'packagePrice',
-    accessorFn: (row) => row.package.price,
-    header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Price</>} />,
-    cell: ({ row }) => <div className="text-right">{usd.format(row.original.package.price)}</div>,
-  },
-  {
-    id: 'licenseUnitPrice',
-    accessorFn: (row) => row.package.price / row.package.quantity,
-    header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Un. Price</>} />,
-    cell: ({ row }) => <div className="text-right">{usd.format(row.original.package.price / row.original.package.quantity)}</div>,
-  },
-  {
-    id: 'totalPrice',
-    accessorFn: (row) => row.quantity * row.package.price,
-    header: ({ column }) => <DataTableColumnHeader column={column} title={<>Total<br/>Price</>} />,
-    cell: ({ row }) => <div className="text-right">{usd.format(row.original.quantity * row.original.package.price)}</div>,
-  },
-  {
-    id: 'seller',
-    accessorFn: (row) => `${row.soldBy.firstName} ${row.soldBy.lastName}`,
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Seller" />,
-    cell: ({ row }) => `${row.original.soldBy.firstName} ${row.original.soldBy.lastName}`,
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: ({ row }) => <ActionsCell row={row} />,
-  },
-]
+export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
+  return [
+    {
+      accessorKey: 'soldAt',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Date" />,
+      cell: ({ row }) => date.format(new Date(row.original.soldAt)),
+    },
+    {
+      id: 'customer',
+      accessorFn: (row) => row.customer.name,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
+      cell: ({ row }) => row.original.customer.name,
+    },
+    {
+      id: 'package',
+      accessorFn: (row) => row.package.name,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Package Name" />,
+      cell: ({ row }) => row.original.package.name,
+    },
+    {
+      accessorKey: 'quantity',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Qtd.</>} />,
+      cell: ({ row }) => <div className="text-right">{row.original.quantity}</div>,
+    },
+    {
+      id: 'totalLicenses',
+      accessorFn: (row) => row.quantity * row.package.quantity,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Total Qtd.</>} />,
+      cell: ({ row }) => <div className="text-right">{(row.original.quantity * row.original.package.quantity).toLocaleString('en-US')}</div>,
+    },
+    {
+      id: 'packagePrice',
+      accessorFn: (row) => row.package.price,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Price</>} />,
+      cell: ({ row }) => <div className="text-right">{usd.format(row.original.package.price)}</div>,
+    },
+    {
+      id: 'licenseUnitPrice',
+      accessorFn: (row) => row.package.price / row.package.quantity,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Un. Price</>} />,
+      cell: ({ row }) => <div className="text-right">{usd.format(row.original.package.price / row.original.package.quantity)}</div>,
+    },
+    {
+      id: 'totalPrice',
+      accessorFn: (row) => row.quantity * row.package.price,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Total<br/>Price</>} />,
+      cell: ({ row }) => <div className="text-right">{usd.format(row.original.quantity * row.original.package.price)}</div>,
+    },
+    {
+      id: 'seller',
+      accessorFn: (row) => `${row.soldBy.firstName} ${row.soldBy.lastName}`,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Seller" />,
+      cell: ({ row }) => `${row.original.soldBy.firstName} ${row.original.soldBy.lastName}`,
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} />,
+    },
+  ]
+}

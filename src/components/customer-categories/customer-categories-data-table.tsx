@@ -1,18 +1,19 @@
 'use client'
 
 import { DataTable } from '@/components/ui/data-table'
-import { customerCategoryColumns, type CustomerCategoryRow } from './columns'
+import { getColumns, type CustomerCategoryRow } from './columns'
 
 interface CustomerCategoriesDataTableProps {
+  currentUserRole: string
   data: CustomerCategoryRow[]
 }
 
-export function CustomerCategoriesDataTable({ data }: CustomerCategoriesDataTableProps) {
+export function CustomerCategoriesDataTable({ currentUserRole, data }: CustomerCategoriesDataTableProps) {
   return (
     <DataTable
-      columns={customerCategoryColumns}
+      columns={getColumns(currentUserRole)}
       data={data}
-      emptyMessage="Nenhuma categoria de cliente encontrada."
+      emptyMessage="No customer categories found."
     />
   )
 }

@@ -1,18 +1,19 @@
 'use client'
 
 import { DataTable } from '@/components/ui/data-table'
-import { supplierColumns, type SupplierRow } from './columns'
+import { getColumns, type SupplierRow } from './columns'
 
 interface SuppliersDataTableProps {
+  currentUserRole: string
   data: SupplierRow[]
 }
 
-export function SuppliersDataTable({ data }: SuppliersDataTableProps) {
+export function SuppliersDataTable({ currentUserRole, data }: SuppliersDataTableProps) {
   return (
     <DataTable
-      columns={supplierColumns}
+      columns={getColumns(currentUserRole)}
       data={data}
-      emptyMessage="Nenhum fornecedor encontrado."
+      emptyMessage="No suppliers found."
     />
   )
 }

@@ -1,18 +1,19 @@
 'use client'
 
 import { DataTable } from '@/components/ui/data-table'
-import { customerColumns, type CustomerRow } from './columns'
+import { getColumns, type CustomerRow } from './columns'
 
 interface CustomersDataTableProps {
+  currentUserRole: string
   data: CustomerRow[]
 }
 
-export function CustomersDataTable({ data }: CustomersDataTableProps) {
+export function CustomersDataTable({ currentUserRole, data }: CustomersDataTableProps) {
   return (
     <DataTable
-      columns={customerColumns}
+      columns={getColumns(currentUserRole)}
       data={data}
-      emptyMessage="Nenhum cliente encontrado."
+      emptyMessage="No customers found."
     />
   )
 }

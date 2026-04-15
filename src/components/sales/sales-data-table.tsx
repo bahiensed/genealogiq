@@ -1,22 +1,23 @@
 'use client'
 
 import { DataTable } from '@/components/ui/data-table'
-import { saleColumns, type SaleRow } from './columns'
+import { getColumns, type SaleRow } from './columns'
 
 interface SalesDataTableProps {
+  currentUserRole: string
   data: SaleRow[]
 }
 
 const COLUMN_LABELS: Record<string, string> = {
-  soldAt:          'Date',
-  customer:        'Customer',
-  package:         'Package Name',
-  quantity:        'Package Qtd.',
-  totalLicenses:   'License Total Qtd.',
-  packagePrice:    'Package Price',
-  licenseUnitPrice:'License Un. Price',
-  totalPrice:      'Total Price',
-  seller:          'Seller',
+  soldAt:           'Date',
+  customer:         'Customer',
+  package:          'Package Name',
+  quantity:         'Package Qtd.',
+  totalLicenses:    'License Total Qtd.',
+  packagePrice:     'Package Price',
+  licenseUnitPrice: 'License Un. Price',
+  totalPrice:       'Total Price',
+  seller:           'Seller',
 }
 
 const INITIAL_VISIBILITY = {
@@ -24,14 +25,14 @@ const INITIAL_VISIBILITY = {
   licenseUnitPrice: false,
 }
 
-export function SalesDataTable({ data }: SalesDataTableProps) {
+export function SalesDataTable({ currentUserRole, data }: SalesDataTableProps) {
   return (
     <DataTable
-      columns={saleColumns}
+      columns={getColumns(currentUserRole)}
       data={data}
       filterColumn="customer"
-      filterPlaceholder="Filtrar por customer…"
-      emptyMessage="Nenhuma venda registrada."
+      filterPlaceholder="Search..."
+      emptyMessage="No sales found."
       columnLabels={COLUMN_LABELS}
       initialColumnVisibility={INITIAL_VISIBILITY}
     />

@@ -1,20 +1,21 @@
 'use client'
 
 import { DataTable } from '@/components/ui/data-table'
-import { licenseColumns, type LicenseRow } from './columns'
+import { getColumns, type LicenseRow } from './columns'
 
 interface LicensesDataTableProps {
+  currentUserRole: string
   data: LicenseRow[]
 }
 
-export function LicensesDataTable({ data }: LicensesDataTableProps) {
+export function LicensesDataTable({ currentUserRole, data }: LicensesDataTableProps) {
   return (
     <DataTable
-      columns={licenseColumns}
+      columns={getColumns(currentUserRole)}
       data={data}
       filterColumn="component"
-      filterPlaceholder="Filtrar por componente…"
-      emptyMessage="Nenhuma licença encontrada."
+      filterPlaceholder="Search..."
+      emptyMessage="No licenses found."
     />
   )
 }

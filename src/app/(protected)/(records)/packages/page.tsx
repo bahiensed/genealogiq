@@ -1,9 +1,11 @@
 import Link from 'next/link'
+import { verifySession } from '@/lib/dal'
 import { getPackages } from '@/queries/packages'
 import { PackagesDataTable } from '@/components/packages/packages-data-table'
 import { Button } from '@/components/ui/button'
 
 export default async function PackagesPage() {
+  const session = await verifySession()
   const packages = await getPackages()
 
   return (
@@ -13,11 +15,11 @@ export default async function PackagesPage() {
           Packages
         </h1>
         <Button asChild>
-          <Link href="/packages/new">Novo package</Link>
+          <Link href="/packages/new">New package</Link>
         </Button>
       </div>
 
-      <PackagesDataTable data={packages} />
+      <PackagesDataTable currentUserRole={session.user.role} data={packages} />
     </div>
   )
 }

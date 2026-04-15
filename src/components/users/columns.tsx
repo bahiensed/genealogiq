@@ -38,7 +38,15 @@ const ROLE_LABELS: Record<string, string> = {
   USER: 'User',
 }
 
-function ActionsCell({ row, currentUserId }: { row: { original: UserRow }; currentUserId: string }) {
+function ActionsCell({
+  row,
+  currentUserId,
+  currentUserRole,
+}: {
+  row: { original: UserRow }
+  currentUserId: string
+  currentUserRole: string
+}) {
   const [isPending, startTransition] = useTransition()
   const user = row.original
   const isSelf = user.id === currentUserId
@@ -48,14 +56,14 @@ function ActionsCell({ row, currentUserId }: { row: { original: UserRow }; curre
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" disabled={isPending}>
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Abrir menu</span>
+          <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/users/${user.id}`}>Editar</Link>
+          <Link href={`/users/${user.id}`}>Edit</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -63,41 +71,45 @@ function ActionsCell({ row, currentUserId }: { row: { original: UserRow }; curre
           onClick={() => startTransition(async () => {
             const result = await toggleUserActive(user.id)
             if (result?.error) toast.error(result.error)
-            else toast.success(user.isActive ? 'Usuário desativado.' : 'Usuário reativado.')
+            else toast.success(user.isActive ? 'User deactivated.' : 'User reactivated.')
           })}
         >
-          {user.isActive ? 'Desativar' : 'Reativar'}
+          {user.isActive ? 'Deactivate' : 'Reactivate'}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => startTransition(async () => {
             const result = await resendWelcomeEmail(user.id)
             if (result?.error) toast.error(result.error)
-            else toast.success('E-mail reenviado com sucesso.')
+            else toast.success('Email resent successfully.')
           })}
         >
-          Reenviar e-mail
+          Resend email
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <ConfirmDeleteDialog
-          isPending={isPending}
-          description={`O usuário "${user.firstName} ${user.lastName}" será excluído permanentemente.`}
-          onConfirm={() => startTransition(async () => {
-            const result = await deleteUser(user.id)
-            if (result?.error) toast.error(result.error)
-            else toast.success('Usuário excluído com sucesso.')
-          })}
-        />
+        {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+          <>
+            <DropdownMenuSeparator />
+            <ConfirmDeleteDialog
+              isPending={isPending}
+              description={`The user "${user.firstName} ${user.lastName}" will be permanently deleted.`}
+              onConfirm={() => startTransition(async () => {
+                const result = await deleteUser(user.id)
+                if (result?.error) toast.error(result.error)
+                else toast.success('User deleted successfully.')
+              })}
+            />
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-export function getColumns(currentUserId: string): ColumnDef<UserRow>[] {
+export function getColumns({ currentUserId, currentUserRole }: { currentUserId: string; currentUserRole: string }): ColumnDef<UserRow>[] {
   return [
     {
       id: 'name',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Nome" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
       cell: ({ row }) => (
         <Link href={`/users/${row.original.id}`} className="hover:underline">
           {row.original.firstName} {row.original.lastName}
@@ -120,21 +132,21 @@ export function getColumns(currentUserId: string): ColumnDef<UserRow>[] {
       header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
       cell: ({ row }) =>
         row.original.isActive ? (
-          <Badge variant="default">Ativo</Badge>
+          <Badge variant="default">Active</Badge>
         ) : (
-          <Badge variant="destructive">Inativo</Badge>
+          <Badge variant="destructive">Inactive</Badge>
         ),
     },
     {
       accessorKey: 'createdAt',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Criado em" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
       cell: ({ row }) =>
-        new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(row.original.createdAt),
+        new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
     },
     {
       id: 'actions',
       enableHiding: false,
-      cell: ({ row }) => <ActionsCell row={row} currentUserId={currentUserId} />,
+      cell: ({ row }) => <ActionsCell row={row} currentUserId={currentUserId} currentUserRole={currentUserRole} />,
     },
   ]
 }

@@ -27,7 +27,7 @@ export type CustomerCategoryRow = {
   createdAt: Date
 }
 
-function ActionsCell({ row }: { row: { original: CustomerCategoryRow } }) {
+function ActionsCell({ row, currentUserRole }: { row: { original: CustomerCategoryRow }; currentUserRole: string }) {
   const [isPending, startTransition] = useTransition()
   const category = row.original
 
@@ -36,74 +36,80 @@ function ActionsCell({ row }: { row: { original: CustomerCategoryRow } }) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" disabled={isPending}>
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Abrir menu</span>
+          <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/customer-categories/${category.id}`}>Editar</Link>
+          <Link href={`/customer-categories/${category.id}`}>Edit</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => startTransition(async () => {
             const result = await toggleCustomerCategoryActive(category.id)
             if (result?.error) toast.error(result.error)
-            else toast.success(category.isActive ? 'Categoria desativada.' : 'Categoria reativada.')
+            else toast.success(category.isActive ? 'Category deactivated.' : 'Category reactivated.')
           })}
         >
-          {category.isActive ? 'Desativar' : 'Reativar'}
+          {category.isActive ? 'Deactivate' : 'Reactivate'}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <ConfirmDeleteDialog
-          isPending={isPending}
-          description={`A categoria "${category.name}" será excluída permanentemente.`}
-          onConfirm={() => startTransition(async () => {
-            const result = await deleteCustomerCategory(category.id)
-            if (result?.error) toast.error(result.error)
-            else toast.success('Categoria excluída com sucesso.')
-          })}
-        />
+        {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+          <>
+            <DropdownMenuSeparator />
+            <ConfirmDeleteDialog
+              isPending={isPending}
+              description={`The category "${category.name}" will be permanently deleted.`}
+              onConfirm={() => startTransition(async () => {
+                const result = await deleteCustomerCategory(category.id)
+                if (result?.error) toast.error(result.error)
+                else toast.success('Category deleted successfully.')
+              })}
+            />
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-export const customerCategoryColumns: ColumnDef<CustomerCategoryRow>[] = [
-  {
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Nome" />,
-    cell: ({ row }) => (
-      <Link href={`/customer-categories/${row.original.id}`} className="hover:underline">
-        {row.original.name}
-      </Link>
-    ),
-  },
-  {
-    accessorKey: 'description',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Descrição" />,
-    cell: ({ row }) => row.original.description ?? '—',
-  },
-  {
-    accessorKey: 'isActive',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
-    cell: ({ row }) =>
-      row.original.isActive ? (
-        <Badge variant="default">Ativa</Badge>
-      ) : (
-        <Badge variant="destructive">Inativa</Badge>
+export function getColumns(currentUserRole: string): ColumnDef<CustomerCategoryRow>[] {
+  return [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      cell: ({ row }) => (
+        <Link href={`/customer-categories/${row.original.id}`} className="hover:underline">
+          {row.original.name}
+        </Link>
       ),
-  },
-  {
-    accessorKey: 'createdAt',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Criado em" />,
-    cell: ({ row }) =>
-      new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(row.original.createdAt),
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: ({ row }) => <ActionsCell row={row} />,
-  },
-]
+    },
+    {
+      accessorKey: 'description',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+      cell: ({ row }) => row.original.description ?? '—',
+    },
+    {
+      accessorKey: 'isActive',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      cell: ({ row }) =>
+        row.original.isActive ? (
+          <Badge variant="default">Active</Badge>
+        ) : (
+          <Badge variant="destructive">Inactive</Badge>
+        ),
+    },
+    {
+      accessorKey: 'createdAt',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+      cell: ({ row }) =>
+        new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} />,
+    },
+  ]
+}

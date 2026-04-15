@@ -30,7 +30,7 @@ export type SupplierRow = {
   category: { id: string; name: string } | null
 }
 
-function ActionsCell({ row }: { row: { original: SupplierRow } }) {
+function ActionsCell({ row, currentUserRole }: { row: { original: SupplierRow }; currentUserRole: string }) {
   const [isPending, startTransition] = useTransition()
   const supplier = row.original
 
@@ -39,85 +39,91 @@ function ActionsCell({ row }: { row: { original: SupplierRow } }) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" disabled={isPending}>
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Abrir menu</span>
+          <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Ações</DropdownMenuLabel>
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/suppliers/${supplier.id}`}>Editar</Link>
+          <Link href={`/suppliers/${supplier.id}`}>Edit</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => startTransition(async () => {
             const result = await toggleSupplierActive(supplier.id)
             if (result?.error) toast.error(result.error)
-            else toast.success(supplier.isActive ? 'Fornecedor desativado.' : 'Fornecedor reativado.')
+            else toast.success(supplier.isActive ? 'Supplier deactivated.' : 'Supplier reactivated.')
           })}
         >
-          {supplier.isActive ? 'Desativar' : 'Reativar'}
+          {supplier.isActive ? 'Deactivate' : 'Reactivate'}
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <ConfirmDeleteDialog
-          isPending={isPending}
-          description={`O fornecedor "${supplier.name}" será excluído permanentemente.`}
-          onConfirm={() => startTransition(async () => {
-            const result = await deleteSupplier(supplier.id)
-            if (result?.error) toast.error(result.error)
-            else toast.success('Fornecedor excluído com sucesso.')
-          })}
-        />
+        {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+          <>
+            <DropdownMenuSeparator />
+            <ConfirmDeleteDialog
+              isPending={isPending}
+              description={`The supplier "${supplier.name}" will be permanently deleted.`}
+              onConfirm={() => startTransition(async () => {
+                const result = await deleteSupplier(supplier.id)
+                if (result?.error) toast.error(result.error)
+                else toast.success('Supplier deleted successfully.')
+              })}
+            />
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-export const supplierColumns: ColumnDef<SupplierRow>[] = [
-  {
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Nome" />,
-    cell: ({ row }) => (
-      <Link href={`/suppliers/${row.original.id}`} className="hover:underline">
-        {row.original.name}
-      </Link>
-    ),
-  },
-  {
-    accessorKey: 'entityType',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Tipo" />,
-    cell: ({ row }) => row.original.entityType === 'INDIVIDUAL' ? 'PF' : 'PJ',
-  },
-  {
-    id: 'category',
-    accessorFn: (row) => row.category?.name ?? '',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Categoria" />,
-    cell: ({ row }) => row.original.category?.name ?? '—',
-  },
-  {
-    accessorKey: 'email',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="E-mail" />,
-    cell: ({ row }) => row.original.email,
-  },
-  {
-    accessorKey: 'isActive',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
-    cell: ({ row }) =>
-      row.original.isActive ? (
-        <Badge variant="default">Ativo</Badge>
-      ) : (
-        <Badge variant="destructive">Inativo</Badge>
+export function getColumns(currentUserRole: string): ColumnDef<SupplierRow>[] {
+  return [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      cell: ({ row }) => (
+        <Link href={`/suppliers/${row.original.id}`} className="hover:underline">
+          {row.original.name}
+        </Link>
       ),
-  },
-  {
-    accessorKey: 'createdAt',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Criado em" />,
-    cell: ({ row }) =>
-      new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(row.original.createdAt),
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: ({ row }) => <ActionsCell row={row} />,
-  },
-]
+    },
+    {
+      accessorKey: 'entityType',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
+      cell: ({ row }) => row.original.entityType === 'INDIVIDUAL' ? 'Individual' : 'Company',
+    },
+    {
+      id: 'category',
+      accessorFn: (row) => row.category?.name ?? '',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Category" />,
+      cell: ({ row }) => row.original.category?.name ?? '—',
+    },
+    {
+      accessorKey: 'email',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="E-mail" />,
+      cell: ({ row }) => row.original.email,
+    },
+    {
+      accessorKey: 'isActive',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      cell: ({ row }) =>
+        row.original.isActive ? (
+          <Badge variant="default">Active</Badge>
+        ) : (
+          <Badge variant="destructive">Inactive</Badge>
+        ),
+    },
+    {
+      accessorKey: 'createdAt',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+      cell: ({ row }) =>
+        new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} />,
+    },
+  ]
+}
