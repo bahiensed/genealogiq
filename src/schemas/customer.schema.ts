@@ -1,10 +1,23 @@
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addressSchema, addressDefaultValues } from './address.schema'
+import { validateCpf, validateCnpj } from '@/lib/masks'
 
 export const ENTITY_TYPES = ['INDIVIDUAL', 'COMPANY'] as const
 
-export const customerSchema = z.object({
+function taxIdRefine(data: { entityType: string; taxId: string }, ctx: z.RefinementCtx) {
+  if (data.entityType === 'INDIVIDUAL') {
+    if (!validateCpf(data.taxId)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid CPF', path: ['taxId'] })
+    }
+  } else {
+    if (!validateCnpj(data.taxId)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid CNPJ', path: ['taxId'] })
+    }
+  }
+}
+
+const customerBaseSchema = z.object({
   entityType:            z.enum(ENTITY_TYPES),
   name:                  z.string().min(2, 'Must be at least 2 characters'),
   tradeName:             z.string().min(2, 'Must be at least 2 characters'),
@@ -31,15 +44,17 @@ export const customerSchema = z.object({
   address:               addressSchema.optional(),
 })
 
+export const customerSchema = customerBaseSchema.superRefine(taxIdRefine)
+
 export const ownerSchema = z.object({
   firstName: z.string().min(2, 'Must be at least 2 characters'),
   lastName:  z.string().min(2, 'Must be at least 2 characters'),
   email:     z.string().email('Invalid email address'),
 })
 
-export const customerCreateSchema = customerSchema.extend({
+export const customerCreateSchema = customerBaseSchema.extend({
   owner: ownerSchema,
-})
+}).superRefine(taxIdRefine)
 
 export type CustomerFormValues       = z.infer<typeof customerSchema>
 export type OwnerFormValues          = z.infer<typeof ownerSchema>

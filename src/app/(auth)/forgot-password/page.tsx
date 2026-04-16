@@ -14,19 +14,19 @@ export default async function ForgotPasswordPage({ searchParams }: Props) {
     return (
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>E-mail enviado</CardTitle>
+          <CardTitle>Email sent</CardTitle>
           <CardDescription>
-            Se este e-mail estiver cadastrado, você receberá um link em breve.
+            If this email is registered, you will receive a link shortly.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Verifique sua caixa de entrada. O link expira em uma hora.
+            Check your inbox. The link expires in one hour.
           </p>
         </CardContent>
         <CardFooter>
           <Button asChild variant="outline" className="w-full">
-            <Link href="/sign-in">Voltar para o login</Link>
+            <Link href="/sign-in">Back to sign in</Link>
           </Button>
         </CardFooter>
       </Card>

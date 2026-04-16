@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -31,11 +31,11 @@ export type UserRow = {
 
 const ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: 'Super Admin',
-  OWNER: 'Owner',
-  ADMIN: 'Admin',
+  OWNER:     'Owner',
+  ADMIN:     'Admin',
   COMERCIAL: 'Comercial',
-  FINANCE: 'Finance',
-  USER: 'User',
+  FINANCE:   'Finance',
+  USER:      'User',
 }
 
 function ActionsCell({
@@ -48,59 +48,73 @@ function ActionsCell({
   currentUserRole: string
 }) {
   const [isPending, startTransition] = useTransition()
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const user = row.original
   const isSelf = user.id === currentUserId
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={isPending}>
-          <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Open menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href={`/users/${user.id}`}>Edit</Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          disabled={isSelf}
-          onClick={() => startTransition(async () => {
-            const result = await toggleUserActive(user.id)
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" disabled={isPending}>
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href={`/users/${user.id}`}>Edit</Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            disabled={isSelf}
+            onClick={() => startTransition(async () => {
+              const result = await toggleUserActive(user.id)
+              if (result?.error) toast.error(result.error)
+              else toast.success(user.isActive ? 'User deactivated.' : 'User reactivated.')
+            })}
+          >
+            {user.isActive ? 'Deactivate' : 'Reactivate'}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => startTransition(async () => {
+              const result = await resendWelcomeEmail(user.id)
+              if (result?.error) toast.error(result.error)
+              else toast.success('Email resent successfully.')
+            })}
+          >
+            Resend email
+          </DropdownMenuItem>
+          {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => setDeleteOpen(true)}
+              >
+                Delete
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+        <ConfirmDeleteDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          isPending={isPending}
+          description={`The user "${user.firstName} ${user.lastName}" will be permanently deleted.`}
+          onConfirm={() => startTransition(async () => {
+            const result = await deleteUser(user.id)
             if (result?.error) toast.error(result.error)
-            else toast.success(user.isActive ? 'User deactivated.' : 'User reactivated.')
+            else { toast.success('User deleted successfully.'); setDeleteOpen(false) }
           })}
-        >
-          {user.isActive ? 'Deactivate' : 'Reactivate'}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => startTransition(async () => {
-            const result = await resendWelcomeEmail(user.id)
-            if (result?.error) toast.error(result.error)
-            else toast.success('Email resent successfully.')
-          })}
-        >
-          Resend email
-        </DropdownMenuItem>
-        {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-          <>
-            <DropdownMenuSeparator />
-            <ConfirmDeleteDialog
-              isPending={isPending}
-              description={`The user "${user.firstName} ${user.lastName}" will be permanently deleted.`}
-              onConfirm={() => startTransition(async () => {
-                const result = await deleteUser(user.id)
-                if (result?.error) toast.error(result.error)
-                else toast.success('User deleted successfully.')
-              })}
-            />
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        />
+      )}
+    </>
   )
 }
 

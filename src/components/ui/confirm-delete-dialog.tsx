@@ -9,27 +9,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 
 interface ConfirmDeleteDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   onConfirm: () => void
   isPending: boolean
   description?: string
 }
 
-export function ConfirmDeleteDialog({ onConfirm, isPending, description }: ConfirmDeleteDialogProps) {
+export function ConfirmDeleteDialog({ open, onOpenChange, onConfirm, isPending, description }: ConfirmDeleteDialogProps) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <DropdownMenuItem
-          className="text-destructive focus:text-destructive"
-          onSelect={(e) => e.preventDefault()}
-        >
-          Delete
-        </DropdownMenuItem>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Confirm deletion</DialogTitle>

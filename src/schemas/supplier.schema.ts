@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addressSchema, addressDefaultValues } from './address.schema'
+import { validateCpf, validateCnpj } from '@/lib/masks'
 
 export const ENTITY_TYPES = ['INDIVIDUAL', 'COMPANY'] as const
 
@@ -19,6 +20,16 @@ export const supplierSchema = z.object({
   categoryId:            z.string().min(1, 'Category is required'),
   isActive:              z.boolean(),
   address:               addressSchema.optional(),
+}).superRefine((data, ctx) => {
+  if (data.entityType === 'INDIVIDUAL') {
+    if (!validateCpf(data.taxId)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid CPF', path: ['taxId'] })
+    }
+  } else {
+    if (!validateCnpj(data.taxId)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid CNPJ', path: ['taxId'] })
+    }
+  }
 })
 
 export type SupplierFormValues = z.infer<typeof supplierSchema>

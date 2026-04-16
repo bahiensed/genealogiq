@@ -18,7 +18,7 @@ export async function updateCompany(id: string, data: CompanyFormValues): Promis
   await verifySession()
 
   const validated = companySchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { address, ...rest } = validated.data
 

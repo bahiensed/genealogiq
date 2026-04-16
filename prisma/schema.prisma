@@ -236,7 +236,7 @@ model Supplier {
   name                  String
   tradeName             String     @map("trade_name")
   birthDate             DateTime?  @map("birth_date")
-  taxId                 String     @map("tax_id")
+  taxId                 String     @unique @map("tax_id")
   stateRegistration     String?    @map("state_registration")
   municipalRegistration String?    @map("municipal_registration")
   email                 String
@@ -285,7 +285,7 @@ model Customer {
   name                  String
   tradeName             String     @map("trade_name")
   birthDate             DateTime?  @map("birth_date")
-  taxId                 String     @map("tax_id")
+  taxId                 String     @unique @map("tax_id")
   stateRegistration     String?    @map("state_registration")
   municipalRegistration String?    @map("municipal_registration")
   email                 String

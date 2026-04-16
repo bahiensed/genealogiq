@@ -13,31 +13,31 @@ export async function createLicense(data: LicenseFormValues): Promise<ActionErro
   await verifySession()
 
   const validated = licenseSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   await prisma.license.create({ data: validated.data })
 
   revalidatePath('/licenses')
-  return { success: 'Licença criada com sucesso.' }
+  return { success: 'License created successfully.' }
 }
 
 export async function updateLicense(id: string, data: LicenseFormValues): Promise<ActionError | ActionSuccess> {
   await verifySession()
 
   const validated = licenseSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   try {
     await prisma.license.update({ where: { id }, data: validated.data })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Licença não encontrada.' }
+      return { error: 'License not found.' }
     }
     throw e
   }
 
   revalidatePath('/licenses')
-  return { success: 'Licença atualizada com sucesso.' }
+  return { success: 'License updated successfully.' }
 }
 
 export async function deleteLicense(id: string): Promise<ActionError | void> {
@@ -47,10 +47,10 @@ export async function deleteLicense(id: string): Promise<ActionError | void> {
     await prisma.license.delete({ where: { id } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Licença não encontrada.' }
+      return { error: 'License not found.' }
     }
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2003') {
-      return { error: 'Esta licença está em uso por um ou mais packages.' }
+      return { error: 'This license is assigned to one or more packages and cannot be deleted.' }
     }
     throw e
   }
@@ -62,7 +62,7 @@ export async function toggleLicenseActive(id: string): Promise<ActionError | voi
   await verifySession()
 
   const license = await prisma.license.findUnique({ where: { id }, select: { isActive: true } })
-  if (!license) return { error: 'Licença não encontrada.' }
+  if (!license) return { error: 'License not found.' }
 
   await prisma.license.update({ where: { id }, data: { isActive: !license.isActive } })
   revalidatePath('/licenses')

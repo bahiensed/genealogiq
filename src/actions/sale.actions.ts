@@ -13,7 +13,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
   const session = await verifySession()
 
   const validated = saleSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { packageId, customerId, quantity, soldAt } = validated.data
 
@@ -21,7 +21,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
     where:  { id: packageId },
     select: { quantity: true, licenseId: true },
   })
-  if (!pkg) return { error: 'Package não encontrado.' }
+  if (!pkg) return { error: 'Package not found.' }
 
   const totalLicenses = pkg.quantity * quantity
 
@@ -44,7 +44,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
   })
 
   revalidatePath('/manual-sales')
-  return { success: 'Venda registrada com sucesso.' }
+  return { success: 'Sale recorded successfully.' }
 }
 
 export async function deleteSale(id: number): Promise<ActionError | void> {
@@ -54,7 +54,7 @@ export async function deleteSale(id: number): Promise<ActionError | void> {
     where:  { id },
     select: { quantity: true, packageId: true, customerId: true, package: { select: { quantity: true, licenseId: true } } },
   })
-  if (!sale) return { error: 'Venda não encontrada.' }
+  if (!sale) return { error: 'Sale not found.' }
 
   const totalLicenses = sale.package.quantity * sale.quantity
 
@@ -78,7 +78,7 @@ export async function deleteSale(id: number): Promise<ActionError | void> {
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Venda não encontrada.' }
+      return { error: 'Sale not found.' }
     }
     throw e
   }

@@ -81,7 +81,7 @@ export function LicenseForm({ id, defaultValues }: LicenseFormProps) {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>Description:</FieldLabel>
-              <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
+              <Textarea {...field} rows={3} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}

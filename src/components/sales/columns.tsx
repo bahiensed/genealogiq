@@ -2,16 +2,10 @@
 
 import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { deleteSale } from '@/actions/sale.actions'
@@ -27,34 +21,48 @@ export type SaleRow = {
 
 function ActionsCell({ row, currentUserRole }: { row: { original: SaleRow }; currentUserRole: string }) {
   const [isPending, startTransition] = useTransition()
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const sale = row.original
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={isPending}>
-          <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Open menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-          <>
-            <DropdownMenuSeparator />
-            <ConfirmDeleteDialog
-              isPending={isPending}
-              description={`The sale of package "${sale.package.name}" to "${sale.customer.name}" will be deleted and licenses will be returned to inventory.`}
-              onConfirm={() => startTransition(async () => {
-                const result = await deleteSale(sale.id)
-                if (result?.error) toast.error(result.error)
-                else toast.success('Sale deleted successfully.')
-              })}
-            />
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" disabled={isPending}>
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => setDeleteOpen(true)}
+              >
+                Delete
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+        <ConfirmDeleteDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          isPending={isPending}
+          description={`The sale of package "${sale.package.name}" to "${sale.customer.name}" will be deleted and licenses will be returned to inventory.`}
+          onConfirm={() => startTransition(async () => {
+            const result = await deleteSale(sale.id)
+            if (result?.error) toast.error(result.error)
+            else { toast.success('Sale deleted successfully.'); setDeleteOpen(false) }
+          })}
+        />
+      )}
+    </>
   )
 }
 
@@ -77,7 +85,7 @@ export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
     {
       id: 'package',
       accessorFn: (row) => row.package.name,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Package Name" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Package" />,
       cell: ({ row }) => row.original.package.name,
     },
     {
@@ -88,7 +96,7 @@ export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
     {
       id: 'totalLicenses',
       accessorFn: (row) => row.quantity * row.package.quantity,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Total Qtd.</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Licenses /<br/> Package</>} />,
       cell: ({ row }) => <div className="text-right">{(row.original.quantity * row.original.package.quantity).toLocaleString('en-US')}</div>,
     },
     {
@@ -106,7 +114,7 @@ export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
     {
       id: 'totalPrice',
       accessorFn: (row) => row.quantity * row.package.price,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Total<br/>Price</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Total Order<br/>Price</>} />,
       cell: ({ row }) => <div className="text-right">{usd.format(row.original.quantity * row.original.package.price)}</div>,
     },
     {

@@ -33,6 +33,7 @@ interface DataTableProps<TData, TValue> {
   emptyMessage?: string
   columnLabels?: Record<string, string>
   initialColumnVisibility?: VisibilityState
+  initialSorting?: SortingState
 }
 
 export function DataTable<TData, TValue>({
@@ -43,8 +44,9 @@ export function DataTable<TData, TValue>({
   emptyMessage = 'No records found.',
   columnLabels,
   initialColumnVisibility,
+  initialSorting,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>(initialSorting ?? [])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility ?? {})
 

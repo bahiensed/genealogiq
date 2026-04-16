@@ -14,6 +14,7 @@ export function PackagesDataTable({ currentUserRole, data }: PackagesDataTablePr
       columns={getColumns(currentUserRole)}
       data={data}
       emptyMessage="No packages found."
+      initialSorting={[{ id: 'quantity', desc: false }]}
     />
   )
 }

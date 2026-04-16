@@ -11,12 +11,12 @@ interface SalesDataTableProps {
 const COLUMN_LABELS: Record<string, string> = {
   soldAt:           'Date',
   customer:         'Customer',
-  package:          'Package Name',
+  package:          'Package',
   quantity:         'Package Qtd.',
-  totalLicenses:    'License Total Qtd.',
+  totalLicenses:    'Licenses / Package',
   packagePrice:     'Package Price',
   licenseUnitPrice: 'License Un. Price',
-  totalPrice:       'Total Price',
+  totalPrice:       'Total Order Price',
   seller:           'Seller',
 }
 

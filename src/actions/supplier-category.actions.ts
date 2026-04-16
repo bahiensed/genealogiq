@@ -14,42 +14,42 @@ export async function createSupplierCategory(data: SupplierCategoryFormValues): 
   await verifySession()
 
   const validated = supplierCategorySchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   let created: { id: string; name: string }
   try {
     created = await prisma.supplierCategory.create({ data: validated.data, select: { id: true, name: true } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Já existe uma categoria com este nome' }
+      return { error: 'A category with this name already exists' }
     }
     throw e
   }
 
   revalidatePath('/supplier-categories')
-  return { success: 'Categoria criada com sucesso.', category: created }
+  return { success: 'Category created successfully.', category: created }
 }
 
 export async function updateSupplierCategory(id: string, data: SupplierCategoryFormValues): Promise<ActionError | ActionSuccess> {
   await verifySession()
 
   const validated = supplierCategorySchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   try {
     const existing = await prisma.supplierCategory.findFirst({ where: { name: validated.data.name, tenantId: null }, select: { id: true } })
-    if (existing && existing.id !== id) return { error: 'Já existe uma categoria com este nome' }
+    if (existing && existing.id !== id) return { error: 'A category with this name already exists' }
 
     await prisma.supplierCategory.update({ where: { id }, data: validated.data })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Categoria não encontrada.' }
+      return { error: 'Category not found.' }
     }
     throw e
   }
 
   revalidatePath('/supplier-categories')
-  return { success: 'Categoria atualizada com sucesso.' }
+  return { success: 'Category updated successfully.' }
 }
 
 export async function deleteSupplierCategory(id: string): Promise<ActionError | void> {
@@ -59,7 +59,7 @@ export async function deleteSupplierCategory(id: string): Promise<ActionError | 
     await prisma.supplierCategory.delete({ where: { id } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Categoria não encontrada.' }
+      return { error: 'Category not found.' }
     }
     throw e
   }
@@ -71,7 +71,7 @@ export async function toggleSupplierCategoryActive(id: string): Promise<ActionEr
   await verifySession()
 
   const category = await prisma.supplierCategory.findUnique({ where: { id }, select: { isActive: true } })
-  if (!category) return { error: 'Categoria não encontrada.' }
+  if (!category) return { error: 'Category not found.' }
 
   await prisma.supplierCategory.update({ where: { id }, data: { isActive: !category.isActive } })
   revalidatePath('/supplier-categories')

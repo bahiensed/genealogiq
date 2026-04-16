@@ -7,8 +7,7 @@ export const licenseSchema = z.object({
     .max(16, 'Must be at most 16 characters'),
   description: z.string()
     .min(12, 'Must be at least 12 characters')
-    .max(32, 'Must be at most 32 characters')
-    .optional(),
+    .max(32, 'Must be at most 32 characters'),
   isActive:    z.boolean(),
 })
 

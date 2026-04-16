@@ -37,9 +37,9 @@ export function ForgotPasswordForm() {
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Esqueceu a senha?</CardTitle>
+          <CardTitle>Forgot your password?</CardTitle>
           <CardDescription>
-            Digite seu e-mail e enviaremos um link para redefinir sua senha.
+            Enter your email and we'll send you a link to reset your password.
           </CardDescription>
         </CardHeader>
 
@@ -63,15 +63,15 @@ export function ForgotPasswordForm() {
 
           <CardFooter className="mt-6 flex flex-col gap-3">
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Enviando…" : "Enviar link"}
+              {isPending ? "Sending…" : "Send reset link"}
             </Button>
             <p className="text-sm text-muted-foreground text-center">
-              Lembrou a senha?{" "}
+              Remember your password?{" "}
               <Link
                 href="/sign-in"
                 className="text-foreground underline underline-offset-4 hover:no-underline"
               >
-                Entrar
+                Sign in
               </Link>
             </p>
           </CardFooter>

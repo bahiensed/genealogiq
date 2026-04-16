@@ -43,8 +43,8 @@ export function ResetPasswordForm({ token }: Props) {
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Redefinir senha</CardTitle>
-          <CardDescription>Digite sua nova senha abaixo</CardDescription>
+          <CardTitle>Reset password</CardTitle>
+          <CardDescription>Enter your new password below</CardDescription>
         </CardHeader>
 
         <form action={dispatch}>
@@ -56,7 +56,7 @@ export function ResetPasswordForm({ token }: Props) {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Nova senha:</Label>
+              <Label htmlFor="password">New password:</Label>
               <InputGroup aria-invalid={!!state?.errors?.password}>
                 <InputGroupInput
                   id="password"
@@ -68,7 +68,7 @@ export function ResetPasswordForm({ token }: Props) {
                 <InputGroupAddon align="inline-end">
                   <InputGroupButton
                     onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff /> : <Eye />}
                   </InputGroupButton>
@@ -82,7 +82,7 @@ export function ResetPasswordForm({ token }: Props) {
 
           <CardFooter className="mt-6">
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Salvando…" : "Salvar nova senha"}
+              {isPending ? "Saving…" : "Save new password"}
             </Button>
           </CardFooter>
         </form>

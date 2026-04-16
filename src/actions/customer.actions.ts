@@ -30,12 +30,15 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
   await verifySession()
 
   const validated = customerCreateSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, owner, ...rest } = validated.data
 
+  const dupTax = await prisma.customer.findFirst({ where: { taxId: rest.taxId }, select: { id: true } })
+  if (dupTax) return { error: 'A customer with this tax ID already exists' }
+
   const existingOwner = await prisma.user.findUnique({ where: { email: owner.email }, select: { id: true } })
-  if (existingOwner) return { error: 'Este e-mail de administrador já está em uso' }
+  if (existingOwner) return { error: 'This administrator email is already in use' }
 
   let token: string
   try {
@@ -72,7 +75,7 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
     }))
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Dados duplicados detectados' }
+      return { error: 'Duplicate data detected' }
     }
     throw e
   }
@@ -80,16 +83,19 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
   await sendSequoiaWelcomeEmail(owner.email, token)
 
   revalidatePath('/customers')
-  return { success: 'Cliente criado com sucesso.' }
+  return { success: 'Customer created successfully.' }
 }
 
 export async function updateCustomer(id: string, data: CustomerFormValues): Promise<ActionError | ActionSuccess> {
   await verifySession()
 
   const validated = customerSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data
+
+  const dupTax = await prisma.customer.findFirst({ where: { taxId: rest.taxId, NOT: { id } }, select: { id: true } })
+  if (dupTax) return { error: 'A customer with this tax ID already exists' }
 
   try {
     await prisma.customer.update({
@@ -103,13 +109,13 @@ export async function updateCustomer(id: string, data: CustomerFormValues): Prom
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Cliente não encontrado.' }
+      return { error: 'Customer not found.' }
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Cliente atualizado com sucesso.' }
+  return { success: 'Customer updated successfully.' }
 }
 
 export async function deleteCustomer(id: string): Promise<ActionError | void> {
@@ -119,7 +125,7 @@ export async function deleteCustomer(id: string): Promise<ActionError | void> {
     await prisma.customer.delete({ where: { id } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Cliente não encontrado.' }
+      return { error: 'Customer not found.' }
     }
     throw e
   }
@@ -131,7 +137,7 @@ export async function toggleCustomerActive(id: string): Promise<ActionError | vo
   await verifySession()
 
   const customer = await prisma.customer.findUnique({ where: { id }, select: { isActive: true } })
-  if (!customer) return { error: 'Cliente não encontrado.' }
+  if (!customer) return { error: 'Customer not found.' }
 
   await prisma.customer.update({ where: { id }, data: { isActive: !customer.isActive } })
   revalidatePath('/customers')

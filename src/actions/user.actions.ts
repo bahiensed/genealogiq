@@ -24,7 +24,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
   await verifySession()
 
   const validated = userSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, ...rest } = validated.data
 
@@ -49,7 +49,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
     }))
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Este e-mail já está em uso' }
+      return { error: 'This email is already in use' }
     }
     throw e
   }
@@ -57,20 +57,20 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
   await sendWelcomeEmail(rest.email, token)
 
   revalidatePath('/users')
-  return { success: 'Usuário criado com sucesso.' }
+  return { success: 'User created successfully.' }
 }
 
 export async function updateUser(id: string, data: UserFormValues): Promise<ActionError | ActionSuccess> {
   await verifySession()
 
   const validated = userSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, ...rest } = validated.data
 
   try {
     const existing = await prisma.user.findUnique({ where: { email: rest.email }, select: { id: true } })
-    if (existing && existing.id !== id) return { error: 'Este e-mail já está em uso' }
+    if (existing && existing.id !== id) return { error: 'This email is already in use' }
 
     await prisma.user.update({
       where: { id },
@@ -82,25 +82,25 @@ export async function updateUser(id: string, data: UserFormValues): Promise<Acti
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Usuário não encontrado.' }
+      return { error: 'User not found.' }
     }
     throw e
   }
 
   revalidatePath('/users')
-  return { success: 'Usuário atualizado com sucesso.' }
+  return { success: 'User updated successfully.' }
 }
 
 export async function deleteUser(userId: string): Promise<ActionError | void> {
   const session = await verifySession()
 
-  if (session.user!.id === userId) return { error: 'Você não pode excluir sua própria conta.' }
+  if (session.user!.id === userId) return { error: 'You cannot delete your own account.' }
 
   try {
     await prisma.user.delete({ where: { id: userId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Usuário não encontrado.' }
+      return { error: 'User not found.' }
     }
     throw e
   }
@@ -111,10 +111,10 @@ export async function deleteUser(userId: string): Promise<ActionError | void> {
 export async function toggleUserActive(userId: string): Promise<ActionError | void> {
   const session = await verifySession()
 
-  if (session.user!.id === userId) return { error: 'Você não pode desativar sua própria conta.' }
+  if (session.user!.id === userId) return { error: 'You cannot deactivate your own account.' }
 
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { isActive: true } })
-  if (!user) return { error: 'Usuário não encontrado.' }
+  if (!user) return { error: 'User not found.' }
 
   await prisma.user.update({ where: { id: userId }, data: { isActive: !user.isActive } })
   revalidatePath('/users')
@@ -124,8 +124,8 @@ export async function resendWelcomeEmail(userId: string): Promise<ActionError | 
   await verifySession()
 
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, password: true } })
-  if (!user) return { error: 'Usuário não encontrado.' }
-  if (user.password) return { error: 'Este usuário já definiu sua senha.' }
+  if (!user) return { error: 'User not found.' }
+  if (user.password) return { error: 'This user has already set their password.' }
 
   await prisma.passwordResetToken.deleteMany({ where: { userId } })
 

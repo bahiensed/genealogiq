@@ -120,7 +120,7 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
                 step="1"
                 min="1"
                 {...field}
-                value={field.value === 0 ? '' : field.value}
+                value={field.value === 0 || Number.isNaN(field.value) ? '' : field.value}
                 onChange={(e) => field.onChange(e.target.valueAsNumber)}
                 autoComplete="off"
                 aria-invalid={fieldState.invalid}
@@ -147,7 +147,7 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Preço (US$):</FieldLabel>
+              <FieldLabel>Price (US$):</FieldLabel>
               <div className="relative">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">$</span>
                 <Input
@@ -156,7 +156,7 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
                   min="0"
                   className="pl-7"
                   {...field}
-                  value={field.value === 0 ? '' : field.value}
+                  value={field.value === 0 || Number.isNaN(field.value) ? '' : field.value}
                   onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   autoComplete="off"
                   aria-invalid={fieldState.invalid}

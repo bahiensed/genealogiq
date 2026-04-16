@@ -1,143 +1,142 @@
 export const metadata = {
-  title: "Política de Privacidade",
+  title: "Privacy Policy",
 }
 
 export default function PrivacyPage() {
   return (
     <article className="prose prose-neutral dark:prose-invert max-w-4xl mx-auto">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Política de Privacidade
+        Privacy Policy
       </h1>
 
-      <p className="text-sm text-muted-foreground mb-6">Última atualização: 25 de março de 2026</p>
+      <p className="text-sm text-muted-foreground mb-6">Last updated: March 25, 2026</p>
 
       <p className="mb-10">
-        Esta Política de Privacidade descreve como o <strong>B2C Boilerplate</strong>
-        ("nós", "nosso") coleta, utiliza e protege seus dados pessoais, em conformidade
-        com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
+        This Privacy Policy describes how <strong>B2C Boilerplate</strong>
+        ("we", "our") collects, uses, and protects your personal data, in compliance
+        with Brazil's General Data Protection Law (LGPD — Law No. 13,709/2018).
       </p>
 
 
-      <h2 className=" mb-2">I. Dados Coletados</h2>
+      <h2 className=" mb-2">I. Data Collected</h2>
 
-      <p className=" mb-4">Coletamos os seguintes dados ao criar e usar sua conta:</p>
+      <p className=" mb-4">We collect the following data when you create and use your account:</p>
 
       <ul className=" mb-4">
-        <li><strong>Nome completo</strong> (nome e sobrenome)</li>
-        <li><strong>Endereço de e-mail</strong></li>
-        <li><strong>Senha</strong> (armazenada exclusivamente em formato hash - nunca em texto puro)</li>
-        <li><strong>Data de verificação de e-mail</strong></li>
-        <li><strong>Data de criação e atualização da conta</strong></li>
+        <li><strong>Full name</strong> (first and last name)</li>
+        <li><strong>Email address</strong></li>
+        <li><strong>Password</strong> (stored exclusively as a hash — never in plain text)</li>
+        <li><strong>Email verification date</strong></li>
+        <li><strong>Account creation and update date</strong></li>
       </ul>
 
-      <p className="mb-10">Não coletamos dados de pagamento, localização, dispositivo ou comportamento de navegação.</p>
+      <p className="mb-10">We do not collect payment, location, device, or browsing-behavior data.</p>
 
 
-      <h2 className=" mb-2">II. Finalidade do Tratamento</h2>
+      <h2 className=" mb-2">II. Purpose of Processing</h2>
 
-      <p className=" mb-4">Utilizamos seus dados para:</p>
+      <p className=" mb-4">We use your data to:</p>
 
       <ul className=" mb-10">
-        <li>Criar e manter sua conta de usuário.</li>
-        <li>Autenticar seu acesso ao Serviço.</li>
-        <li>Enviar e-mails transacionais (verificação de e-mail, redefinição de senha).</li>
-        <li>Garantir a segurança da conta (controle de tentativas de login).</li>
+        <li>Create and maintain your user account.</li>
+        <li>Authenticate your access to the Service.</li>
+        <li>Send transactional emails (email verification, password reset).</li>
+        <li>Ensure account security (login-attempt monitoring).</li>
       </ul>
 
 
-      <h2 className=" mb-2">III. Base Legal (LGPD, art. 7º)</h2>
+      <h2 className=" mb-2">III. Legal Basis (LGPD, art. 7)</h2>
 
       <ul className=" mb-10">
-        <li><strong>Execução de contrato</strong> (art. 7º, V): os dados são necessários para prestar o Serviço contratado.</li>
-        <li><strong>Legítimo interesse</strong> (art. 7º, IX): segurança da conta e prevenção de fraudes.</li>
-        <li><strong>Consentimento</strong> (art. 7º, I): para comunicações opcionais, quando aplicável.</li>
+        <li><strong>Contract performance</strong> (art. 7, V): data is necessary to provide the contracted Service.</li>
+        <li><strong>Legitimate interest</strong> (art. 7, IX): account security and fraud prevention.</li>
+        <li><strong>Consent</strong> (art. 7, I): for optional communications, where applicable.</li>
       </ul>
 
 
-      <h2 className=" mb-2">IV. Retenção dos Dados</h2>
+      <h2 className=" mb-2">IV. Data Retention</h2>
 
       <p className=" mb-10">
-        Seus dados são mantidos enquanto sua conta estiver ativa. Ao excluir a conta, todos
-        os dados pessoais são permanentemente removidos de nossos sistemas.
-        Tokens temporários (verificação de e-mail, redefinição de senha) expiram automaticamente
-        após 1 a 24 horas.
+        Your data is kept while your account is active. When you delete your account, all
+        personal data is permanently removed from our systems.
+        Temporary tokens (email verification, password reset) expire automatically
+        after 1 to 24 hours.
       </p>
 
 
-      <h2 className=" mb-2">V. Compartilhamento de Dados</h2>
+      <h2 className=" mb-2">V. Data Sharing</h2>
 
       <p className=" mb-4">
-        Não vendemos, alugamos nem compartilhamos seus dados pessoais com terceiros, exceto:
+        We do not sell, rent, or share your personal data with third parties, except:
       </p>
 
       <ul className=" mb-10">
-        <li><strong>Prestadores de serviço essenciais</strong>: serviço de envio de e-mails
-          transacionais (Resend) e banco de dados em nuvem (Neon), vinculados por contrato de
-          confidencialidade.</li>
-        <li><strong>Obrigação legal</strong>: quando exigido por lei ou ordem judicial.</li>
+        <li><strong>Essential service providers</strong>: transactional email service (Resend)
+          and cloud database (Neon), bound by confidentiality agreements.</li>
+        <li><strong>Legal obligation</strong>: when required by law or court order.</li>
       </ul>
 
 
-      <h2 className=" mb-2">VI. Seus Direitos (LGPD, art. 18)</h2>
+      <h2 className=" mb-2">VI. Your Rights (LGPD, art. 18)</h2>
 
-      <p className=" mb-4">Você tem direito a:</p>
+      <p className=" mb-4">You have the right to:</p>
 
       <ul className=" mb-4">
-        <li><strong>Acesso</strong>: consultar os dados que mantemos sobre você.</li>
-        <li><strong>Correção</strong>: atualizar nome ou e-mail diretamente no perfil.</li>
-        <li><strong>Exclusão</strong>: excluir sua conta e todos os dados associados.</li>
-        <li><strong>Portabilidade</strong>: solicitar cópia dos seus dados em formato estruturado.</li>
-        <li><strong>Revogação do consentimento</strong>: retirar consentimento a qualquer momento.</li>
-        <li><strong>Oposição</strong>: opor-se ao tratamento em caso de descumprimento da LGPD.</li>
+        <li><strong>Access</strong>: view the data we hold about you.</li>
+        <li><strong>Correction</strong>: update your name or email directly in your profile.</li>
+        <li><strong>Deletion</strong>: delete your account and all associated data.</li>
+        <li><strong>Portability</strong>: request a copy of your data in a structured format.</li>
+        <li><strong>Withdrawal of consent</strong>: withdraw consent at any time.</li>
+        <li><strong>Objection</strong>: object to processing in the event of non-compliance with the LGPD.</li>
       </ul>
 
       <p className=" mb-10">
-        Para exercer estes direitos, entre em contato pelo e-mail indicado na seção abaixo.
-        Responderemos em até 15 dias.
+        To exercise these rights, contact us at the email address in the section below.
+        We will respond within 15 days.
       </p>
 
 
-      <h2 className=" mb-2">VII. Segurança</h2>
+      <h2 className=" mb-2">VII. Security</h2>
       <p className=" mb-10">
-        Adotamos medidas técnicas para proteger seus dados: senhas com hash bcrypt,
-        comunicação criptografada via HTTPS, tokens de uso único com expiração,
-        e controle de tentativas de login.
+        We adopt technical measures to protect your data: bcrypt-hashed passwords,
+        HTTPS-encrypted communications, single-use tokens with expiration,
+        and login-attempt controls.
       </p>
 
 
       <h2 className=" mb-2">VIII. Cookies</h2>
 
-      <p className=" mb-4">Utilizamos dois tipos de cookies:</p>
+      <p className=" mb-4">We use two types of cookies:</p>
 
       <ul className=" mb-4">
-        <li><strong>Essenciais</strong>: necessários para autenticação e funcionamento do Serviço
-          (ex.: cookie de sessão do NextAuth). Não requerem consentimento.</li>
-        <li><strong>Opcionais</strong>: analytics ou rastreamento, quando configurados. Requerem
-          consentimento explícito.</li>
+        <li><strong>Essential</strong>: required for authentication and Service operation
+          (e.g., NextAuth session cookie). Consent is not required.</li>
+        <li><strong>Optional</strong>: analytics or tracking, when configured. Require
+          explicit consent.</li>
       </ul>
 
-      <p className=" mb-10">Você pode gerenciar suas preferências de cookies a qualquer momento no banner de consentimento.</p>
+      <p className=" mb-10">You can manage your cookie preferences at any time in the consent banner.</p>
 
 
-      <h2 className=" mb-2">IX. Controlador e Encarregado (DPO)</h2>
+      <h2 className=" mb-2">IX. Controller and Data Protection Officer (DPO)</h2>
 
       <p className=" mb-4">
-        Controlador dos dados: <strong>[NOME DA EMPRESA]</strong>, CNPJ [XX.XXX.XXX/XXXX-XX],
-        com sede em [ENDEREÇO COMPLETO].
+        Data controller: <strong>[COMPANY NAME]</strong>, CNPJ [XX.XXX.XXX/XXXX-XX],
+        registered at [FULL ADDRESS].
       </p>
 
       <p className=" mb-10">
-        Encarregado (DPO): [NOME DO ENCARREGADO] -{" "}
+        DPO: [DPO NAME] -{" "}
         <a href="mailto:privacidade@exemplo.com.br">privacidade@exemplo.com.br</a>
       </p>
 
 
-      <h2 className=" mb-2">X. Alterações nesta Política</h2>
+      <h2 className=" mb-2">X. Changes to this Policy</h2>
 
       <p className=" mb-10">
-        Podemos atualizar esta Política periodicamente. Notificaremos por e-mail ou aviso
-        no Serviço em caso de alterações relevantes. O uso continuado após as alterações
-        indica aceitação da nova versão.
+        We may update this Policy periodically. We will notify you by email or in-Service
+        notice for relevant changes. Continued use after changes indicates acceptance of the
+        new version.
       </p>
     </article>
   )

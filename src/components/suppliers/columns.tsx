@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -32,48 +32,62 @@ export type SupplierRow = {
 
 function ActionsCell({ row, currentUserRole }: { row: { original: SupplierRow }; currentUserRole: string }) {
   const [isPending, startTransition] = useTransition()
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const supplier = row.original
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={isPending}>
-          <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Open menu</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href={`/suppliers/${supplier.id}`}>Edit</Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => startTransition(async () => {
-            const result = await toggleSupplierActive(supplier.id)
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" disabled={isPending}>
+            <MoreHorizontal className="h-4 w-4" />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href={`/suppliers/${supplier.id}`}>Edit</Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => startTransition(async () => {
+              const result = await toggleSupplierActive(supplier.id)
+              if (result?.error) toast.error(result.error)
+              else toast.success(supplier.isActive ? 'Supplier deactivated.' : 'Supplier reactivated.')
+            })}
+          >
+            {supplier.isActive ? 'Deactivate' : 'Reactivate'}
+          </DropdownMenuItem>
+          {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onSelect={() => setDeleteOpen(true)}
+              >
+                Delete
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+        <ConfirmDeleteDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          isPending={isPending}
+          description={`The supplier "${supplier.name}" will be permanently deleted.`}
+          onConfirm={() => startTransition(async () => {
+            const result = await deleteSupplier(supplier.id)
             if (result?.error) toast.error(result.error)
-            else toast.success(supplier.isActive ? 'Supplier deactivated.' : 'Supplier reactivated.')
+            else { toast.success('Supplier deleted successfully.'); setDeleteOpen(false) }
           })}
-        >
-          {supplier.isActive ? 'Deactivate' : 'Reactivate'}
-        </DropdownMenuItem>
-        {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-          <>
-            <DropdownMenuSeparator />
-            <ConfirmDeleteDialog
-              isPending={isPending}
-              description={`The supplier "${supplier.name}" will be permanently deleted.`}
-              onConfirm={() => startTransition(async () => {
-                const result = await deleteSupplier(supplier.id)
-                if (result?.error) toast.error(result.error)
-                else toast.success('Supplier deleted successfully.')
-              })}
-            />
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        />
+      )}
+    </>
   )
 }
 

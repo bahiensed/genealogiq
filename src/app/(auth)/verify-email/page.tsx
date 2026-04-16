@@ -11,10 +11,10 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
   if (!token) {
     return (
       <VerifyEmailCard
-        title="Verifique seu e-mail"
-        description="E-mail de confirmação enviado."
-        body="Clique no link que enviamos para confirmar. O link expira em 1 hora."
-        buttonText="Ir para o login"
+        title="Check your email"
+        description="Confirmation email sent."
+        body="Click the link we sent to confirm your email. The link expires in 1 hour."
+        buttonText="Go to sign in"
         buttonHref="/sign-in"
         buttonVariant="outline"
       />
@@ -31,10 +31,10 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
     }
     return (
       <VerifyEmailCard
-        title="Link inválido ou expirado"
-        description="Este link de verificação não é válido ou já expirou."
-        body="Solicite um novo link na página de perfil."
-        buttonText="Ir para o login"
+        title="Invalid or expired link"
+        description="This verification link is invalid or has already expired."
+        body="Request a new link from your profile page."
+        buttonText="Go to sign in"
         buttonHref="/sign-in"
         buttonVariant="outline"
       />
@@ -52,10 +52,10 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
 
     return (
       <VerifyEmailCard
-        title="E-mail alterado!"
-        description="Seu e-mail foi atualizado com sucesso."
-        body="Faça login novamente com seu novo endereço de e-mail."
-        buttonText="Entrar"
+        title="Email changed!"
+        description="Your email has been updated successfully."
+        body="Sign in again with your new email address."
+        buttonText="Sign in"
         buttonHref="/sign-in"
       />
     )
@@ -72,10 +72,10 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
 
   return (
     <VerifyEmailCard
-      title="E-mail confirmado!"
-      description="Sua conta foi verificada com sucesso."
-      body="Você já pode entrar com seu e-mail e senha."
-      buttonText="Entrar"
+      title="Email confirmed!"
+      description="Your account has been verified successfully."
+      body="You can now sign in with your email and password."
+      buttonText="Sign in"
       buttonHref="/sign-in"
     />
   )
