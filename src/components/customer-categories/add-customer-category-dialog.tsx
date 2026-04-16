@@ -47,12 +47,12 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { reset(); setServerError(null) } }}>
       <DialogTrigger asChild>
         <button type="button" className="text-sm text-primary underline-offset-4 hover:underline">
-          Adicionar nova categoria
+          Add new category
         </button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nova categoria de cliente</DialogTitle>
+          <DialogTitle>New customer category</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -62,7 +62,7 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Nome:</FieldLabel>
+                  <FieldLabel>Name:</FieldLabel>
                   <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -73,7 +73,7 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Descrição:</FieldLabel>
+                  <FieldLabel>Description:</FieldLabel>
                   <Textarea {...field} rows={2} aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -85,10 +85,10 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
 
           <Field orientation="horizontal">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Criando…' : 'Criar categoria'}
+              {isSubmitting ? 'Creating…' : 'Create category'}
             </Button>
             <Button type="button" variant="outline" onClick={() => { setOpen(false); reset(); setServerError(null) }}>
-              Cancelar
+              Cancel
             </Button>
           </Field>
         </form>

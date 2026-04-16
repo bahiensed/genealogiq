@@ -9,40 +9,32 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 
 interface ConfirmDeleteDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   onConfirm: () => void
   isPending: boolean
   description?: string
 }
 
-export function ConfirmDeleteDialog({ onConfirm, isPending, description }: ConfirmDeleteDialogProps) {
+export function ConfirmDeleteDialog({ open, onOpenChange, onConfirm, isPending, description }: ConfirmDeleteDialogProps) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <DropdownMenuItem
-          className="text-destructive focus:text-destructive"
-          onSelect={(e) => e.preventDefault()}
-        >
-          Excluir
-        </DropdownMenuItem>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirmar exclusão</DialogTitle>
+          <DialogTitle>Confirm deletion</DialogTitle>
           <DialogDescription>
-            {description ?? 'Esta ação não pode ser desfeita.'}
+            {description ?? 'This action cannot be undone.'}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancelar</Button>
+            <Button variant="outline">Cancel</Button>
           </DialogClose>
           <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
-            {isPending ? 'Excluindo…' : 'Excluir'}
+            {isPending ? 'Deleting…' : 'Delete'}
           </Button>
         </DialogFooter>
       </DialogContent>

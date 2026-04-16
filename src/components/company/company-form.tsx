@@ -42,7 +42,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
     if (result?.error) {
       setServerError(result.error)
     } else {
-      toast.success('Dados atualizados com sucesso.')
+      toast.success('Data updated successfully.')
     }
   }
 
@@ -61,7 +61,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Razão Social:</FieldLabel>
+              <FieldLabel>Company Name:</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -73,7 +73,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Nome Fantasia:</FieldLabel>
+              <FieldLabel>Trade Name:</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -104,7 +104,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Inscrição Estadual:</FieldLabel>
+                <FieldLabel>State Registration:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -116,7 +116,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Inscrição Municipal:</FieldLabel>
+                <FieldLabel>Municipal Registration:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -142,7 +142,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-2" data-invalid={fieldState.invalid}>
-                <FieldLabel>DDI:</FieldLabel>
+                <FieldLabel>Country Code:</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger aria-invalid={fieldState.invalid}>
                     <SelectValue />
@@ -162,7 +162,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Telefone:</FieldLabel>
+                <FieldLabel>Phone:</FieldLabel>
                 <MaskedInput
                   value={field.value ?? ''}
                   onChange={field.onChange}
@@ -186,7 +186,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
                 checked={field.value}
                 onCheckedChange={field.onChange}
               />
-              <FieldLabel htmlFor="isActive" className="cursor-pointer">Empresa ativa:</FieldLabel>
+              <FieldLabel htmlFor="isActive" className="cursor-pointer">Active company:</FieldLabel>
             </Field>
           )}
         />
@@ -194,7 +194,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
 
       <FieldSeparator />
 
-      <p className="text-sm font-medium">Endereço</p>
+      <p className="text-sm font-medium">Address</p>
       <AddressSection
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         control={control as any}
@@ -207,10 +207,10 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : 'Salvar alterações'}
+          {isSubmitting ? 'Saving…' : 'Save changes'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

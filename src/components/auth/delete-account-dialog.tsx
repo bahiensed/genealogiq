@@ -17,15 +17,15 @@ export function DeleteAccountDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="text-sm text-destructive underline underline-offset-4 hover:no-underline cursor-pointer">
-          Excluir conta
+          Delete account
         </button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-destructive">Excluir conta</DialogTitle>
+          <DialogTitle className="text-destructive">Delete account</DialogTitle>
           <DialogDescription>
-            Esta ação é irreversível. Todos os seus dados serão permanentemente apagados.
+            This action is irreversible. All your data will be permanently deleted.
           </DialogDescription>
         </DialogHeader>
 
@@ -35,7 +35,7 @@ export function DeleteAccountDialog() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="da-currentPassword">Senha atual:</Label>
+            <Label htmlFor="da-currentPassword">Current password:</Label>
             <InputGroup aria-invalid={!!state?.errors?.currentPassword}>
               <InputGroupInput
                 id="da-currentPassword"
@@ -47,7 +47,7 @@ export function DeleteAccountDialog() {
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff /> : <Eye />}
                 </InputGroupButton>
@@ -59,7 +59,7 @@ export function DeleteAccountDialog() {
           </div>
 
           <Button type="submit" variant="destructive" className="w-full mt-2" disabled={isPending}>
-            {isPending ? "Excluindo…" : "Excluir minha conta"}
+            {isPending ? "Deleting…" : "Delete my account"}
           </Button>
         </form>
       </DialogContent>

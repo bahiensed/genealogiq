@@ -107,12 +107,12 @@ export function SalesForm({ licenses }: SalesFormProps) {
     e.preventDefault()
 
     const errors: FieldErrors = {}
-    if (!selected)  errors.appUser   = 'Selecione um cliente.'
-    if (!licenseId) errors.licenseId = 'Selecione uma licença.'
+    if (!selected)  errors.appUser   = 'Select a customer.'
+    if (!licenseId) errors.licenseId = 'Select a license.'
 
     const numValue = parseFloat(value.replace(',', '.'))
     if (!value || isNaN(numValue) || numValue < 0) {
-      errors.value = 'Informe um valor válido.'
+      errors.value = 'Enter a valid amount.'
     }
 
     if (Object.keys(errors).length > 0) {
@@ -152,14 +152,14 @@ export function SalesForm({ licenses }: SalesFormProps) {
       <FieldGroup>
         {/* Busca de cliente */}
         <Field data-invalid={!!fieldErrors.appUser || undefined}>
-          <FieldLabel>Cliente</FieldLabel>
+          <FieldLabel>Customer</FieldLabel>
           {selected ? (
             <div className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
               <span className="flex-1">
                 {selected.firstName} {selected.lastName}
                 <span className="ml-2 text-muted-foreground">{selected.email}</span>
               </span>
-              <button type="button" onClick={clearSelected} aria-label="Remover cliente">
+              <button type="button" onClick={clearSelected} aria-label="Remove customer">
                 <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
             </div>
@@ -168,7 +168,7 @@ export function SalesForm({ licenses }: SalesFormProps) {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Digite o nome ou e-mail..."
+                  placeholder="Type name or email..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="pl-9"
@@ -198,16 +198,16 @@ export function SalesForm({ licenses }: SalesFormProps) {
 
         {/* Licença */}
         <Field data-invalid={!!fieldErrors.licenseId || undefined}>
-          <FieldLabel>Licença</FieldLabel>
+          <FieldLabel>License</FieldLabel>
           <Select value={licenseId} onValueChange={(v) => { setLicenseId(v); setFieldErrors((prev) => ({ ...prev, licenseId: undefined })) }}>
             <SelectTrigger aria-invalid={!!fieldErrors.licenseId}>
-              <SelectValue placeholder="Selecione uma licença..." />
+              <SelectValue placeholder="Select a license..." />
             </SelectTrigger>
             <SelectContent>
               {licenses.map(({ license, quantity }) => (
                 <SelectItem key={license.id} value={license.id}>
                   {license.component}
-                  <span className="ml-2 text-muted-foreground">({quantity} disponível)</span>
+                  <span className="ml-2 text-muted-foreground">({quantity} available)</span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -217,7 +217,7 @@ export function SalesForm({ licenses }: SalesFormProps) {
 
         {/* Valor */}
         <Field data-invalid={!!fieldErrors.value || undefined}>
-          <FieldLabel>Valor (US$)</FieldLabel>
+          <FieldLabel>Amount (US$)</FieldLabel>
           <Input
             type="number"
             min="0"
@@ -235,7 +235,7 @@ export function SalesForm({ licenses }: SalesFormProps) {
 
       <div>
         <Button type="submit" disabled={isPending}>
-          {isPending ? 'Registrando...' : 'Finalizar Venda'}
+          {isPending ? 'Registering...' : 'Complete sale'}
         </Button>
       </div>
     </form>
@@ -243,17 +243,17 @@ export function SalesForm({ licenses }: SalesFormProps) {
     <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirmar venda</DialogTitle>
+          <DialogTitle>Confirm sale</DialogTitle>
           <DialogDescription>
-            A venda será registrada e uma licença será retirada do estoque. Deseja confirmar?
+            The sale will be registered and a license will be removed from stock. Confirm?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => setConfirmOpen(false)}>
-            Cancelar
+            Cancel
           </Button>
           <Button onClick={handleConfirm} disabled={isPending}>
-            {isPending ? 'Registrando...' : 'Confirmar'}
+            {isPending ? 'Registering...' : 'Confirm'}
           </Button>
         </DialogFooter>
       </DialogContent>

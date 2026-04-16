@@ -37,7 +37,7 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
     if ('error' in result) {
       setServerError(result.error)
     } else {
-      toast.success('Categoria salva com sucesso.')
+      toast.success('success' in result ? result.success : 'Category created successfully.')
       if (!isEditing) router.push('/customer-categories')
     }
   }
@@ -57,7 +57,7 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Nome:</FieldLabel>
+              <FieldLabel>Name:</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -69,7 +69,7 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Descrição:</FieldLabel>
+              <FieldLabel>Description:</FieldLabel>
               <Textarea {...field} rows={3} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -87,7 +87,7 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <FieldLabel htmlFor="isActive" className="cursor-pointer">Categoria ativa:</FieldLabel>
+                <FieldLabel htmlFor="isActive" className="cursor-pointer">Active category:</FieldLabel>
               </Field>
             )}
           />
@@ -98,10 +98,10 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar categoria'}
+          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create category'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

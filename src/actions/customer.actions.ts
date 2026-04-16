@@ -37,10 +37,10 @@ export async function createCustomerWithDeceased(
   const { customerId } = await verifyTenantSession()
 
   const validatedUser = appUserSchema.safeParse(appUserData)
-  if (!validatedUser.success) return { error: 'Dados do cliente inválidos' }
+  if (!validatedUser.success) return { error: 'Invalid data' }
 
   const validatedDeceased = deceasedSchema.safeParse(deceasedData)
-  if (!validatedDeceased.success) return { error: 'Dados do falecido inválidos' }
+  if (!validatedDeceased.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...userRest } = validatedUser.data
   const { birthDate: dBirthDate, deathDate, burialDate, burialLatitude, burialLongitude, ...deceasedRest } = validatedDeceased.data
@@ -106,13 +106,13 @@ export async function createCustomerWithDeceased(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Dados duplicados detectados' }
+      return { error: 'Duplicate data detected' }
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Cliente criado com sucesso.' }
+  return { success: 'Customer created successfully.' }
 }
 
 export async function updateCustomer(id: string, data: AppUserFormValues): Promise<ActionError | ActionSuccess> {
@@ -135,13 +135,13 @@ export async function updateCustomer(id: string, data: AppUserFormValues): Promi
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Cliente não encontrado.' }
+      return { error: 'Customer not found.' }
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Cliente atualizado com sucesso.' }
+  return { success: 'Customer updated successfully.' }
 }
 
 export async function deleteCustomer(id: string): Promise<ActionError | void> {
@@ -151,7 +151,7 @@ export async function deleteCustomer(id: string): Promise<ActionError | void> {
     await prisma.appUser.delete({ where: { id, tenantId: customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Cliente não encontrado.' }
+      return { error: 'Customer not found.' }
     }
     throw e
   }
@@ -166,7 +166,7 @@ export async function toggleCustomerActive(id: string): Promise<ActionError | vo
     where:  { id, tenantId: customerId },
     select: { isActive: true },
   })
-  if (!appUser) return { error: 'Cliente não encontrado.' }
+  if (!appUser) return { error: 'Customer not found.' }
 
   await prisma.appUser.update({ where: { id }, data: { isActive: !appUser.isActive } })
   revalidatePath('/customers')

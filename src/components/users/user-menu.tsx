@@ -70,7 +70,7 @@ export function UserMenu({ name, email, image }: UserMenuProps) {
           disabled={isPending}
         >
           <LogOut className="size-4" />
-          {isPending ? "Saindo…" : "Sair"}
+          {isPending ? "Signing out…" : "Sign out"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -14,7 +14,7 @@ export default async function CustomersPage() {
           Customers
         </h1>
         <Button asChild>
-          <Link href="/customers/new">Novo cliente</Link>
+          <Link href="/customers/new">New customer</Link>
         </Button>
       </div>
 

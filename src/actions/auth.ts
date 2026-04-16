@@ -28,7 +28,7 @@ export async function login(
   }
 
   const validated = SignInSchema.safeParse(data)
-  if (!validated.success) return { error: "Dados inválidos" }
+  if (!validated.success) return { error: "Invalid data" }
 
   const user = await prisma.user.findUnique({
     where: { email: validated.data.email },
@@ -37,11 +37,11 @@ export async function login(
 
   if (user?.lockedUntil && user.lockedUntil > new Date()) {
     const minutes = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000)
-    return { error: `Conta bloqueada temporariamente. Tente novamente em ${minutes} minuto(s).` }
+    return { error: `Account temporarily locked. Try again in ${minutes} minute(s).` }
   }
 
   if (user && user.emailVerified === null) {
-    return { error: "Verifique seu e-mail antes de entrar. Cheque sua caixa de entrada." }
+    return { error: "Please verify your email before signing in. Check your inbox." }
   }
 
   try {
@@ -59,7 +59,7 @@ export async function login(
           },
         })
       }
-      return { error: "E-mail ou senha incorretos" }
+      return { error: "Incorrect email or password" }
     }
     throw error // re-throw para o redirect funcionar
   }
@@ -70,18 +70,18 @@ export async function setupSystem(
   adminData: { firstName: string; lastName: string; email: string; password: string },
 ): Promise<{ error: string } | void> {
   const count = await prisma.user.count()
-  if (count > 0) return { error: "O sistema já foi configurado." }
+  if (count > 0) return { error: "The system is already configured." }
 
   const companyValidated = companySchema.safeParse(companyData)
-  if (!companyValidated.success) return { error: "Dados da empresa inválidos." }
+  if (!companyValidated.success) return { error: "Invalid company data." }
 
   const adminValidated = SetupSchema.safeParse(adminData)
-  if (!adminValidated.success) return { error: "Dados do administrador inválidos." }
+  if (!adminValidated.success) return { error: "Invalid administrator data." }
 
   const { password, ...adminRest } = adminValidated.data
 
   const existing = await prisma.user.findUnique({ where: { email: adminRest.email }, select: { id: true } })
-  if (existing) return { error: "Este e-mail já está em uso" }
+  if (existing) return { error: "This email is already in use" }
 
   const hashedPassword = await bcrypt.hash(password, 12)
 
@@ -106,8 +106,8 @@ export async function forgotPassword(
   formData: FormData,
 ): Promise<AuthState> {
   const email = formData.get("email")
-  const validated = z.string().email("E-mail inválido").safeParse(email)
-  if (!validated.success) return { error: "E-mail inválido" }
+  const validated = z.string().email("Invalid email").safeParse(email)
+  if (!validated.success) return { error: "Invalid email" }
 
   const user = await prisma.user.findUnique({
     where: { email: validated.data },
@@ -145,7 +145,7 @@ export async function resetPassword(
   })
 
   if (!record || record.expiresAt < new Date()) {
-    return { error: "Link inválido ou expirado. Solicite um novo." }
+    return { error: "Invalid or expired link. Please request a new one." }
   }
 
   const hashedPassword = await bcrypt.hash(validated.data.password, 12)
@@ -178,18 +178,18 @@ export async function changePassword(
     where: { id: userId },
     select: { password: true },
   })
-  if (!user?.password) return { error: "Usuário não encontrado" }
+  if (!user?.password) return { error: "User not found" }
 
   const match = await bcrypt.compare(validated.data.currentPassword, user.password)
-  if (!match) return { errors: { currentPassword: ["Senha atual incorreta"] } }
+  if (!match) return { errors: { currentPassword: ["Incorrect current password"] } }
 
   const same = await bcrypt.compare(validated.data.newPassword, user.password)
-  if (same) return { errors: { newPassword: ["A nova senha deve ser diferente da atual"] } }
+  if (same) return { errors: { newPassword: ["New password must differ from current"] } }
 
   const hashed = await bcrypt.hash(validated.data.newPassword, 12)
   await prisma.user.update({ where: { id: userId }, data: { password: hashed } })
 
-  return { success: "Senha alterada com sucesso." }
+  return { success: "Password changed successfully." }
 }
 
 export async function requestEmailChange(
@@ -209,17 +209,17 @@ export async function requestEmailChange(
     where: { id: userId },
     select: { email: true, password: true },
   })
-  if (!user?.password) return { error: "Usuário não encontrado" }
+  if (!user?.password) return { error: "User not found" }
 
   if (validated.data.newEmail === user.email) {
-    return { errors: { newEmail: ["O novo e-mail deve ser diferente do atual"] } }
+    return { errors: { newEmail: ["New email must be different from current"] } }
   }
 
   const match = await bcrypt.compare(validated.data.currentPassword, user.password)
-  if (!match) return { errors: { currentPassword: ["Senha incorreta"] } }
+  if (!match) return { errors: { currentPassword: ["Incorrect password"] } }
 
   const existing = await prisma.user.findUnique({ where: { email: validated.data.newEmail } })
-  if (existing) return { errors: { newEmail: ["Este e-mail já está em uso"] } }
+  if (existing) return { errors: { newEmail: ["This email is already in use"] } }
 
   await prisma.emailToken.deleteMany({ where: { userId, type: 'CHANGE' } })
 
@@ -236,7 +236,7 @@ export async function requestEmailChange(
 
   await sendEmailChangeEmail(validated.data.newEmail, token)
 
-  return { success: "Link de confirmação enviado para o novo e-mail." }
+  return { success: "Confirmation link sent to the new email." }
 }
 
 export async function deleteAccount(
@@ -253,10 +253,10 @@ export async function deleteAccount(
     where: { id: userId },
     select: { email: true, password: true },
   })
-  if (!user?.password) return { error: "Usuário não encontrado" }
+  if (!user?.password) return { error: "User not found" }
 
   const match = await bcrypt.compare(validated.data.currentPassword, user.password)
-  if (!match) return { errors: { currentPassword: ["Senha incorreta"] } }
+  if (!match) return { errors: { currentPassword: ["Incorrect password"] } }
 
   await sendAccountDeletionEmail(user.email)
   await prisma.user.delete({ where: { id: userId } })

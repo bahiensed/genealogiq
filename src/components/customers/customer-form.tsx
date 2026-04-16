@@ -40,9 +40,9 @@ interface CustomerFormProps {
 }
 
 const GENDER_LABELS: Record<string, string> = {
-  MALE:   'Masculino',
-  FEMALE: 'Feminino',
-  OTHER:  'Outro',
+  MALE:   'Male',
+  FEMALE: 'Female',
+  OTHER:  'Other',
 }
 
 export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFormProps) {
@@ -74,8 +74,8 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
   return (
     <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-2xl">
 
-      {/* ── Dados pessoais ── */}
-      <p className="text-sm font-medium">Dados pessoais</p>
+      {/* ── Personal data ── */}
+      <p className="text-sm font-medium">Personal data</p>
       <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
           <Controller
@@ -83,7 +83,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>Nome:</FieldLabel>
+                <FieldLabel>First Name:</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -94,7 +94,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>Sobrenome:</FieldLabel>
+                <FieldLabel>Last Name:</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -108,10 +108,10 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Gênero:</FieldLabel>
+                <FieldLabel>Gender:</FieldLabel>
                 <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione" />
+                    <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
                     {GENDERS.map((g) => (
@@ -127,7 +127,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Data de Nascimento:</FieldLabel>
+                <FieldLabel>Date of Birth:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -141,7 +141,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Cidade natal:</FieldLabel>
+                <FieldLabel>Birth city:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -151,7 +151,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Estado natal:</FieldLabel>
+                <FieldLabel>Birth state:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -161,7 +161,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>País natal:</FieldLabel>
+                <FieldLabel>Birth country:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -171,8 +171,8 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
       <FieldSeparator />
 
-      {/* ── Contato ── */}
-      <p className="text-sm font-medium">Contato</p>
+      {/* ── Contact ── */}
+      <p className="text-sm font-medium">Contact</p>
       <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
           <Controller
@@ -191,7 +191,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field }) => (
               <Field className="col-span-2">
-                <FieldLabel>DDI:</FieldLabel>
+                <FieldLabel>Country Code:</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -208,7 +208,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Telefone:</FieldLabel>
+                <FieldLabel>Phone:</FieldLabel>
                 <MaskedInput
                   value={field.value ?? ''}
                   onChange={field.onChange}
@@ -227,10 +227,10 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
           control={control}
           render={({ field }) => (
             <Field>
-              <FieldLabel>Categoria:</FieldLabel>
+              <FieldLabel>Category:</FieldLabel>
               <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
+                  <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
@@ -247,7 +247,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
           control={control}
           render={({ field }) => (
             <Field>
-              <FieldLabel>Notas:</FieldLabel>
+              <FieldLabel>Notes:</FieldLabel>
               <Textarea {...field} value={field.value ?? ''} rows={3} />
             </Field>
           )}
@@ -259,7 +259,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
           render={({ field }) => (
             <Field orientation="horizontal">
               <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-              <FieldLabel htmlFor="isActive" className="cursor-pointer">Cliente ativo</FieldLabel>
+              <FieldLabel htmlFor="isActive" className="cursor-pointer">Active customer</FieldLabel>
             </Field>
           )}
         />
@@ -267,8 +267,8 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
       <FieldSeparator />
 
-      {/* ── Endereço ── */}
-      <p className="text-sm font-medium">Endereço</p>
+      {/* ── Address ── */}
+      <p className="text-sm font-medium">Address</p>
       <AddressSection
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         control={control as any}
@@ -279,8 +279,8 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
       <FieldSeparator />
 
-      {/* ── Redes sociais ── */}
-      <p className="text-sm font-medium">Redes sociais</p>
+      {/* ── Social media ── */}
+      <p className="text-sm font-medium">Social media</p>
       <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
           {(['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'outro', 'website'] as const).map((key) => (
@@ -290,7 +290,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               control={control}
               render={({ field }) => (
                 <Field className="col-span-6 md:col-span-4">
-                  <FieldLabel>{key === 'fb' ? 'Facebook' : key === 'x' ? 'X (Twitter)' : key === 'outro' ? 'Outro' : key.charAt(0).toUpperCase() + key.slice(1)}:</FieldLabel>
+                  <FieldLabel>{key === 'fb' ? 'Facebook' : key === 'x' ? 'X (Twitter)' : key === 'outro' ? 'Other' : key.charAt(0).toUpperCase() + key.slice(1)}:</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )}
@@ -303,10 +303,10 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : 'Salvar alterações'}
+          {isSubmitting ? 'Saving…' : 'Save changes'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

@@ -13,12 +13,12 @@ export default async function NewMemorializedPage({ params }: { params: Promise<
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Novo perfil memorializado
+        New memorialized profile
       </h1>
       <p className="text-sm text-muted-foreground">
         Cliente: <span className="font-medium text-foreground">{customer.firstName} {customer.lastName}</span>
         {' · '}
-        <span>{available} licença{available !== 1 ? 's' : ''} disponíve{available !== 1 ? 'is' : 'l'}</span>
+        <span>{available} license{available !== 1 ? 's' : ''} available</span>
       </p>
       <MemorializedForm appUserId={id} />
     </div>

@@ -37,9 +37,9 @@ interface MemorializedFormProps {
 }
 
 const GENDER_LABELS: Record<string, string> = {
-  MALE:   'Masculino',
-  FEMALE: 'Feminino',
-  OTHER:  'Outro',
+  MALE:   'Male',
+  FEMALE: 'Female',
+  OTHER:  'Other',
 }
 
 const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'outro', 'website'] as const
@@ -48,7 +48,7 @@ type SocialKey = typeof SOCIAL_KEYS[number]
 function socialLabel(key: SocialKey): string {
   if (key === 'fb') return 'Facebook'
   if (key === 'x') return 'X (Twitter)'
-  if (key === 'outro') return 'Outro'
+  if (key === 'outro') return 'Other'
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
@@ -73,7 +73,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
     if ('error' in result) {
       setServerError(result.error)
     } else {
-      toast.success(isEditing ? 'Perfil atualizado com sucesso.' : 'Perfil criado com sucesso.')
+      toast.success(isEditing ? 'Profile updated successfully.' : 'Profile created successfully.')
       if (!isEditing) router.push(`/customers/${appUserId}`)
     }
   }
@@ -87,8 +87,8 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
   return (
     <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-2xl">
 
-      {/* ── Dados pessoais ── */}
-      <p className="text-sm font-medium">Dados pessoais</p>
+      {/* ── Personal data ── */}
+      <p className="text-sm font-medium">Personal data</p>
       <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
           <Controller
@@ -96,7 +96,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>Nome:*</FieldLabel>
+                <FieldLabel>First Name:*</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -107,7 +107,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>Sobrenome:*</FieldLabel>
+                <FieldLabel>Last Name:*</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -121,10 +121,10 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Gênero:*</FieldLabel>
+                <FieldLabel>Gender:*</FieldLabel>
                 <Select value={field.value ?? ''} onValueChange={field.onChange}>
                   <SelectTrigger aria-invalid={fieldState.invalid}>
-                    <SelectValue placeholder="Selecione" />
+                    <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
                     {GENDERS.map((g) => (
@@ -141,7 +141,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Nascimento:*</FieldLabel>
+                <FieldLabel>Birth date:*</FieldLabel>
                 <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -152,10 +152,10 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>País natal:*</FieldLabel>
+                <FieldLabel>Birth country:*</FieldLabel>
                 <Select value={field.value ?? ''} onValueChange={field.onChange}>
                   <SelectTrigger aria-invalid={fieldState.invalid}>
-                    <SelectValue placeholder="Selecione" />
+                    <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
                     {COUNTRIES.map((c) => (
@@ -175,7 +175,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-6">
-                <FieldLabel>Cidade natal:</FieldLabel>
+                <FieldLabel>Birth city:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -185,7 +185,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>Estado natal:*</FieldLabel>
+                <FieldLabel>Birth state:*</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -196,8 +196,8 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
       <FieldSeparator />
 
-      {/* ── Falecimento ── */}
-      <p className="text-sm font-medium">Falecimento</p>
+      {/* ── Death ── */}
+      <p className="text-sm font-medium">Death</p>
       <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
           <Controller
@@ -205,7 +205,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Data de falecimento:*</FieldLabel>
+                <FieldLabel>Death date:*</FieldLabel>
                 <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -216,7 +216,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Cidade:</FieldLabel>
+                <FieldLabel>City:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -226,7 +226,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Estado:</FieldLabel>
+                <FieldLabel>State:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -239,10 +239,10 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>País:*</FieldLabel>
+                <FieldLabel>Country:*</FieldLabel>
                 <Select value={field.value ?? ''} onValueChange={field.onChange}>
                   <SelectTrigger aria-invalid={fieldState.invalid}>
-                    <SelectValue placeholder="Selecione" />
+                    <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
                     {COUNTRIES.map((c) => (
@@ -259,7 +259,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-6">
-                <FieldLabel>Causa:</FieldLabel>
+                <FieldLabel>Cause:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -269,8 +269,8 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
       <FieldSeparator />
 
-      {/* ── Sepultamento ── */}
-      <p className="text-sm font-medium">Sepultamento</p>
+      {/* ── Burial ── */}
+      <p className="text-sm font-medium">Burial</p>
       <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
           <Controller
@@ -278,7 +278,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Data de sepultamento:</FieldLabel>
+                <FieldLabel>Burial date:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} type="date" />
               </Field>
             )}
@@ -288,7 +288,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-8">
-                <FieldLabel>Local (cemitério/crematório):</FieldLabel>
+                <FieldLabel>Location (cemetery/crematorium):</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -301,7 +301,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-3">
-                <FieldLabel>CEP:</FieldLabel>
+                <FieldLabel>ZIP:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -311,7 +311,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-6">
-                <FieldLabel>Logradouro:</FieldLabel>
+                <FieldLabel>Street:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -321,7 +321,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-3">
-                <FieldLabel>Número:</FieldLabel>
+                <FieldLabel>Number:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -334,7 +334,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Complemento:</FieldLabel>
+                <FieldLabel>Complement:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -344,7 +344,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Bairro:</FieldLabel>
+                <FieldLabel>Neighborhood:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -354,7 +354,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Cidade:</FieldLabel>
+                <FieldLabel>City:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -367,7 +367,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Estado:</FieldLabel>
+                <FieldLabel>State:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -377,7 +377,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>País:</FieldLabel>
+                <FieldLabel>Country:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" />
               </Field>
             )}
@@ -418,7 +418,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
             )}
           />
           <div className="col-span-2 flex items-end">
-            <Button type="button" variant="outline" size="sm" className="w-full" title="Obter coordenadas automaticamente">
+            <Button type="button" variant="outline" size="sm" className="w-full" title="Get coordinates automatically">
               <MapPin className="h-4 w-4" />
               GPS
             </Button>
@@ -428,8 +428,8 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
       <FieldSeparator />
 
-      {/* ── Redes sociais ── */}
-      <p className="text-sm font-medium">Redes sociais</p>
+      {/* ── Social media ── */}
+      <p className="text-sm font-medium">Social media</p>
       <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
           {SOCIAL_KEYS.map((key) => (
@@ -457,7 +457,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
           control={control}
           render={({ field }) => (
             <Field>
-              <FieldLabel>Notas:</FieldLabel>
+              <FieldLabel>Notes:</FieldLabel>
               <Textarea {...field} value={field.value ?? ''} rows={3} />
             </Field>
           )}
@@ -468,11 +468,11 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar perfil'}
+          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create profile'}
         </Button>
         {isEditing && (
           <Button type="button" variant="outline" onClick={() => form.reset()}>
-            Limpar
+            Reset
           </Button>
         )}
       </Field>

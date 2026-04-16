@@ -10,7 +10,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Editar usuário
+        Edit user
       </h1>
       <UserForm
         id={id}

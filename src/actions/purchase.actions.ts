@@ -14,14 +14,14 @@ export async function purchasePackage(
   const { customerId } = session
   const userId = session.user.id
 
-  if (!userId) return { error: 'Usuário não identificado.' }
-  if (!Number.isInteger(quantity) || quantity < 1) return { error: 'Quantidade inválida.' }
+  if (!userId) return { error: 'User not identified.' }
+  if (!Number.isInteger(quantity) || quantity < 1) return { error: 'Invalid quantity.' }
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId, isActive: true },
     select: { quantity: true, licenseId: true },
   })
-  if (!pkg) return { error: 'Pacote não encontrado ou indisponível.' }
+  if (!pkg) return { error: 'Package not found or unavailable.' }
 
   const totalLicenses = pkg.quantity * quantity
 
@@ -46,6 +46,6 @@ export async function purchasePackage(
   revalidatePath('/purchasing/licenses')
   revalidatePath('/inventory/licenses')
 
-  const label = totalLicenses === 1 ? 'licença adicionada' : 'licenças adicionadas'
-  return { success: `Compra realizada! ${totalLicenses} ${label} ao seu inventário.` }
+  const label = totalLicenses === 1 ? 'license added' : 'licenses added'
+  return { success: `Purchase complete! ${totalLicenses} ${label} to your inventory.` }
 }

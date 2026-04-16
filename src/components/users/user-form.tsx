@@ -80,7 +80,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Nome:</FieldLabel>
+                <FieldLabel>First Name:</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -92,7 +92,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Sobrenome:</FieldLabel>
+                <FieldLabel>Last Name:</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -117,10 +117,10 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Perfil:</FieldLabel>
+              <FieldLabel>Role:</FieldLabel>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Selecione um perfil" />
+                  <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
                   {ASSIGNABLE_ROLES.map((role) => (
@@ -157,7 +157,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Data de Nascimento:</FieldLabel>
+                <FieldLabel>Date of Birth:</FieldLabel>
                 <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -171,7 +171,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field }) => (
               <Field className="col-span-2">
-                <FieldLabel>DDI:</FieldLabel>
+                <FieldLabel>Country Code:</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
                     <SelectValue />
@@ -191,7 +191,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Telefone:</FieldLabel>
+                <FieldLabel>Phone:</FieldLabel>
                 <MaskedInput
                   value={field.value ?? ''}
                   onChange={field.onChange}
@@ -216,7 +216,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <FieldLabel htmlFor="isActive" className="cursor-pointer">Usuário ativo:</FieldLabel>
+                <FieldLabel htmlFor="isActive" className="cursor-pointer">Active user:</FieldLabel>
               </Field>
             )}
           />
@@ -225,7 +225,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
 
       <FieldSeparator />
 
-      <p className="text-sm font-medium">Endereço</p>
+      <p className="text-sm font-medium">Address</p>
       <AddressSection
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         control={control as any}
@@ -238,10 +238,10 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar usuário'}
+          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create user'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

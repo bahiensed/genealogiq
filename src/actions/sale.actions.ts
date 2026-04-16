@@ -21,21 +21,21 @@ export async function createAppSale(
     where:  { id: appUserId, tenantId: customerId },
     select: { id: true },
   })
-  if (!appUser) return { error: 'Cliente não encontrado.' }
+  if (!appUser) return { error: 'Customer not found.' }
 
-  // Verifica que há licença disponível
+  // Check that a license is available
   const cl = await prisma.customerLicense.findUnique({
     where:  { customerId_licenseId: { customerId, licenseId } },
     select: { quantity: true },
   })
-  if (!cl || cl.quantity < 1) return { error: 'Sem licenças disponíveis para este tipo.' }
+  if (!cl || cl.quantity < 1) return { error: 'No licenses available for this type.' }
 
-  // Obtém o User vinculado ao APP_USER para criar o token
+  // Get the User linked to the APP_USER for token creation
   const authUser = await prisma.user.findFirst({
     where:  { appUser: { id: appUserId } },
     select: { id: true, email: true },
   })
-  if (!authUser) return { error: 'Usuário de acesso não encontrado para este cliente.' }
+  if (!authUser) return { error: 'Access user not found for this customer.' }
 
   const token = randomBytes(32).toString('hex')
 
@@ -68,5 +68,5 @@ export async function createAppSale(
 
   revalidatePath('/sales')
   revalidatePath('/inventory/licenses')
-  return { success: 'Venda registrada e acesso enviado com sucesso.' }
+  return { success: 'Sale registered and access sent successfully.' }
 }

@@ -18,15 +18,15 @@ export function ChangeEmailDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="text-sm text-foreground underline underline-offset-4 hover:no-underline cursor-pointer">
-          Alterar E-mail
+          Change email
         </button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Alterar e-mail</DialogTitle>
+          <DialogTitle>Change email</DialogTitle>
           <DialogDescription>
-            Um link de confirmação será enviado para o novo endereço
+            A confirmation link will be sent to the new address
           </DialogDescription>
         </DialogHeader>
 
@@ -39,7 +39,7 @@ export function ChangeEmailDialog() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ce-newEmail">Novo e-mail:</Label>
+            <Label htmlFor="ce-newEmail">New email:</Label>
             <Input
               id="ce-newEmail"
               name="newEmail"
@@ -54,7 +54,7 @@ export function ChangeEmailDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ce-currentPassword">Senha atual:</Label>
+            <Label htmlFor="ce-currentPassword">Current password:</Label>
             <InputGroup aria-invalid={!!state?.errors?.currentPassword}>
               <InputGroupInput
                 id="ce-currentPassword"
@@ -66,7 +66,7 @@ export function ChangeEmailDialog() {
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff /> : <Eye />}
                 </InputGroupButton>
@@ -78,7 +78,7 @@ export function ChangeEmailDialog() {
           </div>
 
           <Button type="submit" className="w-full mt-2" disabled={isPending}>
-            {isPending ? "Alterando…" : "Alterar e-mail"}
+            {isPending ? "Changing…" : "Change email"}
           </Button>
         </form>
       </DialogContent>

@@ -18,14 +18,14 @@ export function ChangePasswordDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="text-sm text-foreground underline underline-offset-4 hover:no-underline cursor-pointer">
-          Alterar Senha
+          Change password
         </button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Alterar senha</DialogTitle>
-          <DialogDescription>Digite sua senha atual e escolha uma nova.</DialogDescription>
+          <DialogTitle>Change password</DialogTitle>
+          <DialogDescription>Enter your current password and choose a new one.</DialogDescription>
         </DialogHeader>
 
         <form action={dispatch} className="flex flex-col gap-4">
@@ -37,7 +37,7 @@ export function ChangePasswordDialog() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cp-currentPassword">Senha atual:</Label>
+            <Label htmlFor="cp-currentPassword">Current password:</Label>
             <InputGroup aria-invalid={!!state?.errors?.currentPassword}>
               <InputGroupInput
                 id="cp-currentPassword"
@@ -49,7 +49,7 @@ export function ChangePasswordDialog() {
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   onClick={() => setShowCurrent((v) => !v)}
-                  aria-label={showCurrent ? "Ocultar senha" : "Mostrar senha"}
+                  aria-label={showCurrent ? "Hide password" : "Show password"}
                 >
                   {showCurrent ? <EyeOff /> : <Eye />}
                 </InputGroupButton>
@@ -61,7 +61,7 @@ export function ChangePasswordDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cp-newPassword">Nova senha:</Label>
+            <Label htmlFor="cp-newPassword">New password:</Label>
             <InputGroup aria-invalid={!!state?.errors?.newPassword}>
               <InputGroupInput
                 id="cp-newPassword"
@@ -73,7 +73,7 @@ export function ChangePasswordDialog() {
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   onClick={() => setShowNew((v) => !v)}
-                  aria-label={showNew ? "Ocultar senha" : "Mostrar senha"}
+                  aria-label={showNew ? "Hide password" : "Show password"}
                 >
                   {showNew ? <EyeOff /> : <Eye />}
                 </InputGroupButton>
@@ -85,7 +85,7 @@ export function ChangePasswordDialog() {
           </div>
 
           <Button type="submit" className="w-full mt-2" disabled={isPending}>
-            {isPending ? "Salvando…" : "Alterar senha"}
+            {isPending ? "Saving…" : "Change password"}
           </Button>
         </form>
       </DialogContent>

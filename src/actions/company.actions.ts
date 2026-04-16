@@ -19,7 +19,7 @@ export async function updateCompany(_id: string, data: CompanyFormValues): Promi
   const { customerId } = await verifyTenantSession()
 
   const validated = companySchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { address, legalName, ...rest } = validated.data
 

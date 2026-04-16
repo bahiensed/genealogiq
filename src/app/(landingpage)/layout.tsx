@@ -2,7 +2,6 @@ import Link from "next/link"
 import { auth } from "@/auth"
 import { getCurrentYear } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { SearchInput } from "@/components/search/search-input"
 import { ModeToggle } from "@/components/theme/mode-toggle"
 
 export default async function Layout({
@@ -16,9 +15,8 @@ export default async function Layout({
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex border-b items-center justify-between px-4 py-2">
-        B2C Boilerplate
+        Genealogiq
         <div className="flex gap-4 items-center">
-          <SearchInput />
           <ModeToggle />
           {session ? (
             <Button variant="outline" asChild>
@@ -27,7 +25,7 @@ export default async function Layout({
           ) : (
             <>
               <Button variant="outline" asChild>
-                <Link href="/sign-in">Entrar</Link>
+                <Link href="/sign-in">Sign in</Link>
               </Button>
             </>
           )}
@@ -41,20 +39,20 @@ export default async function Layout({
       <footer className="border-t flex flex-col gap-2 p-4 text-center text-muted-foreground text-xs">
         <div>
           <Link href="/privacy" className="underline-offset-4 hover:underline">
-            Política de Privacidade
+            Privacy Policy
           </Link>
 
           {" | "}
 
           <Link href="/terms" className="underline-offset-4 hover:underline">
-            Termos de Uso
+            Terms of Use
           </Link>
         </div>
 
         <div>
           © &nbsp;
           <Link href="/privacy" className="underline-offset-4 hover:underline">
-            Bahien.se
+            Genealogic Global Ltd.
           </Link>
           , {currentYear}
         </div>

@@ -25,10 +25,10 @@ type AdminFormValues = z.infer<typeof SetupSchema>
 const TOTAL_STEPS = 4
 
 const STEP_LABELS = [
-  'Dados da empresa',
-  'Endereço da empresa',
-  'Dados do administrador',
-  'Acesso ao sistema',
+  'Company data',
+  'Company address',
+  'Administrator data',
+  'System access',
 ]
 
 export function SetupWizard() {
@@ -80,9 +80,9 @@ export function SetupWizard() {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>Configuração inicial</CardTitle>
+        <CardTitle>Initial setup</CardTitle>
         <CardDescription>
-          Passo {step} de {TOTAL_STEPS} — {STEP_LABELS[step - 1]}
+          Step {step} of {TOTAL_STEPS} — {STEP_LABELS[step - 1]}
         </CardDescription>
         <Progress value={(step / TOTAL_STEPS) * 100} className="mt-1" />
       </CardHeader>
@@ -98,7 +98,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Razão Social:</FieldLabel>
+                      <FieldLabel>Company Name:</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -110,7 +110,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Nome Fantasia:</FieldLabel>
+                      <FieldLabel>Trade Name:</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -142,7 +142,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Inscrição Estadual:</FieldLabel>
+                      <FieldLabel>State Registration:</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -153,7 +153,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Inscrição Municipal:</FieldLabel>
+                      <FieldLabel>Municipal Registration:</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -165,7 +165,7 @@ export function SetupWizard() {
                 control={cc}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>E-mail da empresa:</FieldLabel>
+                    <FieldLabel>Company email:</FieldLabel>
                     <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -178,7 +178,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field }) => (
                     <Field className="col-span-2">
-                      <FieldLabel>DDI:</FieldLabel>
+                      <FieldLabel>Country Code:</FieldLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger>
                           <SelectValue />
@@ -198,7 +198,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Telefone:</FieldLabel>
+                      <FieldLabel>Phone:</FieldLabel>
                       <MaskedInput
                         value={field.value ?? ''}
                         onChange={field.onChange}
@@ -216,7 +216,7 @@ export function SetupWizard() {
 
           <CardFooter className="mt-2">
             <Button type="button" className="w-full" onClick={handleStep1}>
-              Próximo →
+              Next →
             </Button>
           </CardFooter>
         </div>
@@ -237,13 +237,13 @@ export function SetupWizard() {
 
           <CardFooter className="mt-2 flex gap-2">
             <Button type="button" variant="outline" onClick={() => setStep(1)}>
-              ← Voltar
+              ← Back
             </Button>
             <Button type="button" variant="ghost" onClick={handleStep2Skip} className="ml-auto">
-              Pular
+              Skip
             </Button>
             <Button type="button" onClick={handleStep2Next}>
-              Próximo →
+              Next →
             </Button>
           </CardFooter>
         </div>
@@ -260,7 +260,7 @@ export function SetupWizard() {
                   control={ac}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Nome:</FieldLabel>
+                      <FieldLabel>First Name:</FieldLabel>
                       <Input {...field} autoComplete="given-name" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -272,7 +272,7 @@ export function SetupWizard() {
                   control={ac}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Sobrenome:</FieldLabel>
+                      <FieldLabel>Last Name:</FieldLabel>
                       <Input {...field} autoComplete="family-name" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -284,10 +284,10 @@ export function SetupWizard() {
 
           <CardFooter className="mt-2 flex gap-2">
             <Button type="button" variant="outline" onClick={() => setStep(2)}>
-              ← Voltar
+              ← Back
             </Button>
             <Button type="button" className="flex-1" onClick={handleStep3}>
-              Próximo →
+              Next →
             </Button>
           </CardFooter>
         </div>
@@ -305,7 +305,7 @@ export function SetupWizard() {
                 control={ac}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>E-mail do administrador:</FieldLabel>
+                    <FieldLabel>Administrator email:</FieldLabel>
                     <Input {...field} type="email" autoComplete="email" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -317,7 +317,7 @@ export function SetupWizard() {
                 control={ac}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Senha:</FieldLabel>
+                    <FieldLabel>Password:</FieldLabel>
                     <InputGroup aria-invalid={fieldState.invalid}>
                       <InputGroupInput
                         {...field}
@@ -328,7 +328,7 @@ export function SetupWizard() {
                       <InputGroupAddon align="inline-end">
                         <InputGroupButton
                           onClick={() => setShowPassword((v) => !v)}
-                          aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
                         >
                           {showPassword ? <EyeOff /> : <Eye />}
                         </InputGroupButton>
@@ -343,10 +343,10 @@ export function SetupWizard() {
 
           <CardFooter className="mt-2 flex gap-2">
             <Button type="button" variant="outline" onClick={() => setStep(3)} disabled={isSubmitting}>
-              ← Voltar
+              ← Back
             </Button>
             <Button type="submit" className="flex-1" disabled={isSubmitting}>
-              {isSubmitting ? 'Configurando…' : 'Concluir'}
+              {isSubmitting ? 'Setting up…' : 'Finish'}
             </Button>
           </CardFooter>
         </form>

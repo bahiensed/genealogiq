@@ -40,9 +40,9 @@ export function SignInForm() {
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Entrar</CardTitle>
+          <CardTitle>Sign in</CardTitle>
           <CardDescription>
-            Digite seu e-mail e senha para acessar sua conta.
+            Enter your email and password to access your account.
           </CardDescription>
         </CardHeader>
 
@@ -64,7 +64,7 @@ export function SignInForm() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Senha:</Label>
+              <Label htmlFor="password">Password:</Label>
               <InputGroup>
                 <InputGroupInput
                   id="password"
@@ -75,7 +75,7 @@ export function SignInForm() {
                 <InputGroupAddon align="inline-end">
                   <InputGroupButton
                     onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff /> : <Eye />}
                   </InputGroupButton>
@@ -94,7 +94,7 @@ export function SignInForm() {
 
           <CardFooter className="mt-6 flex flex-col gap-3">
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Entrando…" : "Entrar"}
+              {isPending ? "Signing in…" : "Sign in"}
             </Button>
           </CardFooter>
         </form>

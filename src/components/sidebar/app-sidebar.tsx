@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -60,8 +61,23 @@ export function AppSidebar({ modules }: AppSidebarProps) {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b p-4">
-        <span className="font-bold text-sm">Genealogiq | Sequoia</span>
+      <SidebarHeader className="border-b px-8 py-3">
+        <Image
+          src="/logo/sign-dark.png"
+          alt="Logo"
+          width={160}
+          height={40}
+          className="dark:hidden"
+          priority
+        />
+        <Image
+          src="/logo/sign-light.png"
+          alt="Logo"
+          width={160}
+          height={40}
+          className="hidden dark:block"
+          priority
+        />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

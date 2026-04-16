@@ -18,67 +18,67 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Licenças Disponíveis</CardTitle>
+            <CardTitle>Available Licenses</CardTitle>
             <CardAction><Layers className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.availableLicenses}</p>
-            <p className="text-sm text-muted-foreground mt-1">Em estoque no momento</p>
+            <p className="text-sm text-muted-foreground mt-1">Currently in stock</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Total de Customers</CardTitle>
+            <CardTitle>Total Customers</CardTitle>
             <CardAction><Users className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.totalCustomers}</p>
-            <p className="text-sm text-muted-foreground mt-1">Clientes cadastrados</p>
+            <p className="text-sm text-muted-foreground mt-1">Registered customers</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Licenças Vendidas no Mês</CardTitle>
+            <CardTitle>Licenses Sold This Month</CardTitle>
             <CardAction><ShoppingCart className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.monthlyCount}</p>
-            <p className="text-sm text-muted-foreground mt-1">Vendas no mês atual</p>
+            <p className="text-sm text-muted-foreground mt-1">Sales this month</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Faturamento Mensal</CardTitle>
+            <CardTitle>Monthly Revenue</CardTitle>
             <CardAction><Banknote className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{usd.format(stats.monthlyRevenue)}</p>
-            <p className="text-sm text-muted-foreground mt-1">Receita no mês atual</p>
+            <p className="text-sm text-muted-foreground mt-1">Revenue this month</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Licenças Vendidas no Ano</CardTitle>
+            <CardTitle>Licenses Sold This Year</CardTitle>
             <CardAction><BarChart3 className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.yearlyCount}</p>
-            <p className="text-sm text-muted-foreground mt-1">Vendas no ano atual</p>
+            <p className="text-sm text-muted-foreground mt-1">Sales this year</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Faturamento Anual</CardTitle>
+            <CardTitle>Annual Revenue</CardTitle>
             <CardAction><TrendingUp className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{usd.format(stats.yearlyRevenue)}</p>
-            <p className="text-sm text-muted-foreground mt-1">Receita no ano atual</p>
+            <p className="text-sm text-muted-foreground mt-1">Revenue this year</p>
           </CardContent>
         </Card>
       </div>

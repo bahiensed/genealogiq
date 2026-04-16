@@ -15,9 +15,9 @@ export default async function SalesPage() {
 
       {licenses.length === 0 ? (
         <p className="text-muted-foreground">
-          Sem licenças disponíveis no inventário.{' '}
+          No licenses available in inventory.{' '}
           <Link href="/purchasing/licenses" className="underline underline-offset-4 hover:text-primary">
-            Comprar licenças
+            Buy licenses
           </Link>
         </p>
       ) : (

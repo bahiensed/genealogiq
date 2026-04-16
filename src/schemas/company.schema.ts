@@ -3,14 +3,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { addressSchema, addressDefaultValues } from './address.schema'
 
 export const companySchema = z.object({
-  legalName:              z.string().min(2, 'Mínimo 2 caracteres'),
-  tradeName:              z.string().min(2, 'Mínimo 2 caracteres'),
-  taxId:                  z.string().min(1, 'CNPJ obrigatório'),
+  legalName:              z.string().min(2, 'Must be at least 2 characters'),
+  tradeName:              z.string().min(2, 'Must be at least 2 characters'),
+  taxId:                  z.string().min(1, 'Required'),
   stateRegistration:      z.string().nullish(),
   municipalRegistration:  z.string().nullish(),
-  email:                  z.string().email('E-mail inválido'),
-  phoneCountryCode:       z.string().min(1, 'DDI obrigatório'),
-  phone:                  z.string().min(1, 'Telefone obrigatório'),
+  email:                  z.string().email('Invalid email address'),
+  phoneCountryCode:       z.string().min(1, 'Country code is required'),
+  phone:                  z.string().min(1, 'Required'),
   isActive:               z.boolean(),
   address:                addressSchema.optional(),
 })

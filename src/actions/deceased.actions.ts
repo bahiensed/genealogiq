@@ -24,13 +24,13 @@ export async function createDeceased(
     where:  { id: appUserId, tenantId: customerId },
     select: { id: true, _count: { select: { appSales: true, guardianships: true } } },
   })
-  if (!appUser) return { error: 'Cliente não encontrado.' }
+  if (!appUser) return { error: 'Customer not found.' }
 
   const available = appUser._count.appSales - appUser._count.guardianships
-  if (available <= 0) return { error: 'Sem licenças disponíveis para este cliente.' }
+  if (available <= 0) return { error: 'No licenses available for this customer.' }
 
   const validated = deceasedSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { birthDate, deathDate, burialDate, burialLatitude, burialLongitude, ...rest } = validated.data
 
@@ -55,20 +55,20 @@ export async function createDeceased(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Dados duplicados detectados' }
+      return { error: 'Duplicate data detected' }
     }
     throw e
   }
 
   revalidatePath(`/customers/${appUserId}`)
-  return { success: 'Perfil memorializado criado com sucesso.' }
+  return { success: 'Memorialized profile created successfully.' }
 }
 
 export async function updateDeceased(id: string, data: DeceasedFormValues): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
   const validated = deceasedSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { birthDate, deathDate, burialDate, burialLatitude, burialLongitude, ...rest } = validated.data
 
@@ -86,13 +86,13 @@ export async function updateDeceased(id: string, data: DeceasedFormValues): Prom
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Falecido não encontrado.' }
+      return { error: 'Profile not found.' }
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Falecido atualizado com sucesso.' }
+  return { success: 'Profile updated successfully.' }
 }
 
 export async function deleteDeceased(id: string): Promise<ActionError | void> {
@@ -102,7 +102,7 @@ export async function deleteDeceased(id: string): Promise<ActionError | void> {
     await prisma.deceased.delete({ where: { id, tenantId: customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Falecido não encontrado.' }
+      return { error: 'Profile not found.' }
     }
     throw e
   }
@@ -122,13 +122,13 @@ export async function addGuardian(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Vínculo já existe.' }
+      return { error: 'Relation already exists.' }
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Guardião adicionado.' }
+  return { success: 'Guardian added.' }
 }
 
 export async function removeGuardian(
@@ -143,7 +143,7 @@ export async function removeGuardian(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Vínculo não encontrado.' }
+      return { error: 'Relation not found.' }
     }
     throw e
   }

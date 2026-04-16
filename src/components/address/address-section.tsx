@@ -13,9 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 
 const SUPPORTED_COUNTRIES = [
-  { code: 'BR', label: 'Brasil' },
-  { code: 'US', label: 'Estados Unidos' },
-  { code: 'MX', label: 'México' },
+  { code: 'BR', label: 'Brazil' },
+  { code: 'US', label: 'USA' },
+  { code: 'MX', label: 'Mexico' },
 ]
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +62,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
       setValue(`${prefix}.state`,        result.state)
       setValue(`${prefix}.country`,      result.country)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Erro ao buscar CEP/ZIP')
+      toast.error(err instanceof Error ? err.message : 'Failed to look up ZIP/postal code')
     } finally {
       setIsSearching(false)
     }
@@ -81,7 +81,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Country */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>País:</FieldLabel>
+        <FieldLabel>Country:</FieldLabel>
         <Select
           value={country}
           onValueChange={(val) => {
@@ -91,7 +91,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
           }}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Selecionar" />
+            <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
             {SUPPORTED_COUNTRIES.map((c) => (
@@ -103,7 +103,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* ZIP */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>{country === 'BR' ? 'CEP:' : 'ZIP / Postal Code:'}</FieldLabel>
+        <FieldLabel>ZIP / Postal Code:</FieldLabel>
         <InputGroup>
           <InputGroupInput
             value={applyZipMask(country, zip)}
@@ -114,7 +114,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
             placeholder={zipPlaceholder(country)}
           />
           <InputGroupAddon align="inline-end">
-            <InputGroupButton onClick={handleZipSearch} disabled={isSearching} aria-label="Buscar endereço">
+            <InputGroupButton onClick={handleZipSearch} disabled={isSearching} aria-label="Look up address">
               <SearchIcon />
             </InputGroupButton>
           </InputGroupAddon>
@@ -124,7 +124,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Street */}
       <Field className="col-span-12 md:col-span-10">
-        <FieldLabel>Logradouro:</FieldLabel>
+        <FieldLabel>Street:</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.street` }) ?? ''}
           onChange={(e) => setValue(`${prefix}.street`, e.target.value)}
@@ -134,7 +134,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Number */}
       <Field className="col-span-12 md:col-span-2">
-        <FieldLabel>Número:</FieldLabel>
+        <FieldLabel>Number:</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.number` }) ?? ''}
           onChange={(e) => setValue(`${prefix}.number`, e.target.value)}
@@ -143,7 +143,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Complement */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>Complemento:</FieldLabel>
+        <FieldLabel>Complement:</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.complement` }) ?? ''}
           onChange={(e) => setValue(`${prefix}.complement`, e.target.value)}
@@ -152,7 +152,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Neighborhood */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>Bairro:</FieldLabel>
+        <FieldLabel>Neighborhood:</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.neighborhood` }) ?? ''}
           onChange={(e) => setValue(`${prefix}.neighborhood`, e.target.value)}
@@ -161,7 +161,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* City */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>Cidade:</FieldLabel>
+        <FieldLabel>City:</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.city` }) ?? ''}
           onChange={(e) => setValue(`${prefix}.city`, e.target.value)}
@@ -170,14 +170,14 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* State */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>Estado / Província:</FieldLabel>
+        <FieldLabel>State / Province:</FieldLabel>
         {states.length > 0 ? (
           <Select
             value={useWatch({ control, name: `${prefix}.state` }) ?? ''}
             onValueChange={(val) => setValue(`${prefix}.state`, val)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecionar" />
+              <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
               {states.map((s) => (

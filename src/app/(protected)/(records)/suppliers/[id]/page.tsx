@@ -18,7 +18,7 @@ export default async function EditSupplierPage({ params }: { params: Promise<{ i
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Editar fornecedor
+        Edit supplier
       </h1>
       <SupplierForm
         id={id}

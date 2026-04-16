@@ -21,9 +21,12 @@ export async function createSupplier(data: SupplierFormValues): Promise<ActionEr
   const { customerId } = await verifyTenantSession()
 
   const validated = supplierSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data
+
+  const dup = await prisma.supplier.findFirst({ where: { taxId: rest.taxId, tenantId: customerId }, select: { id: true } })
+  if (dup) return { error: 'A supplier with this tax ID already exists' }
 
   try {
     await prisma.supplier.create({
@@ -37,22 +40,25 @@ export async function createSupplier(data: SupplierFormValues): Promise<ActionEr
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Dados duplicados detectados' }
+      return { error: 'Duplicate data detected' }
     }
     throw e
   }
 
   revalidatePath('/suppliers')
-  return { success: 'Fornecedor criado com sucesso.' }
+  return { success: 'Supplier created successfully.' }
 }
 
 export async function updateSupplier(id: string, data: SupplierFormValues): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
   const validated = supplierSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data
+
+  const dup = await prisma.supplier.findFirst({ where: { taxId: rest.taxId, tenantId: customerId, NOT: { id } }, select: { id: true } })
+  if (dup) return { error: 'A supplier with this tax ID already exists' }
 
   try {
     await prisma.supplier.update({
@@ -66,13 +72,13 @@ export async function updateSupplier(id: string, data: SupplierFormValues): Prom
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Fornecedor não encontrado.' }
+      return { error: 'Supplier not found.' }
     }
     throw e
   }
 
   revalidatePath('/suppliers')
-  return { success: 'Fornecedor atualizado com sucesso.' }
+  return { success: 'Supplier updated successfully.' }
 }
 
 export async function deleteSupplier(id: string): Promise<ActionError | void> {
@@ -82,7 +88,7 @@ export async function deleteSupplier(id: string): Promise<ActionError | void> {
     await prisma.supplier.delete({ where: { id, tenantId: customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Fornecedor não encontrado.' }
+      return { error: 'Supplier not found.' }
     }
     throw e
   }
@@ -94,7 +100,7 @@ export async function toggleSupplierActive(id: string): Promise<ActionError | vo
   const { customerId } = await verifyTenantSession()
 
   const supplier = await prisma.supplier.findUnique({ where: { id, tenantId: customerId }, select: { isActive: true } })
-  if (!supplier) return { error: 'Fornecedor não encontrado.' }
+  if (!supplier) return { error: 'Supplier not found.' }
 
   await prisma.supplier.update({ where: { id }, data: { isActive: !supplier.isActive } })
   revalidatePath('/suppliers')

@@ -33,7 +33,7 @@ const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' 
 export function LicenseStore({ packages }: { packages: LicensePackage[] }) {
   if (packages.length === 0) {
     return (
-      <p className="text-muted-foreground">Nenhum pacote disponível no momento.</p>
+      <p className="text-muted-foreground">No packages available at the moment.</p>
     )
   }
 
@@ -81,7 +81,7 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
         <div>
           <p className="text-3xl font-bold">{usd.format(pkg.price)}</p>
           <p className="text-sm text-muted-foreground">
-            {pkg.quantity} {pkg.quantity === 1 ? 'licença' : 'licenças'} por pacote
+            {pkg.quantity} {pkg.quantity === 1 ? 'license' : 'licenses'} per package
           </p>
         </div>
 
@@ -92,7 +92,7 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
         )}
 
         <div className="mt-auto flex items-center gap-3 pt-2">
-          <label className="text-sm font-medium whitespace-nowrap">Qtd. pacotes</label>
+          <label className="text-sm font-medium whitespace-nowrap">Qty. packages</label>
           <Input
             type="number"
             min={1}
@@ -104,7 +104,7 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
 
         {qty > 1 && (
           <p className="text-sm text-muted-foreground">
-            {totalLicenses} licenças · {usd.format(totalPrice)}
+            {totalLicenses} licenses · {usd.format(totalPrice)}
           </p>
         )}
       </CardContent>
@@ -112,7 +112,7 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
       <CardFooter className="border-t">
         <Button className="w-full" onClick={handleBuy} disabled={isPending}>
           <ShoppingCart className="mr-2 h-4 w-4" />
-          {isPending ? 'Processando…' : 'Comprar'}
+          {isPending ? 'Processing…' : 'Buy'}
         </Button>
       </CardFooter>
     </Card>

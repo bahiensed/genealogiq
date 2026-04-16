@@ -72,19 +72,19 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
       <section className="flex flex-col gap-4 mt-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold">Perfis memorializados</h2>
+            <h2 className="text-lg font-semibold">Memorialized profiles</h2>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant="outline">{licensesAcquired} adquirida{licensesAcquired !== 1 ? 's' : ''}</Badge>
-              <Badge variant="outline">{licensesUsed} utilizada{licensesUsed !== 1 ? 's' : ''}</Badge>
+              <Badge variant="outline">{licensesAcquired} acquired</Badge>
+              <Badge variant="outline">{licensesUsed} used</Badge>
               <Badge variant={licensesAvailable > 0 ? 'default' : 'secondary'}>
-                {licensesAvailable} disponíve{licensesAvailable !== 1 ? 'is' : 'l'}
+                {licensesAvailable} available
               </Badge>
             </div>
           </div>
           {licensesAvailable > 0 && (
             <Button asChild>
               <Link href={`/customers/${id}/memorialized/new`}>
-                Criar perfil memorializado
+                Create memorialized profile
               </Link>
             </Button>
           )}

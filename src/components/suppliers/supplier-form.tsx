@@ -83,14 +83,14 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
             control={control}
             render={({ field }) => (
               <Field className="col-span-4">
-                <FieldLabel>Tipo:</FieldLabel>
+                <FieldLabel>Type:</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="COMPANY">Pessoa Jurídica</SelectItem>
-                    <SelectItem value="INDIVIDUAL">Pessoa Física</SelectItem>
+                    <SelectItem value="COMPANY">Company</SelectItem>
+                    <SelectItem value="INDIVIDUAL">Individual</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -105,7 +105,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>{isIndividual ? 'Nome:' : 'Razão Social:'}</FieldLabel>
+                <FieldLabel>{isIndividual ? 'Name:' : 'Company Name:'}</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -116,7 +116,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>{isIndividual ? 'Sobrenome:' : 'Nome Fantasia:'}</FieldLabel>
+                <FieldLabel>{isIndividual ? 'Last Name:' : 'Trade Name:'}</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -149,7 +149,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
               control={control}
               render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Data de Nascimento:</FieldLabel>
+                  <FieldLabel>Date of Birth:</FieldLabel>
                   <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -180,7 +180,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
               control={control}
               render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Insc. Estadual:</FieldLabel>
+                  <FieldLabel>State Registration:</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -191,7 +191,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
               control={control}
               render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Insc. Municipal:</FieldLabel>
+                  <FieldLabel>Municipal Registration:</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -218,7 +218,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
             control={control}
             render={({ field }) => (
               <Field className="col-span-2">
-                <FieldLabel>DDI:</FieldLabel>
+                <FieldLabel>Country Code:</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
                     <SelectValue />
@@ -237,7 +237,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Telefone:</FieldLabel>
+                <FieldLabel>Phone:</FieldLabel>
                 <MaskedInput
                   value={field.value}
                   onChange={field.onChange}
@@ -257,10 +257,10 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Categoria:</FieldLabel>
+              <FieldLabel>Category:</FieldLabel>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Selecione uma categoria" />
+                  <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
@@ -279,7 +279,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Notas:</FieldLabel>
+              <FieldLabel>Notes:</FieldLabel>
               <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -297,7 +297,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <FieldLabel htmlFor="isActive" className="cursor-pointer">Fornecedor ativo:</FieldLabel>
+                <FieldLabel htmlFor="isActive" className="cursor-pointer">Active supplier:</FieldLabel>
               </Field>
             )}
           />
@@ -306,7 +306,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
 
       <FieldSeparator />
 
-      <p className="text-sm font-medium">Endereço</p>
+      <p className="text-sm font-medium">Address</p>
       <AddressSection
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         control={control as any}
@@ -319,10 +319,10 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Criar fornecedor'}
+          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create supplier'}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Limpar
+          Reset
         </Button>
       </Field>
     </form>

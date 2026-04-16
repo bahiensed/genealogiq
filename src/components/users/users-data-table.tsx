@@ -14,7 +14,7 @@ export function UsersDataTable({ currentUserId, data }: UsersDataTableProps) {
     <DataTable
       columns={columns}
       data={data}
-      emptyMessage="Nenhum usuário encontrado."
+      emptyMessage="No users found."
     />
   )
 }

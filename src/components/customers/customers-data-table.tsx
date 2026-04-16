@@ -12,7 +12,7 @@ export function CustomersDataTable({ data }: CustomersDataTableProps) {
     <DataTable
       columns={customerColumns}
       data={data}
-      emptyMessage="Nenhum cliente encontrado."
+      emptyMessage="No customers found"
     />
   )
 }
