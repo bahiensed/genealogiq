@@ -16,7 +16,7 @@ export async function getPackages() {
       isActive:    true,
       createdAt:   true,
       license: {
-        select: { component: true },
+        select: { name: true },
       },
     },
     orderBy: { name: 'asc' },

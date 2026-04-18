@@ -11,8 +11,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
@@ -42,12 +40,9 @@ function ActionsCell({ row, currentUserRole }: { row: { original: CustomerCatego
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link href={`/customer-categories/${category.id}`}>Edit</Link>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleCustomerCategoryActive(category.id)
@@ -59,8 +54,7 @@ function ActionsCell({ row, currentUserRole }: { row: { original: CustomerCatego
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
             <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
+                  <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onSelect={() => setDeleteOpen(true)}
               >

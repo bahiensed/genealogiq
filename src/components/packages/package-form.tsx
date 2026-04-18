@@ -18,10 +18,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { CurrencyInput } from '@/components/ui/currency-input'
 
 interface License {
   id: string
-  component: string
+  name: string
 }
 
 interface PackageFormProps {
@@ -88,7 +89,7 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
                 </SelectTrigger>
                 <SelectContent>
                   {licenses.map((l) => (
-                    <SelectItem key={l.id} value={l.id}>{l.component}</SelectItem>
+                    <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -150,14 +151,10 @@ export function PackageForm({ id, defaultValues, licenses = [] }: PackageFormPro
               <FieldLabel>Price (US$):</FieldLabel>
               <div className="relative">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">$</span>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
+                <CurrencyInput
                   className="pl-7"
-                  {...field}
-                  value={field.value === 0 || Number.isNaN(field.value) ? '' : field.value}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  value={field.value}
+                  onChange={field.onChange}
                   autoComplete="off"
                   aria-invalid={fieldState.invalid}
                 />

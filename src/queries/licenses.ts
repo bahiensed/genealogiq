@@ -9,12 +9,12 @@ export async function getLicenses() {
   return prisma.license.findMany({
     select: {
       id:          true,
-      component:   true,
+      name:        true,
       description: true,
       isActive:    true,
       createdAt:   true,
     },
-    orderBy: { component: 'asc' },
+    orderBy: { name: 'asc' },
   })
 }
 
@@ -25,7 +25,7 @@ export async function getLicense(id: string) {
     where: { id },
     select: {
       id:          true,
-      component:   true,
+      name:        true,
       description: true,
       isActive:    true,
     },

@@ -8,6 +8,16 @@ interface PackagesDataTableProps {
   data: PackageRow[]
 }
 
+const COLUMN_LABELS: Record<string, string> = {
+  name:        'Package Name',
+  license:     'License TYpe',
+  quantity:    'Licenses / Package',
+  price:       'Package Price',
+  description: 'Package Description',
+  isActive:    'Status',
+  createdAt:   'Created at',
+}
+
 export function PackagesDataTable({ currentUserRole, data }: PackagesDataTableProps) {
   return (
     <DataTable
@@ -15,6 +25,7 @@ export function PackagesDataTable({ currentUserRole, data }: PackagesDataTablePr
       data={data}
       emptyMessage="No packages found."
       initialSorting={[{ id: 'quantity', desc: false }]}
+      columnLabels={COLUMN_LABELS}
     />
   )
 }

@@ -7,21 +7,14 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { toggleLicenseActive, deleteLicense } from '@/actions/license.actions'
 
 export type LicenseRow = {
   id: string
-  component: string
+  name: string
   description: string | null
   isActive: boolean
   createdAt: Date
@@ -42,12 +35,9 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link href={`/licenses/${license.id}`}>Edit</Link>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleLicenseActive(license.id)
@@ -59,7 +49,6 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
             <>
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onSelect={() => setDeleteOpen(true)}
@@ -76,7 +65,7 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           isPending={isPending}
-          description={`The license "${license.component}" will be permanently deleted.`}
+          description={`The license "${license.name}" will be permanently deleted.`}
           onConfirm={() => startTransition(async () => {
             const result = await deleteLicense(license.id)
             if (result?.error) toast.error(result.error)
@@ -91,11 +80,11 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
 export function getColumns(currentUserRole: string): ColumnDef<LicenseRow>[] {
   return [
     {
-      accessorKey: 'component',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Component" />,
+      accessorKey: 'name',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
       cell: ({ row }) => (
         <Link href={`/licenses/${row.original.id}`} className="hover:underline">
-          {row.original.component}
+          {row.original.name}
         </Link>
       ),
     },

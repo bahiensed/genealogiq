@@ -1,3 +1,11 @@
+export function maskUsdAmount(digits: string): string {
+  if (!digits) return ''
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(parseInt(digits, 10) / 100)
+}
+
 export function unmaskDigits(value: string): string {
   return value.replace(/\D/g, '')
 }

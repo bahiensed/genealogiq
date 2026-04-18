@@ -43,14 +43,19 @@ export async function updateLicense(id: string, data: LicenseFormValues): Promis
 export async function deleteLicense(id: string): Promise<ActionError | void> {
   await verifySession()
 
+  const packageCount = await prisma.package.count({ where: { licenseId: id } })
+  if (packageCount > 0) {
+    return { error: 'This license is assigned to one or more packages and cannot be deleted.' }
+  }
+
   try {
-    await prisma.license.delete({ where: { id } })
+    await prisma.$transaction(async (tx) => {
+      await tx.customerLicense.deleteMany({ where: { licenseId: id } })
+      await tx.license.delete({ where: { id } })
+    })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return { error: 'License not found.' }
-    }
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2003') {
-      return { error: 'This license is assigned to one or more packages and cannot be deleted.' }
     }
     throw e
   }

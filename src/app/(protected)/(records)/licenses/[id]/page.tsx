@@ -11,7 +11,7 @@ export default async function EditLicensePage({ params }: { params: Promise<{ id
     <LicenseForm
       id={id}
       defaultValues={{
-        component:   license.component,
+        name:        license.name,
         description: license.description ?? '',
         isActive:    license.isActive,
       }}

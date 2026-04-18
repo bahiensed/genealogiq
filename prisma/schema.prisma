@@ -33,7 +33,7 @@ enum EntityType {
 
 model License {
   id          String    @id @default(cuid())
-  component   String
+  name        String
   description String?
   isActive    Boolean   @default(true) @map("is_active")
 

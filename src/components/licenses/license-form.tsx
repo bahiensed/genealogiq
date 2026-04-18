@@ -64,11 +64,11 @@ export function LicenseForm({ id, defaultValues }: LicenseFormProps) {
 
       <FieldGroup>
         <Controller
-          name="component"
+          name="name"
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Component:</FieldLabel>
+              <FieldLabel>Name:</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>

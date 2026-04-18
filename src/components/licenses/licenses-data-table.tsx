@@ -8,14 +8,22 @@ interface LicensesDataTableProps {
   data: LicenseRow[]
 }
 
+const COLUMN_LABELS: Record<string, string> = {
+  name:        'Name',
+  description: 'Description',
+  isActive:    'Status',
+  createdAt:   'Created at',
+}
+
 export function LicensesDataTable({ currentUserRole, data }: LicensesDataTableProps) {
   return (
     <DataTable
       columns={getColumns(currentUserRole)}
       data={data}
-      filterColumn="component"
+      filterColumn="name"
       filterPlaceholder="Search..."
-      emptyMessage="No licenses found."
+      emptyMessage="No licenses found"
+      columnLabels={COLUMN_LABELS}
     />
   )
 }

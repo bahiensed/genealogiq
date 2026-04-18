@@ -41,7 +41,7 @@ export function DataTable<TData, TValue>({
   data,
   filterColumn = 'name',
   filterPlaceholder = 'Search...',
-  emptyMessage = 'No records found.',
+  emptyMessage = 'No records found',
   columnLabels,
   initialColumnVisibility,
   initialSorting,

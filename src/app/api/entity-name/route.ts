@@ -20,8 +20,8 @@ async function resolveName(type: EntityType, id: string): Promise<string | null>
     return record?.name ?? null
   }
   if (type === 'licenses') {
-    const record = await prisma.license.findUnique({ where: { id }, select: { component: true } })
-    return record?.component ?? null
+    const record = await prisma.license.findUnique({ where: { id }, select: { name: true } })
+    return record?.name ?? null
   }
   if (type === 'packages') {
     const record = await prisma.package.findUnique({ where: { id }, select: { name: true } })

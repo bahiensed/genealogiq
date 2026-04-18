@@ -5,7 +5,7 @@ import { MoreHorizontal } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { deleteSale } from '@/actions/sale.actions'
@@ -34,10 +34,8 @@ function ActionsCell({ row, currentUserRole }: { row: { original: SaleRow }; cur
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
+{(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
             <>
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onSelect={() => setDeleteOpen(true)}

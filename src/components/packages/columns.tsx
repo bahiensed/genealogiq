@@ -7,14 +7,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { togglePackageActive, deletePackage } from '@/actions/package.actions'
@@ -27,7 +20,7 @@ export type PackageRow = {
   quantity: number
   isActive: boolean
   createdAt: Date
-  license: { component: string }
+  license: { name: string }
 }
 
 function ActionsCell({ row, currentUserRole }: { row: { original: PackageRow }; currentUserRole: string }) {
@@ -45,12 +38,9 @@ function ActionsCell({ row, currentUserRole }: { row: { original: PackageRow }; 
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link href={`/packages/${pkg.id}`}>Edit</Link>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await togglePackageActive(pkg.id)
@@ -62,8 +52,7 @@ function ActionsCell({ row, currentUserRole }: { row: { original: PackageRow }; 
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
             <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
+                  <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onSelect={() => setDeleteOpen(true)}
               >
@@ -97,7 +86,7 @@ export function getColumns(currentUserRole: string): ColumnDef<PackageRow>[] {
   return [
     {
       accessorKey: 'name',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Name</>} />,
       cell: ({ row }) => (
         <Link href={`/packages/${row.original.id}`} className="hover:underline">
           {row.original.name}
@@ -106,23 +95,23 @@ export function getColumns(currentUserRole: string): ColumnDef<PackageRow>[] {
     },
     {
       id: 'license',
-      accessorFn: (row) => row.license.component,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="License" />,
-      cell: ({ row }) => row.original.license.component,
+      accessorFn: (row) => row.license.name,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Type</>} />,
+      cell: ({ row }) => row.original.license.name,
     },
     {
       accessorKey: 'quantity',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="License Qty." className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Licenses /<br/>Package</>} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.quantity}</div>,
     },
     {
       accessorKey: 'price',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Price" className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Price</>} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{usd.format(row.original.price)}</div>,
     },
     {
       accessorKey: 'description',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package Description</>} />,
       cell: ({ row }) => row.original.description ?? '—',
     },
     {
@@ -136,6 +125,11 @@ export function getColumns(currentUserRole: string): ColumnDef<PackageRow>[] {
         ),
     },
     {
+      accessorKey: 'createdAt',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+      cell: ({ row }) =>
+        new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
+    },    {
       id: 'actions',
       enableHiding: false,
       cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} />,
