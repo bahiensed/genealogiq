@@ -114,7 +114,7 @@ export async function forgotPassword(
     select: { id: true },
   })
 
-  // Resposta idêntica independente de o e-mail existir (evita enumeração)
+  // Identical response regardless of whether the email exists (prevents enumeration)
   if (!user) redirect("/forgot-password?sent=true")
 
   await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } })

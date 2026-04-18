@@ -7,9 +7,9 @@ export default async function InventoryLicensesPage() {
     where: { customerId: session.customerId },
     select: {
       quantity: true,
-      license: { select: { component: true, description: true } },
+      license: { select: { name: true, description: true } },
     },
-    orderBy: { license: { component: 'asc' } },
+    orderBy: { license: { name: 'asc' } },
   })
 
   return (
@@ -36,8 +36,8 @@ export default async function InventoryLicensesPage() {
               </tr>
             ) : (
               inventory.map((item) => (
-                <tr key={item.license.component} className="border-b last:border-0">
-                  <td className="px-4 py-3 font-medium">{item.license.component}</td>
+                <tr key={item.license.name} className="border-b last:border-0">
+                  <td className="px-4 py-3 font-medium">{item.license.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{item.license.description ?? '—'}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{item.quantity}</td>
                 </tr>

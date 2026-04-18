@@ -7,12 +7,12 @@ export async function sendVerificationEmail(to: string, token: string): Promise<
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
-    subject: "Confirme seu e-mail",
+    subject: "Confirm your email",
     html: `
-      <p>Obrigado por criar sua conta.</p>
-      <p>Clique no link abaixo para confirmar seu e-mail (expira em 24h):</p>
-      <p><a href="${url}">Confirmar e-mail</a></p>
-      <p>Se você não criou esta conta, ignore este e-mail.</p>
+      <p>Thank you for creating your account.</p>
+      <p>Click the link below to confirm your email (expires in 24h):</p>
+      <p><a href="${url}">Confirm email</a></p>
+      <p>If you did not create this account, please ignore this email.</p>
     `,
   })
 }
@@ -22,12 +22,12 @@ export async function sendEmailChangeEmail(to: string, token: string): Promise<v
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
-    subject: "Confirme seu novo e-mail",
+    subject: "Confirm your new email",
     html: `
-      <p>Recebemos uma solicitação para alterar o e-mail da sua conta.</p>
-      <p>Clique no link abaixo para confirmar o novo endereço (expira em 1h):</p>
-      <p><a href="${url}">Confirmar novo e-mail</a></p>
-      <p>Se você não solicitou isso, ignore este e-mail.</p>
+      <p>We received a request to change the email address on your account.</p>
+      <p>Click the link below to confirm the new address (expires in 1h):</p>
+      <p><a href="${url}">Confirm new email</a></p>
+      <p>If you did not request this, please ignore this email.</p>
     `,
   })
 }
@@ -36,11 +36,11 @@ export async function sendAccountDeletionEmail(to: string): Promise<void> {
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
-    subject: "Sua conta foi excluída",
+    subject: "Your account has been deleted",
     html: `
-      <p>Sua conta foi excluída com sucesso.</p>
-      <p>Sentiremos muito a sua falta. Se quiser voltar algum dia, estaremos aqui.</p>
-      <p>Se você não solicitou a exclusão da sua conta, entre em contato conosco imediatamente.</p>
+      <p>Your account has been successfully deleted.</p>
+      <p>We'll miss you. If you ever want to come back, we'll be here.</p>
+      <p>If you did not request account deletion, please contact us immediately.</p>
     `,
   })
 }
@@ -50,12 +50,12 @@ export async function sendWelcomeEmail(to: string, token: string): Promise<void>
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
-    subject: "Bem-vindo! Configure seu acesso",
+    subject: "Welcome! Set up your access",
     html: `
-      <p>Sua conta foi criada por um administrador.</p>
-      <p>Clique no link abaixo para criar sua senha e acessar o sistema (expira em 72h):</p>
-      <p><a href="${url}">Configurar senha</a></p>
-      <p>Se você não esperava este e-mail, entre em contato com o administrador.</p>
+      <p>Your account was created by an administrator.</p>
+      <p>Click the link below to set your password and access the system (expires in 72h):</p>
+      <p><a href="${url}">Set up password</a></p>
+      <p>If you were not expecting this email, please contact your administrator.</p>
     `,
   })
 }
@@ -65,12 +65,12 @@ export async function sendAppWelcomeEmail(to: string, token: string): Promise<vo
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
-    subject: "Bem-vindo! Configure seu acesso ao app",
+    subject: "Welcome! Set up your app access",
     html: `
-      <p>Sua conta de acesso foi criada.</p>
-      <p>Clique no link abaixo para criar sua senha e acessar o app (expira em 72h):</p>
-      <p><a href="${url}">Configurar senha</a></p>
-      <p>Se você não esperava este e-mail, entre em contato conosco.</p>
+      <p>Your access account has been created.</p>
+      <p>Click the link below to set your password and access the app (expires in 72h):</p>
+      <p><a href="${url}">Set up password</a></p>
+      <p>If you were not expecting this email, please contact us.</p>
     `,
   })
 }
@@ -80,12 +80,12 @@ export async function sendPasswordResetEmail(to: string, token: string): Promise
   await resend.emails.send({
     from: "no-reply@rohling.com.br",
     to,
-    subject: "Redefinição de senha",
+    subject: "Password reset",
     html: `
-      <p>Recebemos uma solicitação para redefinir sua senha.</p>
-      <p>Clique no link abaixo para criar uma nova senha (expira em 1h):</p>
-      <p><a href="${url}">Redefinir senha</a></p>
-      <p>Se você não solicitou isso, ignore este e-mail.</p>
+      <p>We received a request to reset your password.</p>
+      <p>Click the link below to create a new password (expires in 1h):</p>
+      <p><a href="${url}">Reset password</a></p>
+      <p>If you did not request this, please ignore this email.</p>
     `,
   })
 }

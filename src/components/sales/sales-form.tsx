@@ -34,7 +34,7 @@ interface AvailableLicense {
   quantity: number
   license: {
     id:          string
-    component:   string
+    name:        string
     description: string | null
   }
 }
@@ -64,7 +64,7 @@ export function SalesForm({ licenses }: SalesFormProps) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const formRef     = useRef<HTMLFormElement>(null)
 
-  // Busca dinâmica: dispara após 2º caractere + 300ms debounce
+  // Dynamic search: fires after 2nd character + 300ms debounce
   useEffect(() => {
     if (query.length < 2) {
       setResults([])
@@ -150,7 +150,7 @@ export function SalesForm({ licenses }: SalesFormProps) {
     <>
     <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-xl">
       <FieldGroup>
-        {/* Busca de cliente */}
+        {/* Customer search */}
         <Field data-invalid={!!fieldErrors.appUser || undefined}>
           <FieldLabel>Customer</FieldLabel>
           {selected ? (
@@ -196,7 +196,7 @@ export function SalesForm({ licenses }: SalesFormProps) {
           {fieldErrors.appUser && <FieldError>{fieldErrors.appUser}</FieldError>}
         </Field>
 
-        {/* Licença */}
+        {/* License */}
         <Field data-invalid={!!fieldErrors.licenseId || undefined}>
           <FieldLabel>License</FieldLabel>
           <Select value={licenseId} onValueChange={(v) => { setLicenseId(v); setFieldErrors((prev) => ({ ...prev, licenseId: undefined })) }}>
@@ -206,7 +206,7 @@ export function SalesForm({ licenses }: SalesFormProps) {
             <SelectContent>
               {licenses.map(({ license, quantity }) => (
                 <SelectItem key={license.id} value={license.id}>
-                  {license.component}
+                  {license.name}
                   <span className="ml-2 text-muted-foreground">({quantity} available)</span>
                 </SelectItem>
               ))}

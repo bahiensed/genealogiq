@@ -19,19 +19,8 @@ import { Progress } from '@/components/ui/progress'
 import { Card, CardContent } from '@/components/ui/card'
 import { AddressSection } from '@/components/address/address-section'
 import { AddCustomerCategoryDialog } from '@/components/customer-categories/add-customer-category-dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 
 interface Category {
   id: string
@@ -160,7 +149,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
 
       {serverError && <FieldError>{serverError}</FieldError>}
 
-      {/* ── Step 0: Dados pessoais do cliente ── */}
+      {/* ── Step 0: Customer personal data ── */}
       {step === 0 && (
         <Card>
           <CardContent>
@@ -273,7 +262,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
         </Card>
       )}
 
-      {/* ── Step 1: Contato do cliente ── */}
+      {/* ── Step 1: Customer contact ── */}
       {step === 1 && (
         <Card>
           <CardContent>
@@ -369,7 +358,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
         </Card>
       )}
 
-      {/* ── Step 2: Endereço do cliente ── */}
+      {/* ── Step 2: Customer address ── */}
       {step === 2 && (
         <Card>
           <CardContent>
@@ -384,7 +373,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
         </Card>
       )}
 
-      {/* ── Step 3: Redes sociais do cliente ── */}
+      {/* ── Step 3: Customer social media ── */}
       {step === 3 && (
         <Card>
           <CardContent>
@@ -409,7 +398,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
         </Card>
       )}
 
-      {/* ── Step 4: Dados pessoais do falecido ── */}
+      {/* ── Step 4: Deceased personal data ── */}
       {step === 4 && (
         <Card>
           <CardContent>
@@ -528,7 +517,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
         </Card>
       )}
 
-      {/* ── Step 5: Falecimento ── */}
+      {/* ── Step 5: Death ── */}
       {step === 5 && (
         <Card>
           <CardContent>
@@ -602,7 +591,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
         </Card>
       )}
 
-      {/* ── Step 6: Sepultamento ── */}
+      {/* ── Step 6: Burial ── */}
       {step === 6 && (
         <Card>
           <CardContent>
@@ -764,7 +753,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
         </Card>
       )}
 
-      {/* ── Step 7: Redes sociais do falecido ── */}
+      {/* ── Step 7: Deceased social media ── */}
       {step === 7 && (
         <Card>
           <CardContent>

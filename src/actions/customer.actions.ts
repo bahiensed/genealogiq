@@ -119,7 +119,7 @@ export async function updateCustomer(id: string, data: AppUserFormValues): Promi
   const { customerId } = await verifyTenantSession()
 
   const validated = appUserSchema.safeParse(data)
-  if (!validated.success) return { error: 'Dados inválidos' }
+  if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data
 

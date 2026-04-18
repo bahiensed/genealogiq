@@ -11,8 +11,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
@@ -45,12 +43,9 @@ function ActionsCell({ row }: { row: { original: CustomerRow } }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link href={`/customers/${customer.id}`}>Edit</Link>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleCustomerActive(customer.id)
@@ -60,7 +55,6 @@ function ActionsCell({ row }: { row: { original: CustomerRow } }) {
           >
             {customer.isActive ? 'Deactivate' : 'Reactivate'}
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onSelect={() => setDeleteOpen(true)}

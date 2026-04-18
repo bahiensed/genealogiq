@@ -14,7 +14,7 @@ export default async function PurchasingLicensesPage() {
       price:       true,
       quantity:    true,
       license: {
-        select: { component: true, description: true },
+        select: { name: true, description: true },
       },
     },
     orderBy: { quantity: 'asc' },

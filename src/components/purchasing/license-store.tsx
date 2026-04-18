@@ -23,7 +23,7 @@ export interface LicensePackage {
   price: number
   quantity: number
   license: {
-    component: string
+    name: string
     description: string | null
   }
 }
@@ -70,7 +70,7 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle>{pkg.name}</CardTitle>
-          <Badge variant="secondary" className="shrink-0">{pkg.license.component}</Badge>
+          <Badge variant="secondary" className="shrink-0">{pkg.license.name}</Badge>
         </div>
         {pkg.description && (
           <CardDescription>{pkg.description}</CardDescription>

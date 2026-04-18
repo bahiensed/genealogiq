@@ -7,8 +7,8 @@ export async function getAvailableLicenses(customerId: string) {
     where: { customerId, quantity: { gt: 0 } },
     select: {
       quantity: true,
-      license:  { select: { id: true, component: true, description: true } },
+      license:  { select: { id: true, name: true, description: true } },
     },
-    orderBy: { license: { component: 'asc' } },
+    orderBy: { license: { name: 'asc' } },
   })
 }

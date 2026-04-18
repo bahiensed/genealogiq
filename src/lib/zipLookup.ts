@@ -9,13 +9,13 @@ export interface ZipResult {
 
 async function lookupBrazilianCep(cep: string): Promise<ZipResult> {
   const digits = cep.replace(/\D/g, '')
-  if (digits.length !== 8) throw new Error('CEP inválido')
+  if (digits.length !== 8) throw new Error('Invalid ZIP code')
 
   const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`)
-  if (!res.ok) throw new Error('Erro ao consultar CEP')
+  if (!res.ok) throw new Error('Failed to look up ZIP code')
 
   const data = await res.json()
-  if (data.erro) throw new Error('CEP não encontrado')
+  if (data.erro) throw new Error('ZIP code not found')
 
   return {
     zip:          digits,

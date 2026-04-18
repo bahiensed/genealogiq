@@ -38,8 +38,8 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   filterColumn = 'name',
-  filterPlaceholder = 'Filtrar por nome…',
-  emptyMessage = 'Nenhum registro encontrado.',
+  filterPlaceholder = 'Filter by name…',
+  emptyMessage = 'No records found.',
   columnLabels,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])

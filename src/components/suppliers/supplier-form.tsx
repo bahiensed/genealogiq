@@ -98,7 +98,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
           />
         </div>
 
-        {/* Nome principal + Nome secundário (labels mudam por tipo) */}
+        {/* Primary name + Secondary name (labels change by type) */}
         <div className="grid grid-cols-12 gap-3">
           <Controller
             name="name"
@@ -124,7 +124,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
           />
         </div>
 
-        {/* Documento fiscal + campos específicos por tipo */}
+        {/* Tax ID + type-specific fields */}
         {isIndividual ? (
           <div className="grid grid-cols-12 gap-3">
             <Controller

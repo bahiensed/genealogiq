@@ -1,6 +1,6 @@
 import type { NextAuthConfig } from "next-auth"
 
-// Edge-safe config — sem imports de banco de dados
+// Edge-safe config — no database imports
 export const authConfig = {
   pages: {
     signIn: "/sign-in",

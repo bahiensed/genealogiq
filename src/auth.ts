@@ -22,16 +22,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const user = await prisma.user.findUnique({ where: { email } })
         if (!user) return null
 
-        // Segunda linha de defesa: bloqueia usuários não verificados
+        // Second line of defense: block unverified users
         if (user.emailVerified === null) return null
 
-        // Bloqueia usuários desativados
+        // Block deactivated users
         if (!user.isActive) return null
 
-        // Usuário convidado que ainda não definiu senha
+        // Invited user who has not yet set a password
         if (!user.password) return null
 
-        // Bloqueia usuários sem customerId (usuários BMS não podem logar no Sequoia)
+        // Block users without customerId (BMS users cannot log in to Sequoia)
         if (!user.customerId) return null
 
         const match = await bcrypt.compare(password, user.password)

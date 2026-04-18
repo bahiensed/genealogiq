@@ -7,12 +7,20 @@ interface SupplierCategoriesDataTableProps {
   data: SupplierCategoryRow[]
 }
 
+const COLUMN_LABELS: Record<string, string> = {
+  name:        'Name',
+  description: 'Description',
+  isActive:    'Status',
+  createdAt:   'Created at',
+}
+
 export function SupplierCategoriesDataTable({ data }: SupplierCategoriesDataTableProps) {
   return (
     <DataTable
       columns={supplierCategoryColumns}
       data={data}
-      emptyMessage="Nenhuma categoria de fornecedor encontrada."
+      emptyMessage="No supplier categories found."
+      columnLabels={COLUMN_LABELS}
     />
   )
 }

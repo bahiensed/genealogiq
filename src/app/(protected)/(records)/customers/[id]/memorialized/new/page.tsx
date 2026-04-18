@@ -16,7 +16,7 @@ export default async function NewMemorializedPage({ params }: { params: Promise<
         New memorialized profile
       </h1>
       <p className="text-sm text-muted-foreground">
-        Cliente: <span className="font-medium text-foreground">{customer.firstName} {customer.lastName}</span>
+        Customer: <span className="font-medium text-foreground">{customer.firstName} {customer.lastName}</span>
         {' · '}
         <span>{available} license{available !== 1 ? 's' : ''} available</span>
       </p>

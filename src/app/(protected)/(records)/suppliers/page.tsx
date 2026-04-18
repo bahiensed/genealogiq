@@ -15,10 +15,10 @@ export default async function SuppliersPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Fornecedores
+          Suppliers
         </h1>
         <Button asChild>
-          <Link href="/suppliers/new">Novo fornecedor</Link>
+          <Link href="/suppliers/new">New supplier</Link>
         </Button>
       </div>
 

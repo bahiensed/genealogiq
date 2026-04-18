@@ -8,6 +8,14 @@ interface UsersDataTableProps {
   data: UserRow[]
 }
 
+const COLUMN_LABELS: Record<string, string> = {
+  name:      'Name',
+  email:     'E-mail',
+  role:      'Role',
+  isActive:  'Status',
+  createdAt: 'Created at',
+}
+
 export function UsersDataTable({ currentUserId, data }: UsersDataTableProps) {
   const columns = getColumns(currentUserId)
   return (
@@ -15,6 +23,7 @@ export function UsersDataTable({ currentUserId, data }: UsersDataTableProps) {
       columns={columns}
       data={data}
       emptyMessage="No users found."
+      columnLabels={COLUMN_LABELS}
     />
   )
 }
