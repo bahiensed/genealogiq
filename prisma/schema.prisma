@@ -1,0 +1,370 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  OWNER
+  ADMIN
+  COMERCIAL
+  FINANCE
+  USER
+  APP_USER
+  APP_MEMO
+}
+
+enum EmailTokenType {
+  VERIFICATION
+  CHANGE
+}
+
+enum EntityType {
+  INDIVIDUAL
+  COMPANY
+}
+
+// ─── Licenses & Packages ─────────────────────────────────────────────────────
+
+model License {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean   @default(true) @map("is_active")
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  packages         Package[]
+  customerLicenses CustomerLicense[]
+
+  @@map("licenses")
+}
+
+model Package {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2) @map("price")
+  quantity    Int      @default(1)
+  isActive    Boolean  @default(true) @map("is_active")
+
+  licenseId String  @map("license_id")
+  license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sales Sale[]
+
+  @@map("packages")
+}
+
+model Sale {
+  id       Int      @id @default(autoincrement())
+  quantity Int      @default(1)
+  soldAt   DateTime @map("sold_at")
+
+  packageId  String   @map("package_id")
+  package    Package  @relation(fields: [packageId], references: [id], onDelete: Restrict)
+
+  customerId String   @map("customer_id")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  soldById String @map("sold_by_id")
+  soldBy   User   @relation(fields: [soldById], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("sales")
+}
+
+model CustomerLicense {
+  id       String @id @default(cuid())
+  quantity Int    @default(0)
+
+  customerId String   @map("customer_id")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  licenseId String  @map("license_id")
+  license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([customerId, licenseId])
+  @@map("customer_licenses")
+}
+
+// ─── Auth tokens ─────────────────────────────────────────────────────────────
+
+model EmailToken {
+  id        String         @id @default(cuid())
+  token     String         @unique
+  type      EmailTokenType
+  userId    String         @map("user_id")
+  newEmail  String?        @map("new_email")
+  expiresAt DateTime       @map("expires_at")
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// ─── Address ─────────────────────────────────────────────────────────────────
+
+model Address {
+  id           String  @id @default(cuid())
+  zip          String?
+  street       String?
+  number       String?
+  complement   String?
+  neighborhood String?
+  city         String?
+  state        String?
+  country      String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  company  Company?
+  user     User?
+  supplier Supplier?
+  customer Customer?
+
+  @@map("addresses")
+}
+
+// ─── Company ─────────────────────────────────────────────────────────────────
+
+model Company {
+  id                    String   @id @default(cuid())
+  legalName             String   @map("legal_name")
+  tradeName             String   @map("trade_name")
+  taxId                 String   @unique @map("tax_id")
+  stateRegistration     String?  @map("state_registration")
+  municipalRegistration String?  @map("municipal_registration")
+  email                 String   @unique
+  phoneCountryCode      String   @default("55") @map("phone_country_code")
+  phone                 String
+  isActive              Boolean  @default(true) @map("is_active")
+
+  addressId String?  @unique @map("address_id")
+  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("companies")
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id                  String    @id @default(cuid())
+  firstName           String    @map("first_name")
+  lastName            String    @map("last_name")
+  email               String    @unique
+  password            String?
+  role                Role      @default(USER)
+  nationalId          String?   @map("national_id")
+  birthDate           DateTime? @map("birth_date")
+  birthPlace          String?   @map("birth_place")
+  birthCountry        String?   @map("birth_country")
+  deathDate           DateTime? @map("death_date")
+  deathPlace          String?   @map("death_place")
+  deathCountry        String?   @map("death_country")
+  avatarUrl           String?   @map("avatar_url")
+  coverUrl            String?   @map("cover_url")
+  phoneCountryCode    String    @default("55") @map("phone_country_code")
+  phone               String?
+  isActive            Boolean   @default(true) @map("is_active")
+  emailVerified       DateTime? @map("email_verified")
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+
+  customerId String?   @map("customer_id")
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  addressId String?  @unique @map("address_id")
+  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  emailTokens         EmailToken[]
+  passwordResetTokens PasswordResetToken[]
+  sales               Sale[]
+  bio                 Bio?
+
+  @@map("users")
+}
+
+// ─── Bio ─────────────────────────────────────────────────────────────────────
+
+model Bio {
+  id    String  @id @default(cuid())
+  quote String? @db.VarChar(140)
+  text  String? @db.VarChar(2048)
+
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  images BioImage[]
+
+  @@map("bios")
+}
+
+model BioImage {
+  id     String  @id @default(cuid())
+  url    String
+  aspect String  @default("square")
+  order  Int     @default(0)
+
+  bioId String @map("bio_id")
+  bio   Bio    @relation(fields: [bioId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("bio_images")
+}
+
+// ─── Supplier ────────────────────────────────────────────────────────────────
+
+model SupplierCategory {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
+
+  tenantId String?   @map("tenant_id")
+  tenant   Customer? @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  suppliers Supplier[]
+
+  @@unique([tenantId, name])
+  @@map("supplier_categories")
+}
+
+model Supplier {
+  id                    String     @id @default(cuid())
+  entityType            EntityType @map("entity_type")
+  name                  String
+  tradeName             String     @map("trade_name")
+  birthDate             DateTime?  @map("birth_date")
+  taxId                 String     @unique @map("tax_id")
+  stateRegistration     String?    @map("state_registration")
+  municipalRegistration String?    @map("municipal_registration")
+  email                 String
+  phoneCountryCode      String     @default("55") @map("phone_country_code")
+  phone                 String
+  notes                 String?
+  isActive              Boolean    @default(true) @map("is_active")
+
+  categoryId String?           @map("category_id")
+  category   SupplierCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  tenantId String?   @map("tenant_id")
+  tenant   Customer? @relation("SupplierTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  addressId String?  @unique @map("address_id")
+  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("suppliers")
+}
+
+// ─── Customer ────────────────────────────────────────────────────────────────
+
+model CustomerCategory {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
+
+  tenantId String?   @map("tenant_id")
+  tenant   Customer? @relation("CustomerCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  customers Customer[] @relation("CustomerCategory")
+
+  @@unique([tenantId, name])
+  @@map("customer_categories")
+}
+
+model Customer {
+  id                    String     @id @default(cuid())
+  entityType            EntityType @map("entity_type")
+  name                  String
+  tradeName             String     @map("trade_name")
+  birthDate             DateTime?  @map("birth_date")
+  taxId                 String     @unique @map("tax_id")
+  stateRegistration     String?    @map("state_registration")
+  municipalRegistration String?    @map("municipal_registration")
+  email                 String
+  phoneCountryCode      String     @default("55") @map("phone_country_code")
+  phone                 String
+  notes                 String?
+  isActive              Boolean    @default(true) @map("is_active")
+
+  moduleRecordsSuppliers    Boolean @default(false) @map("module_records_suppliers")
+  moduleRecordsProducts     Boolean @default(false) @map("module_records_products")
+  moduleRecordsServices     Boolean @default(false) @map("module_records_services")
+  moduleCategoriesSuppliers Boolean @default(false) @map("module_categories_suppliers")
+  moduleCategoriesProducts  Boolean @default(false) @map("module_categories_products")
+  moduleCategoriesServices  Boolean @default(false) @map("module_categories_services")
+  modulePurchasingProducts  Boolean @default(false) @map("module_purchasing_products")
+  modulePurchasingServices  Boolean @default(false) @map("module_purchasing_services")
+  moduleInventoryProducts   Boolean @default(false) @map("module_inventory_products")
+  moduleFinance             Boolean @default(false) @map("module_finance")
+
+  categoryId String?           @map("category_id")
+  category   CustomerCategory? @relation("CustomerCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+
+  tenantId String?   @map("tenant_id")
+  tenant   Customer? @relation("CustomerTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  addressId String?  @unique @map("address_id")
+  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users        User[]
+  subCustomers Customer[]         @relation("CustomerTenant")
+  suppliers    Supplier[]         @relation("SupplierTenant")
+  supplierCats SupplierCategory[] @relation("SupplierCategoryTenant")
+  customerCats CustomerCategory[] @relation("CustomerCategoryTenant")
+  sales        Sale[]
+  licenses     CustomerLicense[]
+
+  @@map("customers")
+}

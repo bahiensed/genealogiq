@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
-import { geistSans, geistMono } from '@/fonts'
+import { inter } from '@/fonts'
+import { cn } from '@/lib/utils'
 import '@/styles/globals.css'
-import { Inter } from "next/font/google";
-import { cn } from "@/lib/utils";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+import { ThemeProvider } from '@/components/theme/theme-provider'
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { Toaster } from "@/components/ui/sonner"
 
 export const metadata: Metadata = {
   title: "Genealogiq",
@@ -19,10 +20,23 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+      className={cn("h-full", "antialiased", "font-sans", inter.variable)}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
-        {children}
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <main>
+              {children}
+            </main>
+            <Toaster richColors />
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -2,12 +2,13 @@
 
 ## STACK
 ```
-Backend: Node.js v24.14.0 + TypeScript v4
-Database: Neon + PostgreSQL + Prisma 7
-Frontend: React 19 + Next.js v16.2 + Tailwind CSS + Shadcn v4.3
-Auth: Auth.js
-Tests: N/A
+Backend: Node.js v24.14.0 + TypeScript v5
+Database: Neon + PostgreSQL + Prisma 7 (shared DB with BMS and SEQ)
+Frontend: React 19 + Next.js v16.2 + Tailwind CSS v4 + shadcn v4.3
+Auth: next-auth v5 (beta) — Credentials provider, split edge/full config
+Email: Resend
 Deploy: Vercel
+Tests: N/A
 ```
 
 ## PROJECT STRUCTURE
@@ -49,10 +50,39 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 17/04/2016 — Next instalado
-In progress: Pegar o layout de app-boilerplate em React e transformá-lo para Next.js 
-Next: Ler projeto app-boilerplate e planejar a transmigração do layout dele para esse projeto atual que é em Next.js
-Blockers: Só podemos prosseguir assim que o layout estiver igual ao do projeto em React.
+Last session: 21/04/2026 — Fase 4 completa: Bio page (view + edit + Vercel Blob upload)
+In progress: —
+Next: Fase 5 — Gallery (Vercel Blob)
+Blockers: —
+
+### Design System — concluído ✅
+- `src/styles/globals.css` — Liquid Glass design system (brand tokens, glass utilities, aurora keyframes)
+- `src/components/aurora-backdrop.tsx` — Aurora blobs reutilizável
+- `src/components/glass-icon.tsx` — GlassIcon tile (iPadOS 26 style)
+- `public/` — assets copiados (tree-dark/light.png, logo-dark/light.png, mocks)
+
+### Auth Pages — concluído ✅
+- Todos os 5 forms redesenhados: glass-card form + tree logo (dark/light aware)
+- `(auth)/layout.tsx` — AuroraBackdrop
+
+### Header + Home — concluído ✅
+- `src/components/header.tsx` — glass-strong, theme toggle, user dropdown, logout
+- `src/components/profile-mini-card.tsx` — ProfileMiniCard com gradientes e badges
+- `src/app/(protected)/layout.tsx` — inclui Header com dados reais da sessão
+- `src/app/(protected)/home/page.tsx` — Server Component: saudação por hora + empty states
+
+### Auth — concluído ✅
+- `src/auth.ts` + `src/auth.config.ts` + `src/proxy.ts`
+- `src/lib/prisma.ts` + `src/lib/auth.ts` (Zod schemas) + `src/lib/dal.ts` + `src/lib/email.ts`
+- `src/types/next-auth.d.ts`
+- `src/app/api/auth/[...nextauth]/route.ts`
+- `src/actions/auth.ts` — login, signUp, forgotPassword, resetPassword, changePassword, requestEmailChange, deleteAccount, logout
+- Páginas: (auth)/sign-in, sign-up, forgot-password, reset-password, verify-email; (protected)/layout
+- Componentes: sign-in-form, sign-up-form, forgot-password-form, reset-password-form, verify-email-card, change-email-dialog, change-password-dialog, delete-account-dialog
+- Fluxo APP: auto-cadastro → verificação de e-mail → login
+
+### Shared DB note
+BMS, SEQ e APP compartilham o mesmo banco. Roles APP_USER e APP_MEMO foram adicionados ao enum Role do schema.
 
 ## MANDATORY RULES
 1. Antes de adicionar qualquer endpoint → criar schema Zod de validação PRIMEIRO
@@ -130,4 +160,4 @@ Quando completar uma tarefa, mostre o diff e pergunte se pode continuar.
 
 
 ---
-*Claude Code Elite — Pack CLAUDE.md | Atualizado em: [17/04/2026]*
+*Claude Code Elite — Pack CLAUDE.md | Atualizado em: 20/04/2026*
