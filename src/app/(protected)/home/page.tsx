@@ -4,6 +4,11 @@ import { verifySession } from "@/lib/dal"
 import { GlassIcon } from "@/components/glass-icon"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { Input } from "@/components/ui/input"
+import { ProfileMiniCard, type MiniProfile, type AvatarGradient } from "@/components/profile-mini-card"
+import { RecentlyViewedSection } from "@/components/recently-viewed-section"
+import { RecentlyViewedCount } from "@/components/recently-viewed-count"
+import { getFavoritesByUserId, type FavoriteRow } from "@/queries/favorite"
+import { getMemorialsByCreatorId, type MemorialRow } from "@/queries/memorial"
 
 function greeting() {
   const h = new Date().getHours()
@@ -12,10 +17,59 @@ function greeting() {
   return "Good evening"
 }
 
+const FAV_GRADIENTS: AvatarGradient[] = ["brand", "indigo", "violet", "sky", "rose", "amber", "emerald"]
+const MEM_GRADIENTS: AvatarGradient[] = ["indigo", "violet", "sky", "brand", "emerald", "amber", "rose"]
+
+function favToMiniProfile(fav: FavoriteRow, index: number): MiniProfile {
+  const t = fav.target
+  const isMemorialized = t.role === "APP_MEMO"
+  return {
+    id: t.id,
+    name: `${t.firstName} ${t.lastName}`,
+    subtitle: t.birthPlace
+      ? `${t.birthPlace}${t.birthCountry ? `, ${t.birthCountry}` : ""}`
+      : isMemorialized ? "Memorialized profile" : "",
+    status: isMemorialized ? "Memorialized" : "Living",
+    metric: isMemorialized && t.deathDate
+      ? `✦ ${t.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
+      : t.birthDate
+        ? `Born ${t.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
+        : "",
+    initials: `${t.firstName[0]}${t.lastName[0]}`.toUpperCase(),
+    gradient: FAV_GRADIENTS[index % FAV_GRADIENTS.length],
+    href: `/profile/${t.id}`,
+  }
+}
+
+function memToMiniProfile(m: MemorialRow, index: number): MiniProfile {
+  return {
+    id: m.id,
+    name: `${m.firstName} ${m.lastName}`,
+    subtitle: m.birthPlace
+      ? `${m.birthPlace}${m.birthCountry ? `, ${m.birthCountry}` : ""}`
+      : "Memorialized profile",
+    status: "Memorialized",
+    metric: m.deathDate
+      ? `✦ ${m.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
+      : m.birthDate
+        ? `Born ${m.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
+        : "",
+    initials: `${m.firstName[0]}${m.lastName[0]}`.toUpperCase(),
+    gradient: MEM_GRADIENTS[index % MEM_GRADIENTS.length],
+    href: `/profile/${m.id}`,
+  }
+}
+
 export default async function HomePage() {
   const session = await verifySession()
   const firstName = session.user.name?.split(" ")[0] ?? "there"
+  const userId = session.user.id
   const hello = greeting()
+
+  const [favorites, memorials] = await Promise.all([
+    getFavoritesByUserId(userId),
+    getMemorialsByCreatorId(userId),
+  ])
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -55,7 +109,7 @@ export default async function HomePage() {
 
         {/* Quick actions */}
         <section className="mb-[4.5rem] grid grid-cols-2 md:grid-cols-4 gap-3 animate-fade-in" style={{ animationDelay: "160ms" }}>
-          <Link href="/profile" className="glass-card-deep flex items-center gap-3 px-4 py-3">
+          <Link href="/profile" className="glass-card flex items-center gap-3 px-4 py-3">
             <GlassIcon icon={User} size="sm" />
             <div className="min-w-0">
               <p className="text-sm font-semibold leading-tight truncate">My Profile</p>
@@ -63,50 +117,104 @@ export default async function HomePage() {
             </div>
           </Link>
 
-          <a href="#recently-viewed" className="glass-card-deep flex items-center gap-3 px-4 py-3">
+          <a href="#recently-viewed" className="glass-card flex items-center gap-3 px-4 py-3">
             <GlassIcon icon={Clock} size="sm" />
             <div className="min-w-0">
-              <p className="text-lg font-semibold leading-tight">0</p>
+              <p className="text-lg font-semibold leading-tight"><RecentlyViewedCount /></p>
               <p className="text-xs text-muted-foreground truncate">recently viewed</p>
             </div>
           </a>
 
-          <a href="#favorites" className="glass-card-deep flex items-center gap-3 px-4 py-3">
+          <a href="#favorites" className="glass-card flex items-center gap-3 px-4 py-3">
             <GlassIcon icon={Heart} size="sm" />
             <div className="min-w-0">
-              <p className="text-lg font-semibold leading-tight">0</p>
+              <p className="text-lg font-semibold leading-tight">{favorites.length}</p>
               <p className="text-xs text-muted-foreground truncate">favorites</p>
             </div>
           </a>
 
-          <a href="#guarded" className="glass-card-deep flex items-center gap-3 px-4 py-3">
+          <a href="#guarded" className="glass-card flex items-center gap-3 px-4 py-3">
             <GlassIcon icon={BrickWall} size="sm" />
             <div className="min-w-0">
-              <p className="text-lg font-semibold leading-tight">0</p>
+              <p className="text-lg font-semibold leading-tight">{memorials.length}</p>
               <p className="text-xs text-muted-foreground truncate">guarded</p>
             </div>
           </a>
         </section>
 
-        {/* Sections — empty states until profile data exists */}
-        <EmptySection id="recently-viewed" icon={Clock} title="Recently viewed" subtitle="Profiles you've visited will appear here" delay={200} />
-        <EmptySection id="favorites" icon={Heart} title="My favorites" subtitle="The ones closest to your heart" delay={260} seeMoreHref="/favorites" />
-        <EmptySection id="guarded" icon={BrickWall} title="Profiles I guard" subtitle="Memorials under your care" delay={320} seeMoreHref="/memorialized" />
+        {/* Recently viewed — client-side (localStorage) */}
+        <HomeSection
+          id="recently-viewed"
+          icon={Clock}
+          title="Recently viewed"
+          subtitle="Recently viewed profiles appear here"
+          delay={200}
+        >
+          <RecentlyViewedSection />
+        </HomeSection>
+
+        {/* My favorites */}
+        <HomeSection
+          id="favorites"
+          icon={Heart}
+          title="My favorites"
+          subtitle="The ones closest to the heart"
+          delay={260}
+          seeMoreHref={`/profile/${userId}/favorites`}
+          emptyIcon={Heart}
+          emptyText="No favorite profile yet."
+        >
+          {favorites.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {favorites.slice(0, 6).map((fav, i) => (
+                <ProfileMiniCard
+                  key={fav.targetId}
+                  profile={favToMiniProfile(fav, i)}
+                  delay={i * 40}
+                  hideLivingBadge={fav.target.role !== "APP_MEMO"}
+                />
+              ))}
+            </div>
+          ) : undefined}
+        </HomeSection>
+
+        {/* Profiles I guard */}
+        <HomeSection
+          id="guarded"
+          icon={BrickWall}
+          title="Profiles I guard"
+          subtitle="Memorials watched over with quiet care."
+          delay={320}
+          seeMoreHref={`/profile/${userId}/memorialized`}
+          emptyIcon={BrickWall}
+          emptyText="No guarded profile yet."
+        >
+          {memorials.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {memorials.slice(0, 6).map((m, i) => (
+                <ProfileMiniCard key={m.id} profile={memToMiniProfile(m, i)} delay={i * 40} />
+              ))}
+            </div>
+          ) : undefined}
+        </HomeSection>
       </main>
     </div>
   )
 }
 
-interface EmptySectionProps {
+interface HomeSectionProps {
   id: string
   icon: typeof Clock
   title: string
   subtitle: string
   delay: number
   seeMoreHref?: string
+  emptyIcon?: typeof Clock
+  emptyText?: string
+  children?: React.ReactNode
 }
 
-function EmptySection({ id, icon, title, subtitle, delay, seeMoreHref }: EmptySectionProps) {
+function HomeSection({ id, icon, title, subtitle, delay, seeMoreHref, emptyIcon: EmptyIcon, emptyText, children }: HomeSectionProps) {
   return (
     <section id={id} className="mb-[3.75rem] animate-fade-in scroll-mt-24" style={{ animationDelay: `${delay}ms` }}>
       <div className="flex items-end justify-between mb-4 gap-3">
@@ -127,9 +235,14 @@ function EmptySection({ id, icon, title, subtitle, delay, seeMoreHref }: EmptySe
           </Link>
         )}
       </div>
-      <div className="glass-card no-sheen rounded-2xl px-6 py-10 flex items-center justify-center">
-        <p className="text-sm text-muted-foreground">Nothing here yet</p>
-      </div>
+      {children ?? (
+        EmptyIcon && emptyText ? (
+          <div className="glass-card no-sheen px-6 py-10 flex flex-col items-center justify-center gap-3 text-center">
+            <EmptyIcon className="h-10 w-10 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">{emptyText}</p>
+          </div>
+        ) : null
+      )}
     </section>
   )
 }

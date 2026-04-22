@@ -12,6 +12,8 @@ import { getAvatarColor } from "@/lib/avatar-color"
 import { ProfileBanner, type ProfileData } from "@/components/profile-banner"
 import { BentoGrid, type SectionCard } from "@/components/bento-grid"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
+import { ProfileViewTracker } from "@/components/profile-view-tracker"
+import type { MiniProfile, AvatarGradient } from "@/components/profile-mini-card"
 import {
   TreePreview,
   BioPreview,
@@ -25,6 +27,13 @@ import {
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+}
+
+const PROFILE_GRADIENTS: AvatarGradient[] = ["brand", "indigo", "violet", "sky", "rose", "amber", "emerald"]
+function idToGradient(id: string): AvatarGradient {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) & 0xffff
+  return PROFILE_GRADIENTS[hash % PROFILE_GRADIENTS.length]
 }
 
 interface Props {
@@ -223,9 +232,27 @@ export default async function ProfileByIdPage({ params }: Props) {
     },
   ]
 
+  const miniProfile: MiniProfile = {
+    id: user.id,
+    name,
+    subtitle: user.birthPlace
+      ? `${user.birthPlace}${user.birthCountry ? `, ${user.birthCountry}` : ""}`
+      : isMemorialized ? "Memorialized profile" : "",
+    status: isMemorialized ? "Memorialized" : "Living",
+    metric: isMemorialized && user.deathDate
+      ? `✦ ${user.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
+      : user.birthDate
+        ? `Born ${user.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
+        : "",
+    initials,
+    gradient: idToGradient(user.id),
+    href: `/profile/${user.id}`,
+  }
+
   return (
     <div className="min-h-screen relative overflow-x-hidden mt-16">
       <AuroraBackdrop variant="page" intensity="bold" />
+      <ProfileViewTracker profile={miniProfile} />
       <main className="relative z-10">
         <ProfileBanner profile={profile} />
         <BentoGrid cards={isMemorialized ? memorializedCards : livingCards} />
