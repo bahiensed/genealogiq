@@ -3,7 +3,6 @@
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ImagePlus, X, Save, Send, Trash2 } from "lucide-react"
-import { upload } from "@vercel/blob/client"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -50,13 +49,15 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
     const preview = URL.createObjectURL(file)
     setImageUrl(preview)
     try {
-      const blob = await upload(`tributes/${file.name}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/tribute/upload",
+      const res = await fetch(`/api/tribute/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        body: file,
       })
-      setImageUrl(blob.url)
-    } catch {
-      toast.error("Failed to upload image.")
+      const data = await res.json() as { url?: string; error?: string }
+      if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
+      setImageUrl(data.url)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload image.")
       setImageUrl(existing?.imageUrl ?? undefined)
     } finally {
       setUploading(false)

@@ -6,6 +6,7 @@ import { verifySession } from "@/lib/dal"
 import { bioSchema } from "@/schemas/bio"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { deleteBlobs } from "@/lib/blob"
 
 export async function saveBio(profileId: string, data: unknown) {
   const session = await verifySession()
@@ -24,6 +25,10 @@ export async function saveBio(profileId: string, data: unknown) {
     create: { userId: profileId, quote, text },
     update: { quote, text },
   })
+
+  const oldImages = await prisma.bioImage.findMany({ where: { bioId: bio.id }, select: { url: true } })
+  const newUrls = new Set(images.map((i) => i.url))
+  await deleteBlobs(oldImages.map((i) => i.url).filter((u) => !newUrls.has(u)))
 
   await prisma.bioImage.deleteMany({ where: { bioId: bio.id } })
 
@@ -49,6 +54,12 @@ export async function deleteBio(profileId: string) {
   const profile = await getProfileById(profileId)
   if (!profile) return { error: "Profile not found." }
   if (!canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+
+  const bio = await prisma.bio.findUnique({
+    where: { userId: profileId },
+    include: { images: { select: { url: true } } },
+  })
+  await deleteBlobs(bio?.images.map((i) => i.url) ?? [])
 
   await prisma.bio.deleteMany({ where: { userId: profileId } })
   revalidatePath(`/profile/${profileId}/bio`)

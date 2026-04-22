@@ -3,7 +3,6 @@
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ImagePlus, Film, X, Save, RotateCcw, Trash2 } from "lucide-react"
-import { upload } from "@vercel/blob/client"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -131,15 +130,20 @@ export function GalleryEditForm({ initial, profileId }: Props) {
       const file = toProcess[i]
       const localUrl = placeholders[i].url
       try {
-        const blob = await upload(`gallery/${file.name}`, file, { access: "public", handleUploadUrl: "/api/gallery/upload" })
+        const res = await fetch(`/api/gallery/upload?filename=${encodeURIComponent(file.name)}`, {
+          method: "POST",
+          body: file,
+        })
+        const data = await res.json() as { url?: string; error?: string }
+        if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
         setItems((prev) => {
           const next = [...prev]
           const idx = next.findIndex((item) => item.uploading && item.url === localUrl)
-          if (idx !== -1) next[idx] = { kind: "image", url: blob.url }
+          if (idx !== -1) next[idx] = { kind: "image", url: data.url! }
           return next
         })
-      } catch {
-        toast.error(`Failed to upload ${file.name}`)
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : `Failed to upload ${file.name}`)
         setItems((prev) => prev.filter((item) => item.url !== localUrl))
       }
     }
@@ -166,15 +170,20 @@ export function GalleryEditForm({ initial, profileId }: Props) {
       setItems((prev) => [...prev, placeholder])
 
       try {
-        const blob = await upload(`gallery/${file.name}`, file, { access: "public", handleUploadUrl: "/api/gallery/upload" })
+        const res = await fetch(`/api/gallery/upload?filename=${encodeURIComponent(file.name)}`, {
+          method: "POST",
+          body: file,
+        })
+        const data = await res.json() as { url?: string; error?: string }
+        if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
         setItems((prev) => {
           const next = [...prev]
           const idx = next.findIndex((item) => item.uploading && item.url === localUrl)
-          if (idx !== -1) next[idx] = { kind: "video", url: blob.url, durationSec }
+          if (idx !== -1) next[idx] = { kind: "video", url: data.url!, durationSec }
           return next
         })
-      } catch {
-        toast.error(`Failed to upload ${file.name}`)
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : `Failed to upload ${file.name}`)
         setItems((prev) => prev.filter((item) => item.url !== localUrl))
       }
     }

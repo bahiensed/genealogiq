@@ -160,8 +160,8 @@ export function Header({ userName, userImage, notifications = [] }: HeaderProps)
       <div className="glass-strong border-x-0 border-t-0 rounded-none">
         <div className="container flex items-center justify-between h-16">
           <Link href="/home" className="flex items-center group" aria-label="Genealogiq">
-            <Image src="/logo-dark.png" alt="Genealogiq" width={120} height={28} className="block dark:hidden object-contain" style={{ height: "1.75rem", width: "auto" }} priority />
-            <Image src="/logo-light.png" alt="Genealogiq" width={120} height={28} className="hidden dark:block object-contain" style={{ height: "1.75rem", width: "auto" }} priority />
+            <Image src="/logo-dark.png" alt="Genealogiq" width={120} height={28} className="block dark:hidden h-7 w-auto" priority />
+            <Image src="/logo-light.png" alt="Genealogiq" width={120} height={28} className="hidden dark:block h-7 w-auto" priority />
           </Link>
 
           <div className="hidden md:flex items-center gap-2">{controls}</div>
@@ -181,7 +181,7 @@ export function Header({ userName, userImage, notifications = [] }: HeaderProps)
             mobileOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0",
           )}
         >
-          <div className="container flex items-center gap-2 pb-4 pt-1">{controls}</div>
+          <div className="container flex items-center justify-end gap-2 pb-4 pt-1">{controls}</div>
         </div>
       </div>
     </header>

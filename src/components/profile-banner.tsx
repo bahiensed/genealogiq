@@ -105,7 +105,7 @@ export function ProfileBanner({ profile }: Props) {
               <div className="hidden lg:block shrink-0 z-10">
                 <Avatar className="h-44 w-44 xl:h-52 xl:w-52 ring-4 ring-background shadow-[var(--shadow-glass)]">
                   <AvatarImage src={profile.avatarUrl ?? ""} alt={profile.name} />
-                  {fallback("text-2xl")}
+                  {fallback("text-5xl")}
                 </Avatar>
               </div>
 

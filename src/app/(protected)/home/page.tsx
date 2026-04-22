@@ -1,10 +1,10 @@
 import Link from "next/link"
-import { Search, QrCode, Clock, Heart, BrickWall, User, ArrowRight } from "lucide-react"
+import { QrCode, Clock, Heart, BrickWall, User, ArrowRight } from "lucide-react"
 import { verifySession } from "@/lib/dal"
 import { GlassIcon } from "@/components/glass-icon"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
-import { Input } from "@/components/ui/input"
 import { ProfileMiniCard, type MiniProfile, type AvatarGradient } from "@/components/profile-mini-card"
+import { HomeSearch } from "@/components/home-search"
 import { RecentlyViewedSection } from "@/components/recently-viewed-section"
 import { RecentlyViewedCount } from "@/components/recently-viewed-count"
 import { getFavoritesByUserId, type FavoriteRow } from "@/queries/favorite"
@@ -87,15 +87,8 @@ export default async function HomePage() {
         </section>
 
         {/* Action row */}
-        <section className="mb-8 flex flex-col-reverse lg:flex-row gap-3 md:gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
-          <div className="glass-card no-sheen flex-1 flex items-center gap-3 px-5 py-3">
-            <Search className="h-5 w-5 text-muted-foreground shrink-0" />
-            <Input
-              id="home-search"
-              placeholder="Search profile by name..."
-              className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 h-11 text-base px-0"
-            />
-          </div>
+        <section className="relative z-10 mb-8 flex flex-col-reverse lg:flex-row gap-3 md:gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
+          <HomeSearch />
 
           <button
             className="glass-card flex lg:w-auto w-full items-center justify-center gap-3 px-5 py-3 group"

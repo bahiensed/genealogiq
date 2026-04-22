@@ -3,7 +3,6 @@
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ImagePlus, X, Save, RotateCcw, Trash2, LocateFixed } from "lucide-react"
-import { upload } from "@vercel/blob/client"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -82,13 +81,15 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
     setGeo((prev) => { const p = [...prev.photos]; p[slot] = preview; return { ...prev, photos: p } })
     setUploading((prev) => { const u = [...prev]; u[slot] = true; return u })
     try {
-      const blob = await upload(`geolocation/${profileId}/${slot + 1}/${file.name}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/geolocation/upload",
+      const res = await fetch(`/api/geolocation/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        body: file,
       })
-      setGeo((prev) => { const p = [...prev.photos]; p[slot] = blob.url; return { ...prev, photos: p } })
-    } catch {
-      toast.error("Failed to upload photo.")
+      const data = await res.json() as { url?: string; error?: string }
+      if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
+      setGeo((prev) => { const p = [...prev.photos]; p[slot] = data.url!; return { ...prev, photos: p } })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to upload photo.")
       setGeo((prev) => { const p = [...prev.photos]; p[slot] = null; return { ...prev, photos: p } })
     } finally {
       setUploading((prev) => { const u = [...prev]; u[slot] = false; return u })

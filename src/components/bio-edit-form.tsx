@@ -3,7 +3,6 @@
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ImagePlus, X, Save, RotateCcw, Trash2 } from "lucide-react"
-import { upload } from "@vercel/blob/client"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -79,18 +78,20 @@ export function BioEditForm({ initial, profileId }: Props) {
     for (let i = 0; i < toProcess.length; i++) {
       const file = toProcess[i]
       try {
-        const blob = await upload(`bio/${file.name}`, file, {
-          access: "public",
-          handleUploadUrl: "/api/bio/upload",
+        const res = await fetch(`/api/bio/upload?filename=${encodeURIComponent(file.name)}`, {
+          method: "POST",
+          body: file,
         })
+        const data = await res.json() as { url?: string; error?: string }
+        if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
         setImages((prev) => {
           const next = [...prev]
           const idx = next.findIndex((img) => img.uploading && img.url === placeholders[i].url)
-          if (idx !== -1) next[idx] = { url: blob.url, aspect: "square" }
+          if (idx !== -1) next[idx] = { url: data.url!, aspect: "square" }
           return next
         })
-      } catch {
-        toast.error(`Failed to upload ${file.name}`)
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : `Failed to upload ${file.name}`)
         setImages((prev) => prev.filter((img) => img.url !== placeholders[i].url))
       }
     }

@@ -1,28 +1,36 @@
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
+import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
-import { verifySession } from "@/lib/dal"
+import { auth } from "@/auth"
 
-export async function POST(request: Request) {
-  const body = (await request.json()) as HandleUploadBody
+const ALLOWED_TYPES = new Set([
+  "image/jpeg", "image/png", "image/webp", "image/gif",
+  "video/mp4", "video/webm", "video/quicktime",
+])
+const MAX_SIZE = 100 * 1024 * 1024
+
+export async function POST(request: Request): Promise<NextResponse> {
+  const session = await auth()
+  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const filename = new URL(request.url).searchParams.get("filename")
+  if (!filename) return NextResponse.json({ error: "filename is required" }, { status: 400 })
+
+  const contentType = request.headers.get("content-type") ?? ""
+  if (!ALLOWED_TYPES.has(contentType)) return NextResponse.json({ error: "File type not allowed" }, { status: 400 })
+
+  const contentLength = Number(request.headers.get("content-length") ?? 0)
+  if (contentLength > MAX_SIZE) return NextResponse.json({ error: "File too large (max 100 MB)" }, { status: 400 })
+
+  if (!request.body) return NextResponse.json({ error: "No file provided" }, { status: 400 })
 
   try {
-    const session = await verifySession()
-
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async (pathname) => ({
-        allowedContentTypes: [
-          "image/jpeg", "image/png", "image/webp", "image/gif",
-          "video/mp4", "video/webm", "video/quicktime",
-        ],
-        maximumSizeInBytes: 500 * 1024 * 1024, // 500 MB
-        tokenPayload: JSON.stringify({ userId: session.user.id, pathname }),
-      }),
+    const blob = await put(`gallery/${filename}`, request.body, {
+      access: "public",
+      addRandomSuffix: true,
+      contentType,
     })
-
-    return NextResponse.json(jsonResponse)
+    return NextResponse.json({ url: blob.url })
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 400 })
+    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
   }
 }
