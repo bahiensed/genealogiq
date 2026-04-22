@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { Star, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
@@ -68,9 +68,11 @@ export default async function MemorializedPage({ params }: Props) {
             </p>
           </div>
           <div className="flex items-center gap-3 self-start sm:self-auto">
-            <span className="shrink-0 text-xs font-medium px-3 py-1 rounded-full bg-card/60 backdrop-blur-md border border-border/60 text-muted-foreground">
-              {memorials.length} {memorials.length === 1 ? "profile" : "profiles"}
-            </span>
+            {memorials.length > 0 && (
+              <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
+                {memorials.length} {memorials.length === 1 ? "profile" : "profiles"}
+              </span>
+            )}
             {canCreate && (
               <Button asChild className="gap-2">
                 <Link href={`/profile/${id}/memorialized/new`}>
@@ -82,12 +84,9 @@ export default async function MemorializedPage({ params }: Props) {
           </div>
         </section>
 
-        <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {memorials.map((m, i) => (
-            <div key={m.id} className="relative h-full">
-              <Star className="absolute top-3 right-3 h-4 w-4 fill-[hsl(38_92%_55%)] text-[hsl(38_92%_55%)] z-10 drop-shadow" />
-              <ProfileMiniCard profile={toMiniProfile(m, i)} delay={i * 40} hideMetric />
-            </div>
+            <ProfileMiniCard key={m.id} profile={toMiniProfile(m, i)} delay={i * 40} />
           ))}
         </section>
 

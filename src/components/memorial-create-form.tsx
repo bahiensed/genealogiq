@@ -12,8 +12,16 @@ import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { createMemorial } from "@/actions/memorial"
+import { COUNTRIES } from "@/consts/countries"
 
 interface FormState {
   firstName: string
@@ -182,7 +190,10 @@ export function MemorialCreateForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="birth-country">Country</Label>
-            <Input id="birth-country" value={form.birthCountry} onChange={(e) => update("birthCountry", e.target.value)} placeholder="Brazil" maxLength={100} />
+            <Select value={form.birthCountry} onValueChange={(v) => update("birthCountry", v)}>
+              <SelectTrigger id="birth-country"><SelectValue placeholder="Country" /></SelectTrigger>
+              <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -203,7 +214,10 @@ export function MemorialCreateForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="death-country">Country</Label>
-            <Input id="death-country" value={form.deathCountry} onChange={(e) => update("deathCountry", e.target.value)} placeholder="Country" disabled={!form.deathDate} maxLength={100} />
+            <Select value={form.deathCountry} onValueChange={(v) => update("deathCountry", v)} disabled={!form.deathDate}>
+              <SelectTrigger id="death-country"><SelectValue placeholder="Country" /></SelectTrigger>
+              <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
         </div>
       </div>

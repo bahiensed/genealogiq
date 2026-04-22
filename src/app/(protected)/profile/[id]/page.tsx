@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation"
-import QRCode from "qrcode"
 import { TreePine, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
@@ -44,9 +43,6 @@ export default async function ProfileByIdPage({ params }: Props) {
   const isGuardian = isMemorialized && user.createdById === session.user.id
   const name = `${user.firstName} ${user.lastName}`
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-
-  const appUrl = process.env.APP_URL ?? "https://genealogiq.app"
-  const qrDataUrl = await QRCode.toDataURL(`${appUrl}/profile/${id}`, { margin: 1, width: 200, color: { dark: "#000000", light: "#ffffff" } })
 
   const [
     favoritedBy,
@@ -157,7 +153,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       metric: "Ready to print",
       icon: QrCode,
       span: 3,
-      preview: <QrPreview dataUrl={qrDataUrl} />,
+      preview: <QrPreview />,
       href: `${base}/qr-code`,
     },
   ]
@@ -207,7 +203,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "favorites",
       title: "Favorites",
       description: "People who carry deep meaning — kept close, always.",
-      metric: favorites.length > 0 ? `${favorites.length} favorited` : "No favorites yet",
+      metric: favorites.length > 0 ? `${favorites.length} ${favorites.length === 1 ? "Favorite" : "Favorites"}` : "No favorites yet",
       icon: Heart,
       span: 3,
       preview: <FavoritesPreview favorites={favorites} />,

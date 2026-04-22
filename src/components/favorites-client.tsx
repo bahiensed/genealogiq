@@ -14,7 +14,7 @@ function toMiniProfile(fav: FavoriteRow, index: number): MiniProfile {
     ? `${t.birthPlace}${t.birthCountry ? `, ${t.birthCountry}` : ""}`
     : isMemorialized
       ? "Memorialized profile"
-      : "Living profile"
+      : ""
   return {
     id: t.id,
     name,
@@ -47,9 +47,17 @@ export function FavoritesClient({ items }: Props) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
-      {items.map((fav, i) => (
-        <ProfileMiniCard key={fav.targetId} profile={toMiniProfile(fav, i)} delay={i * 40} />
-      ))}
+      {items.map((fav, i) => {
+        const isMemorialized = fav.target.role === "APP_MEMO"
+        return (
+          <ProfileMiniCard
+            key={fav.targetId}
+            profile={toMiniProfile(fav, i)}
+            delay={i * 40}
+            hideLivingBadge={!isMemorialized}
+          />
+        )
+      })}
     </div>
   )
 }

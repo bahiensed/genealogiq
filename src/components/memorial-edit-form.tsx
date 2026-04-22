@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
-import { CalendarIcon, Image as ImageIcon, Trash2 } from "lucide-react"
+import { CalendarIcon, Image as ImageIcon, Trash2, Save } from "lucide-react"
 import { upload } from "@vercel/blob/client"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,13 @@ import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +34,7 @@ import { cn } from "@/lib/utils"
 import { updateMemorial, deleteMemorial } from "@/actions/memorial"
 import { updateProfile } from "@/actions/profile"
 import { getAvatarColor } from "@/lib/avatar-color"
+import { COUNTRIES } from "@/consts/countries"
 import type { ProfileRow } from "@/queries/profile"
 
 interface FormState {
@@ -222,7 +230,10 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
           </div>
           <div className="space-y-2">
             <Label htmlFor="birth-country">Country</Label>
-            <Input id="birth-country" value={form.birthCountry} onChange={(e) => update("birthCountry", e.target.value)} placeholder="Country" maxLength={100} />
+            <Select value={form.birthCountry} onValueChange={(v) => update("birthCountry", v)}>
+              <SelectTrigger id="birth-country"><SelectValue placeholder="Country" /></SelectTrigger>
+              <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -244,7 +255,10 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
             </div>
             <div className="space-y-2">
               <Label htmlFor="death-country">Country</Label>
-              <Input id="death-country" value={form.deathCountry} onChange={(e) => update("deathCountry", e.target.value)} placeholder="Country" disabled={!form.deathDate} maxLength={100} />
+              <Select value={form.deathCountry} onValueChange={(v) => update("deathCountry", v)} disabled={!form.deathDate}>
+                <SelectTrigger id="death-country"><SelectValue placeholder="Country" /></SelectTrigger>
+                <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              </Select>
             </div>
           </div>
         </div>
@@ -282,8 +296,8 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
           <Button variant="ghost" onClick={() => router.back()} disabled={isPending}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isPending || uploading}>
-            Save
+          <Button onClick={handleSave} disabled={isPending || uploading} className="gap-2">
+            <Save className="h-4 w-4" />Save
           </Button>
         </div>
       </div>

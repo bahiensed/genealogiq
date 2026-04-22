@@ -274,7 +274,7 @@ export function BioEditForm({ initial, profileId }: Props) {
           )}
           <Button onClick={handleSave} className="gap-2" disabled={isPending}>
             <Save className="h-4 w-4" />
-            {isCreating ? "Create" : "Save"}
+            Save
           </Button>
         </div>
       </div>

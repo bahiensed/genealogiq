@@ -93,7 +93,6 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
         </Avatar>
         <div>
           <div className="text-sm font-medium">{authorName}</div>
-          <div className="text-xs text-muted-foreground">Posting as you</div>
         </div>
       </div>
 
@@ -174,7 +173,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
           <Button variant="outline" onClick={() => router.push(`/profile/${profileId}/tributes`)} disabled={isPending}>Cancel</Button>
           <Button onClick={handleSubmit} className="gap-2" disabled={isPending || uploading}>
             {isEditing ? <Save className="h-4 w-4" /> : <Send className="h-4 w-4" />}
-            {isEditing ? "Save changes" : "Publish tribute"}
+            {isEditing ? "Save" : "Send tribute"}
           </Button>
         </div>
       </div>

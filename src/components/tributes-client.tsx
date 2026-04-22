@@ -65,7 +65,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite }: Pr
   }, [visibleCount, sorted.length])
 
   const visible = sorted.slice(0, visibleCount)
-  const writeHref = `/profile/${profileId}/tributes/write`
+  const writeHref = `/profile/${profileId}/tributes/edit`
 
   return (
     <>

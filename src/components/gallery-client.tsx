@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
-import { Play, X, ChevronLeft, ChevronRight, Image as ImageIcon, ImagePlus, ArrowDownUp } from "lucide-react"
+import { Play, X, ChevronLeft, ChevronRight, Images, ImagePlus, ArrowDownUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import {
@@ -142,7 +142,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn }: Props) {
 
       {isEmpty ? (
         <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
-          <ImageIcon className="h-10 w-10 text-muted-foreground" />
+          <Images className="h-10 w-10 text-muted-foreground" />
           <p className="text-muted-foreground">No media yet.</p>
           {isOwn && editHref && (
             <Button asChild className="gap-2">

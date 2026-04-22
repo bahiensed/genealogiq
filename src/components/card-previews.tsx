@@ -1,4 +1,4 @@
-import { Heart, Star, Image as ImageIcon, Flower2, BrickWall } from "lucide-react"
+import { Heart, Star, Images, Flower2, BrickWall } from "lucide-react"
 import { getAvatarColor, getAvatarGradient } from "@/lib/avatar-color"
 import type { TributeAuthorPreview } from "@/queries/tribute"
 import type { FavoriteRow } from "@/queries/favorite"
@@ -62,6 +62,12 @@ export function BioPreview() {
         <div className={`${bar} w-[82%]`} />
         <div className={`${bar} w-[60%]`} />
       </div>
+      <div className="space-y-2">
+        <div className={`${bar} w-full`} />
+        <div className={`${bar} w-[90%]`} />
+        <div className={`${bar} w-[78%]`} />
+        <div className={`${bar} w-[50%]`} />
+      </div>
     </div>
   )
 }
@@ -70,7 +76,7 @@ export function GalleryPreview({ images }: { images: string[] }) {
   if (images.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
-        <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+        <Images className="h-8 w-8 text-muted-foreground/50" />
         <p className="text-xs text-muted-foreground">No media yet.</p>
       </div>
     )
@@ -192,10 +198,18 @@ export function GuardianPreview({ memorials }: { memorials: MemorialRow[] }) {
   )
 }
 
+function osmTileUrl(lat: number, lng: number, zoom: number) {
+  const n = Math.pow(2, zoom)
+  const x = Math.floor(((lng + 180) / 360) * n)
+  const latRad = (lat * Math.PI) / 180
+  const y = Math.floor(((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n)
+  return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`
+}
+
 export function GeoPreview({ lat, lng }: { lat?: number | null; lng?: number | null }) {
   const resolvedLat = lat ?? -22.959167
   const resolvedLng = lng ?? -43.188333
-  const mapUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${resolvedLat},${resolvedLng}&zoom=14&size=400x200&markers=${resolvedLat},${resolvedLng},red-pushpin`
+  const mapUrl = osmTileUrl(resolvedLat, resolvedLng, 14)
   return (
     <div className="relative h-full w-full min-h-[120px] rounded-xl overflow-hidden bg-muted">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -211,12 +225,14 @@ export function GeoPreview({ lat, lng }: { lat?: number | null; lng?: number | n
   )
 }
 
-export function QrPreview({ dataUrl }: { dataUrl: string }) {
+const QR_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAAAAAklEQVR4AewaftIAAAQtSURBVO3BUW5jSRIEQY8E739lX2E/hRqABT1OqnvCLH6haslQtWioWjRULRqqFg1Vi178gyT8CVRuJOGGyk8l4UTlJAknKidJ+BOofDdULRqqFg1Vi4aqRUPVoheXVDYk4QkqN5LwLpUTlZMkfJLKhiS8a6haNFQtGqoWDVWLhqpFLx6ShCeoPCEJN1Q+JQk3VD4pCU9Q+amhatFQtWioWjRULRqqFr2o/0vCDZXvknCiUmdD1aKhatFQtWioWjRULXrxH6PyhCR8ShJOVP42Q9WioWrRULVoqFo0VC168RCVP1kSTlR+Kgm/icpvMVQtGqoWDVWLhqpFQ9WiF5eSUGcqJ0k4UTlJwhOS8NsNVYuGqkVD1aKhatFQtSh+4S+UhE9S+ZQknKj8bYaqRUPVoqFq0VC1aKha9OIfJOFE5SQJG1ROVE6ScKLyU0l4gsqNJGxQ+amhatFQtWioWjRULRqqFsUv/CJJOFE5ScKJykkSbqj825JwonIjCScqT0jCicq7hqpFQ9WioWrRULVoqFoUv3CQhCeonCThROUkCScqJ0k4UbmRhBOVn0rCn0DlJAk3VL4bqhYNVYuGqkVD1aKhatGLh6g8IQknKjdUTpJwonIjCd+pnCThROUkCZ+k8gSVkyS8a6haNFQtGqoWDVWLhqpFLz4sCScqN5JwovKEJJyovCsJT1A5ScINlZMknKicJOFThqpFQ9WioWrRULXoxUOS8EkqJ0k4UTlROUnCjSR8p3KShBtJOFG5kYQTlZMknKicJOFE5V1D1aKhatFQtWioWjRULYpfOEjCicqNJPwmKr9FEk5UTpJwonKShCeonCThhsp3Q9WioWrRULVoqFo0VC168cuo3EjCE5JwonKShO9UnpCEE5VPUrmhcpKEdw1Vi4aqRUPVoqFq0VC16MVDknBD5SQJT1A5ScKJyk8l4YbKSRJOkrAhCScqJyrvGqoWDVWLhqpFQ9WioWpR/MJfKAknKidJOFH5qSQ8QeUJSbih8ilD1aKhatFQtWioWjRULXrxD5LwJ1A5UXlCEt6lcqJyIwk3knCickPlJAlPUPluqFo0VC0aqhYNVYuGqkUvLqlsSMKNJNxQOUnCicpvofKEJJyofMpQtWioWjRULRqqFg1Vi148JAlPUPkkld8iCTeS8EkqJ0l4gsp3Q9WioWrRULVoqFo0VC168R+ThBsqJ0l4l8qJyo0k3FA5ScJJEv5tQ9WioWrRULVoqFo0VC168R+jcpKEGyrfJeEkCTdUTlSeoHKShBsqJ0l411C1aKhaNFQtGqoWDVWLXjxE5TdRuaFyIwnvUjlJwkkSfhOVTxmqFg1Vi4aqRUPVoqFq0YtLSfgTJOEJKu9SOUnCicqNJGxIwqcMVYuGqkVD1aKhatFQtSh+oWrJULVoqFo0VC0aqhb9D5sai0l+LRtyAAAAAElFTkSuQmCC"
+
+export function QrPreview() {
   return (
     <div className="flex justify-center">
       <div className="bg-white p-2 rounded-xl shadow-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={dataUrl} alt="QR code" className="h-24 w-24" />
+        <img src={QR_PLACEHOLDER} alt="QR code" className="h-24 w-24" />
       </div>
     </div>
   )

@@ -315,7 +315,7 @@ export function GalleryEditForm({ initial, profileId }: Props) {
           {!isCreating && (
             <Button variant="outline" onClick={handleReset} className="gap-2" disabled={isPending}><RotateCcw className="h-4 w-4" />Reset</Button>
           )}
-          <Button onClick={handleSave} className="gap-2" disabled={isPending}><Save className="h-4 w-4" />{isCreating ? "Create" : "Save"}</Button>
+          <Button onClick={handleSave} className="gap-2" disabled={isPending}><Save className="h-4 w-4" />Save</Button>
         </div>
       </div>
     </div>

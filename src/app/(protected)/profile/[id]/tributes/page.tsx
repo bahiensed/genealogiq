@@ -40,7 +40,7 @@ export default async function TributesPage({ params }: Props) {
           </div>
           {tributes.length > 0 && (
             <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
-              {tributes.length}
+              {tributes.length} {tributes.length === 1 ? "tribute" : "tributes"}
             </span>
           )}
         </div>

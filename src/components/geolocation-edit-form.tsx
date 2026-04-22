@@ -69,13 +69,15 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
   const initialState = toState(existing)
   const [geo, setGeo] = useState<GeoState>(initialState)
   const [uploading, setUploading] = useState<boolean[]>([false, false, false])
-  const fileRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)]
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const update = (key: keyof GeoState, value: string) => setGeo((prev) => ({ ...prev, [key]: value }))
 
-  const handleAddPhoto = async (slot: number, files: FileList | null) => {
+  const handleAddPhoto = async (files: FileList | null) => {
     const file = files?.[0]
     if (!file) return
+    const slot = geo.photos.indexOf(null)
+    if (slot === -1) return
     const preview = URL.createObjectURL(file)
     setGeo((prev) => { const p = [...prev.photos]; p[slot] = preview; return { ...prev, photos: p } })
     setUploading((prev) => { const u = [...prev]; u[slot] = true; return u })
@@ -87,14 +89,19 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
       setGeo((prev) => { const p = [...prev.photos]; p[slot] = blob.url; return { ...prev, photos: p } })
     } catch {
       toast.error("Failed to upload photo.")
-      setGeo((prev) => { const p = [...prev.photos]; p[slot] = existing ? [existing.photo1, existing.photo2, existing.photo3][slot] ?? null : null; return { ...prev, photos: p } })
+      setGeo((prev) => { const p = [...prev.photos]; p[slot] = null; return { ...prev, photos: p } })
     } finally {
       setUploading((prev) => { const u = [...prev]; u[slot] = false; return u })
     }
   }
 
   const removePhoto = (slot: number) => {
-    setGeo((prev) => { const p = [...prev.photos]; p[slot] = null; return { ...prev, photos: p } })
+    setGeo((prev) => {
+      const p = [...prev.photos]
+      p[slot] = null
+      const filled = p.filter(Boolean)
+      return { ...prev, photos: [filled[0] ?? null, filled[1] ?? null, filled[2] ?? null] }
+    })
   }
 
   const handleUseMyLocation = () => {
@@ -130,7 +137,7 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
         photo3: geo.photos[2] || null,
       })
       if (result?.error) { toast.error(result.error); return }
-      toast.success(isEditing ? "Geolocation saved." : "Geolocation created.")
+      toast.success("Geolocation saved.")
       router.push(`/profile/${profileId}/geolocation`)
     })
   }
@@ -157,11 +164,11 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
           <span className="text-xs text-muted-foreground">{geo.photos.filter(Boolean).length}/{MAX_PHOTOS}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[0, 1, 2].map((slot) => (
-            geo.photos[slot] ? (
+          {geo.photos.map((photo, slot) =>
+            photo ? (
               <div key={slot} className="relative group aspect-square rounded-xl overflow-hidden border border-border/60">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={geo.photos[slot]!} alt={`Photo ${slot + 1}`} className="h-full w-full object-cover" />
+                <img src={photo} alt={`Photo ${slot + 1}`} className="h-full w-full object-cover" />
                 {uploading[slot] && (
                   <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
                     <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -178,29 +185,26 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
                   </button>
                 )}
               </div>
-            ) : (
-              <button
-                key={slot}
-                type="button"
-                onClick={() => fileRefs[slot].current?.click()}
-                className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
-              >
-                <ImagePlus className="h-6 w-6" />
-                <span className="text-xs font-medium">Add photo</span>
-              </button>
-            )
-          ))}
+            ) : null
+          )}
+          {geo.photos.filter(Boolean).length < MAX_PHOTOS && (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ImagePlus className="h-6 w-6" />
+              <span className="text-xs font-medium">Add Image</span>
+            </button>
+          )}
         </div>
-        {[0, 1, 2].map((slot) => (
-          <input
-            key={slot}
-            ref={fileRefs[slot]}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={(e) => { handleAddPhoto(slot, e.target.files); e.target.value = "" }}
-          />
-        ))}
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={(e) => { handleAddPhoto(e.target.files); e.target.value = "" }}
+        />
       </div>
 
       {/* Place name */}
@@ -304,8 +308,7 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
             <RotateCcw className="h-4 w-4" />Reset
           </Button>
           <Button onClick={handleSave} className="gap-2" disabled={isPending || uploading.some(Boolean)}>
-            <Save className="h-4 w-4" />
-            {isEditing ? "Save" : "Create"}
+            <Save className="h-4 w-4" />Save
           </Button>
         </div>
       </div>
