@@ -19,8 +19,8 @@ export function ResetPasswordForm({ token }: Props) {
   return (
     <div className="w-full max-w-md animate-fade-in">
       <div className="flex flex-col items-center text-center mb-6">
-        <Image src="/tree-dark.png" alt="Genealogiq" width={160} height={160} className="object-contain dark:hidden" priority />
-        <Image src="/tree-light.png" alt="Genealogiq" width={160} height={160} className="hidden object-contain dark:block" priority />
+        <Image src="/tree-dark.png" alt="Genealogiq" width={160} height={160} className="object-contain dark:hidden" style={{ height: "auto" }} priority />
+        <Image src="/tree-light.png" alt="Genealogiq" width={160} height={160} className="hidden object-contain dark:block" style={{ height: "auto" }} priority />
       </div>
 
       <form action={dispatch} className="glass-card rounded-2xl p-6 space-y-4">

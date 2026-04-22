@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useTheme } from "next-themes"
-import { Moon, Sun, Menu, X, Bell, User, LogOut } from "lucide-react"
+import { Moon, Sun, Menu, X, Bell, User, LogOut, Flower2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -16,22 +16,16 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { logout } from "@/actions/auth"
+import type { TributeNotification } from "@/queries/tribute"
 
-interface HeaderProps {
-  userName?: string | null
-  userImage?: string | null
+interface BellProps {
+  notifications: TributeNotification[]
+  totalPending: number
 }
 
-export function Header({ userName, userImage }: HeaderProps) {
-  const { resolvedTheme, setTheme } = useTheme()
-  const [mobileOpen, setMobileOpen] = useState(false)
-
-  const initials = userName
-    ? userName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
-    : undefined
-
-  const controls = (
-    <>
+function BellNotification({ notifications, totalPending }: BellProps) {
+  if (notifications.length === 0) {
+    return (
       <Button
         variant="ghost"
         size="icon"
@@ -40,6 +34,75 @@ export function Header({ userName, userImage }: HeaderProps) {
       >
         <Bell className="h-4 w-4" />
       </Button>
+    )
+  }
+
+  if (notifications.length === 1) {
+    return (
+      <Link
+        href={`/profile/${notifications[0].profileId}/tributes/moderate`}
+        aria-label={`${totalPending} pending tribute${totalPending > 1 ? "s" : ""}`}
+        className="relative rounded-full glass border-0 h-9 w-9 inline-flex items-center justify-center hover:bg-accent/50 transition-colors"
+      >
+        <Bell className="h-4 w-4" />
+        <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
+          {totalPending}
+        </span>
+      </Link>
+    )
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          aria-label={`${totalPending} pending tributes`}
+          className="relative rounded-full glass border-0 h-9 w-9 inline-flex items-center justify-center hover:bg-accent/50 transition-colors"
+        >
+          <Bell className="h-4 w-4" />
+          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
+            {totalPending}
+          </span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="glass-strong w-64">
+        <div className="px-2 py-1.5 text-xs text-muted-foreground font-medium">Pending tributes</div>
+        <DropdownMenuSeparator />
+        {notifications.map((n) => (
+          <DropdownMenuItem key={n.profileId} asChild>
+            <Link href={`/profile/${n.profileId}/tributes/moderate`} className="gap-2 cursor-pointer">
+              <Flower2 className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="flex-1 truncate">{n.name}</span>
+              <span className="shrink-0 h-5 w-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
+                {n.count}
+              </span>
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+interface HeaderProps {
+  userName?: string | null
+  userImage?: string | null
+  notifications?: TributeNotification[]
+}
+
+export function Header({ userName, userImage, notifications = [] }: HeaderProps) {
+  const { resolvedTheme, setTheme } = useTheme()
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  const initials = userName
+    ? userName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    : undefined
+
+  const totalPending = notifications.reduce((sum, n) => sum + n.count, 0)
+
+  const controls = (
+    <>
+      <BellNotification notifications={notifications} totalPending={totalPending} />
 
       <Button
         variant="ghost"
@@ -97,8 +160,8 @@ export function Header({ userName, userImage }: HeaderProps) {
       <div className="glass-strong border-x-0 border-t-0 rounded-none">
         <div className="container flex items-center justify-between h-16">
           <Link href="/home" className="flex items-center group" aria-label="Genealogiq">
-            <Image src="/logo-dark.png" alt="Genealogiq" width={120} height={28} className="h-7 w-auto block dark:hidden object-contain" style={{ width: "auto" }} />
-            <Image src="/logo-light.png" alt="Genealogiq" width={120} height={28} className="h-7 w-auto hidden dark:block object-contain" style={{ width: "auto" }} />
+            <Image src="/logo-dark.png" alt="Genealogiq" width={120} height={28} className="block dark:hidden object-contain" style={{ height: "1.75rem", width: "auto" }} priority />
+            <Image src="/logo-light.png" alt="Genealogiq" width={120} height={28} className="hidden dark:block object-contain" style={{ height: "1.75rem", width: "auto" }} priority />
           </Link>
 
           <div className="hidden md:flex items-center gap-2">{controls}</div>

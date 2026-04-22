@@ -15,6 +15,7 @@ export async function getProfileById(id: string) {
       deathDate: true,
       deathPlace: true,
       deathCountry: true,
+      createdById: true,
     },
   })
 }

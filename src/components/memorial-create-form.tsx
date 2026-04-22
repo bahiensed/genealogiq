@@ -1,0 +1,222 @@
+'use client'
+
+import { useRef, useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { format } from "date-fns"
+import { CalendarIcon, ImagePlus, RotateCcw, Save, Trash2 } from "lucide-react"
+import { upload } from "@vercel/blob/client"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
+import { createMemorial } from "@/actions/memorial"
+
+interface FormState {
+  firstName: string
+  lastName: string
+  avatarUrl: string
+  birthDate: Date | undefined
+  birthPlace: string
+  birthCountry: string
+  deathDate: Date | undefined
+  deathPlace: string
+  deathCountry: string
+}
+
+const empty: FormState = {
+  firstName: "", lastName: "", avatarUrl: "",
+  birthDate: undefined, birthPlace: "", birthCountry: "",
+  deathDate: undefined, deathPlace: "", deathCountry: "",
+}
+
+const DateField = ({ id, label, value, onChange, disabled, disabledDays }: {
+  id: string; label: string; value: Date | undefined
+  onChange: (d: Date | undefined) => void; disabled?: boolean
+  disabledDays?: (d: Date) => boolean
+}) => (
+  <div className="space-y-2">
+    <div className="flex items-center justify-between h-5">
+      <Label htmlFor={id}>{label}</Label>
+      {value && !disabled && (
+        <button type="button" onClick={() => onChange(undefined)} className="text-xs text-muted-foreground hover:text-foreground">
+          Clear
+        </button>
+      )}
+    </div>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          id={id}
+          variant="outline"
+          disabled={disabled}
+          className={cn("w-full justify-start text-left font-normal", !value && "text-muted-foreground")}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {value ? format(value, "PPP") : <span>Pick a date</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={value}
+          onSelect={onChange}
+          captionLayout="dropdown"
+          startMonth={new Date(1900, 0)}
+          endMonth={new Date()}
+          disabled={disabledDays ?? ((d) => d > new Date())}
+          className="p-3 pointer-events-auto"
+        />
+      </PopoverContent>
+    </Popover>
+  </div>
+)
+
+export function MemorialCreateForm() {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [uploading, setUploading] = useState(false)
+  const [form, setForm] = useState<FormState>(empty)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const update = <K extends keyof FormState>(k: K, v: FormState[K]) =>
+    setForm((p) => ({ ...p, [k]: v }))
+
+  const initials = [form.firstName[0], form.lastName[0]].filter(Boolean).join("").toUpperCase() || "GQ"
+
+  const handleAvatarChange = async (files: FileList | null) => {
+    const file = files?.[0]
+    if (!file) return
+    setUploading(true)
+    update("avatarUrl", URL.createObjectURL(file))
+    try {
+      const blob = await upload(`avatars/memorial/${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/bio/upload",
+      })
+      update("avatarUrl", blob.url)
+    } catch {
+      toast.error("Failed to upload avatar.")
+      update("avatarUrl", "")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleSave = () => {
+    if (uploading) { toast.warning("Please wait for the avatar to finish uploading."); return }
+    startTransition(async () => {
+      const result = await createMemorial({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        birthDate: form.birthDate,
+        birthPlace: form.birthPlace || undefined,
+        birthCountry: form.birthCountry || undefined,
+        deathDate: form.deathDate ?? null,
+        deathPlace: form.deathPlace || undefined,
+        deathCountry: form.deathCountry || undefined,
+        avatarUrl: form.avatarUrl || null,
+      })
+      if (result?.error) { toast.error(result.error); return }
+      toast.success("Memorial profile created.")
+      router.push(`/profile/${result.id}`)
+    })
+  }
+
+  const handleReset = () => {
+    setForm(empty)
+    toast("Form reset.")
+  }
+
+  return (
+    <div className="glass-card no-sheen p-6 md:p-8 space-y-8 animate-fade-in" style={{ animationDelay: "80ms" }}>
+      {/* Avatar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+        <Avatar className="h-28 w-28 ring-4 ring-background shadow-[var(--shadow-glass)]">
+          {form.avatarUrl && <AvatarImage src={form.avatarUrl} alt={`${form.firstName} ${form.lastName}`} />}
+          <AvatarFallback className="text-xl bg-secondary relative">
+            {initials}
+            {uploading && (
+              <div className="absolute inset-0 rounded-full bg-background/60 flex items-center justify-center">
+                <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              </div>
+            )}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+            <ImagePlus className="h-4 w-4" />Change Image
+          </Button>
+          {form.avatarUrl && (
+            <Button variant="ghost" className="gap-2 text-muted-foreground" onClick={() => update("avatarUrl", "")}>
+              <Trash2 className="h-4 w-4" />Remove
+            </Button>
+          )}
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { handleAvatarChange(e.target.files); e.target.value = "" }} />
+        </div>
+      </div>
+
+      {/* Name */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="first-name">First name</Label>
+          <Input id="first-name" value={form.firstName} onChange={(e) => update("firstName", e.target.value)} placeholder="Name" maxLength={100} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="last-name">Family name</Label>
+          <Input id="last-name" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} placeholder="Family name" maxLength={100} />
+        </div>
+      </div>
+
+      {/* Birth */}
+      <div className="space-y-3">
+        <Label className="text-base">Birth</Label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <DateField id="birth-date" label="Date" value={form.birthDate} onChange={(d) => update("birthDate", d)} />
+          <div className="space-y-2">
+            <Label htmlFor="birth-place">City</Label>
+            <Input id="birth-place" value={form.birthPlace} onChange={(e) => update("birthPlace", e.target.value)} placeholder="City" maxLength={100} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="birth-country">Country</Label>
+            <Input id="birth-country" value={form.birthCountry} onChange={(e) => update("birthCountry", e.target.value)} placeholder="Brazil" maxLength={100} />
+          </div>
+        </div>
+      </div>
+
+      {/* Death */}
+      <div className="space-y-3">
+        <Label className="text-base">Death</Label>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <DateField
+            id="death-date" label="Date"
+            value={form.deathDate}
+            onChange={(d) => { update("deathDate", d); if (!d) { update("deathPlace", ""); update("deathCountry", "") } }}
+            disabledDays={(d) => (form.birthDate ? d < form.birthDate : false) || d > new Date()}
+          />
+          <div className="space-y-2">
+            <Label htmlFor="death-place">City</Label>
+            <Input id="death-place" value={form.deathPlace} onChange={(e) => update("deathPlace", e.target.value)} placeholder="City" disabled={!form.deathDate} maxLength={100} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="death-country">Country</Label>
+            <Input id="death-country" value={form.deathCountry} onChange={(e) => update("deathCountry", e.target.value)} placeholder="Country" disabled={!form.deathDate} maxLength={100} />
+          </div>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2 border-t border-border/60">
+        <Button variant="outline" onClick={handleReset} className="gap-2" disabled={isPending}>
+          <RotateCcw className="h-4 w-4" />Reset
+        </Button>
+        <Button onClick={handleSave} className="gap-2" disabled={isPending || uploading}>
+          <Save className="h-4 w-4" />Create profile
+        </Button>
+      </div>
+    </div>
+  )
+}

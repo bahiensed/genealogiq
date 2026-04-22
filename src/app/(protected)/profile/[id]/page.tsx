@@ -1,7 +1,15 @@
 import { notFound } from "next/navigation"
+import QRCode from "qrcode"
 import { TreePine, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
+import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
+import { getGeolocationByUserId } from "@/queries/geolocation"
+import { getMemorialsByCreatorId } from "@/queries/memorial"
+import { getGalleryImageUrls, getGalleryCount } from "@/queries/gallery"
+import { getTributeAuthors, getTributeCountByProfileId } from "@/queries/tribute"
+import { getBioByUserId } from "@/queries/bio"
+import { getAvatarColor } from "@/lib/avatar-color"
 import { ProfileBanner, type ProfileData } from "@/components/profile-banner"
 import { BentoGrid, type SectionCard } from "@/components/bento-grid"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
@@ -15,8 +23,6 @@ import {
   GeoPreview,
   QrPreview,
 } from "@/components/card-previews"
-
-const galleryImages = ["/cover-memorial.jpg", "/avatar-memorial.jpg", "/cover-living.jpg", "/avatar-living.jpg"]
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
@@ -35,13 +41,45 @@ export default async function ProfileByIdPage({ params }: Props) {
 
   const isOwn = user.id === session.user.id
   const isMemorialized = user.role === "APP_MEMO"
+  const isGuardian = isMemorialized && user.createdById === session.user.id
   const name = `${user.firstName} ${user.lastName}`
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+
+  const appUrl = process.env.APP_URL ?? "https://genealogiq.app"
+  const qrDataUrl = await QRCode.toDataURL(`${appUrl}/profile/${id}`, { margin: 1, width: 200, color: { dark: "#000000", light: "#ffffff" } })
+
+  const [
+    favoritedBy,
+    isFavoritedByMe,
+    geo,
+    galleryImages,
+    galleryCount,
+    tributeAuthors,
+    tributeCount,
+    favorites,
+    memorials,
+    bio,
+  ] = await Promise.all([
+    getFavoriteCount(id),
+    isOwn ? Promise.resolve(false) : isFavoritedByUser(session.user.id, id),
+    isMemorialized ? getGeolocationByUserId(id) : Promise.resolve(null),
+    getGalleryImageUrls(id, 4),
+    getGalleryCount(id),
+    getTributeAuthors(id, 5),
+    getTributeCountByProfileId(id),
+    isOwn && !isMemorialized ? getFavoritesByUserId(id) : Promise.resolve([]),
+    isOwn && !isMemorialized ? getMemorialsByCreatorId(id) : Promise.resolve([]),
+    getBioByUserId(id),
+  ])
+
+  const hasBio = !!bio && !!(bio.text || bio.quote || bio.images.length > 0)
+  const memorialCount = memorials.length
 
   const profile: ProfileData = {
     id: user.id,
     name,
     initials,
+    avatarColor: getAvatarColor(user.id),
     type: isMemorialized ? "memorialized" : "living",
     avatarUrl: user.avatarUrl,
     birth: user.birthDate
@@ -50,11 +88,13 @@ export default async function ProfileByIdPage({ params }: Props) {
     death: user.deathDate
       ? { date: formatDate(user.deathDate), place: user.deathPlace ?? "", country: user.deathCountry }
       : null,
-    tributes: 0,
-    favoritedBy: 0,
-    mediaTotal: 0,
+    tributes: tributeCount,
+    favoritedBy,
+    mediaTotal: galleryCount,
     isOwn,
-    isFavoritedByMe: false,
+    isGuardian,
+    guardedCount: memorialCount,
+    isFavoritedByMe,
   }
 
   const base = `/profile/${id}`
@@ -64,7 +104,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "tree",
       title: "Family Tree",
       description: "Roots, branches and the quiet ties that bind generations.",
-      metric: "0 generations • 0 profiles",
+      metric: "Coming soon",
       icon: TreePine,
       span: 4,
       preview: <TreePreview />,
@@ -74,7 +114,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "bio",
       title: "Biography",
       description: "A life told in chapters — moments, places and turning points.",
-      metric: "0 chapters",
+      metric: hasBio ? "Read" : "No biography yet",
       icon: BookOpen,
       span: 2,
       preview: <BioPreview />,
@@ -84,7 +124,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "gallery",
       title: "Gallery",
       description: "Images and moments worth remembering.",
-      metric: "0 memories",
+      metric: galleryCount > 0 ? `${galleryCount} ${galleryCount === 1 ? "memory" : "memories"}` : "No media yet",
       icon: Images,
       span: 3,
       preview: <GalleryPreview images={galleryImages} />,
@@ -94,20 +134,20 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "tributes",
       title: "Tributes",
       description: "Messages celebrating shared experiences and memories.",
-      metric: "0 tributes",
+      metric: tributeCount > 0 ? `${tributeCount} ${tributeCount === 1 ? "tribute" : "tributes"}` : "No tributes yet",
       icon: Flower2,
       span: 3,
-      preview: <TributesPreview />,
+      preview: <TributesPreview authors={tributeAuthors} />,
       href: `${base}/tributes`,
     },
     {
       key: "geo",
       title: "Geolocation",
       description: "A point of departure — and a place to meet again, from anywhere.",
-      metric: "Not set",
+      metric: geo ? geo.placeName : "Not set",
       icon: MapPin,
       span: 3,
-      preview: <GeoPreview />,
+      preview: <GeoPreview lat={geo?.lat} lng={geo?.lng} />,
       href: `${base}/geolocation`,
     },
     {
@@ -117,7 +157,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       metric: "Ready to print",
       icon: QrCode,
       span: 3,
-      preview: <QrPreview profileId={id} />,
+      preview: <QrPreview dataUrl={qrDataUrl} />,
       href: `${base}/qr-code`,
     },
   ]
@@ -127,7 +167,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "tree",
       title: "Family Tree",
       description: "Roots, branches and the quiet ties that bind generations.",
-      metric: "0 generations • 0 profiles",
+      metric: "Coming soon",
       icon: TreePine,
       span: 4,
       preview: <TreePreview />,
@@ -137,7 +177,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "bio",
       title: "Biography",
       description: "A life told in chapters — moments, places and turning points.",
-      metric: "0 chapters",
+      metric: hasBio ? "Read" : "No biography yet",
       icon: BookOpen,
       span: 2,
       preview: <BioPreview />,
@@ -147,7 +187,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "gallery",
       title: "Gallery",
       description: "Images and moments worth remembering.",
-      metric: "0 memories",
+      metric: galleryCount > 0 ? `${galleryCount} ${galleryCount === 1 ? "memory" : "memories"}` : "No media yet",
       icon: Images,
       span: 3,
       preview: <GalleryPreview images={galleryImages} />,
@@ -157,36 +197,38 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "tributes",
       title: "Tributes",
       description: "Messages celebrating shared experiences and memories.",
-      metric: "0 tributes",
+      metric: tributeCount > 0 ? `${tributeCount} ${tributeCount === 1 ? "tribute" : "tributes"}` : "No tributes yet",
       icon: Flower2,
       span: 3,
-      preview: <TributesPreview />,
+      preview: <TributesPreview authors={tributeAuthors} />,
       href: `${base}/tributes`,
     },
     {
       key: "favorites",
       title: "Favorites",
       description: "People who carry deep meaning — kept close, always.",
-      metric: "0 favorited profiles",
+      metric: favorites.length > 0 ? `${favorites.length} favorited` : "No favorites yet",
       icon: Heart,
       span: 3,
-      preview: <FavoritesPreview />,
+      preview: <FavoritesPreview favorites={favorites} />,
       href: `${base}/favorites`,
     },
     {
       key: "guardian",
       title: "Profiles I guard",
       description: "Memorials watched over with quiet care.",
-      metric: "0 profiles",
+      metric: memorialCount > 0
+        ? `${memorialCount} ${memorialCount === 1 ? "profile" : "profiles"}`
+        : "No profiles guarded yet",
       icon: BrickWall,
       span: 3,
-      preview: <GuardianPreview />,
+      preview: <GuardianPreview memorials={memorials} />,
       href: `${base}/memorialized`,
     },
   ]
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden">
+    <div className="min-h-screen relative overflow-x-hidden mt-16">
       <AuroraBackdrop variant="page" intensity="bold" />
       <main className="relative z-10">
         <ProfileBanner profile={profile} />

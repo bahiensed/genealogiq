@@ -1,4 +1,8 @@
-import { Heart, Star } from "lucide-react"
+import { Heart, Star, Image as ImageIcon, Flower2, BrickWall } from "lucide-react"
+import { getAvatarColor, getAvatarGradient } from "@/lib/avatar-color"
+import type { TributeAuthorPreview } from "@/queries/tribute"
+import type { FavoriteRow } from "@/queries/favorite"
+import type { MemorialRow } from "@/queries/memorial"
 
 export function TreePreview() {
   return (
@@ -58,57 +62,144 @@ export function BioPreview() {
         <div className={`${bar} w-[82%]`} />
         <div className={`${bar} w-[60%]`} />
       </div>
-      <div className="flex gap-3 items-start">
-        <div className="flex-1 space-y-2 pt-1">
-          <div className={`${bar} w-full`} />
-          <div className={`${bar} w-[92%]`} />
-          <div className={`${bar} w-[78%]`} />
-          <div className={`${bar} w-[45%]`} />
-        </div>
-        <div className={`${thumb} h-14 w-14`} />
-      </div>
     </div>
   )
 }
 
 export function GalleryPreview({ images }: { images: string[] }) {
+  if (images.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
+        <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
+        <p className="text-xs text-muted-foreground">No media yet.</p>
+      </div>
+    )
+  }
   return (
     <div className="grid grid-cols-4 gap-1.5 h-full">
       {images.slice(0, 4).map((src, i) => (
         <div key={i} className="relative rounded-lg overflow-hidden bg-muted aspect-square">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <img src={src} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         </div>
       ))}
     </div>
   )
 }
 
-export function TributesPreview() {
+export function TributesPreview({ authors }: { authors: TributeAuthorPreview[] }) {
+  if (authors.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
+        <Flower2 className="h-8 w-8 text-muted-foreground/50" />
+        <p className="text-xs text-muted-foreground">No tributes yet.</p>
+      </div>
+    )
+  }
   return (
     <div className="flex items-center gap-3">
       <div className="flex -space-x-2">
-        {(["bg-rose-400", "bg-amber-400", "bg-indigo-400", "bg-emerald-400"] as const).map((c, i) => (
-          <div
-            key={i}
-            className={`h-7 w-7 rounded-full ${c} ring-2 ring-background flex items-center justify-center text-[10px] font-bold text-white`}
-          >
-            {["A", "M", "L", "P"][i]}
+        {authors.slice(0, 4).map((a, i) => {
+          const initials = `${a.firstName[0]}${a.lastName[0]}`.toUpperCase()
+          const color = getAvatarColor(a.id)
+          return (
+            <div
+              key={i}
+              className={`h-7 w-7 rounded-full ${color} ring-2 ring-background flex items-center justify-center text-[10px] font-bold text-white overflow-hidden`}
+            >
+              {a.avatarUrl
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={a.avatarUrl} alt={initials} className="h-full w-full object-cover" />
+                : initials}
+            </div>
+          )
+        })}
+        {authors.length > 4 && (
+          <div className="h-7 w-7 rounded-full bg-muted ring-2 ring-background flex items-center justify-center text-[10px] font-medium text-muted-foreground">
+            +
           </div>
-        ))}
-        <div className="h-7 w-7 rounded-full bg-muted ring-2 ring-background flex items-center justify-center text-[10px] font-medium text-muted-foreground">
-          +
-        </div>
+        )}
       </div>
     </div>
   )
 }
 
-export function GeoPreview() {
+export function FavoritesPreview({ favorites }: { favorites: FavoriteRow[] }) {
+  if (favorites.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
+        <Heart className="h-8 w-8 text-muted-foreground/50" />
+        <p className="text-xs text-muted-foreground">No favorites yet.</p>
+      </div>
+    )
+  }
+  return (
+    <div className="space-y-2">
+      {favorites.slice(0, 3).map((fav) => {
+        const t = fav.target
+        const name = `${t.firstName} ${t.lastName}`
+        const initials = `${t.firstName[0]}${t.lastName[0]}`.toUpperCase()
+        const gradient = getAvatarGradient(t.id)
+        return (
+          <div key={fav.targetId} className="flex items-center gap-2.5">
+            <div
+              className={`h-7 w-7 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white text-[10px] font-semibold ring-2 ring-background overflow-hidden shrink-0`}
+            >
+              {t.avatarUrl
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={t.avatarUrl} alt={initials} className="h-full w-full object-cover" />
+                : initials}
+            </div>
+            <p className="flex-1 min-w-0 text-xs font-medium truncate">{name}</p>
+            <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500 shrink-0" />
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+export function GuardianPreview({ memorials }: { memorials: MemorialRow[] }) {
+  if (memorials.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
+        <BrickWall className="h-8 w-8 text-muted-foreground/50" />
+        <p className="text-xs text-muted-foreground">No profiles guarded yet.</p>
+      </div>
+    )
+  }
+  return (
+    <div className="space-y-2">
+      {memorials.slice(0, 3).map((m) => {
+        const name = `${m.firstName} ${m.lastName}`
+        const initials = `${m.firstName[0]}${m.lastName[0]}`.toUpperCase()
+        return (
+          <div key={m.id} className="flex items-center gap-2.5">
+            <div className="h-7 w-7 rounded-full bg-gradient-brand flex items-center justify-center text-white text-[10px] font-semibold overflow-hidden shrink-0">
+              {m.avatarUrl
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={m.avatarUrl} alt={initials} className="h-full w-full object-cover" />
+                : initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium truncate">{name}</p>
+            </div>
+            <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+export function GeoPreview({ lat, lng }: { lat?: number | null; lng?: number | null }) {
+  const resolvedLat = lat ?? -22.959167
+  const resolvedLng = lng ?? -43.188333
+  const mapUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${resolvedLat},${resolvedLng}&zoom=14&size=400x200&markers=${resolvedLat},${resolvedLng},red-pushpin`
   return (
     <div className="relative h-full w-full min-h-[120px] rounded-xl overflow-hidden bg-muted">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/map-preview.jpg" alt="Map" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      <img src={mapUrl} alt="Map" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/30 to-transparent" />
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <span className="relative flex h-3 w-3">
@@ -120,64 +211,13 @@ export function GeoPreview() {
   )
 }
 
-export function QrPreview({ profileId }: { profileId: string }) {
+export function QrPreview({ dataUrl }: { dataUrl: string }) {
   return (
     <div className="flex justify-center">
       <div className="bg-white p-2 rounded-xl shadow-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`https://api.qrserver.com/v1/create-qr-code/?data=genealogiq.app/profile/${profileId}&size=200x200&margin=0`}
-          alt="QR code"
-          className="h-24 w-24"
-          loading="lazy"
-        />
+        <img src={dataUrl} alt="QR code" className="h-24 w-24" />
       </div>
-    </div>
-  )
-}
-
-export function FavoritesPreview() {
-  return (
-    <div className="space-y-2">
-      {[
-        { name: "Joana Almeida",   rel: "Childhood friend",      color: "from-rose-400 to-pink-500"    },
-        { name: "Pedro Henrique",  rel: "Cousin",                color: "from-amber-400 to-orange-500" },
-        { name: "Oliveira Family", rel: "Collective memorial",   color: "from-indigo-400 to-violet-500" },
-      ].map((p) => (
-        <div key={p.name} className="flex items-center gap-2.5">
-          <div className={`h-7 w-7 rounded-full bg-gradient-to-br ${p.color} flex items-center justify-center text-white text-[10px] font-semibold ring-2 ring-background`}>
-            {p.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium truncate">{p.name}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{p.rel}</p>
-          </div>
-          <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500 shrink-0" />
-        </div>
-      ))}
-    </div>
-  )
-}
-
-export function GuardianPreview() {
-  return (
-    <div className="space-y-2">
-      {[
-        { name: "Grandma Lucia",  rel: "Maternal grandmother"  },
-        { name: "Uncle Ricardo",  rel: "Uncle"                 },
-        { name: "Castro Family",  rel: "Collective memorial"   },
-      ].map((p) => (
-        <div key={p.name} className="flex items-center gap-2.5">
-          <div className="h-7 w-7 rounded-full bg-gradient-brand flex items-center justify-center text-white text-[10px] font-semibold">
-            {p.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium truncate">{p.name}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{p.rel}</p>
-          </div>
-          <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500 shrink-0" />
-        </div>
-      ))}
     </div>
   )
 }

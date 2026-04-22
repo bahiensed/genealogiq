@@ -24,7 +24,7 @@ import { saveBio, deleteBio } from "@/actions/bio"
 import type { BioRow } from "@/queries/bio"
 
 const MAX_IMAGES = 5
-const MAX_QUOTE = 140
+const MAX_QUOTE = 128
 const MAX_BIO_TEXT = 2048
 
 type Aspect = "square" | "portrait" | "landscape"
@@ -38,9 +38,10 @@ interface ImageEntry {
 
 interface Props {
   initial: BioRow | null
+  profileId: string
 }
 
-export function BioEditForm({ initial }: Props) {
+export function BioEditForm({ initial, profileId }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -105,7 +106,7 @@ export function BioEditForm({ initial }: Props) {
       return
     }
     startTransition(async () => {
-      const result = await saveBio({
+      const result = await saveBio(profileId, {
         quote: quote || undefined,
         text: text || undefined,
         images: images.map((img, i) => ({
@@ -119,7 +120,7 @@ export function BioEditForm({ initial }: Props) {
         toast.error(result.error)
       } else {
         toast.success("Biography saved.")
-        router.push("/profile/bio")
+        router.push(`/profile/${profileId}/bio`)
       }
     })
   }
@@ -139,9 +140,9 @@ export function BioEditForm({ initial }: Props) {
 
   const handleDelete = () => {
     startTransition(async () => {
-      await deleteBio()
+      await deleteBio(profileId)
       toast.success("Biography deleted.")
-      router.push("/profile/bio")
+      router.push(`/profile/${profileId}/bio`)
     })
   }
 
@@ -205,7 +206,7 @@ export function BioEditForm({ initial }: Props) {
       {/* Quote */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="bio-quote" className="text-base">Defining quote</Label>
+          <Label htmlFor="bio-quote" className="text-base">Memorable quote</Label>
           <span className="text-xs text-muted-foreground">{quote.length}/{MAX_QUOTE}</span>
         </div>
         <Input
@@ -213,7 +214,7 @@ export function BioEditForm({ initial }: Props) {
           value={quote}
           maxLength={MAX_QUOTE}
           onChange={(e) => setQuote(e.target.value)}
-          placeholder="A defining quote or motto..."
+          placeholder="A defining motto or quote..."
         />
       </div>
 
@@ -228,7 +229,7 @@ export function BioEditForm({ initial }: Props) {
           value={text}
           maxLength={MAX_BIO_TEXT}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Tell their story..."
+          placeholder="Write biography..."
           className="min-h-[260px] text-base leading-relaxed"
         />
         <p className="text-xs text-muted-foreground">Use blank lines to separate paragraphs.</p>

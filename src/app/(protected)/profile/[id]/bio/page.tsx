@@ -1,5 +1,6 @@
+import Link from "next/link"
 import { notFound } from "next/navigation"
-import { Quote } from "lucide-react"
+import { NotebookText, NotebookPen, Quote } from "lucide-react"
 import {
   Carousel,
   CarouselContent,
@@ -7,10 +8,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
+import { verifySession } from "@/lib/dal"
 import { getBioByUserId } from "@/queries/bio"
 import { getProfileById } from "@/queries/profile"
+import { canManageProfile } from "@/lib/profile"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -18,10 +22,12 @@ interface Props {
 
 export default async function ProfileBioPage({ params }: Props) {
   const { id } = await params
+  const session = await verifySession()
   const [profile, bio] = await Promise.all([getProfileById(id), getBioByUserId(id)])
 
   if (!profile) notFound()
 
+  const isOwn = canManageProfile(profile, session.user.id)
   const name = `${profile.firstName} ${profile.lastName}`
   const isEmpty = !bio || (!bio.quote && !bio.text && bio.images.length === 0)
   const paragraphs = bio?.text?.split(/\n\n+/).filter(Boolean) ?? []
@@ -37,13 +43,32 @@ export default async function ProfileBioPage({ params }: Props) {
               <BackButton href={`/profile/${id}`} label="Back to profile" />
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Biography</h1>
             </div>
-            <p className="text-muted-foreground mt-2">{name}&apos;s life story.</p>
+            <p className="text-muted-foreground mt-2">
+              {isOwn ? "A life remembered through words and images." : `${name}'s life story.`}
+            </p>
           </div>
+          {isOwn && (
+            <Button asChild className="shrink-0 gap-2">
+              <Link href={`/profile/${id}/bio/edit`}>
+                <NotebookPen className="h-4 w-4" />
+                {isEmpty ? "Write biography" : "Edit"}
+              </Link>
+            </Button>
+          )}
         </section>
 
         {isEmpty ? (
-          <div className="glass-card no-sheen rounded-2xl px-6 py-20 flex items-center justify-center animate-fade-in">
+          <div
+            className="glass-card no-sheen rounded-2xl px-6 py-20 flex flex-col items-center justify-center gap-3 animate-fade-in"
+            style={{ animationDelay: "80ms" }}
+          >
+            <NotebookText className="h-10 w-10 text-muted-foreground" />
             <p className="text-muted-foreground text-sm">No biography yet.</p>
+            {isOwn && (
+              <Button asChild variant="outline" size="sm" className="gap-2">
+                <Link href={`/profile/${id}/bio/edit`}><NotebookPen className="h-4 w-4" />Write biography</Link>
+              </Button>
+            )}
           </div>
         ) : (
           <>
@@ -63,12 +88,7 @@ export default async function ProfileBioPage({ params }: Props) {
                           <div className="glass-card no-sheen p-2">
                             <div className={`${aspectClass} overflow-hidden rounded-2xl bg-muted/40`}>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={img.url}
-                                alt="Biography photo"
-                                className="h-full w-full object-cover"
-                                loading="lazy"
-                              />
+                              <img src={img.url} alt="Biography photo" className="h-full w-full object-cover" loading="lazy" />
                             </div>
                           </div>
                         </CarouselItem>

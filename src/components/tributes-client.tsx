@@ -1,0 +1,160 @@
+'use client'
+
+import { useEffect, useMemo, useRef, useState } from "react"
+import Link from "next/link"
+import { Send, SquarePen, Flower2, ArrowDownUp } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import type { ApprovedTributeRow } from "@/queries/tribute"
+
+const PAGE_SIZE = 10
+type SortDir = "newest" | "oldest"
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+
+const initials = (name: string) =>
+  name.split(" ").filter(Boolean).slice(0, 2).map((n) => n[0]?.toUpperCase() ?? "").join("")
+
+interface Props {
+  items: ApprovedTributeRow[]
+  profileId: string
+  sessionUserId: string
+  canWrite: boolean
+}
+
+export function TributesClient({ items, profileId, sessionUserId, canWrite }: Props) {
+  const myTribute = items.find((t) => t.authorId === sessionUserId)
+  const [sort, setSort] = useState<SortDir>("newest")
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const listTopRef = useRef<HTMLDivElement | null>(null)
+  const didMountRef = useRef(false)
+
+  const sorted = useMemo(() => {
+    return [...items].sort((a, b) =>
+      sort === "newest"
+        ? b.createdAt.getTime() - a.createdAt.getTime()
+        : a.createdAt.getTime() - b.createdAt.getTime(),
+    )
+  }, [items, sort])
+
+  useEffect(() => {
+    if (!didMountRef.current) { didMountRef.current = true; return }
+    setVisibleCount(PAGE_SIZE)
+    listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [sort])
+
+  useEffect(() => {
+    if (visibleCount >= sorted.length) return
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) setVisibleCount((c) => Math.min(c + PAGE_SIZE, sorted.length)) },
+      { rootMargin: "300px" },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [visibleCount, sorted.length])
+
+  const visible = sorted.slice(0, visibleCount)
+  const writeHref = `/profile/${profileId}/tributes/write`
+
+  return (
+    <>
+      <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
+        <div>
+          <p className="text-muted-foreground mt-2 italic">
+            Words left behind — small flames carried by those who remember.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {!items.length ? null : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <ArrowDownUp className="h-4 w-4" />
+                  {sort === "newest" ? "Newest first" : "Oldest first"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setSort("newest")}>Newest first</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSort("oldest")}>Oldest first</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {canWrite && (
+            <Button asChild className="gap-2">
+              <Link href={writeHref}>
+                {myTribute ? <SquarePen className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+                {myTribute ? "Edit your tribute" : "Send a tribute"}
+              </Link>
+            </Button>
+          )}
+        </div>
+      </section>
+
+      <div ref={listTopRef} />
+
+      {items.length === 0 ? (
+        <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
+          <Flower2 className="h-10 w-10 text-muted-foreground" />
+          <p className="text-muted-foreground">No tributes yet.</p>
+          {canWrite && (
+            <Button asChild className="gap-2">
+              <Link href={writeHref}><Send className="h-4 w-4" />Send a tribute</Link>
+            </Button>
+          )}
+        </div>
+      ) : (
+        <>
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
+            {visible.map((t) => {
+              const isMine = t.authorId === sessionUserId
+              const authorName = `${t.author.firstName} ${t.author.lastName}`
+              return (
+                <article key={t.id} className="mb-4 break-inside-avoid glass-card no-sheen overflow-hidden">
+                  {t.imageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={t.imageUrl} alt={`Tribute by ${authorName}`} loading="lazy" className="w-full h-auto block" />
+                  )}
+                  <div className="p-5 space-y-4">
+                    <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{t.text}</p>
+                    <div className="flex items-center gap-3 pt-1 border-t border-border/60">
+                      <Avatar className="h-8 w-8">
+                        {t.author.avatarUrl && <AvatarFallback className="sr-only" />}
+                        <AvatarFallback className="text-xs bg-secondary">{initials(authorName)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium truncate">{authorName}</span>
+                          {isMine && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Yours</Badge>}
+                        </div>
+                        <div className="text-xs text-muted-foreground">{formatDate(t.createdAt)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+
+          {visibleCount < sorted.length ? (
+            <div ref={sentinelRef} className="py-10 flex justify-center">
+              <div className="h-6 w-6 rounded-full border-2 border-muted-foreground/30 border-t-primary animate-spin" />
+            </div>
+          ) : (
+            <div className="py-10 text-center text-xs text-muted-foreground">End of tributes</div>
+          )}
+        </>
+      )}
+    </>
+  )
+}

@@ -4,17 +4,24 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { bioSchema } from "@/schemas/bio"
+import { getProfileById } from "@/queries/profile"
+import { canManageProfile } from "@/lib/profile"
 
-export async function saveBio(data: unknown) {
+export async function saveBio(profileId: string, data: unknown) {
   const session = await verifySession()
+
+  const profile = await getProfileById(profileId)
+  if (!profile) return { error: "Profile not found." }
+  if (!canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+
   const parsed = bioSchema.safeParse(data)
   if (!parsed.success) return { error: "Invalid data" }
 
   const { quote, text, images } = parsed.data
 
   const bio = await prisma.bio.upsert({
-    where: { userId: session.user.id },
-    create: { userId: session.user.id, quote, text },
+    where: { userId: profileId },
+    create: { userId: profileId, quote, text },
     update: { quote, text },
   })
 
@@ -32,13 +39,18 @@ export async function saveBio(data: unknown) {
     })
   }
 
-  revalidatePath("/profile/bio")
+  revalidatePath(`/profile/${profileId}/bio`)
   return { success: true }
 }
 
-export async function deleteBio() {
+export async function deleteBio(profileId: string) {
   const session = await verifySession()
-  await prisma.bio.deleteMany({ where: { userId: session.user.id } })
-  revalidatePath("/profile/bio")
+
+  const profile = await getProfileById(profileId)
+  if (!profile) return { error: "Profile not found." }
+  if (!canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+
+  await prisma.bio.deleteMany({ where: { userId: profileId } })
+  revalidatePath(`/profile/${profileId}/bio`)
   return { success: true }
 }

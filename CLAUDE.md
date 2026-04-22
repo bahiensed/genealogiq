@@ -50,9 +50,9 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 21/04/2026 — Fase 4 completa: Bio page (view + edit + Vercel Blob upload)
+Last session: 22/04/2026 — Bugs de autorização de guardian corrigidos; notificações de tributos no header; batch de melhorias UX em ~15 arquivos; edit page para living profiles; deleteMemorial action
 In progress: —
-Next: Fase 5 — Gallery (Vercel Blob)
+Next: Family Tree (React Flow)
 Blockers: —
 
 ### Design System — concluído ✅
@@ -64,11 +64,12 @@ Blockers: —
 ### Auth Pages — concluído ✅
 - Todos os 5 forms redesenhados: glass-card form + tree logo (dark/light aware)
 - `(auth)/layout.tsx` — AuroraBackdrop
+- `verify-email-card.tsx` — tree logo acima do card
 
 ### Header + Home — concluído ✅
-- `src/components/header.tsx` — glass-strong, theme toggle, user dropdown, logout
+- `src/components/header.tsx` — notificações de tributos pendentes no sino (badge + dropdown); `BellNotification` como componente top-level
+- `src/app/(protected)/layout.tsx` — busca `getPendingTributeNotifications` e passa para Header
 - `src/components/profile-mini-card.tsx` — ProfileMiniCard com gradientes e badges
-- `src/app/(protected)/layout.tsx` — inclui Header com dados reais da sessão
 - `src/app/(protected)/home/page.tsx` — Server Component: saudação por hora + empty states
 
 ### Auth — concluído ✅
@@ -81,8 +82,51 @@ Blockers: —
 - Componentes: sign-in-form, sign-up-form, forgot-password-form, reset-password-form, verify-email-card, change-email-dialog, change-password-dialog, delete-account-dialog
 - Fluxo APP: auto-cadastro → verificação de e-mail → login
 
+### Profile — concluído ✅
+- `src/app/(protected)/profile/[id]/page.tsx` — QR code gerado server-side via `qrcode` package; 10 queries paralelas com dados reais
+- `src/components/profile-banner.tsx` — coração visível também para guardiões; avatar com cor determinística
+- `src/components/card-previews.tsx` — GalleryPreview/FavoritesPreview/GeoPreview/QrPreview com dados reais; FavoritesPreview sem subtitle; coord padrão -22.959167/-43.188333
+- `src/lib/avatar-color.ts` — getAvatarColor / getAvatarGradient (hash determinístico do ID)
+- `src/lib/profile.ts` — canManageProfile (own OR guardian)
+
+### Edit Profile — concluído ✅
+- `src/app/(protected)/profile/[id]/edit/page.tsx` — permite living (isOwn) E guardian (isGuardian); subtítulo "Edit profile."
+- `src/components/memorial-edit-form.tsx` — avatarColor determinístico; ícone ImageIcon; botão "Save" sem ícone; permanece na página após salvar; AlertDialog "Delete profile" para memorializados; placeholders City/Family name
+- `src/actions/memorial.ts` — deleteMemorial (cascade via Prisma); redireciona para /profile do guardião
+- `src/actions/profile.ts` + `src/schemas/profile.ts` — updateProfile para living users (sem death fields)
+
+### Biography — concluído ✅
+- `src/app/(protected)/profile/[id]/bio/page.tsx` — NotebookText no empty state; NotebookPen nos botões; "biography" em todos os textos
+- `src/app/(protected)/profile/[id]/bio/edit/page.tsx` — título "Write Biography" na criação
+- `src/components/bio-edit-form.tsx` — MAX_QUOTE 128; placeholders atualizados; passa profileId para saveBio/deleteBio
+- `src/actions/bio.ts` — saveBio(profileId, data) / deleteBio(profileId) com canManageProfile → guardiões podem salvar bio de memorializados
+
+### Gallery — concluído ✅
+- `src/components/gallery-client.tsx` — ícone ImageIcon no empty state
+- Queries: getGalleryImageUrls / getGalleryCount para card previews
+
+### Tributes — concluído ✅
+- `src/actions/tribute.ts` — approveTribute/rejectTribute usam canManageProfile → guardiões podem moderar
+- `src/queries/tribute.ts` — getPendingTributeNotifications (agrega pending de todos os perfis gerenciados)
+- `src/components/tributes-client.tsx` — removido botão "Moderate" (notificação migrada para header bell)
+- `src/app/(protected)/profile/[id]/tributes/page.tsx` — removidos pendingCount e canModerate do TributesClient
+
+### Geolocation — concluído ✅
+- `src/actions/geolocation.ts` — saveGeolocation/deleteGeolocation usam canManageProfile → guardiões podem editar
+- `src/schemas/geolocation.ts` — notes max 512
+- `src/components/geolocation-edit-form.tsx` — MAX_NOTES 512
+
+### Memorialized — concluído ✅
+- `src/components/memorial-create-form.tsx` — initials "GQ" quando vazio; placeholders Name/Family name/City
+- `src/app/(protected)/profile/[id]/memorialized/new/page.tsx` — max 2 memoriais por user
+
 ### Shared DB note
 BMS, SEQ e APP compartilham o mesmo banco. Roles APP_USER e APP_MEMO foram adicionados ao enum Role do schema.
+
+### Padrão de autorização para guardiões
+- `canManageProfile(profile, userId)` — `profile.id === userId || profile.createdById === userId`
+- **Todas as actions de escrita** (bio, geolocation, tribute moderate, memorial update/delete) devem usar este helper
+- `isExactOwn = id === session.user.id` — usado apenas para impedir que o próprio dono escreva tributo para si
 
 ## MANDATORY RULES
 1. Antes de adicionar qualquer endpoint → criar schema Zod de validação PRIMEIRO
@@ -117,6 +161,9 @@ DATABASE_URL=
 # auth
 AUTH_URL=
 AUTH_SECRET=
+
+# vercel blob
+BLOB_READ_WRITE_TOKEN=
 
 # resend
 RESEND_API_KEY=

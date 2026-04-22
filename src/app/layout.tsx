@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { inter } from '@/fonts'
 import { cn } from '@/lib/utils'
 import '@/styles/globals.css'
-
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
@@ -23,17 +22,14 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", "font-sans", inter.variable)}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
-          disableTransitionOnChange
         >
           <TooltipProvider>
-            <main>
-              {children}
-            </main>
+            {children}
             <Toaster richColors />
           </TooltipProvider>
         </ThemeProvider>

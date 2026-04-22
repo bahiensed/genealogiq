@@ -25,6 +25,12 @@ enum EmailTokenType {
   CHANGE
 }
 
+enum TributeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum EntityType {
   INDIVIDUAL
   COMPANY
@@ -216,6 +222,15 @@ model User {
   passwordResetTokens PasswordResetToken[]
   sales               Sale[]
   bio                 Bio?
+  galleryItems        GalleryItem[]
+  tributesAuthored    Tribute[]     @relation("TributeAuthor")
+  tributesReceived    Tribute[]     @relation("TributeProfile")
+  favoritesGiven      Favorite[]    @relation("FavoriteUser")
+  favoritesReceived   Favorite[]    @relation("FavoriteTarget")
+  geolocation         Geolocation?
+  createdById         String?       @map("created_by_id")
+  createdBy           User?         @relation("MemorialCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  memorialsCreated    User[]        @relation("MemorialCreator")
 
   @@map("users")
 }
@@ -250,6 +265,90 @@ model BioImage {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("bio_images")
+}
+
+// ─── Tributes ────────────────────────────────────────────────────────────────
+
+model Tribute {
+  id       String         @id @default(cuid())
+  text     String         @db.VarChar(512)
+  imageUrl String?        @map("image_url")
+  status   TributeStatus  @default(PENDING)
+
+  authorId String @map("author_id")
+  author   User   @relation("TributeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  profileId String @map("profile_id")
+  profile   User   @relation("TributeProfile", fields: [profileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([authorId, profileId])
+  @@map("tributes")
+}
+
+// ─── Gallery ─────────────────────────────────────────────────────────────────
+
+model GalleryItem {
+  id          String  @id @default(cuid())
+  kind        String  @default("image")
+  url         String
+  poster      String?
+  durationSec Float?  @map("duration_sec")
+  takenAt     String? @map("taken_at")
+  location    String?
+  description String? @db.VarChar(280)
+  order       Int     @default(0)
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("gallery_items")
+}
+
+// ─── Favorites ───────────────────────────────────────────────────────────────
+
+model Favorite {
+  userId   String @map("user_id")
+  user     User   @relation("FavoriteUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  targetId String @map("target_id")
+  target   User   @relation("FavoriteTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([userId, targetId])
+  @@map("favorites")
+}
+
+// ─── Geolocation ─────────────────────────────────────────────────────────────
+
+model Geolocation {
+  id        String  @id @default(cuid())
+  placeName String  @map("place_name") @db.VarChar(120)
+  address   String? @db.VarChar(200)
+  city      String? @db.VarChar(100)
+  state     String? @db.VarChar(100)
+  country   String? @db.VarChar(100)
+  section   String? @db.VarChar(200)
+  lat       Float
+  lng       Float
+  notes     String? @db.VarChar(500)
+  photo1    String? @map("photo_1")
+  photo2    String? @map("photo_2")
+  photo3    String? @map("photo_3")
+
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("geolocations")
 }
 
 // ─── Supplier ────────────────────────────────────────────────────────────────
