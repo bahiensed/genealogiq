@@ -22,7 +22,7 @@ import {
 import { saveGeolocation, deleteGeolocation } from "@/actions/geolocation"
 import type { GeolocationRow } from "@/queries/geolocation"
 
-const MAX_NOTES = 512
+const MAX_NOTES = 500
 const MAX_PHOTOS = 3
 
 interface GeoState {
@@ -109,11 +109,19 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
     if (!navigator.geolocation) { toast.error("Geolocation not supported by this browser."); return }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        update("lat", String(pos.coords.latitude.toFixed(6)))
-        update("lng", String(pos.coords.longitude.toFixed(6)))
+        setGeo((prev) => ({ ...prev, lat: String(pos.coords.latitude.toFixed(6)), lng: String(pos.coords.longitude.toFixed(6)) }))
         toast.success("Location detected.")
       },
-      () => toast.error("Could not detect location."),
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error("Location access denied. Enable it in your browser settings.")
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          toast.error("Location unavailable. Check your GPS signal.")
+        } else {
+          toast.error("Location request timed out. Try again.")
+        }
+      },
+      { timeout: 10000, maximumAge: 60000 },
     )
   }
 

@@ -7,8 +7,8 @@ export const mediaItemSchema = z.object({
   poster: z.string().url().optional(),
   durationSec: z.number().positive().optional(),
   takenAt: z.string().optional(),
-  location: z.string().max(100).optional(),
-  description: z.string().max(280).optional(),
+  location: z.string().trim().max(100).optional(),
+  description: z.string().trim().max(280).optional(),
   order: z.number().int().min(0),
 })
 

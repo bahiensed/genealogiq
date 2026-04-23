@@ -232,6 +232,7 @@ model User {
   createdBy           User?         @relation("MemorialCreator", fields: [createdById], references: [id], onDelete: SetNull)
   memorialsCreated    User[]        @relation("MemorialCreator")
 
+  @@index([createdById])
   @@map("users")
 }
 
@@ -285,6 +286,7 @@ model Tribute {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([authorId, profileId])
+  @@index([profileId])
   @@map("tributes")
 }
 
@@ -307,6 +309,7 @@ model GalleryItem {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@index([userId])
   @@map("gallery_items")
 }
 

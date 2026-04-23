@@ -28,14 +28,10 @@ export function HomeSearch() {
 
   useEffect(() => {
     const q = query.trim()
-    if (q.length < 3) {
-      setResults([])
-      setOpen(false)
-      return
-    }
-    setLoading(true)
-    setOpen(true)
+    if (q.length < 3) return
     const timer = setTimeout(async () => {
+      setLoading(true)
+      setOpen(true)
       try {
         const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`)
         const data = await res.json() as SearchResult[]

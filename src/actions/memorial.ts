@@ -84,7 +84,7 @@ export async function updateMemorial(profileId: string, data: unknown) {
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile) return { error: "Profile not found." }
+  if (!profile || profile.role !== "APP_MEMO") return { error: "Profile not found." }
   if (profile.createdById !== session.user.id) return { error: "Unauthorized." }
 
   const parsed = memorialSchema.safeParse(data)

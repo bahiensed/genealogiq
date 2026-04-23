@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { Send, SquarePen, Flower2, ArrowDownUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
@@ -129,7 +129,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite }: Pr
                     <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{t.text}</p>
                     <div className="flex items-center gap-3 pt-1 border-t border-border/60">
                       <Avatar className="h-8 w-8">
-                        {t.author.avatarUrl && <AvatarFallback className="sr-only" />}
+                        {t.author.avatarUrl && <AvatarImage src={t.author.avatarUrl} alt={authorName} />}
                         <AvatarFallback className="text-xs bg-secondary">{initials(authorName)}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">

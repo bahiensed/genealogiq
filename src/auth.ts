@@ -26,6 +26,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!user.isActive) return null
         if (!user.password) return null
 
+        if (user.lockedUntil && user.lockedUntil > new Date()) return null
+
         const match = await bcrypt.compare(password, user.password)
         if (!match) return null
 

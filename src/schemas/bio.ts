@@ -8,8 +8,8 @@ export const bioImageSchema = z.object({
 })
 
 export const bioSchema = z.object({
-  quote: z.string().max(140).optional(),
-  text: z.string().max(2048).optional(),
+  quote: z.string().trim().max(140).optional(),
+  text: z.string().trim().max(2048).optional(),
   images: z.array(bioImageSchema).max(5).default([]),
 })
 

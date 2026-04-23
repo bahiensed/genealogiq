@@ -4,23 +4,29 @@ import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { saveGallerySchema } from "@/schemas/gallery"
+import { getProfileById } from "@/queries/profile"
+import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 
-export async function saveGallery(data: unknown) {
+export async function saveGallery(profileId: string, data: unknown) {
   const session = await verifySession()
+
+  const profile = await getProfileById(profileId)
+  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+
   const parsed = saveGallerySchema.safeParse(data)
   if (!parsed.success) return { error: "Invalid data" }
 
   const { items } = parsed.data
 
   const oldItems = await prisma.galleryItem.findMany({
-    where: { userId: session.user.id },
+    where: { userId: profileId },
     select: { url: true },
   })
   const newUrls = new Set(items.map((i) => i.url))
   await deleteBlobs(oldItems.map((i) => i.url).filter((u) => !newUrls.has(u)))
 
-  await prisma.galleryItem.deleteMany({ where: { userId: session.user.id } })
+  await prisma.galleryItem.deleteMany({ where: { userId: profileId } })
 
   if (items.length > 0) {
     await prisma.galleryItem.createMany({
@@ -34,25 +40,28 @@ export async function saveGallery(data: unknown) {
         location: item.location,
         description: item.description,
         order: i,
-        userId: session.user.id,
+        userId: profileId,
       })),
     })
   }
 
-  revalidatePath(`/profile/${session.user.id}/gallery`)
+  revalidatePath(`/profile/${profileId}/gallery`)
   return { success: true }
 }
 
-export async function deleteGallery() {
+export async function deleteGallery(profileId: string) {
   const session = await verifySession()
 
+  const profile = await getProfileById(profileId)
+  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+
   const items = await prisma.galleryItem.findMany({
-    where: { userId: session.user.id },
+    where: { userId: profileId },
     select: { url: true },
   })
   await deleteBlobs(items.map((i) => i.url))
 
-  await prisma.galleryItem.deleteMany({ where: { userId: session.user.id } })
-  revalidatePath(`/profile/${session.user.id}/gallery`)
+  await prisma.galleryItem.deleteMany({ where: { userId: profileId } })
+  revalidatePath(`/profile/${profileId}/gallery`)
   return { success: true }
 }

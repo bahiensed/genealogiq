@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import type { MiniProfile } from "@/components/profile-mini-card"
 
 const KEY = "giq:recently-viewed"
@@ -21,9 +21,9 @@ export function recordView(profile: MiniProfile) {
 }
 
 export function useRecentlyViewed() {
-  const [profiles, setProfiles] = useState<RecentProfile[]>([])
-  useEffect(() => {
-    setProfiles(read())
-  }, [])
+  const [profiles] = useState<RecentProfile[]>(() => {
+    if (typeof window === "undefined") return []
+    return read()
+  })
   return profiles
 }

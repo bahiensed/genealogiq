@@ -21,6 +21,7 @@ import {
   sendAccountDeletionEmail,
 } from "@/lib/email"
 import { verifySession } from "@/lib/dal"
+import { deleteBlobs } from "@/lib/blob"
 import { randomBytes } from "crypto"
 
 type AuthState = {
@@ -285,6 +286,51 @@ export async function deleteAccount(
 
   const match = await bcrypt.compare(validated.data.currentPassword, user.password)
   if (!match) return { errors: { currentPassword: ["Incorrect password"] } }
+
+  // Collect own blob URLs before deletion
+  const [ownProfile, ownBio, ownGallery, ownGeo, ownTributesAuthored, ownTributesReceived] =
+    await Promise.all([
+      prisma.user.findUnique({ where: { id: userId }, select: { avatarUrl: true } }),
+      prisma.bio.findUnique({ where: { userId }, select: { images: { select: { url: true } } } }),
+      prisma.galleryItem.findMany({ where: { userId }, select: { url: true } }),
+      prisma.geolocation.findUnique({ where: { userId }, select: { photo1: true, photo2: true, photo3: true } }),
+      prisma.tribute.findMany({ where: { authorId: userId }, select: { imageUrl: true } }),
+      prisma.tribute.findMany({ where: { profileId: userId }, select: { imageUrl: true } }),
+    ])
+
+  // Collect memorial blob URLs
+  const memorials = await prisma.user.findMany({
+    where: { createdById: userId, role: "APP_MEMO" },
+    select: { id: true, avatarUrl: true },
+  })
+  const memorialIds = memorials.map((m) => m.id)
+  const [memBios, memGallery, memTributes, memGeos] = memorialIds.length > 0
+    ? await Promise.all([
+        prisma.bio.findMany({ where: { userId: { in: memorialIds } }, select: { images: { select: { url: true } } } }),
+        prisma.galleryItem.findMany({ where: { userId: { in: memorialIds } }, select: { url: true } }),
+        prisma.tribute.findMany({ where: { profileId: { in: memorialIds } }, select: { imageUrl: true } }),
+        prisma.geolocation.findMany({ where: { userId: { in: memorialIds } }, select: { photo1: true, photo2: true, photo3: true } }),
+      ])
+    : [[], [], [], []]
+
+  await deleteBlobs([
+    ownProfile?.avatarUrl,
+    ...(ownBio?.images.map((i) => i.url) ?? []),
+    ...ownGallery.map((i) => i.url),
+    ownGeo?.photo1, ownGeo?.photo2, ownGeo?.photo3,
+    ...ownTributesAuthored.map((t) => t.imageUrl),
+    ...ownTributesReceived.map((t) => t.imageUrl),
+    ...memorials.map((m) => m.avatarUrl),
+    ...memBios.flatMap((b) => b.images.map((i) => i.url)),
+    ...memGallery.map((i) => i.url),
+    ...memTributes.map((t) => t.imageUrl),
+    ...memGeos.flatMap((g) => [g.photo1, g.photo2, g.photo3]),
+  ])
+
+  // Delete memorial profiles first (DB cascade handles their bio/gallery/geo/tributes)
+  if (memorialIds.length > 0) {
+    await prisma.user.deleteMany({ where: { id: { in: memorialIds } } })
+  }
 
   await sendAccountDeletionEmail(user.email)
   await prisma.user.delete({ where: { id: userId } })

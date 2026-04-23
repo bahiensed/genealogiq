@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { QrCode, Clock, Heart, BrickWall, User, ArrowRight } from "lucide-react"
+import { Clock, Heart, BrickWall, User, ArrowRight } from "lucide-react"
 import { verifySession } from "@/lib/dal"
 import { GlassIcon } from "@/components/glass-icon"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
@@ -7,15 +7,10 @@ import { ProfileMiniCard, type MiniProfile, type AvatarGradient } from "@/compon
 import { HomeSearch } from "@/components/home-search"
 import { RecentlyViewedSection } from "@/components/recently-viewed-section"
 import { RecentlyViewedCount } from "@/components/recently-viewed-count"
+import { Greeting } from "@/components/greeting"
+import { ScanQrButton } from "@/components/scan-qr-button"
 import { getFavoritesByUserId, type FavoriteRow } from "@/queries/favorite"
 import { getMemorialsByCreatorId, type MemorialRow } from "@/queries/memorial"
-
-function greeting() {
-  const h = new Date().getHours()
-  if (h < 12) return "Good morning"
-  if (h < 18) return "Good afternoon"
-  return "Good evening"
-}
 
 const FAV_GRADIENTS: AvatarGradient[] = ["brand", "indigo", "violet", "sky", "rose", "amber", "emerald"]
 const MEM_GRADIENTS: AvatarGradient[] = ["indigo", "violet", "sky", "brand", "emerald", "amber", "rose"]
@@ -64,7 +59,6 @@ export default async function HomePage() {
   const session = await verifySession()
   const firstName = session.user.name?.split(" ")[0] ?? "there"
   const userId = session.user.id
-  const hello = greeting()
 
   const [favorites, memorials] = await Promise.all([
     getFavoritesByUserId(userId),
@@ -79,7 +73,7 @@ export default async function HomePage() {
         {/* Hero */}
         <section className="mb-10 animate-fade-in">
           <h1 className="text-4xl md:text-6xl font-semibold tracking-tight">
-            {hello}, <span className="text-gradient-brand">{firstName}</span>
+            <Greeting firstName={firstName} />
           </h1>
           <p className="text-base md:text-lg text-muted-foreground mt-3 max-w-xl">
             Scan, search & visit a profile
@@ -90,14 +84,7 @@ export default async function HomePage() {
         <section className="relative z-10 mb-8 flex flex-col-reverse lg:flex-row gap-3 md:gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
           <HomeSearch />
 
-          <button
-            className="glass-card flex lg:w-auto w-full items-center justify-center gap-3 px-5 py-3 group"
-            aria-label="Scan QR code"
-          >
-            <GlassIcon icon={QrCode} size="sm" />
-            <span className="lg:hidden font-medium">Scan a QR code</span>
-            <span className="hidden lg:inline text-sm font-medium pr-2">Scan QR</span>
-          </button>
+          <ScanQrButton />
         </section>
 
         {/* Quick actions */}

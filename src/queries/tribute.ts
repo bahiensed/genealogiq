@@ -41,14 +41,21 @@ export async function getPendingTributeNotifications(userId: string): Promise<Tr
     select: { id: true, firstName: true, lastName: true },
   })
 
-  const results = await Promise.all(
-    profiles.map(async (p) => {
-      const count = await prisma.tribute.count({ where: { profileId: p.id, status: "PENDING" } })
-      return { profileId: p.id, name: `${p.firstName} ${p.lastName}`, count }
-    }),
-  )
+  if (profiles.length === 0) return []
 
-  return results.filter((r) => r.count > 0)
+  const profileIds = profiles.map((p) => p.id)
+
+  const counts = await prisma.tribute.groupBy({
+    by: ["profileId"],
+    where: { profileId: { in: profileIds }, status: "PENDING" },
+    _count: { profileId: true },
+  })
+
+  const countMap = new Map(counts.map((c) => [c.profileId, c._count.profileId]))
+
+  return profiles
+    .filter((p) => (countMap.get(p.id) ?? 0) > 0)
+    .map((p) => ({ profileId: p.id, name: `${p.firstName} ${p.lastName}`, count: countMap.get(p.id)! }))
 }
 
 export async function getTributeAuthors(profileId: string, limit = 5): Promise<TributeAuthorPreview[]> {

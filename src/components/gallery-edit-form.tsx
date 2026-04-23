@@ -192,7 +192,7 @@ export function GalleryEditForm({ initial, profileId }: Props) {
   const handleSave = () => {
     if (items.some((i) => i.uploading)) { toast.warning("Please wait for all uploads to finish."); return }
     startTransition(async () => {
-      const result = await saveGallery({
+      const result = await saveGallery(profileId, {
         items: items.map((item, i) => ({
           id: item.id,
           kind: item.kind,
@@ -213,7 +213,7 @@ export function GalleryEditForm({ initial, profileId }: Props) {
 
   const handleDelete = () => {
     startTransition(async () => {
-      await deleteGallery()
+      await deleteGallery(profileId)
       toast.success("Gallery deleted.")
       router.push(`/profile/${profileId}/gallery`)
     })

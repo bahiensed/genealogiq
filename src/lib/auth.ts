@@ -1,14 +1,14 @@
 import { z } from "zod"
 
 export const SignInSchema = z.object({
-  email: z.string().email("Invalid email"),
+  email: z.string().trim().email("Invalid email"),
   password: z.string().min(1, "Password is required"),
 })
 
 export const SignUpSchema = z.object({
-  firstName: z.string().min(2, "First name must have at least 2 characters"),
-  lastName: z.string().min(2, "Last name must have at least 2 characters"),
-  email: z.string().email("Invalid email"),
+  firstName: z.string().trim().min(2, "First name must have at least 2 characters"),
+  lastName: z.string().trim().min(2, "Last name must have at least 2 characters"),
+  email: z.string().trim().email("Invalid email"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -40,7 +40,7 @@ export const ChangePasswordSchema = z.object({
 })
 
 export const ChangeEmailSchema = z.object({
-  newEmail: z.string().email("Invalid email"),
+  newEmail: z.string().trim().email("Invalid email"),
   currentPassword: z.string().min(1, "Password is required"),
 })
 
