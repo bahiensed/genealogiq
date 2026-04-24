@@ -200,6 +200,7 @@ model User {
   deathDate           DateTime? @map("death_date")
   deathPlace          String?   @map("death_place")
   deathCountry        String?   @map("death_country")
+  gender              String?   @map("gender")
   avatarUrl           String?   @map("avatar_url")
   coverUrl            String?   @map("cover_url")
   phoneCountryCode    String    @default("55") @map("phone_country_code")
@@ -231,6 +232,8 @@ model User {
   createdById         String?       @map("created_by_id")
   createdBy           User?         @relation("MemorialCreator", fields: [createdById], references: [id], onDelete: SetNull)
   memorialsCreated    User[]        @relation("MemorialCreator")
+  familyFrom          FamilyRelation[] @relation("FamilyFrom")
+  familyTo            FamilyRelation[] @relation("FamilyTo")
 
   @@index([createdById])
   @@map("users")
@@ -352,6 +355,26 @@ model Geolocation {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("geolocations")
+}
+
+// ─── Family Tree ─────────────────────────────────────────────────────────────
+
+model FamilyRelation {
+  id      String  @id @default(cuid())
+  fromId  String  @map("from_id")
+  toId    String  @map("to_id")
+  type    String  @map("type")
+  subtype String? @map("subtype")
+
+  from User @relation("FamilyFrom", fields: [fromId], references: [id], onDelete: Cascade)
+  to   User @relation("FamilyTo",   fields: [toId],   references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([fromId, toId, type])
+  @@index([fromId])
+  @@index([toId])
+  @@map("family_relations")
 }
 
 // ─── Supplier ────────────────────────────────────────────────────────────────

@@ -5,6 +5,7 @@ import { getProfileById } from "@/queries/profile"
 import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
 import { getGeolocationByUserId } from "@/queries/geolocation"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
+import { getFamilyRelationCount } from "@/queries/family-tree"
 import { getGalleryImageUrls, getGalleryCount } from "@/queries/gallery"
 import { getTributeAuthors, getTributeCountByProfileId } from "@/queries/tribute"
 import { getBioByUserId } from "@/queries/bio"
@@ -64,6 +65,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     favorites,
     memorials,
     bio,
+    treeCount,
   ] = await Promise.all([
     getFavoriteCount(id),
     isOwn ? Promise.resolve(false) : isFavoritedByUser(session.user.id, id),
@@ -75,6 +77,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     isOwn && !isMemorialized ? getFavoritesByUserId(id) : Promise.resolve([]),
     isOwn && !isMemorialized ? getMemorialsByCreatorId(id) : Promise.resolve([]),
     getBioByUserId(id),
+    getFamilyRelationCount(id),
   ])
 
   const hasBio = !!bio && !!(bio.text || bio.quote || bio.images.length > 0)
@@ -109,7 +112,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "tree",
       title: "Family Tree",
       description: "Roots, branches and the quiet ties that bind generations.",
-      metric: "Coming soon",
+      metric: treeCount > 0 ? `${treeCount} ${treeCount === 1 ? "member" : "members"}` : "No members yet",
       icon: TreePine,
       span: 4,
       preview: <TreePreview />,
@@ -172,7 +175,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "tree",
       title: "Family Tree",
       description: "Roots, branches and the quiet ties that bind generations.",
-      metric: "Coming soon",
+      metric: treeCount > 0 ? `${treeCount} ${treeCount === 1 ? "member" : "members"}` : "No members yet",
       icon: TreePine,
       span: 4,
       preview: <TreePreview />,

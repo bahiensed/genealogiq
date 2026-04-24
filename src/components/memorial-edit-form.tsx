@@ -39,6 +39,7 @@ import type { ProfileRow } from "@/queries/profile"
 interface FormState {
   firstName: string
   lastName: string
+  gender: "male" | "female" | ""
   avatarUrl: string
   birthDate: Date | undefined
   birthPlace: string
@@ -103,6 +104,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   const [form, setForm] = useState<FormState>({
     firstName: initial.firstName,
     lastName: initial.lastName,
+    gender: (initial.gender as "male" | "female" | "") ?? "",
     avatarUrl: initial.avatarUrl ?? "",
     birthDate: initial.birthDate ?? undefined,
     birthPlace: initial.birthPlace ?? "",
@@ -147,6 +149,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         ? {
             firstName: form.firstName,
             lastName: form.lastName,
+            gender: form.gender || null,
             birthDate: form.birthDate,
             birthPlace: form.birthPlace || undefined,
             birthCountry: form.birthCountry || undefined,
@@ -158,6 +161,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         : {
             firstName: form.firstName,
             lastName: form.lastName,
+            gender: form.gender || null,
             birthDate: form.birthDate ?? null,
             birthPlace: form.birthPlace || undefined,
             birthCountry: form.birthCountry || undefined,
@@ -218,6 +222,18 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
           <Label htmlFor="last-name">Family name</Label>
           <Input id="last-name" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} placeholder="Family name" maxLength={100} />
         </div>
+      </div>
+
+      {/* Gender */}
+      <div className="space-y-2">
+        <Label htmlFor="gender">Gender <span className="text-muted-foreground text-xs">(optional)</span></Label>
+        <Select value={form.gender} onValueChange={(v) => update("gender", v as FormState["gender"])}>
+          <SelectTrigger id="gender"><SelectValue placeholder="Not specified" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="male">Male</SelectItem>
+            <SelectItem value="female">Female</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Birth */}

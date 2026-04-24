@@ -9,6 +9,7 @@ import { RecentlyViewedSection } from "@/components/recently-viewed-section"
 import { RecentlyViewedCount } from "@/components/recently-viewed-count"
 import { Greeting } from "@/components/greeting"
 import { ScanQrButton } from "@/components/scan-qr-button"
+import { prisma } from "@/lib/prisma"
 import { getFavoritesByUserId, type FavoriteRow } from "@/queries/favorite"
 import { getMemorialsByCreatorId, type MemorialRow } from "@/queries/memorial"
 
@@ -57,13 +58,15 @@ function memToMiniProfile(m: MemorialRow, index: number): MiniProfile {
 
 export default async function HomePage() {
   const session = await verifySession()
-  const firstName = session.user.name?.split(" ")[0] ?? "there"
   const userId = session.user.id
 
-  const [favorites, memorials] = await Promise.all([
+  const [favorites, memorials, currentUser] = await Promise.all([
     getFavoritesByUserId(userId),
     getMemorialsByCreatorId(userId),
+    prisma.user.findUnique({ where: { id: userId }, select: { firstName: true } }),
   ])
+
+  const firstName = currentUser?.firstName ?? "there"
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">

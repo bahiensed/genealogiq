@@ -22,12 +22,13 @@ export async function createMemorial(data: unknown) {
   const parsed = memorialSchema.safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
-  const { firstName, lastName, birthDate, birthPlace, birthCountry, deathDate, deathPlace, deathCountry, avatarUrl } = parsed.data
+  const { firstName, lastName, gender, birthDate, birthPlace, birthCountry, deathDate, deathPlace, deathCountry, avatarUrl } = parsed.data
 
   const memorial = await prisma.user.create({
     data: {
       firstName,
       lastName,
+      gender: gender ?? null,
       email: `memorial-${Date.now()}@genealogiq.internal`,
       role: "APP_MEMO",
       birthDate,
@@ -90,7 +91,7 @@ export async function updateMemorial(profileId: string, data: unknown) {
   const parsed = memorialSchema.safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
-  const { firstName, lastName, birthDate, birthPlace, birthCountry, deathDate, deathPlace, deathCountry, avatarUrl } = parsed.data
+  const { firstName, lastName, gender, birthDate, birthPlace, birthCountry, deathDate, deathPlace, deathCountry, avatarUrl } = parsed.data
 
   if (profile.avatarUrl && profile.avatarUrl !== avatarUrl) {
     await deleteBlobs([profile.avatarUrl])
@@ -98,7 +99,7 @@ export async function updateMemorial(profileId: string, data: unknown) {
 
   await prisma.user.update({
     where: { id: profileId },
-    data: { firstName, lastName, birthDate, birthPlace, birthCountry, deathDate, deathPlace, deathCountry, avatarUrl },
+    data: { firstName, lastName, gender: gender ?? null, birthDate, birthPlace, birthCountry, deathDate, deathPlace, deathCountry, avatarUrl },
   })
 
   revalidatePath(`/profile/${profileId}`)

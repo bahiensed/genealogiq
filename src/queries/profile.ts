@@ -8,6 +8,7 @@ export async function getProfileById(id: string) {
       firstName: true,
       lastName: true,
       role: true,
+      gender: true,
       avatarUrl: true,
       birthDate: true,
       birthPlace: true,

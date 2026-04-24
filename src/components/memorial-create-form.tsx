@@ -25,6 +25,7 @@ import { COUNTRIES } from "@/consts/countries"
 interface FormState {
   firstName: string
   lastName: string
+  gender: "male" | "female" | ""
   avatarUrl: string
   birthDate: Date | undefined
   birthPlace: string
@@ -35,7 +36,7 @@ interface FormState {
 }
 
 const empty: FormState = {
-  firstName: "", lastName: "", avatarUrl: "",
+  firstName: "", lastName: "", gender: "", avatarUrl: "",
   birthDate: undefined, birthPlace: "", birthCountry: "",
   deathDate: undefined, deathPlace: "", deathCountry: "",
 }
@@ -121,6 +122,7 @@ export function MemorialCreateForm() {
       const result = await createMemorial({
         firstName: form.firstName,
         lastName: form.lastName,
+        gender: form.gender || null,
         birthDate: form.birthDate,
         birthPlace: form.birthPlace || undefined,
         birthCountry: form.birthCountry || undefined,
@@ -178,6 +180,18 @@ export function MemorialCreateForm() {
           <Label htmlFor="last-name">Family name</Label>
           <Input id="last-name" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} placeholder="Family name" maxLength={100} />
         </div>
+      </div>
+
+      {/* Gender */}
+      <div className="space-y-2">
+        <Label htmlFor="gender">Gender <span className="text-muted-foreground text-xs">(optional)</span></Label>
+        <Select value={form.gender} onValueChange={(v) => update("gender", v as FormState["gender"])}>
+          <SelectTrigger id="gender"><SelectValue placeholder="Not specified" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="male">Male</SelectItem>
+            <SelectItem value="female">Female</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Birth */}

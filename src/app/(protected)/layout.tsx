@@ -1,4 +1,5 @@
 import { verifySession } from '@/lib/dal'
+import { prisma } from '@/lib/prisma'
 import { Header } from '@/components/header'
 import { getPendingTributeNotifications } from '@/queries/tribute'
 
@@ -8,13 +9,19 @@ export default async function ProtectedLayout({
   children: React.ReactNode
 }>) {
   const session = await verifySession()
-  const notifications = await getPendingTributeNotifications(session.user.id)
+  const [notifications, user] = await Promise.all([
+    getPendingTributeNotifications(session.user.id),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { firstName: true, lastName: true, avatarUrl: true },
+    }),
+  ])
 
   return (
     <>
       <Header
-        userImage={session.user.image}
-        userName={session.user.name}
+        userImage={user?.avatarUrl}
+        userName={user ? `${user.firstName} ${user.lastName}` : undefined}
         notifications={notifications}
       />
       {children}
