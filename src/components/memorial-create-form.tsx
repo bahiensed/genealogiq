@@ -25,7 +25,7 @@ import { COUNTRIES } from "@/consts/countries"
 interface FormState {
   firstName: string
   lastName: string
-  gender: "male" | "female" | ""
+  gender: "MALE" | "FEMALE" | "OTHER" | ""
   avatarUrl: string
   birthDate: Date | undefined
   birthPlace: string
@@ -188,8 +188,9 @@ export function MemorialCreateForm() {
         <Select value={form.gender} onValueChange={(v) => update("gender", v as FormState["gender"])}>
           <SelectTrigger id="gender"><SelectValue placeholder="Not specified" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="male">Male</SelectItem>
-            <SelectItem value="female">Female</SelectItem>
+            <SelectItem value="MALE">Male</SelectItem>
+            <SelectItem value="FEMALE">Female</SelectItem>
+            <SelectItem value="OTHER">Other</SelectItem>
           </SelectContent>
         </Select>
       </div>

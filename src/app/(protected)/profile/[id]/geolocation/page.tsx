@@ -111,7 +111,7 @@ export default async function GeolocationPage({ params }: Props) {
                   <div className="pt-3 border-t border-border/60">
                     <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Coordinates</div>
                     <code className="text-sm font-mono">
-                      {geo.lat.toFixed(6)}, {geo.lng.toFixed(6)}
+                      {geo.lat.toFixed(6)}, {geo.lon.toFixed(6)}
                     </code>
                   </div>
                 </div>

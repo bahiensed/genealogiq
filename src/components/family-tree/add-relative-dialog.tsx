@@ -51,8 +51,8 @@ const RELATION_LABELS: Record<RelationKind, string> = {
 }
 
 function genderRingClass(gender: string | null) {
-  if (gender === "female") return "ring-rose-400/50"
-  if (gender === "male")   return "ring-[hsl(var(--brand-indigo)/0.5)]"
+  if (gender === "FEMALE") return "ring-rose-400/50"
+  if (gender === "MALE")   return "ring-[hsl(var(--brand-indigo)/0.5)]"
   return "ring-border/40"
 }
 

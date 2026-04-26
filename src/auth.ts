@@ -19,7 +19,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const { email, password } = validated.data
 
-        const user = await prisma.user.findUnique({ where: { email } })
+        const user = await prisma.appUser.findFirst({ where: { email } })
         if (!user) return null
 
         if (user.emailVerified === null) return null
@@ -32,7 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!match) return null
 
         if (user.failedLoginAttempts > 0 || user.lockedUntil) {
-          await prisma.user.update({
+          await prisma.appUser.update({
             where: { id: user.id },
             data: { failedLoginAttempts: 0, lockedUntil: null },
           })
@@ -40,7 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         return {
           id: user.id,
-          email: user.email,
+          email: user.email!,
           name: `${user.firstName} ${user.lastName}`,
           role: user.role,
         }

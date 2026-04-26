@@ -26,9 +26,9 @@ function PersonNodeComponent({ data, selected }: NodeProps) {
     : birthYear || ""
 
   const sideColor =
-    person.gender === "female"
+    person.gender === "FEMALE"
       ? "bg-rose-400/70"
-      : person.gender === "male"
+      : person.gender === "MALE"
         ? "bg-[hsl(var(--brand-indigo)/0.8)]"
         : "bg-muted-foreground/40"
 

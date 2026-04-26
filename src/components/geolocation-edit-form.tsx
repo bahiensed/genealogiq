@@ -33,14 +33,14 @@ interface GeoState {
   country: string
   section: string
   lat: string
-  lng: string
+  lon: string
   notes: string
   photos: (string | null)[]
 }
 
 function toState(existing: GeolocationRow | null): GeoState {
   if (!existing) {
-    return { placeName: "", address: "", city: "", state: "", country: "", section: "", lat: "0", lng: "0", notes: "", photos: [null, null, null] }
+    return { placeName: "", address: "", city: "", state: "", country: "", section: "", lat: "0", lon: "0", notes: "", photos: [null, null, null] }
   }
   return {
     placeName: existing.placeName,
@@ -50,7 +50,7 @@ function toState(existing: GeolocationRow | null): GeoState {
     country: existing.country ?? "",
     section: existing.section ?? "",
     lat: String(existing.lat),
-    lng: String(existing.lng),
+    lon: String(existing.lon),
     notes: existing.notes ?? "",
     photos: [existing.photo1 ?? null, existing.photo2 ?? null, existing.photo3 ?? null],
   }
@@ -109,7 +109,7 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
     if (!navigator.geolocation) { toast.error("Geolocation not supported by this browser."); return }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setGeo((prev) => ({ ...prev, lat: String(pos.coords.latitude.toFixed(6)), lng: String(pos.coords.longitude.toFixed(6)) }))
+        setGeo((prev) => ({ ...prev, lat: String(pos.coords.latitude.toFixed(6)), lon: String(pos.coords.longitude.toFixed(6)) }))
         toast.success("Location detected.")
       },
       (err) => {
@@ -129,8 +129,8 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
     if (uploading.some(Boolean)) { toast.warning("Please wait for photos to finish uploading."); return }
     startTransition(async () => {
       const lat = parseFloat(geo.lat)
-      const lng = parseFloat(geo.lng)
-      if (isNaN(lat) || isNaN(lng)) { toast.error("Invalid coordinates."); return }
+      const lon = parseFloat(geo.lon)
+      if (isNaN(lat) || isNaN(lon)) { toast.error("Invalid coordinates."); return }
       const result = await saveGeolocation(profileId, {
         placeName: geo.placeName,
         address: geo.address || undefined,
@@ -139,7 +139,7 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
         country: geo.country || undefined,
         section: geo.section || undefined,
         lat,
-        lng,
+        lon,
         notes: geo.notes || undefined,
         photo1: geo.photos[0] || null,
         photo2: geo.photos[1] || null,
@@ -259,8 +259,8 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
             <Input id="geo-lat" type="number" step="any" min={-90} max={90} value={geo.lat} onChange={(e) => update("lat", e.target.value)} placeholder="-25.4284" />
           </div>
           <div className="flex-1 space-y-1">
-            <Label htmlFor="geo-lng" className="text-xs text-muted-foreground">Longitude</Label>
-            <Input id="geo-lng" type="number" step="any" min={-180} max={180} value={geo.lng} onChange={(e) => update("lng", e.target.value)} placeholder="-49.2733" />
+            <Label htmlFor="geo-lon" className="text-xs text-muted-foreground">Longitude</Label>
+            <Input id="geo-lon" type="number" step="any" min={-180} max={180} value={geo.lon} onChange={(e) => update("lon", e.target.value)} placeholder="-49.2733" />
           </div>
           <div className="flex items-end">
             <Button type="button" variant="outline" onClick={handleUseMyLocation} className="gap-2 w-full sm:w-auto">

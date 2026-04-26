@@ -11,7 +11,7 @@ export default async function ProtectedLayout({
   const session = await verifySession()
   const [notifications, user] = await Promise.all([
     getPendingTributeNotifications(session.user.id),
-    prisma.user.findUnique({
+    prisma.appUser.findUnique({
       where: { id: session.user.id },
       select: { firstName: true, lastName: true, avatarUrl: true },
     }),

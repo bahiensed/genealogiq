@@ -16,8 +16,17 @@ enum Role {
   COMERCIAL
   FINANCE
   USER
+}
+
+enum AppRole {
   APP_USER
   APP_MEMO
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
 enum EmailTokenType {
@@ -48,7 +57,7 @@ model License {
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   packages         Package[]
-  customerLicenses CustomerLicense[]
+  tenantLicenses TenantLicense[]
 
   @@map("licenses")
 }
@@ -75,13 +84,12 @@ model Package {
 model Sale {
   id       Int      @id @default(autoincrement())
   quantity Int      @default(1)
-  soldAt   DateTime @map("sold_at")
 
   packageId  String   @map("package_id")
   package    Package  @relation(fields: [packageId], references: [id], onDelete: Restrict)
 
-  customerId String   @map("customer_id")
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  tenantId   String   @map("tenant_id")
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
 
   soldById String @map("sold_by_id")
   soldBy   User   @relation(fields: [soldById], references: [id], onDelete: Restrict)
@@ -92,12 +100,12 @@ model Sale {
   @@map("sales")
 }
 
-model CustomerLicense {
+model TenantLicense {
   id       String @id @default(cuid())
   quantity Int    @default(0)
 
-  customerId String   @map("customer_id")
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tenantId   String   @map("tenant_id")
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   licenseId String  @map("license_id")
   license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
@@ -105,8 +113,8 @@ model CustomerLicense {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([customerId, licenseId])
-  @@map("customer_licenses")
+  @@unique([tenantId, licenseId])
+  @@map("tenant_licenses")
 }
 
 // ─── Auth tokens ─────────────────────────────────────────────────────────────
@@ -115,12 +123,15 @@ model EmailToken {
   id        String         @id @default(cuid())
   token     String         @unique
   type      EmailTokenType
-  userId    String         @map("user_id")
+  userId    String?        @map("user_id")
   newEmail  String?        @map("new_email")
   expiresAt DateTime       @map("expires_at")
   createdAt DateTime       @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  appUserId String?  @map("app_user_id")
+  appUser   AppUser? @relation(fields: [appUserId], references: [id], onDelete: Cascade)
 
   @@map("email_tokens")
 }
@@ -128,11 +139,14 @@ model EmailToken {
 model PasswordResetToken {
   id        String   @id @default(cuid())
   token     String   @unique
-  userId    String   @map("user_id")
+  userId    String?  @map("user_id")
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  appUserId String?  @map("app_user_id")
+  appUser   AppUser? @relation(fields: [appUserId], references: [id], onDelete: Cascade)
 
   @@map("password_reset_tokens")
 }
@@ -156,7 +170,8 @@ model Address {
   company  Company?
   user     User?
   supplier Supplier?
-  customer Customer?
+  tenant   Tenant?
+  appUser  AppUser?
 
   @@map("addresses")
 }
@@ -184,7 +199,7 @@ model Company {
   @@map("companies")
 }
 
-// ─── User ─────────────────────────────────────────────────────────────────────
+// ─── User (BMS/SEQ operators only — não contém APP_USER/APP_MEMO) ─────────────
 
 model User {
   id                  String    @id @default(cuid())
@@ -195,14 +210,8 @@ model User {
   role                Role      @default(USER)
   nationalId          String?   @map("national_id")
   birthDate           DateTime? @map("birth_date")
-  birthPlace          String?   @map("birth_place")
-  birthCountry        String?   @map("birth_country")
-  deathDate           DateTime? @map("death_date")
-  deathPlace          String?   @map("death_place")
-  deathCountry        String?   @map("death_country")
   gender              String?   @map("gender")
   avatarUrl           String?   @map("avatar_url")
-  coverUrl            String?   @map("cover_url")
   phoneCountryCode    String    @default("55") @map("phone_country_code")
   phone               String?
   isActive            Boolean   @default(true) @map("is_active")
@@ -210,8 +219,8 @@ model User {
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
 
-  customerId String?   @map("customer_id")
-  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  tenantId   String?   @map("tenant_id")
+  tenant     Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -222,21 +231,98 @@ model User {
   emailTokens         EmailToken[]
   passwordResetTokens PasswordResetToken[]
   sales               Sale[]
-  bio                 Bio?
-  galleryItems        GalleryItem[]
-  tributesAuthored    Tribute[]     @relation("TributeAuthor")
-  tributesReceived    Tribute[]     @relation("TributeProfile")
-  favoritesGiven      Favorite[]    @relation("FavoriteUser")
-  favoritesReceived   Favorite[]    @relation("FavoriteTarget")
-  geolocation         Geolocation?
-  createdById         String?       @map("created_by_id")
-  createdBy           User?         @relation("MemorialCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  memorialsCreated    User[]        @relation("MemorialCreator")
-  familyFrom          FamilyRelation[] @relation("FamilyFrom")
-  familyTo            FamilyRelation[] @relation("FamilyTo")
 
-  @@index([createdById])
   @@map("users")
+}
+
+// ─── AppUser ──────────────────────────────────────────────────────────────────
+
+model AppUser {
+  id    String  @id @default(cuid())
+  role  AppRole @default(APP_USER)
+
+  firstName           String    @map("first_name")
+  lastName            String    @map("last_name")
+  gender              Gender?
+  birthDate           DateTime? @map("birth_date")
+  birthPlace          String?   @map("birth_place")
+  birthCity           String?   @map("birth_city")
+  birthState          String?   @map("birth_state")
+  birthCountry        String?   @map("birth_country")
+  avatarUrl           String?   @map("avatar_url")
+  nationalId          String?   @map("national_id")
+  notes               String?
+
+  deathDate           DateTime? @map("death_date")
+  deathPlace          String?   @map("death_place")
+  deathState          String?   @map("death_state")
+  deathCountry        String?   @map("death_country")
+  deathCause          String?   @map("death_cause")
+
+  // Auth (only APP_USER that can log in)
+  email               String?
+  password            String?
+  emailVerified       DateTime? @map("email_verified")
+  failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime? @map("locked_until")
+  isActive            Boolean   @default(true) @map("is_active")
+
+  phoneCountryCode    String    @default("55") @map("phone_country_code")
+  phone               String?
+  fb                  String?
+  instagram           String?
+  linkedin            String?
+  tiktok              String?
+  x                   String?
+  youtube             String?
+  otherSocial         String?   @map("other_social")
+  website             String?
+
+  tenantId  String?   @map("tenant_id")
+  tenant    Tenant? @relation("AppUserTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+
+  addressId String?   @unique @map("address_id")
+  address   Address?  @relation(fields: [addressId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Guardian relationships
+  guardiansOf AppUserGuardian[] @relation("GuardianOf")
+  guardedBy   AppUserGuardian[] @relation("GuardedBy")
+
+  // APP-specific content
+  // userId field on each model maps to app_user_id column (kept for minimal code churn)
+  bio              Bio?
+  galleryItems     GalleryItem[]
+  tributesAuthored Tribute[]      @relation("TributeAuthor")
+  tributesReceived Tribute[]      @relation("TributeProfile")
+  favoritesGiven   Favorite[]     @relation("FavoriteUser")
+  favoritesReceived Favorite[]    @relation("FavoriteTarget")
+  geolocation      Geolocation?
+  familyFrom       FamilyRelation[] @relation("FamilyFrom")
+  familyTo         FamilyRelation[] @relation("FamilyTo")
+
+  // Auth tokens
+  emailTokens         EmailToken[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("app_users")
+}
+
+model AppUserGuardian {
+  id        String  @id @default(cuid())
+
+  appUserId  String  @map("app_user_id")
+  appUser    AppUser @relation("GuardedBy", fields: [appUserId], references: [id], onDelete: Cascade)
+
+  guardianId String  @map("guardian_id")
+  guardian   AppUser @relation("GuardianOf", fields: [guardianId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([appUserId, guardianId])
+  @@map("app_user_guardians")
 }
 
 // ─── Bio ─────────────────────────────────────────────────────────────────────
@@ -246,15 +332,16 @@ model Bio {
   quote String? @db.VarChar(140)
   text  String? @db.VarChar(2048)
 
-  userId String @unique @map("user_id")
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // userId maps to app_user_id column (kept name to avoid cascading code changes)
+  userId String  @unique @map("app_user_id")
+  user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   images BioImage[]
 
-  @@map("bios")
+  @@map("app_bios")
 }
 
 model BioImage {
@@ -268,7 +355,7 @@ model BioImage {
 
   createdAt DateTime @default(now()) @map("created_at")
 
-  @@map("bio_images")
+  @@map("app_bio_images")
 }
 
 // ─── Tributes ────────────────────────────────────────────────────────────────
@@ -279,18 +366,19 @@ model Tribute {
   imageUrl String?        @map("image_url")
   status   TributeStatus  @default(PENDING)
 
-  authorId String @map("author_id")
-  author   User   @relation("TributeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  // authorId/profileId map to app_author_id/app_profile_id columns
+  authorId  String  @map("app_author_id")
+  author    AppUser @relation("TributeAuthor",  fields: [authorId],  references: [id], onDelete: Cascade)
 
-  profileId String @map("profile_id")
-  profile   User   @relation("TributeProfile", fields: [profileId], references: [id], onDelete: Cascade)
+  profileId String  @map("app_profile_id")
+  profile   AppUser @relation("TributeProfile", fields: [profileId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([authorId, profileId])
   @@index([profileId])
-  @@map("tributes")
+  @@map("app_tributes")
 }
 
 // ─── Gallery ─────────────────────────────────────────────────────────────────
@@ -306,29 +394,31 @@ model GalleryItem {
   description String? @db.VarChar(280)
   order       Int     @default(0)
 
-  userId String @map("user_id")
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // userId maps to app_user_id column
+  userId String  @map("app_user_id")
+  user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([userId])
-  @@map("gallery_items")
+  @@map("app_gallery_items")
 }
 
 // ─── Favorites ───────────────────────────────────────────────────────────────
 
 model Favorite {
-  userId   String @map("user_id")
-  user     User   @relation("FavoriteUser", fields: [userId], references: [id], onDelete: Cascade)
+  // userId/targetId map to app_user_id/app_target_id columns
+  userId   String  @map("app_user_id")
+  user     AppUser @relation("FavoriteUser",   fields: [userId],   references: [id], onDelete: Cascade)
 
-  targetId String @map("target_id")
-  target   User   @relation("FavoriteTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  targetId String  @map("app_target_id")
+  target   AppUser @relation("FavoriteTarget", fields: [targetId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
 
   @@id([userId, targetId])
-  @@map("favorites")
+  @@map("app_favorites")
 }
 
 // ─── Geolocation ─────────────────────────────────────────────────────────────
@@ -342,39 +432,44 @@ model Geolocation {
   country   String? @db.VarChar(100)
   section   String? @db.VarChar(200)
   lat       Float
-  lng       Float
+  lon       Float
+  date      DateTime?
+  zip       String?
   notes     String? @db.VarChar(500)
   photo1    String? @map("photo_1")
   photo2    String? @map("photo_2")
   photo3    String? @map("photo_3")
 
-  userId String @unique @map("user_id")
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // userId maps to app_user_id column
+  userId String  @unique @map("app_user_id")
+  user   AppUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("geolocations")
+  @@map("app_geolocations")
 }
 
 // ─── Family Tree ─────────────────────────────────────────────────────────────
 
 model FamilyRelation {
   id      String  @id @default(cuid())
-  fromId  String  @map("from_id")
-  toId    String  @map("to_id")
   type    String  @map("type")
   subtype String? @map("subtype")
 
-  from User @relation("FamilyFrom", fields: [fromId], references: [id], onDelete: Cascade)
-  to   User @relation("FamilyTo",   fields: [toId],   references: [id], onDelete: Cascade)
+  // fromId/toId map to app_from_id/app_to_id columns
+  fromId String  @map("app_from_id")
+  from   AppUser @relation("FamilyFrom", fields: [fromId], references: [id], onDelete: Cascade)
+
+  toId   String  @map("app_to_id")
+  to     AppUser @relation("FamilyTo",   fields: [toId],   references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([fromId, toId, type])
   @@index([fromId])
   @@index([toId])
-  @@map("family_relations")
+  @@map("app_family_relations")
 }
 
 // ─── Supplier ────────────────────────────────────────────────────────────────
@@ -386,7 +481,7 @@ model SupplierCategory {
   isActive    Boolean @default(true) @map("is_active")
 
   tenantId String?   @map("tenant_id")
-  tenant   Customer? @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant? @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
@@ -415,7 +510,7 @@ model Supplier {
   category   SupplierCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   tenantId String?   @map("tenant_id")
-  tenant   Customer? @relation("SupplierTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant? @relation("SupplierTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -426,26 +521,26 @@ model Supplier {
   @@map("suppliers")
 }
 
-// ─── Customer ────────────────────────────────────────────────────────────────
+// ─── Tenant ────────────────────────────────────────────────────────────────
 
-model CustomerCategory {
+model TenantCategory {
   id          String  @id @default(cuid())
   name        String
   description String?
   isActive    Boolean @default(true) @map("is_active")
 
   tenantId String?   @map("tenant_id")
-  tenant   Customer? @relation("CustomerCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant? @relation("TenantCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
-  customers Customer[] @relation("CustomerCategory")
+  tenants    Tenant[] @relation("TenantCategory")
 
   @@unique([tenantId, name])
-  @@map("customer_categories")
+  @@map("tenant_categories")
 }
 
-model Customer {
+model Tenant {
   id                    String     @id @default(cuid())
   entityType            EntityType @map("entity_type")
   name                  String
@@ -472,10 +567,10 @@ model Customer {
   moduleFinance             Boolean @default(false) @map("module_finance")
 
   categoryId String?           @map("category_id")
-  category   CustomerCategory? @relation("CustomerCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+  category   TenantCategory? @relation("TenantCategory", fields: [categoryId], references: [id], onDelete: SetNull)
 
   tenantId String?   @map("tenant_id")
-  tenant   Customer? @relation("CustomerTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant? @relation("TenantParent", fields: [tenantId], references: [id], onDelete: Cascade)
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -484,12 +579,13 @@ model Customer {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   users        User[]
-  subCustomers Customer[]         @relation("CustomerTenant")
+  appUsers     AppUser[]          @relation("AppUserTenant")
+  subTenants Tenant[]         @relation("TenantParent")
   suppliers    Supplier[]         @relation("SupplierTenant")
   supplierCats SupplierCategory[] @relation("SupplierCategoryTenant")
-  customerCats CustomerCategory[] @relation("CustomerCategoryTenant")
+  tenantCats TenantCategory[] @relation("TenantCategoryTenant")
   sales        Sale[]
-  licenses     CustomerLicense[]
+  licenses     TenantLicense[]
 
-  @@map("customers")
+  @@map("tenants")
 }

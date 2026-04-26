@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 
 export async function getProfileById(id: string) {
-  return prisma.user.findUnique({
+  return prisma.appUser.findUnique({
     where: { id },
     select: {
       id: true,
@@ -16,7 +16,7 @@ export async function getProfileById(id: string) {
       deathDate: true,
       deathPlace: true,
       deathCountry: true,
-      createdById: true,
+      guardedBy: { select: { guardianId: true } },
     },
   })
 }

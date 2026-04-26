@@ -42,7 +42,7 @@ export async function login(
   const validated = SignInSchema.safeParse(data)
   if (!validated.success) return { error: "Invalid data" }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.appUser.findFirst({
     where: { email: validated.data.email },
     select: { id: true, emailVerified: true, lockedUntil: true, failedLoginAttempts: true },
   })
@@ -63,7 +63,7 @@ export async function login(
       if (user) {
         const base = user.lockedUntil && user.lockedUntil < new Date() ? 0 : user.failedLoginAttempts
         const newCount = base + 1
-        await prisma.user.update({
+        await prisma.appUser.update({
           where: { id: user.id },
           data: {
             failedLoginAttempts: newCount,
@@ -93,7 +93,7 @@ export async function signUp(
     return { errors: flattenError(validated.error).fieldErrors }
   }
 
-  const existing = await prisma.user.findUnique({
+  const existing = await prisma.appUser.findFirst({
     where: { email: validated.data.email },
     select: { id: true },
   })
@@ -103,7 +103,7 @@ export async function signUp(
 
   const hashedPassword = await bcrypt.hash(validated.data.password, 12)
 
-  const user = await prisma.user.create({
+  const user = await prisma.appUser.create({
     data: {
       firstName: validated.data.firstName,
       lastName: validated.data.lastName,
@@ -114,14 +114,14 @@ export async function signUp(
     select: { id: true },
   })
 
-  await prisma.emailToken.deleteMany({ where: { userId: user.id, type: "VERIFICATION" } })
+  await prisma.emailToken.deleteMany({ where: { appUserId: user.id, type: "VERIFICATION" } })
 
   const token = randomBytes(32).toString("hex")
   await prisma.emailToken.create({
     data: {
       token,
       type: "VERIFICATION",
-      userId: user.id,
+      appUserId: user.id,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     },
   })
@@ -139,21 +139,21 @@ export async function forgotPassword(
   const validated = z.string().email("Invalid email").safeParse(email)
   if (!validated.success) return { error: "Invalid email" }
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.appUser.findFirst({
     where: { email: validated.data },
-    select: { id: true },
+    select: { id: true, email: true },
   })
 
   if (!user) redirect("/forgot-password?sent=true")
 
-  await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } })
+  await prisma.passwordResetToken.deleteMany({ where: { appUserId: user.id } })
 
   const token = randomBytes(32).toString("hex")
   await prisma.passwordResetToken.create({
-    data: { token, userId: user.id, expiresAt: new Date(Date.now() + 60 * 60 * 1000) },
+    data: { token, appUserId: user.id, expiresAt: new Date(Date.now() + 60 * 60 * 1000) },
   })
 
-  await sendPasswordResetEmail(validated.data, token)
+  await sendPasswordResetEmail(user.email!, token)
   redirect("/forgot-password?sent=true")
 }
 
@@ -170,19 +170,21 @@ export async function resetPassword(
 
   const record = await prisma.passwordResetToken.findUnique({
     where: { token },
-    select: { userId: true, expiresAt: true },
+    select: { appUserId: true, userId: true, expiresAt: true },
   })
 
   if (!record || record.expiresAt < new Date()) {
     return { error: "Invalid or expired link. Please request a new one." }
   }
 
+  // appUserId for new tokens; userId as fallback for tokens created before Phase 3
+  const appUserId = record.appUserId ?? record.userId!
   const hashedPassword = await bcrypt.hash(validated.data.password, 12)
 
   await prisma.$transaction([
-    prisma.user.update({
-      where: { id: record.userId },
-      data: { password: hashedPassword },
+    prisma.appUser.update({
+      where: { id: appUserId },
+      data: { password: hashedPassword, emailVerified: new Date() },
     }),
     prisma.passwordResetToken.delete({ where: { token } }),
   ])
@@ -203,7 +205,7 @@ export async function changePassword(
   if (!validated.success) return { errors: flattenError(validated.error).fieldErrors }
 
   const userId = session.user!.id!
-  const user = await prisma.user.findUnique({
+  const user = await prisma.appUser.findUnique({
     where: { id: userId },
     select: { password: true },
   })
@@ -216,7 +218,7 @@ export async function changePassword(
   if (same) return { errors: { newPassword: ["New password must differ from current"] } }
 
   const hashed = await bcrypt.hash(validated.data.newPassword, 12)
-  await prisma.user.update({ where: { id: userId }, data: { password: hashed } })
+  await prisma.appUser.update({ where: { id: userId }, data: { password: hashed } })
 
   return { success: "Password changed successfully." }
 }
@@ -234,7 +236,7 @@ export async function requestEmailChange(
   if (!validated.success) return { errors: flattenError(validated.error).fieldErrors }
 
   const userId = session.user!.id!
-  const user = await prisma.user.findUnique({
+  const user = await prisma.appUser.findUnique({
     where: { id: userId },
     select: { email: true, password: true },
   })
@@ -247,17 +249,17 @@ export async function requestEmailChange(
   const match = await bcrypt.compare(validated.data.currentPassword, user.password)
   if (!match) return { errors: { currentPassword: ["Incorrect password"] } }
 
-  const existing = await prisma.user.findUnique({ where: { email: validated.data.newEmail } })
+  const existing = await prisma.appUser.findFirst({ where: { email: validated.data.newEmail } })
   if (existing) return { errors: { newEmail: ["This email is already in use"] } }
 
-  await prisma.emailToken.deleteMany({ where: { userId, type: "CHANGE" } })
+  await prisma.emailToken.deleteMany({ where: { appUserId: userId, type: "CHANGE" } })
 
   const token = randomBytes(32).toString("hex")
   await prisma.emailToken.create({
     data: {
       token,
       type: "CHANGE",
-      userId,
+      appUserId: userId,
       newEmail: validated.data.newEmail,
       expiresAt: new Date(Date.now() + 60 * 60 * 1000),
     },
@@ -278,7 +280,7 @@ export async function deleteAccount(
   if (!validated.success) return { errors: flattenError(validated.error).fieldErrors }
 
   const userId = session.user!.id!
-  const user = await prisma.user.findUnique({
+  const user = await prisma.appUser.findUnique({
     where: { id: userId },
     select: { email: true, password: true },
   })
@@ -287,10 +289,9 @@ export async function deleteAccount(
   const match = await bcrypt.compare(validated.data.currentPassword, user.password)
   if (!match) return { errors: { currentPassword: ["Incorrect password"] } }
 
-  // Collect own blob URLs before deletion
   const [ownProfile, ownBio, ownGallery, ownGeo, ownTributesAuthored, ownTributesReceived] =
     await Promise.all([
-      prisma.user.findUnique({ where: { id: userId }, select: { avatarUrl: true } }),
+      prisma.appUser.findUnique({ where: { id: userId }, select: { avatarUrl: true } }),
       prisma.bio.findUnique({ where: { userId }, select: { images: { select: { url: true } } } }),
       prisma.galleryItem.findMany({ where: { userId }, select: { url: true } }),
       prisma.geolocation.findUnique({ where: { userId }, select: { photo1: true, photo2: true, photo3: true } }),
@@ -298,9 +299,8 @@ export async function deleteAccount(
       prisma.tribute.findMany({ where: { profileId: userId }, select: { imageUrl: true } }),
     ])
 
-  // Collect memorial blob URLs
-  const memorials = await prisma.user.findMany({
-    where: { createdById: userId, role: "APP_MEMO" },
+  const memorials = await prisma.appUser.findMany({
+    where: { role: "APP_MEMO", guardedBy: { some: { guardianId: userId } } },
     select: { id: true, avatarUrl: true },
   })
   const memorialIds = memorials.map((m) => m.id)
@@ -327,13 +327,12 @@ export async function deleteAccount(
     ...memGeos.flatMap((g) => [g.photo1, g.photo2, g.photo3]),
   ])
 
-  // Delete memorial profiles first (DB cascade handles their bio/gallery/geo/tributes)
   if (memorialIds.length > 0) {
-    await prisma.user.deleteMany({ where: { id: { in: memorialIds } } })
+    await prisma.appUser.deleteMany({ where: { id: { in: memorialIds } } })
   }
 
-  await sendAccountDeletionEmail(user.email)
-  await prisma.user.delete({ where: { id: userId } })
+  await sendAccountDeletionEmail(user.email!)
+  await prisma.appUser.delete({ where: { id: userId } })
 
   await signOut({ redirectTo: "/" })
 }

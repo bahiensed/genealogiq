@@ -48,7 +48,7 @@ export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
 
   // Fetch all users and all relations in two queries
   const [users, relations] = await Promise.all([
-    prisma.user.findMany({
+    prisma.appUser.findMany({
       where: { id: { in: ids } },
       select: {
         id: true, firstName: true, lastName: true,
@@ -109,7 +109,7 @@ export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
   // Set gender from persons map
   for (const node of nodeById.values()) {
     const user = persons[node.id]
-    node.gender = (user?.gender === "female" ? "female" : "male") as RTNode["gender"]
+    node.gender = (user?.gender === "FEMALE" ? "female" : "male") as RTNode["gender"]
   }
 
   const mutableNodes = Array.from(nodeById.values())

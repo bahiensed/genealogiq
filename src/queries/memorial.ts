@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma"
 
-export async function getMemorialsByCreatorId(createdById: string) {
-  return prisma.user.findMany({
-    where: { createdById, role: "APP_MEMO" },
+export async function getMemorialsByCreatorId(guardianId: string) {
+  return prisma.appUser.findMany({
+    where: { role: "APP_MEMO", guardedBy: { some: { guardianId } } },
     select: {
       id: true,
       firstName: true,
@@ -22,6 +22,7 @@ export async function getMemorialsByCreatorId(createdById: string) {
 
 export type MemorialRow = Awaited<ReturnType<typeof getMemorialsByCreatorId>>[number]
 
-export async function countMemorialsByCreatorId(createdById: string) {
-  return prisma.user.count({ where: { createdById, role: "APP_MEMO" } })
+export async function countMemorialsByCreatorId(guardianId: string) {
+  return prisma.appUser.count({ where: { role: "APP_MEMO", guardedBy: { some: { guardianId } } } }
+  )
 }

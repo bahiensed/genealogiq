@@ -50,7 +50,7 @@ export default async function ProfileByIdPage({ params }: Props) {
 
   const isOwn = user.id === session.user.id
   const isMemorialized = user.role === "APP_MEMO"
-  const isGuardian = isMemorialized && user.createdById === session.user.id
+  const isGuardian = isMemorialized && user.guardedBy.some((g) => g.guardianId === session.user.id)
   const name = `${user.firstName} ${user.lastName}`
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
 
@@ -155,7 +155,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       metric: geo ? geo.placeName : "Not set",
       icon: MapPin,
       span: 3,
-      preview: <GeoPreview lat={geo?.lat} lng={geo?.lng} />,
+      preview: <GeoPreview lat={geo?.lat} lon={geo?.lon} />,
       href: `${base}/geolocation`,
     },
     {

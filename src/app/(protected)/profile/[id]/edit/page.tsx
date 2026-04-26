@@ -19,7 +19,7 @@ export default async function ProfileEditPage({ params }: Props) {
   if (!profile) notFound()
 
   const isOwn = id === session.user.id
-  const isGuardian = profile.role === "APP_MEMO" && profile.createdById === session.user.id
+  const isGuardian = profile.role === "APP_MEMO" && profile.guardedBy.some((g) => g.guardianId === session.user.id)
   if (!isOwn && !isGuardian) redirect(`/profile/${id}`)
 
   const isMemorialized = profile.role === "APP_MEMO"

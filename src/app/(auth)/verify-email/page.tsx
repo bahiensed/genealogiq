@@ -41,10 +41,13 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
     )
   }
 
+  // appUserId for new tokens; userId as fallback for tokens created before Phase 3
+  const appUserId = record.appUserId ?? record.userId!
+
   if (record.type === 'CHANGE') {
     await prisma.$transaction([
-      prisma.user.update({
-        where: { id: record.userId },
+      prisma.appUser.update({
+        where: { id: appUserId },
         data: { email: record.newEmail!, emailVerified: new Date() },
       }),
       prisma.emailToken.delete({ where: { token } }),
@@ -62,8 +65,8 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
   }
 
   await prisma.$transaction([
-    prisma.user.update({
-      where: { id: record.userId },
+    prisma.appUser.update({
+      where: { id: appUserId },
       data: { emailVerified: new Date() },
     }),
     prisma.emailToken.delete({ where: { token } }),

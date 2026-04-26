@@ -39,7 +39,7 @@ import type { ProfileRow } from "@/queries/profile"
 interface FormState {
   firstName: string
   lastName: string
-  gender: "male" | "female" | ""
+  gender: "MALE" | "FEMALE" | "OTHER" | ""
   avatarUrl: string
   birthDate: Date | undefined
   birthPlace: string
@@ -104,7 +104,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   const [form, setForm] = useState<FormState>({
     firstName: initial.firstName,
     lastName: initial.lastName,
-    gender: (initial.gender as "male" | "female" | "") ?? "",
+    gender: (initial.gender as "MALE" | "FEMALE" | "OTHER" | "") ?? "",
     avatarUrl: initial.avatarUrl ?? "",
     birthDate: initial.birthDate ?? undefined,
     birthPlace: initial.birthPlace ?? "",
@@ -230,8 +230,9 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         <Select value={form.gender} onValueChange={(v) => update("gender", v as FormState["gender"])}>
           <SelectTrigger id="gender"><SelectValue placeholder="Not specified" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="male">Male</SelectItem>
-            <SelectItem value="female">Female</SelectItem>
+            <SelectItem value="MALE">Male</SelectItem>
+            <SelectItem value="FEMALE">Female</SelectItem>
+            <SelectItem value="OTHER">Other</SelectItem>
           </SelectContent>
         </Select>
       </div>

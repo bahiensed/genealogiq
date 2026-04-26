@@ -11,9 +11,8 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   const terms = q.split(/\s+/).filter(Boolean)
 
-  const results = await prisma.user.findMany({
+  const results = await prisma.appUser.findMany({
     where: {
-      role: { in: ["APP_USER", "APP_MEMO"] },
       AND: terms.map((term) => ({
         OR: [
           { firstName: { contains: term, mode: "insensitive" } },

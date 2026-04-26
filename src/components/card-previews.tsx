@@ -198,17 +198,17 @@ export function GuardianPreview({ memorials }: { memorials: MemorialRow[] }) {
   )
 }
 
-function osmTileUrl(lat: number, lng: number, zoom: number) {
+function osmTileUrl(lat: number, lon: number, zoom: number) {
   const n = Math.pow(2, zoom)
-  const x = Math.floor(((lng + 180) / 360) * n)
+  const x = Math.floor(((lon + 180) / 360) * n)
   const latRad = (lat * Math.PI) / 180
   const y = Math.floor(((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n)
   return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`
 }
 
-export function GeoPreview({ lat, lng }: { lat?: number | null; lng?: number | null }) {
+export function GeoPreview({ lat, lon }: { lat?: number | null; lon?: number | null }) {
   const resolvedLat = lat ?? -22.959167
-  const resolvedLng = lng ?? -43.188333
+  const resolvedLng = lon ?? -43.188333
   const mapUrl = osmTileUrl(resolvedLat, resolvedLng, 14)
   return (
     <div className="relative h-full w-full min-h-[120px] rounded-xl overflow-hidden bg-muted">

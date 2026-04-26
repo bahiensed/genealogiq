@@ -36,8 +36,8 @@ export type TributeAuthorPreview = {
 export type TributeNotification = { profileId: string; name: string; count: number }
 
 export async function getPendingTributeNotifications(userId: string): Promise<TributeNotification[]> {
-  const profiles = await prisma.user.findMany({
-    where: { OR: [{ id: userId }, { createdById: userId, role: "APP_MEMO" }] },
+  const profiles = await prisma.appUser.findMany({
+    where: { OR: [{ id: userId }, { role: "APP_MEMO", guardedBy: { some: { guardianId: userId } } }] },
     select: { id: true, firstName: true, lastName: true },
   })
 

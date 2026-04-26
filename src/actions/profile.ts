@@ -14,7 +14,7 @@ export async function updateProfile(data: unknown) {
 
   const { firstName, lastName, gender, birthDate, birthPlace, birthCountry, avatarUrl } = parsed.data
 
-  const current = await prisma.user.findUnique({
+  const current = await prisma.appUser.findUnique({
     where: { id: session.user.id },
     select: { avatarUrl: true },
   })
@@ -22,7 +22,7 @@ export async function updateProfile(data: unknown) {
     await deleteBlobs([current.avatarUrl])
   }
 
-  await prisma.user.update({
+  await prisma.appUser.update({
     where: { id: session.user.id },
     data: { firstName, lastName, gender: gender ?? null, birthDate, birthPlace, birthCountry, avatarUrl },
   })

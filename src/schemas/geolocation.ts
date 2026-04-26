@@ -8,7 +8,7 @@ export const geolocationSchema = z.object({
   country: z.string().trim().max(100).optional(),
   section: z.string().trim().max(200).optional(),
   lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
+  lon: z.number().min(-180).max(180),
   notes: z.string().trim().max(500).optional(),
   photo1: z.string().url().optional().nullable(),
   photo2: z.string().url().optional().nullable(),

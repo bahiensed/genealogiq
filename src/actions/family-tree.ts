@@ -34,8 +34,8 @@ export async function addRelation(rootId: string, data: unknown) {
   if (fromId === toId) return { error: "A profile cannot be related to itself." }
 
   const [from, to] = await Promise.all([
-    prisma.user.findUnique({ where: { id: fromId }, select: { id: true } }),
-    prisma.user.findUnique({ where: { id: toId },   select: { id: true } }),
+    prisma.appUser.findUnique({ where: { id: fromId }, select: { id: true } }),
+    prisma.appUser.findUnique({ where: { id: toId },   select: { id: true } }),
   ])
   if (!from || !to) return { error: "Profile not found." }
 
