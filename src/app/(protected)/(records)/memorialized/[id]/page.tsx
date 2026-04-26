@@ -24,7 +24,7 @@ export default async function MemorializedDetailPage({ params }: { params: Promi
     deathCity:          deceased.deathCity          ?? '',
     deathState:         deceased.deathState         ?? '',
     deathCountry:       deceased.deathCountry       ?? '',
-    burialDate:         deceased.burialDate ? deceased.burialDate.toISOString().slice(0, 10) : '',
+    burialDate:         deceased.burialDate,
     burialLatitude:     deceased.burialLatitude  !== null ? Number(deceased.burialLatitude)  : null,
     burialLongitude:    deceased.burialLongitude !== null ? Number(deceased.burialLongitude) : null,
     burialSite:         deceased.burialSite         ?? '',
@@ -42,7 +42,7 @@ export default async function MemorializedDetailPage({ params }: { params: Promi
     tiktok:             deceased.tiktok             ?? '',
     x:                  deceased.x                  ?? '',
     youtube:            deceased.youtube            ?? '',
-    outro:              deceased.outro              ?? '',
+    otherSocial:        deceased.otherSocial        ?? '',
     website:            deceased.website            ?? '',
     notes:              deceased.notes              ?? '',
   }

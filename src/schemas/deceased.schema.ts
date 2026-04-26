@@ -33,7 +33,7 @@ export const deceasedSchema = z.object({
   tiktok:            z.string().max(500).nullish(),
   x:                 z.string().max(500).nullish(),
   youtube:           z.string().max(500).nullish(),
-  outro:             z.string().max(500).nullish(),
+  otherSocial:             z.string().max(500).nullish(),
   website:           z.string().max(500).nullish(),
   notes:             z.string().nullish(),
 })
@@ -73,7 +73,7 @@ export const deceasedDefaultValues: DeceasedFormValues = {
   tiktok:             '',
   x:                  '',
   youtube:            '',
-  outro:              '',
+  otherSocial:              '',
   website:            '',
   notes:              '',
 }

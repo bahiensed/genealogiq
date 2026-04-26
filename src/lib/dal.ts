@@ -20,7 +20,7 @@ export const verifyTenantSession = cache(async () => {
 
 export const getCustomerModules = cache(async () => {
   const session = await verifyTenantSession()
-  return prisma.customer.findUnique({
+  return prisma.tenant.findUnique({
     where: { id: session.customerId },
     select: {
       moduleRecordsSuppliers:    true,

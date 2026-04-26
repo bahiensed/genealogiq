@@ -62,13 +62,13 @@ const DECEASED_STEP_FIELDS: Record<number, (keyof DeceasedFormValues)[]> = {
   7: [],
 }
 
-const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'outro', 'website'] as const
+const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const
 type SocialKey = typeof SOCIAL_KEYS[number]
 
 function socialLabel(key: SocialKey): string {
   if (key === 'fb') return 'Facebook'
   if (key === 'x') return 'X'
-  if (key === 'outro') return 'Other'
+  if (key === 'otherSocial') return 'Other'
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
@@ -90,6 +90,26 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
 
   const isLastStep = step === STEPS.length - 1
   const isAppUserSection = step < 4
+
+  function handleUseMyLocation() {
+    if (!navigator.geolocation) { toast.error('Geolocation not supported by this browser.'); return }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        deceasedForm.setValue('burialLatitude',  pos.coords.latitude)
+        deceasedForm.setValue('burialLongitude', pos.coords.longitude)
+        toast.success('Location detected.')
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED)
+          toast.error('Location access denied. Enable it in your browser settings.')
+        else if (err.code === err.POSITION_UNAVAILABLE)
+          toast.error('Location unavailable. Check your GPS signal.')
+        else
+          toast.error('Location request timed out. Try again.')
+      },
+      { timeout: 10000, maximumAge: 60000 },
+    )
+  }
 
   async function handleNext() {
     let valid = true
@@ -742,7 +762,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   )}
                 />
                 <div className="col-span-2 flex items-end">
-                  <Button type="button" variant="outline" size="sm" className="w-full" title="Get coordinates automatically">
+                  <Button type="button" variant="outline" size="sm" className="w-full" title="Get coordinates automatically" onClick={handleUseMyLocation}>
                     <MapPin className="h-4 w-4" />
                     GPS
                   </Button>

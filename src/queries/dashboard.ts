@@ -9,20 +9,20 @@ export async function getDashboardStats(customerId: string) {
 
   const [availableLicenses, totalCustomers, monthlySales, yearlySales] =
     await Promise.all([
-      prisma.customerLicense.aggregate({
-        where: { customerId },
+      prisma.tenantLicense.aggregate({
+        where: { tenantId: customerId },
         _sum:  { quantity: true },
       }),
       prisma.appUser.count({
         where: { tenantId: customerId },
       }),
       prisma.appSale.aggregate({
-        where: { tenantId: customerId, soldAt: { gte: startOfMonth } },
+        where: { tenantId: customerId, createdAt: { gte: startOfMonth } },
         _count: true,
         _sum:   { value: true },
       }),
       prisma.appSale.aggregate({
-        where: { tenantId: customerId, soldAt: { gte: startOfYear } },
+        where: { tenantId: customerId, createdAt: { gte: startOfYear } },
         _count: true,
         _sum:   { value: true },
       }),

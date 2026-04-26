@@ -42,13 +42,13 @@ const GENDER_LABELS: Record<string, string> = {
   OTHER:  'Other',
 }
 
-const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'outro', 'website'] as const
+const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const
 type SocialKey = typeof SOCIAL_KEYS[number]
 
 function socialLabel(key: SocialKey): string {
   if (key === 'fb') return 'Facebook'
   if (key === 'x') return 'X (Twitter)'
-  if (key === 'outro') return 'Other'
+  if (key === 'otherSocial') return 'Other'
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 

@@ -144,7 +144,7 @@ export async function resetPassword(
     select: { userId: true, expiresAt: true },
   })
 
-  if (!record || record.expiresAt < new Date()) {
+  if (!record || !record.userId || record.expiresAt < new Date()) {
     return { error: "Invalid or expired link. Please request a new one." }
   }
 

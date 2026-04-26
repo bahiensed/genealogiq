@@ -1,10 +1,12 @@
+import Link from 'next/link'
 import { verifyTenantSession } from '@/lib/dal'
 import { prisma } from '@/lib/prisma'
+import { Button } from '@/components/ui/button'
 
 export default async function InventoryLicensesPage() {
   const session = await verifyTenantSession()
-  const inventory = await prisma.customerLicense.findMany({
-    where: { customerId: session.customerId },
+  const inventory = await prisma.tenantLicense.findMany({
+    where: { tenantId: session.customerId },
     select: {
       quantity: true,
       license: { select: { name: true, description: true } },
@@ -14,9 +16,14 @@ export default async function InventoryLicensesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Available Licenses
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+          Available Licenses
+        </h1>
+        <Button asChild>
+          <Link href="/purchasing/licenses">Buy license</Link>
+        </Button>
+      </div>
 
       <div className="rounded-md border">
         <table className="w-full text-sm">

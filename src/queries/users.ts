@@ -18,7 +18,7 @@ export async function getUsers() {
   const { customerId } = await verifyTenantSession()
 
   return prisma.user.findMany({
-    where: { customerId },
+    where: { tenantId: customerId },
     select: {
       id:        true,
       firstName: true,
@@ -36,7 +36,7 @@ export async function getUser(id: string) {
   const { customerId } = await verifyTenantSession()
 
   return prisma.user.findUnique({
-    where: { id, customerId },
+    where: { id, tenantId: customerId },
     select: {
       id:               true,
       firstName:        true,

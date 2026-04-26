@@ -23,7 +23,7 @@ export async function updateCompany(_id: string, data: CompanyFormValues): Promi
 
   const { address, legalName, ...rest } = validated.data
 
-  await prisma.customer.update({
+  await prisma.tenant.update({
     where: { id: customerId },
     data: {
       name: legalName,

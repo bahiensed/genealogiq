@@ -283,14 +283,14 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
       <p className="text-sm font-medium">Social media</p>
       <FieldGroup>
         <div className="grid grid-cols-12 gap-3">
-          {(['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'outro', 'website'] as const).map((key) => (
+          {(['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const).map((key) => (
             <Controller
               key={key}
               name={key}
               control={control}
               render={({ field }) => (
                 <Field className="col-span-6 md:col-span-4">
-                  <FieldLabel>{key === 'fb' ? 'Facebook' : key === 'x' ? 'X (Twitter)' : key === 'outro' ? 'Other' : key.charAt(0).toUpperCase() + key.slice(1)}:</FieldLabel>
+                  <FieldLabel>{key === 'fb' ? 'Facebook' : key === 'x' ? 'X (Twitter)' : key === 'otherSocial' ? 'Other' : key.charAt(0).toUpperCase() + key.slice(1)}:</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )}

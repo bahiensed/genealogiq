@@ -7,7 +7,7 @@ type EntityType = (typeof ENTITY_TYPES)[number]
 
 async function resolveName(type: EntityType, id: string, customerId: string): Promise<string | null> {
   if (type === 'users') {
-    const record = await prisma.user.findUnique({ where: { id, customerId }, select: { firstName: true, lastName: true } })
+    const record = await prisma.user.findUnique({ where: { id, tenantId: customerId }, select: { firstName: true, lastName: true } })
     if (!record) return null
     return `${record.firstName} ${record.lastName}`.trim() || null
   }
@@ -21,7 +21,7 @@ async function resolveName(type: EntityType, id: string, customerId: string): Pr
     return record?.name ?? null
   }
   if (type === 'memorialized') {
-    const record = await prisma.deceased.findUnique({ where: { id, tenantId: customerId }, select: { firstName: true, lastName: true } })
+    const record = await prisma.appUser.findUnique({ where: { id, tenantId: customerId }, select: { firstName: true, lastName: true } })
     if (!record) return null
     return `${record.firstName} ${record.lastName}`.trim() || null
   }

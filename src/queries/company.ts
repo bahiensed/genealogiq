@@ -17,7 +17,7 @@ const addressSelect = {
 export async function getCompany() {
   const { customerId } = await verifyTenantSession()
 
-  const customer = await prisma.customer.findUnique({
+  const customer = await prisma.tenant.findUnique({
     where: { id: customerId },
     select: {
       id:                    true,

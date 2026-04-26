@@ -41,7 +41,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
       const user = await tx.user.create({
         data: {
           ...rest,
-          customer:      { connect: { id: customerId } },
+          tenant:        { connect: { id: customerId } },
           birthDate:     birthDate ? new Date(birthDate) : null,
           password:      null,
           emailVerified: new Date(),
@@ -81,7 +81,7 @@ export async function updateUser(id: string, data: UserFormValues): Promise<Acti
     if (existing && existing.id !== id) return { error: 'This email is already in use' }
 
     await prisma.user.update({
-      where: { id, customerId },
+      where: { id, tenantId: customerId },
       data: {
         ...rest,
         birthDate: birthDate ? new Date(birthDate) : null,
@@ -105,7 +105,7 @@ export async function deleteUser(userId: string): Promise<ActionError | void> {
   if (session.user!.id === userId) return { error: 'You cannot delete your own account.' }
 
   try {
-    await prisma.user.delete({ where: { id: userId, customerId: session.customerId } })
+    await prisma.user.delete({ where: { id: userId, tenantId: session.customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return { error: 'User not found.' }
@@ -121,7 +121,7 @@ export async function toggleUserActive(userId: string): Promise<ActionError | vo
 
   if (session.user!.id === userId) return { error: 'You cannot deactivate your own account.' }
 
-  const user = await prisma.user.findUnique({ where: { id: userId, customerId: session.customerId }, select: { isActive: true } })
+  const user = await prisma.user.findUnique({ where: { id: userId, tenantId: session.customerId }, select: { isActive: true } })
   if (!user) return { error: 'User not found.' }
 
   await prisma.user.update({ where: { id: userId }, data: { isActive: !user.isActive } })
@@ -131,7 +131,7 @@ export async function toggleUserActive(userId: string): Promise<ActionError | vo
 export async function resendWelcomeEmail(userId: string): Promise<ActionError | void> {
   const { customerId } = await verifyTenantSession()
 
-  const user = await prisma.user.findUnique({ where: { id: userId, customerId }, select: { email: true, password: true } })
+  const user = await prisma.user.findUnique({ where: { id: userId, tenantId: customerId }, select: { email: true, password: true } })
   if (!user) return { error: 'User not found.' }
   if (user.password) return { error: 'This user has already set their password.' }
 

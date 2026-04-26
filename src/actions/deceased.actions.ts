@@ -13,45 +13,81 @@ function toDate(value: string | null | undefined): Date | null {
   return value ? new Date(value) : null
 }
 
+function buildBurialAddress(street?: string | null, number?: string | null, complement?: string | null): string | null {
+  const parts = [street, number, complement].filter(Boolean).join(' ')
+  return parts || null
+}
+
+function buildGeolocationData(data: DeceasedFormValues) {
+  const { burialLatitude, burialLongitude, burialDate, burialZip, burialSite,
+          burialStreet, burialNumber, burialComplement, burialNeighborhood,
+          burialCity, burialState, burialCountry } = data
+
+  if (burialLatitude == null || burialLongitude == null) return null
+
+  return {
+    lat:      burialLatitude,
+    lon:      burialLongitude,
+    placeName: burialSite || 'Burial site',
+    date:     toDate(burialDate),
+    zip:      burialZip ?? null,
+    address:  buildBurialAddress(burialStreet, burialNumber, burialComplement),
+    section:  burialNeighborhood ?? null,
+    city:     burialCity    ?? null,
+    state:    burialState   ?? null,
+    country:  burialCountry ?? null,
+  }
+}
+
 export async function createDeceased(
   appUserId: string,
   data: DeceasedFormValues,
 ): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
-  // Verify the appUser belongs to this tenant and check license availability
-  const appUser = await prisma.appUser.findUnique({
+  const guardian = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
-    select: { id: true, _count: { select: { appSales: true, guardianships: true } } },
+    select: { id: true, _count: { select: { appSales: true, guardiansOf: true } } },
   })
-  if (!appUser) return { error: 'Customer not found.' }
+  if (!guardian) return { error: 'Customer not found.' }
 
-  const available = appUser._count.appSales - appUser._count.guardianships
+  const available = guardian._count.appSales - guardian._count.guardiansOf
   if (available <= 0) return { error: 'No licenses available for this customer.' }
 
   const validated = deceasedSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
-  const { birthDate, deathDate, burialDate, burialLatitude, burialLongitude, ...rest } = validated.data
+  const {
+    birthDate, deathDate, deathCity,
+    burialDate, burialLatitude, burialLongitude,
+    burialSite, burialZip, burialStreet, burialNumber, burialComplement,
+    burialNeighborhood, burialCity, burialState, burialCountry,
+    ...rest
+  } = validated.data
+
+  const geoData = buildGeolocationData(validated.data)
 
   try {
     await prisma.$transaction(async (tx) => {
-      const deceased = await tx.deceased.create({
+      const memorial = await tx.appUser.create({
         data: {
           ...rest,
-          birthDate:       toDate(birthDate),
-          deathDate:       toDate(deathDate),
-          burialDate:      toDate(burialDate),
-          burialLatitude:  burialLatitude ?? null,
-          burialLongitude: burialLongitude ?? null,
-          tenantId:        customerId,
+          role:       'APP_MEMO',
+          birthDate:  toDate(birthDate),
+          deathDate:  toDate(deathDate),
+          deathPlace: deathCity ?? null,
+          tenantId:   customerId,
         },
         select: { id: true },
       })
 
-      await tx.deceasedGuardian.create({
-        data: { appUserId, deceasedId: deceased.id, isPrimary: true },
+      await tx.appUserGuardian.create({
+        data: { appUserId: memorial.id, guardianId: appUserId },
       })
+
+      if (geoData) {
+        await tx.geolocation.create({ data: { userId: memorial.id, ...geoData } })
+      }
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
@@ -70,19 +106,37 @@ export async function updateDeceased(id: string, data: DeceasedFormValues): Prom
   const validated = deceasedSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
-  const { birthDate, deathDate, burialDate, burialLatitude, burialLongitude, ...rest } = validated.data
+  const {
+    birthDate, deathDate, deathCity,
+    burialDate, burialLatitude, burialLongitude,
+    burialSite, burialZip, burialStreet, burialNumber, burialComplement,
+    burialNeighborhood, burialCity, burialState, burialCountry,
+    ...rest
+  } = validated.data
+
+  const geoData = buildGeolocationData(validated.data)
 
   try {
-    await prisma.deceased.update({
-      where: { id, tenantId: customerId },
-      data: {
-        ...rest,
-        birthDate:       toDate(birthDate),
-        deathDate:       toDate(deathDate),
-        burialDate:      toDate(burialDate),
-        burialLatitude:  burialLatitude ?? null,
-        burialLongitude: burialLongitude ?? null,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.appUser.update({
+        where: { id, tenantId: customerId },
+        data: {
+          ...rest,
+          birthDate:  toDate(birthDate),
+          deathDate:  toDate(deathDate),
+          deathPlace: deathCity ?? null,
+        },
+      })
+
+      if (geoData) {
+        await tx.geolocation.upsert({
+          where:  { userId: id },
+          create: { userId: id, ...geoData },
+          update: geoData,
+        })
+      } else {
+        await tx.geolocation.deleteMany({ where: { userId: id } })
+      }
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
@@ -99,7 +153,7 @@ export async function deleteDeceased(id: string): Promise<ActionError | void> {
   const { customerId } = await verifyTenantSession()
 
   try {
-    await prisma.deceased.delete({ where: { id, tenantId: customerId } })
+    await prisma.appUser.delete({ where: { id, tenantId: customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return { error: 'Profile not found.' }
@@ -111,14 +165,14 @@ export async function deleteDeceased(id: string): Promise<ActionError | void> {
 }
 
 export async function addGuardian(
-  deceasedId: string,
-  appUserId: string,
+  memorialId: string,
+  guardianId: string,
 ): Promise<ActionError | ActionSuccess> {
   await verifyTenantSession()
 
   try {
-    await prisma.deceasedGuardian.create({
-      data: { deceasedId, appUserId, isPrimary: false },
+    await prisma.appUserGuardian.create({
+      data: { appUserId: memorialId, guardianId },
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
@@ -132,14 +186,14 @@ export async function addGuardian(
 }
 
 export async function removeGuardian(
-  deceasedId: string,
-  appUserId: string,
+  memorialId: string,
+  guardianId: string,
 ): Promise<ActionError | void> {
   await verifyTenantSession()
 
   try {
-    await prisma.deceasedGuardian.delete({
-      where: { deceasedId_appUserId: { deceasedId, appUserId } },
+    await prisma.appUserGuardian.delete({
+      where: { appUserId_guardianId: { appUserId: memorialId, guardianId } },
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {

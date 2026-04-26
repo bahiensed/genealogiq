@@ -31,8 +31,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Invited user who has not yet set a password
         if (!user.password) return null
 
-        // Block users without customerId (BMS users cannot log in to Sequoia)
-        if (!user.customerId) return null
+        // Block users without tenantId (BMS users cannot log in to Sequoia)
+        if (!user.tenantId) return null
 
         const match = await bcrypt.compare(password, user.password)
         if (!match) return null
@@ -49,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email:      user.email,
           name:       `${user.firstName} ${user.lastName}`,
           role:       user.role,
-          customerId: user.customerId,
+          customerId: user.tenantId,
         }
       },
     }),

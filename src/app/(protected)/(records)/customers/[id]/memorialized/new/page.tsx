@@ -7,7 +7,7 @@ export default async function NewMemorializedPage({ params }: { params: Promise<
   const customer = await getCustomer(id)
   if (!customer) notFound()
 
-  const available = Math.max(0, customer._count.appSales - customer._count.guardianships)
+  const available = Math.max(0, customer._count.appSales - customer._count.guardiansOf)
   if (available <= 0) redirect(`/customers/${id}`)
 
   return (

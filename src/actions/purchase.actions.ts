@@ -29,16 +29,15 @@ export async function purchasePackage(
     await tx.sale.create({
       data: {
         packageId,
-        customerId,
+        tenantId: customerId,
         quantity,
-        soldAt:   new Date(),
         soldById: userId,
       },
     })
 
-    await tx.customerLicense.upsert({
-      where:  { customerId_licenseId: { customerId, licenseId: pkg.licenseId } },
-      create: { customerId, licenseId: pkg.licenseId, quantity: totalLicenses },
+    await tx.tenantLicense.upsert({
+      where:  { tenantId_licenseId: { tenantId: customerId, licenseId: pkg.licenseId } },
+      create: { tenantId: customerId, licenseId: pkg.licenseId, quantity: totalLicenses },
       update: { quantity: { increment: totalLicenses } },
     })
   })

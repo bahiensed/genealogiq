@@ -7,8 +7,14 @@ export const authConfig = {
   },
   providers: [],
   callbacks: {
+    session({ session, token }) {
+      const t = token as Record<string, unknown>
+      if (t.customerId) session.user.customerId = t.customerId as string
+      return session
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
+      const customerId = auth?.user?.customerId
       const pathname = nextUrl.pathname
 
       const isProtected = [
@@ -21,7 +27,10 @@ export const authConfig = {
       )
 
       if (isProtected && !isLoggedIn) return false
-      if (isAuthRoute && isLoggedIn) {
+      if (isProtected && isLoggedIn && !customerId) {
+        return Response.redirect(new URL("/sign-in", nextUrl))
+      }
+      if (isAuthRoute && isLoggedIn && customerId) {
         return Response.redirect(new URL("/dashboard", nextUrl))
       }
 

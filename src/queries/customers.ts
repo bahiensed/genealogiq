@@ -18,7 +18,7 @@ export async function getCustomers() {
   const { customerId } = await verifyTenantSession()
 
   return prisma.appUser.findMany({
-    where:   { tenantId: customerId },
+    where:   { tenantId: customerId, role: 'APP_USER' },
     select: {
       id:        true,
       firstName: true,
@@ -58,19 +58,18 @@ export async function getCustomer(id: string) {
       tiktok:          true,
       x:               true,
       youtube:         true,
-      outro:           true,
+      otherSocial:     true,
       website:         true,
       address:         { select: addressSelect },
       _count: {
         select: {
-          appSales:     true,
-          guardianships: true,
+          appSales:    true,
+          guardiansOf: true,
         },
       },
-      guardianships: {
+      guardiansOf: {
         select: {
-          isPrimary: true,
-          deceased: {
+          appUser: {
             select: {
               id:        true,
               firstName: true,

@@ -25,7 +25,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
     birthCity:        customer.birthCity        ?? '',
     birthState:       customer.birthState       ?? '',
     birthCountry:     customer.birthCountry     ?? '',
-    email:            customer.email,
+    email:            customer.email            ?? '',
     phoneCountryCode: customer.phoneCountryCode,
     phone:            customer.phone            ?? '',
     categoryId:       customer.categoryId       ?? '',
@@ -37,7 +37,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
     tiktok:           customer.tiktok           ?? '',
     x:                customer.x                ?? '',
     youtube:          customer.youtube          ?? '',
-    outro:            customer.outro            ?? '',
+    otherSocial:      customer.otherSocial      ?? '',
     website:          customer.website          ?? '',
     address: customer.address ? {
       zip:          customer.address.zip          ?? '',
@@ -52,10 +52,10 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
   }
 
   const licensesAcquired = customer._count.appSales
-  const licensesUsed     = customer._count.guardianships
+  const licensesUsed     = customer._count.guardiansOf
   const licensesAvailable = Math.max(0, licensesAcquired - licensesUsed)
 
-  const memorializedProfiles = customer.guardianships.map(({ deceased }) => deceased)
+  const memorializedProfiles = customer.guardiansOf.map(({ appUser }) => appUser)
 
   return (
     <div className="flex flex-col gap-6">

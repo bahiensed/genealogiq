@@ -15,13 +15,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
-import { toggleCustomerActive, deleteCustomer } from '@/actions/customer.actions'
+import { toggleCustomerActive, deleteCustomer, resendCustomerEmail } from '@/actions/customer.actions'
 
 export type CustomerRow = {
   id: string
   firstName: string
   lastName: string
-  email: string
+  email: string | null
   isActive: boolean
   createdAt: Date
   category: { id: string; name: string } | null
@@ -55,6 +55,17 @@ function ActionsCell({ row }: { row: { original: CustomerRow } }) {
           >
             {customer.isActive ? 'Deactivate' : 'Reactivate'}
           </DropdownMenuItem>
+          {customer.email && (
+            <DropdownMenuItem
+              onClick={() => startTransition(async () => {
+                const result = await resendCustomerEmail(customer.id)
+                if (result?.error) toast.error(result.error)
+                else toast.success('Email resent successfully.')
+              })}
+            >
+              Resend email
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onSelect={() => setDeleteOpen(true)}
@@ -99,7 +110,7 @@ export const customerColumns: ColumnDef<CustomerRow>[] = [
   {
     accessorKey: 'email',
     header: ({ column }) => <DataTableColumnHeader column={column} title="E-mail" />,
-    cell: ({ row }) => row.original.email,
+    cell: ({ row }) => row.original.email ?? '—',
   },
   {
     accessorKey: 'isActive',
