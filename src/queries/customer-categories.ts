@@ -6,7 +6,7 @@ import { verifySession } from '@/lib/dal'
 export async function getCustomerCategories() {
   await verifySession()
 
-  return prisma.customerCategory.findMany({
+  return prisma.tenantCategory.findMany({
     select: {
       id:          true,
       name:        true,
@@ -21,7 +21,7 @@ export async function getCustomerCategories() {
 export async function getCustomerCategory(id: string) {
   await verifySession()
 
-  return prisma.customerCategory.findUnique({
+  return prisma.tenantCategory.findUnique({
     where: { id },
     select: {
       id:          true,

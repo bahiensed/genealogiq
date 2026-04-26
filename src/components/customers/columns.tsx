@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
-import { toggleCustomerActive, deleteCustomer } from '@/actions/customer.actions'
+import { toggleCustomerActive, deleteCustomer, resendCustomerEmail } from '@/actions/customer.actions'
 
 export type CustomerRow = {
   id: string
@@ -54,6 +54,15 @@ function ActionsCell({ row, currentUserRole }: { row: { original: CustomerRow };
             })}
           >
             {customer.isActive ? 'Deactivate' : 'Reactivate'}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => startTransition(async () => {
+              const result = await resendCustomerEmail(customer.id)
+              if (result?.error) toast.error(result.error)
+              else toast.success('Email resent successfully.')
+            })}
+          >
+            Resend email
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
             <>

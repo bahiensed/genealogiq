@@ -10,18 +10,18 @@ export async function getSales() {
     select: {
       id:       true,
       quantity: true,
-      soldAt:   true,
+      createdAt: true,
       package: {
         select: { name: true, price: true, quantity: true },
       },
-      customer: {
+      tenant: {
         select: { name: true },
       },
       soldBy: {
         select: { firstName: true, lastName: true },
       },
     },
-    orderBy: { soldAt: 'desc' },
+    orderBy: { createdAt: 'desc' },
   })
 
   return rows.map(r => ({ ...r, package: { ...r.package, price: Number(r.package.price) } }))

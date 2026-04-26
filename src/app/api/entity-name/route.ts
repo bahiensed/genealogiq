@@ -12,7 +12,7 @@ async function resolveName(type: EntityType, id: string): Promise<string | null>
     return `${record.firstName} ${record.lastName}`.trim() || null
   }
   if (type === 'customers') {
-    const record = await prisma.customer.findUnique({ where: { id }, select: { name: true } })
+    const record = await prisma.tenant.findUnique({ where: { id }, select: { name: true } })
     return record?.name ?? null
   }
   if (type === 'suppliers') {
@@ -32,7 +32,7 @@ async function resolveName(type: EntityType, id: string): Promise<string | null>
     return record?.name ?? null
   }
   if (type === 'customer-categories') {
-    const record = await prisma.customerCategory.findUnique({ where: { id }, select: { name: true } })
+    const record = await prisma.tenantCategory.findUnique({ where: { id }, select: { name: true } })
     return record?.name ?? null
   }
   return null

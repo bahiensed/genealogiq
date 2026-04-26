@@ -50,7 +50,7 @@ export async function deleteLicense(id: string): Promise<ActionError | void> {
 
   try {
     await prisma.$transaction(async (tx) => {
-      await tx.customerLicense.deleteMany({ where: { licenseId: id } })
+      await tx.tenantLicense.deleteMany({ where: { licenseId: id } })
       await tx.license.delete({ where: { id } })
     })
   } catch (e) {

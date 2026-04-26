@@ -13,9 +13,9 @@ import { deleteSale } from '@/actions/sale.actions'
 export type SaleRow = {
   id: number
   quantity: number
-  soldAt: Date
+  createdAt: Date
   package:  { name: string; price: number; quantity: number }
-  customer: { name: string }
+  tenant: { name: string }
   soldBy:   { firstName: string; lastName: string }
 }
 
@@ -23,6 +23,8 @@ function ActionsCell({ row, currentUserRole }: { row: { original: SaleRow }; cur
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const sale = row.original
+
+  if (currentUserRole !== 'SUPER_ADMIN' && currentUserRole !== 'OWNER') return null
 
   return (
     <>
@@ -34,32 +36,26 @@ function ActionsCell({ row, currentUserRole }: { row: { original: SaleRow }; cur
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-{(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-            <>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onSelect={() => setDeleteOpen(true)}
-              >
-                Delete
-              </DropdownMenuItem>
-            </>
-          )}
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onSelect={() => setDeleteOpen(true)}
+          >
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-        <ConfirmDeleteDialog
-          open={deleteOpen}
-          onOpenChange={setDeleteOpen}
-          isPending={isPending}
-          description={`The sale of package "${sale.package.name}" to "${sale.customer.name}" will be deleted and licenses will be returned to inventory.`}
-          onConfirm={() => startTransition(async () => {
-            const result = await deleteSale(sale.id)
-            if (result?.error) toast.error(result.error)
-            else { toast.success('Sale deleted successfully.'); setDeleteOpen(false) }
-          })}
-        />
-      )}
+      <ConfirmDeleteDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        isPending={isPending}
+        description={`The sale of package "${sale.package.name}" to "${sale.tenant.name}" will be deleted and licenses will be returned to inventory.`}
+        onConfirm={() => startTransition(async () => {
+          const result = await deleteSale(sale.id)
+          if (result?.error) toast.error(result.error)
+          else { toast.success('Sale deleted successfully.'); setDeleteOpen(false) }
+        })}
+      />
     </>
   )
 }
@@ -70,15 +66,15 @@ const date = new Intl.DateTimeFormat('en-US', { dateStyle: 'short' })
 export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
   return [
     {
-      accessorKey: 'soldAt',
+      accessorKey: 'createdAt',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Date" />,
-      cell: ({ row }) => date.format(new Date(row.original.soldAt)),
+      cell: ({ row }) => date.format(new Date(row.original.createdAt)),
     },
     {
       id: 'customer',
-      accessorFn: (row) => row.customer.name,
+      accessorFn: (row) => row.tenant.name,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Customer" />,
-      cell: ({ row }) => row.original.customer.name,
+      cell: ({ row }) => row.original.tenant.name,
     },
     {
       id: 'package',

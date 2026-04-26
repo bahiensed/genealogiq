@@ -55,6 +55,9 @@ export async function updateSupplierCategory(id: string, data: SupplierCategoryF
 export async function deleteSupplierCategory(id: string): Promise<ActionError | void> {
   await verifySession()
 
+  const count = await prisma.supplier.count({ where: { categoryId: id } })
+  if (count > 0) return { error: 'Cannot delete: category is assigned to one or more suppliers.' }
+
   try {
     await prisma.supplierCategory.delete({ where: { id } })
   } catch (e) {

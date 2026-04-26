@@ -17,7 +17,7 @@ const addressSelect = {
 export async function getCustomers() {
   await verifySession()
 
-  return prisma.customer.findMany({
+  return prisma.tenant.findMany({
     select: {
       id:         true,
       entityType: true,
@@ -35,7 +35,7 @@ export async function getCustomers() {
 export async function getCustomer(id: string) {
   await verifySession()
 
-  return prisma.customer.findUnique({
+  return prisma.tenant.findUnique({
     where: { id },
     select: {
       id:                    true,
@@ -70,7 +70,7 @@ export async function getCustomer(id: string) {
 export async function getActiveCustomers() {
   await verifySession()
 
-  return prisma.customer.findMany({
+  return prisma.tenant.findMany({
     where:   { isActive: true },
     select:  { id: true, name: true },
     orderBy: { name: 'asc' },

@@ -15,6 +15,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 
 interface Package {
@@ -35,15 +45,16 @@ interface SaleFormProps {
 }
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-const today = new Date().toISOString().slice(0, 10)
 
 export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   const [serverError, setServerError] = useState<string | null>(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pendingData, setPendingData] = useState<SaleFormValues | null>(null)
   const router = useRouter()
 
   const form = useForm<SaleFormValues>({
     resolver: saleResolver,
-    defaultValues: { ...saleDefaultValues, soldAt: today },
+    defaultValues: saleDefaultValues,
   })
 
   const { control, handleSubmit, watch, formState: { isSubmitting } } = form
@@ -52,9 +63,16 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   const selectedQty       = watch('quantity') || 0
   const selectedPkg       = packages.find(p => p.id === selectedPackageId)
 
-  async function onSubmit(data: SaleFormValues) {
+  function onSubmit(data: SaleFormValues) {
+    setPendingData(data)
+    setConfirmOpen(true)
+  }
+
+  async function handleConfirm() {
+    if (!pendingData) return
+    setConfirmOpen(false)
     setServerError(null)
-    const result = await createSale(data)
+    const result = await createSale(pendingData)
     if ('error' in result) {
       setServerError(result.error)
     } else {
@@ -64,104 +82,109 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-lg">
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        New sale
-      </h1>
+    <>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-lg">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+          New sale
+        </h1>
 
-      <FieldGroup>
-        <Controller
-          name="packageId"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Package:</FieldLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Select a package" />
-                </SelectTrigger>
-                <SelectContent>
-                  {packages.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name} — {usd.format(p.price)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+        <FieldGroup>
+          <Controller
+            name="packageId"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Package:</FieldLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger aria-invalid={fieldState.invalid}>
+                    <SelectValue placeholder="Select a package" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {packages.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name} — {usd.format(p.price)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="customerId"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Customer:</FieldLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Select a customer" />
-                </SelectTrigger>
-                <SelectContent>
-                  {customers.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          <Controller
+            name="tenantId"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Customer:</FieldLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger aria-invalid={fieldState.invalid}>
+                    <SelectValue placeholder="Select a customer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {customers.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="quantity"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Quantity:</FieldLabel>
-              <Input
-                type="number"
-                step="1"
-                min="1"
-                {...field}
-                value={field.value === 0 ? '' : field.value}
-                onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                autoComplete="off"
-                aria-invalid={fieldState.invalid}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              {selectedPkg && selectedQty > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  {selectedQty * selectedPkg.quantity} licenses · {usd.format(selectedQty * selectedPkg.price)}
-                </p>
-              )}
-            </Field>
-          )}
-        />
+          <Controller
+            name="quantity"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Quantity:</FieldLabel>
+                <Input
+                  type="number"
+                  step="1"
+                  min="1"
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(isNaN(e.target.valueAsNumber) ? '' : e.target.valueAsNumber)}
+                  autoComplete="off"
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {selectedPkg && selectedQty > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {selectedQty * selectedPkg.quantity} licenses · {usd.format(selectedQty * selectedPkg.price)}
+                  </p>
+                )}
+              </Field>
+            )}
+          />
+        </FieldGroup>
 
-        <Controller
-          name="soldAt"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Sale date:</FieldLabel>
-              <Input {...field} type="date" aria-invalid={fieldState.invalid} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-      </FieldGroup>
+        {serverError && <FieldError>{serverError}</FieldError>}
+        <Field orientation="horizontal">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Recording…' : 'Sale'}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => form.reset(saleDefaultValues)}>
+            Reset
+          </Button>
+        </Field>
+      </form>
 
-      {serverError && <FieldError>{serverError}</FieldError>}
-      <Field orientation="horizontal">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Recording…' : 'Record sale'}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => form.reset({ ...saleDefaultValues, soldAt: today })}>
-          Reset
-        </Button>
-      </Field>
-    </form>
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm sale</AlertDialogTitle>
+            <AlertDialogDescription>
+              Before completing this sale, please verify that payment has already been received.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirm}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

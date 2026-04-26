@@ -9,7 +9,7 @@ interface SalesDataTableProps {
 }
 
 const COLUMN_LABELS: Record<string, string> = {
-  soldAt:           'Date',
+  createdAt:        'Date',
   customer:         'Customer',
   package:          'Package',
   quantity:         'Package Qtd.',

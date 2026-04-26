@@ -34,7 +34,7 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
 
   const { address, birthDate, categoryId, owner, ...rest } = validated.data
 
-  const dupTax = await prisma.customer.findFirst({ where: { taxId: rest.taxId }, select: { id: true } })
+  const dupTax = await prisma.tenant.findFirst({ where: { taxId: rest.taxId }, select: { id: true } })
   if (dupTax) return { error: 'A customer with this tax ID already exists' }
 
   const existingOwner = await prisma.user.findUnique({ where: { email: owner.email }, select: { id: true } })
@@ -43,7 +43,7 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
   let token: string
   try {
     ;({ token } = await prisma.$transaction(async (tx) => {
-      const customer = await tx.customer.create({
+      const customer = await tx.tenant.create({
         data: {
           ...rest,
           birthDate: birthDate ? new Date(birthDate) : null,
@@ -59,7 +59,7 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
           lastName:      owner.lastName,
           email:         owner.email,
           role:          'OWNER',
-          customerId:    customer.id,
+          tenantId:      customer.id,
           password:      null,
           emailVerified: new Date(),
         },
@@ -94,11 +94,11 @@ export async function updateCustomer(id: string, data: CustomerFormValues): Prom
 
   const { address, birthDate, categoryId, ...rest } = validated.data
 
-  const dupTax = await prisma.customer.findFirst({ where: { taxId: rest.taxId, NOT: { id } }, select: { id: true } })
+  const dupTax = await prisma.tenant.findFirst({ where: { taxId: rest.taxId, NOT: { id } }, select: { id: true } })
   if (dupTax) return { error: 'A customer with this tax ID already exists' }
 
   try {
-    await prisma.customer.update({
+    await prisma.tenant.update({
       where: { id },
       data: {
         ...rest,
@@ -121,11 +121,19 @@ export async function updateCustomer(id: string, data: CustomerFormValues): Prom
 export async function deleteCustomer(id: string): Promise<ActionError | void> {
   await verifySession()
 
+  const salesCount = await prisma.sale.count({ where: { tenantId: id } })
+  if (salesCount > 0) {
+    return { error: 'Cannot delete a customer with existing sales records.' }
+  }
+
   try {
-    await prisma.customer.delete({ where: { id } })
+    await prisma.tenant.delete({ where: { id } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
       return { error: 'Customer not found.' }
+    }
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2003') {
+      return { error: 'Cannot delete: customer has dependent records.' }
     }
     throw e
   }
@@ -133,12 +141,32 @@ export async function deleteCustomer(id: string): Promise<ActionError | void> {
   revalidatePath('/customers')
 }
 
+export async function resendCustomerEmail(tenantId: string): Promise<ActionError | void> {
+  await verifySession()
+
+  const owner = await prisma.user.findFirst({
+    where:  { tenantId, role: 'OWNER' },
+    select: { id: true, email: true, password: true },
+  })
+  if (!owner) return { error: 'No owner user found for this customer.' }
+  if (owner.password) return { error: 'This user has already set their password.' }
+
+  await prisma.passwordResetToken.deleteMany({ where: { userId: owner.id } })
+
+  const token = randomBytes(32).toString('hex')
+  await prisma.passwordResetToken.create({
+    data: { token, userId: owner.id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
+  })
+
+  await sendSequoiaWelcomeEmail(owner.email, token)
+}
+
 export async function toggleCustomerActive(id: string): Promise<ActionError | void> {
   await verifySession()
 
-  const customer = await prisma.customer.findUnique({ where: { id }, select: { isActive: true } })
+  const customer = await prisma.tenant.findUnique({ where: { id }, select: { isActive: true } })
   if (!customer) return { error: 'Customer not found.' }
 
-  await prisma.customer.update({ where: { id }, data: { isActive: !customer.isActive } })
+  await prisma.tenant.update({ where: { id }, data: { isActive: !customer.isActive } })
   revalidatePath('/customers')
 }

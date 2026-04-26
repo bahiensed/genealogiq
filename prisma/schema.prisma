@@ -16,7 +16,6 @@ enum Role {
   COMERCIAL
   FINANCE
   USER
-  APP_USER
 }
 
 enum EmailTokenType {
@@ -41,7 +40,7 @@ model License {
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   packages         Package[]
-  customerLicenses CustomerLicense[]
+  customerLicenses TenantLicense[]
 
   @@map("licenses")
 }
@@ -68,13 +67,12 @@ model Package {
 model Sale {
   id       Int      @id @default(autoincrement())
   quantity Int      @default(1)
-  soldAt   DateTime @map("sold_at")
 
   packageId  String   @map("package_id")
   package    Package  @relation(fields: [packageId], references: [id], onDelete: Restrict)
 
-  customerId String   @map("customer_id")
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  tenantId   String   @map("tenant_id")
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
 
   soldById String @map("sold_by_id")
   soldBy   User   @relation(fields: [soldById], references: [id], onDelete: Restrict)
@@ -85,12 +83,12 @@ model Sale {
   @@map("sales")
 }
 
-model CustomerLicense {
+model TenantLicense {
   id       String @id @default(cuid())
   quantity Int    @default(0)
 
-  customerId String   @map("customer_id")
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tenantId   String   @map("tenant_id")
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   licenseId String  @map("license_id")
   license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
@@ -98,8 +96,8 @@ model CustomerLicense {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([customerId, licenseId])
-  @@map("customer_licenses")
+  @@unique([tenantId, licenseId])
+  @@map("tenant_licenses")
 }
 
 // ─── Auth tokens ─────────────────────────────────────────────────────────────
@@ -149,7 +147,7 @@ model Address {
   company  Company?
   user     User?
   supplier Supplier?
-  customer Customer?
+  tenant   Tenant?
 
   @@map("addresses")
 }
@@ -188,6 +186,8 @@ model User {
   role                Role      @default(USER)
   nationalId          String?   @map("national_id")
   birthDate           DateTime? @map("birth_date")
+  gender              String?   @map("gender")
+  avatarUrl           String?   @map("avatar_url")
   phoneCountryCode    String    @default("55") @map("phone_country_code")
   phone               String?
   isActive            Boolean   @default(true) @map("is_active")
@@ -195,8 +195,8 @@ model User {
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
 
-  customerId String?   @map("customer_id")
-  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  tenantId   String?   @map("tenant_id")
+  tenant     Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -220,7 +220,7 @@ model SupplierCategory {
   isActive    Boolean @default(true) @map("is_active")
 
   tenantId String?   @map("tenant_id")
-  tenant   Customer? @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant? @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
@@ -249,7 +249,7 @@ model Supplier {
   category   SupplierCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   tenantId String?   @map("tenant_id")
-  tenant   Customer? @relation("SupplierTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant? @relation("SupplierTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -260,26 +260,26 @@ model Supplier {
   @@map("suppliers")
 }
 
-// ─── Customer ────────────────────────────────────────────────────────────────
+// ─── Tenant ────────────────────────────────────────────────────────────────
 
-model CustomerCategory {
+model TenantCategory {
   id          String  @id @default(cuid())
   name        String
   description String?
   isActive    Boolean @default(true) @map("is_active")
 
   tenantId String?   @map("tenant_id")
-  tenant   Customer? @relation("CustomerCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant? @relation("TenantCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
-  customers Customer[] @relation("CustomerCategory")
+  tenants Tenant[] @relation("TenantCategory")
 
   @@unique([tenantId, name])
-  @@map("customer_categories")
+  @@map("tenant_categories")
 }
 
-model Customer {
+model Tenant {
   id                    String     @id @default(cuid())
   entityType            EntityType @map("entity_type")
   name                  String
@@ -306,10 +306,10 @@ model Customer {
   moduleFinance             Boolean @default(false) @map("module_finance")
 
   categoryId String?           @map("category_id")
-  category   CustomerCategory? @relation("CustomerCategory", fields: [categoryId], references: [id], onDelete: SetNull)
+  category   TenantCategory? @relation("TenantCategory", fields: [categoryId], references: [id], onDelete: SetNull)
 
   tenantId String?   @map("tenant_id")
-  tenant   Customer? @relation("CustomerTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant   Tenant? @relation("TenantParent", fields: [tenantId], references: [id], onDelete: Cascade)
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -318,12 +318,12 @@ model Customer {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   users        User[]
-  subCustomers Customer[]         @relation("CustomerTenant")
+  subTenants   Tenant[]         @relation("TenantParent")
   suppliers    Supplier[]         @relation("SupplierTenant")
   supplierCats SupplierCategory[] @relation("SupplierCategoryTenant")
-  customerCats CustomerCategory[] @relation("CustomerCategoryTenant")
+  tenantCats TenantCategory[] @relation("TenantCategoryTenant")
   sales        Sale[]
-  licenses     CustomerLicense[]
+  licenses     TenantLicense[]
 
-  @@map("customers")
+  @@map("tenants")
 }

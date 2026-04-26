@@ -18,7 +18,7 @@ export async function getUsers() {
   await verifySession()
 
   return prisma.user.findMany({
-    where: { customerId: null },
+    where: { tenantId: null },
     select: {
       id:        true,
       firstName: true,
