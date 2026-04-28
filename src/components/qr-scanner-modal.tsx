@@ -21,13 +21,20 @@ export function QrScannerModal({ onClose }: Props) {
   useEffect(() => {
     const scanner = new Html5Qrcode(SCANNER_ELEMENT_ID, { verbose: false })
     scannerRef.current = scanner
+    let started = false
+    let unmounted = false
+
+    const stopSafely = () => {
+      if (!started) return
+      try { scanner.stop().catch(() => {}) } catch { /* not running */ }
+    }
 
     scanner
       .start(
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 240, height: 240 } },
         (decodedText) => {
-          scanner.stop().catch(() => {})
+          stopSafely()
           try {
             const url = new URL(decodedText)
             const profileMatch = url.pathname.match(/^\/profile\/([^/]+)$/)
@@ -43,7 +50,11 @@ export function QrScannerModal({ onClose }: Props) {
           // per-frame failures are normal while no QR is in frame — ignore
         },
       )
-      .then(() => setHasPermission("granted"))
+      .then(() => {
+        started = true
+        if (unmounted) stopSafely()
+        else setHasPermission("granted")
+      })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : String(err)
         if (msg.toLowerCase().includes("permission")) {
@@ -55,7 +66,8 @@ export function QrScannerModal({ onClose }: Props) {
       })
 
     return () => {
-      scanner.stop().catch(() => {})
+      unmounted = true
+      stopSafely()
     }
   }, [router, onClose])
 
