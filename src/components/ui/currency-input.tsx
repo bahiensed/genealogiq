@@ -10,7 +10,7 @@ interface CurrencyInputProps extends Omit<React.ComponentProps<typeof Input>, 'v
 }
 
 export function CurrencyInput({ value, onChange, ...props }: CurrencyInputProps) {
-  const digits = value > 0 ? Math.round(value * 100).toString() : ''
+  const digits = Math.round(value * 100).toString()
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.value.replace(/\D/g, '').replace(/^0+/, '')

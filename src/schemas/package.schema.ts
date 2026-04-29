@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
 export const packageSchema = z.object({
-  licenseId:   z.string().min(1, 'License is required'),
   name:        z.string()
     .min(4, 'Must be at least 4 characters')
     .max(24, 'Must be at most 24 characters'),
@@ -19,7 +18,6 @@ export type PackageFormValues = z.infer<typeof packageSchema>
 export const packageResolver = zodResolver(packageSchema)
 
 export const packageDefaultValues: PackageFormValues = {
-  licenseId:   '',
   name:        '',
   quantity:    1,
   description: '',

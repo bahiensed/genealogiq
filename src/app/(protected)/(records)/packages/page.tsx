@@ -12,7 +12,7 @@ export default async function PackagesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Packages
+          QR Code Packages (B2B)
         </h1>
         <Button asChild>
           <Link href="/packages/new">New package</Link>

@@ -97,11 +97,17 @@ function ActionsCell({ row, currentUserRole }: { row: { original: CustomerRow };
 export function getColumns(currentUserRole: string): ColumnDef<CustomerRow>[] {
   return [
     {
-      accessorKey: 'name',
+      id: 'name',
+      accessorFn: (row) =>
+        row.entityType === 'INDIVIDUAL'
+          ? `${row.name} ${row.tradeName}`
+          : row.name,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
       cell: ({ row }) => (
         <Link href={`/customers/${row.original.id}`} className="hover:underline">
-          {row.original.name}
+          {row.original.entityType === 'INDIVIDUAL'
+            ? `${row.original.name} ${row.original.tradeName}`
+            : row.original.name}
         </Link>
       ),
     },

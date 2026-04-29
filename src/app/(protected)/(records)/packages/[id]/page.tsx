@@ -1,19 +1,16 @@
 import { notFound } from 'next/navigation'
 import { getPackage } from '@/queries/packages'
-import { getLicenses } from '@/queries/licenses'
 import { PackageForm } from '@/components/packages/package-form'
 
 export default async function EditPackagePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [pkg, licenses] = await Promise.all([getPackage(id), getLicenses()])
+  const pkg = await getPackage(id)
   if (!pkg) notFound()
 
   return (
     <PackageForm
       id={id}
-      licenses={licenses}
       defaultValues={{
-        licenseId:   pkg.licenseId,
         name:        pkg.name,
         quantity:    pkg.quantity,
         description: pkg.description ?? '',

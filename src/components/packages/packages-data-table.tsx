@@ -10,8 +10,7 @@ interface PackagesDataTableProps {
 
 const COLUMN_LABELS: Record<string, string> = {
   name:        'Package Name',
-  license:     'License TYpe',
-  quantity:    'Licenses / Package',
+  quantity:    'QR-Codes / Package',
   price:       'Package Price',
   description: 'Package Description',
   isActive:    'Status',

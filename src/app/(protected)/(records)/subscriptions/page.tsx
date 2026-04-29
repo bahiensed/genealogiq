@@ -12,10 +12,10 @@ export default async function LicensesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Licenses
+          Subscriptions (B2C)
         </h1>
         <Button asChild>
-          <Link href="/licenses/new">New license</Link>
+          <Link href="/subscriptions/new">New subscription</Link>
         </Button>
       </div>
 

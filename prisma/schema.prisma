@@ -31,16 +31,16 @@ enum EntityType {
 // ─── Licenses & Packages ─────────────────────────────────────────────────────
 
 model License {
-  id          String    @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   description String?
-  isActive    Boolean   @default(true) @map("is_active")
+  maxProfiles Int     @map("max_profiles")
+  termLength  Int     @map("term_length")
+  price       Decimal @db.Decimal(10, 2)
+  isActive    Boolean @default(true) @map("is_active")
 
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-
-  packages         Package[]
-  customerLicenses TenantLicense[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("licenses")
 }
@@ -52,9 +52,6 @@ model Package {
   price       Decimal  @db.Decimal(10, 2) @map("price")
   quantity    Int      @default(1)
   isActive    Boolean  @default(true) @map("is_active")
-
-  licenseId String  @map("license_id")
-  license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -87,16 +84,12 @@ model TenantLicense {
   id       String @id @default(cuid())
   quantity Int    @default(0)
 
-  tenantId   String   @map("tenant_id")
-  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  licenseId String  @map("license_id")
-  license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
+  tenantId String @unique @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([tenantId, licenseId])
   @@map("tenant_licenses")
 }
 
@@ -323,7 +316,7 @@ model Tenant {
   supplierCats SupplierCategory[] @relation("SupplierCategoryTenant")
   tenantCats TenantCategory[] @relation("TenantCategoryTenant")
   sales        Sale[]
-  licenses     TenantLicense[]
+  license      TenantLicense?
 
   @@map("tenants")
 }

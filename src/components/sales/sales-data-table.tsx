@@ -13,9 +13,9 @@ const COLUMN_LABELS: Record<string, string> = {
   customer:         'Customer',
   package:          'Package',
   quantity:         'Package Qtd.',
-  totalLicenses:    'Licenses / Package',
+  totalLicenses:    'QR-Codes / Package',
   packagePrice:     'Package Price',
-  licenseUnitPrice: 'License Un. Price',
+  licenseUnitPrice: 'QR-Code Un. Price',
   totalPrice:       'Total Order Price',
   seller:           'Seller',
 }

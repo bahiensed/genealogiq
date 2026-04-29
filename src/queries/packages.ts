@@ -15,9 +15,6 @@ export async function getPackages() {
       quantity:    true,
       isActive:    true,
       createdAt:   true,
-      license: {
-        select: { name: true },
-      },
     },
     orderBy: { name: 'asc' },
   })
@@ -49,7 +46,6 @@ export async function getPackage(id: string) {
       price:       true,
       quantity:    true,
       isActive:    true,
-      licenseId:   true,
     },
   })
 }

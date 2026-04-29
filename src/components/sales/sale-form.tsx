@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
+import { QrCode } from 'lucide-react'
 import { saleResolver, saleDefaultValues, type SaleFormValues } from '@/schemas/sale.schema'
 import { createSale } from '@/actions/sale.actions'
 import { Button } from '@/components/ui/button'
@@ -63,6 +64,10 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   const selectedQty       = watch('quantity') || 0
   const selectedPkg       = packages.find(p => p.id === selectedPackageId)
 
+  const totalQRCodes   = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.quantity : 0
+  const totalPrice     = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.price : 0
+  const unitPrice      = selectedPkg && selectedPkg.quantity > 0 ? selectedPkg.price / selectedPkg.quantity : 0
+
   function onSubmit(data: SaleFormValues) {
     setPendingData(data)
     setConfirmOpen(true)
@@ -83,9 +88,9 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-lg">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 max-w-lg">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          New sale
+          New QR Code Package Sale
         </h1>
 
         <FieldGroup>
@@ -102,7 +107,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                   <SelectContent>
                     {packages.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
-                        {p.name} — {usd.format(p.price)}
+                        {p.name} | {p.quantity.toLocaleString('en-US')} QR codes | {usd.format(p.price)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -138,7 +143,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Quantity:</FieldLabel>
+                <FieldLabel>Package Quantity:</FieldLabel>
                 <Input
                   type="number"
                   step="1"
@@ -150,20 +155,42 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                   aria-invalid={fieldState.invalid}
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                {selectedPkg && selectedQty > 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    {selectedQty * selectedPkg.quantity} licenses · {usd.format(selectedQty * selectedPkg.price)}
-                  </p>
-                )}
               </Field>
             )}
           />
         </FieldGroup>
 
+        {/* QR Code summary card */}
+        {totalQRCodes > 0 && (
+          <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5 flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <QrCode className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">QR Codes to be issued</p>
+                <p className="text-3xl font-extrabold tabular-nums leading-none">
+                  {totalQRCodes.toLocaleString('en-US')}
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-1 border-t border-primary/10">
+              <div>
+                <p className="text-xs text-muted-foreground">Total price</p>
+                <p className="text-lg font-bold tabular-nums">{usd.format(totalPrice)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">Unit price / QR code</p>
+                <p className="text-lg font-bold tabular-nums">{usd.format(unitPrice)}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {serverError && <FieldError>{serverError}</FieldError>}
         <Field orientation="horizontal">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Recording…' : 'Sale'}
+            {isSubmitting ? 'Submitting…' : 'Submit Sale'}
           </Button>
           <Button type="button" variant="outline" onClick={() => form.reset(saleDefaultValues)}>
             Reset

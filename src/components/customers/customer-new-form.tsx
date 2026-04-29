@@ -4,18 +4,18 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
+import { CheckIcon } from 'lucide-react'
 import {
-  customerResolver,
-  customerDefaultValues,
-  type CustomerFormValues,
+  customerCreateResolver,
+  customerCreateDefaultValues,
+  type CustomerCreateFormValues,
 } from '@/schemas/customer.schema'
-import { updateCustomer } from '@/actions/customer.actions'
+import { createCustomer } from '@/actions/customer.actions'
 import { maskCpf, maskCnpj, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
 import { MaskedInput } from '@/components/ui/masked-input'
 import { AddressSection } from '@/components/address/address-section'
 import {
@@ -28,72 +28,140 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { AddCustomerCategoryDialog } from '@/components/customers/add-customer-category-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion'
+import { cn } from '@/lib/utils'
 
 interface Category { id: string; name: string }
+interface Props { categories?: Category[] }
 
-interface CustomerFormProps {
-  id: string
-  defaultValues?: CustomerFormValues
-  categories?: Category[]
+const STEPS = [
+  { title: 'Business',       desc: 'Legal info & identification' },
+  { title: 'Contact',        desc: 'Contact details & category'  },
+  { title: 'Address',        desc: 'Physical location'           },
+  { title: 'Administrator',  desc: 'Sequoia account owner'       },
+  { title: 'Modules',        desc: 'Sequoia access permissions'  },
+]
+
+type StepIndex = 0 | 1 | 2 | 3 | 4
+
+const STEP_FIELDS: Record<StepIndex, (keyof CustomerCreateFormValues | string)[]> = {
+  0: ['entityType', 'name', 'tradeName', 'taxId', 'stateRegistration', 'municipalRegistration', 'birthDate'],
+  1: ['email', 'phoneCountryCode', 'phone', 'categoryId'],
+  2: [],
+  3: ['owner.firstName', 'owner.lastName', 'owner.email'],
+  4: [],
 }
 
-export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFormProps) {
-  const [serverError, setServerError]   = useState<string | null>(null)
+export function CustomerNewForm({ categories = [] }: Props) {
+  const [step, setStep]                 = useState<StepIndex>(0)
   const [localCategories, setLocalCats] = useState(categories)
+  const [serverError, setServerError]   = useState<string | null>(null)
   const router = useRouter()
 
-  const form = useForm<CustomerFormValues>({
+  const form = useForm<CustomerCreateFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:      customerResolver as any,
-    defaultValues: defaultValues ?? customerDefaultValues,
+    resolver:      customerCreateResolver as any,
+    defaultValues: customerCreateDefaultValues,
+    mode:          'onTouched',
   })
 
-  const { control, handleSubmit, setValue, formState: { isSubmitting, errors } } = form
+  const { control, handleSubmit, setValue, trigger, formState: { isSubmitting, errors } } = form
 
-  const entityType  = useWatch({ control, name: 'entityType' })
+  const entityType = useWatch({ control, name: 'entityType' })
   const isIndividual = entityType === 'INDIVIDUAL'
 
-  async function onSubmit(data: CustomerFormValues) {
+  async function goNext() {
+    const fields = STEP_FIELDS[step]
+    if (fields.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ok = await trigger(fields as any)
+      if (!ok) return
+    }
+    setStep((s) => (s + 1) as StepIndex)
+  }
+
+  function goBack() {
+    setStep((s) => (s - 1) as StepIndex)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function onSubmit(data: any) {
+    data = data as CustomerCreateFormValues
     setServerError(null)
-    const result = await updateCustomer(id, data)
+    const result = await createCustomer(data)
     if ('error' in result) {
       setServerError(result.error)
     } else {
       toast.success(result.success)
+      router.push('/customers')
     }
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-2xl">
-      <div className="flex items-center justify-between">
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Edit customer
-        </h1>
-        <Controller
-          name="isActive"
-          control={control}
-          render={({ field }) => (
-            <div className="flex items-center gap-2">
-              <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-              <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
+    <div className="flex flex-col gap-8 w-full max-w-screen-lg mx-auto">
+      {/* Header */}
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+        New customer
+      </h1>
+
+      {/* Stepper */}
+      <nav aria-label="Form steps">
+        {/* Mobile: compact numbered steps */}
+        <div className="flex items-center gap-2 md:hidden">
+          {STEPS.map((s, i) => (
+            <div key={i} className="flex items-center gap-1">
+              <div className={cn(
+                'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold shrink-0 transition-colors',
+                i < step  && 'bg-primary text-primary-foreground',
+                i === step && 'ring-2 ring-primary bg-primary/10 text-primary',
+                i > step  && 'bg-muted text-muted-foreground',
+              )}>
+                {i < step ? <CheckIcon className="h-3.5 w-3.5" /> : i + 1}
+              </div>
+              {i < STEPS.length - 1 && (
+                <div className={cn('h-px w-4 shrink-0', i < step ? 'bg-primary' : 'bg-border')} />
+              )}
             </div>
-          )}
-        />
-      </div>
+          ))}
+          <span className="ml-2 text-sm font-medium">{STEPS[step].title}</span>
+          <span className="text-xs text-muted-foreground ml-1">— {STEPS[step].desc}</span>
+        </div>
 
-      <Accordion type="multiple" defaultValue={['business']} className="flex flex-col gap-2">
+        {/* Desktop: full stepper */}
+        <ol className="hidden md:flex items-start gap-0">
+          {STEPS.map((s, i) => (
+            <li key={i} className="flex items-start flex-1 min-w-0">
+              <div className="flex flex-col items-center flex-1">
+                <div className="flex items-center w-full">
+                  <div className={cn(
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors',
+                    i < step  && 'bg-primary text-primary-foreground',
+                    i === step && 'ring-2 ring-primary ring-offset-2 bg-primary/10 text-primary',
+                    i > step  && 'bg-muted text-muted-foreground',
+                  )}>
+                    {i < step ? <CheckIcon className="h-4 w-4" /> : i + 1}
+                  </div>
+                  {i < STEPS.length - 1 && (
+                    <div className={cn('h-px flex-1 mx-3 mt-0', i < step ? 'bg-primary' : 'bg-border')} />
+                  )}
+                </div>
+                <div className="mt-2 pr-4">
+                  <p className={cn('text-sm font-semibold', i === step ? 'text-foreground' : 'text-muted-foreground')}>{s.title}</p>
+                  <p className="text-xs text-muted-foreground hidden lg:block">{s.desc}</p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </nav>
 
-        {/* ── Business ── */}
-        <AccordionItem value="business" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Business</AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
+      {/* Step content */}
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+
+        {/* ── Step 0: Business ── */}
+        {step === 0 && (
+          <div className="flex flex-col gap-6">
             <FieldGroup>
+              {/* Type */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Controller
                   name="entityType"
@@ -113,6 +181,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 />
               </div>
 
+              {/* Name + Trade name */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Controller name="name" control={control} render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
@@ -130,6 +199,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 )} />
               </div>
 
+              {/* Tax ID + extra fields */}
               {isIndividual ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Controller name="taxId" control={control} render={({ field, fieldState }) => (
@@ -173,83 +243,80 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 </div>
               )}
             </FieldGroup>
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        )}
 
-        {/* ── Contact ── */}
-        <AccordionItem value="contact" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Contact</AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
-            <FieldGroup>
-              <Controller name="email" control={control} render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Email:</FieldLabel>
-                  <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )} />
+        {/* ── Step 1: Contact ── */}
+        {step === 1 && (
+          <FieldGroup>
+            <Controller name="email" control={control} render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Email:</FieldLabel>
+                <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )} />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Controller name="phoneCountryCode" control={control} render={({ field }) => (
-                  <Field>
-                    <FieldLabel>Country Code:</FieldLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {PHONE_COUNTRY_CODES.map((c) => (
-                          <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                )} />
-                <Controller name="phone" control={control} render={({ field, fieldState }) => (
-                  <Field className="md:col-span-2" data-invalid={fieldState.invalid}>
-                    <FieldLabel>Phone:</FieldLabel>
-                    <MaskedInput value={field.value} onChange={field.onChange} maskFn={maskPhone} autoComplete="off" aria-invalid={fieldState.invalid} />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  </Field>
-                )} />
-              </div>
-
-              <Controller name="categoryId" control={control} render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <div className="flex items-center justify-between">
-                    <FieldLabel>Category:</FieldLabel>
-                    <AddCustomerCategoryDialog onCreated={(cat) => {
-                      setLocalCats(prev => [...prev, cat])
-                      field.onChange(cat.id)
-                    }} />
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Controller name="phoneCountryCode" control={control} render={({ field }) => (
+                <Field>
+                  <FieldLabel>Country Code:</FieldLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger aria-invalid={fieldState.invalid}>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {localCategories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      {PHONE_COUNTRY_CODES.map((c) => (
+                        <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                </Field>
+              )} />
+              <Controller name="phone" control={control} render={({ field, fieldState }) => (
+                <Field className="md:col-span-2" data-invalid={fieldState.invalid}>
+                  <FieldLabel>Phone:</FieldLabel>
+                  <MaskedInput value={field.value} onChange={field.onChange} maskFn={maskPhone} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
+            </div>
 
-              <Controller name="notes" control={control} render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Notes:</FieldLabel>
-                  <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )} />
-            </FieldGroup>
-          </AccordionContent>
-        </AccordionItem>
+            <Controller name="categoryId" control={control} render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <div className="flex items-center justify-between">
+                  <FieldLabel>Category:</FieldLabel>
+                  <AddCustomerCategoryDialog onCreated={(cat) => {
+                    setLocalCats(prev => [...prev, cat])
+                    field.onChange(cat.id)
+                  }} />
+                </div>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger aria-invalid={fieldState.invalid}>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {localCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )} />
 
-        {/* ── Address ── */}
-        <AccordionItem value="address" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Address</AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
+            <Controller name="notes" control={control} render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Notes:</FieldLabel>
+                <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )} />
+          </FieldGroup>
+        )}
+
+        {/* ── Step 2: Address ── */}
+        {step === 2 && (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">Address is optional and can be filled in later.</p>
             <AddressSection
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               control={control as any}
@@ -257,14 +324,57 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               errors={errors}
               prefix="address"
             />
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        )}
 
-        {/* ── Modules ── */}
-        <AccordionItem value="modules" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Sequoia Modules</AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
+        {/* ── Step 3: Administrator ── */}
+        {step === 3 && (
+          <div className="flex flex-col gap-6">
+            <div className="rounded-lg border bg-muted/40 px-4 py-3">
+              <p className="text-sm text-muted-foreground">
+                Access credentials for the Sequoia system for the person responsible for this company.
+                An email will be sent with a link to set the password.
+              </p>
+            </div>
+            <FieldGroup>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Controller name="owner.firstName" control={control} render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>First Name:</FieldLabel>
+                    <Input {...field} autoComplete="given-name" aria-invalid={fieldState.invalid} />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )} />
+                <Controller name="owner.lastName" control={control} render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>Last Name:</FieldLabel>
+                    <Input {...field} autoComplete="family-name" aria-invalid={fieldState.invalid} />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )} />
+              </div>
+              <Controller name="owner.email" control={control} render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>Email:</FieldLabel>
+                  <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )} />
+            </FieldGroup>
+          </div>
+        )}
+
+        {/* ── Step 4: Modules ── */}
+        {step === 4 && (
+          <div className="flex flex-col gap-6">
+            <div className="rounded-lg border bg-muted/40 px-4 py-3">
+              <p className="text-sm text-muted-foreground">
+                Items shown in gray are always accessible and cannot be disabled.
+              </p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+              {/* Always-on */}
               <div className="flex flex-col gap-3">
                 <p className="text-sm font-semibold">Always active</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -277,6 +387,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 </div>
               </div>
 
+              {/* Records */}
               <div className="flex flex-col gap-3">
                 <p className="text-sm font-semibold">Records</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -299,6 +410,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 </div>
               </div>
 
+              {/* Categories */}
               <div className="flex flex-col gap-3">
                 <p className="text-sm font-semibold">Categories</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -321,6 +433,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 </div>
               </div>
 
+              {/* Purchasing */}
               <div className="flex flex-col gap-3">
                 <p className="text-sm font-semibold">Purchasing</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -342,6 +455,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 </div>
               </div>
 
+              {/* Inventory */}
               <div className="flex flex-col gap-3">
                 <p className="text-sm font-semibold">Inventory</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -358,6 +472,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 </div>
               </div>
 
+              {/* Finance */}
               <div className="flex flex-col gap-3">
                 <p className="text-sm font-semibold">Finance</p>
                 <div className="grid grid-cols-2 gap-2">
@@ -370,20 +485,38 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 </div>
               </div>
             </div>
-          </AccordionContent>
-        </AccordionItem>
+          </div>
+        )}
 
-      </Accordion>
+        {/* Server error */}
+        {serverError && <FieldError>{serverError}</FieldError>}
 
-      {serverError && <FieldError>{serverError}</FieldError>}
-      <Field orientation="horizontal">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : 'Save changes'}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
-        </Button>
-      </Field>
-    </form>
+        {/* Navigation */}
+        <div className="flex items-center justify-between pt-2 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={goBack}
+            disabled={step === 0}
+          >
+            Back
+          </Button>
+
+          <span className="text-xs text-muted-foreground">
+            Step {step + 1} of {STEPS.length}
+          </span>
+
+          {step < STEPS.length - 1 ? (
+            <Button type="button" onClick={goNext}>
+              Next
+            </Button>
+          ) : (
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating…' : 'Create customer'}
+            </Button>
+          )}
+        </div>
+      </form>
+    </div>
   )
 }

@@ -15,10 +15,11 @@ export async function createLicense(data: LicenseFormValues): Promise<ActionErro
   const validated = licenseSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
-  await prisma.license.create({ data: validated.data })
+  const { price, ...rest } = validated.data
+  await prisma.license.create({ data: { ...rest, price: new Prisma.Decimal(price) } })
 
-  revalidatePath('/licenses')
-  return { success: 'License created successfully.' }
+  revalidatePath('/subscriptions')
+  return { success: 'Subscription created successfully.' }
 }
 
 export async function updateLicense(id: string, data: LicenseFormValues): Promise<ActionError | ActionSuccess> {
@@ -27,48 +28,42 @@ export async function updateLicense(id: string, data: LicenseFormValues): Promis
   const validated = licenseSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
+  const { price, ...rest } = validated.data
+
   try {
-    await prisma.license.update({ where: { id }, data: validated.data })
+    await prisma.license.update({ where: { id }, data: { ...rest, price: new Prisma.Decimal(price) } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'License not found.' }
+      return { error: 'Subscription not found.' }
     }
     throw e
   }
 
-  revalidatePath('/licenses')
-  return { success: 'License updated successfully.' }
+  revalidatePath('/subscriptions')
+  return { success: 'Subscription updated successfully.' }
 }
 
 export async function deleteLicense(id: string): Promise<ActionError | void> {
   await verifySession()
 
-  const packageCount = await prisma.package.count({ where: { licenseId: id } })
-  if (packageCount > 0) {
-    return { error: 'This license is assigned to one or more packages and cannot be deleted.' }
-  }
-
   try {
-    await prisma.$transaction(async (tx) => {
-      await tx.tenantLicense.deleteMany({ where: { licenseId: id } })
-      await tx.license.delete({ where: { id } })
-    })
+    await prisma.license.delete({ where: { id } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'License not found.' }
+      return { error: 'Subscription not found.' }
     }
     throw e
   }
 
-  revalidatePath('/licenses')
+  revalidatePath('/subscriptions')
 }
 
 export async function toggleLicenseActive(id: string): Promise<ActionError | void> {
   await verifySession()
 
   const license = await prisma.license.findUnique({ where: { id }, select: { isActive: true } })
-  if (!license) return { error: 'License not found.' }
+  if (!license) return { error: 'Subscription not found.' }
 
   await prisma.license.update({ where: { id }, data: { isActive: !license.isActive } })
-  revalidatePath('/licenses')
+  revalidatePath('/subscriptions')
 }

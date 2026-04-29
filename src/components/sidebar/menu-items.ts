@@ -1,112 +1,64 @@
 import {
-  BanknoteIcon,
-  BoxIcon,
+  Building2,
   BuildingIcon,
   ChartNoAxesCombined,
+  Coins,
   FactoryIcon,
-  FolderIcon,
   HandCoinsIcon,
   IdCardIcon,
+  Layers,
   LayoutDashboard,
+  LifeBuoy,
   PackageIcon,
   QrCodeIcon,
   TagIcon,
-  ToolboxIcon,
-  UsersIcon,
 } from 'lucide-react'
 
 export const main = [
-  {
-    name: 'Dashboard',
-    url: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    name: 'Licenses',
-    url: '/licenses',
-    icon: QrCodeIcon,
-  },
-  {
-    name: 'Packages',
-    url: '/packages',
-    icon: PackageIcon,
-  },
-  {
-    name: 'Customers',
-    url: '/customers',
-    icon: UsersIcon,
-  },
+  { name: 'Dashboard',         url: '/dashboard',    icon: LayoutDashboard },
+  { name: 'Subscriptions (B2C)', url: '/subscriptions', icon: Layers       },
+  { name: 'QR Codes (B2B)',    url: '/packages',     icon: QrCodeIcon      },
+  { name: 'Customers',         url: '/customers',    icon: Building2       },
+  { name: 'Manual Sales',      url: '/manual-sales', icon: HandCoinsIcon   },
 ]
 
 export const system = [
-  {
-    name: 'Company Data',
-    url: '/company',
-    icon: BuildingIcon,
-  },
-  {
-    name: 'System Users',
-    url: '/users',
-    icon: IdCardIcon,
-  },
+  { name: 'Company Data',  url: '/company', icon: BuildingIcon },
+  { name: 'System Users',  url: '/users',   icon: IdCardIcon   },
 ]
 
 export const records = [
-  { name: 'Licenses',  url: '/licenses',  icon: QrCodeIcon  },
-  { name: 'Packages',  url: '/packages',  icon: PackageIcon },
-  { name: 'Suppliers', url: '/suppliers', icon: FactoryIcon },
-  { name: 'Products',  url: '/products',  icon: BoxIcon     },
-  { name: 'Services',  url: '/services',  icon: ToolboxIcon },
-  { name: 'Customers', url: '/customers', icon: UsersIcon   },
+  { name: 'Subscriptions (B2C)', url: '/subscriptions', icon: Layers      },
+  { name: 'QR Codes (B2B)',      url: '/packages',      icon: QrCodeIcon  },
+  { name: 'Suppliers',           url: '/suppliers',     icon: FactoryIcon },
+  { name: 'Products',            url: '/products',      icon: PackageIcon },
+  { name: 'Services',            url: '/services',      icon: LifeBuoy    },
+  { name: 'Customers',           url: '/customers',     icon: Building2   },
 ]
 
 export const categories = [
-  { name: 'Supplier Categories', url: '/supplier-categories', icon: TagIcon    },
-  { name: 'Product Categories',  url: '/product-categories',  icon: FolderIcon },
-  { name: 'Service Categories',  url: '/service-categories',  icon: FolderIcon },
-  { name: 'Customer Categories', url: '/customer-categories', icon: TagIcon    },
+  { name: 'Supplier Categories', url: '/supplier-categories', icon: TagIcon },
+  { name: 'Product Categories',  url: '/product-categories',  icon: TagIcon },
+  { name: 'Service Categories',  url: '/service-categories',  icon: TagIcon },
+  { name: 'Customer Categories', url: '/customer-categories', icon: TagIcon },
 ]
 
 export const purchasing = [
-  {
-    name: 'Products',
-    url: '/purchasing/products',
-    icon: BoxIcon,
-  },
-  {
-    name: 'Services',
-    url: '/purchasing/services',
-    icon: ToolboxIcon,
-  },
+  { name: 'Products', url: '/purchasing/products', icon: PackageIcon },
+  { name: 'Services', url: '/purchasing/services', icon: LifeBuoy    },
 ]
 
 export const inventory = [
-  {
-    name: 'Products',
-    url: '/inventory/products',
-    icon: BoxIcon,
-  },
+  { name: 'Products', url: '/inventory/products', icon: PackageIcon },
 ]
 
 export const sales = [
-  {
-    name: 'Sales',
-    url: '/sales',
-    icon: BanknoteIcon,
-  },
-  {
-    name: 'Manual Sales',
-    url: '/manual-sales',
-    icon: HandCoinsIcon,
-  },
+  { name: 'Sales',         url: '/sales',        icon: Coins         },
+  { name: 'Manual Sales',  url: '/manual-sales', icon: HandCoinsIcon },
 ]
 
 export const finance = [
-  {
-    name: 'Finance',
-    url: '/finance',
-    icon: ChartNoAxesCombined,
-  },
+  { name: 'Finance', url: '/finance', icon: ChartNoAxesCombined },
 ]
 
 export const groups = [

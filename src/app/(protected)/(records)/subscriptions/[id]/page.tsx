@@ -13,6 +13,9 @@ export default async function EditLicensePage({ params }: { params: Promise<{ id
       defaultValues={{
         name:        license.name,
         description: license.description ?? '',
+        maxProfiles: license.maxProfiles,
+        termLength:  license.termLength,
+        price:       license.price,
         isActive:    license.isActive,
       }}
     />

@@ -36,6 +36,11 @@ const ROLE_LABELS: Record<string, string> = {
   USER:      'User',
 }
 
+const GENDER_OPTIONS = [
+  { value: 'Female', label: 'Female' },
+  { value: 'Male',   label: 'Male'   },
+]
+
 interface UserFormProps {
   id?: string
   defaultValues?: UserFormValues
@@ -88,48 +93,69 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
       {serverError && <FieldError>{serverError}</FieldError>}
 
       <FieldGroup>
+        {/* Row 1: First Name | Last Name */}
         <div className="grid grid-cols-2 gap-3">
-          <Controller
-            name="firstName"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>First Name:</FieldLabel>
-                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="lastName"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Last Name:</FieldLabel>
-                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-        </div>
-
-        <Controller
-          name="email"
-          control={control}
-          render={({ field, fieldState }) => (
+          <Controller name="firstName" control={control} render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Email:</FieldLabel>
-              <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
+              <FieldLabel>First Name:</FieldLabel>
+              <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
-          )}
-        />
+          )} />
 
-        <Controller
-          name="role"
-          control={control}
-          render={({ field, fieldState }) => (
+          <Controller name="lastName" control={control} render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Last Name:</FieldLabel>
+              <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )} />
+        </div>
+
+        {/* Row 2: Gender | Date of Birth */}
+        <div className="grid grid-cols-2 gap-3">
+          <Controller name="gender" control={control} render={({ field }) => (
+            <Field>
+              <FieldLabel>Gender:</FieldLabel>
+              <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {GENDER_OPTIONS.map((g) => (
+                    <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          )} />
+
+          <Controller name="birthDate" control={control} render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Date of Birth:</FieldLabel>
+              <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )} />
+        </div>
+
+        {/* Row 3: CPF | Role */}
+        <div className="grid grid-cols-2 gap-3">
+          <Controller name="nationalId" control={control} render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>CPF:</FieldLabel>
+              <MaskedInput
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                maskFn={maskCpf}
+                autoComplete="off"
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )} />
+
+          <Controller name="role" control={control} render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>Role:</FieldLabel>
               <Select value={field.value} onValueChange={field.onChange}>
@@ -144,81 +170,49 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
               </Select>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-3">
-          <Controller
-            name="nationalId"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>CPF:</FieldLabel>
-                <MaskedInput
-                  value={field.value ?? ''}
-                  onChange={field.onChange}
-                  maskFn={maskCpf}
-                  autoComplete="off"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-
-          <Controller
-            name="birthDate"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Date of Birth:</FieldLabel>
-                <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
+          )} />
         </div>
 
+        {/* Row 4: Email | Country Code | Phone */}
         <div className="grid grid-cols-12 gap-3">
-          <Controller
-            name="phoneCountryCode"
-            control={control}
-            render={({ field }) => (
-              <Field className="col-span-2">
-                <FieldLabel>Country Code:</FieldLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PHONE_COUNTRY_CODES.map((c) => (
-                      <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-          />
+          <Controller name="email" control={control} render={({ field, fieldState }) => (
+            <Field className="col-span-6" data-invalid={fieldState.invalid}>
+              <FieldLabel>Email:</FieldLabel>
+              <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )} />
 
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Phone:</FieldLabel>
-                <MaskedInput
-                  value={field.value ?? ''}
-                  onChange={field.onChange}
-                  maskFn={(v) => maskPhoneByCountry(v, countryCode)}
-                  autoComplete="off"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
+          <Controller name="phoneCountryCode" control={control} render={({ field }) => (
+            <Field className="col-span-2">
+              <FieldLabel>Code:</FieldLabel>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PHONE_COUNTRY_CODES.map((c) => (
+                    <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          )} />
+
+          <Controller name="phone" control={control} render={({ field, fieldState }) => (
+            <Field className="col-span-4" data-invalid={fieldState.invalid}>
+              <FieldLabel>Phone:</FieldLabel>
+              <MaskedInput
+                value={field.value ?? ''}
+                onChange={field.onChange}
+                maskFn={(v) => maskPhoneByCountry(v, countryCode)}
+                autoComplete="off"
+                aria-invalid={fieldState.invalid}
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )} />
         </div>
-
       </FieldGroup>
 
       <FieldSeparator />

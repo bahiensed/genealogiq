@@ -1,7 +1,7 @@
 import { getCustomerCategories } from '@/queries/customer-categories'
-import { CustomerForm } from '@/components/customers/customer-form'
+import { CustomerNewForm } from '@/components/customers/customer-new-form'
 
 export default async function NewCustomerPage() {
   const categories = await getCustomerCategories()
-  return <CustomerForm categories={categories} />
+  return <CustomerNewForm categories={categories} />
 }

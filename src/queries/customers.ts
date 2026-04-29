@@ -72,7 +72,7 @@ export async function getActiveCustomers() {
 
   return prisma.tenant.findMany({
     where:   { isActive: true },
-    select:  { id: true, name: true },
+    select:  { id: true, entityType: true, name: true, tradeName: true },
     orderBy: { name: 'asc' },
   })
 }

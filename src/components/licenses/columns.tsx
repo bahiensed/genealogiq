@@ -7,7 +7,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { toggleLicenseActive, deleteLicense } from '@/actions/license.actions'
@@ -16,6 +16,9 @@ export type LicenseRow = {
   id: string
   name: string
   description: string | null
+  maxProfiles: number
+  termLength: number
+  price: number
   isActive: boolean
   createdAt: Date
 }
@@ -36,26 +39,24 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/licenses/${license.id}`}>Edit</Link>
+            <Link href={`/subscriptions/${license.id}`}>Edit</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleLicenseActive(license.id)
               if (result?.error) toast.error(result.error)
-              else toast.success(license.isActive ? 'License deactivated.' : 'License reactivated.')
+              else toast.success(license.isActive ? 'Subscription deactivated.' : 'Subscription reactivated.')
             })}
           >
             {license.isActive ? 'Deactivate' : 'Reactivate'}
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-            <>
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onSelect={() => setDeleteOpen(true)}
-              >
-                Delete
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={() => setDeleteOpen(true)}
+            >
+              Delete
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -65,11 +66,11 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           isPending={isPending}
-          description={`The license "${license.name}" will be permanently deleted.`}
+          description={`The subscription "${license.name}" will be permanently deleted.`}
           onConfirm={() => startTransition(async () => {
             const result = await deleteLicense(license.id)
             if (result?.error) toast.error(result.error)
-            else { toast.success('License deleted successfully.'); setDeleteOpen(false) }
+            else { toast.success('Subscription deleted successfully.'); setDeleteOpen(false) }
           })}
         />
       )}
@@ -77,21 +78,48 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
   )
 }
 
+const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+
 export function getColumns(currentUserRole: string): ColumnDef<LicenseRow>[] {
   return [
     {
       accessorKey: 'name',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
       cell: ({ row }) => (
-        <Link href={`/licenses/${row.original.id}`} className="hover:underline">
+        <Link href={`/subscriptions/${row.original.id}`} className="hover:underline">
           {row.original.name}
         </Link>
       ),
     },
     {
+      accessorKey: 'maxProfiles',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Maximum<br/>Profiles</>} className="justify-end" />,
+      cell: ({ row }) => <div className="text-right">{row.original.maxProfiles}</div>,
+    },
+    {
+      accessorKey: 'termLength',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Term Length<br/>in Months</>} className="justify-end" />,
+      cell: ({ row }) => (
+        <div className="text-right">
+          {row.original.termLength === 0 ? <span title="Lifetime" className="text-base leading-none">∞</span> : row.original.termLength}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'price',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Price" className="justify-end" />,
+      cell: ({ row }) => (
+        <div className="text-right">
+          {row.original.price === 0 ? 'Free' : usd.format(row.original.price)}
+        </div>
+      ),
+    },
+    {
       accessorKey: 'description',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
-      cell: ({ row }) => row.original.description ?? '—',
+      cell: ({ row }) => (
+        <div className="whitespace-normal break-words max-w-xs">{row.original.description ?? '—'}</div>
+      ),
     },
     {
       accessorKey: 'isActive',

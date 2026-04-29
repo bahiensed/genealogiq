@@ -15,14 +15,10 @@ export async function createPackage(data: PackageFormValues): Promise<ActionErro
   const validated = packageSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
-  const { licenseId, price, ...rest } = validated.data
+  const { price, ...rest } = validated.data
 
   await prisma.package.create({
-    data: {
-      ...rest,
-      price:   new Prisma.Decimal(price),
-      license: { connect: { id: licenseId } },
-    },
+    data: { ...rest, price: new Prisma.Decimal(price) },
   })
 
   revalidatePath('/packages')
@@ -35,16 +31,12 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
   const validated = packageSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
-  const { licenseId, price, ...rest } = validated.data
+  const { price, ...rest } = validated.data
 
   try {
     await prisma.package.update({
       where: { id },
-      data: {
-        ...rest,
-        price:   new Prisma.Decimal(price),
-        license: { connect: { id: licenseId } },
-      },
+      data:  { ...rest, price: new Prisma.Decimal(price) },
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {

@@ -20,7 +20,6 @@ export type PackageRow = {
   quantity: number
   isActive: boolean
   createdAt: Date
-  license: { name: string }
 }
 
 function ActionsCell({ row, currentUserRole }: { row: { original: PackageRow }; currentUserRole: string }) {
@@ -94,14 +93,8 @@ export function getColumns(currentUserRole: string): ColumnDef<PackageRow>[] {
       ),
     },
     {
-      id: 'license',
-      accessorFn: (row) => row.license.name,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Type</>} />,
-      cell: ({ row }) => row.original.license.name,
-    },
-    {
       accessorKey: 'quantity',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Licenses /<br/>Package</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>QR-Codes /<br/>Package</>} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.quantity}</div>,
     },
     {

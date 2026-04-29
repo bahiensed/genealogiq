@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Users, Truck, UserCog, Layers, Box, ArrowUpRight } from 'lucide-react'
+import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Building2, Factory, IdCard, Layers, QrCode, ArrowUpRight } from 'lucide-react'
 import { verifySession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
 import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card'
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
                 Customers <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
-            <CardAction><Users className="h-5 w-5 text-muted-foreground" /></CardAction>
+            <CardAction><Building2 className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.customers}</p>
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
                 Suppliers <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
-            <CardAction><Truck className="h-5 w-5 text-muted-foreground" /></CardAction>
+            <CardAction><Factory className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.suppliers}</p>
@@ -127,7 +127,7 @@ export default async function DashboardPage() {
                 System Users <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
-            <CardAction><UserCog className="h-5 w-5 text-muted-foreground" /></CardAction>
+            <CardAction><IdCard className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.systemUsers}</p>
@@ -141,15 +141,15 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>
-              <Link href="/licenses" className="inline-flex items-center gap-1 hover:underline">
-                License Types <ArrowUpRight className="h-4 w-4" />
+              <Link href="/subscriptions" className="inline-flex items-center gap-1 hover:underline">
+                Subscriptions (B2C) <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
             <CardAction><Layers className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.licenses}</p>
-            <p className="text-sm text-muted-foreground mt-1">Active license types</p>
+            <p className="text-sm text-muted-foreground mt-1">Active subscriptions</p>
           </CardContent>
         </Card>
 
@@ -157,10 +157,10 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>
               <Link href="/packages" className="inline-flex items-center gap-1 hover:underline">
-                Packages <ArrowUpRight className="h-4 w-4" />
+                QR Code Packages <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
-            <CardAction><Box className="h-5 w-5 text-muted-foreground" /></CardAction>
+            <CardAction><QrCode className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.packages}</p>

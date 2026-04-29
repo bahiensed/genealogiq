@@ -49,7 +49,7 @@ function ActionsCell({ row, currentUserRole }: { row: { original: SaleRow }; cur
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         isPending={isPending}
-        description={`The sale of package "${sale.package.name}" to "${sale.tenant.name}" will be deleted and licenses will be returned to inventory.`}
+        description={`The sale of package "${sale.package.name}" to "${sale.tenant.name}" will be deleted and QR codes will be returned to inventory.`}
         onConfirm={() => startTransition(async () => {
           const result = await deleteSale(sale.id)
           if (result?.error) toast.error(result.error)
@@ -90,7 +90,7 @@ export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
     {
       id: 'totalLicenses',
       accessorFn: (row) => row.quantity * row.package.quantity,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Licenses /<br/> Package</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>QR-Codes /<br/>Package</>} />,
       cell: ({ row }) => <div className="text-right">{(row.original.quantity * row.original.package.quantity).toLocaleString('en-US')}</div>,
     },
     {
@@ -102,7 +102,7 @@ export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
     {
       id: 'licenseUnitPrice',
       accessorFn: (row) => row.package.price / row.package.quantity,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>License<br/>Un. Price</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>QR-Code<br/>Un. Price</>} />,
       cell: ({ row }) => <div className="text-right">{usd.format(row.original.package.price / row.original.package.quantity)}</div>,
     },
     {
@@ -115,7 +115,12 @@ export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
       id: 'seller',
       accessorFn: (row) => `${row.soldBy.firstName} ${row.soldBy.lastName}`,
       header: ({ column }) => <DataTableColumnHeader column={column} title="Seller" />,
-      cell: ({ row }) => `${row.original.soldBy.firstName} ${row.original.soldBy.lastName}`,
+      cell: ({ row }) => (
+        <div className="flex flex-col leading-tight">
+          <span>{row.original.soldBy.firstName}</span>
+          <span>{row.original.soldBy.lastName}</span>
+        </div>
+      ),
     },
     {
       id: 'actions',

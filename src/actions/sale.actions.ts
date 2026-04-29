@@ -19,11 +19,11 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId },
-    select: { quantity: true, licenseId: true },
+    select: { quantity: true },
   })
   if (!pkg) return { error: 'Package not found.' }
 
-  const totalLicenses = pkg.quantity * quantity
+  const totalQRCodes = pkg.quantity * quantity
 
   await prisma.$transaction(async (tx) => {
     await tx.sale.create({
@@ -36,9 +36,9 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
     })
 
     await tx.tenantLicense.upsert({
-      where:  { tenantId_licenseId: { tenantId, licenseId: pkg.licenseId } },
-      create: { tenantId, licenseId: pkg.licenseId, quantity: totalLicenses },
-      update: { quantity: { increment: totalLicenses } },
+      where:  { tenantId },
+      create: { tenantId, quantity: totalQRCodes },
+      update: { quantity: { increment: totalQRCodes } },
     })
   })
 
@@ -51,27 +51,27 @@ export async function deleteSale(id: number): Promise<ActionError | void> {
 
   const sale = await prisma.sale.findUnique({
     where:  { id },
-    select: { quantity: true, packageId: true, tenantId: true, package: { select: { quantity: true, licenseId: true } } },
+    select: { quantity: true, packageId: true, tenantId: true, package: { select: { quantity: true } } },
   })
   if (!sale) return { error: 'Sale not found.' }
 
-  const totalLicenses = sale.package.quantity * sale.quantity
+  const totalQRCodes = sale.package.quantity * sale.quantity
 
   try {
     await prisma.$transaction(async (tx) => {
       await tx.sale.delete({ where: { id } })
 
-      const cl = await tx.tenantLicense.findUnique({
-        where:  { tenantId_licenseId: { tenantId: sale.tenantId, licenseId: sale.package.licenseId } },
+      const inv = await tx.tenantLicense.findUnique({
+        where:  { tenantId: sale.tenantId },
         select: { id: true, quantity: true },
       })
 
-      if (cl) {
-        const newQty = cl.quantity - totalLicenses
+      if (inv) {
+        const newQty = inv.quantity - totalQRCodes
         if (newQty <= 0) {
-          await tx.tenantLicense.delete({ where: { id: cl.id } })
+          await tx.tenantLicense.delete({ where: { id: inv.id } })
         } else {
-          await tx.tenantLicense.update({ where: { id: cl.id }, data: { quantity: newQty } })
+          await tx.tenantLicense.update({ where: { id: inv.id }, data: { quantity: newQty } })
         }
       }
     })

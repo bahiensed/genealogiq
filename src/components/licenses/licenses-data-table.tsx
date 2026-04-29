@@ -10,6 +10,9 @@ interface LicensesDataTableProps {
 
 const COLUMN_LABELS: Record<string, string> = {
   name:        'Name',
+  maxProfiles: 'Maximum Profiles',
+  termLength:  'Term Length in Months',
+  price:       'Price',
   description: 'Description',
   isActive:    'Status',
   createdAt:   'Created at',
