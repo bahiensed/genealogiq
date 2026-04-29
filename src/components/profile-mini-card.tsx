@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils"
+import type { AvatarGradient } from "@/lib/avatar-color"
 
-export type AvatarGradient = "rose" | "amber" | "emerald" | "indigo" | "violet" | "sky" | "brand"
+export type { AvatarGradient }
 
 const gradientMap: Record<AvatarGradient, string> = {
   rose:    "bg-[linear-gradient(135deg,hsl(346_84%_61%),hsl(330_81%_60%))]",
@@ -21,6 +22,7 @@ export interface MiniProfile {
   initials: string
   gradient: AvatarGradient
   href: string
+  avatarUrl?: string | null
 }
 
 interface ProfileMiniCardProps {
@@ -47,11 +49,14 @@ export function ProfileMiniCard({ profile, delay = 0, hideLivingBadge, hideMetri
           <div className="absolute -inset-0.5 rounded-full bg-gradient-brand opacity-60 blur-sm" />
           <div
             className={cn(
-              "relative h-14 w-14 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-[var(--shadow-icon)]",
-              gradientMap[profile.gradient],
+              "relative h-14 w-14 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-[var(--shadow-icon)] overflow-hidden",
+              !profile.avatarUrl && gradientMap[profile.gradient],
             )}
           >
-            {profile.initials}
+            {profile.avatarUrl
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={profile.avatarUrl} alt={profile.name} className="h-full w-full object-cover" />
+              : profile.initials}
           </div>
         </div>
         <div className="flex-1 min-w-0">

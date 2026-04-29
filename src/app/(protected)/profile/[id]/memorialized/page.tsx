@@ -4,34 +4,32 @@ import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
-import { ProfileMiniCard, type MiniProfile, type AvatarGradient } from "@/components/profile-mini-card"
+import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
+import { getProfileGradient } from "@/lib/avatar-color"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
 import type { MemorialRow } from "@/queries/memorial"
 
-const GRADIENTS: AvatarGradient[] = ["indigo", "violet", "sky", "brand", "emerald", "amber", "rose"]
 const MAX_MEMORIALS = 2
 
-function toMiniProfile(m: MemorialRow, index: number): MiniProfile {
-  const name = `${m.firstName} ${m.lastName}`
-  const subtitle = m.birthPlace
-    ? `${m.birthPlace}${m.birthCountry ? `, ${m.birthCountry}` : ""}`
-    : "Memorialized profile"
-  const metric = m.deathDate
-    ? `✦ ${m.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
-    : m.birthDate
-      ? `Born ${m.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
-      : ""
+function toMiniProfile(m: MemorialRow): MiniProfile {
   return {
     id: m.id,
-    name,
-    subtitle,
+    name: `${m.firstName} ${m.lastName}`,
+    subtitle: m.birthPlace
+      ? `${m.birthPlace}${m.birthCountry ? `, ${m.birthCountry}` : ""}`
+      : "Memorialized profile",
     status: "Memorialized",
-    metric,
+    metric: m.deathDate
+      ? `✦ ${m.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
+      : m.birthDate
+        ? `Born ${m.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
+        : "",
     initials: `${m.firstName[0]}${m.lastName[0]}`.toUpperCase(),
-    gradient: GRADIENTS[index % GRADIENTS.length],
+    gradient: getProfileGradient(m.id),
     href: `/profile/${m.id}`,
+    avatarUrl: m.avatarUrl,
   }
 }
 
@@ -86,7 +84,7 @@ export default async function MemorializedPage({ params }: Props) {
 
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {memorials.map((m, i) => (
-            <ProfileMiniCard key={m.id} profile={toMiniProfile(m, i)} delay={i * 40} />
+            <ProfileMiniCard key={m.id} profile={toMiniProfile(m)} delay={i * 40} />
           ))}
         </section>
 

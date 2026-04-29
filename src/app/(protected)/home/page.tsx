@@ -3,7 +3,8 @@ import { Clock, Heart, BrickWall, User, ArrowRight } from "lucide-react"
 import { verifySession } from "@/lib/dal"
 import { GlassIcon } from "@/components/glass-icon"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
-import { ProfileMiniCard, type MiniProfile, type AvatarGradient } from "@/components/profile-mini-card"
+import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
+import { getProfileGradient } from "@/lib/avatar-color"
 import { HomeSearch } from "@/components/home-search"
 import { RecentlyViewedSection } from "@/components/recently-viewed-section"
 import { RecentlyViewedCount } from "@/components/recently-viewed-count"
@@ -13,10 +14,7 @@ import { prisma } from "@/lib/prisma"
 import { getFavoritesByUserId, type FavoriteRow } from "@/queries/favorite"
 import { getMemorialsByCreatorId, type MemorialRow } from "@/queries/memorial"
 
-const FAV_GRADIENTS: AvatarGradient[] = ["brand", "indigo", "violet", "sky", "rose", "amber", "emerald"]
-const MEM_GRADIENTS: AvatarGradient[] = ["indigo", "violet", "sky", "brand", "emerald", "amber", "rose"]
-
-function favToMiniProfile(fav: FavoriteRow, index: number): MiniProfile {
+function favToMiniProfile(fav: FavoriteRow): MiniProfile {
   const t = fav.target
   const isMemorialized = t.role === "APP_MEMO"
   return {
@@ -32,12 +30,13 @@ function favToMiniProfile(fav: FavoriteRow, index: number): MiniProfile {
         ? `Born ${t.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
         : "",
     initials: `${t.firstName[0]}${t.lastName[0]}`.toUpperCase(),
-    gradient: FAV_GRADIENTS[index % FAV_GRADIENTS.length],
+    gradient: getProfileGradient(t.id),
     href: `/profile/${t.id}`,
+    avatarUrl: t.avatarUrl,
   }
 }
 
-function memToMiniProfile(m: MemorialRow, index: number): MiniProfile {
+function memToMiniProfile(m: MemorialRow): MiniProfile {
   return {
     id: m.id,
     name: `${m.firstName} ${m.lastName}`,
@@ -51,8 +50,9 @@ function memToMiniProfile(m: MemorialRow, index: number): MiniProfile {
         ? `Born ${m.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
         : "",
     initials: `${m.firstName[0]}${m.lastName[0]}`.toUpperCase(),
-    gradient: MEM_GRADIENTS[index % MEM_GRADIENTS.length],
+    gradient: getProfileGradient(m.id),
     href: `/profile/${m.id}`,
+    avatarUrl: m.avatarUrl,
   }
 }
 
@@ -152,7 +152,7 @@ export default async function HomePage() {
               {favorites.slice(0, 6).map((fav, i) => (
                 <ProfileMiniCard
                   key={fav.targetId}
-                  profile={favToMiniProfile(fav, i)}
+                  profile={favToMiniProfile(fav)}
                   delay={i * 40}
                   hideLivingBadge={fav.target.role !== "APP_MEMO"}
                 />
@@ -175,7 +175,7 @@ export default async function HomePage() {
           {memorials.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {memorials.slice(0, 6).map((m, i) => (
-                <ProfileMiniCard key={m.id} profile={memToMiniProfile(m, i)} delay={i * 40} />
+                <ProfileMiniCard key={m.id} profile={memToMiniProfile(m)} delay={i * 40} />
               ))}
             </div>
           ) : undefined}

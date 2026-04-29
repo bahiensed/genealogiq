@@ -110,9 +110,20 @@ export default async function GeolocationPage({ params }: Props) {
                   </div>
                   <div className="pt-3 border-t border-border/60">
                     <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Coordinates</div>
-                    <code className="text-sm font-mono">
-                      {geo.lat.toFixed(6)}, {geo.lon.toFixed(6)}
-                    </code>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <code className="text-sm font-mono">
+                        {geo.lat.toFixed(6)}, {geo.lon.toFixed(6)}
+                      </code>
+                      <a
+                        href={`https://www.google.com/maps?q=${geo.lat},${geo.lon}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                      >
+                        <MapPin className="h-3 w-3" />
+                        Open in Google Maps
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>

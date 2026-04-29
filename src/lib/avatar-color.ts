@@ -1,15 +1,30 @@
-const COLORS = ["bg-rose-400", "bg-amber-400", "bg-indigo-400", "bg-emerald-400"] as const
-export type AvatarColor = (typeof COLORS)[number]
+export type AvatarColor = "bg-rose-400" | "bg-amber-400" | "bg-indigo-400" | "bg-emerald-400"
 
-export function getAvatarColor(id: string): AvatarColor {
+const COLORS: AvatarColor[] = ["bg-rose-400", "bg-amber-400", "bg-indigo-400", "bg-emerald-400"]
+
+function hashId(id: string): number {
   let hash = 0
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) & 0xffff
-  }
-  return COLORS[hash % COLORS.length]
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) & 0xffff
+  return hash
 }
 
-const GRADIENTS = [
+export function getAvatarColor(id: string): AvatarColor {
+  return COLORS[hashId(id) % COLORS.length]
+}
+
+// ── ProfileMiniCard gradients ────────────────────────────────────────────────
+
+export type AvatarGradient = "rose" | "amber" | "emerald" | "indigo" | "violet" | "sky" | "brand"
+
+const PROFILE_GRADIENTS: AvatarGradient[] = ["brand", "indigo", "violet", "sky", "rose", "amber", "emerald"]
+
+export function getProfileGradient(id: string): AvatarGradient {
+  return PROFILE_GRADIENTS[hashId(id) % PROFILE_GRADIENTS.length]
+}
+
+// ── Inline avatar gradients (Tailwind classes, used in card-previews) ────────
+
+const TAILWIND_GRADIENTS = [
   "from-rose-400 to-pink-500",
   "from-amber-400 to-orange-500",
   "from-indigo-400 to-violet-500",
@@ -19,9 +34,5 @@ const GRADIENTS = [
 ] as const
 
 export function getAvatarGradient(id: string): string {
-  let hash = 0
-  for (let i = 0; i < id.length; i++) {
-    hash = (hash * 31 + id.charCodeAt(i)) & 0xffff
-  }
-  return GRADIENTS[hash % GRADIENTS.length]
+  return TAILWIND_GRADIENTS[hashId(id) % TAILWIND_GRADIENTS.length]
 }
