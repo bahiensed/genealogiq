@@ -1,11 +1,11 @@
 import Link from 'next/link'
 import { verifyTenantSession } from '@/lib/dal'
-import { getAvailableLicenses } from '@/queries/sales'
+import { getInventoryData } from '@/queries/sales'
 import { SalesForm } from '@/components/sales/sales-form'
 
 export default async function SalesPage() {
   const { customerId } = await verifyTenantSession()
-  const licenses = await getAvailableLicenses(customerId)
+  const { qrCodeCount, subscriptions } = await getInventoryData(customerId)
 
   return (
     <div className="flex flex-col gap-6">
@@ -13,15 +13,15 @@ export default async function SalesPage() {
         Sales
       </h1>
 
-      {licenses.length === 0 ? (
+      {qrCodeCount === 0 ? (
         <p className="text-muted-foreground">
-          No licenses available in inventory.{' '}
-          <Link href="/purchasing/licenses" className="underline underline-offset-4 hover:text-primary">
-            Buy licenses
+          No QR codes in inventory.{' '}
+          <Link href="/purchasing/packages" className="underline underline-offset-4 hover:text-primary">
+            Buy QR codes
           </Link>
         </p>
       ) : (
-        <SalesForm licenses={licenses} />
+        <SalesForm qrCodeCount={qrCodeCount} subscriptions={subscriptions} />
       )}
     </div>
   )

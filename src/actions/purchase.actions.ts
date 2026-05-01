@@ -19,11 +19,11 @@ export async function purchasePackage(
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId, isActive: true },
-    select: { quantity: true, licenseId: true },
+    select: { quantity: true },
   })
   if (!pkg) return { error: 'Package not found or unavailable.' }
 
-  const totalLicenses = pkg.quantity * quantity
+  const totalQRCodes = pkg.quantity * quantity
 
   await prisma.$transaction(async (tx) => {
     await tx.sale.create({
@@ -35,16 +35,16 @@ export async function purchasePackage(
       },
     })
 
-    await tx.tenantLicense.upsert({
-      where:  { tenantId_licenseId: { tenantId: customerId, licenseId: pkg.licenseId } },
-      create: { tenantId: customerId, licenseId: pkg.licenseId, quantity: totalLicenses },
-      update: { quantity: { increment: totalLicenses } },
+    await tx.qrInventory.upsert({
+      where:  { tenantId: customerId },
+      create: { tenantId: customerId, quantity: totalQRCodes },
+      update: { quantity: { increment: totalQRCodes } },
     })
   })
 
-  revalidatePath('/purchasing/licenses')
-  revalidatePath('/inventory/licenses')
+  revalidatePath('/purchasing/packages')
+  revalidatePath('/inventory/packages')
 
-  const label = totalLicenses === 1 ? 'license added' : 'licenses added'
-  return { success: `Purchase complete! ${totalLicenses} ${label} to your inventory.` }
+  const label = totalQRCodes === 1 ? 'QR code added' : 'QR codes added'
+  return { success: `Purchase complete! ${totalQRCodes} ${label} to your inventory.` }
 }

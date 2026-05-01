@@ -20,7 +20,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
   const defaultValues: AppUserFormValues = {
     firstName:        customer.firstName,
     lastName:         customer.lastName,
-    gender:           (customer.gender as AppUserFormValues['gender']) ?? 'MALE',
+    gender:           (customer.gender as AppUserFormValues['gender']) ?? null,
     birthDate:        customer.birthDate ? customer.birthDate.toISOString().slice(0, 10) : '',
     birthCity:        customer.birthCity        ?? '',
     birthState:       customer.birthState       ?? '',
@@ -51,19 +51,17 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
     } : undefined,
   }
 
-  const licensesAcquired = customer._count.appSales
-  const licensesUsed     = customer._count.guardiansOf
-  const licensesAvailable = Math.max(0, licensesAcquired - licensesUsed)
+  const qrCodesAcquired  = customer._count.appSales
+  const qrCodesUsed      = customer._count.guardiansOf
+  const qrCodesAvailable = Math.max(0, qrCodesAcquired - qrCodesUsed)
 
   const memorializedProfiles = customer.guardiansOf.map(({ appUser }) => appUser)
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        {customer.firstName} {customer.lastName}
-      </h1>
       <CustomerForm
         id={id}
+        name={`${customer.firstName} ${customer.lastName}`}
         categories={categories}
         defaultValues={defaultValues}
       />
@@ -74,14 +72,14 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-semibold">Memorialized profiles</h2>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant="outline">{licensesAcquired} acquired</Badge>
-              <Badge variant="outline">{licensesUsed} used</Badge>
-              <Badge variant={licensesAvailable > 0 ? 'default' : 'secondary'}>
-                {licensesAvailable} available
+              <Badge variant="outline">{qrCodesAcquired} QR codes acquired</Badge>
+              <Badge variant="outline">{qrCodesUsed} used</Badge>
+              <Badge variant={qrCodesAvailable > 0 ? 'default' : 'secondary'}>
+                {qrCodesAvailable} available
               </Badge>
             </div>
           </div>
-          {licensesAvailable > 0 && (
+          {qrCodesAvailable > 0 && (
             <Button asChild>
               <Link href={`/customers/${id}/memorialized/new`}>
                 Create memorialized profile

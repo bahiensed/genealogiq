@@ -52,7 +52,7 @@ export async function createDeceased(
   if (!guardian) return { error: 'Customer not found.' }
 
   const available = guardian._count.appSales - guardian._count.guardiansOf
-  if (available <= 0) return { error: 'No licenses available for this customer.' }
+  if (available <= 0) return { error: 'No QR codes available for this customer.' }
 
   const validated = deceasedSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }

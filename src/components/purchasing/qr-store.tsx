@@ -12,25 +12,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-export interface LicensePackage {
+export interface QRPackage {
   id: string
   name: string
   description: string | null
   price: number
   quantity: number
-  license: {
-    name: string
-    description: string | null
-  }
 }
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
-export function LicenseStore({ packages }: { packages: LicensePackage[] }) {
+export function QRStore({ packages }: { packages: QRPackage[] }) {
   if (packages.length === 0) {
     return (
       <p className="text-muted-foreground">No packages available at the moment.</p>
@@ -46,7 +41,7 @@ export function LicenseStore({ packages }: { packages: LicensePackage[] }) {
   )
 }
 
-function PackageCard({ pkg }: { pkg: LicensePackage }) {
+function PackageCard({ pkg }: { pkg: QRPackage }) {
   const [qty, setQty] = useState(1)
   const [isPending, startTransition] = useTransition()
 
@@ -62,16 +57,13 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
     })
   }
 
-  const totalLicenses = pkg.quantity * qty
+  const totalQRCodes = pkg.quantity * qty
   const totalPrice = pkg.price * qty
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle>{pkg.name}</CardTitle>
-          <Badge variant="secondary" className="shrink-0">{pkg.license.name}</Badge>
-        </div>
+        <CardTitle>{pkg.name}</CardTitle>
         {pkg.description && (
           <CardDescription>{pkg.description}</CardDescription>
         )}
@@ -81,15 +73,9 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
         <div>
           <p className="text-3xl font-bold">{usd.format(pkg.price)}</p>
           <p className="text-sm text-muted-foreground">
-            {pkg.quantity} {pkg.quantity === 1 ? 'license' : 'licenses'} per package
+            {pkg.quantity} {pkg.quantity === 1 ? 'QR code' : 'QR codes'} per package
           </p>
         </div>
-
-        {pkg.license.description && (
-          <p className="border-t pt-3 text-sm text-muted-foreground">
-            {pkg.license.description}
-          </p>
-        )}
 
         <div className="mt-auto flex items-center gap-3 pt-2">
           <label className="text-sm font-medium whitespace-nowrap">Qty. packages</label>
@@ -104,7 +90,7 @@ function PackageCard({ pkg }: { pkg: LicensePackage }) {
 
         {qty > 1 && (
           <p className="text-sm text-muted-foreground">
-            {totalLicenses} licenses · {usd.format(totalPrice)}
+            {totalQRCodes} QR codes · {usd.format(totalPrice)}
           </p>
         )}
       </CardContent>

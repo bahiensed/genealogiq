@@ -7,11 +7,11 @@ export async function getDashboardStats(customerId: string) {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfYear  = new Date(now.getFullYear(), 0, 1)
 
-  const [availableLicenses, totalCustomers, monthlySales, yearlySales] =
+  const [qrInventory, totalCustomers, monthlySales, yearlySales] =
     await Promise.all([
-      prisma.tenantLicense.aggregate({
-        where: { tenantId: customerId },
-        _sum:  { quantity: true },
+      prisma.qrInventory.findUnique({
+        where:  { tenantId: customerId },
+        select: { quantity: true },
       }),
       prisma.appUser.count({
         where: { tenantId: customerId },
@@ -29,7 +29,7 @@ export async function getDashboardStats(customerId: string) {
     ])
 
   return {
-    availableLicenses: availableLicenses._sum.quantity ?? 0,
+    availableQRCodes: qrInventory?.quantity ?? 0,
     totalCustomers,
     monthlyCount:   monthlySales._count,
     monthlyRevenue: Number(monthlySales._sum.value ?? 0),

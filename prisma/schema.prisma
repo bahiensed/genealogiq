@@ -290,11 +290,11 @@ model Tenant {
   moduleFinance             Boolean @default(false) @map("module_finance")
 
   users         User[]
-  subTenants  Tenant[]         @relation("TenantParent")
+  subTenants    Tenant[]           @relation("TenantParent")
   suppliers     Supplier[]         @relation("SupplierTenant")
   supplierCats  SupplierCategory[] @relation("SupplierCategoryTenant")
-  tenantCats  TenantCategory[] @relation("TenantCategoryTenant")
-  licenses      TenantLicense[]
+  tenantCats    TenantCategory[]   @relation("TenantCategoryTenant")
+  qrInventory   QrInventory?
   sales         Sale[]
   appSales      AppSale[]          @relation("AppSaleTenant")
   appUsers      AppUser[]          @relation("AppUserTenant")
@@ -304,9 +304,9 @@ model Tenant {
   @@map("tenants")
 }
 
-// ─── Licenses / Inventory ────────────────────────────────────────────────────
+// ─── QR Code Inventory ───────────────────────────────────────────────────────
 
-model License {
+model Subscription {
   id          String  @id @default(cuid())
   name        String
   description String?
@@ -315,11 +315,9 @@ model License {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  packages         Package[]
-  tenantLicenses TenantLicense[]
-  appSales         AppSale[]
+  appSales AppSale[]
 
-  @@map("licenses")
+  @@map("subscriptions")
 }
 
 model Package {
@@ -329,9 +327,6 @@ model Package {
   price       Decimal  @db.Decimal(10, 2) @map("price")
   quantity    Int      @default(1)
   isActive    Boolean  @default(true) @map("is_active")
-
-  licenseId String  @map("license_id")
-  license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -360,21 +355,17 @@ model Sale {
   @@map("sales")
 }
 
-model TenantLicense {
+model QrInventory {
   id       String @id @default(cuid())
   quantity Int    @default(0)
 
-  tenantId   String   @map("tenant_id")
-  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  licenseId String  @map("license_id")
-  license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
+  tenantId String @unique @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@unique([tenantId, licenseId])
-  @@map("tenant_licenses")
+  @@map("qr_inventory")
 }
 
 model AppSale {
@@ -384,8 +375,8 @@ model AppSale {
   appUserId String   @map("app_user_id")
   appUser   AppUser  @relation(fields: [appUserId], references: [id], onDelete: Cascade)
 
-  licenseId String  @map("license_id")
-  license   License @relation(fields: [licenseId], references: [id], onDelete: Restrict)
+  subscriptionId String       @map("subscription_id")
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
 
   tenantId  String   @map("tenant_id")
   tenant    Tenant @relation("AppSaleTenant", fields: [tenantId], references: [id], onDelete: Cascade)

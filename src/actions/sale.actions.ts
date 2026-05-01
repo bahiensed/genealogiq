@@ -12,12 +12,11 @@ type ActionSuccess = { success: string }
 
 export async function createAppSale(
   appUserId: string,
-  licenseId: string,
+  subscriptionId: string,
   value: number,
 ): Promise<ActionError | ActionSuccess> {
   const { customerId, user } = await verifyTenantSession()
 
-  // Verifica que o APP_USER pertence ao tenant
   const appUser = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
     select: { id: true, email: true },
@@ -25,26 +24,25 @@ export async function createAppSale(
   if (!appUser) return { error: 'Customer not found.' }
   if (!appUser.email) return { error: 'Customer has no email address.' }
 
-  // Check that a license is available
-  const cl = await prisma.tenantLicense.findUnique({
-    where:  { tenantId_licenseId: { tenantId: customerId, licenseId } },
+  const inventory = await prisma.qrInventory.findUnique({
+    where:  { tenantId: customerId },
     select: { quantity: true },
   })
-  if (!cl || cl.quantity < 1) return { error: 'No licenses available for this type.' }
+  if (!inventory || inventory.quantity < 1) return { error: 'No QR codes available.' }
 
   const token = randomBytes(32).toString('hex')
 
   try {
     await prisma.$transaction(async (tx) => {
-      await tx.tenantLicense.update({
-        where: { tenantId_licenseId: { tenantId: customerId, licenseId } },
+      await tx.qrInventory.update({
+        where: { tenantId: customerId },
         data:  { quantity: { decrement: 1 } },
       })
 
       await tx.appSale.create({
         data: {
           appUserId,
-          licenseId,
+          subscriptionId,
           value,
           tenantId: customerId,
           soldById: user.id,
@@ -73,6 +71,6 @@ export async function createAppSale(
   }
 
   revalidatePath('/sales')
-  revalidatePath('/inventory/licenses')
+  revalidatePath('/inventory/packages')
   return { success: 'Sale registered and access sent successfully.' }
 }

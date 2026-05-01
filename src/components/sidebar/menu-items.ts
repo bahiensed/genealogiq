@@ -22,11 +22,11 @@ export interface MenuItem {
 // ─── Main (fast menu — always visible) ───────────────────────────────────────
 
 export const main: MenuItem[] = [
-  { name: 'Dashboard',     url: '/dashboard',           icon: LayoutDashboard  },
-  { name: 'Buy Licenses',  url: '/purchasing/licenses', icon: QrCodeIcon       },
-  { name: 'My Licenses', url: '/inventory/licenses',    icon: QrCodeIcon       },
-  { name: 'Customers',     url: '/customers',           icon: UsersIcon        },
-  { name: 'Sales',         url: '/sales',               icon: ShoppingCartIcon },
+  { name: 'Dashboard',    url: '/dashboard',            icon: LayoutDashboard  },
+  { name: 'Buy QR Codes', url: '/purchasing/packages',  icon: QrCodeIcon       },
+  { name: 'My QR Codes',  url: '/inventory/packages',   icon: QrCodeIcon       },
+  { name: 'Customers',    url: '/customers',            icon: UsersIcon        },
+  { name: 'Sales',        url: '/sales',                icon: ShoppingCartIcon },
 ]
 
 // ─── System (always visible) ─────────────────────────────────────────────────
@@ -54,19 +54,19 @@ export const categories: MenuItem[] = [
   { name: 'Customer Categories', url: '/customer-categories', icon: TagIcon     }, // always-on
 ]
 
-// ─── Purchasing (Licenses always-on) ─────────────────────────────────────────
+// ─── Purchasing (Packages always-on) ─────────────────────────────────────────
 
 export const purchasing: MenuItem[] = [
-  { name: 'Buy Licenses', url: '/purchasing/licenses', icon: QrCodeIcon      },
-  { name: 'Products', url: '/purchasing/products',    icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
-  { name: 'Services', url: '/purchasing/services',    icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
+  { name: 'Buy QR Codes', url: '/purchasing/packages', icon: QrCodeIcon      },
+  { name: 'Products',     url: '/purchasing/products', icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
+  { name: 'Services',     url: '/purchasing/services', icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
 ]
 
-// ─── Inventory (Licenses always-on) ──────────────────────────────────────────
+// ─── Inventory (QR Codes always-on) ──────────────────────────────────────────
 
 export const inventory: MenuItem[] = [
-  { name: 'My Licenses', url: '/inventory/licenses', icon: QrCodeIcon },
-  { name: 'Products', url: '/inventory/products', icon: BoxIcon,    moduleKey: 'moduleInventoryProducts' },
+  { name: 'My QR Codes', url: '/inventory/packages', icon: QrCodeIcon },
+  { name: 'Products',    url: '/inventory/products',  icon: BoxIcon,    moduleKey: 'moduleInventoryProducts' },
 ]
 
 // ─── Sales (always visible) ───────────────────────────────────────────────────

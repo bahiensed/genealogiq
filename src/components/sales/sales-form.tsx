@@ -30,41 +30,38 @@ interface AppUserResult {
   email:     string
 }
 
-interface AvailableLicense {
-  quantity: number
-  license: {
-    id:          string
-    name:        string
-    description: string | null
-  }
+interface Subscription {
+  id:          string
+  name:        string
+  description: string | null
 }
 
 interface SalesFormProps {
-  licenses: AvailableLicense[]
+  qrCodeCount:   number
+  subscriptions: Subscription[]
 }
 
 interface FieldErrors {
-  appUser?:  string
-  licenseId?: string
-  value?:    string
+  appUser?:        string
+  subscriptionId?: string
+  value?:          string
 }
 
-export function SalesForm({ licenses }: SalesFormProps) {
-  const [query,       setQuery]       = useState('')
-  const [results,     setResults]     = useState<AppUserResult[]>([])
-  const [open,        setOpen]        = useState(false)
-  const [selected,    setSelected]    = useState<AppUserResult | null>(null)
-  const [licenseId,   setLicenseId]   = useState('')
-  const [value,       setValue]       = useState('')
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
-  const [serverError, setServerError] = useState<string | null>(null)
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const [isPending,   startTransition] = useTransition()
+export function SalesForm({ qrCodeCount, subscriptions }: SalesFormProps) {
+  const [query,          setQuery]          = useState('')
+  const [results,        setResults]        = useState<AppUserResult[]>([])
+  const [open,           setOpen]           = useState(false)
+  const [selected,       setSelected]       = useState<AppUserResult | null>(null)
+  const [subscriptionId, setSubscriptionId] = useState('')
+  const [value,          setValue]          = useState('')
+  const [fieldErrors,    setFieldErrors]    = useState<FieldErrors>({})
+  const [serverError,    setServerError]    = useState<string | null>(null)
+  const [confirmOpen,    setConfirmOpen]    = useState(false)
+  const [isPending,      startTransition]   = useTransition()
 
   const dropdownRef = useRef<HTMLDivElement>(null)
   const formRef     = useRef<HTMLFormElement>(null)
 
-  // Dynamic search: fires after 2nd character + 300ms debounce
   useEffect(() => {
     if (query.length < 2) {
       setResults([])
@@ -80,7 +77,6 @@ export function SalesForm({ licenses }: SalesFormProps) {
     return () => clearTimeout(timer)
   }, [query])
 
-  // Fecha dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -107,8 +103,8 @@ export function SalesForm({ licenses }: SalesFormProps) {
     e.preventDefault()
 
     const errors: FieldErrors = {}
-    if (!selected)  errors.appUser   = 'Select a customer.'
-    if (!licenseId) errors.licenseId = 'Select a license.'
+    if (!selected)        errors.appUser        = 'Select a customer.'
+    if (!subscriptionId)  errors.subscriptionId = 'Select a subscription.'
 
     const numValue = parseFloat(value.replace(',', '.'))
     if (!value || isNaN(numValue) || numValue < 0) {
@@ -134,13 +130,13 @@ export function SalesForm({ licenses }: SalesFormProps) {
     setConfirmOpen(false)
     const numValue = parseFloat(value.replace(',', '.'))
     startTransition(async () => {
-      const result = await createAppSale(selected!.id, licenseId, numValue)
+      const result = await createAppSale(selected!.id, subscriptionId, numValue)
       if ('error' in result) {
         setServerError(result.error)
       } else {
         toast.success(result.success)
         setSelected(null)
-        setLicenseId('')
+        setSubscriptionId('')
         setValue('')
       }
     })
@@ -149,6 +145,13 @@ export function SalesForm({ licenses }: SalesFormProps) {
   return (
     <>
     <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-xl">
+      <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm self-start">
+        <span className="font-medium tabular-nums">{qrCodeCount}</span>
+        <span className="ml-1.5 text-muted-foreground">
+          {qrCodeCount === 1 ? 'QR code available' : 'QR codes available'}
+        </span>
+      </div>
+
       <FieldGroup>
         {/* Customer search */}
         <Field data-invalid={!!fieldErrors.appUser || undefined}>
@@ -196,26 +199,25 @@ export function SalesForm({ licenses }: SalesFormProps) {
           {fieldErrors.appUser && <FieldError>{fieldErrors.appUser}</FieldError>}
         </Field>
 
-        {/* License */}
-        <Field data-invalid={!!fieldErrors.licenseId || undefined}>
-          <FieldLabel>License</FieldLabel>
-          <Select value={licenseId} onValueChange={(v) => { setLicenseId(v); setFieldErrors((prev) => ({ ...prev, licenseId: undefined })) }}>
-            <SelectTrigger aria-invalid={!!fieldErrors.licenseId}>
-              <SelectValue placeholder="Select a license..." />
+        {/* Subscription */}
+        <Field data-invalid={!!fieldErrors.subscriptionId || undefined}>
+          <FieldLabel>Subscription</FieldLabel>
+          <Select value={subscriptionId} onValueChange={(v) => { setSubscriptionId(v); setFieldErrors((prev) => ({ ...prev, subscriptionId: undefined })) }}>
+            <SelectTrigger aria-invalid={!!fieldErrors.subscriptionId}>
+              <SelectValue placeholder="Select a subscription..." />
             </SelectTrigger>
             <SelectContent>
-              {licenses.map(({ license, quantity }) => (
-                <SelectItem key={license.id} value={license.id}>
-                  {license.name}
-                  <span className="ml-2 text-muted-foreground">({quantity} available)</span>
+              {subscriptions.map((sub) => (
+                <SelectItem key={sub.id} value={sub.id}>
+                  {sub.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          {fieldErrors.licenseId && <FieldError>{fieldErrors.licenseId}</FieldError>}
+          {fieldErrors.subscriptionId && <FieldError>{fieldErrors.subscriptionId}</FieldError>}
         </Field>
 
-        {/* Valor */}
+        {/* Amount */}
         <Field data-invalid={!!fieldErrors.value || undefined}>
           <FieldLabel>Amount (US$)</FieldLabel>
           <Input
@@ -245,7 +247,7 @@ export function SalesForm({ licenses }: SalesFormProps) {
         <DialogHeader>
           <DialogTitle>Confirm sale</DialogTitle>
           <DialogDescription>
-            The sale will be registered and a license will be removed from stock. Confirm?
+            The sale will be registered and a QR code will be removed from inventory. Confirm?
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

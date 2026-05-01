@@ -18,11 +18,11 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Available Licenses</CardTitle>
+            <CardTitle>Available QR Codes</CardTitle>
             <CardAction><Layers className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{stats.availableLicenses}</p>
+            <p className="text-3xl font-bold">{stats.availableQRCodes}</p>
             <p className="text-sm text-muted-foreground mt-1">Currently in stock</p>
           </CardContent>
         </Card>
@@ -40,7 +40,7 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Licenses Sold This Month</CardTitle>
+            <CardTitle>QR Codes Sold This Month</CardTitle>
             <CardAction><ShoppingCart className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
@@ -62,7 +62,7 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Licenses Sold This Year</CardTitle>
+            <CardTitle>QR Codes Sold This Year</CardTitle>
             <CardAction><BarChart3 className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>

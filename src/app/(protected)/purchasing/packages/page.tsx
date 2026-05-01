@@ -1,8 +1,8 @@
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
-import { LicenseStore } from '@/components/purchasing/license-store'
+import { QRStore } from '@/components/purchasing/qr-store'
 
-export default async function PurchasingLicensesPage() {
+export default async function PurchasingPackagesPage() {
   await verifyTenantSession()
 
   const packages = await prisma.package.findMany({
@@ -13,9 +13,6 @@ export default async function PurchasingLicensesPage() {
       description: true,
       price:       true,
       quantity:    true,
-      license: {
-        select: { name: true, description: true },
-      },
     },
     orderBy: { quantity: 'asc' },
   })
@@ -25,9 +22,9 @@ export default async function PurchasingLicensesPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Buy Licenses
+        Buy QR Codes
       </h1>
-      <LicenseStore packages={data} />
+      <QRStore packages={data} />
     </div>
   )
 }
