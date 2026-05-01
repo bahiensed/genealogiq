@@ -1,6 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { getCustomer } from '@/queries/customers'
-import { MemorializedForm } from '@/components/memorialized/memorialized-form'
+import { MemorializedNewForm } from '@/components/memorialized/memorialized-new-form'
 
 export default async function NewMemorializedPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -12,15 +12,17 @@ export default async function NewMemorializedPage({ params }: { params: Promise<
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        New memorialized profile
-      </h1>
-      <p className="text-sm text-muted-foreground">
-        Customer: <span className="font-medium text-foreground">{customer.firstName} {customer.lastName}</span>
-        {' · '}
-        <span>{available} license{available !== 1 ? 's' : ''} available</span>
-      </p>
-      <MemorializedForm appUserId={id} />
+      <div>
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+          New memorialized profile
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Customer: <span className="font-medium text-foreground">{customer.firstName} {customer.lastName}</span>
+          {' · '}
+          <span>{available} QR code{available !== 1 ? 's' : ''} available</span>
+        </p>
+      </div>
+      <MemorializedNewForm appUserId={id} />
     </div>
   )
 }

@@ -1,16 +1,7 @@
 import { getCustomerCategories } from '@/queries/customer-categories'
-import { CustomerWizard } from '@/components/customers/customer-wizard'
+import { CustomerNewForm } from '@/components/customers/customer-new-form'
 
 export default async function NewCustomerPage() {
-
   const categories = await getCustomerCategories()
-
-  return (
-    <div className="flex flex-col gap-6">
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        New Customer
-      </h1>
-      <CustomerWizard categories={categories} />
-    </div>
-  )
+  return <CustomerNewForm categories={categories} />
 }

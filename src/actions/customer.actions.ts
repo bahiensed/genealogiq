@@ -32,6 +32,37 @@ function toDate(value: string | null | undefined): Date | null {
   return value ? new Date(value) : null
 }
 
+export async function createCustomer(
+  appUserData: AppUserFormValues,
+): Promise<ActionError | ActionSuccess> {
+  const { customerId } = await verifyTenantSession()
+
+  const validated = appUserSchema.safeParse(appUserData)
+  if (!validated.success) return { error: 'Invalid data' }
+
+  const { address, birthDate, categoryId, ...rest } = validated.data
+
+  try {
+    await prisma.appUser.create({
+      data: {
+        ...rest,
+        birthDate: toDate(birthDate),
+        tenant:    { connect: { id: customerId } },
+        category:  categoryId ? { connect: { id: categoryId } } : undefined,
+        address:   buildAddressCreate(address),
+      },
+    })
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      return { error: 'An account with this email already exists.' }
+    }
+    throw e
+  }
+
+  revalidatePath('/customers')
+  return { success: 'Customer created successfully.' }
+}
+
 export async function createCustomerWithDeceased(
   appUserData: AppUserFormValues,
   deceasedData: DeceasedFormValues,

@@ -4,11 +4,12 @@ import { addressSchema, addressDefaultValues } from './address.schema'
 
 export const GENDERS = ['MALE', 'FEMALE', 'OTHER'] as const
 export type Gender = typeof GENDERS[number]
+export const GENDER_OPTIONS = ['FEMALE', 'MALE'] as const
 
 export const appUserSchema = z.object({
   firstName:       z.string().min(1, 'Required').max(100, 'Must be at most 100 characters'),
   lastName:        z.string().min(1, 'Required').max(100, 'Must be at most 100 characters'),
-  gender:          z.enum(GENDERS, { error: 'Required' }),
+  gender:          z.enum(GENDERS).nullish(),
   birthDate:       z.string().min(1, 'Required'),
   birthCity:       z.string().max(200).nullish(),
   birthState:      z.string().max(200).nullish(),
@@ -37,7 +38,7 @@ export const appUserResolver = zodResolver(appUserSchema)
 export const appUserDefaultValues: AppUserFormValues = {
   firstName:        '',
   lastName:         '',
-  gender:           'MALE',
+  gender:           null,
   birthDate:        '',
   birthCity:        '',
   birthState:       '',

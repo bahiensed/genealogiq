@@ -14,7 +14,7 @@ export default async function MemorializedDetailPage({ params }: { params: Promi
   const defaultValues: DeceasedFormValues = {
     firstName:          deceased.firstName,
     lastName:           deceased.lastName,
-    gender:             (deceased.gender as DeceasedFormValues['gender']) ?? 'MALE',
+    gender:             (deceased.gender as DeceasedFormValues['gender']) ?? null,
     birthDate:          deceased.birthDate ? deceased.birthDate.toISOString().slice(0, 10) : '',
     birthCity:          deceased.birthCity          ?? '',
     birthState:         deceased.birthState         ?? '',

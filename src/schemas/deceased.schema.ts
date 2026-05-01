@@ -5,7 +5,7 @@ import { GENDERS } from './app-user.schema'
 export const deceasedSchema = z.object({
   firstName:         z.string().min(1, 'Required').max(100, 'Must be at most 100 characters'),
   lastName:          z.string().min(1, 'Required').max(100, 'Must be at most 100 characters'),
-  gender:            z.enum(GENDERS, { error: 'Required' }),
+  gender:            z.enum(GENDERS).nullish(),
   birthDate:         z.string().min(1, 'Required'),
   birthCity:         z.string().max(200).nullish(),
   birthState:        z.string().min(1, 'Required').max(200),
@@ -45,7 +45,7 @@ export const deceasedResolver = zodResolver(deceasedSchema)
 export const deceasedDefaultValues: DeceasedFormValues = {
   firstName:          '',
   lastName:           '',
-  gender:             'MALE',
+  gender:             null,
   birthDate:          '',
   birthCity:          '',
   birthState:         '',

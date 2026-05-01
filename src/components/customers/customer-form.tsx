@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
-import { appUserResolver, appUserDefaultValues, type AppUserFormValues, GENDERS } from '@/schemas/app-user.schema'
+import { appUserResolver, appUserDefaultValues, type AppUserFormValues } from '@/schemas/app-user.schema'
+import { GenderSelect } from '@/components/ui/gender-select'
+import { CountrySelect } from '@/components/ui/country-select'
 import { updateCustomer } from '@/actions/customer.actions'
 import { maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
@@ -20,13 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldSeparator,
-} from '@/components/ui/field'
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 
 interface Category {
   id: string
@@ -35,17 +37,22 @@ interface Category {
 
 interface CustomerFormProps {
   id: string
+  name: string
   defaultValues?: AppUserFormValues
   categories?: Category[]
 }
 
-const GENDER_LABELS: Record<string, string> = {
-  MALE:   'Male',
-  FEMALE: 'Female',
-  OTHER:  'Other',
+const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const
+type SocialKey = typeof SOCIAL_KEYS[number]
+
+function socialLabel(key: SocialKey): string {
+  if (key === 'fb') return 'Facebook'
+  if (key === 'x') return 'X (Twitter)'
+  if (key === 'otherSocial') return 'Other'
+  return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
-export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFormProps) {
+export function CustomerForm({ id, name, defaultValues, categories = [] }: CustomerFormProps) {
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<AppUserFormValues>({
@@ -74,230 +81,240 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
   return (
     <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-2xl">
 
-      {/* ── Personal data ── */}
-      <p className="text-sm font-medium">Personal data</p>
-      <FieldGroup>
-        <div className="grid grid-cols-12 gap-3">
-          <Controller
-            name="firstName"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>First Name:</FieldLabel>
-                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-          <Controller
-            name="lastName"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>Last Name:</FieldLabel>
-                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-12 gap-3">
-          <Controller
-            name="gender"
-            control={control}
-            render={({ field }) => (
-              <Field className="col-span-4">
-                <FieldLabel>Gender:</FieldLabel>
-                <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {GENDERS.map((g) => (
-                      <SelectItem key={g} value={g}>{GENDER_LABELS[g]}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-          />
-          <Controller
-            name="birthDate"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Date of Birth:</FieldLabel>
-                <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-12 gap-3">
-          <Controller
-            name="birthCity"
-            control={control}
-            render={({ field }) => (
-              <Field className="col-span-4">
-                <FieldLabel>Birth city:</FieldLabel>
-                <Input {...field} value={field.value ?? ''} autoComplete="off" />
-              </Field>
-            )}
-          />
-          <Controller
-            name="birthState"
-            control={control}
-            render={({ field }) => (
-              <Field className="col-span-4">
-                <FieldLabel>Birth state:</FieldLabel>
-                <Input {...field} value={field.value ?? ''} autoComplete="off" />
-              </Field>
-            )}
-          />
-          <Controller
-            name="birthCountry"
-            control={control}
-            render={({ field }) => (
-              <Field className="col-span-4">
-                <FieldLabel>Birth country:</FieldLabel>
-                <Input {...field} value={field.value ?? ''} autoComplete="off" />
-              </Field>
-            )}
-          />
-        </div>
-      </FieldGroup>
-
-      <FieldSeparator />
-
-      {/* ── Contact ── */}
-      <p className="text-sm font-medium">Contact</p>
-      <FieldGroup>
-        <div className="grid grid-cols-12 gap-3">
-          <Controller
-            name="email"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                <FieldLabel>E-mail:</FieldLabel>
-                <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-          <Controller
-            name="phoneCountryCode"
-            control={control}
-            render={({ field }) => (
-              <Field className="col-span-2">
-                <FieldLabel>Country Code:</FieldLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {PHONE_COUNTRY_CODES.map((c) => (
-                      <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-          />
-          <Controller
-            name="phone"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Phone:</FieldLabel>
-                <MaskedInput
-                  value={field.value ?? ''}
-                  onChange={field.onChange}
-                  maskFn={maskPhone}
-                  autoComplete="off"
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
-        </div>
-
-        <Controller
-          name="categoryId"
-          control={control}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel>Category:</FieldLabel>
-              <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-          )}
-        />
-
-        <Controller
-          name="notes"
-          control={control}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel>Notes:</FieldLabel>
-              <Textarea {...field} value={field.value ?? ''} rows={3} />
-            </Field>
-          )}
-        />
-
+      <div className="flex items-center justify-between">
+        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">{name}</h1>
         <Controller
           name="isActive"
           control={control}
           render={({ field }) => (
-            <Field orientation="horizontal">
+            <div className="flex items-center gap-2">
               <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-              <FieldLabel htmlFor="isActive" className="cursor-pointer">Active customer</FieldLabel>
-            </Field>
+              <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
+            </div>
           )}
         />
-      </FieldGroup>
+      </div>
 
-      <FieldSeparator />
+      <Accordion type="multiple" defaultValue={['personal']} className="flex flex-col gap-2">
 
-      {/* ── Address ── */}
-      <p className="text-sm font-medium">Address</p>
-      <AddressSection
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        control={control as any}
-        setValue={setValue}
-        errors={errors}
-        prefix="address"
-      />
+        {/* ── Personal data ── */}
+        <AccordionItem value="personal" className="border rounded-lg px-4">
+          <AccordionTrigger className="text-base font-semibold">Personal data</AccordionTrigger>
+          <AccordionContent className="pt-2 pb-4">
+            <FieldGroup>
+              <div className="grid grid-cols-12 gap-3">
+                <Controller
+                  name="firstName"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field className="col-span-6" data-invalid={fieldState.invalid}>
+                      <FieldLabel>First Name:</FieldLabel>
+                      <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="lastName"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field className="col-span-6" data-invalid={fieldState.invalid}>
+                      <FieldLabel>Last Name:</FieldLabel>
+                      <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+              </div>
 
-      <FieldSeparator />
+              <div className="grid grid-cols-12 gap-3">
+                <Controller
+                  name="gender"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field className="col-span-4" data-invalid={fieldState.invalid}>
+                      <FieldLabel>Gender:</FieldLabel>
+                      <GenderSelect value={field.value} onChange={(v) => field.onChange(v || null)} invalid={fieldState.invalid} />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="birthDate"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field className="col-span-4" data-invalid={fieldState.invalid}>
+                      <FieldLabel>Date of Birth:</FieldLabel>
+                      <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+              </div>
 
-      {/* ── Social media ── */}
-      <p className="text-sm font-medium">Social media</p>
-      <FieldGroup>
-        <div className="grid grid-cols-12 gap-3">
-          {(['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const).map((key) => (
-            <Controller
-              key={key}
-              name={key}
-              control={control}
-              render={({ field }) => (
-                <Field className="col-span-6 md:col-span-4">
-                  <FieldLabel>{key === 'fb' ? 'Facebook' : key === 'x' ? 'X (Twitter)' : key === 'otherSocial' ? 'Other' : key.charAt(0).toUpperCase() + key.slice(1)}:</FieldLabel>
-                  <Input {...field} value={field.value ?? ''} autoComplete="off" />
-                </Field>
-              )}
+              <div className="grid grid-cols-12 gap-3">
+                <Controller
+                  name="birthCity"
+                  control={control}
+                  render={({ field }) => (
+                    <Field className="col-span-4">
+                      <FieldLabel>Birth city:</FieldLabel>
+                      <Input {...field} value={field.value ?? ''} autoComplete="off" />
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="birthState"
+                  control={control}
+                  render={({ field }) => (
+                    <Field className="col-span-4">
+                      <FieldLabel>Birth state:</FieldLabel>
+                      <Input {...field} value={field.value ?? ''} autoComplete="off" />
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="birthCountry"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field className="col-span-4" data-invalid={fieldState.invalid}>
+                      <FieldLabel>Birth country:</FieldLabel>
+                      <CountrySelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+              </div>
+            </FieldGroup>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Contact ── */}
+        <AccordionItem value="contact" className="border rounded-lg px-4">
+          <AccordionTrigger className="text-base font-semibold">Contact</AccordionTrigger>
+          <AccordionContent className="pt-2 pb-4">
+            <FieldGroup>
+              <div className="grid grid-cols-12 gap-3">
+                <Controller
+                  name="email"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field className="col-span-6" data-invalid={fieldState.invalid}>
+                      <FieldLabel>E-mail:</FieldLabel>
+                      <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="phoneCountryCode"
+                  control={control}
+                  render={({ field }) => (
+                    <Field className="col-span-2">
+                      <FieldLabel>Country Code:</FieldLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {PHONE_COUNTRY_CODES.map((c) => (
+                            <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                  )}
+                />
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field className="col-span-4" data-invalid={fieldState.invalid}>
+                      <FieldLabel>Phone:</FieldLabel>
+                      <MaskedInput
+                        value={field.value ?? ''}
+                        onChange={field.onChange}
+                        maskFn={maskPhone}
+                        autoComplete="off"
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    </Field>
+                  )}
+                />
+              </div>
+
+              <Controller
+                name="categoryId"
+                control={control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>Category:</FieldLabel>
+                    <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="notes"
+                control={control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>Notes:</FieldLabel>
+                    <Textarea {...field} value={field.value ?? ''} rows={3} />
+                  </Field>
+                )}
+              />
+            </FieldGroup>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Address ── */}
+        <AccordionItem value="address" className="border rounded-lg px-4">
+          <AccordionTrigger className="text-base font-semibold">Address</AccordionTrigger>
+          <AccordionContent className="pt-2 pb-4">
+            <AddressSection
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              control={control as any}
+              setValue={setValue}
+              errors={errors}
+              prefix="address"
             />
-          ))}
-        </div>
-      </FieldGroup>
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* ── Social media ── */}
+        <AccordionItem value="social" className="border rounded-lg px-4">
+          <AccordionTrigger className="text-base font-semibold">Social media</AccordionTrigger>
+          <AccordionContent className="pt-2 pb-4">
+            <FieldGroup>
+              <div className="grid grid-cols-12 gap-3">
+                {SOCIAL_KEYS.map((key) => (
+                  <Controller
+                    key={key}
+                    name={key}
+                    control={control}
+                    render={({ field }) => (
+                      <Field className="col-span-6 md:col-span-4">
+                        <FieldLabel>{socialLabel(key)}:</FieldLabel>
+                        <Input {...field} value={field.value ?? ''} autoComplete="off" />
+                      </Field>
+                    )}
+                  />
+                ))}
+              </div>
+            </FieldGroup>
+          </AccordionContent>
+        </AccordionItem>
+
+      </Accordion>
 
       {serverError && <FieldError>{serverError}</FieldError>}
 
