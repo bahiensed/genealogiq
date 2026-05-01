@@ -13,16 +13,16 @@ const COLUMN_LABELS: Record<string, string> = {
   customer:         'Customer',
   package:          'Package',
   quantity:         'Package Qtd.',
-  totalLicenses:    'QR-Codes / Package',
+  totalSubscriptions:    'QR-Codes / Package',
   packagePrice:     'Package Price',
-  licenseUnitPrice: 'QR-Code Un. Price',
+  subscriptionUnitPrice: 'QR-Code Un. Price',
   totalPrice:       'Total Order Price',
   seller:           'Seller',
 }
 
 const INITIAL_VISIBILITY = {
-  totalLicenses:    false,
-  licenseUnitPrice: false,
+  totalSubscriptions:    false,
+  subscriptionUnitPrice: false,
 }
 
 export function SalesDataTable({ currentUserRole, data }: SalesDataTableProps) {

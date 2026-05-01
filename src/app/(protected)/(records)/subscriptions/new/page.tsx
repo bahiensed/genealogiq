@@ -1,5 +1,5 @@
-import { LicenseForm } from '@/components/licenses/license-form'
+import { SubscriptionForm } from '@/components/subscriptions/subscription-form'
 
-export default function NewLicensePage() {
-  return <LicenseForm />
+export default function NewSubscriptionPage() {
+  return <SubscriptionForm />
 }

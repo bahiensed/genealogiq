@@ -10,9 +10,9 @@ import { Badge } from '@/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
-import { toggleLicenseActive, deleteLicense } from '@/actions/license.actions'
+import { toggleSubscriptionActive, deleteSubscription } from '@/actions/subscription.actions'
 
-export type LicenseRow = {
+export type SubscriptionRow = {
   id: string
   name: string
   description: string | null
@@ -23,10 +23,10 @@ export type LicenseRow = {
   createdAt: Date
 }
 
-function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; currentUserRole: string }) {
+function ActionsCell({ row, currentUserRole }: { row: { original: SubscriptionRow }; currentUserRole: string }) {
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
-  const license = row.original
+  const subscription = row.original
 
   return (
     <>
@@ -39,16 +39,16 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/subscriptions/${license.id}`}>Edit</Link>
+            <Link href={`/subscriptions/${subscription.id}`}>Edit</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
-              const result = await toggleLicenseActive(license.id)
+              const result = await toggleSubscriptionActive(subscription.id)
               if (result?.error) toast.error(result.error)
-              else toast.success(license.isActive ? 'Subscription deactivated.' : 'Subscription reactivated.')
+              else toast.success(subscription.isActive ? 'Subscription deactivated.' : 'Subscription reactivated.')
             })}
           >
-            {license.isActive ? 'Deactivate' : 'Reactivate'}
+            {subscription.isActive ? 'Deactivate' : 'Reactivate'}
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
             <DropdownMenuItem
@@ -66,9 +66,9 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           isPending={isPending}
-          description={`The subscription "${license.name}" will be permanently deleted.`}
+          description={`The subscription "${subscription.name}" will be permanently deleted.`}
           onConfirm={() => startTransition(async () => {
-            const result = await deleteLicense(license.id)
+            const result = await deleteSubscription(subscription.id)
             if (result?.error) toast.error(result.error)
             else { toast.success('Subscription deleted successfully.'); setDeleteOpen(false) }
           })}
@@ -80,7 +80,7 @@ function ActionsCell({ row, currentUserRole }: { row: { original: LicenseRow }; 
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
-export function getColumns(currentUserRole: string): ColumnDef<LicenseRow>[] {
+export function getColumns(currentUserRole: string): ColumnDef<SubscriptionRow>[] {
   return [
     {
       accessorKey: 'name',

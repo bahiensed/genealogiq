@@ -28,9 +28,9 @@ enum EntityType {
   COMPANY
 }
 
-// ─── Licenses & Packages ─────────────────────────────────────────────────────
+// ─── Subscriptions & Packages ────────────────────────────────────────────────
 
-model License {
+model Subscription {
   id          String  @id @default(cuid())
   name        String
   description String?
@@ -42,7 +42,7 @@ model License {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("licenses")
+  @@map("subscriptions")
 }
 
 model Package {
@@ -80,7 +80,7 @@ model Sale {
   @@map("sales")
 }
 
-model TenantLicense {
+model QrInventory {
   id       String @id @default(cuid())
   quantity Int    @default(0)
 
@@ -90,7 +90,7 @@ model TenantLicense {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@map("tenant_licenses")
+  @@map("qr_inventory")
 }
 
 // ─── Auth tokens ─────────────────────────────────────────────────────────────
@@ -316,7 +316,7 @@ model Tenant {
   supplierCats SupplierCategory[] @relation("SupplierCategoryTenant")
   tenantCats TenantCategory[] @relation("TenantCategoryTenant")
   sales        Sale[]
-  license      TenantLicense?
+  qrInventory  QrInventory?
 
   @@map("tenants")
 }

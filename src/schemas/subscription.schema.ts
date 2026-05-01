@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
-export const licenseSchema = z.object({
+export const subscriptionSchema = z.object({
   name:        z.string()
     .min(4, 'Must be at least 4 characters')
     .max(64, 'Must be at most 64 characters'),
@@ -12,11 +12,11 @@ export const licenseSchema = z.object({
   isActive:    z.boolean(),
 })
 
-export type LicenseFormValues = z.infer<typeof licenseSchema>
+export type SubscriptionFormValues = z.infer<typeof subscriptionSchema>
 
-export const licenseResolver = zodResolver(licenseSchema)
+export const subscriptionResolver = zodResolver(subscriptionSchema)
 
-export const licenseDefaultValues: LicenseFormValues = {
+export const subscriptionDefaultValues: SubscriptionFormValues = {
   name:        '',
   description: '',
   maxProfiles: 1,

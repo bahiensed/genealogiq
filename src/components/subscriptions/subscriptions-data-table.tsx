@@ -1,11 +1,11 @@
 'use client'
 
 import { DataTable } from '@/components/ui/data-table'
-import { getColumns, type LicenseRow } from './columns'
+import { getColumns, type SubscriptionRow } from './columns'
 
-interface LicensesDataTableProps {
+interface SubscriptionsDataTableProps {
   currentUserRole: string
-  data: LicenseRow[]
+  data: SubscriptionRow[]
 }
 
 const COLUMN_LABELS: Record<string, string> = {
@@ -18,14 +18,14 @@ const COLUMN_LABELS: Record<string, string> = {
   createdAt:   'Created at',
 }
 
-export function LicensesDataTable({ currentUserRole, data }: LicensesDataTableProps) {
+export function SubscriptionsDataTable({ currentUserRole, data }: SubscriptionsDataTableProps) {
   return (
     <DataTable
       columns={getColumns(currentUserRole)}
       data={data}
       filterColumn="name"
       filterPlaceholder="Search..."
-      emptyMessage="No licenses found"
+      emptyMessage="No subscriptions found"
       columnLabels={COLUMN_LABELS}
     />
   )

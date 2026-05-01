@@ -8,7 +8,7 @@ export async function getDashboardStats() {
   const startOfYear  = new Date(now.getFullYear(), 0, 1)
 
   const [
-    licenses,
+    subscriptions,
     packages,
     customers,
     systemUsers,
@@ -17,7 +17,7 @@ export async function getDashboardStats() {
     yearlySales,
     allSales,
   ] = await Promise.all([
-    prisma.license.count({ where: { isActive: true } }),
+    prisma.subscription.count({ where: { isActive: true } }),
     prisma.package.count({ where: { isActive: true } }),
     prisma.tenant.count(),
     prisma.user.count({ where: { tenantId: null } }),
@@ -39,7 +39,7 @@ export async function getDashboardStats() {
     rows.reduce((sum, s) => sum + s.quantity * Number(s.package.price), 0)
 
   return {
-    licenses,
+    subscriptions,
     packages,
     customers,
     systemUsers,

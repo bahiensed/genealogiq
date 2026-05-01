@@ -1,22 +1,22 @@
 import { notFound } from 'next/navigation'
-import { getLicense } from '@/queries/licenses'
-import { LicenseForm } from '@/components/licenses/license-form'
+import { getSubscription } from '@/queries/subscriptions'
+import { SubscriptionForm } from '@/components/subscriptions/subscription-form'
 
-export default async function EditLicensePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditSubscriptionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const license = await getLicense(id)
-  if (!license) notFound()
+  const subscription = await getSubscription(id)
+  if (!subscription) notFound()
 
   return (
-    <LicenseForm
+    <SubscriptionForm
       id={id}
       defaultValues={{
-        name:        license.name,
-        description: license.description ?? '',
-        maxProfiles: license.maxProfiles,
-        termLength:  license.termLength,
-        price:       license.price,
-        isActive:    license.isActive,
+        name:        subscription.name,
+        description: subscription.description ?? '',
+        maxProfiles: subscription.maxProfiles,
+        termLength:  subscription.termLength,
+        price:       subscription.price,
+        isActive:    subscription.isActive,
       }}
     />
   )

@@ -88,7 +88,7 @@ export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
       cell: ({ row }) => <div className="text-right">{row.original.quantity}</div>,
     },
     {
-      id: 'totalLicenses',
+      id: 'totalSubscriptions',
       accessorFn: (row) => row.quantity * row.package.quantity,
       header: ({ column }) => <DataTableColumnHeader column={column} title={<>QR-Codes /<br/>Package</>} />,
       cell: ({ row }) => <div className="text-right">{(row.original.quantity * row.original.package.quantity).toLocaleString('en-US')}</div>,
@@ -100,7 +100,7 @@ export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
       cell: ({ row }) => <div className="text-right">{usd.format(row.original.package.price)}</div>,
     },
     {
-      id: 'licenseUnitPrice',
+      id: 'subscriptionUnitPrice',
       accessorFn: (row) => row.package.price / row.package.quantity,
       header: ({ column }) => <DataTableColumnHeader column={column} title={<>QR-Code<br/>Un. Price</>} />,
       cell: ({ row }) => <div className="text-right">{usd.format(row.original.package.price / row.original.package.quantity)}</div>,

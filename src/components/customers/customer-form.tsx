@@ -268,7 +268,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               <div className="flex flex-col gap-3">
                 <p className="text-sm font-semibold">Always active</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {['Dashboard', 'Buy Licenses', 'View Licenses', 'Customers', 'Sales', 'System'].map((label) => (
+                  {['Dashboard', 'Buy Subscriptions', 'View Subscriptions', 'Customers', 'Sales', 'System'].map((label) => (
                     <label key={label} className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                       <Checkbox checked disabled />
                       {label}
@@ -326,7 +326,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    Buy Licenses
+                    Buy Subscriptions
                   </label>
                   {([
                     { name: 'modulePurchasingProducts', label: 'Products' },
@@ -347,7 +347,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    View Licenses
+                    View Subscriptions
                   </label>
                   <Controller name="moduleInventoryProducts" control={control} render={({ field }) => (
                     <label className="flex items-center gap-2 text-sm cursor-pointer">

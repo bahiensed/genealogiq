@@ -97,8 +97,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-screen-lg mx-auto">
-      {/* Header */}
+    <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
         New customer
       </h1>
@@ -155,7 +154,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
       </nav>
 
       {/* Step content */}
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+      <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-6">
 
         {/* ── Step 0: Business ── */}
         {step === 0 && (
@@ -378,7 +377,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
               <div className="flex flex-col gap-3">
                 <p className="text-sm font-semibold">Always active</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {['Dashboard', 'Buy Licenses', 'View Licenses', 'Customers', 'Sales', 'System'].map((label) => (
+                  {['Dashboard', 'Buy Subscriptions', 'View Subscriptions', 'Customers', 'Sales', 'System'].map((label) => (
                     <label key={label} className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                       <Checkbox checked disabled />
                       {label}
@@ -439,7 +438,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    Buy Licenses
+                    Buy Subscriptions
                   </label>
                   {([
                     { name: 'modulePurchasingProducts', label: 'Products' },
@@ -461,7 +460,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    View Licenses
+                    View Subscriptions
                   </label>
                   <Controller name="moduleInventoryProducts" control={control} render={({ field }) => (
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -511,7 +510,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
               Next
             </Button>
           ) : (
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="button" onClick={() => handleSubmit(onSubmit)()} disabled={isSubmitting}>
               {isSubmitting ? 'Creating…' : 'Create customer'}
             </Button>
           )}

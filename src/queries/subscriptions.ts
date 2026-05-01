@@ -3,10 +3,10 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 
-export async function getLicenses() {
+export async function getSubscriptions() {
   await verifySession()
 
-  const rows = await prisma.license.findMany({
+  const rows = await prisma.subscription.findMany({
     select: {
       id:          true,
       name:        true,
@@ -23,10 +23,10 @@ export async function getLicenses() {
   return rows.map(r => ({ ...r, price: Number(r.price) }))
 }
 
-export async function getLicense(id: string) {
+export async function getSubscription(id: string) {
   await verifySession()
 
-  const row = await prisma.license.findUnique({
+  const row = await prisma.subscription.findUnique({
     where: { id },
     select: {
       id:          true,

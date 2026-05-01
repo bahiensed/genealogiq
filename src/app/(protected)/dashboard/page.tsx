@@ -148,7 +148,7 @@ export default async function DashboardPage() {
             <CardAction><Layers className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{stats.licenses}</p>
+            <p className="text-3xl font-bold">{stats.subscriptions}</p>
             <p className="text-sm text-muted-foreground mt-1">Active subscriptions</p>
           </CardContent>
         </Card>

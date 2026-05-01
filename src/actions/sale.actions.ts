@@ -35,7 +35,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
       },
     })
 
-    await tx.tenantLicense.upsert({
+    await tx.qrInventory.upsert({
       where:  { tenantId },
       create: { tenantId, quantity: totalQRCodes },
       update: { quantity: { increment: totalQRCodes } },
@@ -61,7 +61,7 @@ export async function deleteSale(id: number): Promise<ActionError | void> {
     await prisma.$transaction(async (tx) => {
       await tx.sale.delete({ where: { id } })
 
-      const inv = await tx.tenantLicense.findUnique({
+      const inv = await tx.qrInventory.findUnique({
         where:  { tenantId: sale.tenantId },
         select: { id: true, quantity: true },
       })
@@ -69,9 +69,9 @@ export async function deleteSale(id: number): Promise<ActionError | void> {
       if (inv) {
         const newQty = inv.quantity - totalQRCodes
         if (newQty <= 0) {
-          await tx.tenantLicense.delete({ where: { id: inv.id } })
+          await tx.qrInventory.delete({ where: { id: inv.id } })
         } else {
-          await tx.tenantLicense.update({ where: { id: inv.id }, data: { quantity: newQty } })
+          await tx.qrInventory.update({ where: { id: inv.id }, data: { quantity: newQty } })
         }
       }
     })

@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { verifySession } from '@/lib/dal'
-import { getLicenses } from '@/queries/licenses'
-import { LicensesDataTable } from '@/components/licenses/licenses-data-table'
+import { getSubscriptions } from '@/queries/subscriptions'
+import { SubscriptionsDataTable } from '@/components/subscriptions/subscriptions-data-table'
 import { Button } from '@/components/ui/button'
 
-export default async function LicensesPage() {
+export default async function SubscriptionsPage() {
   const session = await verifySession()
-  const licenses = await getLicenses()
+  const subscriptions = await getSubscriptions()
 
   return (
     <div className="flex flex-col gap-6">
@@ -19,7 +19,7 @@ export default async function LicensesPage() {
         </Button>
       </div>
 
-      <LicensesDataTable currentUserRole={session.user.role} data={licenses} />
+      <SubscriptionsDataTable currentUserRole={session.user.role} data={subscriptions} />
     </div>
   )
 }

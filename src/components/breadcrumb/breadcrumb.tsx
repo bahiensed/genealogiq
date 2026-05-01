@@ -12,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 
-const RESOLVABLE = ['users', 'customers', 'suppliers', 'licenses', 'packages', 'supplier-categories', 'customer-categories'] as const
+const RESOLVABLE = ['users', 'customers', 'suppliers', 'subscriptions', 'packages', 'supplier-categories', 'customer-categories'] as const
 type ResolvableType = (typeof RESOLVABLE)[number]
 
 function formatSegment(segment: string): string {

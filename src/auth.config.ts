@@ -13,7 +13,7 @@ export const authConfig = {
 
       const isProtected = [
         "/profile", "/dashboard", "/users", "/company",
-        "/suppliers", "/licenses", "/products", "/services", "/customers",
+        "/suppliers", "/subscriptions", "/products", "/services", "/customers",
         "/purchasing", "/inventory", "/sales", "/finance",
       ].some((r) => pathname.startsWith(r))
       const isAuthRoute = ["/sign-in", "/setup", "/forgot-password"].some((r) =>

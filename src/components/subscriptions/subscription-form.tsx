@@ -4,8 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
-import { licenseResolver, licenseDefaultValues, type LicenseFormValues } from '@/schemas/license.schema'
-import { createLicense, updateLicense } from '@/actions/license.actions'
+import { subscriptionResolver, subscriptionDefaultValues, type SubscriptionFormValues } from '@/schemas/subscription.schema'
+import { createSubscription, updateSubscription } from '@/actions/subscription.actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,28 +13,28 @@ import { Switch } from '@/components/ui/switch'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { CurrencyInput } from '@/components/ui/currency-input'
 
-interface LicenseFormProps {
+interface SubscriptionFormProps {
   id?: string
-  defaultValues?: LicenseFormValues
+  defaultValues?: SubscriptionFormValues
 }
 
-export function LicenseForm({ id, defaultValues }: LicenseFormProps) {
+export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
-  const form = useForm<LicenseFormValues>({
-    resolver: licenseResolver,
-    defaultValues: defaultValues ?? licenseDefaultValues,
+  const form = useForm<SubscriptionFormValues>({
+    resolver: subscriptionResolver,
+    defaultValues: defaultValues ?? subscriptionDefaultValues,
   })
 
   const { control, handleSubmit, formState: { isSubmitting } } = form
 
-  async function onSubmit(data: LicenseFormValues) {
+  async function onSubmit(data: SubscriptionFormValues) {
     setServerError(null)
     const result = isEditing
-      ? await updateLicense(id, data)
-      : await createLicense(data)
+      ? await updateSubscription(id, data)
+      : await createSubscription(data)
     if ('error' in result) {
       setServerError(result.error)
     } else {
