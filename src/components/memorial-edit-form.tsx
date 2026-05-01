@@ -230,9 +230,8 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         <Select value={form.gender} onValueChange={(v) => update("gender", v as FormState["gender"])}>
           <SelectTrigger id="gender"><SelectValue placeholder="Not specified" /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="MALE">Male</SelectItem>
             <SelectItem value="FEMALE">Female</SelectItem>
-            <SelectItem value="OTHER">Other</SelectItem>
+            <SelectItem value="MALE">Male</SelectItem>
           </SelectContent>
         </Select>
       </div>
