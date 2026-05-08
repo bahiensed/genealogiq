@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Building2, Factory, IdCard, Layers, QrCode, ArrowUpRight } from 'lucide-react'
 import { verifySession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@/components/ui/card'
+import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart'
+import { RevenueByPackageChart } from '@/components/dashboard/revenue-by-package-chart'
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
@@ -88,7 +90,30 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Row 3 — Entities */}
+      {/* Row 3 — Charts */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Monthly Revenue</CardTitle>
+            <CardDescription>Last 12 months · active sales only</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MonthlyRevenueChart data={stats.monthlyRevenueChart} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue by Package</CardTitle>
+            <CardDescription>Last 12 months · active sales only</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RevenueByPackageChart data={stats.revenueByPackageChart} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 4 — Entities */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
@@ -136,7 +161,7 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Row 4 — Catalog */}
+      {/* Row 5 — Catalog */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
