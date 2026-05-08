@@ -51,9 +51,10 @@ export function MemorializedNewForm({ appUserId }: Props) {
   const router = useRouter()
 
   const form = useForm<DeceasedFormValues>({
-    resolver:      deceasedResolver,
-    defaultValues: deceasedDefaultValues,
-    mode:          'onTouched',
+    resolver:       deceasedResolver,
+    defaultValues:  deceasedDefaultValues,
+    mode:           'onBlur',
+    reValidateMode: 'onChange',
   })
 
   const { control, handleSubmit, trigger, formState: { isSubmitting } } = form
@@ -62,7 +63,10 @@ export function MemorializedNewForm({ appUserId }: Props) {
     const fields = STEP_FIELDS[step]
     if (fields.length > 0) {
       const ok = await trigger(fields)
-      if (!ok) return
+      if (!ok) {
+        fields.forEach((f) => form.setValue(f, form.getValues(f), { shouldTouch: true, shouldValidate: false }))
+        return
+      }
     }
     setStep((s) => (s + 1) as StepIndex)
   }

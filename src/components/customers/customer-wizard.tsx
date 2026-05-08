@@ -79,13 +79,17 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
   const router = useRouter()
 
   const appUserForm = useForm<AppUserFormValues>({
-    resolver: appUserResolver,
-    defaultValues: appUserDefaultValues,
+    resolver:       appUserResolver,
+    defaultValues:  appUserDefaultValues,
+    mode:           'onBlur',
+    reValidateMode: 'onChange',
   })
 
   const deceasedForm = useForm<DeceasedFormValues>({
-    resolver: deceasedResolver,
-    defaultValues: deceasedDefaultValues,
+    resolver:       deceasedResolver,
+    defaultValues:  deceasedDefaultValues,
+    mode:           'onBlur',
+    reValidateMode: 'onChange',
   })
 
   const isLastStep = step === STEPS.length - 1
@@ -118,11 +122,15 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
       const fields = APP_USER_STEP_FIELDS[step]
       if (fields.length > 0) {
         valid = await appUserForm.trigger(fields)
+        if (!valid)
+          fields.forEach((f) => appUserForm.setValue(f, appUserForm.getValues(f), { shouldTouch: true, shouldValidate: false }))
       }
     } else {
       const fields = DECEASED_STEP_FIELDS[step]
       if (fields.length > 0) {
         valid = await deceasedForm.trigger(fields)
+        if (!valid)
+          fields.forEach((f) => deceasedForm.setValue(f, deceasedForm.getValues(f), { shouldTouch: true, shouldValidate: false }))
       }
     }
 

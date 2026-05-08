@@ -1,24 +1,27 @@
 'use client'
 
 import { useState } from 'react'
+import type { z } from 'zod'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Eye, EyeOff } from 'lucide-react'
-import { companyResolver, companyDefaultValues, type CompanyFormValues } from '@/schemas/company.schema'
+
+import { SetupSchema } from '@/lib/auth'
 import { maskCnpj, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
-import { SetupSchema } from '@/lib/auth'
+
+import { companyResolver, companyDefaultValues, type CompanyFormValues } from '@/schemas/company.schema'
 import { setupSystem } from '@/actions/auth'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { MaskedInput } from '@/components/ui/masked-input'
+
+import { Eye, EyeOff } from 'lucide-react'
 import { AddressSection } from '@/components/address/address-section'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
-import type { z } from 'zod'
+import { MaskedInput } from '@/components/ui/masked-input'
+import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 type AdminFormValues = z.infer<typeof SetupSchema>
 
@@ -38,20 +41,27 @@ export function SetupWizard() {
   const [showPassword, setShowPassword] = useState(false)
 
   const companyForm = useForm<CompanyFormValues>({
-    resolver: companyResolver,
-    defaultValues: companyDefaultValues,
+    resolver:       companyResolver,
+    defaultValues:  companyDefaultValues,
+    mode:           'onBlur',
+    reValidateMode: 'onChange',
   })
 
   const adminForm = useForm<AdminFormValues>({
-    resolver: zodResolver(SetupSchema),
-    defaultValues: { firstName: '', lastName: '', email: '', password: '' },
+    resolver:       zodResolver(SetupSchema),
+    defaultValues:  { firstName: '', lastName: '', email: '', password: '' },
+    mode:           'onBlur',
+    reValidateMode: 'onChange',
   })
 
   async function handleStep1() {
-    const valid = await companyForm.trigger([
-      'legalName', 'tradeName', 'taxId', 'email', 'phoneCountryCode', 'phone',
-    ])
-    if (valid) setStep(2)
+    const fields = ['legalName', 'tradeName', 'taxId', 'email', 'phoneCountryCode', 'phone'] as const
+    const valid = await companyForm.trigger([...fields])
+    if (!valid) {
+      fields.forEach((f) => companyForm.setValue(f, companyForm.getValues(f), { shouldTouch: true, shouldValidate: false }))
+      return
+    }
+    setStep(2)
   }
 
   function handleStep2Skip() {
@@ -63,8 +73,13 @@ export function SetupWizard() {
   }
 
   async function handleStep3() {
-    const valid = await adminForm.trigger(['firstName', 'lastName'])
-    if (valid) setStep(4)
+    const fields = ['firstName', 'lastName'] as const
+    const valid = await adminForm.trigger([...fields])
+    if (!valid) {
+      fields.forEach((f) => adminForm.setValue(f, adminForm.getValues(f), { shouldTouch: true, shouldValidate: false }))
+      return
+    }
+    setStep(4)
   }
 
   async function onFinalSubmit(adminData: AdminFormValues) {
