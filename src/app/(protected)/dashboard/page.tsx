@@ -1,7 +1,9 @@
 import { Layers, Users, ShoppingCart, Banknote, BarChart3, TrendingUp } from 'lucide-react'
 import { verifyTenantSession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
-import { Card, CardContent, CardHeader, CardTitle, CardAction } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@/components/ui/card'
+import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart'
+import { RevenueByPlanChart } from '@/components/dashboard/revenue-by-plan-chart'
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
@@ -79,6 +81,29 @@ export default async function DashboardPage() {
           <CardContent>
             <p className="text-3xl font-bold">{usd.format(stats.yearlyRevenue)}</p>
             <p className="text-sm text-muted-foreground mt-1">Revenue this year</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Monthly Revenue</CardTitle>
+            <CardDescription>Last 12 months</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MonthlyRevenueChart data={stats.monthlyRevenueChart} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue by Plan</CardTitle>
+            <CardDescription>Last 12 months</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RevenueByPlanChart data={stats.revenueByPlanChart} />
           </CardContent>
         </Card>
       </div>
