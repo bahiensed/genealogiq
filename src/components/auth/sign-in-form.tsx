@@ -64,7 +64,15 @@ export function SignInForm() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Password:</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password:</Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-muted-foreground underline underline-offset-4 hover:no-underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <InputGroup>
                 <InputGroupInput
                   id="password"
@@ -81,14 +89,6 @@ export function SignInForm() {
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
-              <div className="flex justify-end">
-                <Link
-                  href="/forgot-password"
-                  className="text-xs text-muted-foreground underline underline-offset-4 hover:no-underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
             </div>
           </CardContent>
 
