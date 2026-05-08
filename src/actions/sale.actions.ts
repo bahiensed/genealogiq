@@ -46,20 +46,29 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
   return { success: 'Sale recorded successfully.' }
 }
 
-export async function deleteSale(id: number): Promise<ActionError | void> {
+export async function reverseSale(id: number): Promise<ActionError | void> {
   await verifySession()
 
   const sale = await prisma.sale.findUnique({
     where:  { id },
-    select: { quantity: true, packageId: true, tenantId: true, package: { select: { quantity: true } } },
+    select: {
+      quantity:   true,
+      tenantId:   true,
+      reversedAt: true,
+      package:    { select: { quantity: true } },
+    },
   })
   if (!sale) return { error: 'Sale not found.' }
+  if (sale.reversedAt) return { error: 'This sale has already been reversed.' }
 
   const totalQRCodes = sale.package.quantity * sale.quantity
 
   try {
     await prisma.$transaction(async (tx) => {
-      await tx.sale.delete({ where: { id } })
+      await tx.sale.update({
+        where: { id },
+        data:  { reversedAt: new Date() },
+      })
 
       const inv = await tx.qrInventory.findUnique({
         where:  { tenantId: sale.tenantId },

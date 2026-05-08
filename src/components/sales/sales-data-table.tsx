@@ -9,15 +9,16 @@ interface SalesDataTableProps {
 }
 
 const COLUMN_LABELS: Record<string, string> = {
-  createdAt:        'Date',
-  customer:         'Customer',
-  package:          'Package',
-  quantity:         'Package Qtd.',
+  createdAt:             'Date',
+  status:                'Status',
+  customer:              'Customer',
+  package:               'Package',
+  quantity:              'Package Qtd.',
   totalSubscriptions:    'QR-Codes / Package',
-  packagePrice:     'Package Price',
+  packagePrice:          'Package Price',
   subscriptionUnitPrice: 'QR-Code Un. Price',
-  totalPrice:       'Total Order Price',
-  seller:           'Seller',
+  totalPrice:            'Total Order Price',
+  seller:                'Seller',
 }
 
 const INITIAL_VISIBILITY = {

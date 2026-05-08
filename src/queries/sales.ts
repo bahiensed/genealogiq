@@ -8,9 +8,10 @@ export async function getSales() {
 
   const rows = await prisma.sale.findMany({
     select: {
-      id:       true,
-      quantity: true,
-      createdAt: true,
+      id:         true,
+      quantity:   true,
+      reversedAt: true,
+      createdAt:  true,
       package: {
         select: { name: true, price: true, quantity: true },
       },
