@@ -179,6 +179,7 @@ RESEND_API_KEY=
 | Quando encontrar bug | Documentar causa, fix e prevenção no CURRENT STATE |
 | Ao criar novo componente | Verificar se existe similar antes de criar |
 | Ao finalizar tarefa | Atualizar CURRENT STATE com progresso |
+| Ao finalizar tarefa | Criar commit semântico com mensagem descritiva |
 
 ## COMMANDS
 *Atalhos para tarefas repetitivas — digite o nome e Claude executa:*
