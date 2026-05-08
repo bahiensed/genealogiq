@@ -1,7 +1,7 @@
 import Link from 'next/link'
+import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
 
 interface Props {
   searchParams: Promise<{ sent?: string }>
