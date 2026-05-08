@@ -44,20 +44,27 @@ export function SetupWizard() {
   const [showPassword, setShowPassword] = useState(false)
 
   const companyForm = useForm<CompanyFormValues>({
-    resolver: companyResolver,
-    defaultValues: companyDefaultValues,
+    resolver:       companyResolver,
+    defaultValues:  companyDefaultValues,
+    mode:           'onBlur',
+    reValidateMode: 'onChange',
   })
 
   const adminForm = useForm<AdminFormValues>({
-    resolver: zodResolver(SetupSchema),
-    defaultValues: { firstName: '', lastName: '', email: '', password: '' },
+    resolver:       zodResolver(SetupSchema),
+    defaultValues:  { firstName: '', lastName: '', email: '', password: '' },
+    mode:           'onBlur',
+    reValidateMode: 'onChange',
   })
 
   async function handleStep1() {
-    const valid = await companyForm.trigger([
-      'legalName', 'tradeName', 'taxId', 'email', 'phoneCountryCode', 'phone',
-    ])
-    if (valid) setStep(2)
+    const fields = ['legalName', 'tradeName', 'taxId', 'email', 'phoneCountryCode', 'phone'] as const
+    const valid = await companyForm.trigger([...fields])
+    if (!valid) {
+      fields.forEach((f) => companyForm.setValue(f, companyForm.getValues(f), { shouldTouch: true, shouldValidate: false }))
+      return
+    }
+    setStep(2)
   }
 
   function handleStep2Skip() {
@@ -69,8 +76,13 @@ export function SetupWizard() {
   }
 
   async function handleStep3() {
-    const valid = await adminForm.trigger(['firstName', 'lastName'])
-    if (valid) setStep(4)
+    const fields = ['firstName', 'lastName'] as const
+    const valid = await adminForm.trigger([...fields])
+    if (!valid) {
+      fields.forEach((f) => adminForm.setValue(f, adminForm.getValues(f), { shouldTouch: true, shouldValidate: false }))
+      return
+    }
+    setStep(4)
   }
 
   async function onFinalSubmit(adminData: AdminFormValues) {

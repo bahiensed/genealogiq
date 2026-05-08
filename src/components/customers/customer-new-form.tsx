@@ -59,9 +59,10 @@ export function CustomerNewForm({ categories = [] }: Props) {
 
   const form = useForm<CustomerCreateFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:      customerCreateResolver as any,
-    defaultValues: customerCreateDefaultValues,
-    mode:          'onTouched',
+    resolver:         customerCreateResolver as any,
+    defaultValues:    customerCreateDefaultValues,
+    mode:             'onBlur',
+    reValidateMode:   'onChange',
   })
 
   const { control, handleSubmit, setValue, trigger, formState: { isSubmitting, errors } } = form
@@ -74,7 +75,15 @@ export function CustomerNewForm({ categories = [] }: Props) {
     if (fields.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ok = await trigger(fields as any)
-      if (!ok) return
+      if (!ok) {
+        // trigger() does not set isTouched, so onChange re-validation wouldn't fire.
+        // Marking the fields as touched ensures errors clear as soon as the user corrects them.
+        fields.forEach((f) =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          form.setValue(f as any, form.getValues(f as any), { shouldTouch: true, shouldValidate: false })
+        )
+        return
+      }
     }
     setStep((s) => (s + 1) as StepIndex)
   }
