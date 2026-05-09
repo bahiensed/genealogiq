@@ -1,9 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Search, X } from 'lucide-react'
 import { createAppSale } from '@/actions/sale.actions'
+import { maskCurrency, parseCurrencyDigits } from '@/lib/masks'
+import { MaskedInput } from '@/components/ui/masked-input'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -47,6 +50,8 @@ interface FieldErrors {
 }
 
 export function SalesForm({ subscriptions }: SalesFormProps) {
+  const router = useRouter()
+
   const [query,          setQuery]          = useState('')
   const [results,        setResults]        = useState<AppUserResult[]>([])
   const [open,           setOpen]           = useState(false)
@@ -105,8 +110,8 @@ export function SalesForm({ subscriptions }: SalesFormProps) {
     if (!selected)        errors.appUser        = 'Select a customer.'
     if (!subscriptionId)  errors.subscriptionId = 'Select a subscription.'
 
-    const numValue = parseFloat(value.replace(',', '.'))
-    if (!value || isNaN(numValue) || numValue < 0) {
+    const numValue = parseCurrencyDigits(value)
+    if (!value || numValue <= 0) {
       errors.value = 'Enter a valid amount.'
     }
 
@@ -127,16 +132,15 @@ export function SalesForm({ subscriptions }: SalesFormProps) {
 
   function handleConfirm() {
     setConfirmOpen(false)
-    const numValue = parseFloat(value.replace(',', '.'))
+    const customerId = selected!.id
+    const numValue   = parseCurrencyDigits(value)
     startTransition(async () => {
-      const result = await createAppSale(selected!.id, subscriptionId, numValue)
+      const result = await createAppSale(customerId, subscriptionId, numValue)
       if ('error' in result) {
         setServerError(result.error)
       } else {
         toast.success(result.success)
-        setSelected(null)
-        setSubscriptionId('')
-        setValue('')
+        router.push(`/customers/${customerId}#memorialized-profiles`)
       }
     })
   }
@@ -214,13 +218,11 @@ export function SalesForm({ subscriptions }: SalesFormProps) {
         {/* Amount */}
         <Field data-invalid={!!fieldErrors.value || undefined}>
           <FieldLabel>Total Amount:</FieldLabel>
-          <Input
-            type="number"
-            min="0"
-            step="0.01"
-            placeholder="Enter final value"
+          <MaskedInput
+            maskFn={maskCurrency}
             value={value}
-            onChange={(e) => { setValue(e.target.value); setFieldErrors((prev) => ({ ...prev, value: undefined })) }}
+            onChange={(v) => { setValue(v); setFieldErrors((prev) => ({ ...prev, value: undefined })) }}
+            placeholder="0.00"
             aria-invalid={!!fieldErrors.value}
           />
           <FieldDescription>The total price charged for the QR Codes.</FieldDescription>
@@ -232,7 +234,7 @@ export function SalesForm({ subscriptions }: SalesFormProps) {
 
       <div>
         <Button type="submit" disabled={isPending}>
-          {isPending ? 'Registering...' : 'Complete sale'}
+          {isPending ? 'Registering...' : 'Complete Sale'}
         </Button>
       </div>
     </form>

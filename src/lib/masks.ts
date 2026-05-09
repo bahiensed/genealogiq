@@ -2,6 +2,19 @@ export function unmaskDigits(value: string): string {
   return value.replace(/\D/g, '')
 }
 
+export function maskCurrency(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 10)
+  if (!digits) return ''
+  const cents = digits.padStart(3, '0')
+  const intPart = parseInt(cents.slice(0, -2), 10).toLocaleString('en-US')
+  const decPart = cents.slice(-2)
+  return `${intPart}.${decPart}`
+}
+
+export function parseCurrencyDigits(digits: string): number {
+  return parseInt(digits || '0', 10) / 100
+}
+
 export function maskCpf(value: string): string {
   const digits = unmaskDigits(value).slice(0, 11)
   return digits

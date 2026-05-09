@@ -67,7 +67,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
       />
 
       {/* ── Memorialized profiles ── */}
-      <section className="flex flex-col gap-4 mt-4">
+      <section id="memorialized-profiles" className="flex flex-col gap-4 mt-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
             <h2 className="text-lg font-semibold">Memorialized Profiles</h2>
