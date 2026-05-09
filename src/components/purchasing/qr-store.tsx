@@ -58,7 +58,6 @@ function PackageCard({ pkg }: { pkg: QRPackage }) {
     })
   }
 
-  const totalPrice    = pkg.price * qty
   const revenueUpside = pkg.price * 5
 
   return (
@@ -92,19 +91,16 @@ function PackageCard({ pkg }: { pkg: QRPackage }) {
           </p>
         </div>
 
-        {/* Qty + Amount */}
+        {/* Amount */}
         <div className="mt-auto flex items-center gap-2 pt-2">
-          <span className="text-sm font-medium whitespace-nowrap">Qty. packages</span>
+          <span className="text-sm font-medium whitespace-nowrap">Amount:</span>
           <Input
             type="number"
             min={1}
             value={qty}
             onChange={(e) => setQty(Math.max(1, Math.trunc(Number(e.target.value))))}
-            className="w-20"
+            className="w-24"
           />
-          <span className="text-muted-foreground">→</span>
-          <span className="text-sm font-medium whitespace-nowrap">Amount:</span>
-          <span className="text-sm font-semibold tabular-nums">{usd.format(totalPrice)}</span>
         </div>
       </CardContent>
 
