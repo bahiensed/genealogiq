@@ -21,7 +21,7 @@ export default async function SalesPage() {
           </Link>
         </p>
       ) : (
-        <SalesForm qrCodeCount={qrCodeCount} subscriptions={subscriptions} />
+        <SalesForm subscriptions={subscriptions} />
       )}
     </div>
   )

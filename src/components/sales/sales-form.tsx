@@ -6,7 +6,7 @@ import { Search, X } from 'lucide-react'
 import { createAppSale } from '@/actions/sale.actions'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import {
   Select,
   SelectContent,
@@ -37,7 +37,6 @@ interface Subscription {
 }
 
 interface SalesFormProps {
-  qrCodeCount:   number
   subscriptions: Subscription[]
 }
 
@@ -47,7 +46,7 @@ interface FieldErrors {
   value?:          string
 }
 
-export function SalesForm({ qrCodeCount, subscriptions }: SalesFormProps) {
+export function SalesForm({ subscriptions }: SalesFormProps) {
   const [query,          setQuery]          = useState('')
   const [results,        setResults]        = useState<AppUserResult[]>([])
   const [open,           setOpen]           = useState(false)
@@ -145,17 +144,10 @@ export function SalesForm({ qrCodeCount, subscriptions }: SalesFormProps) {
   return (
     <>
     <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-xl">
-      <div className="inline-flex items-center rounded-full border px-3 py-1 text-sm self-start">
-        <span className="font-medium tabular-nums">{qrCodeCount}</span>
-        <span className="ml-1.5 text-muted-foreground">
-          {qrCodeCount === 1 ? 'QR code available' : 'QR codes available'}
-        </span>
-      </div>
-
       <FieldGroup>
         {/* Customer search */}
         <Field data-invalid={!!fieldErrors.appUser || undefined}>
-          <FieldLabel>Customer</FieldLabel>
+          <FieldLabel>Customer:</FieldLabel>
           {selected ? (
             <div className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
               <span className="flex-1">
@@ -196,12 +188,13 @@ export function SalesForm({ qrCodeCount, subscriptions }: SalesFormProps) {
               )}
             </div>
           )}
+          <FieldDescription>Who are you selling to?</FieldDescription>
           {fieldErrors.appUser && <FieldError>{fieldErrors.appUser}</FieldError>}
         </Field>
 
         {/* Subscription */}
         <Field data-invalid={!!fieldErrors.subscriptionId || undefined}>
-          <FieldLabel>Subscription</FieldLabel>
+          <FieldLabel>Bonus subscription:</FieldLabel>
           <Select value={subscriptionId} onValueChange={(v) => { setSubscriptionId(v); setFieldErrors((prev) => ({ ...prev, subscriptionId: undefined })) }}>
             <SelectTrigger aria-invalid={!!fieldErrors.subscriptionId}>
               <SelectValue placeholder="Select a subscription..." />
@@ -214,21 +207,23 @@ export function SalesForm({ qrCodeCount, subscriptions }: SalesFormProps) {
               ))}
             </SelectContent>
           </Select>
+          <FieldDescription>The app subscription the customer will receive for free</FieldDescription>
           {fieldErrors.subscriptionId && <FieldError>{fieldErrors.subscriptionId}</FieldError>}
         </Field>
 
         {/* Amount */}
         <Field data-invalid={!!fieldErrors.value || undefined}>
-          <FieldLabel>Amount (US$)</FieldLabel>
+          <FieldLabel>Total Amount:</FieldLabel>
           <Input
             type="number"
             min="0"
             step="0.01"
-            placeholder="0,00"
+            placeholder="Enter final value"
             value={value}
             onChange={(e) => { setValue(e.target.value); setFieldErrors((prev) => ({ ...prev, value: undefined })) }}
             aria-invalid={!!fieldErrors.value}
           />
+          <FieldDescription>The total price charged for the QR Codes.</FieldDescription>
           {fieldErrors.value && <FieldError>{fieldErrors.value}</FieldError>}
         </Field>
       </FieldGroup>
