@@ -5,10 +5,9 @@ import { prisma } from '@/lib/prisma'
 export async function getDashboardStats(customerId: string) {
   const now             = new Date()
   const startOfMonth    = new Date(now.getFullYear(), now.getMonth(), 1)
-  const startOfYear     = new Date(now.getFullYear(), 0, 1)
   const startOf12Months = new Date(now.getFullYear(), now.getMonth() - 11, 1)
 
-  const [qrInventory, totalCustomers, monthlySales, yearlySales, last12MonthsSales] =
+  const [qrInventory, totalCustomers, monthlySales, last12MonthsSales] =
     await Promise.all([
       prisma.qrInventory.findUnique({
         where:  { tenantId: customerId },
@@ -19,11 +18,6 @@ export async function getDashboardStats(customerId: string) {
       }),
       prisma.appSale.aggregate({
         where: { tenantId: customerId, createdAt: { gte: startOfMonth } },
-        _count: true,
-        _sum:   { value: true },
-      }),
-      prisma.appSale.aggregate({
-        where: { tenantId: customerId, createdAt: { gte: startOfYear } },
         _count: true,
         _sum:   { value: true },
       }),
@@ -69,8 +63,6 @@ export async function getDashboardStats(customerId: string) {
     totalCustomers,
     monthlyCount:   monthlySales._count,
     monthlyRevenue: Number(monthlySales._sum.value ?? 0),
-    yearlyCount:    yearlySales._count,
-    yearlyRevenue:  Number(yearlySales._sum.value ?? 0),
     monthlyRevenueChart,
     revenueByPlanChart,
   }

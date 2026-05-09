@@ -1,4 +1,4 @@
-import { Layers, Users, ShoppingCart, Banknote, BarChart3, TrendingUp } from 'lucide-react'
+import { Layers, Users, ShoppingCart, Banknote } from 'lucide-react'
 import { verifyTenantSession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
 import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@/components/ui/card'
@@ -62,27 +62,6 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>QR Codes Sold This Year</CardTitle>
-            <CardAction><BarChart3 className="h-5 w-5 text-muted-foreground" /></CardAction>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.yearlyCount}</p>
-            <p className="text-sm text-muted-foreground mt-1">Sales this year</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Annual Revenue</CardTitle>
-            <CardAction><TrendingUp className="h-5 w-5 text-muted-foreground" /></CardAction>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{usd.format(stats.yearlyRevenue)}</p>
-            <p className="text-sm text-muted-foreground mt-1">Revenue this year</p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Charts */}
