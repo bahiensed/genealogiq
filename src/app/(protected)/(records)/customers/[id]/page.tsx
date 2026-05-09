@@ -51,9 +51,9 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
     } : undefined,
   }
 
-  const qrCodesAcquired  = customer._count.appSales
-  const qrCodesUsed      = customer._count.guardiansOf
-  const qrCodesAvailable = Math.max(0, qrCodesAcquired - qrCodesUsed)
+  const acquiredQRCodes   = customer._count.appSales
+  const createdProfiles   = customer._count.guardiansOf
+  const availableProfiles = Math.max(0, acquiredQRCodes - createdProfiles)
 
   const memorializedProfiles = customer.guardiansOf.map(({ appUser }) => appUser)
 
@@ -69,17 +69,17 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
       {/* ── Memorialized profiles ── */}
       <section className="flex flex-col gap-4 mt-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold">Memorialized profiles</h2>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Badge variant="outline">{qrCodesAcquired} QR codes acquired</Badge>
-              <Badge variant="outline">{qrCodesUsed} used</Badge>
-              <Badge variant={qrCodesAvailable > 0 ? 'default' : 'secondary'}>
-                {qrCodesAvailable} available
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <h2 className="text-lg font-semibold">Memorialized Profiles</h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline">Acquired QR Codes: {acquiredQRCodes}</Badge>
+              <Badge variant={availableProfiles > 0 ? 'default' : 'secondary'}>
+                Available Memo Profiles: {availableProfiles}
               </Badge>
+              <Badge variant="outline">Created Memo Profiles: {createdProfiles}</Badge>
             </div>
           </div>
-          {qrCodesAvailable > 0 && (
+          {availableProfiles > 0 && (
             <Button asChild>
               <Link href={`/customers/${id}/memorialized/new`}>
                 Create memorialized profile

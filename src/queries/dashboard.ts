@@ -14,7 +14,7 @@ export async function getDashboardStats(customerId: string) {
         select: { quantity: true },
       }),
       prisma.appUser.count({
-        where: { tenantId: customerId },
+        where: { tenantId: customerId, role: 'APP_USER' },
       }),
       prisma.appSale.aggregate({
         where: { tenantId: customerId, createdAt: { gte: startOfMonth } },

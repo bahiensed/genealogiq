@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { MaskedInput } from '@/components/ui/masked-input'
 import { AddressSection } from '@/components/address/address-section'
+import { AddCustomerCategoryDialog } from '@/components/customer-categories/add-customer-category-dialog'
 import {
   Select,
   SelectContent,
@@ -53,7 +54,8 @@ function socialLabel(key: SocialKey): string {
 }
 
 export function CustomerForm({ id, name, defaultValues, categories = [] }: CustomerFormProps) {
-  const [serverError, setServerError] = useState<string | null>(null)
+  const [serverError,     setServerError]     = useState<string | null>(null)
+  const [localCategories, setLocalCategories] = useState<Category[]>(categories)
 
   const form = useForm<AppUserFormValues>({
     resolver: appUserResolver,
@@ -70,6 +72,11 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
     } else {
       toast.success(result.success)
     }
+  }
+
+  function handleCategoryCreated(cat: { id: string; name: string }) {
+    setLocalCategories((prev) => [...prev, cat])
+    setValue('categoryId', cat.id)
   }
 
   function scrollToFirstError() {
@@ -102,12 +109,12 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
           <AccordionTrigger className="text-base font-semibold">Personal data</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
-              <div className="grid grid-cols-12 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Controller
                   name="firstName"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <Field className="col-span-6" data-invalid={fieldState.invalid}>
+                    <Field data-invalid={fieldState.invalid}>
                       <FieldLabel>First Name:</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -118,7 +125,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   name="lastName"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <Field className="col-span-6" data-invalid={fieldState.invalid}>
+                    <Field data-invalid={fieldState.invalid}>
                       <FieldLabel>Last Name:</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -127,12 +134,12 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                 />
               </div>
 
-              <div className="grid grid-cols-12 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Controller
                   name="gender"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <Field className="col-span-4" data-invalid={fieldState.invalid}>
+                    <Field data-invalid={fieldState.invalid}>
                       <FieldLabel>Gender:</FieldLabel>
                       <GenderSelect value={field.value} onChange={(v) => field.onChange(v || null)} invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -143,7 +150,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   name="birthDate"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <Field className="col-span-4" data-invalid={fieldState.invalid}>
+                    <Field data-invalid={fieldState.invalid}>
                       <FieldLabel>Date of Birth:</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -152,12 +159,12 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                 />
               </div>
 
-              <div className="grid grid-cols-12 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 <Controller
                   name="birthCity"
                   control={control}
                   render={({ field }) => (
-                    <Field className="col-span-4">
+                    <Field>
                       <FieldLabel>Birth city:</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
@@ -167,7 +174,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   name="birthState"
                   control={control}
                   render={({ field }) => (
-                    <Field className="col-span-4">
+                    <Field>
                       <FieldLabel>Birth state:</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
@@ -177,7 +184,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   name="birthCountry"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <Field className="col-span-4" data-invalid={fieldState.invalid}>
+                    <Field data-invalid={fieldState.invalid}>
                       <FieldLabel>Birth country:</FieldLabel>
                       <CountrySelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -194,23 +201,24 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
           <AccordionTrigger className="text-base font-semibold">Contact</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
-              <div className="grid grid-cols-12 gap-3">
-                <Controller
-                  name="email"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>E-mail:</FieldLabel>
-                      <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
+              <Controller
+                name="email"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>E-mail:</FieldLabel>
+                    <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+
+              <div className="grid grid-cols-3 gap-3">
                 <Controller
                   name="phoneCountryCode"
                   control={control}
                   render={({ field }) => (
-                    <Field className="col-span-2">
+                    <Field>
                       <FieldLabel>Country Code:</FieldLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
@@ -227,7 +235,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   name="phone"
                   control={control}
                   render={({ field, fieldState }) => (
-                    <Field className="col-span-4" data-invalid={fieldState.invalid}>
+                    <Field className="col-span-2" data-invalid={fieldState.invalid}>
                       <FieldLabel>Phone:</FieldLabel>
                       <MaskedInput
                         value={field.value ?? ''}
@@ -247,13 +255,16 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                 control={control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Category:</FieldLabel>
+                    <div className="flex items-center justify-between">
+                      <FieldLabel>Category:</FieldLabel>
+                      <AddCustomerCategoryDialog onCreated={handleCategoryCreated} />
+                    </div>
                     <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
-                        {categories.map((cat) => (
+                        {localCategories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                         ))}
                       </SelectContent>
@@ -295,14 +306,14 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
           <AccordionTrigger className="text-base font-semibold">Social media</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
-              <div className="grid grid-cols-12 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {SOCIAL_KEYS.map((key) => (
                   <Controller
                     key={key}
                     name={key}
                     control={control}
                     render={({ field }) => (
-                      <Field className="col-span-6 md:col-span-4">
+                      <Field>
                         <FieldLabel>{socialLabel(key)}:</FieldLabel>
                         <Input {...field} value={field.value ?? ''} autoComplete="off" />
                       </Field>

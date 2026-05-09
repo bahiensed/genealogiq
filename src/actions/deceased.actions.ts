@@ -152,6 +152,11 @@ export async function updateDeceased(id: string, data: DeceasedFormValues): Prom
 export async function deleteDeceased(id: string): Promise<ActionError | void> {
   const { customerId } = await verifyTenantSession()
 
+  const guardian = await prisma.appUserGuardian.findFirst({
+    where:  { appUserId: id },
+    select: { guardianId: true },
+  })
+
   try {
     await prisma.appUser.delete({ where: { id, tenantId: customerId } })
   } catch (e) {
@@ -162,6 +167,7 @@ export async function deleteDeceased(id: string): Promise<ActionError | void> {
   }
 
   revalidatePath('/customers')
+  if (guardian) revalidatePath(`/customers/${guardian.guardianId}`)
 }
 
 export async function addGuardian(
