@@ -27,7 +27,7 @@ export default async function InventoryPackagesPage() {
           <thead>
             <tr className="border-b bg-muted/50">
               <th className="px-4 py-3 text-left font-medium">QR Codes</th>
-              <th className="px-4 py-3 text-right font-medium">Available</th>
+              <th className="px-4 py-3 text-right font-medium">Available for Sale</th>
             </tr>
           </thead>
           <tbody>
