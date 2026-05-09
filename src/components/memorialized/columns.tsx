@@ -29,7 +29,7 @@ export type MemorializedRow = {
 
 function formatDate(d: Date | null | undefined): string {
   if (!d) return '—'
-  return new Intl.DateTimeFormat('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).format(new Date(d))
+  return new Intl.DateTimeFormat('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', timeZone: 'UTC' }).format(new Date(d))
 }
 
 function ActionsCell({ row }: { row: { original: MemorializedRow } }) {

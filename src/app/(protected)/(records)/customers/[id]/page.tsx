@@ -6,6 +6,7 @@ import { CustomerForm } from '@/components/customers/customer-form'
 import { MemorializedDataTable } from '@/components/memorialized/memorialized-data-table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import type { AppUserFormValues } from '@/schemas/app-user.schema'
 
 export default async function EditCustomerPage({ params }: { params: Promise<{ id: string }> }) {
@@ -58,7 +59,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
   const memorializedProfiles = customer.guardiansOf.map(({ appUser }) => appUser)
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 pb-16">
       <CustomerForm
         id={id}
         name={`${customer.firstName} ${customer.lastName}`}
@@ -66,8 +67,10 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
         defaultValues={defaultValues}
       />
 
+      <Separator />
+
       {/* ── Memorialized profiles ── */}
-      <section id="memorialized-profiles" className="flex flex-col gap-4 mt-4">
+      <section id="memorialized-profiles" className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
             <h2 className="text-lg font-semibold">Memorialized Profiles</h2>
