@@ -58,11 +58,15 @@ export async function getDashboardStats(customerId: string) {
     .map(([name, revenue]) => ({ name, revenue: Math.round(revenue * 100) / 100 }))
     .sort((a, b) => b.revenue - a.revenue)
 
+  const monthlyCount   = monthlySales._count
+  const monthlyRevenue = Number(monthlySales._sum.value ?? 0)
+
   return {
     availableQRCodes: qrInventory?.quantity ?? 0,
     totalCustomers,
-    monthlyCount:   monthlySales._count,
-    monthlyRevenue: Number(monthlySales._sum.value ?? 0),
+    monthlyCount,
+    monthlyRevenue,
+    averageTicket: monthlyCount > 0 ? monthlyRevenue / monthlyCount : 0,
     monthlyRevenueChart,
     revenueByPlanChart,
   }

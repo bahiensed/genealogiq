@@ -1,4 +1,4 @@
-import { Layers, Users, ShoppingCart, Banknote } from 'lucide-react'
+import { Layers, Users, ShoppingCart, Banknote, TrendingUp } from 'lucide-react'
 import { verifyTenantSession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
 import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@/components/ui/card'
@@ -17,10 +17,11 @@ export default async function DashboardPage() {
         Dashboard
       </h1>
 
+      {/* Row 1 — Inventory + Customers */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Available QR Codes</CardTitle>
+            <CardTitle>Available QR Codes for Sale</CardTitle>
             <CardAction><Layers className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
@@ -39,10 +40,13 @@ export default async function DashboardPage() {
             <p className="text-sm text-muted-foreground mt-1">Registered customers</p>
           </CardContent>
         </Card>
+      </div>
 
+      {/* Row 2 — Monthly sales metrics */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>QR Codes Sold This Month</CardTitle>
+            <CardTitle>QR Codes Sold this Month</CardTitle>
             <CardAction><ShoppingCart className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
@@ -62,6 +66,16 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle>Average Ticket</CardTitle>
+            <CardAction><TrendingUp className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{usd.format(stats.averageTicket)}</p>
+            <p className="text-sm text-muted-foreground mt-1">Avg. revenue per sale this month</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Charts */}
