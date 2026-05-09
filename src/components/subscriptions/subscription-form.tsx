@@ -152,7 +152,7 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>Description:</FieldLabel>
-              <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={128} aria-invalid={fieldState.invalid} />
+              <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={256} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
