@@ -8,7 +8,7 @@ export const packageSchema = z.object({
   quantity:    z.number().int('Must be a whole number').positive('Must be greater than zero'),
   description: z.string()
     .min(12, 'Must be at least 12 characters')
-    .max(48, 'Must be at most 48 characters'),
+    .max(256, 'Must be at most 256 characters'),
   price:       z.number().positive('Must be greater than zero'),
   isActive:    z.boolean(),
 })
