@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
 
 export interface QRPackage {
   id: string
@@ -57,28 +58,43 @@ function PackageCard({ pkg }: { pkg: QRPackage }) {
     })
   }
 
-  const totalQRCodes = pkg.quantity * qty
-  const totalPrice = pkg.price * qty
+  const totalPrice    = pkg.price * qty
+  const revenueUpside = pkg.price * 5
 
   return (
-    <Card>
+    <Card className="flex flex-col">
       <CardHeader>
         <CardTitle>{pkg.name}</CardTitle>
-        {pkg.description && (
-          <CardDescription>{pkg.description}</CardDescription>
-        )}
+        <CardDescription>
+          Package with {pkg.quantity} QR {pkg.quantity === 1 ? 'Code' : 'Codes'}
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="flex flex-1 flex-col gap-4">
-        <div>
-          <p className="text-3xl font-bold">{usd.format(pkg.price)}</p>
+        {/* Marketing copy */}
+        <div className="flex flex-col gap-0.5">
+          <p className="text-sm font-medium">
+            Boost your margins by up to 500% with this bundle
+          </p>
           <p className="text-sm text-muted-foreground">
-            {pkg.quantity} {pkg.quantity === 1 ? 'QR code' : 'QR codes'} per package
+            Generate {usd.format(revenueUpside)}+ in revenue
           </p>
         </div>
 
-        <div className="mt-auto flex items-center gap-3 pt-2">
-          <label className="text-sm font-medium whitespace-nowrap">Qty. packages</label>
+        <Separator />
+
+        {/* Price */}
+        <div>
+          <p className="text-xs text-muted-foreground">For as little as</p>
+          <p className="text-3xl font-bold">{usd.format(pkg.price)}</p>
+          <p className="text-sm text-muted-foreground">
+            {pkg.quantity} QR {pkg.quantity === 1 ? 'Code' : 'Codes'} per package
+          </p>
+        </div>
+
+        {/* Qty + Amount */}
+        <div className="mt-auto flex items-center gap-2 pt-2">
+          <span className="text-sm font-medium whitespace-nowrap">Qty. packages</span>
           <Input
             type="number"
             min={1}
@@ -86,19 +102,16 @@ function PackageCard({ pkg }: { pkg: QRPackage }) {
             onChange={(e) => setQty(Math.max(1, Math.trunc(Number(e.target.value))))}
             className="w-20"
           />
+          <span className="text-muted-foreground">→</span>
+          <span className="text-sm font-medium whitespace-nowrap">Amount:</span>
+          <span className="text-sm font-semibold tabular-nums">{usd.format(totalPrice)}</span>
         </div>
-
-        {qty > 1 && (
-          <p className="text-sm text-muted-foreground">
-            {totalQRCodes} QR codes · {usd.format(totalPrice)}
-          </p>
-        )}
       </CardContent>
 
       <CardFooter className="border-t">
         <Button className="w-full" onClick={handleBuy} disabled={isPending}>
           <ShoppingCart className="mr-2 h-4 w-4" />
-          {isPending ? 'Processing…' : 'Buy'}
+          {isPending ? 'Processing…' : 'Start Earning Now'}
         </Button>
       </CardFooter>
     </Card>
