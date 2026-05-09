@@ -3,8 +3,6 @@
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -13,9 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
-import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
 import { QrCodeDownload } from '@/components/ui/qr-code-download'
-import { deleteDeceased } from '@/actions/deceased.actions'
 
 const BASE_URL = 'https://www.genealogiq.app'
 
@@ -33,47 +29,22 @@ function formatDate(d: Date | null | undefined): string {
 }
 
 function ActionsCell({ row }: { row: { original: MemorializedRow } }) {
-  const [isPending, startTransition] = useTransition()
-  const [deleteOpen, setDeleteOpen] = useState(false)
   const profile = row.original
-  const fullName = `${profile.firstName} ${profile.lastName}`
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" disabled={isPending}>
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href={`/memorialized/${profile.id}`}>Edit</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onSelect={() => setDeleteOpen(true)}
-          >
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ConfirmDeleteDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        isPending={isPending}
-        description={`The profile "${fullName}" will be permanently deleted.`}
-        onConfirm={() =>
-          startTransition(async () => {
-            const result = await deleteDeceased(profile.id)
-            if (result?.error) toast.error(result.error)
-            else { toast.success('Profile deleted successfully.'); setDeleteOpen(false) }
-          })
-        }
-      />
-    </>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MoreHorizontal className="h-4 w-4" />
+          <span className="sr-only">Open menu</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link href={`/memorialized/${profile.id}`}>Edit</Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
