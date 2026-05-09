@@ -8,16 +8,22 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 
-const MAX_MEMORIALS = 2
-
 export async function createMemorial(data: unknown) {
   const session = await verifySession()
 
-  const count = await prisma.appUser.count({
-    where: { role: "APP_MEMO", guardedBy: { some: { guardianId: session.user.id } } },
-  })
-  if (count >= MAX_MEMORIALS) {
-    return { error: `You have reached the limit of ${MAX_MEMORIALS} memorialized profiles.` }
+  const [createdCount, salesCount] = await Promise.all([
+    prisma.appUser.count({
+      where: { role: "APP_MEMO", guardedBy: { some: { guardianId: session.user.id } } },
+    }),
+    prisma.appSale.count({
+      where: { appUserId: session.user.id },
+    }),
+  ])
+  if (salesCount === 0) {
+    return { error: "You need to acquire a QR Code to create a memorialized profile." }
+  }
+  if (createdCount >= salesCount) {
+    return { error: "No available QR Codes. Purchase a QR Code to create more profiles." }
   }
 
   const parsed = memorialSchema.safeParse(data)

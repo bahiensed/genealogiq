@@ -9,9 +9,8 @@ import { getProfileGradient } from "@/lib/avatar-color"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
+import { prisma } from "@/lib/prisma"
 import type { MemorialRow } from "@/queries/memorial"
-
-const MAX_MEMORIALS = 2
 
 function toMiniProfile(m: MemorialRow): MiniProfile {
   return {
@@ -41,14 +40,15 @@ export default async function MemorializedPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
 
-  const [profile, memorials] = await Promise.all([
+  const [profile, memorials, salesCount] = await Promise.all([
     getProfileById(id),
     getMemorialsByCreatorId(id),
+    prisma.appSale.count({ where: { appUserId: id } }),
   ])
   if (!profile) notFound()
 
   const isOwn = id === session.user.id
-  const canCreate = isOwn && memorials.length < MAX_MEMORIALS
+  const canCreate = isOwn && memorials.length < salesCount
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">

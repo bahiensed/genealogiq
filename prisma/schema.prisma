@@ -109,6 +109,16 @@ model QrInventory {
   @@map("qr_inventory")
 }
 
+model AppSale {
+  id        String  @id @default(cuid())
+  appUserId String  @map("app_user_id")
+  appUser   AppUser @relation(fields: [appUserId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt    @map("updated_at")
+
+  @@map("app_sales")
+}
+
 // ─── Auth tokens ─────────────────────────────────────────────────────────────
 
 model EmailToken {
@@ -294,6 +304,9 @@ model AppUser {
   geolocation      Geolocation?
   familyFrom       FamilyRelation[] @relation("FamilyFrom")
   familyTo         FamilyRelation[] @relation("FamilyTo")
+
+  // Sales (QR codes acquired via SEQUOIA)
+  appSales AppSale[]
 
   // Auth tokens
   emailTokens         EmailToken[]
