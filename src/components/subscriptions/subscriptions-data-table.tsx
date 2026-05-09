@@ -25,6 +25,7 @@ export function SubscriptionsDataTable({ currentUserRole, data }: SubscriptionsD
       data={data}
       filterColumn="name"
       filterPlaceholder="Search..."
+      initialSorting={[{ id: 'maxProfiles', desc: false }]}
       emptyMessage="No subscriptions found"
       columnLabels={COLUMN_LABELS}
     />
