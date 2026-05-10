@@ -9,13 +9,27 @@ interface SubscriptionsDataTableProps {
 }
 
 const COLUMN_LABELS: Record<string, string> = {
-  name:        'Name',
-  maxProfiles: 'Maximum Profiles',
-  termLength:  'Term Length in Months',
-  price:       'Price',
-  description: 'Description',
-  isActive:    'Status',
-  createdAt:   'Created at',
+  code:                  'Code',
+  name:                  'Name',
+  maxProfiles:           'Memo',
+  bioMaxChars:           'Bio Chars',
+  bioMaxImages:          'Bio Images',
+  galleryMaxImages:      'Gallery Images',
+  galleryMaxVideos:      'Gallery Videos',
+  geolocationFullAccess: 'Geo',
+  qrCodeAccess:          'QR Code',
+  termLength:            'Term',
+  price:                 'Price',
+  isActive:              'Status',
+  createdAt:             'Created at',
+}
+
+const INITIAL_COLUMN_VISIBILITY = {
+  bioMaxChars:      false,
+  bioMaxImages:     false,
+  galleryMaxImages: false,
+  galleryMaxVideos: false,
+  createdAt:        false,
 }
 
 export function SubscriptionsDataTable({ currentUserRole, data }: SubscriptionsDataTableProps) {
@@ -26,6 +40,7 @@ export function SubscriptionsDataTable({ currentUserRole, data }: SubscriptionsD
       filterColumn="name"
       filterPlaceholder="Search..."
       initialSorting={[{ id: 'maxProfiles', desc: false }]}
+      initialColumnVisibility={INITIAL_COLUMN_VISIBILITY}
       emptyMessage="No subscriptions found"
       columnLabels={COLUMN_LABELS}
     />

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { CurrencyInput } from '@/components/ui/currency-input'
 
 interface SubscriptionFormProps {
@@ -121,126 +121,106 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
         )}
       </div>
 
-      {/* Identity */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Identity</h2>
-        <FieldGroup>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <Controller
-              name="code"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Code:</FieldLabel>
-                  <Input
-                    {...field}
-                    autoComplete="off"
-                    aria-invalid={fieldState.invalid}
-                    disabled={isFreePlan}
-                    onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                    placeholder="DECADE"
-                  />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  <p className="text-xs text-muted-foreground">
-                    {isFreePlan ? 'FREE plan code is reserved.' : 'Uppercase slug. Used by APP to identify the tier.'}
-                  </p>
-                </Field>
-              )}
-            />
-            <Controller
-              name="name"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid} className="lg:col-span-2">
-                  <FieldLabel>Name:</FieldLabel>
-                  <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                </Field>
-              )}
-            />
-          </div>
-        </FieldGroup>
-      </section>
-
-      {/* Commercial */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Commercial</h2>
-        <FieldGroup>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <IntField
-              control={control}
-              name="termLength"
-              label="Term Length (in months):"
-              helper="0 = Lifetime"
-            />
-            <IntField
-              control={control}
-              name="maxProfiles"
-              label="Max Memo Profiles:"
-              min={1}
-            />
-            <Controller
-              name="price"
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Price (US$):</FieldLabel>
-                  <div className="relative">
-                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">$</span>
-                    <CurrencyInput
-                      className="pl-7"
-                      value={field.value}
-                      onChange={field.onChange}
-                      autoComplete="off"
-                      aria-invalid={fieldState.invalid}
-                    />
-                  </div>
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                  <p className="text-xs text-muted-foreground">0 = Free</p>
-                </Field>
-              )}
-            />
-          </div>
-        </FieldGroup>
-      </section>
-
-      {/* Feature limits */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Feature limits</h2>
-        <FieldGroup>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <IntField control={control} name="treeMaxMembers" label="Family Tree max members:" />
-            <IntField control={control} name="bioMaxChars" label="Bio max characters:" />
-            <IntField control={control} name="bioMaxImages" label="Bio max images:" />
-            <IntField control={control} name="galleryMaxImages" label="Gallery max images:" />
-            <IntField control={control} name="galleryMaxVideos" label="Gallery max videos:" />
-          </div>
-        </FieldGroup>
-      </section>
-
-      {/* Feature flags */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Features</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <SwitchField control={control} name="geolocationFullAccess" label="Geolocation full access (lat/lon)" />
-          <SwitchField control={control} name="qrCodeAccess" label="QR-Code access" />
-        </div>
-      </section>
-
-      {/* Description */}
-      <FieldGroup>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Controller
-          name="description"
+          name="code"
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Description:</FieldLabel>
-              <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={256} aria-invalid={fieldState.invalid} />
+              <FieldLabel>Code:</FieldLabel>
+              <Input
+                {...field}
+                autoComplete="off"
+                aria-invalid={fieldState.invalid}
+                disabled={isFreePlan}
+                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                placeholder="DECADE"
+              />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              <p className="text-xs text-muted-foreground">
+                {isFreePlan ? 'FREE plan code is reserved.' : 'Tier identification'}
+              </p>
+            </Field>
+          )}
+        />
+        <Controller
+          name="name"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid} className="lg:col-span-2">
+              <FieldLabel>Name:</FieldLabel>
+              <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
-      </FieldGroup>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <IntField control={control} name="maxProfiles" label="Max Memo Profiles:" min={1} />
+        <IntField control={control} name="treeMaxMembers" label="Family Tree Max Members:" />
+        <div />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <IntField control={control} name="bioMaxChars" label="Bio Max Characters:" />
+        <IntField control={control} name="bioMaxImages" label="Bio Max Images:" />
+        <div />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <IntField control={control} name="galleryMaxImages" label="Gallery Max Images:" />
+        <IntField control={control} name="galleryMaxVideos" label="Gallery Max Videos:" />
+        <div />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <SwitchField control={control} name="geolocationFullAccess" label="Geolocation Full Access" />
+        <SwitchField control={control} name="qrCodeAccess" label="QR Code Access" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <IntField
+          control={control}
+          name="termLength"
+          label="Term Length (in months):"
+          helper="0 = Lifetime"
+        />
+        <Controller
+          name="price"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Price (US$):</FieldLabel>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">$</span>
+                <CurrencyInput
+                  className="pl-7"
+                  value={field.value}
+                  onChange={field.onChange}
+                  autoComplete="off"
+                  aria-invalid={fieldState.invalid}
+                />
+              </div>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              <p className="text-xs text-muted-foreground">0 = Free</p>
+            </Field>
+          )}
+        />
+        <div />
+      </div>
+
+      <Controller
+        name="description"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel>Description:</FieldLabel>
+            <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={256} aria-invalid={fieldState.invalid} />
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
 
       {serverError && <FieldError>{serverError}</FieldError>}
       <Field orientation="horizontal">

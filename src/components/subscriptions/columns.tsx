@@ -108,31 +108,18 @@ export function getColumns(currentUserRole: string): ColumnDef<SubscriptionRow>[
     },
     {
       accessorKey: 'maxProfiles',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Max Memo<br/>Profiles</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Memo" className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.maxProfiles}</div>,
     },
     {
-      accessorKey: 'termLength',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Term Length<br/>in Months</>} className="justify-end" />,
-      cell: ({ row }) => (
-        <div className="text-right">
-          {row.original.termLength === 0 ? <span title="Lifetime" className="text-base leading-none">∞</span> : row.original.termLength}
-        </div>
-      ),
+      accessorKey: 'bioMaxChars',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Bio<br/>Chars</>} className="justify-end" />,
+      cell: ({ row }) => <div className="text-right">{row.original.bioMaxChars}</div>,
     },
     {
-      accessorKey: 'price',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Price" className="justify-end" />,
-      cell: ({ row }) => (
-        <div className="text-right">
-          {row.original.price === 0 ? 'Free' : usd.format(row.original.price)}
-        </div>
-      ),
-    },
-    {
-      accessorKey: 'treeMaxMembers',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Tree<br/>Members</>} className="justify-end" />,
-      cell: ({ row }) => <div className="text-right">{row.original.treeMaxMembers}</div>,
+      accessorKey: 'bioMaxImages',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Bio<br/>Images</>} className="justify-end" />,
+      cell: ({ row }) => <div className="text-right">{row.original.bioMaxImages}</div>,
     },
     {
       accessorKey: 'galleryMaxImages',
@@ -148,14 +135,32 @@ export function getColumns(currentUserRole: string): ColumnDef<SubscriptionRow>[
       accessorKey: 'geolocationFullAccess',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Geo" />,
       cell: ({ row }) => (
-        <span className="text-xs">{row.original.geolocationFullAccess ? '✓' : '—'}</span>
+        <span className="text-xs">{row.original.geolocationFullAccess ? '✓' : '∅'}</span>
       ),
     },
     {
       accessorKey: 'qrCodeAccess',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="QR" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>QR<br/>Code</>} />,
       cell: ({ row }) => (
-        <span className="text-xs">{row.original.qrCodeAccess ? '✓' : '—'}</span>
+        <span className="text-xs">{row.original.qrCodeAccess ? '✓' : '∅'}</span>
+      ),
+    },
+    {
+      accessorKey: 'termLength',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Term" className="justify-end" />,
+      cell: ({ row }) => (
+        <div className="text-right">
+          {row.original.termLength === 0 ? <span title="Lifetime" className="text-base leading-none">∞</span> : row.original.termLength}
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'price',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Price" className="justify-end" />,
+      cell: ({ row }) => (
+        <div className="text-right">
+          {row.original.price === 0 ? 'Free' : usd.format(row.original.price)}
+        </div>
       ),
     },
     {
