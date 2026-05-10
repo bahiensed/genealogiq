@@ -48,7 +48,7 @@ export default async function ProfileBioPage({ params }: Props) {
             </p>
           </div>
           {isOwn && (
-            <Button asChild className="shrink-0 gap-2">
+            <Button asChild className="shrink-0 self-end gap-2">
               <Link href={`/profile/${id}/bio/edit`}>
                 <NotebookPen className="h-4 w-4" />
                 {isEmpty ? "Write biography" : "Edit"}

@@ -105,7 +105,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn }: Props) {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
           {!isEmpty && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

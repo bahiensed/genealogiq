@@ -36,7 +36,7 @@ export default async function FavoritesPage({ params }: Props) {
             </p>
           </div>
           {favorites.length > 0 && (
-            <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
+            <span className="shrink-0 self-end inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
               {favorites.length} {favorites.length === 1 ? "profile" : "profiles"}
             </span>
           )}

@@ -65,7 +65,7 @@ export default async function MemorializedPage({ params }: Props) {
               Memorials under your care — keepers of memory, holders of light.
             </p>
           </div>
-          <div className="flex items-center gap-3 self-start sm:self-auto">
+          <div className="flex items-center gap-3 self-end sm:self-auto">
             {memorials.length > 0 && (
               <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
                 {memorials.length} {memorials.length === 1 ? "profile" : "profiles"}
