@@ -15,7 +15,7 @@ export default async function UsersPage() {
           Employees
         </h1>
         <Button asChild>
-          <Link href="/users/new">New user</Link>
+          <Link href="/users/new">New employee</Link>
         </Button>
       </div>
 

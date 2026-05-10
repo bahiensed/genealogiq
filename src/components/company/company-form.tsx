@@ -56,49 +56,51 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
     <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-2xl">
 
       <FieldGroup>
-        <Controller
-          name="legalName"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Company Name:</FieldLabel>
-              <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Controller
+            name="legalName"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Company Name:</FieldLabel>
+                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
 
-        <Controller
-          name="tradeName"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Trade Name:</FieldLabel>
-              <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+          <Controller
+            name="tradeName"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Trade Name:</FieldLabel>
+                <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
+        </div>
 
-        <Controller
-          name="taxId"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>CNPJ:</FieldLabel>
-              <MaskedInput
-                value={field.value ?? ''}
-                onChange={field.onChange}
-                maskFn={maskCnpj}
-                autoComplete="off"
-                aria-invalid={fieldState.invalid}
-              />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Controller
+            name="taxId"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>CNPJ:</FieldLabel>
+                <MaskedInput
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  maskFn={maskCnpj}
+                  autoComplete="off"
+                  aria-invalid={fieldState.invalid}
+                />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
 
-        <div className="grid grid-cols-2 gap-3">
           <Controller
             name="stateRegistration"
             control={control}
@@ -124,24 +126,24 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
           />
         </div>
 
-        <Controller
-          name="email"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>E-mail:</FieldLabel>
-              <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Controller
+            name="email"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>E-mail:</FieldLabel>
+                <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
+                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+              </Field>
+            )}
+          />
 
-        <div className="grid grid-cols-12 gap-3">
           <Controller
             name="phoneCountryCode"
             control={control}
             render={({ field, fieldState }) => (
-              <Field className="col-span-2" data-invalid={fieldState.invalid}>
+              <Field data-invalid={fieldState.invalid}>
                 <FieldLabel>Country Code:</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger aria-invalid={fieldState.invalid}>
@@ -161,7 +163,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
             name="phone"
             control={control}
             render={({ field, fieldState }) => (
-              <Field className="col-span-4" data-invalid={fieldState.invalid}>
+              <Field data-invalid={fieldState.invalid}>
                 <FieldLabel>Phone:</FieldLabel>
                 <MaskedInput
                   value={field.value ?? ''}
