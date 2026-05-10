@@ -73,7 +73,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, hasP
       <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
         <div>
           <p className="text-muted-foreground mt-2 italic">
-            Words left behind — small flames carried by those who remember.
+            Words left behind: small flames carried by those who remember.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -111,7 +111,10 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, hasP
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
           </span>
           <p className="text-sm text-foreground/90">
-            Your tribute is awaiting moderation. You&apos;ll see it here once approved.
+            Your tribute is awaiting moderation. You&apos;ll see it here once approved.{" "}
+            <Link href={writeHref} className="font-medium text-primary hover:underline">
+              Click here to edit your tribute.
+            </Link>
           </p>
         </div>
       )}
