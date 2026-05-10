@@ -28,10 +28,14 @@ export async function saveGeolocation(profileId: string, data: unknown) {
     )
   }
 
+  // Flatten the nested address object into the DB columns
+  const { address, ...rest } = parsed.data
+  const flat = { ...rest, ...address }
+
   await prisma.geolocation.upsert({
     where: { userId: profileId },
-    create: { userId: profileId, ...parsed.data },
-    update: parsed.data,
+    create: { userId: profileId, ...flat },
+    update: flat,
   })
 
   revalidatePath(`/profile/${profileId}/geolocation`)

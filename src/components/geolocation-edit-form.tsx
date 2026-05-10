@@ -2,6 +2,8 @@
 
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useForm, useWatch } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { ImagePlus, X, Save, RotateCcw, Trash2, LocateFixed } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -19,40 +21,34 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { AddressSection } from "@/components/address/address-section"
 import { saveGeolocation, deleteGeolocation } from "@/actions/geolocation"
+import { geolocationSchema, type GeolocationFormValues } from "@/schemas/geolocation"
 import type { GeolocationRow } from "@/queries/geolocation"
 
 const MAX_NOTES = 500
 const MAX_PHOTOS = 3
 
-interface GeoState {
-  placeName: string
-  address: string
-  city: string
-  state: string
-  country: string
-  section: string
-  lat: string
-  lon: string
-  notes: string
-  photos: (string | null)[]
-}
-
-function toState(existing: GeolocationRow | null): GeoState {
-  if (!existing) {
-    return { placeName: "", address: "", city: "", state: "", country: "", section: "", lat: "0", lon: "0", notes: "", photos: [null, null, null] }
-  }
+function buildDefaults(existing: GeolocationRow | null): GeolocationFormValues {
   return {
-    placeName: existing.placeName,
-    address: existing.address ?? "",
-    city: existing.city ?? "",
-    state: existing.state ?? "",
-    country: existing.country ?? "",
-    section: existing.section ?? "",
-    lat: String(existing.lat),
-    lon: String(existing.lon),
-    notes: existing.notes ?? "",
-    photos: [existing.photo1 ?? null, existing.photo2 ?? null, existing.photo3 ?? null],
+    placeName: existing?.placeName ?? "",
+    address: {
+      zip:          existing?.zip          ?? "",
+      street:       existing?.street       ?? "",
+      number:       existing?.number       ?? "",
+      complement:   existing?.complement   ?? "",
+      neighborhood: existing?.neighborhood ?? "",
+      city:         existing?.city         ?? "",
+      state:        existing?.state        ?? "",
+      country:      existing?.country      ?? "BR",
+    },
+    section: existing?.section ?? "",
+    lat: existing?.lat ?? 0,
+    lon: existing?.lon ?? 0,
+    notes: existing?.notes ?? "",
+    photo1: existing?.photo1 ?? null,
+    photo2: existing?.photo2 ?? null,
+    photo3: existing?.photo3 ?? null,
   }
 }
 
@@ -65,20 +61,40 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const isEditing = !!existing
-  const initialState = toState(existing)
-  const [geo, setGeo] = useState<GeoState>(initialState)
-  const [uploading, setUploading] = useState<boolean[]>([false, false, false])
   const fileRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState<boolean[]>([false, false, false])
 
-  const update = (key: keyof GeoState, value: string) => setGeo((prev) => ({ ...prev, [key]: value }))
+  const {
+    control,
+    setValue,
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<GeolocationFormValues>({
+    resolver: zodResolver(geolocationSchema),
+    defaultValues: buildDefaults(existing),
+  })
+
+  const photo1 = useWatch({ control, name: "photo1" }) ?? null
+  const photo2 = useWatch({ control, name: "photo2" }) ?? null
+  const photo3 = useWatch({ control, name: "photo3" }) ?? null
+  const photos: (string | null)[] = [photo1, photo2, photo3]
+  const filledPhotoCount = photos.filter(Boolean).length
+  const notesValue = useWatch({ control, name: "notes" }) ?? ""
+
+  const setPhotoAt = (slot: number, value: string | null) => {
+    const key = (["photo1", "photo2", "photo3"] as const)[slot]
+    setValue(key, value, { shouldDirty: true })
+  }
 
   const handleAddPhoto = async (files: FileList | null) => {
     const file = files?.[0]
     if (!file) return
-    const slot = geo.photos.indexOf(null)
+    const slot = photos.findIndex((p) => p == null)
     if (slot === -1) return
     const preview = URL.createObjectURL(file)
-    setGeo((prev) => { const p = [...prev.photos]; p[slot] = preview; return { ...prev, photos: p } })
+    setPhotoAt(slot, preview)
     setUploading((prev) => { const u = [...prev]; u[slot] = true; return u })
     try {
       const res = await fetch(`/api/geolocation/upload?filename=${encodeURIComponent(file.name)}`, {
@@ -87,29 +103,30 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
       })
       const data = await res.json() as { url?: string; error?: string }
       if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
-      setGeo((prev) => { const p = [...prev.photos]; p[slot] = data.url!; return { ...prev, photos: p } })
+      setPhotoAt(slot, data.url)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to upload photo.")
-      setGeo((prev) => { const p = [...prev.photos]; p[slot] = null; return { ...prev, photos: p } })
+      setPhotoAt(slot, null)
     } finally {
       setUploading((prev) => { const u = [...prev]; u[slot] = false; return u })
     }
   }
 
   const removePhoto = (slot: number) => {
-    setGeo((prev) => {
-      const p = [...prev.photos]
-      p[slot] = null
-      const filled = p.filter(Boolean)
-      return { ...prev, photos: [filled[0] ?? null, filled[1] ?? null, filled[2] ?? null] }
-    })
+    const next = [...photos]
+    next[slot] = null
+    const filled = next.filter(Boolean) as string[]
+    setPhotoAt(0, filled[0] ?? null)
+    setPhotoAt(1, filled[1] ?? null)
+    setPhotoAt(2, filled[2] ?? null)
   }
 
   const handleUseMyLocation = () => {
     if (!navigator.geolocation) { toast.error("Geolocation not supported by this browser."); return }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setGeo((prev) => ({ ...prev, lat: String(pos.coords.latitude.toFixed(6)), lon: String(pos.coords.longitude.toFixed(6)) }))
+        setValue("lat", parseFloat(pos.coords.latitude.toFixed(6)), { shouldDirty: true })
+        setValue("lon", parseFloat(pos.coords.longitude.toFixed(6)), { shouldDirty: true })
         toast.success("Location detected.")
       },
       (err) => {
@@ -125,26 +142,10 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
     )
   }
 
-  const handleSave = () => {
+  const onSubmit = (data: GeolocationFormValues) => {
     if (uploading.some(Boolean)) { toast.warning("Please wait for photos to finish uploading."); return }
     startTransition(async () => {
-      const lat = parseFloat(geo.lat)
-      const lon = parseFloat(geo.lon)
-      if (isNaN(lat) || isNaN(lon)) { toast.error("Invalid coordinates."); return }
-      const result = await saveGeolocation(profileId, {
-        placeName: geo.placeName,
-        address: geo.address || undefined,
-        city: geo.city || undefined,
-        state: geo.state || undefined,
-        country: geo.country || undefined,
-        section: geo.section || undefined,
-        lat,
-        lon,
-        notes: geo.notes || undefined,
-        photo1: geo.photos[0] || null,
-        photo2: geo.photos[1] || null,
-        photo3: geo.photos[2] || null,
-      })
+      const result = await saveGeolocation(profileId, data)
       if (result?.error) { toast.error(result.error); return }
       toast.success("Geolocation saved.")
       router.push(`/profile/${profileId}/geolocation`)
@@ -152,7 +153,7 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
   }
 
   const handleReset = () => {
-    setGeo(toState(existing))
+    reset(buildDefaults(existing))
     toast("Changes reset.")
   }
 
@@ -165,15 +166,19 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
   }
 
   return (
-    <div className="glass-card no-sheen p-6 md:p-8 space-y-8 animate-fade-in" style={{ animationDelay: "80ms" }}>
+    <form
+      onSubmit={handleSubmit(onSubmit, () => toast.error("Please fix the highlighted fields."))}
+      className="glass-card no-sheen p-6 md:p-8 space-y-8 animate-fade-in"
+      style={{ animationDelay: "80ms" }}
+    >
       {/* Photos */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base">Photos</Label>
-          <span className="text-xs text-muted-foreground">{geo.photos.filter(Boolean).length}/{MAX_PHOTOS}</span>
+          <span className="text-xs text-muted-foreground">{filledPhotoCount}/{MAX_PHOTOS}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {geo.photos.map((photo, slot) =>
+          {photos.map((photo, slot) =>
             photo ? (
               <div key={slot} className="relative group aspect-square rounded-xl overflow-hidden border border-border/60">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -196,7 +201,7 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
               </div>
             ) : null
           )}
-          {geo.photos.filter(Boolean).length < MAX_PHOTOS && (
+          {filledPhotoCount < MAX_PHOTOS && (
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
@@ -219,35 +224,26 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
       {/* Place name */}
       <div className="space-y-2">
         <Label htmlFor="geo-place" className="text-base">Place name</Label>
-        <Input id="geo-place" value={geo.placeName} onChange={(e) => update("placeName", e.target.value)} placeholder="e.g. São Francisco Cemetery" maxLength={120} />
+        <Input id="geo-place" maxLength={120} placeholder="e.g. São Francisco Cemetery" {...register("placeName")} />
+        {errors.placeName && <p className="text-xs text-destructive">{errors.placeName.message}</p>}
       </div>
 
-      {/* Address */}
-      <div className="space-y-2">
-        <Label htmlFor="geo-address" className="text-base">Address</Label>
-        <Input id="geo-address" value={geo.address} onChange={(e) => update("address", e.target.value)} placeholder="Street, number" maxLength={200} />
-      </div>
-
-      {/* City / State / Country */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="space-y-2">
-          <Label htmlFor="geo-city" className="text-base">City</Label>
-          <Input id="geo-city" value={geo.city} onChange={(e) => update("city", e.target.value)} maxLength={100} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="geo-state" className="text-base">State</Label>
-          <Input id="geo-state" value={geo.state} onChange={(e) => update("state", e.target.value)} maxLength={100} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="geo-country" className="text-base">Country</Label>
-          <Input id="geo-country" value={geo.country} onChange={(e) => update("country", e.target.value)} maxLength={100} />
-        </div>
+      {/* Address (BMS-style with CEP search) */}
+      <div className="space-y-3">
+        <Label className="text-base">Address</Label>
+        <AddressSection
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          control={control as any}
+          setValue={setValue}
+          errors={errors}
+          prefix="address"
+        />
       </div>
 
       {/* Section / plot */}
       <div className="space-y-2">
         <Label htmlFor="geo-section" className="text-base">Section / plot <span className="text-muted-foreground text-xs">(optional)</span></Label>
-        <Input id="geo-section" value={geo.section} onChange={(e) => update("section", e.target.value)} placeholder="e.g. Garden of Peace, Plot 42" maxLength={200} />
+        <Input id="geo-section" maxLength={200} placeholder="e.g. Garden of Peace, Plot 42" {...register("section")} />
       </div>
 
       {/* Coordinates */}
@@ -256,11 +252,13 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 space-y-1">
             <Label htmlFor="geo-lat" className="text-xs text-muted-foreground">Latitude</Label>
-            <Input id="geo-lat" type="number" step="any" min={-90} max={90} value={geo.lat} onChange={(e) => update("lat", e.target.value)} placeholder="-25.4284" />
+            <Input id="geo-lat" type="number" step="any" min={-90} max={90} placeholder="-25.4284" {...register("lat", { valueAsNumber: true })} />
+            {errors.lat && <p className="text-xs text-destructive">{errors.lat.message}</p>}
           </div>
           <div className="flex-1 space-y-1">
             <Label htmlFor="geo-lon" className="text-xs text-muted-foreground">Longitude</Label>
-            <Input id="geo-lon" type="number" step="any" min={-180} max={180} value={geo.lon} onChange={(e) => update("lon", e.target.value)} placeholder="-49.2733" />
+            <Input id="geo-lon" type="number" step="any" min={-180} max={180} placeholder="-49.2733" {...register("lon", { valueAsNumber: true })} />
+            {errors.lon && <p className="text-xs text-destructive">{errors.lon.message}</p>}
           </div>
           <div className="flex items-end">
             <Button type="button" variant="outline" onClick={handleUseMyLocation} className="gap-2 w-full sm:w-auto">
@@ -275,15 +273,14 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="geo-notes" className="text-base">Notes <span className="text-muted-foreground text-xs">(optional)</span></Label>
-          <span className="text-xs text-muted-foreground">{geo.notes.length}/{MAX_NOTES}</span>
+          <span className="text-xs text-muted-foreground">{notesValue.length}/{MAX_NOTES}</span>
         </div>
         <Textarea
           id="geo-notes"
-          value={geo.notes}
           maxLength={MAX_NOTES}
-          onChange={(e) => update("notes", e.target.value)}
           placeholder="Visiting hours, how to find the spot, anything that helps…"
           className="min-h-[140px] text-base leading-relaxed"
+          {...register("notes")}
         />
       </div>
 
@@ -292,7 +289,7 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
         {isEditing ? (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2 md:w-auto w-full" disabled={isPending}>
+              <Button type="button" variant="destructive" className="gap-2 md:w-auto w-full" disabled={isPending}>
                 <Trash2 className="h-4 w-4" />Delete location
               </Button>
             </AlertDialogTrigger>
@@ -313,14 +310,14 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
           <div />
         )}
         <div className="flex flex-col-reverse sm:flex-row gap-2 md:gap-3">
-          <Button variant="outline" onClick={handleReset} className="gap-2" disabled={isPending}>
+          <Button type="button" variant="outline" onClick={handleReset} className="gap-2" disabled={isPending}>
             <RotateCcw className="h-4 w-4" />Reset
           </Button>
-          <Button onClick={handleSave} className="gap-2" disabled={isPending || uploading.some(Boolean)}>
+          <Button type="submit" className="gap-2" disabled={isPending || uploading.some(Boolean)}>
             <Save className="h-4 w-4" />Save
           </Button>
         </div>
       </div>
-    </div>
+    </form>
   )
 }
