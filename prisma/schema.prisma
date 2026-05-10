@@ -506,18 +506,23 @@ model AppUserGuardian {
 }
 
 model Geolocation {
-  id        String    @id @default(cuid())
-  placeName String    @map("place_name") @db.VarChar(120)
-  address   String?   @db.VarChar(200)
-  city      String?   @db.VarChar(100)
-  state     String?   @db.VarChar(100)
-  country   String?   @db.VarChar(100)
-  section   String?   @db.VarChar(200)
-  lat       Float
-  lon       Float
-  date      DateTime?
-  zip       String?
-  notes     String?   @db.VarChar(500)
+  id           String    @id @default(cuid())
+  placeName    String    @map("place_name") @db.VarChar(120)
+  // Legacy free-form address (kept for backward compatibility — superseded by structured fields below)
+  address      String?   @db.VarChar(200)
+  zip          String?
+  street       String?   @db.VarChar(200)
+  number       String?   @db.VarChar(20)
+  complement   String?   @db.VarChar(200)
+  neighborhood String?   @db.VarChar(100)
+  city         String?   @db.VarChar(100)
+  state        String?   @db.VarChar(100)
+  country      String?   @db.VarChar(100)
+  section      String?   @db.VarChar(200)
+  lat          Float
+  lon          Float
+  date         DateTime?
+  notes        String?   @db.VarChar(500)
   photo1    String?   @map("photo_1")
   photo2    String?   @map("photo_2")
   photo3    String?   @map("photo_3")
