@@ -233,8 +233,30 @@ export function BioPreview({
   )
 }
 
-export function GalleryPreview({ images }: { images: string[] }) {
+// SMPTE-inspired color bars — shown when the gallery has only videos and no
+// thumbnails, evoking the analog "no-signal" pattern.
+function TvBarsPreview() {
+  const bars = [
+    "#c0c0c0", // gray
+    "#c0c000", // yellow
+    "#00c0c0", // cyan
+    "#00c000", // green
+    "#c000c0", // magenta
+    "#c00000", // red
+    "#0000c0", // blue
+  ]
+  return (
+    <div className="flex h-full w-full overflow-hidden rounded-lg border border-border/60">
+      {bars.map((c, i) => (
+        <div key={i} className="flex-1" style={{ backgroundColor: c }} />
+      ))}
+    </div>
+  )
+}
+
+export function GalleryPreview({ images, hasVideos = false }: { images: string[]; hasVideos?: boolean }) {
   if (images.length === 0) {
+    if (hasVideos) return <TvBarsPreview />
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
         <Images className="h-8 w-8 text-muted-foreground/50" />

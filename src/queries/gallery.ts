@@ -21,4 +21,9 @@ export async function getGalleryCount(userId: string): Promise<number> {
   return prisma.galleryItem.count({ where: { userId } })
 }
 
+export async function getGalleryHasVideos(userId: string): Promise<boolean> {
+  const count = await prisma.galleryItem.count({ where: { userId, kind: "video" } })
+  return count > 0
+}
+
 export type GalleryItemRow = Awaited<ReturnType<typeof getGalleryByUserId>>[number]

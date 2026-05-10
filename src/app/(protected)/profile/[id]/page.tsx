@@ -6,7 +6,7 @@ import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/que
 import { getGeolocationByUserId } from "@/queries/geolocation"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
 import { getFamilyRelationCount } from "@/queries/family-tree"
-import { getGalleryImageUrls, getGalleryCount } from "@/queries/gallery"
+import { getGalleryImageUrls, getGalleryCount, getGalleryHasVideos } from "@/queries/gallery"
 import { getTributeAuthors, getTributeCountByProfileId } from "@/queries/tribute"
 import { getBioByUserId } from "@/queries/bio"
 import { getAvatarColor, getProfileGradient } from "@/lib/avatar-color"
@@ -53,6 +53,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     geo,
     galleryImages,
     galleryCount,
+    galleryHasVideos,
     tributeAuthors,
     tributeCount,
     favorites,
@@ -65,6 +66,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     isMemorialized ? getGeolocationByUserId(id) : Promise.resolve(null),
     getGalleryImageUrls(id, 4),
     getGalleryCount(id),
+    getGalleryHasVideos(id),
     getTributeAuthors(id, 5),
     getTributeCountByProfileId(id),
     !isMemorialized ? getFavoritesByUserId(id) : Promise.resolve([]),
@@ -132,7 +134,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       metric: galleryCount > 0 ? `${galleryCount} ${galleryCount === 1 ? "memory" : "memories"}` : "No media yet",
       icon: Images,
       span: 3,
-      preview: <GalleryPreview images={galleryImages} />,
+      preview: <GalleryPreview images={galleryImages} hasVideos={galleryHasVideos} />,
       href: `${base}/gallery`,
     },
     {
@@ -199,7 +201,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       metric: galleryCount > 0 ? `${galleryCount} ${galleryCount === 1 ? "memory" : "memories"}` : "No media yet",
       icon: Images,
       span: 3,
-      preview: <GalleryPreview images={galleryImages} />,
+      preview: <GalleryPreview images={galleryImages} hasVideos={galleryHasVideos} />,
       href: `${base}/gallery`,
     },
     {
