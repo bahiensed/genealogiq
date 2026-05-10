@@ -7,6 +7,7 @@ import { geolocationSchema } from "@/schemas/geolocation"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
+import { getMemorialFeatures } from "@/lib/subscription"
 
 export async function saveGeolocation(profileId: string, data: unknown) {
   const session = await verifySession()
@@ -28,9 +29,17 @@ export async function saveGeolocation(profileId: string, data: unknown) {
     )
   }
 
-  // Flatten the nested address object into the DB columns
+  const features = await getMemorialFeatures(profileId)
+
+  // Flatten the nested address object into the DB columns;
+  // when the tier doesn't allow precise coordinates, force lat/lon to 0.
   const { address, ...rest } = parsed.data
-  const flat = { ...rest, ...address }
+  const flat = {
+    ...rest,
+    ...address,
+    lat: features.geolocationFullAccess ? rest.lat : 0,
+    lon: features.geolocationFullAccess ? rest.lon : 0,
+  }
 
   await prisma.geolocation.upsert({
     where: { userId: profileId },

@@ -22,8 +22,6 @@ import {
 import { saveGallery, deleteGallery } from "@/actions/gallery"
 import type { GalleryItemRow } from "@/queries/gallery"
 
-const MAX_IMAGES = 20
-const MAX_VIDEOS = 5
 const MAX_VIDEO_SECONDS = 600
 
 type MediaKind = "image" | "video"
@@ -80,9 +78,11 @@ function MetaFields({ item, onChange }: { item: MediaEntry; idx: number; onChang
 interface Props {
   initial: GalleryItemRow[]
   profileId: string
+  maxImages: number
+  maxVideos: number
 }
 
-export function GalleryEditForm({ initial, profileId }: Props) {
+export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const imgInputRef = useRef<HTMLInputElement>(null)
@@ -114,10 +114,10 @@ export function GalleryEditForm({ initial, profileId }: Props) {
 
   const handleAddImages = async (files: FileList | null) => {
     if (!files || files.length === 0) return
-    const remaining = MAX_IMAGES - images.length
-    if (remaining <= 0) { toast.warning(`Maximum of ${MAX_IMAGES} images reached.`); return }
+    const remaining = maxImages - images.length
+    if (remaining <= 0) { toast.warning(`Maximum of ${maxImages} images reached.`); return }
     const toProcess = Array.from(files).slice(0, remaining)
-    if (files.length > remaining) toast.warning(`Only ${remaining} image(s) added — limit is ${MAX_IMAGES}.`)
+    if (files.length > remaining) toast.warning(`Only ${remaining} image(s) added — limit is ${maxImages}.`)
 
     const placeholders: MediaEntry[] = toProcess.map((f) => ({
       kind: "image",
@@ -151,10 +151,10 @@ export function GalleryEditForm({ initial, profileId }: Props) {
 
   const handleAddVideos = async (files: FileList | null) => {
     if (!files || files.length === 0) return
-    const remaining = MAX_VIDEOS - videos.length
-    if (remaining <= 0) { toast.warning(`Maximum of ${MAX_VIDEOS} videos reached.`); return }
+    const remaining = maxVideos - videos.length
+    if (remaining <= 0) { toast.warning(`Maximum of ${maxVideos} videos reached.`); return }
     const candidates = Array.from(files).slice(0, remaining)
-    if (files.length > remaining) toast.warning(`Only ${remaining} video(s) processed — limit is ${MAX_VIDEOS}.`)
+    if (files.length > remaining) toast.warning(`Only ${remaining} video(s) processed — limit is ${maxVideos}.`)
 
     for (const file of candidates) {
       let durationSec: number
@@ -227,7 +227,7 @@ export function GalleryEditForm({ initial, profileId }: Props) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base">Photos</Label>
-          <span className="text-xs text-muted-foreground">{images.length}/{MAX_IMAGES}</span>
+          <span className="text-xs text-muted-foreground">{images.length}/{maxImages}</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -251,7 +251,7 @@ export function GalleryEditForm({ initial, profileId }: Props) {
             </div>
           ))}
 
-          {images.length < MAX_IMAGES && (
+          {images.length < maxImages && (
             <button type="button" onClick={() => imgInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground">
               <ImagePlus className="h-6 w-6" />
               <span className="text-xs font-medium">Add image</span>
@@ -265,7 +265,7 @@ export function GalleryEditForm({ initial, profileId }: Props) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base">Videos</Label>
-          <span className="text-xs text-muted-foreground">{videos.length}/{MAX_VIDEOS} · max 10 min each</span>
+          <span className="text-xs text-muted-foreground">{videos.length}/{maxVideos} · max 10 min each</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -291,7 +291,7 @@ export function GalleryEditForm({ initial, profileId }: Props) {
             </div>
           ))}
 
-          {videos.length < MAX_VIDEOS && (
+          {videos.length < maxVideos && (
             <button type="button" onClick={() => vidInputRef.current?.click()} className="aspect-video rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground">
               <Film className="h-6 w-6" />
               <span className="text-xs font-medium">Add video</span>

@@ -9,8 +9,8 @@ export const bioImageSchema = z.object({
 
 export const bioSchema = z.object({
   quote: z.string().trim().max(140).optional(),
-  text: z.string().trim().max(2048).optional(),
-  images: z.array(bioImageSchema).max(5).default([]),
+  text: z.string().trim().optional(),
+  images: z.array(bioImageSchema).default([]),
 })
 
 export type BioFormData = z.infer<typeof bioSchema>

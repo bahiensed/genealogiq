@@ -7,6 +7,7 @@ import { bioSchema } from "@/schemas/bio"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
+import { getMemorialFeatures } from "@/lib/subscription"
 
 export async function saveBio(profileId: string, data: unknown) {
   const session = await verifySession()
@@ -19,6 +20,14 @@ export async function saveBio(profileId: string, data: unknown) {
   if (!parsed.success) return { error: "Invalid data" }
 
   const { quote, text, images } = parsed.data
+
+  const features = await getMemorialFeatures(profileId)
+  if ((text?.length ?? 0) > features.bioMaxChars) {
+    return { error: `Biography limit is ${features.bioMaxChars} characters for this plan.` }
+  }
+  if (images.length > features.bioMaxImages) {
+    return { error: `Image limit is ${features.bioMaxImages} for this plan.` }
+  }
 
   const bio = await prisma.bio.upsert({
     where: { userId: profileId },

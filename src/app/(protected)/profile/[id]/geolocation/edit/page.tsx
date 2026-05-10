@@ -8,6 +8,7 @@ import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { getGeolocationByUserId } from "@/queries/geolocation"
 import { canManageProfile } from "@/lib/profile"
+import { getMemorialFeatures } from "@/lib/subscription"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -17,9 +18,10 @@ export default async function GeolocationEditPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
 
-  const [profile, existing] = await Promise.all([
+  const [profile, existing, features] = await Promise.all([
     getProfileById(id),
     getGeolocationByUserId(id),
+    getMemorialFeatures(id),
   ])
   if (!profile) notFound()
 
@@ -51,7 +53,11 @@ export default async function GeolocationEditPage({ params }: Props) {
           </Button>
         </section>
 
-        <GeolocationEditForm profileId={id} existing={existing} />
+        <GeolocationEditForm
+          profileId={id}
+          existing={existing}
+          geolocationFullAccess={features.geolocationFullAccess}
+        />
       </main>
     </div>
   )

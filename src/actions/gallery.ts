@@ -7,6 +7,7 @@ import { saveGallerySchema } from "@/schemas/gallery"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
+import { getMemorialFeatures } from "@/lib/subscription"
 
 export async function saveGallery(profileId: string, data: unknown) {
   const session = await verifySession()
@@ -18,6 +19,16 @@ export async function saveGallery(profileId: string, data: unknown) {
   if (!parsed.success) return { error: "Invalid data" }
 
   const { items } = parsed.data
+
+  const features = await getMemorialFeatures(profileId)
+  const imgCount = items.filter((i) => i.kind === "image").length
+  const vidCount = items.filter((i) => i.kind === "video").length
+  if (imgCount > features.galleryMaxImages) {
+    return { error: `Image limit is ${features.galleryMaxImages} for this plan.` }
+  }
+  if (vidCount > features.galleryMaxVideos) {
+    return { error: `Video limit is ${features.galleryMaxVideos} for this plan.` }
+  }
 
   const oldItems = await prisma.galleryItem.findMany({
     where: { userId: profileId },

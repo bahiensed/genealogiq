@@ -22,9 +22,7 @@ import {
 import { saveBio, deleteBio } from "@/actions/bio"
 import type { BioRow } from "@/queries/bio"
 
-const MAX_IMAGES = 5
 const MAX_QUOTE = 128
-const MAX_BIO_TEXT = 2048
 
 type Aspect = "square" | "portrait" | "landscape"
 
@@ -38,9 +36,11 @@ interface ImageEntry {
 interface Props {
   initial: BioRow | null
   profileId: string
+  maxChars: number
+  maxImages: number
 }
 
-export function BioEditForm({ initial, profileId }: Props) {
+export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -58,14 +58,14 @@ export function BioEditForm({ initial, profileId }: Props) {
 
   const handleAddImages = async (files: FileList | null) => {
     if (!files || files.length === 0) return
-    const remaining = MAX_IMAGES - images.length
+    const remaining = maxImages - images.length
     if (remaining <= 0) {
-      toast.warning(`Maximum of ${MAX_IMAGES} images reached.`)
+      toast.warning(`Maximum of ${maxImages} images reached.`)
       return
     }
     const toProcess = Array.from(files).slice(0, remaining)
     if (files.length > remaining) {
-      toast.warning(`Only ${remaining} image(s) added — limit is ${MAX_IMAGES}.`)
+      toast.warning(`Only ${remaining} image(s) added — limit is ${maxImages}.`)
     }
 
     const placeholders: ImageEntry[] = toProcess.map((f) => ({
@@ -153,7 +153,7 @@ export function BioEditForm({ initial, profileId }: Props) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base">Photos</Label>
-          <span className="text-xs text-muted-foreground">{images.length}/{MAX_IMAGES}</span>
+          <span className="text-xs text-muted-foreground">{images.length}/{maxImages}</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
@@ -179,7 +179,7 @@ export function BioEditForm({ initial, profileId }: Props) {
             </div>
           ))}
 
-          {images.length < MAX_IMAGES && (
+          {images.length < maxImages && (
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -223,12 +223,12 @@ export function BioEditForm({ initial, profileId }: Props) {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="bio-text" className="text-base">Biography</Label>
-          <span className="text-xs text-muted-foreground">{text.length}/{MAX_BIO_TEXT}</span>
+          <span className="text-xs text-muted-foreground">{text.length}/{maxChars}</span>
         </div>
         <Textarea
           id="bio-text"
           value={text}
-          maxLength={MAX_BIO_TEXT}
+          maxLength={maxChars}
           onChange={(e) => setText(e.target.value)}
           placeholder="Write biography..."
           className="min-h-[260px] text-base leading-relaxed"

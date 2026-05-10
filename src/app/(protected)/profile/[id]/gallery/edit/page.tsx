@@ -8,6 +8,7 @@ import { verifySession } from "@/lib/dal"
 import { getGalleryByUserId } from "@/queries/gallery"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { getMemorialFeatures } from "@/lib/subscription"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -17,7 +18,11 @@ export default async function GalleryEditPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
 
-  const [profile, items] = await Promise.all([getProfileById(id), getGalleryByUserId(id)])
+  const [profile, items, features] = await Promise.all([
+    getProfileById(id),
+    getGalleryByUserId(id),
+    getMemorialFeatures(id),
+  ])
   if (!profile) notFound()
 
   if (!canManageProfile(profile, session.user.id)) redirect(`/profile/${id}/gallery`)
@@ -40,7 +45,12 @@ export default async function GalleryEditPage({ params }: Props) {
           </Button>
         </section>
 
-        <GalleryEditForm initial={items} profileId={id} />
+        <GalleryEditForm
+          initial={items}
+          profileId={id}
+          maxImages={features.galleryMaxImages}
+          maxVideos={features.galleryMaxVideos}
+        />
       </main>
     </div>
   )

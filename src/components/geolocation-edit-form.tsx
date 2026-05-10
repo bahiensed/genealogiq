@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ImagePlus, X, Save, RotateCcw, Trash2, LocateFixed } from "lucide-react"
+import { ImagePlus, X, Save, RotateCcw, Trash2, LocateFixed, Lock } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { AddressSection } from "@/components/address/address-section"
+import { GeolocationGate } from "@/components/geolocation-gate"
 import { saveGeolocation, deleteGeolocation } from "@/actions/geolocation"
 import { geolocationSchema, type GeolocationFormValues } from "@/schemas/geolocation"
 import type { GeolocationRow } from "@/queries/geolocation"
@@ -55,9 +56,10 @@ function buildDefaults(existing: GeolocationRow | null): GeolocationFormValues {
 interface Props {
   profileId: string
   existing: GeolocationRow | null
+  geolocationFullAccess: boolean
 }
 
-export function GeolocationEditForm({ profileId, existing }: Props) {
+export function GeolocationEditForm({ profileId, existing, geolocationFullAccess }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const isEditing = !!existing
@@ -248,20 +250,28 @@ export function GeolocationEditForm({ profileId, existing }: Props) {
 
       {/* Coordinates */}
       <div className="space-y-2">
-        <Label className="text-base">Coordinates</Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-base">Coordinates</Label>
+          {!geolocationFullAccess && (
+            <GeolocationGate className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
+              <Lock className="h-3.5 w-3.5" />
+              Upgrade plan to unlock
+            </GeolocationGate>
+          )}
+        </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 space-y-1">
             <Label htmlFor="geo-lat" className="text-xs text-muted-foreground">Latitude</Label>
-            <Input id="geo-lat" type="number" step="any" min={-90} max={90} placeholder="-25.4284" {...register("lat", { valueAsNumber: true })} />
+            <Input id="geo-lat" type="number" step="any" min={-90} max={90} placeholder="-25.4284" disabled={!geolocationFullAccess} {...register("lat", { valueAsNumber: true })} />
             {errors.lat && <p className="text-xs text-destructive">{errors.lat.message}</p>}
           </div>
           <div className="flex-1 space-y-1">
             <Label htmlFor="geo-lon" className="text-xs text-muted-foreground">Longitude</Label>
-            <Input id="geo-lon" type="number" step="any" min={-180} max={180} placeholder="-49.2733" {...register("lon", { valueAsNumber: true })} />
+            <Input id="geo-lon" type="number" step="any" min={-180} max={180} placeholder="-49.2733" disabled={!geolocationFullAccess} {...register("lon", { valueAsNumber: true })} />
             {errors.lon && <p className="text-xs text-destructive">{errors.lon.message}</p>}
           </div>
           <div className="flex items-end">
-            <Button type="button" variant="outline" onClick={handleUseMyLocation} className="gap-2 w-full sm:w-auto">
+            <Button type="button" variant="outline" onClick={handleUseMyLocation} disabled={!geolocationFullAccess} className="gap-2 w-full sm:w-auto">
               <LocateFixed className="h-4 w-4" />
               Use my location
             </Button>

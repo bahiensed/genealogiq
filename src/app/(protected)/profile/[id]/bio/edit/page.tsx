@@ -8,6 +8,7 @@ import { verifySession } from "@/lib/dal"
 import { getBioByUserId } from "@/queries/bio"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { getMemorialFeatures } from "@/lib/subscription"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -17,7 +18,11 @@ export default async function BioEditPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
 
-  const [profile, bio] = await Promise.all([getProfileById(id), getBioByUserId(id)])
+  const [profile, bio, features] = await Promise.all([
+    getProfileById(id),
+    getBioByUserId(id),
+    getMemorialFeatures(id),
+  ])
   if (!profile) notFound()
 
   if (!canManageProfile(profile, session.user.id)) redirect(`/profile/${id}/bio`)
@@ -46,7 +51,12 @@ export default async function BioEditPage({ params }: Props) {
           </Button>
         </section>
 
-        <BioEditForm initial={bio} profileId={id} />
+        <BioEditForm
+          initial={bio}
+          profileId={id}
+          maxChars={features.bioMaxChars}
+          maxImages={features.bioMaxImages}
+        />
       </main>
     </div>
   )

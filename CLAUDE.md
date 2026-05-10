@@ -50,7 +50,7 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 22/04/2026 — Bugs de autorização de guardian corrigidos; notificações de tributos no header; batch de melhorias UX em ~15 arquivos; edit page para living profiles; deleteMemorial action
+Last session: 10/05/2026 — Per-feature enforcement em APP: gallery/bio/geolocation agora leem limites via `getMemorialFeatures(profileId)` (props-driven nas forms, validação no server action). Novo componente `geolocation-gate.tsx` espelha `qr-card-gate.tsx` para o lock de coordenadas precisas no FREE.
 In progress: —
 Next: Family Tree (React Flow)
 Blockers: —

@@ -13,7 +13,7 @@ export const mediaItemSchema = z.object({
 })
 
 export const saveGallerySchema = z.object({
-  items: z.array(mediaItemSchema).max(25),
+  items: z.array(mediaItemSchema),
 })
 
 export type MediaItemData = z.infer<typeof mediaItemSchema>
