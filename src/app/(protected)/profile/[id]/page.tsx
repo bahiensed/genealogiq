@@ -121,7 +121,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       metric: hasBio ? "Read" : "No biography yet",
       icon: BookOpen,
       span: 2,
-      preview: <BioPreview />,
+      preview: <BioPreview hasBio={hasBio} />,
       href: `${base}/bio`,
     },
     {
@@ -188,7 +188,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       metric: hasBio ? "Read" : "No biography yet",
       icon: BookOpen,
       span: 2,
-      preview: <BioPreview />,
+      preview: <BioPreview hasBio={hasBio} />,
       href: `${base}/bio`,
     },
     {

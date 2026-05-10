@@ -44,31 +44,101 @@ export function TreePreview() {
   )
 }
 
-export function BioPreview() {
-  const bar = "h-2.5 rounded-full skeleton-block"
-  const thumb = "rounded-xl skeleton-block shrink-0"
-  return (
-    <div className="space-y-3.5">
-      <div className="flex gap-3 items-start">
-        <div className={`${thumb} h-14 w-14`} />
-        <div className="flex-1 space-y-2 pt-1">
+function manuscriptLine(y: number, x0: number, length: number, seed: number): string {
+  const step = 2.4
+  let d = `M${x0} ${y}`
+  for (let i = 0; i * step < length; i++) {
+    const dir = i % 2 === 0 ? -1 : 1
+    const h = 1.2 + Math.abs(Math.sin(i * 0.85 + seed)) * 0.8
+    d += ` q ${step / 2} ${(dir * h).toFixed(2)} ${step} 0`
+  }
+  return d
+}
+
+function manuscriptStrokes(y: number, x0: number, length: number, seed: number): string {
+  const parts: string[] = []
+  const count = Math.floor(length / 5)
+  for (let i = 0; i < count; i++) {
+    const x = x0 + i * 5 + (i % 3) * 0.6
+    const r = Math.sin(x * 0.43 + seed * 1.7)
+    if (r > 0.55) parts.push(`M${x.toFixed(1)} ${y} v-${(4 + r * 2.5).toFixed(2)}`)
+    else if (r < -0.55) parts.push(`M${x.toFixed(1)} ${y} v${(3 + Math.abs(r) * 2).toFixed(2)}`)
+  }
+  return parts.join(" ")
+}
+
+export function BioPreview({ hasBio = false }: { hasBio?: boolean }) {
+  if (!hasBio) {
+    const bar = "h-2.5 rounded-full skeleton-block"
+    const thumb = "rounded-xl skeleton-block shrink-0"
+    return (
+      <div className="space-y-3.5">
+        <div className="flex gap-3 items-start">
+          <div className={`${thumb} h-14 w-14`} />
+          <div className="flex-1 space-y-2 pt-1">
+            <div className={`${bar} w-full`} />
+            <div className={`${bar} w-[88%]`} />
+            <div className={`${bar} w-[55%]`} />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className={`${bar} w-[95%]`} />
+          <div className={`${bar} w-[82%]`} />
+          <div className={`${bar} w-[60%]`} />
+        </div>
+        <div className="space-y-2">
           <div className={`${bar} w-full`} />
-          <div className={`${bar} w-[88%]`} />
-          <div className={`${bar} w-[55%]`} />
+          <div className={`${bar} w-[90%]`} />
+          <div className={`${bar} w-[78%]`} />
+          <div className={`${bar} w-[50%]`} />
         </div>
       </div>
-      <div className="space-y-2">
-        <div className={`${bar} w-[95%]`} />
-        <div className={`${bar} w-[82%]`} />
-        <div className={`${bar} w-[60%]`} />
-      </div>
-      <div className="space-y-2">
-        <div className={`${bar} w-full`} />
-        <div className={`${bar} w-[90%]`} />
-        <div className={`${bar} w-[78%]`} />
-        <div className={`${bar} w-[50%]`} />
-      </div>
-    </div>
+    )
+  }
+
+  // Manuscript-style preview — evokes a medieval scholastic autograph (Aquinas-esque).
+  const lines = [
+    { y: 16, x: 28, len: 204, s: 1.2 },
+    { y: 30, x: 28, len: 206, s: 2.7 },
+    { y: 44, x: 6,  len: 228, s: 3.4 },
+    { y: 58, x: 6,  len: 224, s: 4.1 },
+    { y: 72, x: 6,  len: 230, s: 5.6 },
+    { y: 86, x: 6,  len: 218, s: 6.3 },
+    { y: 100, x: 6, len: 152, s: 7.0 },
+  ]
+
+  return (
+    <svg
+      viewBox="0 0 240 110"
+      preserveAspectRatio="xMidYMid meet"
+      className="w-full h-full text-foreground/55"
+      aria-hidden
+    >
+      <text
+        x="3"
+        y="30"
+        fontFamily="serif"
+        fontSize="28"
+        fontWeight="700"
+        fontStyle="italic"
+        fill="currentColor"
+        className="text-[hsl(var(--brand-indigo-deep))] dark:text-[hsl(var(--brand-slate-soft))]"
+      >Q</text>
+      <g
+        stroke="currentColor"
+        strokeWidth="0.7"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        {lines.map((l, i) => (
+          <path key={`l-${i}`} d={manuscriptLine(l.y, l.x, l.len, l.s)} />
+        ))}
+        {lines.map((l, i) => (
+          <path key={`s-${i}`} d={manuscriptStrokes(l.y, l.x, l.len, l.s)} />
+        ))}
+      </g>
+    </svg>
   )
 }
 
