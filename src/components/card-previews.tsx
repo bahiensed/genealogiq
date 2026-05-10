@@ -44,25 +44,92 @@ export function TreePreview() {
   )
 }
 
+// Generates a baseline of varied glyph-like shapes — vowels (small bumps),
+// m/n (double bumps), u-dips, sweeps (s/c) and word breaks — to evoke
+// medieval cursive scholastic script.
 function manuscriptLine(y: number, x0: number, length: number, seed: number): string {
-  const step = 2.4
   let d = `M${x0} ${y}`
-  for (let i = 0; i * step < length; i++) {
-    const dir = i % 2 === 0 ? -1 : 1
-    const h = 1.4 + Math.abs(Math.sin(i * 0.85 + seed)) * 0.9
-    d += ` q ${step / 2} ${(dir * h).toFixed(2)} ${step} 0`
+  let x = x0
+  let i = 0
+  while (x < x0 + length) {
+    const h = 1.6 + Math.abs(Math.sin(i * 0.85 + seed)) * 1.1
+    const v = ((i * 1.7 + seed * 2.1) * 0.5 + 100) % 10
+    if (v < 1.2) {
+      // word break (small pen lift)
+      const gap = 1.4
+      d += ` m ${gap.toFixed(2)} 0`
+      x += gap
+    } else if (v < 4) {
+      // single vowel/c bump (a, e, i, o, c)
+      const w = 2.6
+      const dir = i % 2 === 0 ? -1 : 1
+      d += ` q ${(w / 2).toFixed(2)} ${(dir * h).toFixed(2)} ${w} 0`
+      x += w
+    } else if (v < 6.5) {
+      // m/n double bump
+      const w = 1.8
+      d += ` q ${(w / 2).toFixed(2)} -${h.toFixed(2)} ${w} 0`
+      d += ` q ${(w / 2).toFixed(2)} -${h.toFixed(2)} ${w} 0`
+      x += w * 2
+    } else if (v < 8) {
+      // u-like dip
+      const w = 2.6
+      d += ` q ${(w / 2).toFixed(2)} ${h.toFixed(2)} ${w} 0`
+      x += w
+    } else {
+      // wider sweep (s, c long form)
+      const w = 3.5
+      const dir = (i + 1) % 2 === 0 ? -1 : 1
+      d += ` q ${(w / 2).toFixed(2)} ${(dir * h * 0.7).toFixed(2)} ${w} 0`
+      x += w
+    }
+    i++
   }
   return d
 }
 
+// Generates the vertical strokes that hover above/below the baseline:
+// tall ascenders (b, d, h, l, k) often with a top curl,
+// cross-stroked verticals (t, f) with optional descender,
+// long descenders (g, y, j) with bottom curl, short descenders (p, q).
 function manuscriptStrokes(y: number, x0: number, length: number, seed: number): string {
   const parts: string[] = []
-  const count = Math.floor(length / 5)
+  const stride = 4
+  const count = Math.floor(length / stride)
   for (let i = 0; i < count; i++) {
-    const x = x0 + i * 5 + (i % 3) * 0.6
+    const x = x0 + i * stride + (i % 3) * 0.6
     const r = Math.sin(x * 0.43 + seed * 1.7)
-    if (r > 0.55) parts.push(`M${x.toFixed(1)} ${y} v-${(4.5 + r * 2.5).toFixed(2)}`)
-    else if (r < -0.55) parts.push(`M${x.toFixed(1)} ${y} v${(3.5 + Math.abs(r) * 2).toFixed(2)}`)
+    const r2 = Math.cos(x * 0.31 + seed * 2.3)
+
+    if (r > 0.7) {
+      // tall ascender (b, d, h, l, k)
+      const ht = 7 + r * 2.5
+      parts.push(`M${x.toFixed(1)} ${y} v-${ht.toFixed(2)}`)
+      if (r2 > 0.4) {
+        // small curl at top
+        parts.push(`M${x.toFixed(1)} ${(y - ht).toFixed(2)} q 1 -1.2 2.2 0.5`)
+      }
+    } else if (r > 0.55) {
+      // cross-stroked tall (t, f)
+      const ht = 6 + r * 1.8
+      parts.push(`M${x.toFixed(1)} ${y} v-${ht.toFixed(2)}`)
+      parts.push(`M${(x - 1.2).toFixed(1)} ${(y - ht + 2.2).toFixed(2)} h 2.5`)
+      if (r2 > 0.5) {
+        // f sometimes has a descender
+        parts.push(`M${x.toFixed(1)} ${y} v ${(2 + r2 * 1.5).toFixed(2)}`)
+      }
+    } else if (r < -0.7) {
+      // long descender with curl (g, y, j)
+      const dp = 5 + Math.abs(r) * 2.5
+      parts.push(`M${x.toFixed(1)} ${y} v${dp.toFixed(2)}`)
+      if (r2 > 0.2) {
+        parts.push(`M${x.toFixed(1)} ${(y + dp).toFixed(2)} q -0.6 1 -1.8 0.4`)
+      }
+    } else if (r < -0.55) {
+      // short descender (p, q)
+      const dp = 3.5 + Math.abs(r) * 1.5
+      parts.push(`M${x.toFixed(1)} ${y} v${dp.toFixed(2)}`)
+    }
   }
   return parts.join(" ")
 }
@@ -99,32 +166,32 @@ export function BioPreview({ hasBio = false }: { hasBio?: boolean }) {
   // Manuscript-style preview — evokes a medieval scholastic autograph (Aquinas-esque).
   // Two paragraphs: capital "B" with 5 lines, then "G" with 4 lines.
   const lines = [
-    // Paragraph 1 (drop cap B)
-    { y: 14,  x: 26, len: 208, s: 1.2 },
-    { y: 26,  x: 26, len: 208, s: 2.7 },
-    { y: 38,  x: 6,  len: 228, s: 3.4 },
-    { y: 50,  x: 6,  len: 224, s: 4.1 },
-    { y: 62,  x: 6,  len: 150, s: 5.6 },
-    // (blank y≈74 — paragraph break)
+    // Paragraph 1 (drop cap B) — line spacing 14
+    { y: 16,  x: 30, len: 204, s: 1.2 },
+    { y: 30,  x: 30, len: 206, s: 2.7 },
+    { y: 44,  x: 6,  len: 228, s: 3.4 },
+    { y: 58,  x: 6,  len: 224, s: 4.1 },
+    { y: 72,  x: 6,  len: 150, s: 5.6 },
+    // (blank y≈86 — paragraph break)
     // Paragraph 2 (drop cap G)
-    { y: 86,  x: 26, len: 208, s: 6.3 },
-    { y: 98,  x: 26, len: 208, s: 7.0 },
-    { y: 110, x: 6,  len: 224, s: 7.9 },
-    { y: 122, x: 6,  len: 50,  s: 8.6 },
+    { y: 100, x: 30, len: 204, s: 6.3 },
+    { y: 114, x: 30, len: 206, s: 7.0 },
+    { y: 128, x: 6,  len: 224, s: 7.9 },
+    { y: 142, x: 6,  len: 50,  s: 8.6 },
   ]
 
   return (
     <svg
-      viewBox="0 0 240 130"
-      preserveAspectRatio="xMidYMid meet"
+      viewBox="0 0 240 152"
+      preserveAspectRatio="xMidYMin meet"
       className="w-full h-full text-foreground/55"
       aria-hidden
     >
       <text
         x="3"
-        y="29"
+        y="33"
         fontFamily="serif"
-        fontSize="26"
+        fontSize="32"
         fontWeight="700"
         fontStyle="italic"
         fill="currentColor"
@@ -132,9 +199,9 @@ export function BioPreview({ hasBio = false }: { hasBio?: boolean }) {
       >B</text>
       <text
         x="3"
-        y="101"
+        y="117"
         fontFamily="serif"
-        fontSize="26"
+        fontSize="32"
         fontWeight="700"
         fontStyle="italic"
         fill="currentColor"
@@ -142,7 +209,7 @@ export function BioPreview({ hasBio = false }: { hasBio?: boolean }) {
       >G</text>
       <g
         stroke="currentColor"
-        strokeWidth="0.85"
+        strokeWidth="1"
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
