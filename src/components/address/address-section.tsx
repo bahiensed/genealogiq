@@ -103,7 +103,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* ZIP */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>ZIP / Postal Code:</FieldLabel>
+        <FieldLabel>ZIP Code:</FieldLabel>
         <InputGroup>
           <InputGroupInput
             value={applyZipMask(country, zip)}

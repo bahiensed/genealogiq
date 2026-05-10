@@ -106,7 +106,7 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Maximum Profiles:</FieldLabel>
+                <FieldLabel>Max Memo Profiles:</FieldLabel>
                 <Input
                   type="number"
                   step="1"

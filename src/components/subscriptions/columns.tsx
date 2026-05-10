@@ -93,7 +93,7 @@ export function getColumns(currentUserRole: string): ColumnDef<SubscriptionRow>[
     },
     {
       accessorKey: 'maxProfiles',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Maximum<br/>Profiles</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Max Memo<br/>Profiles</>} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.maxProfiles}</div>,
     },
     {

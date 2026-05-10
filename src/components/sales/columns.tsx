@@ -142,7 +142,7 @@ export function getColumns(currentUserRole: string): ColumnDef<SaleRow>[] {
     },
     {
       accessorKey: 'quantity',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Qtd.</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Quantity</>} />,
       cell: ({ row }) => (
         <div className={`text-right ${row.original.reversedAt ? 'opacity-40' : ''}`}>
           {row.original.quantity}

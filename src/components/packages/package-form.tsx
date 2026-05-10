@@ -89,7 +89,7 @@ export function PackageForm({ id, defaultValues }: PackageFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>QR-Code Qty.:</FieldLabel>
+                <FieldLabel>QR-Code Quantity:</FieldLabel>
                 <Input
                   type="number"
                   step="1"

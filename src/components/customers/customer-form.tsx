@@ -158,14 +158,14 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                   )} />
                   <Controller name="stateRegistration" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>State Reg.:</FieldLabel>
+                      <FieldLabel>State Registration:</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
                   )} />
                   <Controller name="municipalRegistration" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Municipal Reg.:</FieldLabel>
+                      <FieldLabel>Municipal Registration:</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
