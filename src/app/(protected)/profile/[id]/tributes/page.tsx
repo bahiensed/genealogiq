@@ -3,7 +3,7 @@ import { verifySession } from "@/lib/dal"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { TributesClient } from "@/components/tributes-client"
-import { getApprovedTributesByProfileId } from "@/queries/tribute"
+import { getApprovedTributesByProfileId, getMyTributeForProfile } from "@/queries/tribute"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 
@@ -20,7 +20,11 @@ export default async function TributesPage({ params }: Props) {
   const isExactOwn = id === session.user.id
   const canWrite = !isExactOwn
 
-  const tributes = await getApprovedTributesByProfileId(id)
+  const [tributes, myTribute] = await Promise.all([
+    getApprovedTributesByProfileId(id),
+    getMyTributeForProfile(session.user.id, id),
+  ])
+  const hasPendingFromMe = myTribute?.status === "PENDING"
 
   const name = `${profile.firstName} ${profile.lastName}`
   const isManager = canManageProfile(profile, session.user.id)
@@ -50,6 +54,7 @@ export default async function TributesPage({ params }: Props) {
           profileId={id}
           sessionUserId={session.user.id}
           canWrite={canWrite}
+          hasPendingFromMe={hasPendingFromMe}
         />
       </main>
     </div>

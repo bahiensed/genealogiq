@@ -28,9 +28,10 @@ interface Props {
   profileId: string
   sessionUserId: string
   canWrite: boolean
+  hasPendingFromMe?: boolean
 }
 
-export function TributesClient({ items, profileId, sessionUserId, canWrite }: Props) {
+export function TributesClient({ items, profileId, sessionUserId, canWrite, hasPendingFromMe }: Props) {
   const myTribute = items.find((t) => t.authorId === sessionUserId)
   const [sort, setSort] = useState<SortDir>("newest")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -102,6 +103,18 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite }: Pr
       </section>
 
       <div ref={listTopRef} />
+
+      {hasPendingFromMe && (
+        <div className="glass-card no-sheen mb-6 flex items-center gap-3 px-4 py-3 animate-fade-in">
+          <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400/70" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
+          </span>
+          <p className="text-sm text-foreground/90">
+            Your tribute is awaiting moderation. You&apos;ll see it here once approved.
+          </p>
+        </div>
+      )}
 
       {items.length === 0 ? (
         <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
