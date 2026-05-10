@@ -307,15 +307,32 @@ model Tenant {
 // ─── QR Code Inventory ───────────────────────────────────────────────────────
 
 model Subscription {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  isActive    Boolean @default(true) @map("is_active")
+  id                    String  @id @default(cuid())
+  code                  String  @unique
+  name                  String
+  description           String?
+  isActive              Boolean @default(true) @map("is_active")
 
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  // Commercial
+  maxProfiles           Int     @map("max_profiles")
+  termLength            Int     @map("term_length")
+  price                 Decimal @db.Decimal(10, 2)
 
-  appSales AppSale[]
+  // Feature limits
+  treeMaxMembers        Int     @map("tree_max_members")
+  bioMaxChars           Int     @map("bio_max_chars")
+  bioMaxImages          Int     @map("bio_max_images")
+  galleryMaxImages      Int     @map("gallery_max_images")
+  galleryMaxVideos      Int     @map("gallery_max_videos")
+
+  // Feature flags
+  geolocationFullAccess Boolean @default(false) @map("geolocation_full_access")
+  qrCodeAccess          Boolean @default(false) @map("qr_code_access")
+
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  appSales              AppSale[]
 
   @@map("subscriptions")
 }
