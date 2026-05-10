@@ -375,7 +375,9 @@ model AppSale {
   value     Decimal  @db.Decimal(10, 2)
 
   appUserId String   @map("app_user_id")
-  appUser   AppUser  @relation(fields: [appUserId], references: [id], onDelete: Cascade)
+  appUser   AppUser  @relation("AppSaleBuyer", fields: [appUserId], references: [id], onDelete: Cascade)
+
+  assignedTo AppUser? @relation("AppSaleMemorial")
 
   subscriptionId String       @map("subscription_id")
   subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
@@ -473,7 +475,13 @@ model AppUser {
   createdAt  DateTime         @default(now()) @map("created_at")
   updatedAt  DateTime         @updatedAt @map("updated_at")
 
-  appSales            AppSale[]
+  // Sales purchased by this user (buyer side)
+  appSales            AppSale[]            @relation("AppSaleBuyer")
+
+  // QR-Code (sale) assigned to this memorial (null = free-tier memorial)
+  appSaleId String?  @unique @map("app_sale_id")
+  appSale   AppSale? @relation("AppSaleMemorial", fields: [appSaleId], references: [id], onDelete: SetNull)
+
   passwordResetTokens PasswordResetToken[]
   guardiansOf         AppUserGuardian[] @relation("GuardianOf")
   guardedBy           AppUserGuardian[] @relation("GuardedBy")
