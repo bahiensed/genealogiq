@@ -40,15 +40,16 @@ export default async function MemorializedPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
 
-  const [profile, memorials, salesCount] = await Promise.all([
+  const [profile, memorials, unassignedSalesCount] = await Promise.all([
     getProfileById(id),
     getMemorialsByCreatorId(id),
-    prisma.appSale.count({ where: { appUserId: id } }),
+    prisma.appSale.count({ where: { appUserId: id, assignedTo: null } }),
   ])
   if (!profile) notFound()
 
   const isOwn = id === session.user.id
-  const canCreate = isOwn && memorials.length < salesCount
+  // Free tier: every user gets 1 memorial slot for free; beyond that requires an unassigned AppSale.
+  const canCreate = isOwn && (unassignedSalesCount > 0 || memorials.length === 0)
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">

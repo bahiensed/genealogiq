@@ -11,18 +11,19 @@ import { deleteBlobs } from "@/lib/blob"
 export async function createMemorial(data: unknown) {
   const session = await verifySession()
 
-  const [createdCount, salesCount] = await Promise.all([
+  const [createdCount, nextSale] = await Promise.all([
     prisma.appUser.count({
       where: { role: "APP_MEMO", guardedBy: { some: { guardianId: session.user.id } } },
     }),
-    prisma.appSale.count({
-      where: { appUserId: session.user.id },
+    prisma.appSale.findFirst({
+      where: { appUserId: session.user.id, assignedTo: null },
+      orderBy: { createdAt: "asc" },
+      select: { id: true },
     }),
   ])
-  if (salesCount === 0) {
-    return { error: "You need to acquire a QR Code to create a memorialized profile." }
-  }
-  if (createdCount >= salesCount) {
+
+  // Free tier: allow 1 memorial without AppSale. Beyond that, require an unassigned AppSale.
+  if (!nextSale && createdCount >= 1) {
     return { error: "No available QR Codes. Purchase a QR Code to create more profiles." }
   }
 
@@ -44,6 +45,7 @@ export async function createMemorial(data: unknown) {
       deathPlace,
       deathCountry,
       avatarUrl,
+      appSaleId: nextSale?.id ?? null,
     },
   })
 

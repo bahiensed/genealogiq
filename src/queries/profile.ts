@@ -16,6 +16,7 @@ export async function getProfileById(id: string) {
       deathDate: true,
       deathPlace: true,
       deathCountry: true,
+      appSaleId: true,
       guardedBy: { select: { guardianId: true } },
     },
   })

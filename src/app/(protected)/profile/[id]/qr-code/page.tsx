@@ -1,4 +1,7 @@
+import Link from "next/link"
 import { notFound } from "next/navigation"
+import { Lock, QrCode } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { QrCodeClient } from "@/components/qr-code-client"
@@ -15,6 +18,8 @@ export default async function QrCodePage({ params }: Props) {
 
   const profile = await getProfileById(id)
   if (!profile) notFound()
+
+  const isFreeMemorial = profile.role === "APP_MEMO" && profile.appSaleId == null
 
   const appUrl = process.env.APP_URL ?? "https://genealogiq.app"
   const profileUrl = `${appUrl}/profile/${id}`
@@ -34,7 +39,25 @@ export default async function QrCodePage({ params }: Props) {
           </p>
         </section>
 
-        <QrCodeClient profileUrl={profileUrl} />
+        {isFreeMemorial ? (
+          <div className="glass-card flex flex-col items-center justify-center gap-4 py-20 text-center animate-fade-in">
+            <div className="relative">
+              <QrCode className="h-12 w-12 text-muted-foreground" />
+              <div className="absolute -bottom-1 -right-1 rounded-full bg-background/90 p-1 ring-1 ring-border/60">
+                <Lock className="h-4 w-4 text-primary" />
+              </div>
+            </div>
+            <h2 className="text-xl font-semibold tracking-tight mt-2">Unlock your QR-Code</h2>
+            <p className="text-muted-foreground max-w-md text-sm">
+              This memorial is on the free plan. Purchase a QR-Code to print it on plaques, headstones and digital spaces — keep their memory anywhere, scannable forever.
+            </p>
+            <Button asChild className="mt-2 gap-2">
+              <Link href="/billing/qr-code">Purchase QR-Code</Link>
+            </Button>
+          </div>
+        ) : (
+          <QrCodeClient profileUrl={profileUrl} />
+        )}
       </main>
     </div>
   )

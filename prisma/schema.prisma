@@ -112,7 +112,10 @@ model QrInventory {
 model AppSale {
   id        String  @id @default(cuid())
   appUserId String  @map("app_user_id")
-  appUser   AppUser @relation(fields: [appUserId], references: [id], onDelete: Cascade)
+  appUser   AppUser @relation("AppSaleBuyer", fields: [appUserId], references: [id], onDelete: Cascade)
+
+  assignedTo AppUser? @relation("AppSaleMemorial")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt    @map("updated_at")
 
@@ -305,8 +308,12 @@ model AppUser {
   familyFrom       FamilyRelation[] @relation("FamilyFrom")
   familyTo         FamilyRelation[] @relation("FamilyTo")
 
-  // Sales (QR codes acquired via SEQUOIA)
-  appSales AppSale[]
+  // Sales (QR codes acquired via SEQUOIA — buyer side)
+  appSales AppSale[] @relation("AppSaleBuyer")
+
+  // QR-Code (sale) assigned to this memorial (null = free-tier memorial)
+  appSaleId String?  @unique @map("app_sale_id")
+  appSale   AppSale? @relation("AppSaleMemorial", fields: [appSaleId], references: [id], onDelete: SetNull)
 
   // Auth tokens
   emailTokens         EmailToken[]

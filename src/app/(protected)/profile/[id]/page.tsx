@@ -75,6 +75,7 @@ export default async function ProfileByIdPage({ params }: Props) {
 
   const hasBio = !!bio && !!(bio.text || bio.quote || bio.images.length > 0)
   const memorialCount = memorials.length
+  const isFreeMemorial = isMemorialized && user.appSaleId == null
 
   const profile: ProfileData = {
     id: user.id,
@@ -155,11 +156,11 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "qr",
       title: "QR Code",
       description: "For plaques, headstones and digital spaces alike.",
-      metric: "Ready to print",
+      metric: isFreeMemorial ? "Locked — purchase to unlock" : "Ready to print",
       icon: QrCode,
       span: 3,
       preview: <QrPreview />,
-      href: `${base}/qr-code`,
+      ...(isFreeMemorial ? { gated: true } : { href: `${base}/qr-code` }),
     },
   ]
 

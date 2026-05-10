@@ -3,6 +3,7 @@ import Link from "next/link"
 import type { LucideIcon } from "lucide-react"
 import { ArrowUpRight } from "lucide-react"
 import { GlassIcon } from "@/components/glass-icon"
+import { QrCardGate } from "@/components/qr-card-gate"
 import { cn } from "@/lib/utils"
 
 export interface SectionCard {
@@ -14,6 +15,7 @@ export interface SectionCard {
   span?: 2 | 3 | 4 | 6
   preview?: ReactNode
   href?: string
+  gated?: boolean
 }
 
 interface Props {
@@ -58,6 +60,18 @@ export function BentoGrid({ cards }: Props) {
             "sm:col-span-1",
             card.span && spanClass[card.span],
           )
+
+          if (card.gated) {
+            return (
+              <QrCardGate
+                key={card.key}
+                className={cn(className, "text-left")}
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                {inner}
+              </QrCardGate>
+            )
+          }
 
           if (card.href) {
             return (
