@@ -11,9 +11,9 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
   if (!token) {
     return (
       <VerifyEmailCard
-        title="Check your email"
-        description="Confirmation email sent."
-        body="Click the link we sent to confirm your email. The link expires in 24 hours."
+        title="Check your e-mail"
+        description="Confirmation e-mail sent."
+        body="Click the link we sent to confirm your e-mail. The link expires in 24 hours."
         buttonText="Go to sign in"
         buttonHref="/sign-in"
         buttonVariant="outline"
@@ -55,9 +55,9 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
 
     return (
       <VerifyEmailCard
-        title="Email changed!"
-        description="Your email has been updated successfully."
-        body="Sign in again with your new email address."
+        title="E-mail changed!"
+        description="Your e-mail has been updated successfully."
+        body="Sign in again with your new e-mail address."
         buttonText="Sign in"
         buttonHref="/sign-in"
       />
@@ -74,9 +74,9 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
 
   return (
     <VerifyEmailCard
-      title="Email confirmed!"
+      title="E-mail confirmed!"
       description="Your account has been verified successfully."
-      body="You can now sign in with your email and password."
+      body="You can now sign in with your e-mail and password."
       buttonText="Sign in"
       buttonHref="/sign-in"
     />

@@ -18,13 +18,13 @@ export function ChangeEmailDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="text-sm text-foreground underline underline-offset-4 hover:no-underline cursor-pointer">
-          Change Email
+          Change E-mail
         </button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change email</DialogTitle>
+          <DialogTitle>Change e-mail</DialogTitle>
           <DialogDescription>
             A confirmation link will be sent to the new address
           </DialogDescription>
@@ -39,7 +39,7 @@ export function ChangeEmailDialog() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ce-newEmail">New email:</Label>
+            <Label htmlFor="ce-newEmail">New e-mail:</Label>
             <Input
               id="ce-newEmail"
               name="newEmail"
@@ -78,7 +78,7 @@ export function ChangeEmailDialog() {
           </div>
 
           <Button type="submit" className="w-full mt-2" disabled={isPending}>
-            {isPending ? "Changing…" : "Change email"}
+            {isPending ? "Changing…" : "Change e-mail"}
           </Button>
         </form>
       </DialogContent>

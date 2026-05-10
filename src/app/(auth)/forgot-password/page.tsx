@@ -14,7 +14,7 @@ export default async function ForgotPasswordPage({ searchParams }: Props) {
     return (
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Email sent</CardTitle>
+          <CardTitle>E-mail sent</CardTitle>
           <CardDescription>
             If this email is registered, you will receive a link shortly.
           </CardDescription>
