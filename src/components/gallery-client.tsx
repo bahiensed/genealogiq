@@ -98,12 +98,16 @@ export function GalleryClient({ items: rawItems, editHref, isOwn }: Props) {
     <>
       <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
         <div>
-          <p className="text-muted-foreground mt-2 italic">Frozen moments — light, laughter and the quiet in between.</p>
-          {!isEmpty && (
-            <p className="text-xs text-muted-foreground mt-1">
-              {rawItems.filter((i) => i.kind === "image").length} photos · {rawItems.filter((i) => i.kind === "video").length} videos
-            </p>
-          )}
+          <p className="text-muted-foreground mt-2 italic">Frozen moments: light, laughter and the quiet in between.</p>
+          {!isEmpty && (() => {
+            const imgCount = rawItems.filter((i) => i.kind === "image").length
+            const vidCount = rawItems.filter((i) => i.kind === "video").length
+            return (
+              <p className="text-xs text-muted-foreground mt-1">
+                {imgCount} {imgCount === 1 ? "image" : "images"} · {vidCount} {vidCount === 1 ? "video" : "videos"}
+              </p>
+            )
+          })()}
         </div>
         <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
           {!isEmpty && (
@@ -121,19 +125,12 @@ export function GalleryClient({ items: rawItems, editHref, isOwn }: Props) {
             </DropdownMenu>
           )}
           {isOwn && editHref && (
-            <>
-              {!isEmpty && (
-                <span className="text-sm text-muted-foreground tabular-nums">
-                  {rawItems.length} {rawItems.length === 1 ? "item" : "items"}
-                </span>
-              )}
-              <Button asChild className="gap-2">
-                <Link href={editHref}>
-                  <ImagePlus className="h-4 w-4" />
-                  {isEmpty ? "Add media" : "Edit"}
-                </Link>
-              </Button>
-            </>
+            <Button asChild className="gap-2">
+              <Link href={editHref}>
+                {isEmpty ? <ImagePlus className="h-4 w-4" /> : <Images className="h-4 w-4" />}
+                {isEmpty ? "Add media" : "Edit"}
+              </Link>
+            </Button>
           )}
         </div>
       </section>
