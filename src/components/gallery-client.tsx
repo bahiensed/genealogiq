@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { Play, X, ChevronLeft, ChevronRight, Images, ImagePlus, ArrowDownUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -200,6 +200,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn }: Props) {
       {/* Lightbox */}
       <Dialog open={isOpen} onOpenChange={(o) => !o && setLightboxIndex(null)}>
         <DialogContent className="max-w-[100vw] w-screen h-screen sm:max-w-[95vw] sm:h-[90vh] p-0 bg-background/95 backdrop-blur-xl border-border/60 [&>button]:hidden">
+          <DialogTitle className="sr-only">Gallery item viewer</DialogTitle>
           {currentItem && (
             <div className="relative w-full h-full flex items-center justify-center">
               <div className="relative inline-block max-h-full max-w-full group/media">
