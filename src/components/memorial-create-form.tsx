@@ -184,7 +184,7 @@ export function MemorialCreateForm() {
 
       {/* Gender */}
       <div className="space-y-2">
-        <Label htmlFor="gender">Gender <span className="text-muted-foreground text-xs">(optional)</span></Label>
+        <Label htmlFor="gender">Gender</Label>
         <Select value={form.gender} onValueChange={(v) => update("gender", v as FormState["gender"])}>
           <SelectTrigger id="gender"><SelectValue placeholder="Not specified" /></SelectTrigger>
           <SelectContent>

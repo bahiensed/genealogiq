@@ -7,7 +7,7 @@ export const memorialSchema = z.object({
   birthDate: z.coerce.date({ error: "Birth date is required." }),
   birthPlace: z.string().trim().max(100).optional(),
   birthCountry: z.string().trim().max(100).optional(),
-  deathDate: z.coerce.date().optional().nullable(),
+  deathDate: z.coerce.date({ error: "Date of death is required." }),
   deathPlace: z.string().trim().max(100).optional(),
   deathCountry: z.string().trim().max(100).optional(),
   avatarUrl: z.string().url().optional().nullable(),
