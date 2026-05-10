@@ -92,6 +92,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     death: user.deathDate
       ? { date: formatDate(user.deathDate), place: user.deathPlace ?? "", country: user.deathCountry }
       : null,
+    geo: geo ? { lat: geo.lat, lon: geo.lon } : null,
     tributes: tributeCount,
     favoritedBy,
     mediaTotal: galleryCount,
@@ -117,11 +118,11 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "bio",
       title: "Biography",
-      description: "A life told in chapters — moments, places and turning points.",
+      description: "A life told in chapters: moments, places and turning points.",
       metric: hasBio ? "Read" : "No biography yet",
       icon: BookOpen,
       span: 2,
-      preview: <BioPreview hasBio={hasBio} />,
+      preview: <BioPreview hasBio={hasBio} initial1={user.firstName[0]} initial2={user.lastName[0]} />,
       href: `${base}/bio`,
     },
     {
@@ -184,11 +185,11 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "bio",
       title: "Biography",
-      description: "A life told in chapters — moments, places and turning points.",
+      description: "A life told in chapters: moments, places and turning points.",
       metric: hasBio ? "Read" : "No biography yet",
       icon: BookOpen,
       span: 2,
-      preview: <BioPreview hasBio={hasBio} />,
+      preview: <BioPreview hasBio={hasBio} initial1={user.firstName[0]} initial2={user.lastName[0]} />,
       href: `${base}/bio`,
     },
     {

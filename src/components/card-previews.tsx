@@ -134,7 +134,15 @@ function manuscriptStrokes(y: number, x0: number, length: number, seed: number):
   return parts.join(" ")
 }
 
-export function BioPreview({ hasBio = false }: { hasBio?: boolean }) {
+export function BioPreview({
+  hasBio = false,
+  initial1 = "A",
+  initial2 = "B",
+}: {
+  hasBio?: boolean
+  initial1?: string
+  initial2?: string
+}) {
   if (!hasBio) {
     const bar = "h-2.5 rounded-full skeleton-block"
     const thumb = "rounded-xl skeleton-block shrink-0"
@@ -196,7 +204,7 @@ export function BioPreview({ hasBio = false }: { hasBio?: boolean }) {
         fontStyle="italic"
         fill="currentColor"
         className="text-[hsl(var(--brand-indigo-deep))] dark:text-[hsl(var(--brand-slate-soft))]"
-      >B</text>
+      >{initial1.toUpperCase()}</text>
       <text
         x="3"
         y="117"
@@ -206,7 +214,7 @@ export function BioPreview({ hasBio = false }: { hasBio?: boolean }) {
         fontStyle="italic"
         fill="currentColor"
         className="text-[hsl(var(--brand-indigo-deep))] dark:text-[hsl(var(--brand-slate-soft))]"
-      >G</text>
+      >{initial2.toUpperCase()}</text>
       <g
         stroke="currentColor"
         strokeWidth="1"
