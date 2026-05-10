@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { Moon, Sun, Menu, X, Bell, User, LogOut, Flower2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -14,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { HeaderSearch } from "@/components/header-search"
 import { cn } from "@/lib/utils"
 import { logout } from "@/actions/auth"
 import type { TributeNotification } from "@/queries/tribute"
@@ -93,6 +95,8 @@ interface HeaderProps {
 export function Header({ userName, userImage, notifications = [] }: HeaderProps) {
   const { resolvedTheme, setTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const pathname = usePathname()
+  const showSearch = pathname !== "/home"
 
   const initials = userName
     ? userName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
@@ -158,22 +162,36 @@ export function Header({ userName, userImage, notifications = [] }: HeaderProps)
   return (
     <header className="fixed top-0 inset-x-0 z-50">
       <div className="glass-strong border-x-0 border-t-0 rounded-none">
-        <div className="container flex items-center justify-between h-16">
-          <Link href="/home" className="flex items-center group" aria-label="Genealogiq">
+        <div className="container flex items-center justify-between gap-3 md:gap-4 h-16">
+          <Link href="/home" className="flex items-center group shrink-0" aria-label="Genealogiq">
             <Image src="/logo-dark.png" alt="Genealogiq" width={120} height={28} className="block dark:hidden h-7 w-auto" priority />
             <Image src="/logo-light.png" alt="Genealogiq" width={120} height={28} className="hidden dark:block h-7 w-auto" priority />
           </Link>
 
-          <div className="hidden md:flex items-center gap-2">{controls}</div>
+          {showSearch && (
+            <div className="hidden md:block flex-1 max-w-md mx-auto">
+              <HeaderSearch />
+            </div>
+          )}
+
+          <div className="hidden md:flex items-center gap-2 shrink-0">{controls}</div>
 
           <button
-            className="md:hidden rounded-full glass h-9 w-9 inline-flex items-center justify-center"
+            className="md:hidden rounded-full glass h-9 w-9 inline-flex items-center justify-center shrink-0"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Open menu"
           >
             {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
         </div>
+
+        {showSearch && (
+          <div className="md:hidden border-t border-border/40">
+            <div className="container py-2">
+              <HeaderSearch />
+            </div>
+          </div>
+        )}
 
         <div
           className={cn(
