@@ -3,20 +3,30 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 
+const subscriptionSelect = {
+  id:                    true,
+  code:                  true,
+  name:                  true,
+  description:           true,
+  maxProfiles:           true,
+  termLength:            true,
+  price:                 true,
+  treeMaxMembers:        true,
+  bioMaxChars:           true,
+  bioMaxImages:          true,
+  galleryMaxImages:      true,
+  galleryMaxVideos:      true,
+  geolocationFullAccess: true,
+  qrCodeAccess:          true,
+  isActive:              true,
+  createdAt:             true,
+} as const
+
 export async function getSubscriptions() {
   await verifySession()
 
   const rows = await prisma.subscription.findMany({
-    select: {
-      id:          true,
-      name:        true,
-      description: true,
-      maxProfiles: true,
-      termLength:  true,
-      price:       true,
-      isActive:    true,
-      createdAt:   true,
-    },
+    select: subscriptionSelect,
     orderBy: { name: 'asc' },
   })
 
@@ -28,15 +38,7 @@ export async function getSubscription(id: string) {
 
   const row = await prisma.subscription.findUnique({
     where: { id },
-    select: {
-      id:          true,
-      name:        true,
-      description: true,
-      maxProfiles: true,
-      termLength:  true,
-      price:       true,
-      isActive:    true,
-    },
+    select: subscriptionSelect,
   })
 
   if (!row) return null

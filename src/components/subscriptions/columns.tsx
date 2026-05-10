@@ -14,11 +14,19 @@ import { toggleSubscriptionActive, deleteSubscription } from '@/actions/subscrip
 
 export type SubscriptionRow = {
   id: string
+  code: string
   name: string
   description: string | null
   maxProfiles: number
   termLength: number
   price: number
+  treeMaxMembers: number
+  bioMaxChars: number
+  bioMaxImages: number
+  galleryMaxImages: number
+  galleryMaxVideos: number
+  geolocationFullAccess: boolean
+  qrCodeAccess: boolean
   isActive: boolean
   createdAt: Date
 }
@@ -83,6 +91,13 @@ const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' 
 export function getColumns(currentUserRole: string): ColumnDef<SubscriptionRow>[] {
   return [
     {
+      accessorKey: 'code',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Code" />,
+      cell: ({ row }) => (
+        <code className="text-xs font-mono bg-muted/60 px-1.5 py-0.5 rounded">{row.original.code}</code>
+      ),
+    },
+    {
       accessorKey: 'name',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
       cell: ({ row }) => (
@@ -115,10 +130,32 @@ export function getColumns(currentUserRole: string): ColumnDef<SubscriptionRow>[
       ),
     },
     {
-      accessorKey: 'description',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+      accessorKey: 'treeMaxMembers',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Tree<br/>Members</>} className="justify-end" />,
+      cell: ({ row }) => <div className="text-right">{row.original.treeMaxMembers}</div>,
+    },
+    {
+      accessorKey: 'galleryMaxImages',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Gallery<br/>Images</>} className="justify-end" />,
+      cell: ({ row }) => <div className="text-right">{row.original.galleryMaxImages}</div>,
+    },
+    {
+      accessorKey: 'galleryMaxVideos',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Gallery<br/>Videos</>} className="justify-end" />,
+      cell: ({ row }) => <div className="text-right">{row.original.galleryMaxVideos}</div>,
+    },
+    {
+      accessorKey: 'geolocationFullAccess',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Geo" />,
       cell: ({ row }) => (
-        <div className="whitespace-normal break-words max-w-xs">{row.original.description ?? '—'}</div>
+        <span className="text-xs">{row.original.geolocationFullAccess ? '✓' : '—'}</span>
+      ),
+    },
+    {
+      accessorKey: 'qrCodeAccess',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="QR" />,
+      cell: ({ row }) => (
+        <span className="text-xs">{row.original.qrCodeAccess ? '✓' : '—'}</span>
       ),
     },
     {
