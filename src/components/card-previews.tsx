@@ -49,7 +49,7 @@ function manuscriptLine(y: number, x0: number, length: number, seed: number): st
   let d = `M${x0} ${y}`
   for (let i = 0; i * step < length; i++) {
     const dir = i % 2 === 0 ? -1 : 1
-    const h = 1.2 + Math.abs(Math.sin(i * 0.85 + seed)) * 0.8
+    const h = 1.4 + Math.abs(Math.sin(i * 0.85 + seed)) * 0.9
     d += ` q ${step / 2} ${(dir * h).toFixed(2)} ${step} 0`
   }
   return d
@@ -61,8 +61,8 @@ function manuscriptStrokes(y: number, x0: number, length: number, seed: number):
   for (let i = 0; i < count; i++) {
     const x = x0 + i * 5 + (i % 3) * 0.6
     const r = Math.sin(x * 0.43 + seed * 1.7)
-    if (r > 0.55) parts.push(`M${x.toFixed(1)} ${y} v-${(4 + r * 2.5).toFixed(2)}`)
-    else if (r < -0.55) parts.push(`M${x.toFixed(1)} ${y} v${(3 + Math.abs(r) * 2).toFixed(2)}`)
+    if (r > 0.55) parts.push(`M${x.toFixed(1)} ${y} v-${(4.5 + r * 2.5).toFixed(2)}`)
+    else if (r < -0.55) parts.push(`M${x.toFixed(1)} ${y} v${(3.5 + Math.abs(r) * 2).toFixed(2)}`)
   }
   return parts.join(" ")
 }
@@ -97,36 +97,52 @@ export function BioPreview({ hasBio = false }: { hasBio?: boolean }) {
   }
 
   // Manuscript-style preview — evokes a medieval scholastic autograph (Aquinas-esque).
+  // Two paragraphs: capital "B" with 5 lines, then "G" with 4 lines.
   const lines = [
-    { y: 16, x: 28, len: 204, s: 1.2 },
-    { y: 30, x: 28, len: 206, s: 2.7 },
-    { y: 44, x: 6,  len: 228, s: 3.4 },
-    { y: 58, x: 6,  len: 224, s: 4.1 },
-    { y: 72, x: 6,  len: 230, s: 5.6 },
-    { y: 86, x: 6,  len: 218, s: 6.3 },
-    { y: 100, x: 6, len: 152, s: 7.0 },
+    // Paragraph 1 (drop cap B)
+    { y: 14,  x: 26, len: 208, s: 1.2 },
+    { y: 26,  x: 26, len: 208, s: 2.7 },
+    { y: 38,  x: 6,  len: 228, s: 3.4 },
+    { y: 50,  x: 6,  len: 224, s: 4.1 },
+    { y: 62,  x: 6,  len: 150, s: 5.6 },
+    // (blank y≈74 — paragraph break)
+    // Paragraph 2 (drop cap G)
+    { y: 86,  x: 26, len: 208, s: 6.3 },
+    { y: 98,  x: 26, len: 208, s: 7.0 },
+    { y: 110, x: 6,  len: 224, s: 7.9 },
+    { y: 122, x: 6,  len: 50,  s: 8.6 },
   ]
 
   return (
     <svg
-      viewBox="0 0 240 110"
+      viewBox="0 0 240 130"
       preserveAspectRatio="xMidYMid meet"
       className="w-full h-full text-foreground/55"
       aria-hidden
     >
       <text
         x="3"
-        y="30"
+        y="29"
         fontFamily="serif"
-        fontSize="28"
+        fontSize="26"
         fontWeight="700"
         fontStyle="italic"
         fill="currentColor"
         className="text-[hsl(var(--brand-indigo-deep))] dark:text-[hsl(var(--brand-slate-soft))]"
-      >Q</text>
+      >B</text>
+      <text
+        x="3"
+        y="101"
+        fontFamily="serif"
+        fontSize="26"
+        fontWeight="700"
+        fontStyle="italic"
+        fill="currentColor"
+        className="text-[hsl(var(--brand-indigo-deep))] dark:text-[hsl(var(--brand-slate-soft))]"
+      >G</text>
       <g
         stroke="currentColor"
-        strokeWidth="0.7"
+        strokeWidth="0.85"
         fill="none"
         strokeLinecap="round"
         strokeLinejoin="round"
