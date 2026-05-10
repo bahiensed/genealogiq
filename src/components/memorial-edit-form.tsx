@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils"
 import { updateMemorial, deleteMemorial } from "@/actions/memorial"
 import { updateProfile } from "@/actions/profile"
 import { getAvatarColor } from "@/lib/avatar-color"
+import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { COUNTRIES } from "@/consts/countries"
 import type { ProfileRow } from "@/queries/profile"
 
@@ -124,6 +125,10 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   const handleAvatarChange = async (files: FileList | null) => {
     const file = files?.[0]
     if (!file) return
+    if (!isAllowedImage(file)) {
+      toast.error(`Unsupported file. Use ${IMAGE_FORMATS_LABEL}.`)
+      return
+    }
     setUploading(true)
     update("avatarUrl", URL.createObjectURL(file))
     try {

@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { submitTribute, deleteTribute } from "@/actions/tribute"
+import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 
 const MAX_TEXT = 512
 
@@ -45,6 +46,10 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
   const handleAddImage = async (files: FileList | null) => {
     const file = files?.[0]
     if (!file) return
+    if (!isAllowedImage(file)) {
+      toast.error(`Unsupported file. Use ${IMAGE_FORMATS_LABEL}.`)
+      return
+    }
     setUploading(true)
     const preview = URL.createObjectURL(file)
     setImageUrl(preview)

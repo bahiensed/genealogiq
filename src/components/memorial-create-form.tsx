@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { createMemorial } from "@/actions/memorial"
+import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { COUNTRIES } from "@/consts/countries"
 
 interface FormState {
@@ -98,6 +99,10 @@ export function MemorialCreateForm() {
   const handleAvatarChange = async (files: FileList | null) => {
     const file = files?.[0]
     if (!file) return
+    if (!isAllowedImage(file)) {
+      toast.error(`Unsupported file. Use ${IMAGE_FORMATS_LABEL}.`)
+      return
+    }
     setUploading(true)
     update("avatarUrl", URL.createObjectURL(file))
     try {

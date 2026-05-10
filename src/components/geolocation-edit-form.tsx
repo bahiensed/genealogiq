@@ -24,6 +24,7 @@ import {
 import { AddressSection } from "@/components/address/address-section"
 import { GeolocationGate } from "@/components/geolocation-gate"
 import { saveGeolocation, deleteGeolocation } from "@/actions/geolocation"
+import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { geolocationSchema, type GeolocationFormValues } from "@/schemas/geolocation"
 import type { GeolocationRow } from "@/queries/geolocation"
 
@@ -93,6 +94,10 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
   const handleAddPhoto = async (files: FileList | null) => {
     const file = files?.[0]
     if (!file) return
+    if (!isAllowedImage(file)) {
+      toast.error(`Unsupported file. Use ${IMAGE_FORMATS_LABEL}.`)
+      return
+    }
     const slot = photos.findIndex((p) => p == null)
     if (slot === -1) return
     const preview = URL.createObjectURL(file)

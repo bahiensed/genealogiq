@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { saveBio, deleteBio } from "@/actions/bio"
+import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import type { BioRow } from "@/queries/bio"
 
 const MAX_QUOTE = 128
@@ -58,13 +59,19 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
 
   const handleAddImages = async (files: FileList | null) => {
     if (!files || files.length === 0) return
+    const all = Array.from(files)
+    const valid = all.filter(isAllowedImage)
+    if (valid.length < all.length) {
+      toast.warning(`${all.length - valid.length} file(s) skipped. Use ${IMAGE_FORMATS_LABEL}.`)
+    }
+    if (valid.length === 0) return
     const remaining = maxImages - images.length
     if (remaining <= 0) {
       toast.warning(`Maximum of ${maxImages} images reached.`)
       return
     }
-    const toProcess = Array.from(files).slice(0, remaining)
-    if (files.length > remaining) {
+    const toProcess = valid.slice(0, remaining)
+    if (valid.length > remaining) {
       toast.warning(`Only ${remaining} image(s) added — limit is ${maxImages}.`)
     }
 

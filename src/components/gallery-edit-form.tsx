@@ -20,6 +20,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { saveGallery, deleteGallery } from "@/actions/gallery"
+import {
+  isAllowedImage,
+  isAllowedVideo,
+  IMAGE_FORMATS_LABEL,
+  VIDEO_FORMATS_LABEL,
+} from "@/lib/upload-validation"
 import type { GalleryItemRow } from "@/queries/gallery"
 
 const MAX_VIDEO_SECONDS = 600
@@ -114,10 +120,16 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
 
   const handleAddImages = async (files: FileList | null) => {
     if (!files || files.length === 0) return
+    const all = Array.from(files)
+    const valid = all.filter(isAllowedImage)
+    if (valid.length < all.length) {
+      toast.warning(`${all.length - valid.length} file(s) skipped. Use ${IMAGE_FORMATS_LABEL}.`)
+    }
+    if (valid.length === 0) return
     const remaining = maxImages - images.length
     if (remaining <= 0) { toast.warning(`Maximum of ${maxImages} images reached.`); return }
-    const toProcess = Array.from(files).slice(0, remaining)
-    if (files.length > remaining) toast.warning(`Only ${remaining} image(s) added — limit is ${maxImages}.`)
+    const toProcess = valid.slice(0, remaining)
+    if (valid.length > remaining) toast.warning(`Only ${remaining} image(s) added — limit is ${maxImages}.`)
 
     const placeholders: MediaEntry[] = toProcess.map((f) => ({
       kind: "image",
@@ -151,10 +163,16 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
 
   const handleAddVideos = async (files: FileList | null) => {
     if (!files || files.length === 0) return
+    const all = Array.from(files)
+    const valid = all.filter(isAllowedVideo)
+    if (valid.length < all.length) {
+      toast.warning(`${all.length - valid.length} file(s) skipped. Use ${VIDEO_FORMATS_LABEL}.`)
+    }
+    if (valid.length === 0) return
     const remaining = maxVideos - videos.length
     if (remaining <= 0) { toast.warning(`Maximum of ${maxVideos} videos reached.`); return }
-    const candidates = Array.from(files).slice(0, remaining)
-    if (files.length > remaining) toast.warning(`Only ${remaining} video(s) processed — limit is ${maxVideos}.`)
+    const candidates = valid.slice(0, remaining)
+    if (valid.length > remaining) toast.warning(`Only ${remaining} video(s) processed — limit is ${maxVideos}.`)
 
     for (const file of candidates) {
       let durationSec: number
