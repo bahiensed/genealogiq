@@ -25,7 +25,7 @@ export default async function FavoritesPage({ params }: Props) {
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32 max-w-5xl">
-        <section className="mb-8 flex items-end justify-between gap-4 animate-fade-in">
+        <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
           <div>
             <div className="flex items-center gap-3 md:gap-4">
               <BackButton href={`/profile/${id}`} label="Back to profile" />
