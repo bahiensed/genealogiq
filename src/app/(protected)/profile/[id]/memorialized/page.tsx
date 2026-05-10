@@ -72,7 +72,7 @@ export default async function MemorializedPage({ params }: Props) {
               </span>
             )}
             {canCreate && (
-              <Button asChild className="gap-2">
+              <Button asChild className="shrink-0 self-end gap-2">
                 <Link href={`/profile/${id}/memorialized/new`}>
                   <Plus className="h-4 w-4" />
                   New memorialized profile
