@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
-import { Cake, Feather, Heart, Images, Flower2, SquarePen, BrickWall } from "lucide-react"
+import { Cake, Feather, Heart, Images, Flower2, MapPin, SquarePen, BrickWall } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -18,6 +18,7 @@ export interface ProfileData {
   avatarUrl?: string | null
   birth?: { date: string; place: string; country?: string | null } | null
   death?: { date: string; place: string; country?: string | null } | null
+  geo?: { lat: number; lon: number } | null
   tributes: number
   favoritedBy: number
   mediaTotal: number
@@ -162,6 +163,19 @@ export function ProfileBanner({ profile }: Props) {
                           <> in <span className="text-foreground font-medium">{formatPlace(profile.death.place, profile.death.country)}</span></>
                         )}
                       </span>
+                    </div>
+                  )}
+                  {isMemorial && profile.geo && (
+                    <div className="flex items-center gap-2 text-muted-foreground justify-center lg:justify-start min-w-0">
+                      <MapPin className="h-4 w-4 text-primary shrink-0" />
+                      <a
+                        href={`https://www.google.com/maps?q=${profile.geo.lat},${profile.geo.lon}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-foreground font-medium hover:underline truncate min-w-0"
+                      >
+                        {profile.geo.lat.toFixed(6)}, {profile.geo.lon.toFixed(6)}
+                      </a>
                     </div>
                   )}
                 </div>
