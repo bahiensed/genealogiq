@@ -172,25 +172,29 @@ export function BioPreview({
   }
 
   // Manuscript-style preview — evokes a medieval scholastic autograph (Aquinas-esque).
-  // Two paragraphs: capital "B" with 5 lines, then "G" with 4 lines.
+  // Two paragraphs: drop cap initial1 with 6 lines, then initial2 with 7 lines.
   const lines = [
-    // Paragraph 1 (drop cap B) — line spacing 14
+    // Paragraph 1 (drop cap initial1) — line spacing 14
     { y: 16,  x: 30, len: 204, s: 1.2 },
     { y: 30,  x: 30, len: 206, s: 2.7 },
     { y: 44,  x: 6,  len: 228, s: 3.4 },
-    { y: 58,  x: 6,  len: 224, s: 4.1 },
-    { y: 72,  x: 6,  len: 150, s: 5.6 },
-    // (blank y≈86 — paragraph break)
-    // Paragraph 2 (drop cap G)
-    { y: 100, x: 30, len: 204, s: 6.3 },
-    { y: 114, x: 30, len: 206, s: 7.0 },
-    { y: 128, x: 6,  len: 224, s: 7.9 },
-    { y: 142, x: 6,  len: 50,  s: 8.6 },
+    { y: 58,  x: 6,  len: 226, s: 4.1 },
+    { y: 72,  x: 6,  len: 230, s: 5.6 },
+    { y: 86,  x: 6,  len: 160, s: 6.3 },
+    // (blank y≈100 — paragraph break)
+    // Paragraph 2 (drop cap initial2)
+    { y: 114, x: 30, len: 204, s: 7.0 },
+    { y: 128, x: 30, len: 206, s: 7.9 },
+    { y: 142, x: 6,  len: 228, s: 8.6 },
+    { y: 156, x: 6,  len: 224, s: 9.3 },
+    { y: 170, x: 6,  len: 230, s: 10.1 },
+    { y: 184, x: 6,  len: 222, s: 10.8 },
+    { y: 198, x: 6,  len: 70,  s: 11.5 },
   ]
 
   return (
     <svg
-      viewBox="0 0 240 152"
+      viewBox="0 0 240 210"
       preserveAspectRatio="xMidYMin meet"
       className="w-full h-full text-foreground/55"
       aria-hidden
@@ -207,7 +211,7 @@ export function BioPreview({
       >{initial1.toUpperCase()}</text>
       <text
         x="3"
-        y="117"
+        y="131"
         fontFamily="serif"
         fontSize="32"
         fontWeight="700"
