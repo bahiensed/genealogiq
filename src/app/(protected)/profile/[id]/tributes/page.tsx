@@ -30,7 +30,7 @@ export default async function TributesPage({ params }: Props) {
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32 max-w-6xl">
-        <div className="flex items-center justify-between gap-4 mb-2 animate-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href={`/profile/${id}`} label="Back to profile" />
             <div>
