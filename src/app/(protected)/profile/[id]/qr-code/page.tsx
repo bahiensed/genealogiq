@@ -14,12 +14,13 @@ interface Props {
 
 export default async function QrCodePage({ params }: Props) {
   const { id } = await params
-  await verifySession()
+  const session = await verifySession()
 
   const profile = await getProfileById(id)
   if (!profile) notFound()
 
   const isFreeMemorial = profile.role === "APP_MEMO" && profile.appSaleId == null
+  const isGuardian = profile.role === "APP_MEMO" && profile.guardedBy.some((g) => g.guardianId === session.user.id)
 
   const appUrl = process.env.APP_URL ?? "https://genealogiq.app"
   const profileUrl = `${appUrl}/profile/${id}`
@@ -39,7 +40,7 @@ export default async function QrCodePage({ params }: Props) {
           </p>
         </section>
 
-        {isFreeMemorial ? (
+        {isFreeMemorial && isGuardian ? (
           <div className="glass-card flex flex-col items-center justify-center gap-4 py-20 text-center animate-fade-in">
             <div className="relative">
               <QrCode className="h-12 w-12 text-muted-foreground" />
@@ -54,6 +55,11 @@ export default async function QrCodePage({ params }: Props) {
             <Button asChild className="mt-2 gap-2">
               <Link href="/billing/qr-code">Purchase QR-Code</Link>
             </Button>
+          </div>
+        ) : isFreeMemorial ? (
+          <div className="glass-card no-sheen flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
+            <QrCode className="h-10 w-10 text-muted-foreground" />
+            <p className="text-muted-foreground text-sm">No QR-Code yet.</p>
           </div>
         ) : (
           <QrCodeClient profileUrl={profileUrl} />
