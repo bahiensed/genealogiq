@@ -185,21 +185,16 @@ export function Header({ userName, userImage, notifications = [] }: HeaderProps)
           </button>
         </div>
 
-        {showSearch && (
-          <div className="md:hidden border-t border-border/40">
-            <div className="container py-2">
-              <HeaderSearch />
-            </div>
-          </div>
-        )}
-
         <div
           className={cn(
             "md:hidden overflow-hidden transition-[max-height,opacity] duration-300",
-            mobileOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0",
+            mobileOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0",
           )}
         >
-          <div className="container flex items-center justify-end gap-2 pb-4 pt-1">{controls}</div>
+          <div className="container flex flex-col gap-3 pb-4 pt-2">
+            {showSearch && <HeaderSearch />}
+            <div className="flex items-center justify-end gap-2">{controls}</div>
+          </div>
         </div>
       </div>
     </header>
