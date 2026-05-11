@@ -169,6 +169,29 @@ export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
     }
   }
 
+  // Passo 2.7 — sibling parent propagation
+  // relatives-tree positions siblings through shared parents; a node connected
+  // to the tree only via a SIBLING edge (no parents of its own) is dropped from
+  // the layout. Mirror parents across explicit sibling links so the layout
+  // engine has the structure it expects. Run multiple passes to cover sibling
+  // chains (A↔B, B↔C → A gets C's parents too). In-memory only.
+  for (let pass = 0; pass < 3; pass++) {
+    for (const node of mutableNodes) {
+      for (const s of node.siblings) {
+        const sibling = nodeById.get(s.id)
+        if (!sibling) continue
+        for (const p of node.parents) {
+          if (sibling.parents.some((x) => x.id === p.id)) continue
+          sibling.parents.push({ id: p.id, type: p.type })
+          const parent = nodeById.get(p.id)
+          if (parent && !parent.children.some((c) => c.id === sibling.id)) {
+            parent.children.push({ id: sibling.id, type: p.type })
+          }
+        }
+      }
+    }
+  }
+
   // Passo 3 — co-parent spouse inference
   // relatives-tree requires co-parents to be spouses; without this the layout crashes.
   const childToParents = new Map<string, string[]>()
