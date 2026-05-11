@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { ShoppingCart } from 'lucide-react'
-import { purchasePackage } from '@/actions/purchase.actions'
+import { createPackageCheckoutSession } from '@/actions/checkout.actions'
 import {
   Card,
   CardContent,
@@ -43,18 +44,18 @@ export function QRStore({ packages }: { packages: QRPackage[] }) {
 }
 
 function PackageCard({ pkg }: { pkg: QRPackage }) {
+  const router = useRouter()
   const [qty, setQty] = useState(1)
   const [isPending, startTransition] = useTransition()
 
   function handleBuy() {
     startTransition(async () => {
-      const result = await purchasePackage(pkg.id, qty)
+      const result = await createPackageCheckoutSession(pkg.id, qty)
       if ('error' in result) {
         toast.error(result.error)
-      } else {
-        toast.success(result.success)
-        setQty(1)
+        return
       }
+      router.push(result.url)
     })
   }
 
