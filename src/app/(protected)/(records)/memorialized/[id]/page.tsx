@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation'
 import { getDeceased } from '@/queries/deceased'
 import { MemorializedForm } from '@/components/memorialized/memorialized-form'
-import { QrCodeDownload } from '@/components/ui/qr-code-download'
+import { QrCodePresets } from '@/components/memorialized/qr-code-presets'
 import type { DeceasedFormValues } from '@/schemas/deceased.schema'
 
-const BASE_URL = 'https://www.genealogiq.app'
+const APP_URL = 'https://genealogiq.app'
 
 export default async function MemorializedDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -47,22 +47,25 @@ export default async function MemorializedDetailPage({ params }: { params: Promi
     notes:              deceased.notes              ?? '',
   }
 
+  const profileUrl = `${APP_URL}/profile/${id}`
+  const filename = `qr-${deceased.firstName}-${deceased.lastName}`.toLowerCase().replace(/\s+/g, '-')
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-start justify-between gap-4">
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          {deceased.firstName} {deceased.lastName}
-        </h1>
-        <div className="shrink-0 pt-1">
-          <QrCodeDownload
-            value={`${BASE_URL}/${id}`}
-            filename={`qr-${deceased.firstName}-${deceased.lastName}`}
-            previewSize={80}
-          />
-        </div>
-      </div>
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+        {deceased.firstName} {deceased.lastName}
+      </h1>
 
-      <MemorializedForm id={id} defaultValues={defaultValues} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <MemorializedForm id={id} defaultValues={defaultValues} />
+        </div>
+        <aside className="lg:col-span-1">
+          <div className="lg:sticky lg:top-20">
+            <QrCodePresets profileUrl={profileUrl} filename={filename} />
+          </div>
+        </aside>
+      </div>
     </div>
   )
 }

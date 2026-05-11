@@ -11,9 +11,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
-import { QrCodeDownload } from '@/components/ui/qr-code-download'
-
-const BASE_URL = 'https://www.genealogiq.app'
 
 export type MemorializedRow = {
   id:        string
@@ -75,11 +72,9 @@ export const memorializedColumns: ColumnDef<MemorializedRow>[] = [
     enableSorting: false,
     enableHiding: false,
     cell: ({ row }) => (
-      <QrCodeDownload
-        value={`${BASE_URL}/${row.original.id}`}
-        filename={`qr-${row.original.firstName}-${row.original.lastName}`}
-        previewSize={48}
-      />
+      <Link href={`/memorialized/${row.original.id}`} className="text-sm font-medium text-primary hover:underline">
+        Download
+      </Link>
     ),
   },
   {
