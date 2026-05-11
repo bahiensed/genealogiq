@@ -50,9 +50,9 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 10/05/2026 — Per-feature enforcement em APP: gallery/bio/geolocation agora leem limites via `getMemorialFeatures(profileId)` (props-driven nas forms, validação no server action). Novo componente `geolocation-gate.tsx` espelha `qr-card-gate.tsx` para o lock de coordenadas precisas no FREE.
+Last session: 11/05/2026 — Family Tree primeira leva: novo role `APP_GHOST` para parentes não cadastrados (criação inline no add-relative-dialog), `treeMaxMembers` enforced no action `addRelation` + contador `n/limit` no header da página, `UpgradeHint context="tree"` aparece quando atinge o limite. Visual limpo: gradient removido, sibling edges suprimidas quando há pai compartilhado, heart label do spouse removido, PersonNode mais enxuto, ghosts com ring tracejado + nome em italic.
 In progress: —
-Next: Family Tree (React Flow)
+Next: Family Tree (React Flow) — segunda leva (hover polish, divorced dashed, tooltip)
 Blockers: —
 
 ### Design System — concluído ✅

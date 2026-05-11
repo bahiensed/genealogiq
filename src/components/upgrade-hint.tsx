@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { ArrowUpRight, Sparkles } from "lucide-react"
 
-type Context = "bio" | "gallery" | "memorialized" | "geolocation"
+type Context = "bio" | "gallery" | "memorialized" | "geolocation" | "tree"
 
 const COPY: Record<Context, { headline: string; body: string }> = {
   bio: {
@@ -19,6 +19,10 @@ const COPY: Record<Context, { headline: string; body: string }> = {
   geolocation: {
     headline: "Precise resting place",
     body:     "Paid plans unlock GPS coordinates so visitors can navigate to the exact spot.",
+  },
+  tree: {
+    headline: "A bigger family tree",
+    body:     "Década expands the tree to 10 people; Século opens it up to 20. Room for grandparents, cousins and everyone in between.",
   },
 }
 

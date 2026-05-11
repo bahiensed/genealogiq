@@ -18,62 +18,79 @@ const formatYear = (date: Date | null) => date?.getFullYear().toString() ?? ""
 function PersonNodeComponent({ data, selected }: NodeProps) {
   const { person, isRoot, isSessionUser } = data as PersonNodeData
   const fullName = `${person.firstName} ${person.lastName}`
-  const isMemorialized = !!person.deathDate
+  const isMemorialized = person.role === "APP_MEMO" || !!person.deathDate
+  const isGhost = person.role === "APP_GHOST"
   const birthYear = formatYear(person.birthDate)
   const deathYear = formatYear(person.deathDate)
-  const yearLabel = isMemorialized
+  const yearLabel = deathYear
     ? `${birthYear || "—"} – ${deathYear}`
     : birthYear || ""
 
-  const sideColor =
+  const ringColor =
     person.gender === "FEMALE"
-      ? "bg-rose-400/70"
+      ? "ring-rose-300/70"
       : person.gender === "MALE"
-        ? "bg-[hsl(var(--brand-indigo)/0.8)]"
-        : "bg-muted-foreground/40"
+        ? "ring-[hsl(var(--brand-indigo)/0.55)]"
+        : "ring-border/50"
 
   const initials = `${person.firstName[0] ?? ""}${person.lastName[0] ?? ""}`.toUpperCase()
 
   return (
     <>
-      <Handle type="target" position={Position.Top}   className="!opacity-0 !pointer-events-none" />
+      <Handle type="target" position={Position.Top}    className="!opacity-0 !pointer-events-none" />
       <Handle type="source" position={Position.Bottom} className="!opacity-0 !pointer-events-none" />
-      <Handle type="target" position={Position.Left}  id="left"  className="!opacity-0 !pointer-events-none" />
-      <Handle type="source" position={Position.Right} id="right" className="!opacity-0 !pointer-events-none" />
+      <Handle type="target" position={Position.Left}   id="left"  className="!opacity-0 !pointer-events-none" />
+      <Handle type="source" position={Position.Right}  id="right" className="!opacity-0 !pointer-events-none" />
 
       <div
         className={cn(
-          "relative flex items-center gap-2.5 px-3 py-2.5 w-[160px] cursor-pointer",
-          "rounded-xl border border-white/30 bg-card/60 backdrop-blur-xl",
-          "transition-[box-shadow,border-color] duration-200",
-          "hover:border-white/50 hover:bg-card/75",
+          "relative flex items-center gap-2 px-2.5 py-2 w-[160px] cursor-pointer",
+          "rounded-xl border bg-card/70 backdrop-blur-md",
+          isGhost ? "border-dashed border-border/70" : "border-white/30",
+          "transition-[box-shadow,border-color,transform] duration-200",
+          "hover:bg-card/85",
           selected && "ring-2 ring-primary/60 border-primary/30",
-          isRoot && "scale-105",
+          isRoot && "scale-[1.04]",
         )}
         style={{
-          boxShadow: "0 8px 24px -8px hsl(230 40% 12% / 0.35), inset 0 1px 0 hsl(0 0% 100% / 0.5)",
+          boxShadow: isGhost
+            ? undefined
+            : "0 4px 14px -6px hsl(230 40% 12% / 0.25), inset 0 1px 0 hsl(0 0% 100% / 0.4)",
         }}
       >
-        {/* Gender sidebar */}
-        <span aria-hidden className={cn("absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-full", sideColor)} />
-
         {/* Avatar */}
-        <div className="h-9 w-9 rounded-full overflow-hidden ring-1 ring-background/60 shrink-0 bg-muted flex items-center justify-center">
+        <div className={cn(
+          "h-8 w-8 rounded-full overflow-hidden shrink-0 bg-muted flex items-center justify-center ring-2",
+          ringColor,
+          isGhost && "ring-dashed",
+        )}>
           {person.avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={person.avatarUrl} alt={fullName} className={cn("h-full w-full object-cover", isMemorialized && "saturate-50")} />
+            <img
+              src={person.avatarUrl}
+              alt={fullName}
+              className={cn("h-full w-full object-cover", isMemorialized && "saturate-50")}
+            />
           ) : (
-            <span className="text-[11px] font-semibold text-muted-foreground">
-              {initials || <User className="h-4 w-4" />}
+            <span className="text-[10px] font-semibold text-muted-foreground">
+              {initials || <User className="h-3.5 w-3.5" />}
             </span>
           )}
         </div>
 
         {/* Text */}
         <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-semibold leading-tight truncate">{fullName}</p>
+          <p className={cn(
+            "text-[11.5px] font-semibold leading-tight truncate",
+            isGhost && "italic text-muted-foreground",
+          )}>
+            {fullName}
+          </p>
           {yearLabel && (
-            <p className={cn("text-[10px] text-muted-foreground mt-0.5 tabular-nums", isMemorialized && "italic")}>
+            <p className={cn(
+              "text-[10px] text-muted-foreground/80 mt-0.5 tabular-nums",
+              isMemorialized && "italic",
+            )}>
               {yearLabel}
             </p>
           )}

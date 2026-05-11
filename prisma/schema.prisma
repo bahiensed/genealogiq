@@ -21,6 +21,7 @@ enum Role {
 enum AppRole {
   APP_USER
   APP_MEMO
+  APP_GHOST
 }
 
 enum Gender {

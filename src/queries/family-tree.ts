@@ -9,6 +9,7 @@ export type TreePerson = {
   avatarUrl: string | null
   birthDate: Date | null
   deathDate: Date | null
+  role: string
   marriages: Record<string, { status: string }>
 }
 
@@ -52,7 +53,7 @@ export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
       where: { id: { in: ids } },
       select: {
         id: true, firstName: true, lastName: true,
-        gender: true, avatarUrl: true, birthDate: true, deathDate: true,
+        gender: true, avatarUrl: true, birthDate: true, deathDate: true, role: true,
       },
     }),
     prisma.familyRelation.findMany({
@@ -72,6 +73,7 @@ export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
       avatarUrl: u.avatarUrl,
       birthDate: u.birthDate,
       deathDate: u.deathDate,
+      role: u.role,
       marriages: {},
     }
   }

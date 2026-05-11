@@ -128,7 +128,6 @@ function FamilyTreeInner({ rtNodes, persons, rootId, sessionUserId, canManage, r
               trunkY:         posA.y + NODE_H + Y_GAP - TRUNK_CHILD_CLEARANCE,
               trunkLeftX:     trunk?.leftX,
               trunkRightX:    trunk?.rightX,
-              active: true,
             },
           } as Edge)
         } else {
@@ -138,7 +137,7 @@ function FamilyTreeInner({ rtNodes, persons, rootId, sessionUserId, canManage, r
             source: node.id,
             target: child.id,
             type: "smoothstep",
-            style: { stroke: "url(#ft-edge-parent)", strokeWidth: 1.75 },
+            style: { stroke: "hsl(var(--brand-indigo) / 0.5)", strokeWidth: 1.5 },
           })
         }
       }
@@ -155,15 +154,23 @@ function FamilyTreeInner({ rtNodes, persons, rootId, sessionUserId, canManage, r
           sourceHandle: "right",
           targetHandle: "left",
           type: "spouse",
-          style: { stroke: "hsl(var(--brand-indigo) / 0.5)", strokeWidth: 1.5 },
+          style: { stroke: "hsl(350 70% 65% / 0.6)", strokeWidth: 1.5 },
         })
       }
 
-      // ── Sibling edges
+      // ── Sibling edges (skip pairs that already share a visible parent —
+      // the parent-child T-junction makes the relationship obvious).
       for (const sibling of node.siblings) {
         const key = [node.id, sibling.id].sort().join("|")
         if (seenSibling.has(key)) continue
         seenSibling.add(key)
+
+        const siblingNode = rtNodes.find((n) => n.id === sibling.id)
+        const sharedParent = siblingNode?.parents.some((p) =>
+          node.parents.some((q) => q.id === p.id),
+        )
+        if (sharedParent) continue
+
         rfEdgesOut.push({
           id: `sib-${key}`,
           source: node.id,
@@ -171,7 +178,7 @@ function FamilyTreeInner({ rtNodes, persons, rootId, sessionUserId, canManage, r
           sourceHandle: "right",
           targetHandle: "left",
           type: "smoothstep",
-          style: { stroke: "hsl(var(--muted-foreground) / 0.35)", strokeWidth: 1, strokeDasharray: "3 3" },
+          style: { stroke: "hsl(var(--muted-foreground) / 0.4)", strokeWidth: 1.5 },
         })
       }
     }
@@ -196,16 +203,6 @@ function FamilyTreeInner({ rtNodes, persons, rootId, sessionUserId, canManage, r
 
   return (
     <div className="h-full w-full relative">
-      {/* SVG gradient defs for parent-child edges */}
-      <svg width="0" height="0" className="absolute" aria-hidden>
-        <defs>
-          <linearGradient id="ft-edge-parent" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor="hsl(var(--brand-indigo))" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="hsl(280 60% 65%)"         stopOpacity="0.7" />
-          </linearGradient>
-        </defs>
-      </svg>
-
       <ReactFlow
         nodes={rfNodes}
         edges={rfEdges}

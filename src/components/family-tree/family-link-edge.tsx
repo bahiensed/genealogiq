@@ -9,7 +9,6 @@ export type FamilyLinkEdgeData = {
   trunkY?: number
   trunkLeftX?: number
   trunkRightX?: number
-  active?: boolean
   [key: string]: unknown
 }
 
@@ -36,7 +35,6 @@ const FamilyLinkEdgeComponent = ({
     trunkY,
     trunkLeftX,
     trunkRightX,
-    active = true,
   } = (data ?? {}) as FamilyLinkEdgeData
 
   const startX = otherParentX != null ? (sourceX + otherParentX) / 2 : sourceX
@@ -60,12 +58,10 @@ const FamilyLinkEdgeComponent = ({
       id={id}
       path={path}
       style={{
-        stroke: "url(#ft-edge-parent)",
-        strokeWidth: 1.75,
+        stroke: "hsl(var(--brand-indigo) / 0.5)",
+        strokeWidth: 1.5,
         fill: "none",
         strokeLinecap: "round",
-        opacity: active ? 1 : 0.18,
-        transition: "opacity 300ms",
       }}
     />
   )
