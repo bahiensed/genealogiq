@@ -37,6 +37,7 @@ enum Gender {
 enum AppRole {
   APP_USER
   APP_MEMO
+  APP_GHOST
 }
 
 // ─── Auth tokens ─────────────────────────────────────────────────────────────
