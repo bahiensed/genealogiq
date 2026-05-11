@@ -127,9 +127,15 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
     }
     if (valid.length === 0) return
     const remaining = maxImages - images.length
-    if (remaining <= 0) { toast.warning(`Maximum of ${maxImages} images reached.`); return }
+    const upgradeAction = { label: "Upgrade plan", onClick: () => router.push("/plans") }
+    if (remaining <= 0) {
+      toast.warning(`Maximum of ${maxImages} images reached.`, { action: upgradeAction })
+      return
+    }
     const toProcess = valid.slice(0, remaining)
-    if (valid.length > remaining) toast.warning(`Only ${remaining} image(s) added — limit is ${maxImages}.`)
+    if (valid.length > remaining) {
+      toast.warning(`Only ${remaining} image(s) added — limit is ${maxImages}.`, { action: upgradeAction })
+    }
 
     const placeholders: MediaEntry[] = toProcess.map((f) => ({
       kind: "image",
@@ -170,9 +176,15 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
     }
     if (valid.length === 0) return
     const remaining = maxVideos - videos.length
-    if (remaining <= 0) { toast.warning(`Maximum of ${maxVideos} videos reached.`); return }
+    const upgradeAction = { label: "Upgrade plan", onClick: () => router.push("/plans") }
+    if (remaining <= 0) {
+      toast.warning(`Maximum of ${maxVideos} videos reached.`, { action: upgradeAction })
+      return
+    }
     const candidates = valid.slice(0, remaining)
-    if (valid.length > remaining) toast.warning(`Only ${remaining} video(s) processed — limit is ${maxVideos}.`)
+    if (valid.length > remaining) {
+      toast.warning(`Only ${remaining} video(s) processed — limit is ${maxVideos}.`, { action: upgradeAction })
+    }
 
     for (const file of candidates) {
       let durationSec: number

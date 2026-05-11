@@ -4,6 +4,7 @@ import { cache } from "react"
 import { prisma } from "@/lib/prisma"
 
 export interface SubscriptionFeatures {
+  code: string
   treeMaxMembers: number
   bioMaxChars: number
   bioMaxImages: number
@@ -14,6 +15,7 @@ export interface SubscriptionFeatures {
 }
 
 const FEATURE_SELECT = {
+  code:                  true,
   treeMaxMembers:        true,
   bioMaxChars:           true,
   bioMaxImages:          true,
@@ -24,6 +26,7 @@ const FEATURE_SELECT = {
 } as const
 
 const FREE_FALLBACK: SubscriptionFeatures = {
+  code: "FREE",
   treeMaxMembers: 5,
   bioMaxChars: 2000,
   bioMaxImages: 3,

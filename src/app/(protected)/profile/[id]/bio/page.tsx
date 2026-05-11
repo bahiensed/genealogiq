@@ -15,6 +15,8 @@ import { verifySession } from "@/lib/dal"
 import { getBioByUserId } from "@/queries/bio"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { getMemorialFeatures } from "@/lib/subscription"
+import { UpgradeHint } from "@/components/upgrade-hint"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -23,7 +25,11 @@ interface Props {
 export default async function ProfileBioPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
-  const [profile, bio] = await Promise.all([getProfileById(id), getBioByUserId(id)])
+  const [profile, bio, features] = await Promise.all([
+    getProfileById(id),
+    getBioByUserId(id),
+    getMemorialFeatures(id),
+  ])
 
   if (!profile) notFound()
 
@@ -126,6 +132,12 @@ export default async function ProfileBioPage({ params }: Props) {
               </section>
             )}
           </>
+        )}
+
+        {isOwn && (
+          <div className="mt-10">
+            <UpgradeHint context="bio" currentTier={features.code} />
+          </div>
         )}
       </main>
     </div>

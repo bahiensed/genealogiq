@@ -9,6 +9,7 @@ import { getBioByUserId } from "@/queries/bio"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { UpgradeHint } from "@/components/upgrade-hint"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -57,6 +58,10 @@ export default async function BioEditPage({ params }: Props) {
           maxChars={features.bioMaxChars}
           maxImages={features.bioMaxImages}
         />
+
+        <div className="mt-8">
+          <UpgradeHint context="bio" currentTier={features.code} />
+        </div>
       </main>
     </div>
   )

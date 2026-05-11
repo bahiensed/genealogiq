@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
-import { Moon, Sun, Menu, X, Bell, User, LogOut, Flower2 } from "lucide-react"
+import { Moon, Sun, Menu, X, Bell, User, LogOut, Flower2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -144,6 +144,12 @@ export function Header({ userName, userImage, notifications = [] }: HeaderProps)
             <Link href="/profile" className="gap-2 cursor-pointer">
               <User className="h-4 w-4" />
               My profile
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/plans" className="gap-2 cursor-pointer">
+              <Sparkles className="h-4 w-4" />
+              Plans &amp; billing
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

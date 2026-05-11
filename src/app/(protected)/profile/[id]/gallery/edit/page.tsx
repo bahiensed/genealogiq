@@ -9,6 +9,7 @@ import { getGalleryByUserId } from "@/queries/gallery"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { UpgradeHint } from "@/components/upgrade-hint"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -51,6 +52,10 @@ export default async function GalleryEditPage({ params }: Props) {
           maxImages={features.galleryMaxImages}
           maxVideos={features.galleryMaxVideos}
         />
+
+        <div className="mt-8">
+          <UpgradeHint context="gallery" currentTier={features.code} />
+        </div>
       </main>
     </div>
   )

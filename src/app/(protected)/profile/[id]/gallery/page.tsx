@@ -6,6 +6,8 @@ import { GalleryClient } from "@/components/gallery-client"
 import { getGalleryByUserId } from "@/queries/gallery"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { getMemorialFeatures } from "@/lib/subscription"
+import { UpgradeHint } from "@/components/upgrade-hint"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -14,7 +16,11 @@ interface Props {
 export default async function ProfileGalleryPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
-  const [profile, items] = await Promise.all([getProfileById(id), getGalleryByUserId(id)])
+  const [profile, items, features] = await Promise.all([
+    getProfileById(id),
+    getGalleryByUserId(id),
+    getMemorialFeatures(id),
+  ])
 
   if (!profile) notFound()
 
@@ -35,6 +41,12 @@ export default async function ProfileGalleryPage({ params }: Props) {
         </div>
 
         <GalleryClient items={items} editHref={`/profile/${id}/gallery/edit`} isOwn={isOwn} />
+
+        {isOwn && (
+          <div className="mt-8">
+            <UpgradeHint context="gallery" currentTier={features.code} />
+          </div>
+        )}
       </main>
     </div>
   )

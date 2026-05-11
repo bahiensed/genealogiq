@@ -10,6 +10,7 @@ import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
 import { prisma } from "@/lib/prisma"
+import { UpgradeHint } from "@/components/upgrade-hint"
 import type { MemorialRow } from "@/queries/memorial"
 
 function toMiniProfile(m: MemorialRow): MiniProfile {
@@ -46,7 +47,7 @@ export default async function MemorializedPage({ params }: Props) {
     prisma.appSale.findMany({
       where: { appUserId: id },
       select: {
-        subscription: { select: { maxProfiles: true } },
+        subscription: { select: { code: true, maxProfiles: true } },
         _count: { select: { assignedTo: true } },
       },
     }),
@@ -61,6 +62,10 @@ export default async function MemorializedPage({ params }: Props) {
   const isOwn = id === session.user.id
   // Free tier: every user gets 1 memorial slot for free; beyond that requires a paid sale slot.
   const canCreate = isOwn && (availableSlots > 0 || memorials.length === 0)
+
+  // Highest tier the user already owns drives the upgrade hint visibility.
+  const ownsCentury = sales.some((s) => s.subscription.code === "CENTURY")
+  const currentTier = ownsCentury ? "CENTURY" : "FREE"
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -114,6 +119,12 @@ export default async function MemorializedPage({ params }: Props) {
         {memorials.length === 0 && !isOwn && (
           <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
             <p className="text-muted-foreground">No memorialized profiles guarded yet.</p>
+          </div>
+        )}
+
+        {isOwn && (
+          <div className="mt-10">
+            <UpgradeHint context="memorialized" currentTier={currentTier} />
           </div>
         )}
       </main>
