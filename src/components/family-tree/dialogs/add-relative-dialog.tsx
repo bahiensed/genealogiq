@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
   SelectContent,
@@ -36,12 +37,19 @@ interface SearchResult {
   deathDate: string | null
 }
 
+interface ExistingParent {
+  id:   string
+  name: string
+}
+
 interface Props {
   open: boolean
   onClose: () => void
   anchorId: string
   rootId: string
   initialKind?: RelationKind
+  /** Existing parents of the anchor — used to offer the "Married to X" checkbox when adding a 2nd parent. */
+  anchorParents?: ExistingParent[]
   onSuccess?: () => void
 }
 
@@ -62,11 +70,12 @@ function genderRingClass(gender: string | null) {
   return "ring-border/40"
 }
 
-export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind = "parent", onSuccess }: Props) {
+export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind = "parent", anchorParents = [], onSuccess }: Props) {
   const [isPending, startTransition] = useTransition()
   const [mode, setMode]   = useState<Mode>("search")
   const [kind, setKind]   = useState<RelationKind>(initialKind)
   const [marriedAt, setMarriedAt] = useState("")
+  const [linkSpouse, setLinkSpouse] = useState(true)
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
   const [selected, setSelected] = useState<SearchResult | null>(null)
@@ -114,6 +123,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         fromId, toId, type,
         startDate: kind === "spouse" && marriedAt ? marriedAt : null,
         endDate:   null,
+        linkSpouseId: shouldLinkSpouse ? anchorParents[0]?.id : null,
       })
       if (result?.error) { toast.error(result.error); return }
       toast.success("Relative added.")
@@ -138,6 +148,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         anchorId, kind,
         startDate: kind === "spouse" && marriedAt ? marriedAt : null,
         endDate:   null,
+        linkSpouseId: shouldLinkSpouse ? anchorParents[0]?.id : null,
       })
       if (result?.error) { toast.error(result.error); return }
       toast.success("Person added to the tree.")
@@ -152,12 +163,15 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
     setQuery(""); setResults([]); setSelected(null)
     setKind(initialKind)
     setMarriedAt("")
+    setLinkSpouse(true)
     setFirstName(""); setLastName(""); setMaidenName("")
     setNickname("")
     setGender(""); setBirthDate(""); setDeathDate("")
   }
 
   const showNoResults = !loading && results.length === 0 && query.length >= 3
+  const showSpouseLink = kind === "parent" && anchorParents.length > 0
+  const shouldLinkSpouse = showSpouseLink && linkSpouse
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose() }}>
@@ -195,6 +209,15 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
               <Label htmlFor="rel-start">Married</Label>
               <Input id="rel-start" type="date" value={marriedAt} onChange={(e) => setMarriedAt(e.target.value)} />
             </div>
+          )}
+
+          {showSpouseLink && (
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <Checkbox checked={linkSpouse} onCheckedChange={(v) => setLinkSpouse(v === true)} />
+              <span>
+                Married to <span className="font-medium">{anchorParents[0].name}</span>?
+              </span>
+            </label>
           )}
 
           {mode === "search" ? (

@@ -17,9 +17,10 @@ interface Props {
   currentTier:  string
   canManage:    boolean
   atLimit:      boolean
+  rootParents:  Array<{ id: string; name: string }>
 }
 
-export function TreeHeader({ rootName, rootId, persons, generations, memberLimit, currentTier, canManage, atLimit }: Props) {
+export function TreeHeader({ rootName, rootId, persons, generations, memberLimit, currentTier, canManage, atLimit, rootParents }: Props) {
   const [open, setOpen] = useState(false)
   return (
     <div className="relative z-10 flex items-center justify-between px-4 md:px-6 py-3 border-b border-border/60 bg-background/60 backdrop-blur-md shrink-0">
@@ -54,6 +55,7 @@ export function TreeHeader({ rootName, rootId, persons, generations, memberLimit
                 anchorId={rootId}
                 rootId={rootId}
                 initialKind="parent"
+                anchorParents={rootParents}
                 onSuccess={() => { setOpen(false); window.location.reload() }}
               />
             )}

@@ -6,7 +6,7 @@ import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
-import { countTreeMembers } from "@/queries/family-tree"
+import { countTreeMembers, getTreeMemberIds } from "@/queries/family-tree"
 import {
   addRelationSchema,
   addGhostRelativeSchema,
@@ -37,7 +37,7 @@ export async function addRelation(rootId: string, data: unknown) {
   const parsed = addRelationSchema.safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
-  const { fromId, toId, type, subtype, startDate, endDate } = parsed.data
+  const { fromId, toId, type, subtype, startDate, endDate, linkSpouseId } = parsed.data
 
   if (fromId === toId) return { error: "A profile cannot be related to itself." }
 
@@ -103,6 +103,23 @@ export async function addRelation(rootId: string, data: unknown) {
     })
   }
 
+  // Optional spouse link: when adding a 2nd parent and the UI says they're
+  // married to the existing parent, create the SPOUSE relation in one go.
+  if (linkSpouseId && type === "PARENT_OF") {
+    // The new parent is fromId (PARENT_OF: parent → child).
+    const newParentId = fromId
+    if (newParentId !== linkSpouseId) {
+      const [a, b] = normalizePair("SPOUSE", newParentId, linkSpouseId)
+      try {
+        await prisma.familyRelation.create({
+          data: { fromId: a, toId: b, type: "SPOUSE", subtype: "married", status: "ACCEPTED" },
+        })
+      } catch {
+        // Already exists — ignore.
+      }
+    }
+  }
+
   revalidatePath(`/profile/${rootId}/tree`)
   return { success: true, pending: needsConsent }
 }
@@ -121,7 +138,7 @@ export async function addGhostRelative(rootId: string, data: unknown) {
   const {
     firstName, lastName, maidenName, nickname,
     gender, birthDate, deathDate,
-    anchorId, kind, subtype, startDate, endDate,
+    anchorId, kind, subtype, startDate, endDate, linkSpouseId,
   } = parsed.data
 
   // Tier limit (always +1 here).
@@ -176,6 +193,18 @@ export async function addGhostRelative(rootId: string, data: unknown) {
         status:    "ACCEPTED",
       },
     })
+
+    // Spouse link to an existing parent when adding a 2nd parent.
+    if (linkSpouseId && kindType === "PARENT_OF" && kind === "parent" && linkSpouseId !== ghost.id) {
+      const [a, b] = normalizePair("SPOUSE", ghost.id, linkSpouseId)
+      try {
+        await tx.familyRelation.create({
+          data: { fromId: a, toId: b, type: "SPOUSE", subtype: "married", status: "ACCEPTED" },
+        })
+      } catch {
+        // Already exists — ignore.
+      }
+    }
 
     return ghost.id
   })
@@ -261,7 +290,7 @@ export async function removeRelation(rootId: string, relationId: string) {
   return { success: true }
 }
 
-// ─── removeMember (ghost only) ───────────────────────────────────────────────
+// ─── removeMember — ghost: delete; real: detach from this tree ───────────────
 
 export async function removeMember(rootId: string, memberId: string) {
   const session = await verifySession()
@@ -269,16 +298,33 @@ export async function removeMember(rootId: string, memberId: string) {
   const profile = await getProfileById(rootId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
 
+  if (memberId === rootId) return { error: "You cannot remove the tree root." }
+
   const member = await prisma.appUser.findUnique({
     where:  { id: memberId },
     select: { id: true, role: true },
   })
   if (!member) return { error: "Member not found." }
-  if (member.role !== "APP_GHOST") {
-    return { error: "Only placeholder members can be removed from here. Use the profile delete flow for memorials." }
+
+  if (member.role === "APP_GHOST") {
+    // Ghosts only live inside one tree — full delete.
+    await prisma.appUser.delete({ where: { id: memberId } })
+  } else {
+    // Real users / memorials keep their profile. Disconnect them from THIS
+    // tree by deleting every relation between this member and any current
+    // member of the root's reachable set.
+    const memberIds = await getTreeMemberIds(rootId)
+    const treeOthers = Array.from(memberIds).filter((id) => id !== memberId)
+    await prisma.familyRelation.deleteMany({
+      where: {
+        OR: [
+          { fromId: memberId, toId:   { in: treeOthers } },
+          { toId:   memberId, fromId: { in: treeOthers } },
+        ],
+      },
+    })
   }
 
-  await prisma.appUser.delete({ where: { id: memberId } })
   revalidatePath(`/profile/${rootId}/tree`)
   return { success: true }
 }

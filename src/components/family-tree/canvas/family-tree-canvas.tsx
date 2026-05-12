@@ -58,6 +58,18 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
     setSheetOpen(false)
   }, [canManage])
 
+  // Existing parents of a given anchor, so the dialog can offer
+  // "Married to X" when adding a 2nd parent.
+  const anchorParentsFor = useCallback((anchorId: string) => {
+    return relations
+      .filter((r) => r.type === "PARENT_OF" && r.toId === anchorId)
+      .map((r) => {
+        const p = persons[r.fromId]
+        return p ? { id: p.id, name: `${p.firstName} ${p.lastName}` } : null
+      })
+      .filter((p): p is { id: string; name: string } => p !== null)
+  }, [relations, persons])
+
   const handleEdit = useCallback(() => {
     if (activePerson) setEditing(activePerson)
   }, [activePerson])
@@ -110,6 +122,7 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
           anchorId={adder.anchorId}
           rootId={rootId}
           initialKind={adder.kind}
+          anchorParents={anchorParentsFor(adder.anchorId)}
           onSuccess={onSuccess}
         />
       )}

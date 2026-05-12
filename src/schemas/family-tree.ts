@@ -25,12 +25,15 @@ const subtypeForType = (type: RelationType): readonly string[] =>
 // ─── addRelation ─────────────────────────────────────────────────────────────
 
 export const addRelationSchema = z.object({
-  fromId:    z.string().cuid(),
-  toId:      z.string().cuid(),
-  type:      z.enum(RELATION_TYPES),
-  subtype:   z.string().min(1).optional().nullable(),
-  startDate: dateString,
-  endDate:   dateString,
+  fromId:        z.string().cuid(),
+  toId:          z.string().cuid(),
+  type:          z.enum(RELATION_TYPES),
+  subtype:       z.string().min(1).optional().nullable(),
+  startDate:     dateString,
+  endDate:       dateString,
+  // When set on a PARENT_OF add, the action also creates a SPOUSE relation
+  // between the new parent and `linkSpouseId` (the existing other parent).
+  linkSpouseId:  z.string().cuid().optional().nullable(),
 }).refine((d) => !d.subtype || subtypeForType(d.type).includes(d.subtype), {
   message: "Subtype is not valid for this relation type.",
   path:    ["subtype"],
@@ -51,11 +54,12 @@ const ghostIdentity = z.object({
 })
 
 export const addGhostRelativeSchema = ghostIdentity.extend({
-  anchorId:  z.string().cuid(),
-  kind:      z.enum(["parent", "child", "spouse", "sibling"]),
-  subtype:   z.string().min(1).optional().nullable(),
-  startDate: dateString,
-  endDate:   dateString,
+  anchorId:     z.string().cuid(),
+  kind:         z.enum(["parent", "child", "spouse", "sibling"]),
+  subtype:      z.string().min(1).optional().nullable(),
+  startDate:    dateString,
+  endDate:      dateString,
+  linkSpouseId: z.string().cuid().optional().nullable(),
 }).refine((d) => {
   if (!d.subtype) return true
   const type: RelationType = d.kind === "spouse" ? "SPOUSE" : d.kind === "sibling" ? "SIBLING" : "PARENT_OF"

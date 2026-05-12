@@ -37,6 +37,16 @@ export default async function TreePage({ params }: Props) {
   const atLimit = memberCount >= memberLimit
   const rootName = `${profile.firstName} ${profile.lastName}`
 
+  // Existing parents of the root, so the header dialog can offer the
+  // "Married to X" checkbox when adding a 2nd parent.
+  const rootParents = relations
+    .filter((r) => r.type === "PARENT_OF" && r.toId === id)
+    .map((r) => {
+      const p = persons[r.fromId]
+      return p ? { id: p.id, name: `${p.firstName} ${p.lastName}` } : null
+    })
+    .filter((p): p is { id: string; name: string } => p !== null)
+
   return (
     <div className="relative flex flex-col mt-16" style={{ height: "calc(100vh - 64px)" }}>
       <AuroraBackdrop />
@@ -50,6 +60,7 @@ export default async function TreePage({ params }: Props) {
         currentTier={features.code}
         canManage={canManage}
         atLimit={atLimit}
+        rootParents={rootParents}
       />
 
       <div className="flex-1 relative">
@@ -63,7 +74,7 @@ export default async function TreePage({ params }: Props) {
       </div>
 
       {canManage && atLimit && features.code !== "CENTURY" && (
-        <div className="relative z-10 px-4 md:px-6 py-3 border-t border-border/60 bg-background/80 backdrop-blur-md">
+        <div className="relative z-10 px-4 md:px-6 py-2 border-t border-border/60 bg-background/80 backdrop-blur-md">
           <UpgradeHint context="tree" currentTier={features.code} />
         </div>
       )}

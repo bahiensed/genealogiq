@@ -97,7 +97,7 @@ export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
   return { persons, relations }
 }
 
-export async function countTreeMembers(rootId: string): Promise<number> {
+export async function getTreeMemberIds(rootId: string): Promise<Set<string>> {
   const discovered = new Set<string>([rootId])
   let frontier = [rootId]
   while (frontier.length > 0) {
@@ -112,5 +112,9 @@ export async function countTreeMembers(rootId: string): Promise<number> {
     }
     frontier = next
   }
-  return discovered.size
+  return discovered
+}
+
+export async function countTreeMembers(rootId: string): Promise<number> {
+  return (await getTreeMemberIds(rootId)).size
 }

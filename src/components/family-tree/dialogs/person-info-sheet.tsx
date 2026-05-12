@@ -127,7 +127,9 @@ export function PersonInfoSheet({
   // Editable = guardian-managed (your own profile, your memorial, your ghost).
   // The action does the real check; this gates the button UI.
   const canEditMember = canManage && (isGhost || isMemorial || isSelf)
-  const canRemoveGhost = canManage && isGhost
+  // Anyone in the tree (except the root) can be removed by a guardian.
+  // Ghosts get deleted entirely; real users/memorials are just disconnected.
+  const canRemoveMember = canManage && !isSelf
 
   const label = relationFromRoot(persons, relations, rootId, person.id)
   const displayName = person.maidenName
@@ -243,7 +245,7 @@ export function PersonInfoSheet({
               <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           ) : <span />}
-          {canRemoveGhost && (
+          {canRemoveMember && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-1.5 text-destructive hover:text-destructive" disabled={removing}>
@@ -255,7 +257,9 @@ export function PersonInfoSheet({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Remove from tree?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    {displayName} will be deleted permanently along with their relations to others in the tree. This cannot be undone.
+                    {isGhost
+                      ? <>{displayName} will be deleted permanently along with their relations to others in the tree. This cannot be undone.</>
+                      : <>{displayName} will be removed from your tree. Their profile stays untouched and they remain in the system. People who were only connected to your tree through them will also disappear from this view.</>}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
