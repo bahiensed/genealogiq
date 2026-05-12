@@ -27,17 +27,36 @@ export default async function ProfileGalleryPage({ params }: Props) {
   const isOwn = canManageProfile(profile, session.user.id)
   const name = `${profile.firstName} ${profile.lastName}`
 
+  const imageCount = items.filter((i) => i.kind === "image").length
+  const videoCount = items.filter((i) => i.kind === "video").length
+
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32 max-w-6xl">
-        <div className="flex items-center gap-3 md:gap-4 mb-2 animate-fade-in">
-          <BackButton href={`/profile/${id}`} label="Back to profile" />
-          <div>
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Gallery</h1>
-            {!isOwn && <p className="text-muted-foreground text-sm mt-1">{name}</p>}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2 animate-fade-in">
+          <div className="flex items-center gap-3 md:gap-4">
+            <BackButton href={`/profile/${id}`} label="Back to profile" />
+            <div>
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Gallery</h1>
+              {!isOwn && <p className="text-muted-foreground text-sm mt-1">{name}</p>}
+            </div>
           </div>
+          {(imageCount > 0 || videoCount > 0) && (
+            <div className="flex items-center gap-2 shrink-0 self-end">
+              {imageCount > 0 && (
+                <span className="inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
+                  {imageCount} {imageCount === 1 ? "image" : "images"}
+                </span>
+              )}
+              {videoCount > 0 && (
+                <span className="inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
+                  {videoCount} {videoCount === 1 ? "video" : "videos"}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <GalleryClient items={items} editHref={`/profile/${id}/gallery/edit`} isOwn={isOwn} />
