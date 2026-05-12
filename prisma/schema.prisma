@@ -443,7 +443,6 @@ model AppUser {
   lastName         String    @map("last_name")
   maidenName       String?   @map("maiden_name")
   nickname         String?
-  shortBio         String?   @map("short_bio")
   gender           Gender?
   birthDate        DateTime? @map("birth_date")
   birthCity        String?   @map("birth_city")
