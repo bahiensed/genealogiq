@@ -78,7 +78,6 @@ export async function addRelation(rootId: string, data: unknown) {
   try {
     const created = await prisma.familyRelation.create({
       data: {
-        id:            crypto.randomUUID(),
         fromId:        normFrom,
         toId:          normTo,
         type,
@@ -132,24 +131,16 @@ export async function addGhostRelative(rootId: string, data: unknown) {
     return { error: `Family tree limit is ${features.treeMaxMembers} people on this plan.` }
   }
 
-  const ghostId = crypto.randomUUID()
+  let kindType: RelationType
+  if (kind === "parent" || kind === "child") kindType = "PARENT_OF"
+  else if (kind === "sibling")               kindType = "SIBLING"
+  else                                        kindType = "SPOUSE"
 
-  let fromId: string
-  let toId:   string
-  let type:   RelationType
+  const finalSubtype = subtype ?? (kindType === "SPOUSE" ? "married" : null)
 
-  if (kind === "parent")      { fromId = ghostId;  toId = anchorId; type = "PARENT_OF" }
-  else if (kind === "child")  { fromId = anchorId; toId = ghostId;  type = "PARENT_OF" }
-  else if (kind === "sibling"){ fromId = anchorId; toId = ghostId;  type = "SIBLING" }
-  else                        { fromId = anchorId; toId = ghostId;  type = "SPOUSE" }
-
-  const [normFrom, normTo] = normalizePair(type, fromId, toId)
-  const finalSubtype = subtype ?? (type === "SPOUSE" ? "married" : null)
-
-  await prisma.$transaction(async (tx) => {
-    await tx.appUser.create({
+  const ghostId = await prisma.$transaction(async (tx) => {
+    const ghost = await tx.appUser.create({
       data: {
-        id:        ghostId,
         firstName,
         lastName,
         maidenName: maidenName ?? null,
@@ -159,18 +150,25 @@ export async function addGhostRelative(rootId: string, data: unknown) {
         birthDate:  toDate(birthDate),
         deathDate:  toDate(deathDate),
       },
+      select: { id: true },
     })
 
     await tx.appUserGuardian.create({
-      data: { appUserId: ghostId, guardianId: session.user.id },
+      data: { appUserId: ghost.id, guardianId: session.user.id },
     })
+
+    let fromId: string
+    let toId:   string
+    if (kind === "parent")      { fromId = ghost.id; toId = anchorId }
+    else if (kind === "child")  { fromId = anchorId; toId = ghost.id }
+    else                        { fromId = anchorId; toId = ghost.id }
+    const [normFrom, normTo] = normalizePair(kindType, fromId, toId)
 
     await tx.familyRelation.create({
       data: {
-        id:        crypto.randomUUID(),
         fromId:    normFrom,
         toId:      normTo,
-        type,
+        type:      kindType,
         subtype:   finalSubtype,
         startDate: toDate(startDate),
         endDate:   toDate(endDate),
@@ -178,6 +176,8 @@ export async function addGhostRelative(rootId: string, data: unknown) {
         status:    "ACCEPTED",
       },
     })
+
+    return ghost.id
   })
 
   revalidatePath(`/profile/${rootId}/tree`)
