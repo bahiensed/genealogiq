@@ -47,7 +47,7 @@ interface Props {
 
 const KIND_LABELS: Record<RelationKind, string> = {
   parent:  "Parent",
-  spouse:  "Spouse / partner",
+  spouse:  "Partner",
   sibling: "Sibling",
   child:   "Child",
 }

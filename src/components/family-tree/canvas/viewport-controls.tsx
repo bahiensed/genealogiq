@@ -1,6 +1,6 @@
 'use client'
 
-import { Minus, Plus, Crosshair, Maximize2 } from "lucide-react"
+import { Minus, Plus, Maximize, Frame } from "lucide-react"
 import { useViewport } from "./svg-canvas"
 
 interface Props {
@@ -38,7 +38,7 @@ export function ViewportControls({ rootCenter = null }: Props) {
         aria-label="Fit whole tree"
         title="Fit whole tree (F)"
       >
-        <Crosshair className="h-4 w-4" />
+        <Maximize className="h-4 w-4" />
       </button>
       {rootCenter && (
         <>
@@ -50,7 +50,7 @@ export function ViewportControls({ rootCenter = null }: Props) {
             aria-label="Focus on root"
             title="Focus on the tree owner"
           >
-            <Maximize2 className="h-4 w-4" />
+            <Frame className="h-4 w-4" />
           </button>
         </>
       )}
