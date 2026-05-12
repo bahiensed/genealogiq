@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
-import { Moon, Sun, Menu, X, Bell, User, LogOut, Flower2, Sparkles } from "lucide-react"
+import { Moon, Sun, Menu, X, Bell, User, LogOut, Flower2, Sparkles, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { HeaderSearch } from "@/components/header-search"
 import { cn } from "@/lib/utils"
 import { logout } from "@/actions/auth"
@@ -95,6 +96,7 @@ interface HeaderProps {
 export function Header({ userName, userImage, notifications = [] }: HeaderProps) {
   const { resolvedTheme, setTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const pathname = usePathname()
   const showSearch = pathname !== "/home"
 
@@ -194,15 +196,32 @@ export function Header({ userName, userImage, notifications = [] }: HeaderProps)
         <div
           className={cn(
             "md:hidden overflow-hidden transition-[max-height,opacity] duration-300",
-            mobileOpen ? "max-h-48 opacity-100" : "max-h-0 opacity-0",
+            mobileOpen ? "max-h-32 opacity-100" : "max-h-0 opacity-0",
           )}
         >
-          <div className="container flex flex-col gap-3 pb-4 pt-2">
-            {showSearch && <HeaderSearch />}
-            <div className="flex items-center justify-end gap-2">{controls}</div>
+          <div className="container flex items-center justify-end gap-2 pb-4 pt-2">
+            {showSearch && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => { setSearchOpen(true); setMobileOpen(false) }}
+                aria-label="Search profiles"
+                className="rounded-full glass border-0 h-9 w-9"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            )}
+            {controls}
           </div>
         </div>
       </div>
+
+      <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <DialogContent className="sm:max-w-md p-4 top-[15%] translate-y-0">
+          <DialogTitle className="sr-only">Search profiles</DialogTitle>
+          <HeaderSearch onNavigate={() => setSearchOpen(false)} />
+        </DialogContent>
+      </Dialog>
     </header>
   )
 }

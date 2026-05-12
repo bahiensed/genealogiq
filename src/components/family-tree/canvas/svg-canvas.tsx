@@ -38,10 +38,11 @@ const FALLBACK_VIEWPORT: Viewport = { tx: 0, ty: 0, scale: 1 }
 interface SvgCanvasProps {
   bounds:    { minX: number; maxX: number; minY: number; maxY: number }
   children:  ReactNode
+  overlays?: ReactNode
   className?: string
 }
 
-export function SvgCanvas({ bounds, children, className }: SvgCanvasProps) {
+export function SvgCanvas({ bounds, children, overlays, className }: SvgCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ w: 0, h: 0 })
 
@@ -211,6 +212,7 @@ export function SvgCanvas({ bounds, children, className }: SvgCanvasProps) {
             {children}
           </g>
         </svg>
+        {overlays}
       </div>
     </ViewportContext.Provider>
   )

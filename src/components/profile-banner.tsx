@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Cake, Feather, Heart, Images, Flower2, MapPin, SquarePen, BrickWall } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { toggleFavorite } from "@/actions/favorite"
 import { toast } from "sonner"
@@ -112,31 +113,53 @@ export function ProfileBanner({ profile }: Props) {
 
               <div className="flex-1 min-w-0 w-full">
                 {/* Badges */}
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-3">
-                  {isMemorial && (
-                    <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
-                      Memorialized
-                    </Badge>
-                  )}
-                  <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
-                    <Images className="h-3 w-3 mr-1" />
-                    {profile.mediaTotal}
-                  </Badge>
-                  <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
-                    <Flower2 className="h-3 w-3 mr-1" />
-                    {profile.tributes}
-                  </Badge>
-                  <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
-                    <Heart className="h-3 w-3 mr-1" />
-                    {favCount}
-                  </Badge>
-                  {!isMemorial && (
-                    <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
-                      <BrickWall className="h-3 w-3 mr-1" />
-                      {profile.guardedCount}
-                    </Badge>
-                  )}
-                </div>
+                <TooltipProvider delayDuration={200}>
+                  <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-3">
+                    {isMemorial && (
+                      <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
+                        Memorialized
+                      </Badge>
+                    )}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium cursor-help">
+                          <Images className="h-3 w-3 mr-1" />
+                          {profile.mediaTotal}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>Media on Gallery</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium cursor-help">
+                          <Flower2 className="h-3 w-3 mr-1" />
+                          {profile.tributes}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>Received Tributes</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium cursor-help">
+                          <Heart className="h-3 w-3 mr-1" />
+                          {favCount}
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>Favorites</TooltipContent>
+                    </Tooltip>
+                    {!isMemorial && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium cursor-help">
+                            <BrickWall className="h-3 w-3 mr-1" />
+                            {profile.guardedCount}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>Guarded Profiles</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+                </TooltipProvider>
 
                 <h1 className="text-3xl lg:text-5xl font-semibold leading-tight tracking-tight truncate">
                   {profile.name}

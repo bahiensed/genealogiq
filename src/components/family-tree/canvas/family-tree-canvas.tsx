@@ -80,7 +80,7 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
 
   return (
     <div className="absolute inset-0">
-      <SvgCanvas bounds={paddedBounds}>
+      <SvgCanvas bounds={paddedBounds} overlays={<ViewportControls />}>
         <FamilyEdges
           nodes={layout.nodes}
           parentLines={layout.parentLines}
@@ -119,7 +119,6 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
         })}
       </SvgCanvas>
 
-      <ViewportControls />
       <CanvasSearch persons={persons} onPick={handleSearchPick} />
 
       {adder && (

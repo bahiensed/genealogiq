@@ -17,7 +17,11 @@ interface SearchResult {
   deathDate: string | null
 }
 
-export function HeaderSearch() {
+interface Props {
+  onNavigate?: () => void
+}
+
+export function HeaderSearch({ onNavigate }: Props = {}) {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -65,6 +69,7 @@ export function HeaderSearch() {
   const handleSelect = (id: string) => {
     setOpen(false)
     setQuery("")
+    onNavigate?.()
     router.push(`/profile/${id}`)
   }
 

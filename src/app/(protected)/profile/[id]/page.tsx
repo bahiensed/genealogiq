@@ -217,7 +217,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "favorites",
       title: "Favorites",
-      description: "People who carry deep meaning — kept close, always.",
+      description: "People who carry deep meaning, kept close, always.",
       metric: favorites.length > 0 ? `${favorites.length} ${favorites.length === 1 ? "Favorite" : "Favorites"}` : "No favorites yet",
       icon: Heart,
       span: 3,
