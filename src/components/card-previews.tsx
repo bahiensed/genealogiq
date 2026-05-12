@@ -1,10 +1,19 @@
-import { Heart, Star, Images, Flower2, BrickWall } from "lucide-react"
+import { Heart, Star, Images, Flower2, BrickWall, TreePine } from "lucide-react"
 import { getAvatarColor, getAvatarGradient } from "@/lib/avatar-color"
 import type { TributeAuthorPreview } from "@/queries/tribute"
 import type { FavoriteRow } from "@/queries/favorite"
 import type { MemorialRow } from "@/queries/memorial"
 
-export function TreePreview() {
+export function TreePreview({ memberCount = 0 }: { memberCount?: number }) {
+  // memberCount === 1 means only the root is in the tree (no relations yet).
+  if (memberCount <= 1) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
+        <TreePine className="h-8 w-8 text-muted-foreground/50" />
+        <p className="text-xs text-muted-foreground">No relatives yet.</p>
+      </div>
+    )
+  }
   return (
     <svg viewBox="0 0 240 110" className="w-full h-full" aria-hidden>
       <defs>
