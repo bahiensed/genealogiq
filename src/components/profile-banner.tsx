@@ -122,7 +122,7 @@ export function ProfileBanner({ profile }: Props) {
                     )}
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium cursor-help">
+                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
                           <Images className="h-3 w-3 mr-1" />
                           {profile.mediaTotal}
                         </Badge>
@@ -131,7 +131,7 @@ export function ProfileBanner({ profile }: Props) {
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium cursor-help">
+                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
                           <Flower2 className="h-3 w-3 mr-1" />
                           {profile.tributes}
                         </Badge>
@@ -140,7 +140,7 @@ export function ProfileBanner({ profile }: Props) {
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium cursor-help">
+                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
                           <Heart className="h-3 w-3 mr-1" />
                           {favCount}
                         </Badge>
@@ -150,7 +150,7 @@ export function ProfileBanner({ profile }: Props) {
                     {!isMemorial && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium cursor-help">
+                          <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
                             <BrickWall className="h-3 w-3 mr-1" />
                             {profile.guardedCount}
                           </Badge>

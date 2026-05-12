@@ -15,41 +15,65 @@ export function TreePreview({ memberCount = 0 }: { memberCount?: number }) {
     )
   }
   return (
-    <svg viewBox="0 0 240 110" className="w-full h-full" aria-hidden>
+    <svg viewBox="0 0 240 130" className="w-full h-full" aria-hidden>
       <defs>
-        <linearGradient id="tg" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="ft-card-root" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="hsl(var(--brand-indigo))" />
           <stop offset="100%" stopColor="hsl(var(--brand-slate))" />
         </linearGradient>
       </defs>
-      <g stroke="hsl(var(--muted-foreground) / 0.4)" strokeWidth="1.2" fill="none">
-        <path d="M110 22 V40 M48 64 V46 H172 V58" />
-        <path d="M20 96 V80 H82 V96 M48 96 V80" />
-        <path d="M140 96 V76 H210 V96" />
-        <path d="M110 22 H196 V40" />
-      </g>
-      {[
-        { cx: 110, cy: 18, r: 10, fill: "url(#tg)" },
-        { cx: 48,  cy: 70, r: 8  },
-        { cx: 172, cy: 64, r: 7  },
-        { cx: 196, cy: 46, r: 5  },
-        { cx: 20,  cy: 100, r: 6 },
-        { cx: 48,  cy: 100, r: 7 },
-        { cx: 82,  cy: 100, r: 5 },
-        { cx: 140, cy: 100, r: 6 },
-        { cx: 210, cy: 100, r: 8 },
-      ].map((n, i) => (
-        <circle
-          key={i}
-          cx={n.cx}
-          cy={n.cy}
-          r={n.r}
-          fill={n.fill ?? "hsl(var(--card))"}
-          stroke="hsl(var(--brand-indigo) / 0.6)"
-          strokeWidth="1.4"
+
+      {/* Edges: rose for spouses, indigo for parent-child T-junctions */}
+      <g fill="none" strokeLinecap="round" strokeWidth="1.2">
+        {/* Generation -2: grandparents spouse */}
+        <line x1="112" y1="16" x2="128" y2="16" stroke="hsl(350 70% 65% / 0.7)" />
+        {/* Trunk: grandparents → father */}
+        <path d="M 120 24 L 120 38 L 90 38 L 90 52" stroke="hsl(var(--brand-indigo) / 0.55)" />
+        {/* Generation -1: parents spouse */}
+        <line x1="112" y1="60" x2="128" y2="60" stroke="hsl(350 70% 65% / 0.7)" />
+        {/* Trunk: parents → root + sibling (T-junction) */}
+        <path
+          d="M 120 68 L 120 82 M 66 82 L 174 82 M 66 82 L 66 96 M 174 82 L 174 96"
+          stroke="hsl(var(--brand-indigo) / 0.55)"
         />
-      ))}
+      </g>
+
+      {/* Nodes */}
+      <MiniNode x={68}  y={8}   gender="m" />
+      <MiniNode x={128} y={8}   gender="f" />
+      <MiniNode x={68}  y={52}  gender="m" />
+      <MiniNode x={128} y={52}  gender="f" />
+      <MiniNode x={44}  y={96}  gender="m" isRoot />
+      <MiniNode x={152} y={96}  gender="f" />
     </svg>
+  )
+}
+
+const TREE_NODE_W = 44
+const TREE_NODE_H = 16
+
+function MiniNode({ x, y, gender, isRoot = false }: { x: number; y: number; gender: "m" | "f"; isRoot?: boolean }) {
+  const avatarFill = isRoot
+    ? "url(#ft-card-root)"
+    : gender === "f"
+      ? "hsl(350 70% 65% / 0.85)"
+      : "hsl(var(--brand-indigo) / 0.7)"
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={TREE_NODE_W}
+        height={TREE_NODE_H}
+        rx={4}
+        fill="hsl(var(--card) / 0.95)"
+        stroke={isRoot ? "hsl(var(--brand-indigo) / 0.5)" : "hsl(var(--border))"}
+        strokeWidth={isRoot ? 1.2 : 0.75}
+      />
+      <circle cx={x + 8} cy={y + TREE_NODE_H / 2} r={4} fill={avatarFill} />
+      <rect x={x + 16} y={y + 5}  width={TREE_NODE_W - 22} height="2"   rx="1"    fill="hsl(var(--muted-foreground) / 0.3)" />
+      <rect x={x + 16} y={y + 10} width={TREE_NODE_W - 28} height="1.5" rx="0.75" fill="hsl(var(--muted-foreground) / 0.2)" />
+    </g>
   )
 }
 
