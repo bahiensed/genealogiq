@@ -7,6 +7,7 @@ import { tributeSchema } from "@/schemas/tribute"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
+import { notify, markNotificationsRead } from "@/lib/notifications"
 
 export async function submitTribute(profileId: string, data: unknown) {
   const session = await verifySession()
@@ -23,11 +24,25 @@ export async function submitTribute(profileId: string, data: unknown) {
     await deleteBlobs([existing.imageUrl])
   }
 
-  await prisma.tribute.upsert({
+  const tribute = await prisma.tribute.upsert({
     where: { authorId_profileId: { authorId: session.user.id, profileId } },
     create: { authorId: session.user.id, profileId, ...parsed.data, status: "PENDING" },
     update: { ...parsed.data, status: "PENDING" },
   })
+
+  // Notify every guardian of the profile.
+  const guardians = await prisma.appUserGuardian.findMany({
+    where:  { appUserId: profileId },
+    select: { guardianId: true },
+  })
+  for (const g of guardians) {
+    await notify({
+      type:      "TRIBUTE_PENDING",
+      userId:    g.guardianId,
+      actorId:   session.user.id,
+      tributeId: tribute.id,
+    })
+  }
 
   revalidatePath(`/profile/${profileId}/tributes`)
   return { success: true }
@@ -39,7 +54,26 @@ export async function approveTribute(tributeId: string, profileId: string) {
   const profile = await getProfileById(profileId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
 
-  await prisma.tribute.update({ where: { id: tributeId }, data: { status: "APPROVED" } })
+  const tribute = await prisma.tribute.update({
+    where: { id: tributeId },
+    data:  { status: "APPROVED" },
+    select: { authorId: true },
+  })
+
+  // Mark pending notifications for this tribute (for any guardian) as read.
+  await prisma.notification.updateMany({
+    where: { tributeId, type: "TRIBUTE_PENDING", readAt: null },
+    data:  { readAt: new Date() },
+  })
+
+  // Notify the tribute author.
+  await notify({
+    type:      "TRIBUTE_APPROVED",
+    userId:    tribute.authorId,
+    actorId:   session.user.id,
+    tributeId,
+  })
+
   revalidatePath(`/profile/${profileId}/tributes`)
   revalidatePath(`/profile/${profileId}/tributes/moderate`)
   return { success: true }
@@ -51,7 +85,24 @@ export async function rejectTribute(tributeId: string, profileId: string) {
   const profile = await getProfileById(profileId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
 
-  await prisma.tribute.update({ where: { id: tributeId }, data: { status: "REJECTED" } })
+  const tribute = await prisma.tribute.update({
+    where: { id: tributeId },
+    data:  { status: "REJECTED" },
+    select: { authorId: true },
+  })
+
+  await prisma.notification.updateMany({
+    where: { tributeId, type: "TRIBUTE_PENDING", readAt: null },
+    data:  { readAt: new Date() },
+  })
+
+  await notify({
+    type:      "TRIBUTE_REJECTED",
+    userId:    tribute.authorId,
+    actorId:   session.user.id,
+    tributeId,
+  })
+
   revalidatePath(`/profile/${profileId}/tributes/moderate`)
   return { success: true }
 }
@@ -61,8 +112,11 @@ export async function deleteTribute(profileId: string) {
 
   const tribute = await prisma.tribute.findFirst({
     where: { authorId: session.user.id, profileId },
-    select: { imageUrl: true },
+    select: { id: true, imageUrl: true },
   })
+  if (tribute?.id) {
+    await markNotificationsRead(session.user.id, { tributeId: tribute.id })
+  }
   await deleteBlobs([tribute?.imageUrl])
 
   await prisma.tribute.deleteMany({ where: { authorId: session.user.id, profileId } })

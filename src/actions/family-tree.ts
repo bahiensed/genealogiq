@@ -13,6 +13,7 @@ import {
   updateMemberSchema,
   updateRelationSchema,
 } from "@/schemas/family-tree"
+import { notify } from "@/lib/notifications"
 
 type RelationType = "PARENT_OF" | "SPOUSE" | "SIBLING"
 
@@ -41,8 +42,8 @@ export async function addRelation(rootId: string, data: unknown) {
   if (fromId === toId) return { error: "A profile cannot be related to itself." }
 
   const [from, to] = await Promise.all([
-    prisma.appUser.findUnique({ where: { id: fromId }, select: { id: true } }),
-    prisma.appUser.findUnique({ where: { id: toId },   select: { id: true } }),
+    prisma.appUser.findUnique({ where: { id: fromId }, select: { id: true, role: true } }),
+    prisma.appUser.findUnique({ where: { id: toId },   select: { id: true, role: true } }),
   ])
   if (!from || !to) return { error: "Profile not found." }
 
@@ -61,26 +62,46 @@ export async function addRelation(rootId: string, data: unknown) {
     return { error: `Family tree limit is ${features.treeMaxMembers} people on this plan.` }
   }
 
+  // The "other" endpoint (the one being invited). Adding a real APP_USER
+  // who isn't the actor requires their consent — relation goes PENDING.
+  const otherId = fromId === rootId ? toId : toId === rootId ? fromId : null
+  const otherRole = fromId === rootId ? to.role : toId === rootId ? from.role : null
+  const needsConsent = !!otherId && otherRole === "APP_USER" && otherId !== session.user.id
+
   const [normFrom, normTo] = normalizePair(type, fromId, toId)
 
+  let createdRelationId: string
   try {
-    await prisma.familyRelation.create({
+    const created = await prisma.familyRelation.create({
       data: {
-        id:        crypto.randomUUID(),
-        fromId:    normFrom,
-        toId:      normTo,
+        id:            crypto.randomUUID(),
+        fromId:        normFrom,
+        toId:          normTo,
         type,
         subtype,
-        startDate: toDate(startDate),
-        endDate:   toDate(endDate),
+        startDate:     toDate(startDate),
+        endDate:       toDate(endDate),
+        status:        needsConsent ? "PENDING" : "ACCEPTED",
+        requestedById: needsConsent ? session.user.id : null,
       },
+      select: { id: true },
     })
+    createdRelationId = created.id
   } catch {
     return { error: "This relation already exists." }
   }
 
+  if (needsConsent && otherId) {
+    await notify({
+      type:             "FAMILY_REQUEST_PENDING",
+      userId:           otherId,
+      actorId:          session.user.id,
+      familyRelationId: createdRelationId,
+    })
+  }
+
   revalidatePath(`/profile/${rootId}/tree`)
-  return { success: true }
+  return { success: true, pending: needsConsent }
 }
 
 // ─── addGhostRelative ────────────────────────────────────────────────────────
@@ -95,7 +116,7 @@ export async function addGhostRelative(rootId: string, data: unknown) {
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const {
-    firstName, lastName, maidenName, nickname, shortBio,
+    firstName, lastName, maidenName, nickname,
     gender, birthDate, deathDate,
     anchorId, kind, subtype, startDate, endDate,
   } = parsed.data
@@ -128,7 +149,6 @@ export async function addGhostRelative(rootId: string, data: unknown) {
         lastName,
         maidenName: maidenName ?? null,
         nickname:   nickname ?? null,
-        shortBio:   shortBio ?? null,
         gender:     gender ?? null,
         role:       "APP_GHOST",
         birthDate:  toDate(birthDate),
@@ -149,6 +169,8 @@ export async function addGhostRelative(rootId: string, data: unknown) {
         subtype,
         startDate: toDate(startDate),
         endDate:   toDate(endDate),
+        // Ghosts are placeholders; no consent needed.
+        status:    "ACCEPTED",
       },
     })
   })
@@ -188,7 +210,6 @@ export async function updateMember(rootId: string, memberId: string, data: unkno
       lastName:   d.lastName,
       maidenName: d.maidenName ?? null,
       nickname:   d.nickname ?? null,
-      shortBio:   d.shortBio ?? null,
       gender:     d.gender ?? null,
       birthDate:  toDate(d.birthDate),
       deathDate:  toDate(d.deathDate),
@@ -254,5 +275,71 @@ export async function removeMember(rootId: string, memberId: string) {
 
   await prisma.appUser.delete({ where: { id: memberId } })
   revalidatePath(`/profile/${rootId}/tree`)
+  return { success: true }
+}
+
+// ─── acceptFamilyRequest / rejectFamilyRequest ───────────────────────────────
+
+export async function acceptFamilyRequest(relationId: string) {
+  const session = await verifySession()
+
+  const relation = await prisma.familyRelation.findUnique({
+    where:  { id: relationId },
+    select: { id: true, fromId: true, toId: true, status: true, requestedById: true },
+  })
+  if (!relation) return { error: "Request not found." }
+  if (relation.status !== "PENDING") return { error: "This request has already been decided." }
+
+  const isTarget = relation.fromId === session.user.id || relation.toId === session.user.id
+  if (!isTarget || relation.requestedById === session.user.id) return { error: "Not authorized." }
+
+  await prisma.familyRelation.update({
+    where: { id: relationId },
+    data:  { status: "ACCEPTED" },
+  })
+
+  await prisma.notification.updateMany({
+    where: { familyRelationId: relationId, userId: session.user.id, readAt: null },
+    data:  { readAt: new Date() },
+  })
+
+  if (relation.requestedById) {
+    await notify({
+      type:             "FAMILY_REQUEST_ACCEPTED",
+      userId:           relation.requestedById,
+      actorId:          session.user.id,
+      familyRelationId: relationId,
+    })
+  }
+
+  revalidatePath("/family-requests")
+  return { success: true }
+}
+
+export async function rejectFamilyRequest(relationId: string) {
+  const session = await verifySession()
+
+  const relation = await prisma.familyRelation.findUnique({
+    where:  { id: relationId },
+    select: { id: true, fromId: true, toId: true, status: true, requestedById: true },
+  })
+  if (!relation) return { error: "Request not found." }
+  if (relation.status !== "PENDING") return { error: "This request has already been decided." }
+
+  const isTarget = relation.fromId === session.user.id || relation.toId === session.user.id
+  if (!isTarget || relation.requestedById === session.user.id) return { error: "Not authorized." }
+
+  // Notify the requester BEFORE deleting (deletion cascades the existing notif rows).
+  if (relation.requestedById) {
+    await notify({
+      type:    "FAMILY_REQUEST_REJECTED",
+      userId:  relation.requestedById,
+      actorId: session.user.id,
+    })
+  }
+
+  await prisma.familyRelation.delete({ where: { id: relationId } })
+
+  revalidatePath("/family-requests")
   return { success: true }
 }

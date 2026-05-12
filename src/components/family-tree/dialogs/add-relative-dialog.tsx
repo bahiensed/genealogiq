@@ -94,7 +94,6 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
   const [lastName,  setLastName]    = useState("")
   const [maidenName, setMaidenName] = useState("")
   const [nickname, setNickname]     = useState("")
-  const [shortBio, setShortBio]     = useState("")
   const [gender,    setGender]      = useState<"MALE" | "FEMALE" | "OTHER" | "">("")
   const [birthDate, setBirthDate]   = useState("")
   const [deathDate, setDeathDate]   = useState("")
@@ -155,7 +154,6 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         firstName, lastName,
         maidenName: maidenName || null,
         nickname:   nickname   || null,
-        shortBio:   shortBio   || null,
         gender:     gender || null,
         birthDate:  birthDate || null,
         deathDate:  deathDate || null,
@@ -177,7 +175,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
     setKind(initialKind); setSubtype(defaultSubtype(initialKind))
     setStartDate(""); setEndDate("")
     setFirstName(""); setLastName(""); setMaidenName("")
-    setNickname(""); setShortBio("")
+    setNickname("")
     setGender(""); setBirthDate(""); setDeathDate("")
   }
 
@@ -345,10 +343,6 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                   <Label htmlFor="g-death">Death date</Label>
                   <Input id="g-death" type="date" value={deathDate} onChange={(e) => setDeathDate(e.target.value)} />
                 </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="g-bio">Short bio <span className="text-muted-foreground">(140 chars)</span></Label>
-                <Input id="g-bio" value={shortBio} maxLength={140} onChange={(e) => setShortBio(e.target.value)} placeholder="e.g. Carpenter, emigrated from Italy in 1923" />
               </div>
               <p className="text-xs text-muted-foreground">
                 This person stays in the family tree without a profile. You can promote them to a memorialized profile later.

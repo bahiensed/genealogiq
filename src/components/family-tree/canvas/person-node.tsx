@@ -2,6 +2,7 @@
 
 import { User, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { formatYear } from "@/lib/format-date"
 import type { TreePerson } from "@/queries/family-tree"
 import { NODE_W, NODE_H } from "./layout"
 
@@ -15,13 +16,10 @@ interface Props {
   onActivate:     () => void
 }
 
-function formatYear(d: Date | null): string {
-  return d ? new Date(d).getFullYear().toString() : ""
-}
-
 export function PersonNode({ person, x, y, isRoot, isSessionUser, isSelected, onActivate }: Props) {
   const isGhost = person.role === "APP_GHOST"
   const isMemorial = person.role === "APP_MEMO"
+  const isPending = person.pending && !isRoot
 
   const ringColor =
     person.gender === "FEMALE"
@@ -46,13 +44,14 @@ export function PersonNode({ person, x, y, isRoot, isSessionUser, isSelected, on
         onClick={(e) => { e.stopPropagation(); onActivate() }}
         className={cn(
           "h-full w-full cursor-pointer rounded-xl border bg-card/85 backdrop-blur-md flex items-center gap-2.5 px-2.5",
-          "transition-[transform,box-shadow,border-color] duration-150",
-          isGhost ? "border-dashed border-border/70" : "border-white/30",
+          "transition-[transform,box-shadow,border-color,opacity] duration-150",
+          isGhost || isPending ? "border-dashed border-border/70" : "border-white/30",
           isSelected && "ring-2 ring-primary/70 border-primary/30",
           isRoot && "scale-[1.04]",
+          isPending && "opacity-60",
         )}
         style={{
-          boxShadow: isGhost
+          boxShadow: isGhost || isPending
             ? undefined
             : "0 4px 14px -6px hsl(230 40% 12% / 0.25), inset 0 1px 0 hsl(0 0% 100% / 0.4)",
         }}
@@ -73,7 +72,7 @@ export function PersonNode({ person, x, y, isRoot, isSessionUser, isSelected, on
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className={cn("text-[11.5px] font-semibold leading-tight truncate", isGhost && "italic text-muted-foreground")}>
+          <p className={cn("text-[11.5px] font-semibold leading-tight truncate", (isGhost || isPending) && "italic text-muted-foreground")}>
             {displayName}
           </p>
           {person.nickname && (
@@ -88,8 +87,13 @@ export function PersonNode({ person, x, y, isRoot, isSessionUser, isSelected, on
           )}
         </div>
 
-        {(isSessionUser || isMemorial) && (
+        {(isSessionUser || isMemorial || isPending) && (
           <div className="absolute bottom-1 right-1 flex items-center gap-1">
+            {isPending && (
+              <span className="text-[8px] font-semibold uppercase tracking-wider px-1 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300" title="Awaiting confirmation">
+                Pending
+              </span>
+            )}
             {isMemorial && (
               <span className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-secondary text-foreground/70" title="Memorial">
                 <BookOpen className="h-2 w-2" />

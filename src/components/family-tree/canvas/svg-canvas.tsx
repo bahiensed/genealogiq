@@ -21,6 +21,7 @@ interface ViewportContextValue {
   viewport: Viewport
   zoomBy:   (factor: number) => void
   fitView:  () => void
+  focusOn:  (x: number, y: number, scale?: number) => void
 }
 
 const ViewportContext = createContext<ViewportContextValue | null>(null)
@@ -84,6 +85,15 @@ export function SvgCanvas({ bounds, children, overlays, className }: SvgCanvasPr
     setUserViewport(autoFit())
   }, [autoFit])
 
+  const focusOn = useCallback((x: number, y: number, scale?: number) => {
+    const target = clamp(scale ?? MAX_SCALE, MIN_SCALE, MAX_SCALE)
+    setUserViewport({
+      scale: target,
+      tx:    size.w / 2 - x * target,
+      ty:    size.h / 2 - y * target,
+    })
+  }, [size])
+
   const zoomBy = useCallback((factor: number) => {
     setUserViewport((prev) => {
       const v = prev ?? autoFit()
@@ -104,7 +114,10 @@ export function SvgCanvas({ bounds, children, overlays, className }: SvgCanvasPr
   const lastPinch = useRef<{ dist: number; midX: number; midY: number } | null>(null)
 
   const onPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget && (e.target as HTMLElement).closest("[data-node]")) {
+    // Let clicks on nodes and any interactive HTML overlay (buttons, links, inputs)
+    // through — only initiate pan when the surface itself was clicked.
+    const t = e.target as HTMLElement
+    if (t.closest("[data-node]") || t.closest("button") || t.closest("a") || t.closest("input") || t.closest("[data-no-pan]")) {
       return
     }
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
@@ -185,8 +198,8 @@ export function SvgCanvas({ bounds, children, overlays, className }: SvgCanvasPr
   }, [fitView, autoFit])
 
   const ctxValue = useMemo<ViewportContextValue>(
-    () => ({ viewport, zoomBy, fitView }),
-    [viewport, zoomBy, fitView],
+    () => ({ viewport, zoomBy, fitView, focusOn }),
+    [viewport, zoomBy, fitView, focusOn],
   )
 
   return (
@@ -202,12 +215,6 @@ export function SvgCanvas({ bounds, children, overlays, className }: SvgCanvasPr
         style={{ cursor: "grab" }}
       >
         <svg width="100%" height="100%" style={{ display: "block" }}>
-          <defs>
-            <pattern id="ft-grid" width={24} height={24} patternUnits="userSpaceOnUse">
-              <circle cx={1.5} cy={1.5} r={0.75} fill="hsl(var(--muted-foreground) / 0.18)" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#ft-grid)" />
           <g transform={`translate(${viewport.tx} ${viewport.ty}) scale(${viewport.scale})`}>
             {children}
           </g>

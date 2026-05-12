@@ -274,7 +274,6 @@ model AppUser {
   lastName            String    @map("last_name")
   maidenName          String?   @map("maiden_name")
   nickname            String?
-  shortBio            String?   @map("short_bio")
   gender              Gender?
   birthDate           DateTime? @map("birth_date")
   birthPlace          String?   @map("birth_place")
@@ -334,6 +333,9 @@ model AppUser {
   geolocation      Geolocation?
   familyFrom       FamilyRelation[] @relation("FamilyFrom")
   familyTo         FamilyRelation[] @relation("FamilyTo")
+
+  notifications     Notification[]   @relation("UserNotifications")
+  actorNotifications Notification[]  @relation("ActorNotifications")
 
   // Sales (QR codes acquired via SEQUOIA — buyer side)
   appSales AppSale[] @relation("AppSaleBuyer")
@@ -412,6 +414,8 @@ model Tribute {
 
   profileId String  @map("app_profile_id")
   profile   AppUser @relation("TributeProfile", fields: [profileId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -512,12 +516,53 @@ model FamilyRelation {
   startDate DateTime? @map("start_date")
   endDate   DateTime? @map("end_date")
 
+  // Pending tree-member invitations awaiting the target's consent.
+  status        String  @default("ACCEPTED") @map("status")
+  requestedById String? @map("requested_by")
+
+  notifications Notification[]
+
   createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([fromId, toId, type])
   @@index([fromId])
   @@index([toId])
   @@map("app_family_relations")
+}
+
+// ─── Notifications ───────────────────────────────────────────────────────────
+
+enum NotificationType {
+  TRIBUTE_PENDING
+  TRIBUTE_APPROVED
+  TRIBUTE_REJECTED
+  FAMILY_REQUEST_PENDING
+  FAMILY_REQUEST_ACCEPTED
+  FAMILY_REQUEST_REJECTED
+}
+
+model Notification {
+  id    String           @id @default(cuid())
+  type  NotificationType
+
+  userId String  @map("user_id")
+  user   AppUser @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  actorId String?  @map("actor_id")
+  actor   AppUser? @relation("ActorNotifications", fields: [actorId], references: [id], onDelete: SetNull)
+
+  tributeId String?  @map("tribute_id")
+  tribute   Tribute? @relation(fields: [tributeId], references: [id], onDelete: Cascade)
+
+  familyRelationId String?         @map("family_relation_id")
+  familyRelation   FamilyRelation? @relation(fields: [familyRelationId], references: [id], onDelete: Cascade)
+
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@map("app_notifications")
 }
 
 // ─── Supplier ────────────────────────────────────────────────────────────────

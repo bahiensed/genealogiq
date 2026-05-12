@@ -7,7 +7,6 @@ export interface TreePerson {
   lastName:     string
   maidenName:   string | null
   nickname:     string | null
-  shortBio:     string | null
   gender:       string | null
   avatarUrl:    string | null
   birthDate:    Date | null
@@ -17,6 +16,8 @@ export interface TreePerson {
   deathPlace:   string | null
   deathCountry: string | null
   role:         string
+  /** True when at least one relation touching this person is still PENDING and this person isn't the root. */
+  pending:      boolean
 }
 
 export interface TreeRelation {
@@ -27,6 +28,8 @@ export interface TreeRelation {
   toId:      string
   startDate: Date | null
   endDate:   Date | null
+  status:    string
+  requestedById: string | null
 }
 
 export interface FamilyTreeData {
@@ -58,7 +61,7 @@ export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
       where: { id: { in: ids } },
       select: {
         id: true, firstName: true, lastName: true,
-        maidenName: true, nickname: true, shortBio: true,
+        maidenName: true, nickname: true,
         gender: true, avatarUrl: true,
         birthDate: true, birthPlace: true, birthCountry: true,
         deathDate: true, deathPlace: true, deathCountry: true,
@@ -71,12 +74,25 @@ export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
         id: true, type: true, subtype: true,
         fromId: true, toId: true,
         startDate: true, endDate: true,
+        status: true, requestedById: true,
       },
     }),
   ])
 
+  // Mark people as pending when at least one relation touching them is PENDING
+  // and they are not the root themselves.
+  const pendingIds = new Set<string>()
+  for (const r of relations) {
+    if (r.status === "PENDING") {
+      if (r.fromId !== rootId) pendingIds.add(r.fromId)
+      if (r.toId !== rootId)   pendingIds.add(r.toId)
+    }
+  }
+
   const persons: Record<string, TreePerson> = {}
-  for (const u of users) persons[u.id] = u
+  for (const u of users) {
+    persons[u.id] = { ...u, pending: pendingIds.has(u.id) }
+  }
 
   return { persons, relations }
 }

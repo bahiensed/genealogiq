@@ -43,7 +43,6 @@ const ghostIdentity = z.object({
   lastName:   z.string().trim().min(1, "Last name is required.").max(64),
   maidenName: z.string().trim().max(64).optional().nullable(),
   nickname:   z.string().trim().max(40).optional().nullable(),
-  shortBio:   z.string().trim().max(140).optional().nullable(),
   gender:     z.enum(["MALE", "FEMALE", "OTHER"]).nullable().optional(),
   birthDate:  dateString,
   deathDate:  dateString,

@@ -33,31 +33,6 @@ export type TributeAuthorPreview = {
   avatarUrl: string | null
 }
 
-export type TributeNotification = { profileId: string; name: string; count: number }
-
-export async function getPendingTributeNotifications(userId: string): Promise<TributeNotification[]> {
-  const profiles = await prisma.appUser.findMany({
-    where: { OR: [{ id: userId }, { role: "APP_MEMO", guardedBy: { some: { guardianId: userId } } }] },
-    select: { id: true, firstName: true, lastName: true },
-  })
-
-  if (profiles.length === 0) return []
-
-  const profileIds = profiles.map((p) => p.id)
-
-  const counts = await prisma.tribute.groupBy({
-    by: ["profileId"],
-    where: { profileId: { in: profileIds }, status: "PENDING" },
-    _count: { profileId: true },
-  })
-
-  const countMap = new Map(counts.map((c) => [c.profileId, c._count.profileId]))
-
-  return profiles
-    .filter((p) => (countMap.get(p.id) ?? 0) > 0)
-    .map((p) => ({ profileId: p.id, name: `${p.firstName} ${p.lastName}`, count: countMap.get(p.id)! }))
-}
-
 export async function getTributeAuthors(profileId: string, limit = 5): Promise<TributeAuthorPreview[]> {
   const rows = await prisma.tribute.findMany({
     where: { profileId, status: "APPROVED" },

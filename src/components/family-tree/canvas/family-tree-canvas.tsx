@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { SvgCanvas } from "./svg-canvas"
 import { ViewportControls } from "./viewport-controls"
 import { PersonNode } from "./person-node"
-import { QuickAddOverlay } from "./quick-add-overlay"
 import { CanvasSearch } from "./canvas-search"
 import { FamilyEdges } from "./edges/family-edges"
 import { computeLayout, NODE_W, NODE_H } from "./layout"
@@ -29,16 +28,12 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
   const layout = useMemo(() => computeLayout(persons, relations, rootId), [persons, relations, rootId])
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [hoveredId,  setHoveredId]  = useState<string | null>(null)
-  const [tappedId,   setTappedId]   = useState<string | null>(null)
   const [sheetOpen,  setSheetOpen]  = useState(false)
   const [adder,      setAdder]      = useState<{ anchorId: string; kind: Kind } | null>(null)
   const [editing,    setEditing]    = useState<TreePerson | null>(null)
 
-  const activeOverlayId = hoveredId ?? tappedId
   const activePerson = selectedId ? persons[selectedId] ?? null : null
 
-  // Padding around node bounds so the canvas reserves room for the quick-add buttons.
   const paddedBounds = useMemo(() => ({
     minX: layout.bounds.minX - 40,
     maxX: layout.bounds.maxX + 40,
@@ -46,21 +41,21 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
     maxY: layout.bounds.maxY + 40,
   }), [layout.bounds])
 
+  const rootCenter = useMemo(() => {
+    const r = layout.nodes.find((n) => n.id === rootId)
+    if (!r) return null
+    return { x: r.x + NODE_W / 2, y: r.y + NODE_H / 2 }
+  }, [layout.nodes, rootId])
+
   const handleNodeActivate = useCallback((id: string) => {
-    if (selectedId === id && sheetOpen) {
-      setSheetOpen(false)
-      return
-    }
     setSelectedId(id)
     setSheetOpen(true)
-    // On mobile, also toggle the quick-add overlay tied to that node
-    setTappedId((cur) => (cur === id ? null : id))
-  }, [selectedId, sheetOpen])
+  }, [])
 
   const handleAdd = useCallback((anchorId: string, kind: Kind) => {
     if (!canManage) return
     setAdder({ anchorId, kind })
-    setTappedId(null)
+    setSheetOpen(false)
   }, [canManage])
 
   const handleEdit = useCallback(() => {
@@ -80,7 +75,7 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
 
   return (
     <div className="absolute inset-0">
-      <SvgCanvas bounds={paddedBounds} overlays={<ViewportControls />}>
+      <SvgCanvas bounds={paddedBounds} overlays={<ViewportControls rootCenter={rootCenter} />}>
         <FamilyEdges
           nodes={layout.nodes}
           parentLines={layout.parentLines}
@@ -88,33 +83,20 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
           siblingLines={layout.siblingLines}
         />
 
-        {/* Nodes with hover handlers grouped on a <g> so foreignObject events bubble correctly */}
         {layout.nodes.map((n) => {
           const p = persons[n.id]
           if (!p) return null
           return (
-            <g
+            <PersonNode
               key={n.id}
-              onMouseEnter={() => setHoveredId(n.id)}
-              onMouseLeave={() => setHoveredId((cur) => (cur === n.id ? null : cur))}
-            >
-              <PersonNode
-                person={p}
-                x={n.x}
-                y={n.y}
-                isRoot={n.id === rootId}
-                isSessionUser={n.id === sessionUserId}
-                isSelected={selectedId === n.id}
-                onActivate={() => handleNodeActivate(n.id)}
-              />
-              {canManage && activeOverlayId === n.id && (
-                <QuickAddOverlay
-                  x={n.x}
-                  y={n.y}
-                  onAdd={(kind) => handleAdd(n.id, kind)}
-                />
-              )}
-            </g>
+              person={p}
+              x={n.x}
+              y={n.y}
+              isRoot={n.id === rootId}
+              isSessionUser={n.id === sessionUserId}
+              isSelected={selectedId === n.id}
+              onActivate={() => handleNodeActivate(n.id)}
+            />
           )
         })}
       </SvgCanvas>
@@ -151,11 +133,9 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
         relations={relations}
         canManage={canManage}
         onEdit={handleEdit}
+        onAddRelative={handleAdd}
         onSuccess={onSuccess}
       />
-
-      {/* Static reference so NODE constants stay tied to the layout output */}
-      <span hidden aria-hidden>{NODE_W}-{NODE_H}</span>
     </div>
   )
 }

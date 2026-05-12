@@ -38,7 +38,6 @@ export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: P
   const [lastName,  setLastName]  = useState(person.lastName)
   const [maidenName, setMaidenName] = useState(person.maidenName ?? "")
   const [nickname,   setNickname]   = useState(person.nickname ?? "")
-  const [shortBio,   setShortBio]   = useState(person.shortBio ?? "")
   const [gender,     setGender]     = useState<"MALE" | "FEMALE" | "OTHER" | "">((person.gender as "MALE" | "FEMALE" | "OTHER" | null) ?? "")
   const [birthDate,  setBirthDate]  = useState(toInputDate(person.birthDate))
   const [deathDate,  setDeathDate]  = useState(toInputDate(person.deathDate))
@@ -53,7 +52,6 @@ export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: P
         firstName, lastName,
         maidenName: maidenName || null,
         nickname:   nickname   || null,
-        shortBio:   shortBio   || null,
         gender:     gender || null,
         birthDate:  birthDate || null,
         deathDate:  deathDate || null,
@@ -113,10 +111,6 @@ export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: P
               <Label htmlFor="e-death">Death date</Label>
               <Input id="e-death" type="date" value={deathDate} onChange={(e) => setDeathDate(e.target.value)} />
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="e-bio">Short bio</Label>
-            <Input id="e-bio" value={shortBio} maxLength={140} onChange={(e) => setShortBio(e.target.value)} />
           </div>
         </div>
         <DialogFooter>

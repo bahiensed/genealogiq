@@ -47,6 +47,7 @@ export default async function TreePage({ params }: Props) {
         persons={persons}
         generations={generation}
         memberLimit={memberLimit}
+        currentTier={features.code}
         canManage={canManage}
         atLimit={atLimit}
       />
