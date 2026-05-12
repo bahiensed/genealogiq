@@ -1,0 +1,129 @@
+'use client'
+
+import { useState, useTransition } from "react"
+import { toast } from "sonner"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { updateMember } from "@/actions/family-tree"
+import type { TreePerson } from "@/queries/family-tree"
+
+interface Props {
+  open:      boolean
+  onClose:   () => void
+  rootId:    string
+  person:    TreePerson
+  onSuccess?: () => void
+}
+
+const toInputDate = (d: Date | null) => d ? new Date(d).toISOString().slice(0, 10) : ""
+
+export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: Props) {
+  const [isPending, startTransition] = useTransition()
+  const [firstName, setFirstName] = useState(person.firstName)
+  const [lastName,  setLastName]  = useState(person.lastName)
+  const [maidenName, setMaidenName] = useState(person.maidenName ?? "")
+  const [nickname,   setNickname]   = useState(person.nickname ?? "")
+  const [shortBio,   setShortBio]   = useState(person.shortBio ?? "")
+  const [gender,     setGender]     = useState<"MALE" | "FEMALE" | "OTHER" | "">((person.gender as "MALE" | "FEMALE" | "OTHER" | null) ?? "")
+  const [birthDate,  setBirthDate]  = useState(toInputDate(person.birthDate))
+  const [deathDate,  setDeathDate]  = useState(toInputDate(person.deathDate))
+
+  const handleSave = () => {
+    if (!firstName.trim() || !lastName.trim()) {
+      toast.error("First and last name are required.")
+      return
+    }
+    startTransition(async () => {
+      const result = await updateMember(rootId, person.id, {
+        firstName, lastName,
+        maidenName: maidenName || null,
+        nickname:   nickname   || null,
+        shortBio:   shortBio   || null,
+        gender:     gender || null,
+        birthDate:  birthDate || null,
+        deathDate:  deathDate || null,
+        avatarUrl:  person.avatarUrl,
+      })
+      if (result?.error) { toast.error(result.error); return }
+      toast.success("Person updated.")
+      onClose()
+      onSuccess?.()
+    })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Edit person</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="e-first">First name</Label>
+              <Input id="e-first" value={firstName} onChange={(e) => setFirstName(e.target.value)} maxLength={64} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="e-last">Last name</Label>
+              <Input id="e-last" value={lastName} onChange={(e) => setLastName(e.target.value)} maxLength={64} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="e-maiden">Maiden name</Label>
+              <Input id="e-maiden" value={maidenName} onChange={(e) => setMaidenName(e.target.value)} maxLength={64} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="e-nick">Nickname</Label>
+              <Input id="e-nick" value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={40} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Gender</Label>
+            <Select value={gender} onValueChange={(v) => setGender(v as "MALE" | "FEMALE" | "OTHER")}>
+              <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="FEMALE">Female</SelectItem>
+                <SelectItem value="MALE">Male</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="e-birth">Birth date</Label>
+              <Input id="e-birth" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="e-death">Death date</Label>
+              <Input id="e-death" type="date" value={deathDate} onChange={(e) => setDeathDate(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="e-bio">Short bio</Label>
+            <Input id="e-bio" value={shortBio} maxLength={140} onChange={(e) => setShortBio(e.target.value)} />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={isPending}>Cancel</Button>
+          <Button onClick={handleSave} disabled={isPending}>{isPending ? "Saving…" : "Save"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}

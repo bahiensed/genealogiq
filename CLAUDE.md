@@ -50,10 +50,10 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 11/05/2026 — Family Tree primeira leva: novo role `APP_GHOST` para parentes não cadastrados (criação inline no add-relative-dialog), `treeMaxMembers` enforced no action `addRelation` + contador `n/limit` no header da página, `UpgradeHint context="tree"` aparece quando atinge o limite. Visual limpo: gradient removido, sibling edges suprimidas quando há pai compartilhado, heart label do spouse removido, PersonNode mais enxuto, ghosts com ring tracejado + nome em italic.
+Last session: 11/05/2026 — Family Tree v2 reescrita do zero. Removidas as deps `@xyflow/react` e `relatives-tree`; canvas próprio em SVG puro com pan/zoom/pinch (pointer events), layout genealógico em ~200 linhas calculando gerações via BFS e clustering por casais. Schema ganhou `maidenName`/`nickname`/`shortBio` em AppUser e `startDate`/`endDate` em FamilyRelation. Subtype canon validado em Zod (PARENT_OF blood|adopted|step, SPOUSE married|divorced|partner|widowed, SIBLING blood|half|adopted|step) — refletido visualmente nas linhas (sólido/dashed/dotted). Nó com avatar, nome (maiden em "née ..."), nickname italic, ano. Quick-add overlay com 4 botões aparecendo no hover/tap. Search no canvas via "/". Header com stats (n/limit, gerações, ano mais antigo). Dialogs novos para add/edit member/edit relation/info sheet, com computeRelationFromRoot ("Your maternal grandmother", etc.). Migration wipe das FamilyRelations + APP_GHOSTs existentes.
 In progress: —
-Next: Family Tree (React Flow) — segunda leva (hover polish, divorced dashed, tooltip)
-Blockers: —
+Next: testar layout em casos diversos (grandparents, multiple marriages, sibling sem pai); polishes (animação no fit-view, ghost upload de avatar)
+Blockers: aplicar a migration na Neon
 
 ### Design System — concluído ✅
 - `src/styles/globals.css` — Liquid Glass design system (brand tokens, glass utilities, aurora keyframes)

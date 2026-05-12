@@ -272,6 +272,9 @@ model AppUser {
 
   firstName           String    @map("first_name")
   lastName            String    @map("last_name")
+  maidenName          String?   @map("maiden_name")
+  nickname            String?
+  shortBio            String?   @map("short_bio")
   gender              Gender?
   birthDate           DateTime? @map("birth_date")
   birthPlace          String?   @map("birth_place")
@@ -505,6 +508,9 @@ model FamilyRelation {
 
   toId   String  @map("app_to_id")
   to     AppUser @relation("FamilyTo",   fields: [toId],   references: [id], onDelete: Cascade)
+
+  startDate DateTime? @map("start_date")
+  endDate   DateTime? @map("end_date")
 
   createdAt DateTime @default(now()) @map("created_at")
 

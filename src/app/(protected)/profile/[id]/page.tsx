@@ -5,7 +5,7 @@ import { getProfileById } from "@/queries/profile"
 import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
 import { getGeolocationByUserId } from "@/queries/geolocation"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
-import { getFamilyRelationCount } from "@/queries/family-tree"
+import { countTreeMembers } from "@/queries/family-tree"
 import { getGalleryImageUrls, getGalleryCount, getGalleryHasVideos } from "@/queries/gallery"
 import { getTributeAuthors, getTributeCountByProfileId } from "@/queries/tribute"
 import { getBioByUserId } from "@/queries/bio"
@@ -72,7 +72,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     !isMemorialized ? getFavoritesByUserId(id) : Promise.resolve([]),
     !isMemorialized ? getMemorialsByCreatorId(id) : Promise.resolve([]),
     getBioByUserId(id),
-    getFamilyRelationCount(id),
+    countTreeMembers(id),
   ])
 
   const hasBio = !!bio && !!(bio.text || bio.quote || bio.images.length > 0)
