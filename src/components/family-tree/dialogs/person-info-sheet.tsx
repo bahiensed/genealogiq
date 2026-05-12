@@ -176,7 +176,7 @@ export function PersonInfoSheet({
         </SheetHeader>
 
         {/* Edit row */}
-        <div className="px-5 py-3 flex items-start justify-between gap-3 border-b border-border/60">
+        <div className="px-5 py-4 flex items-center justify-between gap-3 border-b border-border/60">
           <p className="text-xs text-muted-foreground leading-snug max-w-[220px]">
             {canEditMember
               ? "Update name, dates and details."
@@ -221,7 +221,7 @@ export function PersonInfoSheet({
 
         {/* Quick add relatives */}
         {canManage && (
-          <div className="px-5 py-3 border-b border-border/60">
+          <div className="px-5 py-4 border-b border-border/60">
             <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">Add relative</p>
             <div className="grid grid-cols-2 gap-1.5">
               <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "parent")}>+ Parent</Button>

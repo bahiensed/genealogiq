@@ -22,11 +22,6 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { addRelation, addGhostRelative } from "@/actions/family-tree"
-import {
-  PARENT_OF_SUBTYPES,
-  SPOUSE_SUBTYPES,
-  SIBLING_SUBTYPES,
-} from "@/schemas/family-tree"
 
 type RelationKind = "parent" | "spouse" | "sibling" | "child"
 type Mode = "search" | "create"
@@ -61,15 +56,6 @@ const KIND_TO_TYPE: Record<RelationKind, "PARENT_OF" | "SPOUSE" | "SIBLING"> = {
   parent: "PARENT_OF", child: "PARENT_OF", spouse: "SPOUSE", sibling: "SIBLING",
 }
 
-const subtypesFor = (kind: RelationKind): readonly string[] => {
-  const type = KIND_TO_TYPE[kind]
-  if (type === "SPOUSE")  return SPOUSE_SUBTYPES
-  if (type === "SIBLING") return SIBLING_SUBTYPES
-  return PARENT_OF_SUBTYPES
-}
-
-const defaultSubtype = (kind: RelationKind): string => subtypesFor(kind)[0]
-
 function genderRingClass(gender: string | null) {
   if (gender === "FEMALE") return "ring-rose-400/50"
   if (gender === "MALE")   return "ring-[hsl(var(--brand-indigo)/0.5)]"
@@ -80,9 +66,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
   const [isPending, startTransition] = useTransition()
   const [mode, setMode]   = useState<Mode>("search")
   const [kind, setKind]   = useState<RelationKind>(initialKind)
-  const [subtype, setSubtype] = useState<string>(defaultSubtype(initialKind))
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate]     = useState("")
+  const [marriedAt, setMarriedAt] = useState("")
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
   const [selected, setSelected] = useState<SearchResult | null>(null)
@@ -97,12 +81,6 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
   const [gender,    setGender]      = useState<"MALE" | "FEMALE" | "OTHER" | "">("")
   const [birthDate, setBirthDate]   = useState("")
   const [deathDate, setDeathDate]   = useState("")
-
-  const handleKindChange = (k: RelationKind) => {
-    setKind(k)
-    setSubtype(defaultSubtype(k))
-    if (k !== "spouse") setEndDate("")
-  }
 
   const handleSearch = (value: string) => {
     setQuery(value)
@@ -133,9 +111,9 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
       else                        { fromId = anchorId;    toId = selected.id }
 
       const result = await addRelation(rootId, {
-        fromId, toId, type, subtype,
-        startDate: startDate || null,
-        endDate:   endDate || null,
+        fromId, toId, type,
+        startDate: kind === "spouse" && marriedAt ? marriedAt : null,
+        endDate:   null,
       })
       if (result?.error) { toast.error(result.error); return }
       toast.success("Relative added.")
@@ -157,9 +135,9 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         gender:     gender || null,
         birthDate:  birthDate || null,
         deathDate:  deathDate || null,
-        anchorId, kind, subtype,
-        startDate: startDate || null,
-        endDate:   endDate   || null,
+        anchorId, kind,
+        startDate: kind === "spouse" && marriedAt ? marriedAt : null,
+        endDate:   null,
       })
       if (result?.error) { toast.error(result.error); return }
       toast.success("Person added to the tree.")
@@ -172,16 +150,14 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
     onClose()
     setMode("search")
     setQuery(""); setResults([]); setSelected(null)
-    setKind(initialKind); setSubtype(defaultSubtype(initialKind))
-    setStartDate(""); setEndDate("")
+    setKind(initialKind)
+    setMarriedAt("")
     setFirstName(""); setLastName(""); setMaidenName("")
     setNickname("")
     setGender(""); setBirthDate(""); setDeathDate("")
   }
 
   const showNoResults = !loading && results.length === 0 && query.length >= 3
-  const showDates = kind === "spouse" || (kind === "parent" && (subtype === "adopted" || subtype === "step")) || (kind === "child" && (subtype === "adopted" || subtype === "step"))
-  const showEndDate = kind === "spouse" && (subtype === "divorced" || subtype === "widowed")
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose() }}>
@@ -200,57 +176,32 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                 </button>
                 Add a new person
               </span>
-            ) : "Add a relative"}
+            ) : "Add relative"}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1.5">
-              <Label>Relation</Label>
-              <Select value={kind} onValueChange={(v) => handleKindChange(v as RelationKind)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {(Object.entries(KIND_LABELS) as [RelationKind, string][]).map(([k, label]) => (
-                    <SelectItem key={k} value={k}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Type</Label>
-              <Select value={subtype} onValueChange={setSubtype}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {subtypesFor(kind).map((s) => (
-                    <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <Select value={kind} onValueChange={(v) => setKind(v as RelationKind)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {(Object.entries(KIND_LABELS) as [RelationKind, string][]).map(([k, label]) => (
+                <SelectItem key={k} value={k}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          {(showDates || showEndDate) && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="rel-start">{kind === "spouse" ? "Married" : "Started"}</Label>
-                <Input id="rel-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-              </div>
-              {showEndDate && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="rel-end">{subtype === "widowed" ? "Widowed" : "Ended"}</Label>
-                  <Input id="rel-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                </div>
-              )}
+          {kind === "spouse" && (
+            <div className="space-y-1.5">
+              <Label htmlFor="rel-start">Married</Label>
+              <Input id="rel-start" type="date" value={marriedAt} onChange={(e) => setMarriedAt(e.target.value)} />
             </div>
           )}
 
           {mode === "search" ? (
-            <div className="space-y-1.5">
-              <Label>Search profile</Label>
+            <div className="space-y-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9" placeholder="Name..." value={query} onChange={(e) => handleSearch(e.target.value)} />
+                <Input className="pl-9" placeholder="Search profile..." value={query} onChange={(e) => handleSearch(e.target.value)} />
               </div>
 
               {(results.length > 0 || loading) && (
@@ -298,7 +249,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                 className="w-full inline-flex items-center justify-center gap-2 text-sm font-medium text-primary hover:underline pt-1"
               >
                 <UserPlus className="h-4 w-4" />
-                Add a new person to the tree
+                Didn&apos;t find a profile? Add a new person to the tree.
               </button>
             </div>
           ) : (

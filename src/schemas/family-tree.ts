@@ -1,10 +1,12 @@
 import { z } from "zod"
 
 // ─── Subtype canon ───────────────────────────────────────────────────────────
+// "blood" (regular/by-birth) is the implicit default — represented by a null
+// subtype in the DB. Only the *special* subtypes need to be enumerated here.
 
-export const PARENT_OF_SUBTYPES = ["blood", "adopted", "step"] as const
+export const PARENT_OF_SUBTYPES = ["adopted", "step"] as const
 export const SPOUSE_SUBTYPES    = ["married", "divorced", "partner", "widowed"] as const
-export const SIBLING_SUBTYPES   = ["blood", "half", "adopted", "step"] as const
+export const SIBLING_SUBTYPES   = ["half", "adopted", "step"] as const
 
 export type ParentOfSubtype = typeof PARENT_OF_SUBTYPES[number]
 export type SpouseSubtype   = typeof SPOUSE_SUBTYPES[number]
@@ -26,10 +28,10 @@ export const addRelationSchema = z.object({
   fromId:    z.string().cuid(),
   toId:      z.string().cuid(),
   type:      z.enum(RELATION_TYPES),
-  subtype:   z.string().min(1),
+  subtype:   z.string().min(1).optional().nullable(),
   startDate: dateString,
   endDate:   dateString,
-}).refine((d) => subtypeForType(d.type).includes(d.subtype), {
+}).refine((d) => !d.subtype || subtypeForType(d.type).includes(d.subtype), {
   message: "Subtype is not valid for this relation type.",
   path:    ["subtype"],
 })
@@ -51,10 +53,11 @@ const ghostIdentity = z.object({
 export const addGhostRelativeSchema = ghostIdentity.extend({
   anchorId:  z.string().cuid(),
   kind:      z.enum(["parent", "child", "spouse", "sibling"]),
-  subtype:   z.string().min(1),
+  subtype:   z.string().min(1).optional().nullable(),
   startDate: dateString,
   endDate:   dateString,
 }).refine((d) => {
+  if (!d.subtype) return true
   const type: RelationType = d.kind === "spouse" ? "SPOUSE" : d.kind === "sibling" ? "SIBLING" : "PARENT_OF"
   return subtypeForType(type).includes(d.subtype)
 }, {
@@ -75,7 +78,7 @@ export type UpdateMemberInput = z.infer<typeof updateMemberSchema>
 // ─── updateRelation (subtype + dates) ────────────────────────────────────────
 
 export const updateRelationSchema = z.object({
-  subtype:   z.string().min(1),
+  subtype:   z.string().min(1).optional().nullable(),
   startDate: dateString,
   endDate:   dateString,
 })

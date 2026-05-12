@@ -70,6 +70,10 @@ export async function addRelation(rootId: string, data: unknown) {
 
   const [normFrom, normTo] = normalizePair(type, fromId, toId)
 
+  // Default subtype: SPOUSE always implies "married" unless overridden;
+  // PARENT_OF / SIBLING use null to mean a regular blood relation.
+  const finalSubtype = subtype ?? (type === "SPOUSE" ? "married" : null)
+
   let createdRelationId: string
   try {
     const created = await prisma.familyRelation.create({
@@ -78,7 +82,7 @@ export async function addRelation(rootId: string, data: unknown) {
         fromId:        normFrom,
         toId:          normTo,
         type,
-        subtype,
+        subtype:       finalSubtype,
         startDate:     toDate(startDate),
         endDate:       toDate(endDate),
         status:        needsConsent ? "PENDING" : "ACCEPTED",
@@ -140,6 +144,7 @@ export async function addGhostRelative(rootId: string, data: unknown) {
   else                        { fromId = anchorId; toId = ghostId;  type = "SPOUSE" }
 
   const [normFrom, normTo] = normalizePair(type, fromId, toId)
+  const finalSubtype = subtype ?? (type === "SPOUSE" ? "married" : null)
 
   await prisma.$transaction(async (tx) => {
     await tx.appUser.create({
@@ -166,7 +171,7 @@ export async function addGhostRelative(rootId: string, data: unknown) {
         fromId:    normFrom,
         toId:      normTo,
         type,
-        subtype,
+        subtype:   finalSubtype,
         startDate: toDate(startDate),
         endDate:   toDate(endDate),
         // Ghosts are placeholders; no consent needed.
@@ -236,7 +241,7 @@ export async function updateRelation(rootId: string, relationId: string, data: u
 
   await prisma.familyRelation.update({
     where: { id: relationId },
-    data:  { subtype, startDate: toDate(startDate), endDate: toDate(endDate) },
+    data:  { subtype: subtype ?? null, startDate: toDate(startDate), endDate: toDate(endDate) },
   })
 
   revalidatePath(`/profile/${rootId}/tree`)

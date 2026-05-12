@@ -37,9 +37,16 @@ interface Props {
 
 const toInputDate = (d: Date | null) => d ? new Date(d).toISOString().slice(0, 10) : ""
 
+// SPOUSE always needs a value (married is the implicit default), so we don't
+// expose a "standard" option. For PARENT_OF and SIBLING, null = blood-relation
+// default; users can mark adopted/step/half instead.
+const STANDARD = "__standard"
+
 export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess }: Props) {
   const [isPending, startTransition] = useTransition()
-  const [subtype, setSubtype] = useState(relation.subtype ?? "blood")
+  const [subtype, setSubtype] = useState<string>(
+    relation.subtype ?? (relation.type === "SPOUSE" ? "married" : STANDARD),
+  )
   const [startDate, setStartDate] = useState(toInputDate(relation.startDate))
   const [endDate, setEndDate]     = useState(toInputDate(relation.endDate))
 
@@ -48,13 +55,15 @@ export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess 
     relation.type === "SIBLING" ? SIBLING_SUBTYPES :
     PARENT_OF_SUBTYPES
 
+  const allowStandard = relation.type !== "SPOUSE"
+
   const showEndDate = relation.type === "SPOUSE" && (subtype === "divorced" || subtype === "widowed")
   const showStartDate = relation.type === "SPOUSE" || (relation.type === "PARENT_OF" && (subtype === "adopted" || subtype === "step"))
 
   const handleSave = () => {
     startTransition(async () => {
       const result = await updateRelation(rootId, relation.id, {
-        subtype,
+        subtype:   subtype === STANDARD ? null : subtype,
         startDate: startDate || null,
         endDate:   endDate || null,
       })
@@ -87,6 +96,9 @@ export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess 
             <Select value={subtype} onValueChange={setSubtype}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
+                {allowStandard && (
+                  <SelectItem value={STANDARD}>Standard</SelectItem>
+                )}
                 {subtypes.map((s) => (
                   <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
                 ))}

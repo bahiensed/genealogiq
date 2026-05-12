@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { formatYear } from "@/lib/format-date"
 import type { TreePerson } from "@/queries/family-tree"
 
 interface Props {
@@ -23,14 +22,6 @@ export function TreeStats({ persons, generations, memberLimit, currentTier }: Pr
     ? Math.max(...generations.values()) - Math.min(...generations.values()) + 1
     : 1
 
-  let oldestYear: string | null = null
-  for (const p of Object.values(persons)) {
-    if (p.birthDate) {
-      const y = formatYear(p.birthDate)
-      if (oldestYear == null || y < oldestYear) oldestYear = y
-    }
-  }
-
   const showUpgrade = currentTier !== "CENTURY"
 
   return (
@@ -39,12 +30,6 @@ export function TreeStats({ persons, generations, memberLimit, currentTier }: Pr
       <span className="mx-1.5 text-muted-foreground/50">·</span>
       <span className={cn(tone)}>{count}</span>
       <span className="text-muted-foreground/70">/{memberLimit} people</span>
-      {oldestYear && (
-        <>
-          <span className="mx-1.5 text-muted-foreground/50">·</span>
-          <span>oldest: {oldestYear}</span>
-        </>
-      )}
       {showUpgrade && (
         <>
           <span className="mx-1.5 text-muted-foreground/50">·</span>
