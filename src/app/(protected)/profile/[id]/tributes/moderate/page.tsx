@@ -28,12 +28,12 @@ export default async function TributeModeratePage({ params }: Props) {
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32 max-w-4xl">
-        <div className="mb-8 animate-fade-in">
+        <div className="mb-8 animate-fade-in bg-transparent">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href={`/profile/${id}/tributes`} label="Back to tributes" />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Moderate Tributes</h1>
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Moderate Tributes</h1>
           </div>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-muted-foreground mt-2 bg-transparent">
             {pending.length} pending {pending.length === 1 ? "tribute" : "tributes"} awaiting review.
           </p>
         </div>

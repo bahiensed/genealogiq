@@ -38,12 +38,12 @@ export default async function GalleryEditPage({ params }: Props) {
 
       <main className="container relative pt-24 pb-32 max-w-5xl">
         <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-          <div>
+          <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">
               <BackButton href={`/profile/${id}/gallery`} label="Back to gallery" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Edit Gallery</h1>
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Edit Gallery</h1>
             </div>
-            <p className="text-muted-foreground mt-2">Manage images and videos</p>
+            <p className="text-muted-foreground mt-2 bg-transparent">Manage images and videos</p>
           </div>
           <Button variant="ghost" asChild className="shrink-0">
             <Link href={`/profile/${id}/gallery`}>Cancel</Link>

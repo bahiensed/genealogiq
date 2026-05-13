@@ -33,14 +33,14 @@ export default async function TributeWritePage({ params }: Props) {
 
       <main className="container relative pt-24 pb-32 max-w-3xl">
         <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-          <div>
+          <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">
               <BackButton href={`/profile/${id}/tributes`} label="Back to tributes" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">
                 {isEditing ? "Edit your tribute" : "Send a tribute"}
               </h1>
             </div>
-            <p className="text-muted-foreground mt-2">Share a memory or message</p>
+            <p className="text-muted-foreground mt-2 bg-transparent">Share a memory or message</p>
           </div>
           <Button variant="ghost" asChild className="shrink-0">
             <Link href={`/profile/${id}/tributes`}>Cancel</Link>

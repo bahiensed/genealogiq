@@ -30,12 +30,12 @@ export default async function ProfileEditPage({ params }: Props) {
 
       <main className="container relative pt-24 pb-32 max-w-4xl">
         <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-          <div>
+          <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">
               <BackButton href={`/profile/${id}`} label="Back to profile" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Edit Profile</h1>
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Edit Profile</h1>
             </div>
-            <p className="text-muted-foreground mt-2">Edit profile</p>
+            <p className="text-muted-foreground mt-2 bg-transparent">Edit profile</p>
           </div>
           <Button variant="ghost" asChild className="shrink-0">
             <Link href={`/profile/${id}`}>Cancel</Link>

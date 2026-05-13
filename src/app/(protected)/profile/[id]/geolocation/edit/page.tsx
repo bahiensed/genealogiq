@@ -35,14 +35,14 @@ export default async function GeolocationEditPage({ params }: Props) {
 
       <main className="container relative pt-24 pb-32 max-w-4xl">
         <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-          <div>
+          <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">
               <BackButton href={`/profile/${id}/geolocation`} label="Back to geolocation" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">
                 {isCreating ? "Add Geolocation" : "Edit Geolocation"}
               </h1>
             </div>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-2 bg-transparent">
               {isCreating
                 ? "Add the resting place and how to find it."
                 : "Update place, address and coordinates."}

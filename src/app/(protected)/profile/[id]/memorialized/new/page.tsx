@@ -28,12 +28,12 @@ export default async function MemorialNewPage({ params }: Props) {
 
       <main className="container relative pt-24 pb-32 max-w-4xl">
         <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-          <div>
+          <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">
-              <BackButton href={`/profile/${id}/memorialized`} label="Back to profiles I guard" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">New memorialized profile</h1>
+              <BackButton href={`/profile/${id}/memorialized`} label="Back to guarded profiles" />
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">New memorialized profile</h1>
             </div>
-            <p className="text-muted-foreground mt-2">
+            <p className="text-muted-foreground mt-2 bg-transparent">
               Create a memorial for someone who lives on in your memory.
             </p>
           </div>
