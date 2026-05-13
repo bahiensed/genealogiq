@@ -70,11 +70,21 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, hasP
 
   return (
     <>
-      <section className="mb-8 flex items-center justify-between gap-3 animate-fade-in">
-        <p className="text-muted-foreground italic min-w-0 truncate">
-          Words left behind: small flames carried by those who remember
-        </p>
-        <div className="flex items-center gap-2 shrink-0">
+      <section className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
+        <div className="flex flex-col gap-1 min-w-0">
+          <p className="text-muted-foreground italic">
+            Words left behind: small flames carried by those who remember
+          </p>
+          {hasPendingFromMe && (
+            <p className="text-xs text-muted-foreground">
+              Your tribute is awaiting moderation.{" "}
+              <Link href={writeHref} className="text-primary hover:underline">
+                Click here to edit your tribute.
+              </Link>
+            </p>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0 self-end lg:self-auto">
           {!items.length ? null : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -101,21 +111,6 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, hasP
       </section>
 
       <div ref={listTopRef} />
-
-      {hasPendingFromMe && (
-        <div className="glass-card no-sheen mb-6 flex items-center gap-3 px-4 py-3 animate-fade-in">
-          <span className="relative inline-flex h-2.5 w-2.5 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400/70" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-500" />
-          </span>
-          <p className="text-sm text-foreground/90">
-            Your tribute is awaiting moderation. You&apos;ll see it here once approved.{" "}
-            <Link href={writeHref} className="font-medium text-primary hover:underline">
-              Click here to edit your tribute.
-            </Link>
-          </p>
-        </div>
-      )}
 
       {items.length === 0 ? (
         <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">

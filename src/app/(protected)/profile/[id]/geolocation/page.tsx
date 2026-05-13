@@ -43,7 +43,7 @@ export default async function GeolocationPage({ params }: Props) {
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Geolocation</h1>
             </div>
             <p className="text-muted-foreground mt-2 italic">
-              A place to meet again, from anywhere.
+              A place to meet again, from anywhere
             </p>
           </div>
           {isOwn && (
@@ -108,23 +108,25 @@ export default async function GeolocationPage({ params }: Props) {
                       <div className="text-sm text-muted-foreground pt-1">{geo.section}</div>
                     )}
                   </div>
-                  <div className="pt-3 border-t border-border/60">
-                    <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Coordinates</div>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <code className="text-sm font-mono">
-                        {geo.lat.toFixed(6)}, {geo.lon.toFixed(6)}
-                      </code>
-                      <a
-                        href={`https://www.google.com/maps?q=${geo.lat},${geo.lon}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                      >
-                        <MapPin className="h-3 w-3" />
-                        Open in Google Maps
-                      </a>
+                  {(geo.lat !== 0 || geo.lon !== 0) && (
+                    <div className="pt-3 border-t border-border/60">
+                      <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Coordinates</div>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <code className="text-sm font-mono">
+                          {geo.lat.toFixed(6)}, {geo.lon.toFixed(6)}
+                        </code>
+                        <a
+                          href={`https://www.google.com/maps?q=${geo.lat},${geo.lon}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                        >
+                          <MapPin className="h-3 w-3" />
+                          Open in Google Maps
+                        </a>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </section>

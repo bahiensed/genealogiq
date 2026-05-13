@@ -86,12 +86,15 @@ export default async function MemorializedPage({ params }: Props) {
               </span>
             )}
           </div>
-          <div className="mt-2 flex items-center justify-between gap-3">
-            <p className="text-muted-foreground italic min-w-0 truncate">
-              Memorials under your care — keepers of memory, holders of light
-            </p>
+          <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+            <div className="flex flex-col gap-1 min-w-0">
+              <p className="text-muted-foreground italic">
+                Memorials under your care — keepers of memory, holders of light
+              </p>
+              {atLimit && <UpgradeHint context="memorialized" currentTier={currentTier} />}
+            </div>
             {canCreate && (
-              <Button asChild className="shrink-0 gap-2">
+              <Button asChild className="shrink-0 self-end lg:self-auto gap-2">
                 <Link href={`/profile/${id}/memorialized/new`}>
                   <Plus className="h-4 w-4" />
                   New memorialized profile
@@ -100,12 +103,6 @@ export default async function MemorializedPage({ params }: Props) {
             )}
           </div>
         </div>
-
-        {atLimit && (
-          <div className="-mt-4 mb-6">
-            <UpgradeHint context="memorialized" currentTier={currentTier} />
-          </div>
-        )}
 
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {memorials.map((m, i) => (

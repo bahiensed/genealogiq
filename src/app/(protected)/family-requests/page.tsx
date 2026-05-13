@@ -21,7 +21,7 @@ export default async function FamilyRequestsPage() {
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Tree invitations</h1>
           </div>
           <p className="text-muted-foreground mt-2 italic">
-            People who would like to add you to their family tree.
+            People who would like to add you to their family tree
           </p>
         </section>
 

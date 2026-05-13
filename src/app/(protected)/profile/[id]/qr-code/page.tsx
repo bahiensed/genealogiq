@@ -36,7 +36,7 @@ export default async function QrCodePage({ params }: Props) {
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">QR Code</h1>
           </div>
           <p className="text-muted-foreground mt-2 italic">
-            For plaques, headstones and digital spaces alike.
+            For plaques, headstones and digital spaces alike
           </p>
         </section>
 

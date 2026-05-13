@@ -40,7 +40,7 @@ export default async function TributeWritePage({ params }: Props) {
                 {isEditing ? "Edit your tribute" : "Send a tribute"}
               </h1>
             </div>
-            <p className="text-muted-foreground mt-2">Share a memory or message.</p>
+            <p className="text-muted-foreground mt-2">Share a memory or message</p>
           </div>
           <Button variant="ghost" asChild className="shrink-0">
             <Link href={`/profile/${id}/tributes`}>Cancel</Link>

@@ -47,7 +47,7 @@ export default async function BioEditPage({ params }: Props) {
               </h1>
             </div>
             <p className="text-muted-foreground mt-2">
-              {isCreating ? "Add photos, a quote and the life story." : "Update photos, quote and life story."}
+              {isCreating ? "Add photos, a quote and the life story" : "Update photos, quote and life story"}
             </p>
           </div>
           <Button variant="ghost" asChild className="shrink-0">

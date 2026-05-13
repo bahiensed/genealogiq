@@ -188,7 +188,7 @@ export function ProfileBanner({ profile }: Props) {
                       </span>
                     </div>
                   )}
-                  {isMemorial && profile.geo && (
+                  {isMemorial && profile.geo && (profile.geo.lat !== 0 || profile.geo.lon !== 0) && (
                     <div className="flex items-center gap-2 text-muted-foreground justify-center lg:justify-start min-w-0">
                       <MapPin className="h-4 w-4 text-primary shrink-0" />
                       <a
@@ -197,7 +197,7 @@ export function ProfileBanner({ profile }: Props) {
                         rel="noopener noreferrer"
                         className="text-foreground font-medium hover:underline truncate min-w-0"
                       >
-                        {profile.geo.lat.toFixed(6)}, {profile.geo.lon.toFixed(6)}
+                        {profile.geo.lat.toFixed(2)}, {profile.geo.lon.toFixed(2)}
                       </a>
                     </div>
                   )}

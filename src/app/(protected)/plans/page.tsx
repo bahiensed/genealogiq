@@ -20,7 +20,7 @@ export default async function PlansPage() {
           </div>
           <p className="text-muted-foreground mt-2 italic max-w-2xl">
             Choose how generous a canvas you want for each memorial — more characters, more photos,
-            more videos, more slots. Every purchase carries forward forever.
+            more videos, more slots. Every purchase carries forward forever
           </p>
         </section>
 

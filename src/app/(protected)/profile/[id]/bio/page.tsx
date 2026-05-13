@@ -4,6 +4,7 @@ import { NotebookText, NotebookPen, Quote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
+import { BioImageCarousel } from "@/components/bio-image-carousel"
 import { verifySession } from "@/lib/dal"
 import { getBioByUserId } from "@/queries/bio"
 import { getProfileById } from "@/queries/profile"
@@ -39,31 +40,28 @@ export default async function ProfileBioPage({ params }: Props) {
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32 max-w-5xl">
-        <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-          <div>
-            <div className="flex items-center gap-3 md:gap-4">
-              <BackButton href={`/profile/${id}`} label="Back to profile" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Biography</h1>
+        <div className="mb-8 animate-fade-in">
+          <div className="flex items-center gap-3 md:gap-4">
+            <BackButton href={`/profile/${id}`} label="Back to profile" />
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight truncate">Biography</h1>
+          </div>
+          <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+            <div className="flex flex-col gap-1 min-w-0">
+              <p className="text-muted-foreground italic">
+                {isOwn ? "A life remembered through words and images" : `${name}'s life story`}
+              </p>
+              {isOwn && atLimit && <UpgradeHint context="bio" currentTier={features.code} />}
             </div>
-            <p className="text-muted-foreground mt-2">
-              {isOwn ? "A life remembered through words and images." : `${name}'s life story.`}
-            </p>
+            {isOwn && (
+              <Button asChild className="shrink-0 self-end lg:self-auto gap-2">
+                <Link href={`/profile/${id}/bio/edit`}>
+                  <NotebookPen className="h-4 w-4" />
+                  {isEmpty ? "Write biography" : "Edit"}
+                </Link>
+              </Button>
+            )}
           </div>
-          {isOwn && (
-            <Button asChild className="shrink-0 self-end gap-2">
-              <Link href={`/profile/${id}/bio/edit`}>
-                <NotebookPen className="h-4 w-4" />
-                {isEmpty ? "Write biography" : "Edit"}
-              </Link>
-            </Button>
-          )}
-        </section>
-
-        {isOwn && atLimit && (
-          <div className="-mt-4 mb-6">
-            <UpgradeHint context="bio" currentTier={features.code} />
-          </div>
-        )}
+        </div>
 
         {isEmpty ? (
           <div
@@ -82,21 +80,7 @@ export default async function ProfileBioPage({ params }: Props) {
           <>
             {bio.images.length > 0 && (
               <section className="mb-10 animate-fade-in" style={{ animationDelay: "80ms" }}>
-                <div className="flex gap-4 overflow-x-auto snap-x pb-2 -mx-2 px-2 scroll-smooth items-center">
-                  {bio.images.map((img) => (
-                    <div key={img.id} className="snap-start shrink-0 glass-card no-sheen p-2">
-                      <div className="overflow-hidden rounded-2xl bg-muted/40">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={img.url}
-                          alt="Biography photo"
-                          className="block h-[320px] md:h-[400px] w-auto object-contain"
-                          loading="lazy"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <BioImageCarousel images={bio.images} />
               </section>
             )}
 

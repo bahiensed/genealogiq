@@ -24,7 +24,7 @@ export default async function BillingQrCodePage() {
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Get a QR Code</h1>
           </div>
           <p className="text-muted-foreground mt-2 italic">
-            One QR Code, scannable forever — for plaques, headstones and digital spaces alike.
+            One QR Code, scannable forever — for plaques, headstones and digital spaces alike
           </p>
         </section>
 

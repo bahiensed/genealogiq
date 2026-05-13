@@ -43,7 +43,7 @@ export default async function GalleryEditPage({ params }: Props) {
               <BackButton href={`/profile/${id}/gallery`} label="Back to gallery" />
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Edit Gallery</h1>
             </div>
-            <p className="text-muted-foreground mt-2">Manage images and videos.</p>
+            <p className="text-muted-foreground mt-2">Manage images and videos</p>
           </div>
           <Button variant="ghost" asChild className="shrink-0">
             <Link href={`/profile/${id}/gallery`}>Cancel</Link>

@@ -97,9 +97,12 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
 
   return (
     <>
-      <section className="mb-8 flex items-center justify-between gap-3 animate-fade-in">
-        <p className="text-muted-foreground italic min-w-0 truncate">Frozen moments: light, laughter and the quiet in between</p>
-        <div className="flex items-center gap-2 shrink-0">
+      <section className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
+        <div className="flex flex-col gap-1 min-w-0">
+          <p className="text-muted-foreground italic">Frozen moments: light, laughter and the quiet in between</p>
+          {upgradeHint}
+        </div>
+        <div className="flex items-center gap-2 shrink-0 self-end lg:self-auto">
           {!isEmpty && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -124,8 +127,6 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
           )}
         </div>
       </section>
-
-      {upgradeHint && <div className="mb-6 -mt-4">{upgradeHint}</div>}
 
       <div ref={listTopRef} />
 

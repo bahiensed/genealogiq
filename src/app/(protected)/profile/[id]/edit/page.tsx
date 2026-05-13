@@ -35,7 +35,7 @@ export default async function ProfileEditPage({ params }: Props) {
               <BackButton href={`/profile/${id}`} label="Back to profile" />
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Edit Profile</h1>
             </div>
-            <p className="text-muted-foreground mt-2">Edit profile.</p>
+            <p className="text-muted-foreground mt-2">Edit profile</p>
           </div>
           <Button variant="ghost" asChild className="shrink-0">
             <Link href={`/profile/${id}`}>Cancel</Link>
