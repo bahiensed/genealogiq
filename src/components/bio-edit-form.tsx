@@ -249,7 +249,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
         {!isCreating && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2 md:w-auto w-full">
+              <Button variant="destructive" className="gap-2">
                 <Trash2 className="h-4 w-4" />
                 Delete bio
               </Button>

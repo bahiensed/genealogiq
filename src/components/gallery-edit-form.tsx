@@ -336,7 +336,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
         {!isCreating && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2 md:w-auto w-full"><Trash2 className="h-4 w-4" />Delete gallery</Button>
+              <Button variant="destructive" className="gap-2"><Trash2 className="h-4 w-4" />Delete gallery</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
