@@ -245,47 +245,48 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col-reverse md:flex-row md:justify-between md:items-center gap-3 pt-2 border-t border-border/60">
-        {!isCreating && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2">
-                <Trash2 className="h-4 w-4" />
-                Delete bio
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete biography?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently remove the photos, quote and biography text. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDelete}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-
-        <div className="flex flex-col-reverse sm:flex-row gap-2 md:gap-3 md:ml-auto">
+      <div className="flex flex-col md:flex-row md:items-center gap-3 pt-2 border-t border-border/60">
+        <div className="order-1 md:order-2 md:ml-auto flex flex-col md:flex-row gap-2 md:gap-3">
+          <Button onClick={handleSave} className="gap-2 w-full md:w-auto order-1 md:order-2" disabled={isPending}>
+            <Save className="h-4 w-4" />
+            Save
+          </Button>
           {!isCreating && (
-            <Button variant="outline" onClick={handleReset} className="gap-2" disabled={isPending}>
+            <Button variant="outline" onClick={handleReset} className="gap-2 w-full md:w-auto order-2 md:order-1" disabled={isPending}>
               <RotateCcw className="h-4 w-4" />
               Reset
             </Button>
           )}
-          <Button onClick={handleSave} className="gap-2" disabled={isPending}>
-            <Save className="h-4 w-4" />
-            Save
-          </Button>
         </div>
+        {!isCreating && (
+          <div className="order-2 md:order-1">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="gap-2 w-full md:w-auto">
+                  <Trash2 className="h-4 w-4" />
+                  Delete bio
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete biography?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently remove the photos, quote and biography text. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
       </div>
     </div>
   )

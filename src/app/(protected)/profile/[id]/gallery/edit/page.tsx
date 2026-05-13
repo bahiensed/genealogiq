@@ -37,24 +37,21 @@ export default async function GalleryEditPage({ params }: Props) {
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32 max-w-5xl">
-        <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-          <div className="bg-transparent">
-            <div className="flex items-center gap-3 md:gap-4">
-              <BackButton href={`/profile/${id}/gallery`} label="Back to gallery" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Edit Gallery</h1>
+        <div className="mb-8 animate-fade-in">
+          <div className="flex items-center gap-3 md:gap-4">
+            <BackButton href={`/profile/${id}/gallery`} label="Back to gallery" />
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Edit Gallery</h1>
+          </div>
+          <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
+            <div className="flex flex-col gap-1 min-w-0 bg-transparent">
+              <p className="text-muted-foreground italic bg-transparent">Manage images and videos.</p>
+              {atLimit && <UpgradeHint context="gallery" currentTier={features.code} />}
             </div>
-            <p className="text-muted-foreground mt-2 bg-transparent">Manage images and videos</p>
+            <Button variant="ghost" asChild className="shrink-0 self-end lg:self-auto">
+              <Link href={`/profile/${id}/gallery`}>Cancel</Link>
+            </Button>
           </div>
-          <Button variant="ghost" asChild className="shrink-0">
-            <Link href={`/profile/${id}/gallery`}>Cancel</Link>
-          </Button>
-        </section>
-
-        {atLimit && (
-          <div className="-mt-4 mb-6">
-            <UpgradeHint context="gallery" currentTier={features.code} />
-          </div>
-        )}
+        </div>
 
         <GalleryEditForm
           initial={items}

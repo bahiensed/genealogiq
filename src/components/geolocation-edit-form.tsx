@@ -300,38 +300,38 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col-reverse md:flex-row md:justify-between md:items-center gap-3 pt-2 border-t border-border/60">
-        {isEditing ? (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button type="button" variant="destructive" className="gap-2 md:w-auto w-full" disabled={isPending}>
-                <Trash2 className="h-4 w-4" />Delete location
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete geolocation?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently remove the place, photos and coordinates.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        ) : (
-          <div />
-        )}
-        <div className="flex flex-col-reverse sm:flex-row gap-2 md:gap-3">
-          <Button type="button" variant="outline" onClick={handleReset} className="gap-2" disabled={isPending}>
-            <RotateCcw className="h-4 w-4" />Reset
-          </Button>
-          <Button type="submit" className="gap-2" disabled={isPending || uploading.some(Boolean)}>
+      <div className="flex flex-col md:flex-row md:items-center gap-3 pt-2 border-t border-border/60">
+        <div className="order-1 md:order-2 md:ml-auto flex flex-col md:flex-row gap-2 md:gap-3">
+          <Button type="submit" className="gap-2 w-full md:w-auto order-1 md:order-2" disabled={isPending || uploading.some(Boolean)}>
             <Save className="h-4 w-4" />Save
           </Button>
+          <Button type="button" variant="outline" onClick={handleReset} className="gap-2 w-full md:w-auto order-2 md:order-1" disabled={isPending}>
+            <RotateCcw className="h-4 w-4" />Reset
+          </Button>
         </div>
+        {isEditing && (
+          <div className="order-2 md:order-1">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button type="button" variant="destructive" className="gap-2 w-full md:w-auto" disabled={isPending}>
+                  <Trash2 className="h-4 w-4" />Delete location
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete geolocation?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently remove the place, photos and coordinates.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
       </div>
     </form>
   )
