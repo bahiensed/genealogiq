@@ -38,7 +38,7 @@ export default async function FavoritesPage({ params }: Props) {
             )}
           </div>
           <p className="text-muted-foreground mt-2 italic">
-            The ones closest to the heart — kept near, always
+            The ones closest to the heart, kept near, always
           </p>
         </div>
 

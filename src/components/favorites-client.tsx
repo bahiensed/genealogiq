@@ -28,6 +28,7 @@ function toMiniProfile(fav: FavoriteRow, index: number): MiniProfile {
     initials: `${t.firstName[0]}${t.lastName[0]}`.toUpperCase(),
     gradient: GRADIENTS[index % GRADIENTS.length],
     href: `/profile/${t.id}`,
+    avatarUrl: t.avatarUrl,
   }
 }
 
