@@ -29,6 +29,7 @@ export default async function ProfileGalleryPage({ params }: Props) {
 
   const imageCount = items.filter((i) => i.kind === "image").length
   const videoCount = items.filter((i) => i.kind === "video").length
+  const atLimit = imageCount >= features.galleryMaxImages || videoCount >= features.galleryMaxVideos
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -59,13 +60,14 @@ export default async function ProfileGalleryPage({ params }: Props) {
           )}
         </div>
 
-        <GalleryClient items={items} editHref={`/profile/${id}/gallery/edit`} isOwn={isOwn} />
-
-        {isOwn && (
-          <div className="mt-8">
-            <UpgradeHint context="gallery" currentTier={features.code} />
-          </div>
-        )}
+        <GalleryClient
+          items={items}
+          editHref={`/profile/${id}/gallery/edit`}
+          isOwn={isOwn}
+          upgradeHint={isOwn && atLimit
+            ? <UpgradeHint context="gallery" currentTier={features.code} />
+            : null}
+        />
       </main>
     </div>
   )

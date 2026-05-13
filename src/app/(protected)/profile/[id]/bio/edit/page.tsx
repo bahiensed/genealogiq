@@ -29,6 +29,9 @@ export default async function BioEditPage({ params }: Props) {
   if (!canManageProfile(profile, session.user.id)) redirect(`/profile/${id}/bio`)
 
   const isCreating = !bio
+  const textLen = bio?.text?.length ?? 0
+  const imageCount = bio?.images.length ?? 0
+  const atLimit = textLen >= features.bioMaxChars || imageCount >= features.bioMaxImages
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -52,16 +55,18 @@ export default async function BioEditPage({ params }: Props) {
           </Button>
         </section>
 
+        {atLimit && (
+          <div className="-mt-4 mb-6">
+            <UpgradeHint context="bio" currentTier={features.code} />
+          </div>
+        )}
+
         <BioEditForm
           initial={bio}
           profileId={id}
           maxChars={features.bioMaxChars}
           maxImages={features.bioMaxImages}
         />
-
-        <div className="mt-8">
-          <UpgradeHint context="bio" currentTier={features.code} />
-        </div>
       </main>
     </div>
   )

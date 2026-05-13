@@ -1,13 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { NotebookText, NotebookPen, Quote } from "lucide-react"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
@@ -37,6 +30,9 @@ export default async function ProfileBioPage({ params }: Props) {
   const name = `${profile.firstName} ${profile.lastName}`
   const isEmpty = !bio || (!bio.quote && !bio.text && bio.images.length === 0)
   const paragraphs = bio?.text?.split(/\n\n+/).filter(Boolean) ?? []
+  const textLen = bio?.text?.length ?? 0
+  const imageCount = bio?.images.length ?? 0
+  const atLimit = textLen >= features.bioMaxChars || imageCount >= features.bioMaxImages
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -63,6 +59,12 @@ export default async function ProfileBioPage({ params }: Props) {
           )}
         </section>
 
+        {isOwn && atLimit && (
+          <div className="-mt-4 mb-6">
+            <UpgradeHint context="bio" currentTier={features.code} />
+          </div>
+        )}
+
         {isEmpty ? (
           <div
             className="glass-card no-sheen rounded-2xl px-6 py-20 flex flex-col items-center justify-center gap-3 animate-fade-in"
@@ -80,30 +82,29 @@ export default async function ProfileBioPage({ params }: Props) {
           <>
             {bio.images.length > 0 && (
               <section className="mb-10 animate-fade-in" style={{ animationDelay: "80ms" }}>
-                <Carousel opts={{ align: "start", loop: true }} className="w-full">
-                  <CarouselContent className="items-center">
-                    {bio.images.map((img) => {
-                      const aspectClass =
-                        img.aspect === "portrait"
-                          ? "aspect-[3/4]"
-                          : img.aspect === "landscape"
-                            ? "aspect-[16/9]"
-                            : "aspect-square"
-                      return (
-                        <CarouselItem key={img.id} className="basis-full md:basis-2/3 lg:basis-1/2">
-                          <div className="glass-card no-sheen p-2">
-                            <div className={`${aspectClass} overflow-hidden rounded-2xl bg-muted/40`}>
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={img.url} alt="Biography photo" className="h-full w-full object-cover" loading="lazy" />
-                            </div>
+                <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-2 px-2 scroll-smooth">
+                  {bio.images.map((img) => {
+                    const aspectClass =
+                      img.aspect === "portrait"
+                        ? "aspect-[3/4]"
+                        : img.aspect === "landscape"
+                          ? "aspect-[16/9]"
+                          : "aspect-square"
+                    return (
+                      <div
+                        key={img.id}
+                        className="snap-center shrink-0 basis-full md:basis-2/3 lg:basis-1/2"
+                      >
+                        <div className="glass-card no-sheen p-2">
+                          <div className={`${aspectClass} overflow-hidden rounded-2xl bg-muted/40`}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={img.url} alt="Biography photo" className="h-full w-full object-cover" loading="lazy" />
                           </div>
-                        </CarouselItem>
-                      )
-                    })}
-                  </CarouselContent>
-                  <CarouselPrevious className="hidden md:flex -left-4" />
-                  <CarouselNext className="hidden md:flex -right-4" />
-                </Carousel>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
               </section>
             )}
 
@@ -132,12 +133,6 @@ export default async function ProfileBioPage({ params }: Props) {
               </section>
             )}
           </>
-        )}
-
-        {isOwn && (
-          <div className="mt-10">
-            <UpgradeHint context="bio" currentTier={features.code} />
-          </div>
         )}
       </main>
     </div>

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { TreePine, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
+import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
@@ -110,9 +110,9 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "tree",
       title: "Family Tree",
-      description: "Roots, branches and the quiet ties that bind generations.",
+      description: "Roots, branches and the quiet ties that bind generations",
       metric: treeCount > 1 ? `${treeCount} members` : "No relatives yet",
-      icon: TreePine,
+      icon: Network,
       span: 4,
       preview: <TreePreview memberCount={treeCount} />,
       href: `${base}/tree`,
@@ -120,7 +120,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "bio",
       title: "Biography",
-      description: "A life told in chapters: moments, places and turning points.",
+      description: "A life told in chapters: moments, places and turning points",
       metric: hasBio ? "Read" : "No biography yet",
       icon: BookOpen,
       span: 2,
@@ -130,7 +130,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "gallery",
       title: "Gallery",
-      description: "Images and moments worth remembering.",
+      description: "Images and moments worth remembering",
       metric: galleryCount > 0 ? `${galleryCount} ${galleryCount === 1 ? "memory" : "memories"}` : "No media yet",
       icon: Images,
       span: 3,
@@ -140,7 +140,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "tributes",
       title: "Tributes",
-      description: "Messages celebrating shared experiences and memories.",
+      description: "Messages celebrating shared experiences and memories",
       metric: tributeCount > 0 ? `${tributeCount} ${tributeCount === 1 ? "tribute" : "tributes"}` : "No tributes yet",
       icon: Flower2,
       span: 3,
@@ -150,7 +150,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "geo",
       title: "Geolocation",
-      description: "A point of departure — and a place to meet again, from anywhere.",
+      description: "A point of departure — and a place to meet again, from anywhere",
       metric: geo ? geo.placeName : "Not set",
       icon: MapPin,
       span: 3,
@@ -160,7 +160,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "qr",
       title: "QR Code",
-      description: "For plaques, headstones and digital spaces alike.",
+      description: "For plaques, headstones and digital spaces alike",
       metric: showQrPurchaseCTA
         ? "Purchase to unlock"
         : showQrVisitorEmpty
@@ -177,9 +177,9 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "tree",
       title: "Family Tree",
-      description: "Roots, branches and the quiet ties that bind generations.",
+      description: "Roots, branches and the quiet ties that bind generations",
       metric: treeCount > 1 ? `${treeCount} members` : "No relatives yet",
-      icon: TreePine,
+      icon: Network,
       span: 4,
       preview: <TreePreview memberCount={treeCount} />,
       href: `${base}/tree`,
@@ -187,7 +187,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "bio",
       title: "Biography",
-      description: "A life told in chapters: moments, places and turning points.",
+      description: "A life told in chapters: moments, places and turning points",
       metric: hasBio ? "Read" : "No biography yet",
       icon: BookOpen,
       span: 2,
@@ -197,7 +197,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "gallery",
       title: "Gallery",
-      description: "Images and moments worth remembering.",
+      description: "Images and moments worth remembering",
       metric: galleryCount > 0 ? `${galleryCount} ${galleryCount === 1 ? "memory" : "memories"}` : "No media yet",
       icon: Images,
       span: 3,
@@ -207,7 +207,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "tributes",
       title: "Tributes",
-      description: "Messages celebrating shared experiences and memories.",
+      description: "Messages celebrating shared experiences and memories",
       metric: tributeCount > 0 ? `${tributeCount} ${tributeCount === 1 ? "tribute" : "tributes"}` : "No tributes yet",
       icon: Flower2,
       span: 3,
@@ -217,7 +217,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "favorites",
       title: "Favorites",
-      description: "People who carry deep meaning, kept close, always.",
+      description: "People who carry deep meaning, kept close, always",
       metric: favorites.length > 0 ? `${favorites.length} ${favorites.length === 1 ? "Favorite" : "Favorites"}` : "No favorites yet",
       icon: Heart,
       span: 3,
@@ -227,7 +227,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "guardian",
       title: "Profiles I guard",
-      description: "Memorials watched over with quiet care.",
+      description: "Memorials watched over with quiet care",
       metric: memorialCount > 0
         ? `${memorialCount} ${memorialCount === 1 ? "profile" : "profiles"}`
         : "No profiles guarded yet",

@@ -28,6 +28,10 @@ export default async function GalleryEditPage({ params }: Props) {
 
   if (!canManageProfile(profile, session.user.id)) redirect(`/profile/${id}/gallery`)
 
+  const imageCount = items.filter((i) => i.kind === "image").length
+  const videoCount = items.filter((i) => i.kind === "video").length
+  const atLimit = imageCount >= features.galleryMaxImages || videoCount >= features.galleryMaxVideos
+
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
@@ -46,16 +50,18 @@ export default async function GalleryEditPage({ params }: Props) {
           </Button>
         </section>
 
+        {atLimit && (
+          <div className="-mt-4 mb-6">
+            <UpgradeHint context="gallery" currentTier={features.code} />
+          </div>
+        )}
+
         <GalleryEditForm
           initial={items}
           profileId={id}
           maxImages={features.galleryMaxImages}
           maxVideos={features.galleryMaxVideos}
         />
-
-        <div className="mt-8">
-          <UpgradeHint context="gallery" currentTier={features.code} />
-        </div>
       </main>
     </div>
   )

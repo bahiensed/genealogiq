@@ -70,12 +70,10 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, hasP
 
   return (
     <>
-      <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-        <div>
-          <p className="text-muted-foreground mt-2 italic">
-            Words left behind: small flames carried by those who remember.
-          </p>
-        </div>
+      <section className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
+        <p className="text-muted-foreground italic">
+          Words left behind: small flames carried by those who remember
+        </p>
         <div className="flex items-center gap-2 shrink-0">
           {!items.length ? null : (
             <DropdownMenu>

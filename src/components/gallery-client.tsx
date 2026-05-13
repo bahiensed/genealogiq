@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { Play, X, ChevronLeft, ChevronRight, Images, ImagePlus, ArrowDownUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -33,9 +33,10 @@ interface Props {
   items: GalleryItemRow[]
   editHref?: string
   isOwn?: boolean
+  upgradeHint?: ReactNode
 }
 
-export function GalleryClient({ items: rawItems, editHref, isOwn }: Props) {
+export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }: Props) {
   const isEmpty = rawItems.length === 0
 
   const [sort, setSort] = useState<SortDir>("newest")
@@ -96,19 +97,8 @@ export function GalleryClient({ items: rawItems, editHref, isOwn }: Props) {
 
   return (
     <>
-      <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-        <div>
-          <p className="text-muted-foreground mt-2 italic">Frozen moments: light, laughter and the quiet in between.</p>
-          {!isEmpty && (() => {
-            const imgCount = rawItems.filter((i) => i.kind === "image").length
-            const vidCount = rawItems.filter((i) => i.kind === "video").length
-            return (
-              <p className="text-xs text-muted-foreground mt-1">
-                {imgCount} {imgCount === 1 ? "image" : "images"} · {vidCount} {vidCount === 1 ? "video" : "videos"}
-              </p>
-            )
-          })()}
-        </div>
+      <section className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
+        <p className="text-muted-foreground italic">Frozen moments: light, laughter and the quiet in between</p>
         <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
           {!isEmpty && (
             <DropdownMenu>
@@ -134,6 +124,8 @@ export function GalleryClient({ items: rawItems, editHref, isOwn }: Props) {
           )}
         </div>
       </section>
+
+      {upgradeHint && <div className="mb-6 -mt-4">{upgradeHint}</div>}
 
       <div ref={listTopRef} />
 

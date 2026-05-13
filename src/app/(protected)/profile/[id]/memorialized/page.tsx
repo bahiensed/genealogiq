@@ -67,29 +67,31 @@ export default async function MemorializedPage({ params }: Props) {
   const ownsCentury = sales.some((s) => s.subscription.code === "CENTURY")
   const currentTier = ownsCentury ? "CENTURY" : "FREE"
 
+  const atLimit = isOwn && !canCreate
+
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="top" />
 
       <main className="container relative pt-24 pb-32 max-w-6xl">
-        <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-          <div>
+        <div className="mb-8 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3 md:gap-4">
               <BackButton href={`/profile/${id}`} label="Back to profile" />
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Profiles I guard</h1>
             </div>
-            <p className="text-muted-foreground mt-2 italic">
-              Memorials under your care — keepers of memory, holders of light.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 self-end sm:self-auto">
             {memorials.length > 0 && (
-              <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
+              <span className="shrink-0 self-end sm:self-auto inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
                 {memorials.length} {memorials.length === 1 ? "profile" : "profiles"}
               </span>
             )}
+          </div>
+          <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p className="text-muted-foreground italic">
+              Memorials under your care — keepers of memory, holders of light
+            </p>
             {canCreate && (
-              <Button asChild className="shrink-0 self-end gap-2">
+              <Button asChild className="shrink-0 self-end sm:self-auto gap-2">
                 <Link href={`/profile/${id}/memorialized/new`}>
                   <Plus className="h-4 w-4" />
                   New memorialized profile
@@ -97,7 +99,13 @@ export default async function MemorializedPage({ params }: Props) {
               </Button>
             )}
           </div>
-        </section>
+        </div>
+
+        {atLimit && (
+          <div className="-mt-4 mb-6">
+            <UpgradeHint context="memorialized" currentTier={currentTier} />
+          </div>
+        )}
 
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {memorials.map((m, i) => (
@@ -122,11 +130,6 @@ export default async function MemorializedPage({ params }: Props) {
           </div>
         )}
 
-        {isOwn && (
-          <div className="mt-10">
-            <UpgradeHint context="memorialized" currentTier={currentTier} />
-          </div>
-        )}
       </main>
     </div>
   )
