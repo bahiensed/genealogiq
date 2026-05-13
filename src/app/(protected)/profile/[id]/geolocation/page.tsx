@@ -37,12 +37,12 @@ export default async function GeolocationPage({ params }: Props) {
 
       <main className="container relative pt-24 pb-32 max-w-5xl">
         <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
-          <div>
+          <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">
               <BackButton href={`/profile/${id}`} label="Back to profile" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Geolocation</h1>
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Geolocation</h1>
             </div>
-            <p className="text-muted-foreground mt-2 italic">
+            <p className="text-muted-foreground mt-2 italic bg-transparent">
               A place to meet again, from anywhere
             </p>
           </div>

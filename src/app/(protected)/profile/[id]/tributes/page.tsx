@@ -38,8 +38,8 @@ export default async function TributesPage({ params }: Props) {
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <BackButton href={`/profile/${id}`} label="Back to profile" />
             <div className="min-w-0">
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight truncate">Tributes</h1>
-              {!isManager && <p className="text-muted-foreground text-sm mt-1 truncate">{name}</p>}
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Tributes</h1>
+              {!isManager && <p className="text-muted-foreground text-sm mt-1 truncate bg-transparent">{name}</p>}
             </div>
           </div>
           {tributes.length > 0 && (

@@ -30,12 +30,12 @@ export default async function QrCodePage({ params }: Props) {
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32 max-w-5xl">
-        <section className="mb-8 animate-fade-in">
+        <section className="mb-8 animate-fade-in bg-transparent">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href={`/profile/${id}`} label="Back to profile" />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">QR Code</h1>
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">QR Code</h1>
           </div>
-          <p className="text-muted-foreground mt-2 italic">
+          <p className="text-muted-foreground mt-2 italic bg-transparent">
             For plaques, headstones and digital spaces alike
           </p>
         </section>
