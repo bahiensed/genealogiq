@@ -8,65 +8,55 @@ interface Props {
 }
 
 export function BioImageCarousel({ images }: Props) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [canPrev, setCanPrev] = useState(false)
-  const [canNext, setCanNext] = useState(false)
-
-  const evalArrows = () => {
-    const el = ref.current
-    if (!el) return
-    setCanPrev(el.scrollLeft > 4)
-    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
-  }
+  const [startIdx, setStartIdx] = useState(0)
+  const [cols, setCols]         = useState(2)   // 2 on xs/sm, 3 on md+
+  const touchX                  = useRef(0)
 
   useEffect(() => {
-    evalArrows()
-    const el = ref.current
-    if (!el) return
-    el.addEventListener("scroll", evalArrows, { passive: true })
-    window.addEventListener("resize", evalArrows)
-    return () => {
-      el.removeEventListener("scroll", evalArrows)
-      window.removeEventListener("resize", evalArrows)
-    }
-  }, [images.length])
+    const mq     = window.matchMedia("(min-width: 768px)")
+    const update = (e: MediaQueryListEvent | MediaQueryList) => setCols(e.matches ? 3 : 2)
+    update(mq)
+    mq.addEventListener("change", update)
+    return () => mq.removeEventListener("change", update)
+  }, [])
 
-  const scrollBy = (dir: -1 | 1) => {
-    const el = ref.current
-    if (!el) return
-    // Half the visible width — one "slide" of 2 images, advances by 1.
-    const step = el.clientWidth / 2
-    el.scrollBy({ left: dir * step, behavior: "smooth" })
-  }
+  const n          = images.length
+  const canNavigate = n > cols
 
-  const showArrows = images.length > 2
+  const prev = () => setStartIdx((i) => (i - 1 + n) % n)
+  const next = () => setStartIdx((i) => (i + 1) % n)
+
+  // Stable position keys so React updates src in-place instead of remounting.
+  const visible = Array.from({ length: Math.min(cols, n) }, (_, pos) => ({
+    pos,
+    img: images[(startIdx + pos) % n],
+  }))
 
   const arrowClass =
-    "hidden lg:inline-flex shrink-0 h-10 w-10 rounded-full bg-background/90 border border-border/60 shadow-md items-center justify-center hover:bg-background transition-opacity disabled:opacity-30 disabled:cursor-default"
+    "hidden lg:inline-flex shrink-0 h-10 w-10 rounded-full bg-background/90 border border-border/60 shadow-md items-center justify-center hover:bg-background transition-opacity"
 
   return (
-    <div className="flex items-center gap-2">
-      {showArrows && (
-        <button
-          type="button"
-          onClick={() => scrollBy(-1)}
-          disabled={!canPrev}
-          aria-label="Previous"
-          className={arrowClass}
-        >
+    <div
+      className="flex items-center gap-2"
+      onTouchStart={(e) => { touchX.current = e.touches[0].clientX }}
+      onTouchEnd={(e) => {
+        if (!canNavigate) return
+        const dx = touchX.current - e.changedTouches[0].clientX
+        if (Math.abs(dx) > 40) dx > 0 ? next() : prev()
+      }}
+    >
+      {canNavigate && (
+        <button type="button" onClick={prev} aria-label="Previous" className={arrowClass}>
           <ChevronLeft className="h-5 w-5" />
         </button>
       )}
 
       <div
-        ref={ref}
-        className="flex-1 flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth items-start pb-2 -mx-2 px-2 [scrollbar-width:thin]"
+        className="flex-1 grid gap-4"
+        style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
       >
-        {images.map((img) => (
-          <div
-            key={img.id}
-            className="snap-start shrink-0 basis-[calc(50%-0.5rem)] glass-card no-sheen p-2"
-          >
+        {visible.map(({ pos, img }) => (
+          <div key={`pos-${pos}`} className="glass-card no-sheen p-2">
             <div className="overflow-hidden rounded-2xl bg-muted/40">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -80,14 +70,8 @@ export function BioImageCarousel({ images }: Props) {
         ))}
       </div>
 
-      {showArrows && (
-        <button
-          type="button"
-          onClick={() => scrollBy(1)}
-          disabled={!canNext}
-          aria-label="Next"
-          className={arrowClass}
-        >
+      {canNavigate && (
+        <button type="button" onClick={next} aria-label="Next" className={arrowClass}>
           <ChevronRight className="h-5 w-5" />
         </button>
       )}
