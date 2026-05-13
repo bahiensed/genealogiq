@@ -5,7 +5,6 @@ import type { FavoriteRow } from "@/queries/favorite"
 import type { MemorialRow } from "@/queries/memorial"
 
 export function TreePreview({ memberCount = 0 }: { memberCount?: number }) {
-  // memberCount === 1 means only the root is in the tree (no relations yet).
   if (memberCount <= 1) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
@@ -14,65 +13,68 @@ export function TreePreview({ memberCount = 0 }: { memberCount?: number }) {
       </div>
     )
   }
-  return (
-    <svg viewBox="0 0 240 130" className="w-full h-full" aria-hidden>
-      <defs>
-        <linearGradient id="ft-card-root" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="hsl(var(--brand-indigo))" />
-          <stop offset="100%" stopColor="hsl(var(--brand-slate))" />
-        </linearGradient>
-      </defs>
 
-      {/* Edges: rose for spouses, indigo for parent-child T-junctions */}
-      <g fill="none" strokeLinecap="round" strokeWidth="1.2">
-        {/* Generation -2: grandparents spouse */}
-        <line x1="112" y1="16" x2="128" y2="16" stroke="hsl(350 70% 65% / 0.7)" />
-        {/* Trunk: grandparents → father */}
-        <path d="M 120 24 L 120 38 L 90 38 L 90 52" stroke="hsl(var(--brand-indigo) / 0.55)" />
-        {/* Generation -1: parents spouse */}
-        <line x1="112" y1="60" x2="128" y2="60" stroke="hsl(350 70% 65% / 0.7)" />
-        {/* Trunk: parents → root + sibling (T-junction) */}
-        <path
-          d="M 120 68 L 120 82 M 66 82 L 174 82 M 66 82 L 66 96 M 174 82 L 174 96"
-          stroke="hsl(var(--brand-indigo) / 0.55)"
-        />
+  // Neutral line colors — no brand palette on the structure
+  const lc  = "hsl(var(--muted-foreground) / 0.38)"  // parent-child lines
+  const mc  = "hsl(var(--muted-foreground) / 0.22)"  // marriage connectors
+
+  // Layout (viewBox 0 0 260 140, node W=38 H=14):
+  //   Gen0: G0L(62,6) · G0R(110,6)        couple-cx=105
+  //   Gen1: G1A(24,60) · G1B(86,60) · G1C(148,60) · G1D(202,60)
+  //         G1C+G1D couple-cx=194
+  //   Gen2: G2A(152,114) · G2B(202,114)
+
+  return (
+    <svg viewBox="0 0 260 140" className="w-full h-full" aria-hidden>
+      <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+
+        {/* Gen0 marriage connector */}
+        <line x1="100" y1="13" x2="110" y2="13" stroke={mc} strokeWidth="1.4" />
+
+        {/* Gen0 → Gen1 T-junction */}
+        <line x1="105" y1="20" x2="105" y2="44" stroke={lc} strokeWidth="1" />
+        <line x1="43"  y1="44" x2="167" y2="44" stroke={lc} strokeWidth="1" />
+        <line x1="43"  y1="44" x2="43"  y2="60" stroke={lc} strokeWidth="1" />
+        <line x1="105" y1="44" x2="105" y2="60" stroke={lc} strokeWidth="1" />
+        <line x1="167" y1="44" x2="167" y2="60" stroke={lc} strokeWidth="1" />
+
+        {/* Gen1 marriage connector (G1C ↔ G1D) */}
+        <line x1="186" y1="67" x2="202" y2="67" stroke={mc} strokeWidth="1.4" />
+
+        {/* G1C+G1D → Gen2 T-junction */}
+        <line x1="194" y1="74" x2="194" y2="98" stroke={lc} strokeWidth="1" />
+        <line x1="171" y1="98" x2="221" y2="98" stroke={lc} strokeWidth="1" />
+        <line x1="171" y1="98" x2="171" y2="114" stroke={lc} strokeWidth="1" />
+        <line x1="221" y1="98" x2="221" y2="114" stroke={lc} strokeWidth="1" />
       </g>
 
-      {/* Nodes */}
-      <MiniNode x={68}  y={8}   gender="m" />
-      <MiniNode x={128} y={8}   gender="f" />
-      <MiniNode x={68}  y={52}  gender="m" />
-      <MiniNode x={128} y={52}  gender="f" />
-      <MiniNode x={44}  y={96}  gender="m" isRoot />
-      <MiniNode x={152} y={96}  gender="f" />
+      {/* Gen 0 */}
+      <TreeNode x={62}  y={6}   />
+      <TreeNode x={110} y={6}   />
+      {/* Gen 1 */}
+      <TreeNode x={24}  y={60}  />
+      <TreeNode x={86}  y={60}  />
+      <TreeNode x={148} y={60}  isRoot />
+      <TreeNode x={202} y={60}  />
+      {/* Gen 2 */}
+      <TreeNode x={152} y={114} />
+      <TreeNode x={202} y={114} />
     </svg>
   )
 }
 
-const TREE_NODE_W = 44
-const TREE_NODE_H = 16
-
-function MiniNode({ x, y, gender, isRoot = false }: { x: number; y: number; gender: "m" | "f"; isRoot?: boolean }) {
-  const avatarFill = isRoot
-    ? "url(#ft-card-root)"
-    : gender === "f"
-      ? "hsl(350 70% 65% / 0.85)"
-      : "hsl(var(--brand-indigo) / 0.7)"
+function TreeNode({ x, y, isRoot = false }: { x: number; y: number; isRoot?: boolean }) {
+  const W = 38, H = 14
   return (
     <g>
       <rect
-        x={x}
-        y={y}
-        width={TREE_NODE_W}
-        height={TREE_NODE_H}
-        rx={4}
-        fill="hsl(var(--card) / 0.95)"
-        stroke={isRoot ? "hsl(var(--brand-indigo) / 0.5)" : "hsl(var(--border))"}
-        strokeWidth={isRoot ? 1.2 : 0.75}
+        x={x} y={y} width={W} height={H} rx={3}
+        fill="hsl(var(--card) / 0.8)"
+        stroke={isRoot ? "hsl(var(--muted-foreground) / 0.55)" : "hsl(var(--border) / 0.9)"}
+        strokeWidth={isRoot ? 1.3 : 0.8}
       />
-      <circle cx={x + 8} cy={y + TREE_NODE_H / 2} r={4} fill={avatarFill} />
-      <rect x={x + 16} y={y + 5}  width={TREE_NODE_W - 22} height="2"   rx="1"    fill="hsl(var(--muted-foreground) / 0.3)" />
-      <rect x={x + 16} y={y + 10} width={TREE_NODE_W - 28} height="1.5" rx="0.75" fill="hsl(var(--muted-foreground) / 0.2)" />
+      <rect x={x + 5} y={y + 4}   width={W - 13} height="2"   rx="1"    fill="hsl(var(--muted-foreground) / 0.28)" />
+      <rect x={x + 5} y={y + 9}   width={W - 18} height="1.5" rx="0.75" fill="hsl(var(--muted-foreground) / 0.16)" />
     </g>
   )
 }
