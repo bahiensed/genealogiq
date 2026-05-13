@@ -36,16 +36,16 @@ export default async function ProfileGalleryPage({ params }: Props) {
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32 max-w-6xl">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2 animate-fade-in">
-          <div className="flex items-center gap-3 md:gap-4">
+        <div className="flex items-center justify-between gap-3 mb-2 animate-fade-in">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <BackButton href={`/profile/${id}`} label="Back to profile" />
-            <div>
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Gallery</h1>
-              {!isOwn && <p className="text-muted-foreground text-sm mt-1">{name}</p>}
+            <div className="min-w-0">
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight truncate">Gallery</h1>
+              {!isOwn && <p className="text-muted-foreground text-sm mt-1 truncate">{name}</p>}
             </div>
           </div>
           {(imageCount > 0 || videoCount > 0) && (
-            <div className="flex items-center gap-2 shrink-0 self-end">
+            <div className="flex items-center gap-2 shrink-0">
               {imageCount > 0 && (
                 <span className="inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
                   {imageCount} {imageCount === 1 ? "image" : "images"}

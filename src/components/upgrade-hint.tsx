@@ -20,7 +20,7 @@ export function UpgradeHint({ context, currentTier }: Props) {
   if (currentTier === "CENTURY") return null
 
   return (
-    <p className="text-xs text-muted-foreground text-center">
+    <p className="text-xs text-muted-foreground">
       {QUESTION[context]}{" "}
       <Link href="/plans" className="text-primary hover:underline">
         Upgrade your plan.

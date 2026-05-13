@@ -97,9 +97,9 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
 
   return (
     <>
-      <section className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
-        <p className="text-muted-foreground italic">Frozen moments: light, laughter and the quiet in between</p>
-        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+      <section className="mb-8 flex items-center justify-between gap-3 animate-fade-in">
+        <p className="text-muted-foreground italic min-w-0 truncate">Frozen moments: light, laughter and the quiet in between</p>
+        <div className="flex items-center gap-2 shrink-0">
           {!isEmpty && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

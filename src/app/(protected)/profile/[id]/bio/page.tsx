@@ -82,28 +82,20 @@ export default async function ProfileBioPage({ params }: Props) {
           <>
             {bio.images.length > 0 && (
               <section className="mb-10 animate-fade-in" style={{ animationDelay: "80ms" }}>
-                <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2 -mx-2 px-2 scroll-smooth">
-                  {bio.images.map((img) => {
-                    const aspectClass =
-                      img.aspect === "portrait"
-                        ? "aspect-[3/4]"
-                        : img.aspect === "landscape"
-                          ? "aspect-[16/9]"
-                          : "aspect-square"
-                    return (
-                      <div
-                        key={img.id}
-                        className="snap-center shrink-0 basis-full md:basis-2/3 lg:basis-1/2"
-                      >
-                        <div className="glass-card no-sheen p-2">
-                          <div className={`${aspectClass} overflow-hidden rounded-2xl bg-muted/40`}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={img.url} alt="Biography photo" className="h-full w-full object-cover" loading="lazy" />
-                          </div>
-                        </div>
+                <div className="flex gap-4 overflow-x-auto snap-x pb-2 -mx-2 px-2 scroll-smooth items-center">
+                  {bio.images.map((img) => (
+                    <div key={img.id} className="snap-start shrink-0 glass-card no-sheen p-2">
+                      <div className="overflow-hidden rounded-2xl bg-muted/40">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={img.url}
+                          alt="Biography photo"
+                          className="block h-[320px] md:h-[400px] w-auto object-contain"
+                          loading="lazy"
+                        />
                       </div>
-                    )
-                  })}
+                    </div>
+                  ))}
                 </div>
               </section>
             )}
