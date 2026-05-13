@@ -331,7 +331,7 @@ export function TributesPreview({ authors }: { authors: TributeAuthorPreview[] }
           return (
             <div
               key={i}
-              className={`h-7 w-7 rounded-full ${color} ring-2 ring-background flex items-center justify-center text-[10px] font-bold text-white overflow-hidden`}
+              className={`h-14 w-14 rounded-full ${color} ring-2 ring-background flex items-center justify-center text-xs font-bold text-white overflow-hidden`}
             >
               {a.avatarUrl
                 // eslint-disable-next-line @next/next/no-img-element
@@ -341,7 +341,7 @@ export function TributesPreview({ authors }: { authors: TributeAuthorPreview[] }
           )
         })}
         {authors.length > 4 && (
-          <div className="h-7 w-7 rounded-full bg-muted ring-2 ring-background flex items-center justify-center text-[10px] font-medium text-muted-foreground">
+          <div className="h-14 w-14 rounded-full bg-muted ring-2 ring-background flex items-center justify-center text-xs font-medium text-muted-foreground">
             +
           </div>
         )}

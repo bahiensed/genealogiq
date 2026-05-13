@@ -226,7 +226,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     },
     {
       key: "guardian",
-      title: "Profiles I guard",
+      title: "Guarded profiles",
       description: "Memorials watched over with quiet care",
       metric: memorialCount > 0
         ? `${memorialCount} ${memorialCount === 1 ? "profile" : "profiles"}`
