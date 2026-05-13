@@ -42,7 +42,7 @@ export function BioImageCarousel({ images }: Props) {
   const showArrows = images.length > 2
 
   return (
-    <div className="relative group">
+    <div className="flex flex-col gap-3">
       <div
         ref={ref}
         className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth items-start pb-2 -mx-2 px-2 [scrollbar-width:thin]"
@@ -66,13 +66,13 @@ export function BioImageCarousel({ images }: Props) {
       </div>
 
       {showArrows && (
-        <>
+        <div className="hidden lg:flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={() => scrollBy(-1)}
             disabled={!canPrev}
             aria-label="Previous"
-            className="absolute left-1 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-background/90 border border-border/60 shadow-md inline-flex items-center justify-center hover:bg-background transition-opacity disabled:opacity-30 disabled:cursor-default"
+            className="h-10 w-10 rounded-full bg-background/90 border border-border/60 shadow-md inline-flex items-center justify-center hover:bg-background transition-opacity disabled:opacity-30 disabled:cursor-default"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -81,11 +81,11 @@ export function BioImageCarousel({ images }: Props) {
             onClick={() => scrollBy(1)}
             disabled={!canNext}
             aria-label="Next"
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-background/90 border border-border/60 shadow-md inline-flex items-center justify-center hover:bg-background transition-opacity disabled:opacity-30 disabled:cursor-default"
+            className="h-10 w-10 rounded-full bg-background/90 border border-border/60 shadow-md inline-flex items-center justify-center hover:bg-background transition-opacity disabled:opacity-30 disabled:cursor-default"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
-        </>
+        </div>
       )}
     </div>
   )

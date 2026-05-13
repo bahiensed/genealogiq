@@ -78,7 +78,7 @@ export default async function MemorializedPage({ params }: Props) {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
               <BackButton href={`/profile/${id}`} label="Back to profile" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight truncate">Profiles I guard</h1>
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Guarded profiles</h1>
             </div>
             {memorials.length > 0 && (
               <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
@@ -86,10 +86,10 @@ export default async function MemorializedPage({ params }: Props) {
               </span>
             )}
           </div>
-          <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-            <div className="flex flex-col gap-1 min-w-0">
+          <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
+            <div className="flex flex-col gap-1 min-w-0 bg-transparent">
               <p className="text-muted-foreground italic">
-                Memorials under your care — keepers of memory, holders of light
+                Memorials watched over with love and care
               </p>
               {atLimit && <UpgradeHint context="memorialized" currentTier={currentTier} />}
             </div>

@@ -43,10 +43,10 @@ export default async function ProfileBioPage({ params }: Props) {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href={`/profile/${id}`} label="Back to profile" />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight truncate">Biography</h1>
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Biography</h1>
           </div>
-          <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-            <div className="flex flex-col gap-1 min-w-0">
+          <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
+            <div className="flex flex-col gap-1 min-w-0 bg-transparent">
               <p className="text-muted-foreground italic">
                 {isOwn ? "A life remembered through words and images" : `${name}'s life story`}
               </p>
