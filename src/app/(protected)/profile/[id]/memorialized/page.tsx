@@ -1,7 +1,4 @@
 import { notFound } from "next/navigation"
-import Link from "next/link"
-import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { MemorializedClient } from "@/components/memorialized-client"
@@ -87,43 +84,15 @@ export default async function MemorializedPage({ params }: Props) {
               </span>
             )}
           </div>
-          <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
-            <div className="flex flex-col gap-1 min-w-0 bg-transparent">
-              <p className="text-muted-foreground italic">
-                Memorials watched over with love and care
-              </p>
-              {atLimit && <UpgradeHint context="memorialized" currentTier={currentTier} />}
-            </div>
-            {canCreate && (
-              <Button asChild className="shrink-0 self-end lg:self-auto gap-2">
-                <Link href={`/profile/${id}/memorialized/new`}>
-                  <Plus className="h-4 w-4" />
-                  New memorialized profile
-                </Link>
-              </Button>
-            )}
-          </div>
         </div>
 
-        <MemorializedClient profiles={memorials.map(toMiniProfile)} />
-
-        {memorials.length === 0 && isOwn && (
-          <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
-            <p className="text-muted-foreground">No memorialized profiles yet.</p>
-            <Button asChild className="gap-2">
-              <Link href={`/profile/${id}/memorialized/new`}>
-                <Plus className="h-4 w-4" />New memorialized profile
-              </Link>
-            </Button>
-          </div>
-        )}
-
-        {memorials.length === 0 && !isOwn && (
-          <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
-            <p className="text-muted-foreground">No memorialized profiles guarded yet.</p>
-          </div>
-        )}
-
+        <MemorializedClient
+          profiles={memorials.map(toMiniProfile)}
+          isOwn={isOwn}
+          canCreate={canCreate}
+          newHref={`/profile/${id}/memorialized/new`}
+          upgradeHint={atLimit ? <UpgradeHint context="memorialized" currentTier={currentTier} /> : undefined}
+        />
       </main>
     </div>
   )

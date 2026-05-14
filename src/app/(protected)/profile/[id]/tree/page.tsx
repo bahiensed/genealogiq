@@ -46,7 +46,7 @@ export default async function TreePage({ params }: Props) {
     .filter((p): p is { id: string; name: string } => p !== null)
 
   return (
-    <div className="relative flex flex-col mt-16" style={{ height: "calc(100vh - 64px)" }}>
+    <div className="fixed top-16 inset-x-0 bottom-0 flex flex-col">
       <AuroraBackdrop />
 
       <TreeHeader
