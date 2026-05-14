@@ -28,6 +28,7 @@ export interface CoupleLineGeom {
   aId:     string
   bId:     string
   subtype: string
+  endDate: Date | null
 }
 
 export interface SiblingLineGeom {
@@ -227,7 +228,7 @@ export function computeLayout(
     if (r.type === "PARENT_OF") {
       parentLines.push({ parentId: r.fromId, childId: r.toId, subtype: r.subtype ?? "blood" })
     } else if (r.type === "SPOUSE") {
-      coupleLines.push({ aId: r.fromId, bId: r.toId, subtype: r.subtype ?? "married" })
+      coupleLines.push({ aId: r.fromId, bId: r.toId, subtype: r.subtype ?? "married", endDate: r.endDate })
     } else if (r.type === "SIBLING") {
       const pa = parents.get(r.fromId) ?? new Set()
       const pb = parents.get(r.toId)   ?? new Set()

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { addRelation, addGhostRelative } from "@/actions/family-tree"
+import { SPOUSE_SUBTYPES, type SpouseSubtype } from "@/schemas/family-tree"
 
 type RelationKind = "parent" | "spouse" | "sibling" | "child"
 type Mode = "search" | "create"
@@ -74,7 +75,9 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
   const [isPending, startTransition] = useTransition()
   const [mode, setMode]   = useState<Mode>("search")
   const [kind, setKind]   = useState<RelationKind>(initialKind)
+  const [spouseSubtype, setSpouseSubtype] = useState<SpouseSubtype>("married")
   const [marriedAt, setMarriedAt] = useState("")
+  const [endedAt, setEndedAt] = useState("")
   const [linkSpouse, setLinkSpouse] = useState(true)
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<SearchResult[]>([])
@@ -121,8 +124,9 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
 
       const result = await addRelation(rootId, {
         fromId, toId, type,
+        subtype:   kind === "spouse" ? spouseSubtype : null,
         startDate: kind === "spouse" && marriedAt ? marriedAt : null,
-        endDate:   null,
+        endDate:   kind === "spouse" && needsEndDate && endedAt ? endedAt : null,
         linkSpouseId: shouldLinkSpouse ? anchorParents[0]?.id : null,
       })
       if (result?.error) { toast.error(result.error); return }
@@ -146,8 +150,9 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         birthDate:  birthDate || null,
         deathDate:  deathDate || null,
         anchorId, kind,
+        subtype:   kind === "spouse" ? spouseSubtype : null,
         startDate: kind === "spouse" && marriedAt ? marriedAt : null,
-        endDate:   null,
+        endDate:   kind === "spouse" && needsEndDate && endedAt ? endedAt : null,
         linkSpouseId: shouldLinkSpouse ? anchorParents[0]?.id : null,
       })
       if (result?.error) { toast.error(result.error); return }
@@ -162,7 +167,9 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
     setMode("search")
     setQuery(""); setResults([]); setSelected(null)
     setKind(initialKind)
+    setSpouseSubtype("married")
     setMarriedAt("")
+    setEndedAt("")
     setLinkSpouse(true)
     setFirstName(""); setLastName(""); setMaidenName("")
     setNickname("")
@@ -172,6 +179,9 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
   const showNoResults = !loading && results.length === 0 && query.length >= 3
   const showSpouseLink = kind === "parent" && anchorParents.length > 0
   const shouldLinkSpouse = showSpouseLink && linkSpouse
+  const needsEndDate = spouseSubtype === "divorced" || spouseSubtype === "widowed"
+  const startLabel = spouseSubtype === "partner" ? "Together since" : "Married"
+  const endLabel   = spouseSubtype === "widowed" ? "Widowed" : "Divorced"
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose() }}>
@@ -205,10 +215,31 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
           </Select>
 
           {kind === "spouse" && (
-            <div className="space-y-1.5">
-              <Label htmlFor="rel-start">Married</Label>
-              <Input id="rel-start" type="date" value={marriedAt} onChange={(e) => setMarriedAt(e.target.value)} />
-            </div>
+            <>
+              <div className="space-y-1.5">
+                <Label>Partner type</Label>
+                <Select value={spouseSubtype} onValueChange={(v) => setSpouseSubtype(v as SpouseSubtype)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {SPOUSE_SUBTYPES.map((s) => (
+                      <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="rel-start">{startLabel}</Label>
+                  <Input id="rel-start" type="date" value={marriedAt} onChange={(e) => setMarriedAt(e.target.value)} />
+                </div>
+                {needsEndDate && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="rel-end">{endLabel}</Label>
+                    <Input id="rel-end" type="date" value={endedAt} onChange={(e) => setEndedAt(e.target.value)} />
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
           {showSpouseLink && (
