@@ -8,7 +8,6 @@ import { computeLayout } from "@/components/family-tree/canvas/layout"
 import { FamilyTreeCanvas } from "@/components/family-tree/canvas/family-tree-canvas"
 import { TreeHeader } from "@/components/family-tree/header/tree-header"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
-import { UpgradeHint } from "@/components/upgrade-hint"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -35,7 +34,6 @@ export default async function TreePage({ params }: Props) {
   const memberCount = Object.keys(persons).length
   const memberLimit = features.treeMaxMembers
   const atLimit = memberCount >= memberLimit
-  const rootName = `${profile.firstName} ${profile.lastName}`
 
   // Existing parents of the root, so the header dialog can offer the
   // "Married to X" checkbox when adding a 2nd parent.
@@ -52,7 +50,7 @@ export default async function TreePage({ params }: Props) {
       <AuroraBackdrop />
 
       <TreeHeader
-        rootName={rootName}
+        rootFirstName={profile.firstName}
         rootId={id}
         persons={persons}
         generations={generation}
@@ -72,12 +70,6 @@ export default async function TreePage({ params }: Props) {
           canManage={canManage}
         />
       </div>
-
-      {canManage && atLimit && features.code !== "CENTURY" && (
-        <div className="relative z-10 px-4 md:px-6 py-2 border-t border-border/60 bg-background/80 backdrop-blur-md">
-          <UpgradeHint context="tree" currentTier={features.code} />
-        </div>
-      )}
     </div>
   )
 }

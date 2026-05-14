@@ -7,24 +7,28 @@ const QUESTION: Record<Context, string> = {
   gallery:      "Need more images and videos?",
   memorialized: "Need more memorialized profiles?",
   geolocation:  "Need precise GPS coordinates?",
-  tree:         "Need more relatives?",
+  tree:         "Need a bigger tree?",
 }
 
 interface Props {
   context:     Context
   currentTier: string
+  inline?:     boolean
 }
 
-export function UpgradeHint({ context, currentTier }: Props) {
+export function UpgradeHint({ context, currentTier, inline = false }: Props) {
   // Top tier — nothing to upsell.
   if (currentTier === "CENTURY") return null
 
-  return (
-    <p className="text-xs text-muted-foreground">
+  const content = (
+    <>
       {QUESTION[context]}{" "}
       <Link href="/plans" className="text-primary hover:underline">
         Upgrade your plan.
       </Link>
-    </p>
+    </>
   )
+
+  if (inline) return content
+  return <p className="text-xs text-muted-foreground">{content}</p>
 }

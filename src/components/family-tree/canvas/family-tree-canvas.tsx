@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { SvgCanvas } from "./svg-canvas"
 import { ViewportControls } from "./viewport-controls"
 import { PersonNode } from "./person-node"
-import { CanvasSearch } from "./canvas-search"
 import { FamilyEdges } from "./edges/family-edges"
 import { computeLayout, NODE_W, NODE_H } from "./layout"
 import { AddRelativeDialog } from "../dialogs/add-relative-dialog"
@@ -74,11 +73,6 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
     if (activePerson) setEditing(activePerson)
   }, [activePerson])
 
-  const handleSearchPick = useCallback((id: string) => {
-    setSelectedId(id)
-    setSheetOpen(true)
-  }, [])
-
   const onSuccess = useCallback(() => {
     setAdder(null)
     setEditing(null)
@@ -87,7 +81,7 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
 
   return (
     <div className="absolute inset-0">
-      <SvgCanvas bounds={paddedBounds} overlays={<ViewportControls rootCenter={rootCenter} />}>
+      <SvgCanvas bounds={paddedBounds} initialTarget={rootCenter} overlays={<ViewportControls rootCenter={rootCenter} />}>
         <FamilyEdges
           nodes={layout.nodes}
           parentLines={layout.parentLines}
@@ -112,8 +106,6 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
           )
         })}
       </SvgCanvas>
-
-      <CanvasSearch persons={persons} onPick={handleSearchPick} />
 
       {adder && (
         <AddRelativeDialog

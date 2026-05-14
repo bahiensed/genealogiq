@@ -34,6 +34,9 @@ export function useViewport(): ViewportContextValue {
 
 const MIN_SCALE = 0.25
 const MAX_SCALE = 2.5
+const ZOOM_STEP = 1.2
+// Initial zoom is 4 zoom-steps below the maximum.
+const INITIAL_SCALE = MAX_SCALE / Math.pow(ZOOM_STEP, 4)
 const FALLBACK_VIEWPORT: Viewport = { tx: 0, ty: 0, scale: 1 }
 
 interface SvgCanvasProps {
@@ -41,9 +44,12 @@ interface SvgCanvasProps {
   children:  ReactNode
   overlays?: ReactNode
   className?: string
+  // When set, the page-load viewport centers on this point at INITIAL_SCALE
+  // instead of fitting the whole tree.
+  initialTarget?: { x: number; y: number } | null
 }
 
-export function SvgCanvas({ bounds, children, overlays, className }: SvgCanvasProps) {
+export function SvgCanvas({ bounds, children, overlays, className, initialTarget = null }: SvgCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ w: 0, h: 0 })
 
@@ -78,8 +84,21 @@ export function SvgCanvas({ bounds, children, overlays, className }: SvgCanvasPr
     return { tx, ty, scale }
   }, [bounds, size])
 
-  // Effective viewport — user's if they've interacted, otherwise live auto-fit.
-  const viewport: Viewport = useMemo(() => userViewport ?? autoFit(), [userViewport, autoFit])
+  // Page-load viewport: zoomed in (max - 4 steps) on the initial target if provided,
+  // otherwise auto-fit the whole tree.
+  const initialFit = useCallback((): Viewport => {
+    if (size.w === 0 || size.h === 0) return FALLBACK_VIEWPORT
+    if (!initialTarget) return autoFit()
+    const scale = INITIAL_SCALE
+    return {
+      scale,
+      tx: size.w / 2 - initialTarget.x * scale,
+      ty: size.h / 2 - initialTarget.y * scale,
+    }
+  }, [size, initialTarget, autoFit])
+
+  // Effective viewport — user's if they've interacted, otherwise live initial fit.
+  const viewport: Viewport = useMemo(() => userViewport ?? initialFit(), [userViewport, initialFit])
 
   const fitView = useCallback(() => {
     setUserViewport(autoFit())
