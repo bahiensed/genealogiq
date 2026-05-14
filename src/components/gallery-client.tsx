@@ -46,14 +46,12 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const items = useMemo(() => {
-    const withDate = rawItems.filter((i) => !!i.takenAt)
-    const withoutDate = rawItems.filter((i) => !i.takenAt)
-    withDate.sort((a, b) => {
-      const da = new Date(a.takenAt!).getTime()
-      const db = new Date(b.takenAt!).getTime()
+    return [...rawItems].sort((a, b) => {
+      // Use takenAt when available, fall back to createdAt (upload date)
+      const da = new Date(a.takenAt ?? a.createdAt).getTime()
+      const db = new Date(b.takenAt ?? b.createdAt).getTime()
       return sort === "newest" ? db - da : da - db
     })
-    return [...withDate, ...withoutDate]
   }, [rawItems, sort])
 
   const isOpen = lightboxIndex !== null
