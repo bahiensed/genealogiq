@@ -2,11 +2,12 @@ import type { TreePerson, TreeRelation } from "@/queries/family-tree"
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-export const NODE_W   = 168
-export const NODE_H   = 72
-export const Y_GEN    = 140    // vertical distance between generations
-export const X_TIGHT  = 24     // sibling spacing inside a cluster
-export const X_FAMILY = 64     // gap between distinct clusters at the same generation
+export const NODE_W    = 168
+export const NODE_H    = 72
+export const Y_GEN     = 140   // vertical distance between generations
+export const X_TIGHT   = 24    // spacing between spouses inside the same cluster
+export const X_SIBLING = 40    // spacing between sibling clusters (children of same parents)
+export const X_FAMILY  = 64    // gap between unrelated family groups at the same generation
 
 // ─── Output types ────────────────────────────────────────────────────────────
 
@@ -136,46 +137,79 @@ export function computeLayout(
     return clusters
   }
 
-  // Anchor for a cluster = average x of placed neighbors (parents for descendants, children for ancestors).
-  const clusterAnchor = (cluster: string[]): number | null => {
-    const xs: number[] = []
+  // For each cluster, compute the placed-neighbor anchor (top-left x) and a grouping key.
+  // Clusters sharing the same key form a sibling group and will be centered together on the anchor.
+  const computeAnchorAndKey = (cluster: string[]): { anchor: number; key: string } => {
+    const placedParents:  string[] = []
+    const placedChildren: string[] = []
+    const placedSiblings: string[] = []
+    const gen = generation.get(cluster[0]) ?? 0
+
     for (const id of cluster) {
-      const ps = Array.from(parents.get(id)  ?? []).filter((p) => position.has(p))
-      const cs = Array.from(children.get(id) ?? []).filter((c) => position.has(c))
-      const ss = Array.from(siblings.get(id) ?? []).filter((s) => position.has(s))
-      if (ps.length > 0) {
-        xs.push(ps.reduce((s, p) => s + position.get(p)!.x, 0) / ps.length)
-      } else if (cs.length > 0) {
-        xs.push(cs.reduce((s, c) => s + position.get(c)!.x, 0) / cs.length)
-      } else if (ss.length > 0) {
-        xs.push(ss.reduce((s, x) => s + position.get(x)!.x, 0) / ss.length + NODE_W + X_TIGHT)
+      for (const p of parents.get(id) ?? [])   if (position.has(p) && !placedParents.includes(p))   placedParents.push(p)
+      for (const c of children.get(id) ?? [])  if (position.has(c) && !placedChildren.includes(c))  placedChildren.push(c)
+      for (const s of siblings.get(id) ?? [])  {
+        if (position.has(s) && generation.get(s) === gen && !placedSiblings.includes(s)) placedSiblings.push(s)
       }
     }
-    if (xs.length === 0) return null
-    return xs.reduce((s, x) => s + x, 0) / xs.length
+
+    if (placedParents.length > 0) {
+      const key = [...placedParents].sort().join("|")
+      const anchor = placedParents.reduce((s, p) => s + position.get(p)!.x, 0) / placedParents.length
+      return { anchor, key }
+    }
+    if (placedChildren.length > 0) {
+      const anchor = placedChildren.reduce((s, c) => s + position.get(c)!.x, 0) / placedChildren.length
+      return { anchor, key: `__anc_${cluster[0]}` }
+    }
+    if (placedSiblings.length > 0) {
+      const anchor = placedSiblings.reduce((s, x) => s + position.get(x)!.x, 0) / placedSiblings.length + NODE_W + X_TIGHT
+      return { anchor, key: `__sib_${cluster[0]}` }
+    }
+    return { anchor: 0, key: `__iso_${cluster[0]}` }
   }
+
+  const clusterWidth = (c: string[]) => c.length * NODE_W + (c.length - 1) * X_TIGHT
 
   for (const gen of sortedGens) {
     if (gen === 0) continue
     const y = gen * Y_GEN
     const clusters = buildClusters(gen)
-    const withAnchor = clusters.map((c) => ({ c, anchor: clusterAnchor(c) ?? 0 }))
-    withAnchor.sort((a, b) => a.anchor - b.anchor)
+
+    // Group clusters by their anchor key (siblings sharing the same parents).
+    const grouped = new Map<string, { c: string[]; anchor: number }[]>()
+    for (const c of clusters) {
+      const { anchor, key } = computeAnchorAndKey(c)
+      if (!grouped.has(key)) grouped.set(key, [])
+      grouped.get(key)!.push({ c, anchor })
+    }
+
+    // Order groups by anchor (left to right). All clusters within a group share the same anchor.
+    const orderedGroups = Array.from(grouped.values()).sort((a, b) => a[0].anchor - b[0].anchor)
 
     let lastRight = -Infinity
-    for (const { c, anchor } of withAnchor) {
-      const width = c.length * NODE_W + (c.length - 1) * X_TIGHT
-      let leftX = anchor - width / 2 + NODE_W / 2
-      // Hmm — anchor is a parent/child x (top-left); we want the cluster centered relative to its anchor's center.
-      // Actually, anchor here is treated as the anchor's x (top-left). Adjust to center the cluster on that anchor:
-      leftX = anchor - (width - NODE_W) / 2
+    for (const group of orderedGroups) {
+      const anchor = group[0].anchor
+
+      const totalWidth =
+        group.reduce((sum, g) => sum + clusterWidth(g.c), 0) +
+        (group.length - 1) * X_SIBLING
+
+      // Center the whole group on the anchor's center (anchor is a top-left, so add NODE_W/2 for its center).
+      let leftX = anchor + NODE_W / 2 - totalWidth / 2
       if (leftX < lastRight + X_FAMILY) leftX = lastRight + X_FAMILY
+
       let px = leftX
-      for (const id of c) {
-        position.set(id, { x: px, y })
-        px += NODE_W + X_TIGHT
+      for (let i = 0; i < group.length; i++) {
+        const { c } = group[i]
+        for (const id of c) {
+          position.set(id, { x: px, y })
+          px += NODE_W + X_TIGHT
+        }
+        px -= X_TIGHT  // undo the trailing X_TIGHT from the last cluster member
+        if (i < group.length - 1) px += X_SIBLING
       }
-      lastRight = leftX + width
+      lastRight = leftX + totalWidth
     }
   }
 
