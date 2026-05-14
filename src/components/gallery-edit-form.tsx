@@ -261,6 +261,13 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {images.length < maxImages && (
+            <button type="button" onClick={() => imgInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground">
+              <ImagePlus className="h-6 w-6" />
+              <span className="text-xs font-medium">Add image</span>
+            </button>
+          )}
+
           {allItems.map((item, idx) => item.kind !== "image" ? null : (
             <div key={idx} className="relative group rounded-xl overflow-hidden border border-border/60 bg-card/40 flex flex-col">
               <div className="relative aspect-square">
@@ -280,13 +287,6 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
               {!item.uploading && <MetaFields item={item} idx={idx} onChange={(patch) => updateMeta(idx, patch)} />}
             </div>
           ))}
-
-          {images.length < maxImages && (
-            <button type="button" onClick={() => imgInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground">
-              <ImagePlus className="h-6 w-6" />
-              <span className="text-xs font-medium">Add image</span>
-            </button>
-          )}
         </div>
         <input ref={imgInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple className="hidden" onChange={(e) => { handleAddImages(e.target.files); e.target.value = "" }} />
       </div>
@@ -299,6 +299,13 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {videos.length < maxVideos && (
+            <button type="button" onClick={() => vidInputRef.current?.click()} className="aspect-video rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground">
+              <Film className="h-6 w-6" />
+              <span className="text-xs font-medium">Add video</span>
+            </button>
+          )}
+
           {allItems.map((item, idx) => item.kind !== "video" ? null : (
             <div key={idx} className="relative group rounded-xl overflow-hidden border border-border/60 bg-card/40 flex flex-col">
               <div className="relative">
@@ -320,13 +327,6 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
               {!item.uploading && <MetaFields item={item} idx={idx} onChange={(patch) => updateMeta(idx, patch)} />}
             </div>
           ))}
-
-          {videos.length < maxVideos && (
-            <button type="button" onClick={() => vidInputRef.current?.click()} className="aspect-video rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground">
-              <Film className="h-6 w-6" />
-              <span className="text-xs font-medium">Add video</span>
-            </button>
-          )}
         </div>
         <input ref={vidInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" multiple className="hidden" onChange={(e) => { handleAddVideos(e.target.files); e.target.value = "" }} />
       </div>

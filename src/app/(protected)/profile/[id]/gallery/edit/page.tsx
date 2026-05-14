@@ -44,7 +44,7 @@ export default async function GalleryEditPage({ params }: Props) {
           </div>
           <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
             <div className="flex flex-col gap-1 min-w-0 bg-transparent">
-              <p className="text-muted-foreground italic bg-transparent">Manage images and videos.</p>
+              <p className="text-muted-foreground italic bg-transparent">Manage images and videos</p>
               {atLimit && <UpgradeHint context="gallery" currentTier={features.code} />}
             </div>
             <Button variant="ghost" asChild className="shrink-0 self-end lg:self-auto">
