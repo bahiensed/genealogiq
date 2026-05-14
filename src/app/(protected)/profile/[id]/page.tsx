@@ -150,7 +150,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     {
       key: "geo",
       title: "Geolocation",
-      description: "A point of departure — and a place to meet again, from anywhere",
+      description: "A place to meet again, from anywhere",
       metric: geo ? geo.placeName : "Not set",
       icon: MapPin,
       span: 3,
