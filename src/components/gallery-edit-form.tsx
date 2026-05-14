@@ -26,9 +26,10 @@ import {
   IMAGE_FORMATS_LABEL,
   VIDEO_FORMATS_LABEL,
 } from "@/lib/upload-validation"
+import { inspectVideo, needsTranscode, transcodeToHD } from "@/lib/video-transcode"
 import type { GalleryItemRow } from "@/queries/gallery"
 
-const MAX_VIDEO_SECONDS = 600
+const MAX_VIDEO_SECONDS = 300
 
 type MediaKind = "image" | "video"
 
@@ -42,17 +43,9 @@ interface MediaEntry {
   location?: string
   description?: string
   uploading?: boolean
+  transcoding?: boolean
+  transcodeProgress?: number
 }
-
-const probeVideoDuration = (file: File): Promise<number> =>
-  new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file)
-    const video = document.createElement("video")
-    video.preload = "metadata"
-    video.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(video.duration) }
-    video.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Could not read video metadata")) }
-    video.src = url
-  })
 
 const formatDuration = (sec: number) => {
   const m = Math.floor(sec / 60)
@@ -187,22 +180,50 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
     }
 
     for (const file of candidates) {
-      let durationSec: number
+      let meta
       try {
-        durationSec = await probeVideoDuration(file)
-        if (durationSec > MAX_VIDEO_SECONDS) { toast.error(`"${file.name}" exceeds 10 minutes.`); continue }
+        meta = await inspectVideo(file)
+        if (meta.durationSec > MAX_VIDEO_SECONDS) { toast.error(`"${file.name}" exceeds 5 minutes.`); continue }
       } catch {
         toast.error(`Could not read "${file.name}".`); continue
       }
 
+      const durationSec = meta.durationSec
+      const willTranscode = needsTranscode(file, meta)
       const localUrl = URL.createObjectURL(file)
-      const placeholder: MediaEntry = { kind: "video", url: localUrl, durationSec, uploading: true }
+      const placeholder: MediaEntry = {
+        kind: "video",
+        url: localUrl,
+        durationSec,
+        uploading: true,
+        transcoding: willTranscode,
+        transcodeProgress: willTranscode ? 0 : undefined,
+      }
       setItems((prev) => [...prev, placeholder])
 
+      let payload: File = file
+      if (willTranscode) {
+        try {
+          payload = await transcodeToHD(file, (r) => {
+            setItems((prev) => prev.map((item) =>
+              item.url === localUrl ? { ...item, transcodeProgress: r } : item,
+            ))
+          })
+          setItems((prev) => prev.map((item) =>
+            item.url === localUrl ? { ...item, transcoding: false, transcodeProgress: undefined } : item,
+          ))
+        } catch (err) {
+          console.error(err)
+          toast.error(`Could not convert "${file.name}" — please use MP4 under 1080p.`)
+          setItems((prev) => prev.filter((item) => item.url !== localUrl))
+          continue
+        }
+      }
+
       try {
-        const res = await fetch(`/api/gallery/upload?filename=${encodeURIComponent(file.name)}`, {
+        const res = await fetch(`/api/gallery/upload?filename=${encodeURIComponent(payload.name)}`, {
           method: "POST",
-          body: file,
+          body: payload,
         })
         const data = await res.json() as { url?: string; error?: string }
         if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
@@ -295,7 +316,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base">Videos</Label>
-          <span className="text-xs text-muted-foreground">{videos.length}/{maxVideos} · max 10 min each</span>
+          <span className="text-xs text-muted-foreground">{videos.length}/{maxVideos} · max 5 min each · auto-converted to HD MP4</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -314,8 +335,17 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
                   <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md text-xs font-medium bg-background/80 backdrop-blur-md border border-border/60">{formatDuration(item.durationSec)}</span>
                 )}
                 {item.uploading && (
-                  <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                    <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                  <div className="absolute inset-0 bg-background/70 flex flex-col items-center justify-center gap-2">
+                    {item.transcoding ? (
+                      <>
+                        <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                        <span className="text-xs font-medium">
+                          Converting… {Math.round((item.transcodeProgress ?? 0) * 100)}%
+                        </span>
+                      </>
+                    ) : (
+                      <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    )}
                   </div>
                 )}
                 {!item.uploading && (
@@ -328,7 +358,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
             </div>
           ))}
         </div>
-        <input ref={vidInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" multiple className="hidden" onChange={(e) => { handleAddVideos(e.target.files); e.target.value = "" }} />
+        <input ref={vidInputRef} type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v" multiple className="hidden" onChange={(e) => { handleAddVideos(e.target.files); e.target.value = "" }} />
       </div>
 
       {/* Actions */}
