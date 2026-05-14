@@ -100,10 +100,7 @@ export default async function GeolocationPage({ params }: Props) {
                   <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{geo.placeName}</h2>
                   <div className="text-base text-foreground/80 space-y-1">
                     {geo.address && <div>{geo.address}</div>}
-                    <div>
-                      {[geo.city, geo.state].filter(Boolean).join(", ")}
-                      {geo.country ? ` — ${geo.country}` : ""}
-                    </div>
+                    <div>{[geo.city, geo.state, geo.country].filter(Boolean).join(", ")}</div>
                     {geo.section && (
                       <div className="text-sm text-muted-foreground pt-1">{geo.section}</div>
                     )}

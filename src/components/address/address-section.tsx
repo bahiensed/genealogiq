@@ -1,22 +1,28 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { type Control, type FieldErrors, type UseFormSetValue, useWatch } from 'react-hook-form'
-import { SearchIcon } from 'lucide-react'
-import { toast } from 'sonner'
-import { lookupZip } from '@/lib/zipLookup'
-import { maskCep, maskUsZip, maskMxZip, unmaskDigits } from '@/lib/masks'
-import { STATES_BY_COUNTRY } from '@/constants/states'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { useState } from "react"
+import { type Control, type FieldErrors, type UseFormSetValue, useWatch } from "react-hook-form"
+import { SearchIcon } from "lucide-react"
+import { toast } from "sonner"
+import { lookupZip } from "@/lib/zipLookup"
+import { maskCep, maskUsZip, maskMxZip, unmaskDigits } from "@/lib/masks"
+import { COUNTRY_NAMES, COUNTRY_BY_NAME } from "@/consts/countries-data"
+import { Field, FieldError, FieldLabel } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group"
+import { Button } from "@/components/ui/button"
 
-const SUPPORTED_COUNTRIES = [
-  { code: 'BR', label: 'Brazil' },
-  { code: 'MX', label: 'Mexico' },
-  { code: 'US', label: 'USA' },
-]
+interface AddressSuggestion {
+  zip: string
+  street: string | null
+  number: string | null
+  complement: string | null
+  neighborhood: string | null
+  city: string | null
+  state: string | null
+  country: string | null
+}
 
 interface AddressSectionProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,50 +34,81 @@ interface AddressSectionProps {
   prefix: string
 }
 
-function applyZipMask(country: string, value: string): string {
-  if (country === 'BR') return maskCep(value)
-  if (country === 'US') return maskUsZip(value)
-  if (country === 'MX') return maskMxZip(value)
+function applyZipMask(countryName: string, value: string): string {
+  if (countryName === "Brazil") return maskCep(value)
+  if (countryName === "United States") return maskUsZip(value)
+  if (countryName === "Mexico") return maskMxZip(value)
   return value
 }
 
-function zipPlaceholder(country: string): string {
-  if (country === 'BR') return '00000-000'
-  if (country === 'US') return '00000-0000'
-  if (country === 'MX') return '00000'
-  return ''
+function zipPlaceholder(countryName: string): string {
+  if (countryName === "Brazil") return "00000-000"
+  if (countryName === "United States") return "00000-0000"
+  if (countryName === "Mexico") return "00000"
+  return ""
 }
 
 export function AddressSection({ control, setValue, errors, prefix }: AddressSectionProps) {
   const [isSearching, setIsSearching] = useState(false)
+  const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
 
-  const country: string = useWatch({ control, name: `${prefix}.country` }) ?? 'BR'
-  const zip: string     = useWatch({ control, name: `${prefix}.zip` })     ?? ''
+  const country: string = useWatch({ control, name: `${prefix}.country` }) ?? "Brazil"
+  const zip: string     = useWatch({ control, name: `${prefix}.zip` })     ?? ""
 
-  const states = STATES_BY_COUNTRY[country] ?? []
+  const countryData = COUNTRY_BY_NAME[country]
+  const states = countryData?.states ?? []
+  const zipSupported = !!countryData?.zipProvider
 
   async function handleZipSearch() {
     const digits = unmaskDigits(zip)
     if (!digits) return
-    // zippopotam.us requires exactly 5 digits for US/MX
-    const lookupCode = (country === 'US' || country === 'MX') ? digits.slice(0, 5) : digits
+    const lookupZipValue = (country === "United States" || country === "Mexico") ? digits.slice(0, 5) : digits
     setIsSearching(true)
+    setSuggestions([])
     try {
-      const result = await lookupZip(country, lookupCode)
-      setValue(`${prefix}.street`,       result.street)
-      setValue(`${prefix}.neighborhood`, result.neighborhood)
-      setValue(`${prefix}.city`,         result.city)
-      setValue(`${prefix}.state`,        result.state)
-      setValue(`${prefix}.country`,      result.country)
+      const [zipResult, suggestionsRes] = await Promise.all([
+        lookupZip(country, lookupZipValue).catch(() => null),
+        fetch(`/api/address/suggestions?zip=${encodeURIComponent(digits)}`).then((r) =>
+          r.ok ? r.json() : [],
+        ),
+      ])
+
+      if (zipResult) {
+        setValue(`${prefix}.street`,       zipResult.street)
+        setValue(`${prefix}.neighborhood`, zipResult.neighborhood)
+        setValue(`${prefix}.city`,         zipResult.city)
+        setValue(`${prefix}.state`,        zipResult.state)
+        setValue(`${prefix}.country`,      zipResult.country)
+      }
+
+      if (Array.isArray(suggestionsRes) && suggestionsRes.length > 0) {
+        setSuggestions(suggestionsRes)
+      }
+
+      if (!zipResult && (!Array.isArray(suggestionsRes) || suggestionsRes.length === 0)) {
+        toast.error("ZIP not found")
+      }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to look up ZIP/postal code')
+      toast.error(err instanceof Error ? err.message : "Failed to look up ZIP/postal code")
     } finally {
       setIsSearching(false)
     }
   }
 
+  function applySuggestion(s: AddressSuggestion) {
+    setValue(`${prefix}.zip`,          s.zip ?? "")
+    setValue(`${prefix}.street`,       s.street ?? "")
+    setValue(`${prefix}.number`,       s.number ?? "")
+    setValue(`${prefix}.complement`,   s.complement ?? "")
+    setValue(`${prefix}.neighborhood`, s.neighborhood ?? "")
+    setValue(`${prefix}.city`,         s.city ?? "")
+    setValue(`${prefix}.state`,        s.state ?? "")
+    setValue(`${prefix}.country`,      s.country ?? "Brazil")
+    setSuggestions([])
+  }
+
   function fieldError(name: string) {
-    const parts = name.split('.')
+    const parts = name.split(".")
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let e: any = errors
     for (const part of parts) e = e?.[part]
@@ -88,16 +125,16 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
           value={country}
           onValueChange={(val) => {
             setValue(`${prefix}.country`, val)
-            setValue(`${prefix}.state`, '')
-            setValue(`${prefix}.zip`, '')
+            setValue(`${prefix}.state`, "")
+            setValue(`${prefix}.zip`, "")
           }}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
-            {SUPPORTED_COUNTRIES.map((c) => (
-              <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+            {COUNTRY_NAMES.map((name) => (
+              <SelectItem key={name} value={name}>{name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -112,24 +149,52 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
             onChange={(e) => {
               const raw = unmaskDigits(e.target.value)
               setValue(`${prefix}.zip`, raw)
+              setSuggestions([])
             }}
             placeholder={zipPlaceholder(country)}
+            disabled={!zipSupported && !zip}
           />
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton onClick={handleZipSearch} disabled={isSearching} aria-label="Look up address">
-              <SearchIcon />
-            </InputGroupButton>
-          </InputGroupAddon>
+          {zipSupported && (
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton onClick={handleZipSearch} disabled={isSearching} aria-label="Look up address">
+                <SearchIcon />
+              </InputGroupButton>
+            </InputGroupAddon>
+          )}
         </InputGroup>
         <FieldError errors={fieldError(`${prefix}.zip`)} />
+
+        {/* DB address suggestions */}
+        {suggestions.length > 0 && (
+          <div className="mt-2 rounded-md border border-border bg-background shadow-sm">
+            <p className="px-3 pt-2 pb-1 text-xs text-muted-foreground">Addresses already on file:</p>
+            <ul className="divide-y divide-border">
+              {suggestions.map((s, i) => (
+                <li key={i}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start rounded-none px-3 py-2 text-left text-sm h-auto"
+                    onClick={() => applySuggestion(s)}
+                  >
+                    {[s.street, s.number].filter(Boolean).join(", ")}
+                    {s.city ? ` – ${s.city}` : ""}
+                    {s.state ? `, ${s.state}` : ""}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Field>
 
       {/* Street */}
       <Field className="col-span-12 md:col-span-10">
         <FieldLabel>Street:</FieldLabel>
         <Input
-          value={useWatch({ control, name: `${prefix}.street` }) ?? ''}
-          onChange={(e) => setValue(`${prefix}.street`, e.target.value)}
+          value={useWatch({ control, name: `${prefix}.street` }) ?? ""}
+          onChange={(e) => { setValue(`${prefix}.street`, e.target.value); setSuggestions([]) }}
         />
         <FieldError errors={fieldError(`${prefix}.street`)} />
       </Field>
@@ -138,7 +203,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
       <Field className="col-span-12 md:col-span-2">
         <FieldLabel>Number:</FieldLabel>
         <Input
-          value={useWatch({ control, name: `${prefix}.number` }) ?? ''}
+          value={useWatch({ control, name: `${prefix}.number` }) ?? ""}
           onChange={(e) => setValue(`${prefix}.number`, e.target.value)}
         />
       </Field>
@@ -147,7 +212,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
       <Field className="col-span-12 md:col-span-6">
         <FieldLabel>Complement:</FieldLabel>
         <Input
-          value={useWatch({ control, name: `${prefix}.complement` }) ?? ''}
+          value={useWatch({ control, name: `${prefix}.complement` }) ?? ""}
           onChange={(e) => setValue(`${prefix}.complement`, e.target.value)}
         />
       </Field>
@@ -156,7 +221,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
       <Field className="col-span-12 md:col-span-6">
         <FieldLabel>Neighborhood:</FieldLabel>
         <Input
-          value={useWatch({ control, name: `${prefix}.neighborhood` }) ?? ''}
+          value={useWatch({ control, name: `${prefix}.neighborhood` }) ?? ""}
           onChange={(e) => setValue(`${prefix}.neighborhood`, e.target.value)}
         />
       </Field>
@@ -165,7 +230,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
       <Field className="col-span-12 md:col-span-6">
         <FieldLabel>City:</FieldLabel>
         <Input
-          value={useWatch({ control, name: `${prefix}.city` }) ?? ''}
+          value={useWatch({ control, name: `${prefix}.city` }) ?? ""}
           onChange={(e) => setValue(`${prefix}.city`, e.target.value)}
         />
       </Field>
@@ -191,7 +256,7 @@ interface StateFieldProps {
 }
 
 function StateField({ control, setValue, prefix, states }: StateFieldProps) {
-  const value = useWatch({ control, name: `${prefix}.state` }) ?? ''
+  const value = useWatch({ control, name: `${prefix}.state` }) ?? ""
   return (
     <Field className="col-span-12 md:col-span-6">
       <FieldLabel>State / Province:</FieldLabel>

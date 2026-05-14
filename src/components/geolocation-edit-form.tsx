@@ -1,6 +1,6 @@
-'use client'
+"use client"
 
-import { useRef, useState, useTransition } from "react"
+import { useRef, useState, useEffect, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -31,6 +31,20 @@ import type { GeolocationRow } from "@/queries/geolocation"
 const MAX_NOTES = 500
 const MAX_PHOTOS = 3
 
+interface PlaceSuggestion {
+  placeName: string
+  zip: string | null
+  street: string | null
+  number: string | null
+  complement: string | null
+  neighborhood: string | null
+  city: string | null
+  state: string | null
+  country: string | null
+  lat: number
+  lon: number
+}
+
 function buildDefaults(existing: GeolocationRow | null): GeolocationFormValues {
   return {
     placeName: existing?.placeName ?? "",
@@ -42,7 +56,7 @@ function buildDefaults(existing: GeolocationRow | null): GeolocationFormValues {
       neighborhood: existing?.neighborhood ?? "",
       city:         existing?.city         ?? "",
       state:        existing?.state        ?? "",
-      country:      existing?.country      ?? "BR",
+      country:      existing?.country      ?? "Brazil",
     },
     section: existing?.section ?? "",
     lat: existing?.lat ?? 0,
@@ -67,6 +81,10 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState<boolean[]>([false, false, false])
 
+  const [placeSuggestions, setPlaceSuggestions] = useState<PlaceSuggestion[]>([])
+  const placeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const placeDropdownRef = useRef<HTMLDivElement>(null)
+
   const {
     control,
     setValue,
@@ -85,6 +103,51 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
   const photos: (string | null)[] = [photo1, photo2, photo3]
   const filledPhotoCount = photos.filter(Boolean).length
   const notesValue = useWatch({ control, name: "notes" }) ?? ""
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (placeDropdownRef.current && !placeDropdownRef.current.contains(e.target as Node)) {
+        setPlaceSuggestions([])
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  const { onChange: placeRegOnChange, ...placeRestRegister } = register("placeName")
+
+  function handlePlaceNameChange(value: string) {
+    if (placeDebounceRef.current) clearTimeout(placeDebounceRef.current)
+    if (value.length < 2) { setPlaceSuggestions([]); return }
+    placeDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/geolocation/places?q=${encodeURIComponent(value)}`)
+        if (res.ok) {
+          const data: PlaceSuggestion[] = await res.json()
+          setPlaceSuggestions(data)
+        }
+      } catch {
+        // silently ignore typeahead errors
+      }
+    }, 300)
+  }
+
+  function applyPlaceSuggestion(s: PlaceSuggestion) {
+    setValue("placeName",            s.placeName,               { shouldValidate: true })
+    setValue("address.zip",          s.zip          ?? "")
+    setValue("address.street",       s.street       ?? "")
+    setValue("address.number",       s.number       ?? "")
+    setValue("address.complement",   s.complement   ?? "")
+    setValue("address.neighborhood", s.neighborhood ?? "")
+    setValue("address.city",         s.city         ?? "")
+    setValue("address.state",        s.state        ?? "")
+    setValue("address.country",      s.country      ?? "Brazil")
+    if (s.lat !== 0 || s.lon !== 0) {
+      setValue("lat", s.lat)
+      setValue("lon", s.lon)
+    }
+    setPlaceSuggestions([])
+  }
 
   const setPhotoAt = (slot: number, value: string | null) => {
     const key = (["photo1", "photo2", "photo3"] as const)[slot]
@@ -228,10 +291,45 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
         />
       </div>
 
-      {/* Place name */}
+      {/* Place name with typeahead */}
       <div className="space-y-2">
         <Label htmlFor="geo-place" className="text-base">Place name</Label>
-        <Input id="geo-place" maxLength={120} placeholder="e.g. São Francisco Cemetery" {...register("placeName")} />
+        <div className="relative" ref={placeDropdownRef}>
+          <Input
+            id="geo-place"
+            maxLength={120}
+            placeholder="e.g. São Francisco Cemetery"
+            {...placeRestRegister}
+            onChange={(e) => {
+              placeRegOnChange(e)
+              handlePlaceNameChange(e.target.value)
+            }}
+            onKeyDown={(e) => { if (e.key === "Escape") setPlaceSuggestions([]) }}
+            autoComplete="off"
+          />
+          {placeSuggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-md border border-border bg-background shadow-lg">
+              <ul className="divide-y divide-border">
+                {placeSuggestions.map((s, i) => (
+                  <li key={i}>
+                    <button
+                      type="button"
+                      className="w-full px-3 py-2 text-left text-sm hover:bg-accent transition"
+                      onClick={() => applyPlaceSuggestion(s)}
+                    >
+                      <span className="font-medium">{s.placeName}</span>
+                      {(s.city || s.country) && (
+                        <span className="ml-2 text-muted-foreground">
+                          — {[s.city, s.country].filter(Boolean).join(", ")}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
         {errors.placeName && <p className="text-xs text-destructive">{errors.placeName.message}</p>}
       </div>
 

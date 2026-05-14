@@ -1,3 +1,5 @@
+import { COUNTRY_BY_NAME } from "@/consts/countries-data"
+
 export interface ZipResult {
   zip: string
   street: string
@@ -7,45 +9,47 @@ export interface ZipResult {
   country: string
 }
 
-async function lookupBrazilianCep(cep: string): Promise<ZipResult> {
-  const digits = cep.replace(/\D/g, '')
-  if (digits.length !== 8) throw new Error('CEP inválido')
+async function lookupBrazilianCep(cep: string, countryName: string): Promise<ZipResult> {
+  const digits = cep.replace(/\D/g, "")
+  if (digits.length !== 8) throw new Error("CEP inválido")
 
   const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`)
-  if (!res.ok) throw new Error('Erro ao consultar CEP')
+  if (!res.ok) throw new Error("Erro ao consultar CEP")
 
   const data = await res.json()
-  if (data.erro) throw new Error('CEP não encontrado')
+  if (data.erro) throw new Error("CEP não encontrado")
 
   return {
     zip:          digits,
-    street:       data.logradouro ?? '',
-    neighborhood: data.bairro     ?? '',
-    city:         data.localidade ?? '',
-    state:        data.uf         ?? '',
-    country:      'BR',
+    street:       data.logradouro ?? "",
+    neighborhood: data.bairro     ?? "",
+    city:         data.localidade ?? "",
+    state:        data.uf         ?? "",
+    country:      countryName,
   }
 }
 
-async function lookupZippopotam(countryCode: string, zip: string): Promise<ZipResult> {
-  const res = await fetch(`https://api.zippopotam.us/${countryCode.toLowerCase()}/${zip}`)
-  if (!res.ok) throw new Error('ZIP not found')
+async function lookupZippopotam(iso: string, zip: string, countryName: string): Promise<ZipResult> {
+  const res = await fetch(`https://api.zippopotam.us/${iso.toLowerCase()}/${zip}`)
+  if (!res.ok) throw new Error("ZIP not found")
 
   const data = await res.json()
   const place = data.places?.[0]
-  if (!place) throw new Error('ZIP not found')
+  if (!place) throw new Error("ZIP not found")
 
   return {
-    zip:          zip,
-    street:       '',
-    neighborhood: '',
-    city:         place['place name']         ?? '',
-    state:        place['state abbreviation'] ?? '',
-    country:      countryCode,
+    zip,
+    street:       "",
+    neighborhood: "",
+    city:         place["place name"]         ?? "",
+    state:        place["state abbreviation"] ?? "",
+    country:      countryName,
   }
 }
 
-export async function lookupZip(countryCode: string, zip: string): Promise<ZipResult> {
-  if (countryCode === 'BR') return lookupBrazilianCep(zip)
-  return lookupZippopotam(countryCode, zip)
+export async function lookupZip(countryName: string, zip: string): Promise<ZipResult> {
+  const c = COUNTRY_BY_NAME[countryName]
+  if (!c?.zipProvider) throw new Error("ZIP lookup not supported for this country")
+  if (c.zipProvider === "viacep") return lookupBrazilianCep(zip, countryName)
+  return lookupZippopotam(c.iso, zip, countryName)
 }
