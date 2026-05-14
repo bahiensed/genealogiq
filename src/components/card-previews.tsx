@@ -18,21 +18,21 @@ export function TreePreview({ memberCount = 0 }: { memberCount?: number }) {
   const mc  = "hsl(var(--brand-indigo) / 0.60)"   // marriage connectors
 
   // Layout (viewBox 0 0 260 140, node W=38 H=14):
-  //   Gen0: G0L(62,6) · G0R(110,6)        couple-cx=105
+  //   Gen0: G0L(62,6) · G0R(110,6)        couple-cx=105   couple-line-y=13
   //   Gen1: G1A(24,60) · G1B(86,60) · G1C(148,60) · G1D(202,60)
-  //         G1C+G1D couple-cx=194
+  //         G1C+G1D couple-cx=194  couple-line-y=67
   //   Gen2: G2A(152,114) · G2B(202,114)
 
   return (
     <svg viewBox="0 0 260 140" className="w-full h-full" aria-hidden>
-      <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <g fill="none" strokeLinecap="butt" strokeLinejoin="miter">
 
         {/* Gen0 marriage connector */}
         <line x1="100" y1="13" x2="110" y2="13" stroke={mc} strokeWidth="1.4" />
 
-        {/* Gen0 → Gen1 T-junction */}
-        <line x1="105" y1="20" x2="105" y2="44" stroke={lc} strokeWidth="1" />
-        <line x1="43"  y1="44" x2="167" y2="44" stroke={lc} strokeWidth="1" />
+        {/* Gen0 → Gen1 T-junction (vertical drop starts at marriage line) */}
+        <line x1="105" y1="13" x2="105" y2="44" stroke={lc} strokeWidth="1" />
+        <line x1="42.5" y1="44" x2="167.5" y2="44" stroke={lc} strokeWidth="1" />
         <line x1="43"  y1="44" x2="43"  y2="60" stroke={lc} strokeWidth="1" />
         <line x1="105" y1="44" x2="105" y2="60" stroke={lc} strokeWidth="1" />
         <line x1="167" y1="44" x2="167" y2="60" stroke={lc} strokeWidth="1" />
@@ -40,9 +40,9 @@ export function TreePreview({ memberCount = 0 }: { memberCount?: number }) {
         {/* Gen1 marriage connector (G1C ↔ G1D) */}
         <line x1="186" y1="67" x2="202" y2="67" stroke={mc} strokeWidth="1.4" />
 
-        {/* G1C+G1D → Gen2 T-junction */}
-        <line x1="194" y1="74" x2="194" y2="98" stroke={lc} strokeWidth="1" />
-        <line x1="171" y1="98" x2="221" y2="98" stroke={lc} strokeWidth="1" />
+        {/* G1C+G1D → Gen2 T-junction (vertical drop starts at marriage line) */}
+        <line x1="194" y1="67" x2="194" y2="98" stroke={lc} strokeWidth="1" />
+        <line x1="170.5" y1="98" x2="221.5" y2="98" stroke={lc} strokeWidth="1" />
         <line x1="171" y1="98" x2="171" y2="114" stroke={lc} strokeWidth="1" />
         <line x1="221" y1="98" x2="221" y2="114" stroke={lc} strokeWidth="1" />
       </g>
@@ -68,12 +68,12 @@ function TreeNode({ x, y, isRoot = false }: { x: number; y: number; isRoot?: boo
     <g>
       <rect
         x={x} y={y} width={W} height={H} rx={3}
-        fill="hsl(var(--card) / 0.9)"
-        stroke={isRoot ? "hsl(var(--brand-indigo) / 0.75)" : "hsl(var(--brand-slate) / 0.45)"}
-        strokeWidth={isRoot ? 1.5 : 0.9}
+        fill={isRoot ? "hsl(var(--brand-indigo) / 0.10)" : "hsl(var(--brand-indigo) / 0.05)"}
+        stroke={isRoot ? "hsl(var(--brand-indigo) / 0.55)" : "hsl(var(--brand-indigo) / 0.22)"}
+        strokeWidth={isRoot ? 1.2 : 0.8}
       />
-      <rect x={x + 5} y={y + 4}   width={W - 13} height="2"   rx="1"    fill="hsl(var(--muted-foreground) / 0.28)" />
-      <rect x={x + 5} y={y + 9}   width={W - 18} height="1.5" rx="0.75" fill="hsl(var(--muted-foreground) / 0.16)" />
+      <rect x={x + 5} y={y + 4}   width={W - 13} height="2"   rx="1"    fill="hsl(var(--brand-slate) / 0.35)" />
+      <rect x={x + 5} y={y + 9}   width={W - 18} height="1.5" rx="0.75" fill="hsl(var(--brand-slate) / 0.20)" />
     </g>
   )
 }
