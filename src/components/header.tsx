@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { HeaderSearch } from "@/components/header-search"
 import { cn } from "@/lib/utils"
-import { logout } from "@/actions/auth"
+import { signOut } from "next-auth/react"
 import { Check, X as XIcon, UserPlus } from "lucide-react"
 import type { BellNotifications } from "@/queries/notifications"
 
@@ -211,7 +211,7 @@ export function Header({ userName, userImage, notifications = EMPTY_NOTIFICATION
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="gap-2 text-destructive focus:text-destructive cursor-pointer"
-            onSelect={() => logout()}
+            onSelect={() => signOut({ callbackUrl: "/" })}
           >
             <LogOut className="h-4 w-4" />
             Sign out
