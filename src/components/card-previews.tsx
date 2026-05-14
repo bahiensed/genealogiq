@@ -14,9 +14,8 @@ export function TreePreview({ memberCount = 0 }: { memberCount?: number }) {
     )
   }
 
-  // Neutral line colors — no brand palette on the structure
-  const lc  = "hsl(var(--muted-foreground) / 0.38)"  // parent-child lines
-  const mc  = "hsl(var(--muted-foreground) / 0.22)"  // marriage connectors
+  const lc  = "hsl(var(--brand-slate) / 0.55)"    // parent-child lines
+  const mc  = "hsl(var(--brand-indigo) / 0.60)"   // marriage connectors
 
   // Layout (viewBox 0 0 260 140, node W=38 H=14):
   //   Gen0: G0L(62,6) · G0R(110,6)        couple-cx=105
@@ -69,9 +68,9 @@ function TreeNode({ x, y, isRoot = false }: { x: number; y: number; isRoot?: boo
     <g>
       <rect
         x={x} y={y} width={W} height={H} rx={3}
-        fill="hsl(var(--card) / 0.8)"
-        stroke={isRoot ? "hsl(var(--muted-foreground) / 0.55)" : "hsl(var(--border) / 0.9)"}
-        strokeWidth={isRoot ? 1.3 : 0.8}
+        fill="hsl(var(--card) / 0.9)"
+        stroke={isRoot ? "hsl(var(--brand-indigo) / 0.75)" : "hsl(var(--brand-slate) / 0.45)"}
+        strokeWidth={isRoot ? 1.5 : 0.9}
       />
       <rect x={x + 5} y={y + 4}   width={W - 13} height="2"   rx="1"    fill="hsl(var(--muted-foreground) / 0.28)" />
       <rect x={x + 5} y={y + 9}   width={W - 18} height="1.5" rx="0.75" fill="hsl(var(--muted-foreground) / 0.16)" />

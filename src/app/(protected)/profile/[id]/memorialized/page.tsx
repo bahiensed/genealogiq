@@ -4,7 +4,8 @@ import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
-import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
+import { MemorializedClient } from "@/components/memorialized-client"
+import { type MiniProfile } from "@/components/profile-mini-card"
 import { getProfileGradient } from "@/lib/avatar-color"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
@@ -104,11 +105,7 @@ export default async function MemorializedPage({ params }: Props) {
           </div>
         </div>
 
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {memorials.map((m, i) => (
-            <ProfileMiniCard key={m.id} profile={toMiniProfile(m)} delay={i * 40} />
-          ))}
-        </section>
+        <MemorializedClient profiles={memorials.map(toMiniProfile)} />
 
         {memorials.length === 0 && isOwn && (
           <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
