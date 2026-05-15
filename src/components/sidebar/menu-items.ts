@@ -12,6 +12,7 @@ import {
   PackageIcon,
   QrCodeIcon,
   TagIcon,
+  TicketPercent,
 } from 'lucide-react'
 
 export const main = [
@@ -53,8 +54,9 @@ export const inventory = [
 ]
 
 export const sales = [
-  { name: 'Sales',         url: '/sales',        icon: Coins         },
-  { name: 'Manual Sales',  url: '/manual-sales', icon: HandCoinsIcon },
+  { name: 'Sales',              url: '/sales',                    icon: Coins          },
+  { name: 'Manual Sales',       url: '/manual-sales',             icon: HandCoinsIcon  },
+  { name: 'Discount Coupons',   url: '/sales/discount-coupons',   icon: TicketPercent  },
 ]
 
 export const finance = [
