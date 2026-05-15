@@ -90,10 +90,7 @@ function ActivePlanBanner({ plan }: { plan: ActivePlan }) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const renews = longDate.format(plan.currentPeriodEnd)
-  const summary = plan.cancelAtPeriodEnd
-    ? `Currently on ${plan.subscription.name}. Ends ${renews}.`
-    : `Currently on ${plan.subscription.name}. Renews ${renews}.`
+  const summary = `Currently on ${plan.subscription.name} until ${longDate.format(plan.currentPeriodEnd)}.`
 
   const handleManage = () => {
     startTransition(async () => {

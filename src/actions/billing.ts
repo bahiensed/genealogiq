@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { verifySession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import { stripe } from "@/lib/stripe"
-import { ensureStripeCustomer, compareTier } from "@/lib/billing"
+import { ensureStripeCustomer, compareTier, upsertSaleFromSubscription } from "@/lib/billing"
 
 type ActionResult<T> = { error: string } | T
 
@@ -95,11 +95,16 @@ export async function changeSubscription(
       const itemId = sub.items.data[0]?.id
       if (!itemId) return { error: "Active subscription has no items in Stripe." }
 
-      await stripe.subscriptions.update(active.stripeSubscriptionId, {
+      const updated = await stripe.subscriptions.update(active.stripeSubscriptionId, {
         items:              [{ id: itemId, price: targetPriceId }],
         proration_behavior: "always_invoice",
         metadata,
       })
+
+      // Mirror the change to our DB immediately so the page refresh shows the new
+      // plan without waiting for the customer.subscription.updated webhook. The
+      // webhook will also fire and upsert again — idempotent via stripeSubscriptionId.
+      await upsertSaleFromSubscription(prisma, updated)
 
       revalidatePath("/subscriptions")
       revalidatePath(`/profile/${session.user.id}/memorialized`)

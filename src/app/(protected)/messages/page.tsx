@@ -21,22 +21,17 @@ export default async function MessagesPage() {
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
-      <main className="container relative pt-24 pb-32 max-w-3xl">
-        <div className="mb-8 animate-fade-in">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 md:gap-4 min-w-0">
-              <BackButton href="/home" label="Back" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Messages</h1>
-            </div>
-            {totalPending > 0 && (
-              <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
-                {totalPending} pending
-              </span>
-            )}
+      <main className="container relative pt-24 pb-32 max-w-6xl">
+        <div className="flex items-center justify-between gap-3 mb-2 animate-fade-in">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            <BackButton href="/home" label="Back to home" />
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Messages</h1>
           </div>
-          <p className="text-muted-foreground mt-2 italic">
-            Your inbox: requests, approvals, and replies.
-          </p>
+          {totalPending > 0 && (
+            <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
+              {totalPending} pending
+            </span>
+          )}
         </div>
 
         <MessagesList data={data} sessionUserId={session.user.id} />

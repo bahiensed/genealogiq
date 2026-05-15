@@ -30,15 +30,18 @@ export async function submitTribute(profileId: string, data: unknown) {
     update: { ...parsed.data, status: "PENDING" },
   })
 
-  // Notify every guardian of the profile.
+  // Notify everyone who can moderate this profile: the profile owner (when it's
+  // a living user) and any guardians (typical for memorial profiles). Deduped.
   const guardians = await prisma.appUserGuardian.findMany({
     where:  { appUserId: profileId },
     select: { guardianId: true },
   })
-  for (const g of guardians) {
+  const recipientIds = new Set<string>([profileId, ...guardians.map((g) => g.guardianId)])
+  recipientIds.delete(session.user.id) // never notify the author about their own tribute
+  for (const recipientId of recipientIds) {
     await notify({
       type:      "TRIBUTE_PENDING",
-      userId:    g.guardianId,
+      userId:    recipientId,
       actorId:   session.user.id,
       tributeId: tribute.id,
     })
