@@ -23,7 +23,7 @@ export function UpgradeHint({ context, currentTier, inline = false }: Props) {
   const content = (
     <>
       {QUESTION[context]}{" "}
-      <Link href="/plans" className="text-primary hover:underline">
+      <Link href="/subscriptions" className="text-primary hover:underline">
         Upgrade your plan.
       </Link>
     </>

@@ -34,27 +34,21 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Idempotency first: if the event.id already exists, this throws P2002 and we exit early.
+    // Idempotency: stripe_events.id is the PK. A duplicate delivery throws P2002.
     await prisma.stripeEvent.create({ data: { id: event.id, type: event.type } })
   } catch (err: unknown) {
     if ((err as { code?: string }).code === "P2002") {
       return NextResponse.json({ received: true, duplicate: true })
     }
     console.error("[stripe-webhook] stripeEvent insert failed", err)
-    return NextResponse.json(
-      { error: "stripeEvent insert failed", detail: (err as Error).message },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "internal" }, { status: 500 })
   }
 
   try {
     await upsertSaleFromSubscription(prisma, event.data.object as Stripe.Subscription)
   } catch (err: unknown) {
     console.error("[stripe-webhook] upsertSaleFromSubscription failed", err)
-    return NextResponse.json(
-      { error: "upsertSaleFromSubscription failed", detail: (err as Error).message },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "internal" }, { status: 500 })
   }
 
   return NextResponse.json({ received: true })

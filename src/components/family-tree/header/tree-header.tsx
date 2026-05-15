@@ -37,7 +37,7 @@ export function TreeHeader({ rootFirstName, rootId, persons, generations, member
       {canManage && (
         atLimit ? (
           <Button size="sm" asChild className="gap-1.5 shrink-0">
-            <Link href="/plans">
+            <Link href="/subscriptions">
               <Sprout className="h-3.5 w-3.5" />
               Upgrade plan
             </Link>

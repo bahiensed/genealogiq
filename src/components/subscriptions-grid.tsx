@@ -2,7 +2,7 @@
 
 import { useEffect, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Check, Sparkles, Settings } from "lucide-react"
+import { Check, CalendarDays, Calendar1, Settings } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { createCheckoutSession, createPortalSession } from "@/actions/billing"
@@ -17,7 +17,7 @@ interface Props {
   flashStatus?:  "success" | "cancel" | null
 }
 
-export function PlansGrid({ subscriptions, activePlan, flashStatus }: Props) {
+export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Props) {
   useEffect(() => {
     if (flashStatus === "success") {
       toast.success("Payment received — your plan is being activated. Refresh in a moment if it hasn't appeared yet.")
@@ -26,14 +26,19 @@ export function PlansGrid({ subscriptions, activePlan, flashStatus }: Props) {
     }
   }, [flashStatus])
 
+  const activeSubscriptionId = activePlan?.subscription.id ?? null
+
   return (
     <div className="space-y-6">
       {activePlan && <ActivePlanBanner plan={activePlan} />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {subscriptions.map((s, i) => (
-          <PlanCard key={s.id} plan={s} delay={i * 60} isActiveTier={activePlan?.subscription.id === s.id} />
-        ))}
+        {subscriptions.map((s, i) => {
+          const isActive = activeSubscriptionId
+            ? activeSubscriptionId === s.id
+            : s.code === "FREE"
+          return <PlanCard key={s.id} plan={s} delay={i * 60} isActive={isActive} />
+        })}
       </div>
     </div>
   )
@@ -43,10 +48,12 @@ function ActivePlanBanner({ plan }: { plan: ActivePlan }) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const renews = plan.currentPeriodEnd.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+  const renews = plan.currentPeriodEnd.toLocaleDateString("en-US", {
+    year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
+  })
   const summary = plan.cancelAtPeriodEnd
-    ? `Currently on ${plan.subscription.name} — ${plan.cadence} cadence, ends ${renews}.`
-    : `Currently on ${plan.subscription.name} — ${plan.cadence} cadence, renews ${renews}.`
+    ? `Currently on ${plan.subscription.name}. Ends ${renews}.`
+    : `Currently on ${plan.subscription.name}. Renews ${renews}.`
 
   const handleManage = () => {
     startTransition(async () => {
@@ -67,7 +74,7 @@ function ActivePlanBanner({ plan }: { plan: ActivePlan }) {
   )
 }
 
-function PlanCard({ plan, delay, isActiveTier }: { plan: SubscriptionRow; delay: number; isActiveTier: boolean }) {
+function PlanCard({ plan, delay, isActive }: { plan: SubscriptionRow; delay: number; isActive: boolean }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const isFree = plan.code === "FREE"
@@ -91,19 +98,15 @@ function PlanCard({ plan, delay, isActiveTier }: { plan: SubscriptionRow; delay:
     plan.qrCodeAccess ? "QR Code for plaques & stones" : "QR Code on paid plans",
   ]
 
-  const monthlyEquivalent = plan.termLength > 0 ? Number(plan.price) / plan.termLength : 0
+  const annualPrice = Number(plan.price)
+  const monthlyPrice = plan.termLength > 0 ? annualPrice / plan.termLength : 0
 
   return (
     <div className="glass-card no-sheen p-6 flex flex-col gap-5 animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
       <div className="space-y-1.5">
         <div className="flex items-center gap-2">
           <h3 className="text-2xl font-semibold tracking-tight">{plan.name}</h3>
-          {isFree && (
-            <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-secondary text-foreground/80 px-2 py-0.5">
-              Default
-            </span>
-          )}
-          {isActiveTier && (
+          {isActive && (
             <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-primary text-primary-foreground px-2 py-0.5">
               Active
             </span>
@@ -114,15 +117,14 @@ function PlanCard({ plan, delay, isActiveTier }: { plan: SubscriptionRow; delay:
         )}
       </div>
 
-      {!isFree && (
+      {!isFree ? (
         <div className="flex items-baseline gap-1">
-          <span className="text-4xl font-bold">{usd.format(Number(plan.price))}</span>
+          <span className="text-4xl font-bold">{usd.format(annualPrice)}</span>
           <span className="text-sm text-muted-foreground">
             {plan.termLength === 12 ? "/ year" : plan.termLength === 0 ? "/ lifetime" : `/ ${plan.termLength} mo`}
           </span>
         </div>
-      )}
-      {isFree && (
+      ) : (
         <div>
           <span className="text-4xl font-bold">Free</span>
         </div>
@@ -137,16 +139,15 @@ function PlanCard({ plan, delay, isActiveTier }: { plan: SubscriptionRow; delay:
         ))}
       </ul>
 
-      {isFree ? (
-        <Button variant="outline" disabled className="w-full">Your default plan</Button>
-      ) : (
+      {!isFree && !isActive && (
         <div className="grid grid-cols-1 gap-2">
           <Button onClick={() => choose("annual")} disabled={isPending} className="w-full gap-2">
-            <Sparkles className="h-4 w-4" />
-            Pay annually — {usd.format(Number(plan.price))}
+            <CalendarDays className="h-4 w-4" />
+            Pay annually {usd.format(annualPrice)}
           </Button>
-          <Button onClick={() => choose("monthly")} disabled={isPending} variant="outline" className="w-full">
-            Pay monthly — {usd.format(monthlyEquivalent)} / mo
+          <Button onClick={() => choose("monthly")} disabled={isPending} variant="outline" className="w-full gap-2">
+            <Calendar1 className="h-4 w-4" />
+            Pay monthly {usd.format(monthlyPrice)}
           </Button>
         </div>
       )}

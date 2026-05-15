@@ -37,8 +37,8 @@ export async function createCheckoutSession(
     client_reference_id:   session.user.id,
     metadata,
     subscription_data:     { metadata },
-    success_url:           `${appUrl}/plans?status=success`,
-    cancel_url:            `${appUrl}/plans?status=cancel`,
+    success_url:           `${appUrl}/subscriptions?status=success`,
+    cancel_url:            `${appUrl}/subscriptions?status=cancel`,
     allow_promotion_codes: true,
   })
 
@@ -53,7 +53,7 @@ export async function createPortalSession(): Promise<ActionResult<{ url: string 
 
   const portal = await stripe.billingPortal.sessions.create({
     customer:   customerId,
-    return_url: `${appUrl}/plans`,
+    return_url: `${appUrl}/subscriptions`,
   })
   return { url: portal.url }
 }

@@ -203,9 +203,9 @@ export function Header({ userName, userImage, notifications = EMPTY_NOTIFICATION
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/plans" className="gap-2 cursor-pointer">
+            <Link href="/subscriptions" className="gap-2 cursor-pointer">
               <Sparkles className="h-4 w-4" />
-              Plans &amp; billing
+              Subscriptions
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

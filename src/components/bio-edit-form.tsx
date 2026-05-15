@@ -66,7 +66,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
     }
     if (valid.length === 0) return
     const remaining = maxImages - images.length
-    const upgradeAction = { label: "Upgrade plan", onClick: () => router.push("/plans") }
+    const upgradeAction = { label: "Upgrade plan", onClick: () => router.push("/subscriptions") }
     if (remaining <= 0) {
       toast.warning(`Maximum of ${maxImages} images reached.`, { action: upgradeAction })
       return

@@ -2,7 +2,7 @@ import Link from "next/link"
 import { ArrowRight, QrCode } from "lucide-react"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
-import { PlansGrid } from "@/components/plans-grid"
+import { SubscriptionsGrid } from "@/components/subscriptions-grid"
 import { Button } from "@/components/ui/button"
 import { verifySession } from "@/lib/dal"
 import { getActiveSubscriptions } from "@/queries/subscriptions"
@@ -33,7 +33,7 @@ export default async function BillingQrCodePage() {
         </section>
 
         {entryPlan.length > 0 ? (
-          <PlansGrid subscriptions={entryPlan} activePlan={activePlan} />
+          <SubscriptionsGrid subscriptions={entryPlan} activePlan={activePlan} />
         ) : (
           <div className="glass-card no-sheen flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
             <QrCode className="h-10 w-10 text-muted-foreground" />
@@ -43,7 +43,7 @@ export default async function BillingQrCodePage() {
 
         <div className="mt-10 flex items-center justify-center animate-fade-in" style={{ animationDelay: "120ms" }}>
           <Button variant="ghost" asChild className="gap-2">
-            <Link href="/plans">
+            <Link href="/subscriptions">
               Compare all plans
               <ArrowRight className="h-4 w-4" />
             </Link>
