@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useActionState } from 'react'
-import Image from 'next/image'
 import { Eye, EyeOff } from 'lucide-react'
+import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,18 +17,8 @@ export function ResetPasswordForm({ token }: Props) {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <div className="w-full max-w-md animate-fade-in">
-      <div className="flex flex-col items-center text-center mb-6">
-        <Image src="/tree-dark.png" alt="Genealogiq" width={160} height={160} className="object-contain dark:hidden" style={{ height: "auto" }} priority />
-        <Image src="/tree-light.png" alt="Genealogiq" width={160} height={160} className="hidden object-contain dark:block" style={{ height: "auto" }} priority />
-      </div>
-
-      <form action={dispatch} className="glass-card rounded-2xl p-6 space-y-4">
-        <div>
-          <h1 className="text-xl font-semibold">Reset password</h1>
-          <p className="text-sm text-muted-foreground mt-1">Enter your new password below.</p>
-        </div>
-
+    <AuthCard title="Reset password" description="Enter your new password below.">
+      <form action={dispatch} className="space-y-4">
         <input type="hidden" name="token" value={token} />
 
         {state?.error && (
@@ -64,6 +54,6 @@ export function ResetPasswordForm({ token }: Props) {
           {isPending ? "Saving…" : "Save new password"}
         </Button>
       </form>
-    </div>
+    </AuthCard>
   )
 }

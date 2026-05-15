@@ -2,8 +2,8 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { forgotPassword } from '@/actions/auth'
+import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,20 +12,11 @@ export function ForgotPasswordForm() {
   const [state, dispatch, isPending] = useActionState(forgotPassword, undefined)
 
   return (
-    <div className="animate-fade-in w-full max-w-md">
-      <div className="flex flex-col items-center text-center mb-8">
-        <Image src="/tree-dark.png" alt="Genealogiq" width={256} height={256} className="object-contain dark:hidden" style={{ height: "auto" }} priority />
-        <Image src="/tree-light.png" alt="Genealogiq" width={256} height={256} className="hidden object-contain dark:block" style={{ height: "auto" }} priority />
-      </div>
-
-      <form action={dispatch} className="glass-card rounded-2xl p-8 space-y-4">
-        <div>
-          <h1 className="text-xl font-semibold">Forgot your password?</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {"Enter your email below and we'll send you a reset link."}
-          </p>
-        </div>
-
+    <AuthCard
+      title="Forgot your password?"
+      description="Enter your email below and we'll send you a reset link."
+    >
+      <form action={dispatch} className="space-y-4">
         {state?.error && (
           <p className="text-sm text-destructive">{state.error}</p>
         )}
@@ -52,6 +43,6 @@ export function ForgotPasswordForm() {
           </Link>
         </p>
       </form>
-    </div>
+    </AuthCard>
   )
 }
