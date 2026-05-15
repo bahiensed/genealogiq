@@ -80,8 +80,41 @@ model Subscription {
   updatedAt             DateTime @updatedAt @map("updated_at")
 
   appSales              AppSale[]
+  coupons               DiscountCoupon[] @relation("CouponSubscriptions")
 
   @@map("subscriptions")
+}
+
+model DiscountCoupon {
+  id                    String   @id @default(cuid())
+  code                  String   @unique
+  description           String?
+
+  // Discount config
+  discountType          String                                       // "percent" | "amount"
+  discountValue         Decimal  @db.Decimal(10, 2)
+  duration              String                                       // "once" | "forever" | "repeating"
+  durationInMonths      Int?     @map("duration_in_months")
+
+  // Limits
+  maxRedemptions        Int?     @map("max_redemptions")
+  redeemBy              DateTime? @map("redeem_by")
+
+  // Scope — empty = all paid subs
+  appliesTo             Subscription[] @relation("CouponSubscriptions")
+
+  // Stripe mirror
+  stripeCouponId        String?  @unique @map("stripe_coupon_id")
+  stripePromotionCodeId String?  @unique @map("stripe_promotion_code_id")
+
+  // Audit (createdById is a BMS User id, not an AppUser; not modeled as relation here)
+  createdById           String   @map("created_by_id")
+  isActive              Boolean  @default(true) @map("is_active")
+
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("discount_coupons")
 }
 
 model Package {
