@@ -6,10 +6,14 @@ import { PlansGrid } from "@/components/plans-grid"
 import { Button } from "@/components/ui/button"
 import { verifySession } from "@/lib/dal"
 import { getActiveSubscriptions } from "@/queries/subscriptions"
+import { getActivePlan } from "@/queries/billing"
 
 export default async function BillingQrCodePage() {
-  await verifySession()
-  const subscriptions = await getActiveSubscriptions()
+  const session = await verifySession()
+  const [subscriptions, activePlan] = await Promise.all([
+    getActiveSubscriptions(),
+    getActivePlan(session.user.id),
+  ])
   const paidPlans = subscriptions.filter((s) => s.code !== "FREE")
   const entryPlan = paidPlans[0] ? [paidPlans[0]] : []
 
@@ -29,7 +33,7 @@ export default async function BillingQrCodePage() {
         </section>
 
         {entryPlan.length > 0 ? (
-          <PlansGrid subscriptions={entryPlan} />
+          <PlansGrid subscriptions={entryPlan} activePlan={activePlan} />
         ) : (
           <div className="glass-card no-sheen flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
             <QrCode className="h-10 w-10 text-muted-foreground" />

@@ -63,12 +63,20 @@ export const getMemorialFeatures = cache(async (memorialId: string): Promise<Sub
     select: {
       appSale: {
         select: {
-          subscription: { select: FEATURE_SELECT },
+          status:           true,
+          currentPeriodEnd: true,
+          subscription:     { select: FEATURE_SELECT },
         },
       },
     },
   })
 
-  if (memorial?.appSale?.subscription) return memorial.appSale.subscription
+  const sale = memorial?.appSale
+  const isLive =
+    !!sale &&
+    (sale.status === "active" || sale.status === "trialing") &&
+    sale.currentPeriodEnd > new Date()
+
+  if (isLive && sale.subscription) return sale.subscription
   return getFreeSubscription()
 })

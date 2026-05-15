@@ -3,10 +3,21 @@ import { BackButton } from "@/components/back-button"
 import { PlansGrid } from "@/components/plans-grid"
 import { verifySession } from "@/lib/dal"
 import { getActiveSubscriptions } from "@/queries/subscriptions"
+import { getActivePlan } from "@/queries/billing"
 
-export default async function PlansPage() {
-  await verifySession()
-  const subscriptions = await getActiveSubscriptions()
+interface Props {
+  searchParams: Promise<{ status?: string }>
+}
+
+export default async function PlansPage({ searchParams }: Props) {
+  const session = await verifySession()
+  const [{ status }, subscriptions, activePlan] = await Promise.all([
+    searchParams,
+    getActiveSubscriptions(),
+    getActivePlan(session.user.id),
+  ])
+
+  const flashStatus = status === "success" ? "success" : status === "cancel" ? "cancel" : null
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -24,7 +35,7 @@ export default async function PlansPage() {
           </p>
         </section>
 
-        <PlansGrid subscriptions={subscriptions} />
+        <PlansGrid subscriptions={subscriptions} activePlan={activePlan} flashStatus={flashStatus} />
       </main>
     </div>
   )
