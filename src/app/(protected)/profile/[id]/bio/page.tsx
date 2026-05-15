@@ -39,21 +39,15 @@ export default async function ProfileBioPage({ params }: Props) {
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
-      <main className="container relative pt-24 pb-32 max-w-5xl">
+      <main className="container relative pt-24 pb-32 max-w-6xl">
         <div className="mb-8 animate-fade-in">
-          <div className="flex items-center gap-3 md:gap-4">
-            <BackButton href={`/profile/${id}`} label="Back to profile" />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Biography</h1>
-          </div>
-          <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
-            <div className="flex flex-col gap-1 min-w-0 bg-transparent">
-              <p className="text-muted-foreground italic">
-                {isOwn ? "A life remembered through words and images" : `${name}'s life story`}
-              </p>
-              {isOwn && atLimit && <UpgradeHint context="bio" currentTier={features.code} />}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 md:gap-4 min-w-0">
+              <BackButton href={`/profile/${id}`} label="Back to profile" />
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Biography</h1>
             </div>
             {isOwn && (
-              <Button asChild className="shrink-0 self-end lg:self-auto gap-2">
+              <Button asChild className="shrink-0 gap-2">
                 <Link href={`/profile/${id}/bio/edit`}>
                   <NotebookPen className="h-4 w-4" />
                   {isEmpty ? "Write biography" : "Edit"}
@@ -61,6 +55,14 @@ export default async function ProfileBioPage({ params }: Props) {
               </Button>
             )}
           </div>
+          <p className="text-muted-foreground mt-2 italic">
+            {isOwn ? "A life remembered through words and images" : `${name}'s life story`}
+          </p>
+          {isOwn && atLimit && (
+            <div className="mt-2">
+              <UpgradeHint context="bio" currentTier={features.code} />
+            </div>
+          )}
         </div>
 
         {isEmpty ? (

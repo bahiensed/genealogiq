@@ -63,13 +63,15 @@ export async function approveTribute(tributeId: string, profileId: string) {
     select: { authorId: true },
   })
 
-  // Mark pending notifications for this tribute (for any guardian) as read.
+  // Transform every moderator's TRIBUTE_PENDING notification into TRIBUTE_APPROVED
+  // so it persists in their Recent Activity ("You approved <author>'s tribute")
+  // instead of vanishing. Mark read so the bell badge clears.
   await prisma.notification.updateMany({
-    where: { tributeId, type: "TRIBUTE_PENDING", readAt: null },
-    data:  { readAt: new Date() },
+    where: { tributeId, type: "TRIBUTE_PENDING" },
+    data:  { type: "TRIBUTE_APPROVED", readAt: new Date() },
   })
 
-  // Notify the tribute author.
+  // Notify the tribute author too.
   await notify({
     type:      "TRIBUTE_APPROVED",
     userId:    tribute.authorId,
@@ -94,9 +96,11 @@ export async function rejectTribute(tributeId: string, profileId: string) {
     select: { authorId: true },
   })
 
+  // See approveTribute: transform-in-place so the moderator keeps an audit trail
+  // in Recent Activity.
   await prisma.notification.updateMany({
-    where: { tributeId, type: "TRIBUTE_PENDING", readAt: null },
-    data:  { readAt: new Date() },
+    where: { tributeId, type: "TRIBUTE_PENDING" },
+    data:  { type: "TRIBUTE_REJECTED", readAt: new Date() },
   })
 
   await notify({

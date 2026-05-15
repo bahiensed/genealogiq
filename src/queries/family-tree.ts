@@ -38,12 +38,13 @@ export interface FamilyTreeData {
 }
 
 export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
-  // BFS reachable set from root via FamilyRelation
+  // BFS reachable set from root via FamilyRelation (skip REJECTED — kept in DB
+  // for the audit trail but not part of any tree)
   const discovered = new Set<string>([rootId])
   let frontier = [rootId]
   while (frontier.length > 0) {
     const rels = await prisma.familyRelation.findMany({
-      where:  { OR: [{ fromId: { in: frontier } }, { toId: { in: frontier } }] },
+      where:  { status: { not: "REJECTED" }, OR: [{ fromId: { in: frontier } }, { toId: { in: frontier } }] },
       select: { fromId: true, toId: true },
     })
     const next: string[] = []
@@ -69,7 +70,7 @@ export async function getFamilyTree(rootId: string): Promise<FamilyTreeData> {
       },
     }),
     prisma.familyRelation.findMany({
-      where:  { OR: [{ fromId: { in: ids } }, { toId: { in: ids } }] },
+      where:  { status: { not: "REJECTED" }, OR: [{ fromId: { in: ids } }, { toId: { in: ids } }] },
       select: {
         id: true, type: true, subtype: true,
         fromId: true, toId: true,
@@ -102,7 +103,7 @@ export async function getTreeMemberIds(rootId: string): Promise<Set<string>> {
   let frontier = [rootId]
   while (frontier.length > 0) {
     const rels = await prisma.familyRelation.findMany({
-      where:  { OR: [{ fromId: { in: frontier } }, { toId: { in: frontier } }] },
+      where:  { status: { not: "REJECTED" }, OR: [{ fromId: { in: frontier } }, { toId: { in: frontier } }] },
       select: { fromId: true, toId: true },
     })
     const next: string[] = []

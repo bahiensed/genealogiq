@@ -184,24 +184,35 @@ function PendingFamilyRequest({ request, sessionUserId }: { request: MessagesDat
 }
 
 function ActivityCard({ item }: { item: MessagesData["recentActivity"][number] }) {
+  const counterparty: Actor = item.actor ?? { firstName: "Someone", lastName: "", avatarUrl: null }
+  const counterpartyName = `${counterparty.firstName} ${counterparty.lastName}`.trim() || "Someone"
   let description: React.ReactNode = null
   let href: string | null = null
 
   if (item.type === "TRIBUTE_APPROVED" || item.type === "TRIBUTE_REJECTED") {
     const approved = item.type === "TRIBUTE_APPROVED"
-    description = approved
-      ? <>approved your tribute.</>
-      : <>declined your tribute.</>
+    description = item.viewerActed
+      ? <>{approved ? "approved" : "rejected"} {counterpartyName}&apos;s tribute.</>
+      : <>{approved ? "approved" : "declined"} your tribute.</>
     href = item.profileId ? `/profile/${item.profileId}/tributes` : null
   } else if (item.type === "FAMILY_REQUEST_ACCEPTED") {
-    description = <>joined your family tree.</>
+    description = item.viewerActed
+      ? <>joined {counterpartyName}&apos;s family tree.</>
+      : <>joined your family tree.</>
   } else if (item.type === "FAMILY_REQUEST_REJECTED") {
-    description = <>declined your tree invitation.</>
+    description = item.viewerActed
+      ? <>declined {counterpartyName}&apos;s tree invitation.</>
+      : <>declined your tree invitation.</>
   } else {
     return null
   }
 
-  const actor: Actor = item.actor ?? { firstName: "Someone", lastName: "", avatarUrl: null }
+  // When the viewer is the one who took the action, headline reads "You" but we
+  // keep the counterparty's avatar so the picture matches the person mentioned
+  // in the description.
+  const actor: Actor = item.viewerActed
+    ? { firstName: "You", lastName: "", avatarUrl: counterparty.avatarUrl }
+    : counterparty
 
   const card = (
     <MessageCard

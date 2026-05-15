@@ -349,9 +349,11 @@ export async function acceptFamilyRequest(relationId: string) {
     data:  { status: "ACCEPTED" },
   })
 
+  // Transform the accepter's own PENDING notification into ACCEPTED in-place so
+  // it persists in their Recent Activity ("You joined <requester>'s family tree").
   await prisma.notification.updateMany({
-    where: { familyRelationId: relationId, userId: session.user.id, readAt: null },
-    data:  { readAt: new Date() },
+    where: { familyRelationId: relationId, userId: session.user.id, type: "FAMILY_REQUEST_PENDING" },
+    data:  { type: "FAMILY_REQUEST_ACCEPTED", readAt: new Date() },
   })
 
   if (relation.requestedById) {
@@ -380,16 +382,28 @@ export async function rejectFamilyRequest(relationId: string) {
   const isTarget = relation.fromId === session.user.id || relation.toId === session.user.id
   if (!isTarget || relation.requestedById === session.user.id) return { error: "Not authorized." }
 
-  // Notify the requester BEFORE deleting (deletion cascades the existing notif rows).
+  // Keep the row but mark it REJECTED so we preserve the audit trail and the
+  // notifications linked to it (tree queries filter REJECTED out).
+  await prisma.familyRelation.update({
+    where: { id: relationId },
+    data:  { status: "REJECTED" },
+  })
+
+  // Transform the rejecter's own PENDING notification into REJECTED in-place so
+  // it persists in their Recent Activity ("You declined <requester>'s invitation").
+  await prisma.notification.updateMany({
+    where: { familyRelationId: relationId, userId: session.user.id, type: "FAMILY_REQUEST_PENDING" },
+    data:  { type: "FAMILY_REQUEST_REJECTED", readAt: new Date() },
+  })
+
   if (relation.requestedById) {
     await notify({
-      type:    "FAMILY_REQUEST_REJECTED",
-      userId:  relation.requestedById,
-      actorId: session.user.id,
+      type:             "FAMILY_REQUEST_REJECTED",
+      userId:           relation.requestedById,
+      actorId:          session.user.id,
+      familyRelationId: relationId,
     })
   }
-
-  await prisma.familyRelation.delete({ where: { id: relationId } })
 
   revalidatePath("/family-requests")
   return { success: true }

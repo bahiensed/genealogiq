@@ -21,16 +21,18 @@ export default async function BillingQrCodePage() {
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
-      <main className="container relative pt-24 pb-32 max-w-3xl">
-        <section className="mb-10 animate-fade-in">
-          <div className="flex items-center gap-3 md:gap-4">
-            <BackButton href="/home" label="Back" />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">Get a QR Code</h1>
+      <main className="container relative pt-24 pb-32 max-w-6xl">
+        <div className="mb-8 animate-fade-in">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 md:gap-4 min-w-0">
+              <BackButton href="/home" label="Back to home" />
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Get a QR Code</h1>
+            </div>
           </div>
           <p className="text-muted-foreground mt-2 italic">
             One QR Code, scannable forever — for plaques, headstones and digital spaces alike
           </p>
-        </section>
+        </div>
 
         {entryPlan.length > 0 ? (
           <SubscriptionsGrid subscriptions={entryPlan} activePlan={activePlan} />

@@ -40,6 +40,8 @@ export interface MessagesData {
     actor:     ActorSummary | null
     tributeId: string | null
     profileId: string | null
+    /** True when the viewer was the one who took the action (moderator/accepter), false when they received it (author/requester). */
+    viewerActed: boolean
     familyRelationId: string | null
   }[]
 }
@@ -84,8 +86,14 @@ export async function getMessages(userId: string): Promise<MessagesData> {
         id: true, type: true, createdAt: true,
         tributeId: true,
         familyRelationId: true,
-        tribute: { select: { profileId: true } },
-        actor:   { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+        // Pull tribute.authorId so we can tell whether the viewer is the tribute
+        // author ("your tribute was approved") or the moderator ("you approved …").
+        tribute:        { select: { profileId: true, authorId: true } },
+        // Pull familyRelation.requestedById so we can tell whether the viewer
+        // sent the invite ("X joined your tree") or received and acted on it
+        // ("you joined X's tree").
+        familyRelation: { select: { requestedById: true } },
+        actor:          { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
       },
     }),
   ])
@@ -101,14 +109,25 @@ export async function getMessages(userId: string): Promise<MessagesData> {
       author:      t.author,
     })),
     pendingFamilyRequests,
-    recentActivity: recentActivity.map((n) => ({
-      id:               n.id,
-      type:             n.type,
-      createdAt:        n.createdAt,
-      actor:            n.actor,
-      tributeId:        n.tributeId,
-      profileId:        n.tribute?.profileId ?? null,
-      familyRelationId: n.familyRelationId,
-    })),
+    recentActivity: recentActivity.map((n) => {
+      let viewerActed = false
+      if (n.tribute) {
+        // Viewer is the moderator when they are NOT the tribute's author.
+        viewerActed = n.tribute.authorId !== userId
+      } else if (n.familyRelation) {
+        // Viewer accepted/rejected when they are NOT the one who sent the invite.
+        viewerActed = n.familyRelation.requestedById !== userId
+      }
+      return {
+        id:               n.id,
+        type:             n.type,
+        createdAt:        n.createdAt,
+        actor:            n.actor,
+        tributeId:        n.tributeId,
+        profileId:        n.tribute?.profileId ?? null,
+        familyRelationId: n.familyRelationId,
+        viewerActed,
+      }
+    }),
   }
 }
