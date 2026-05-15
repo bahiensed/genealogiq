@@ -16,11 +16,11 @@ export function parentStyle(subtype: string): Style {
 }
 
 export function spouseStyle(subtype: string): Style {
-  const rose = "hsl(350 70% 65% / 0.65)"
-  const muted = "hsl(var(--muted-foreground) / 0.45)"
-  if (subtype === "divorced") return { stroke: muted, width: 1.5, dashArray: "5 4" }
-  if (subtype === "partner")  return { stroke: muted, width: 1.5, dashArray: "1 4" }
-  if (subtype === "widowed")  return { stroke: muted, width: 1.5, dashArray: "5 4" }
+  const rose  = "hsl(350 70% 65% / 0.65)"
+  const grey  = "hsl(0 0% 65% / 0.55)"
+  if (subtype === "divorced") return { stroke: grey, width: 1.5, dashArray: "5 4" }
+  if (subtype === "partner")  return { stroke: grey, width: 1.5, dashArray: "1 4" }
+  if (subtype === "widowed")  return { stroke: grey, width: 1.5, dashArray: "5 4" }
   return { stroke: rose, width: 1.5 }
 }
 
