@@ -1,15 +1,26 @@
 "use client"
 
-import { useEffect, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Check, CalendarDays, Calendar1, Settings } from "lucide-react"
 import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { createCheckoutSession, createPortalSession } from "@/actions/billing"
+import { changeSubscription, createCheckoutSession, createPortalSession } from "@/actions/billing"
 import type { SubscriptionRow } from "@/queries/subscriptions"
 import type { ActivePlan } from "@/queries/billing"
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" })
+const longDate = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })
 
 interface Props {
   subscriptions: SubscriptionRow[]
@@ -17,7 +28,23 @@ interface Props {
   flashStatus?:  "success" | "cancel" | null
 }
 
+type PendingChange = {
+  plan:    SubscriptionRow
+  cadence: "annual" | "monthly"
+  effect:  "upgrade" | "downgrade"
+}
+
+function monthlyEquivalent(price: number, termLength: number) {
+  return termLength > 0 ? price / termLength : 0
+}
+
+function compareMonthly(a: { price: number; termLength: number }, b: { price: number; termLength: number }) {
+  return monthlyEquivalent(a.price, a.termLength) - monthlyEquivalent(b.price, b.termLength)
+}
+
 export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Props) {
+  const [pendingChange, setPendingChange] = useState<PendingChange | null>(null)
+
   useEffect(() => {
     if (flashStatus === "success") {
       toast.success("Payment received — your plan is being activated. Refresh in a moment if it hasn't appeared yet.")
@@ -37,9 +64,24 @@ export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Pr
           const isActive = activeSubscriptionId
             ? activeSubscriptionId === s.id
             : s.code === "FREE"
-          return <PlanCard key={s.id} plan={s} delay={i * 60} isActive={isActive} />
+          return (
+            <PlanCard
+              key={s.id}
+              plan={s}
+              delay={i * 60}
+              isActive={isActive}
+              activePlan={activePlan}
+              onRequestChange={setPendingChange}
+            />
+          )
         })}
       </div>
+
+      <ChangeConfirmDialog
+        pending={pendingChange}
+        activePlan={activePlan}
+        onClose={() => setPendingChange(null)}
+      />
     </div>
   )
 }
@@ -48,9 +90,7 @@ function ActivePlanBanner({ plan }: { plan: ActivePlan }) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const renews = plan.currentPeriodEnd.toLocaleDateString("en-US", {
-    year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
-  })
+  const renews = longDate.format(plan.currentPeriodEnd)
   const summary = plan.cancelAtPeriodEnd
     ? `Currently on ${plan.subscription.name}. Ends ${renews}.`
     : `Currently on ${plan.subscription.name}. Renews ${renews}.`
@@ -74,17 +114,41 @@ function ActivePlanBanner({ plan }: { plan: ActivePlan }) {
   )
 }
 
-function PlanCard({ plan, delay, isActive }: { plan: SubscriptionRow; delay: number; isActive: boolean }) {
+interface PlanCardProps {
+  plan:            SubscriptionRow
+  delay:           number
+  isActive:        boolean
+  activePlan:      ActivePlan | null
+  onRequestChange: (change: PendingChange) => void
+}
+
+function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCardProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const isFree = plan.code === "FREE"
 
-  const choose = (cadence: "annual" | "monthly") => {
+  const annualPrice  = Number(plan.price)
+  const monthlyPrice = monthlyEquivalent(annualPrice, plan.termLength)
+
+  const startFirstSubscription = (cadence: "annual" | "monthly") => {
     startTransition(async () => {
       const result = await createCheckoutSession(plan.id, cadence)
       if ("error" in result) { toast.error(result.error); return }
       router.push(result.url)
     })
+  }
+
+  const requestChange = (cadence: "annual" | "monthly") => {
+    if (!activePlan) {
+      startFirstSubscription(cadence)
+      return
+    }
+    const cmp = compareMonthly(
+      { price: annualPrice, termLength: plan.termLength },
+      { price: activePlan.subscription.price, termLength: activePlan.subscription.termLength },
+    )
+    const effect: "upgrade" | "downgrade" = cmp >= 0 ? "upgrade" : "downgrade"
+    onRequestChange({ plan, cadence, effect })
   }
 
   const features = [
@@ -97,9 +161,6 @@ function PlanCard({ plan, delay, isActive }: { plan: SubscriptionRow; delay: num
     plan.geolocationFullAccess ? "Precise GPS coordinates" : "Address only (no GPS pin)",
     plan.qrCodeAccess ? "QR Code for plaques & stones" : "QR Code on paid plans",
   ]
-
-  const annualPrice = Number(plan.price)
-  const monthlyPrice = plan.termLength > 0 ? annualPrice / plan.termLength : 0
 
   return (
     <div className="glass-card no-sheen p-6 flex flex-col gap-5 animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
@@ -141,16 +202,70 @@ function PlanCard({ plan, delay, isActive }: { plan: SubscriptionRow; delay: num
 
       {!isFree && !isActive && (
         <div className="grid grid-cols-1 gap-2">
-          <Button onClick={() => choose("annual")} disabled={isPending} className="w-full gap-2">
+          <Button onClick={() => requestChange("annual")} disabled={isPending} className="w-full gap-2">
             <CalendarDays className="h-4 w-4" />
             Pay annually {usd.format(annualPrice)}
           </Button>
-          <Button onClick={() => choose("monthly")} disabled={isPending} variant="outline" className="w-full gap-2">
+          <Button onClick={() => requestChange("monthly")} disabled={isPending} variant="outline" className="w-full gap-2">
             <Calendar1 className="h-4 w-4" />
             Pay monthly {usd.format(monthlyPrice)}
           </Button>
         </div>
       )}
     </div>
+  )
+}
+
+interface ChangeConfirmDialogProps {
+  pending:    PendingChange | null
+  activePlan: ActivePlan | null
+  onClose:    () => void
+}
+
+function ChangeConfirmDialog({ pending, activePlan, onClose }: ChangeConfirmDialogProps) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  if (!pending || !activePlan) return null
+
+  const isUpgrade = pending.effect === "upgrade"
+  const cadenceLabel = pending.cadence === "annual" ? "annual" : "monthly"
+  const periodEnd = longDate.format(activePlan.currentPeriodEnd)
+
+  const title = isUpgrade ? "Upgrade now?" : "Schedule downgrade?"
+  const description = isUpgrade
+    ? `You'll switch to ${pending.plan.name} (${cadenceLabel}) immediately. Stripe will charge the prorated difference today and the new features unlock right away.`
+    : `Your ${activePlan.subscription.name} plan stays active until ${periodEnd}. After that, ${pending.plan.name} (${cadenceLabel}) kicks in with no charge today.`
+  const confirmLabel = isUpgrade ? "Upgrade now" : "Schedule switch"
+
+  const handleConfirm = () => {
+    startTransition(async () => {
+      const result = await changeSubscription(pending.plan.id, pending.cadence)
+      if ("error" in result) { toast.error(result.error); return }
+      toast.success(
+        result.effect === "upgraded"
+          ? `Switched to ${pending.plan.name}. Stripe just charged the prorated amount.`
+          : `${pending.plan.name} is scheduled to start on ${periodEnd}.`,
+      )
+      onClose()
+      router.refresh()
+    })
+  }
+
+  return (
+    <AlertDialog open onOpenChange={(open) => { if (!open) onClose() }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleConfirm} disabled={isPending}>
+            {isPending ? "Working…" : confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

@@ -11,17 +11,19 @@ export async function getActivePlan(userId: string) {
     },
     orderBy: { currentPeriodEnd: "desc" },
     select: {
-      id:                true,
-      cadence:           true,
-      status:            true,
-      currentPeriodEnd:  true,
-      cancelAtPeriodEnd: true,
+      id:                   true,
+      cadence:              true,
+      status:               true,
+      currentPeriodEnd:     true,
+      cancelAtPeriodEnd:    true,
+      stripeSubscriptionId: true,
       subscription: {
-        select: { id: true, code: true, name: true },
+        select: { id: true, code: true, name: true, price: true, termLength: true },
       },
     },
   })
-  return row
+  if (!row) return null
+  return { ...row, subscription: { ...row.subscription, price: Number(row.subscription.price) } }
 }
 
 export type ActivePlan = NonNullable<Awaited<ReturnType<typeof getActivePlan>>>

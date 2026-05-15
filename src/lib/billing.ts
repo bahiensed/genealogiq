@@ -5,6 +5,21 @@ import { prisma } from "@/lib/prisma"
 
 type PrismaLike = PrismaClient | Prisma.TransactionClient
 
+/**
+ * Compares two plans by their normalized monthly price (price / termLength).
+ * Positive when `a` is the more expensive tier; 0 when equal.
+ * Used to decide whether a plan change is an upgrade (immediate, prorated)
+ * or a downgrade (deferred to period end).
+ */
+export function compareTier(
+  a: { price: number; termLength: number },
+  b: { price: number; termLength: number },
+): number {
+  const aMonthly = a.price / Math.max(a.termLength, 1)
+  const bMonthly = b.price / Math.max(b.termLength, 1)
+  return aMonthly - bMonthly
+}
+
 export async function ensureStripeCustomer(userId: string): Promise<string> {
   const user = await prisma.appUser.findUnique({
     where:  { id: userId },
