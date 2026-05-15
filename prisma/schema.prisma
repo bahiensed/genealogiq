@@ -137,6 +137,12 @@ model QrInventory {
 model AppSale {
   id                   String   @id @default(cuid())
 
+  // Legacy SEQUOIA fields (seller-driven QR-code sales). Nullable here because
+  // Stripe direct purchases originating from the APP have no tenant or seller.
+  value                Decimal? @db.Decimal(10, 2)
+  tenantId             String?  @map("tenant_id")
+  soldById             String?  @map("sold_by_id")
+
   appUserId            String   @map("app_user_id")
   appUser              AppUser  @relation("AppSaleBuyer", fields: [appUserId], references: [id], onDelete: Cascade)
 
