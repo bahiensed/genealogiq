@@ -8,14 +8,6 @@ export async function getApprovedTributesByProfileId(profileId: string) {
   })
 }
 
-export async function getPendingTributesByProfileId(profileId: string) {
-  return prisma.tribute.findMany({
-    where: { profileId, status: "PENDING" },
-    include: { author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } } },
-    orderBy: { createdAt: "asc" },
-  })
-}
-
 export async function getMyTributeForProfile(authorId: string, profileId: string) {
   return prisma.tribute.findUnique({ where: { authorId_profileId: { authorId, profileId } } })
 }

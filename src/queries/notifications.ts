@@ -2,132 +2,113 @@ import "server-only"
 
 import { prisma } from "@/lib/prisma"
 
-export interface ActorSummary {
+interface ActorSummary {
   id:        string
   firstName: string
   lastName:  string
   avatarUrl: string | null
 }
 
-export interface BellTributePending {
-  id:        string
-  createdAt: Date
-  tributeId: string
-  profileId: string
-  actor:     ActorSummary | null
+export async function getUnreadCount(userId: string): Promise<number> {
+  return prisma.notification.count({ where: { userId, readAt: null } })
 }
 
-export interface BellTributeDecided {
-  id:        string
-  createdAt: Date
-  type:      "TRIBUTE_APPROVED" | "TRIBUTE_REJECTED"
-  tributeId: string
-  profileId: string | null
-  actor:     ActorSummary | null
+export interface MessagesData {
+  pendingTributes: {
+    id: string
+    text: string
+    imageUrl: string | null
+    createdAt: Date
+    profileId: string
+    profileName: string
+    author: ActorSummary
+  }[]
+  pendingFamilyRequests: {
+    id:        string
+    type:      string
+    subtype:   string | null
+    fromId:    string
+    toId:      string
+    createdAt: Date
+    from:      ActorSummary
+    to:        ActorSummary
+  }[]
+  recentActivity: {
+    id:        string
+    type:      string
+    createdAt: Date
+    actor:     ActorSummary | null
+    tributeId: string | null
+    profileId: string | null
+    familyRelationId: string | null
+  }[]
 }
 
-export interface BellFamilyPending {
-  id:               string
-  createdAt:        Date
-  familyRelationId: string
-  actor:            ActorSummary | null
-}
-
-export interface BellFamilyDecided {
-  id:               string
-  createdAt:        Date
-  type:             "FAMILY_REQUEST_ACCEPTED" | "FAMILY_REQUEST_REJECTED"
-  familyRelationId: string
-  actor:            ActorSummary | null
-}
-
-export interface BellNotifications {
-  tributePending: BellTributePending[]
-  tributeDecided: BellTributeDecided[]
-  familyPending:  BellFamilyPending[]
-  familyDecided:  BellFamilyDecided[]
-  totalUnread:    number
-}
-
-export async function getBellNotifications(userId: string): Promise<BellNotifications> {
-  const rows = await prisma.notification.findMany({
-    where:   { userId, readAt: null },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true, type: true, createdAt: true,
-      tributeId: true,
-      familyRelationId: true,
-      tribute: { select: { profileId: true } },
-      actor: {
-        select: { id: true, firstName: true, lastName: true, avatarUrl: true },
+export async function getMessages(userId: string): Promise<MessagesData> {
+  const [pendingTributes, pendingFamilyRequests, recentActivity] = await Promise.all([
+    // Tributes awaiting moderation by this user (they manage the target profile)
+    prisma.tribute.findMany({
+      where: {
+        status: "PENDING",
+        profile: {
+          OR: [
+            { id: userId },
+            { guardedBy: { some: { guardianId: userId } } },
+          ],
+        },
       },
-    },
-  })
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true, text: true, imageUrl: true, createdAt: true,
+        profileId: true,
+        profile: { select: { firstName: true, lastName: true } },
+        author:  { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+      },
+    }),
+    // Family-tree invitations awaiting this user's response
+    prisma.familyRelation.findMany({
+      where:   { status: "PENDING", OR: [{ fromId: userId }, { toId: userId }] },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true, type: true, subtype: true, fromId: true, toId: true, createdAt: true,
+        from: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+        to:   { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+      },
+    }),
+    // Recent info-only notifications (everything read for activity log)
+    prisma.notification.findMany({
+      where:   { userId, type: { in: ["TRIBUTE_APPROVED", "TRIBUTE_REJECTED", "FAMILY_REQUEST_ACCEPTED", "FAMILY_REQUEST_REJECTED"] } },
+      orderBy: { createdAt: "desc" },
+      take:    50,
+      select: {
+        id: true, type: true, createdAt: true,
+        tributeId: true,
+        familyRelationId: true,
+        tribute: { select: { profileId: true } },
+        actor:   { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
+      },
+    }),
+  ])
 
-  const result: BellNotifications = {
-    tributePending: [],
-    tributeDecided: [],
-    familyPending:  [],
-    familyDecided:  [],
-    totalUnread:    rows.length,
+  return {
+    pendingTributes: pendingTributes.map((t) => ({
+      id:          t.id,
+      text:        t.text,
+      imageUrl:    t.imageUrl,
+      createdAt:   t.createdAt,
+      profileId:   t.profileId,
+      profileName: `${t.profile.firstName} ${t.profile.lastName}`,
+      author:      t.author,
+    })),
+    pendingFamilyRequests,
+    recentActivity: recentActivity.map((n) => ({
+      id:               n.id,
+      type:             n.type,
+      createdAt:        n.createdAt,
+      actor:            n.actor,
+      tributeId:        n.tributeId,
+      profileId:        n.tribute?.profileId ?? null,
+      familyRelationId: n.familyRelationId,
+    })),
   }
-
-  for (const r of rows) {
-    if (r.type === "TRIBUTE_PENDING" && r.tributeId) {
-      result.tributePending.push({
-        id:        r.id,
-        createdAt: r.createdAt,
-        tributeId: r.tributeId,
-        profileId: r.tribute?.profileId ?? "",
-        actor:     r.actor,
-      })
-    } else if ((r.type === "TRIBUTE_APPROVED" || r.type === "TRIBUTE_REJECTED") && r.tributeId) {
-      result.tributeDecided.push({
-        id:        r.id,
-        createdAt: r.createdAt,
-        type:      r.type,
-        tributeId: r.tributeId,
-        profileId: r.tribute?.profileId ?? null,
-        actor:     r.actor,
-      })
-    } else if (r.type === "FAMILY_REQUEST_PENDING" && r.familyRelationId) {
-      result.familyPending.push({
-        id:               r.id,
-        createdAt:        r.createdAt,
-        familyRelationId: r.familyRelationId,
-        actor:            r.actor,
-      })
-    } else if ((r.type === "FAMILY_REQUEST_ACCEPTED" || r.type === "FAMILY_REQUEST_REJECTED") && r.familyRelationId) {
-      result.familyDecided.push({
-        id:               r.id,
-        createdAt:        r.createdAt,
-        type:             r.type,
-        familyRelationId: r.familyRelationId,
-        actor:            r.actor,
-      })
-    }
-  }
-
-  return result
-}
-
-// For /family-requests page
-export async function getPendingFamilyRequests(userId: string) {
-  return prisma.familyRelation.findMany({
-    where:   { status: "PENDING", OR: [{ fromId: userId }, { toId: userId }] },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id:           true,
-      type:         true,
-      subtype:      true,
-      fromId:       true,
-      toId:         true,
-      startDate:    true,
-      endDate:      true,
-      requestedById: true,
-      createdAt:    true,
-      from: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-      to:   { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-    },
-  })
 }

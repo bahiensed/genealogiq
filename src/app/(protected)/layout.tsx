@@ -1,7 +1,7 @@
 import { verifySession } from '@/lib/dal'
 import { prisma } from '@/lib/prisma'
 import { Header } from '@/components/header'
-import { getBellNotifications } from '@/queries/notifications'
+import { getUnreadCount } from '@/queries/notifications'
 
 export default async function ProtectedLayout({
   children,
@@ -9,8 +9,8 @@ export default async function ProtectedLayout({
   children: React.ReactNode
 }>) {
   const session = await verifySession()
-  const [notifications, user] = await Promise.all([
-    getBellNotifications(session.user.id),
+  const [unreadCount, user] = await Promise.all([
+    getUnreadCount(session.user.id),
     prisma.appUser.findUnique({
       where: { id: session.user.id },
       select: { firstName: true, lastName: true, avatarUrl: true },
@@ -22,7 +22,7 @@ export default async function ProtectedLayout({
       <Header
         userImage={user?.avatarUrl}
         userName={user ? `${user.firstName} ${user.lastName}` : undefined}
-        notifications={notifications}
+        unreadCount={unreadCount}
       />
       {children}
     </>

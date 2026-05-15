@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
-import { Moon, Sun, Menu, X, Bell, User, LogOut, Flower2, Sparkles, Search } from "lucide-react"
+import { Moon, Sun, Menu, X, Bell, User, LogOut, Sparkles, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -19,137 +19,31 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { HeaderSearch } from "@/components/header-search"
 import { cn } from "@/lib/utils"
 import { signOut } from "next-auth/react"
-import { Check, X as XIcon, UserPlus } from "lucide-react"
-import type { BellNotifications } from "@/queries/notifications"
 
-interface BellProps {
-  notifications: BellNotifications
-}
-
-function BellNotification({ notifications }: BellProps) {
-  const { tributePending, tributeDecided, familyPending, familyDecided, totalUnread } = notifications
-
-  if (totalUnread === 0) {
-    return (
-      <Button variant="ghost" size="icon" aria-label="Notifications" className="rounded-full glass border-0 h-9 w-9">
-        <Bell className="h-4 w-4" />
-      </Button>
-    )
-  }
-
+function BellLink({ unreadCount }: { unreadCount: number }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label={`${totalUnread} unread notifications`}
-          className="relative rounded-full glass border-0 h-9 w-9 inline-flex items-center justify-center hover:bg-accent/50 transition-colors"
-        >
-          <Bell className="h-4 w-4" />
-          <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
-            {totalUnread}
-          </span>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="glass-strong w-80 max-h-[480px] overflow-y-auto">
-        {tributePending.length > 0 && (
-          <>
-            <div className="px-2 py-1.5 text-xs text-muted-foreground font-medium">Tributes to moderate</div>
-            {tributePending.map((n) => (
-              <DropdownMenuItem key={n.id} asChild>
-                <Link href={`/profile/${n.profileId}/tributes/moderate`} className="gap-2 cursor-pointer">
-                  <Flower2 className="h-4 w-4 text-primary shrink-0" />
-                  <span className="flex-1 truncate text-xs">
-                    <span className="font-medium">{n.actor ? `${n.actor.firstName} ${n.actor.lastName}` : "Someone"}</span>
-                    <span className="text-muted-foreground"> wrote a tribute</span>
-                  </span>
-                </Link>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-          </>
-        )}
-
-        {tributeDecided.length > 0 && (
-          <>
-            <div className="px-2 py-1.5 text-xs text-muted-foreground font-medium">Your tributes</div>
-            {tributeDecided.map((n) => {
-              const approved = n.type === "TRIBUTE_APPROVED"
-              return (
-                <DropdownMenuItem
-                  key={n.id}
-                  asChild
-                >
-                  <Link href={n.profileId ? `/profile/${n.profileId}/tributes` : "#"} className="gap-2 cursor-pointer">
-                    {approved
-                      ? <Check className="h-4 w-4 text-emerald-500 shrink-0" />
-                      : <XIcon className="h-4 w-4 text-destructive shrink-0" />}
-                    <span className="flex-1 truncate text-xs">
-                      <span className="text-muted-foreground">Your tribute was </span>
-                      <span className="font-medium">{approved ? "approved" : "declined"}</span>
-                    </span>
-                  </Link>
-                </DropdownMenuItem>
-              )
-            })}
-            <DropdownMenuSeparator />
-          </>
-        )}
-
-        {familyPending.length > 0 && (
-          <>
-            <div className="px-2 py-1.5 text-xs text-muted-foreground font-medium">Tree invitations</div>
-            {familyPending.map((n) => (
-              <DropdownMenuItem key={n.id} asChild>
-                <Link href="/family-requests" className="gap-2 cursor-pointer">
-                  <UserPlus className="h-4 w-4 text-primary shrink-0" />
-                  <span className="flex-1 truncate text-xs">
-                    <span className="font-medium">{n.actor ? `${n.actor.firstName} ${n.actor.lastName}` : "Someone"}</span>
-                    <span className="text-muted-foreground"> wants you in their tree</span>
-                  </span>
-                </Link>
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-          </>
-        )}
-
-        {familyDecided.length > 0 && (
-          <>
-            <div className="px-2 py-1.5 text-xs text-muted-foreground font-medium">Tree decisions</div>
-            {familyDecided.map((n) => {
-              const accepted = n.type === "FAMILY_REQUEST_ACCEPTED"
-              return (
-                <DropdownMenuItem key={n.id} asChild>
-                  <Link href="/family-requests" className="gap-2 cursor-pointer">
-                    {accepted
-                      ? <Check className="h-4 w-4 text-emerald-500 shrink-0" />
-                      : <XIcon className="h-4 w-4 text-destructive shrink-0" />}
-                    <span className="flex-1 truncate text-xs">
-                      <span className="font-medium">{n.actor ? `${n.actor.firstName} ${n.actor.lastName}` : "Someone"}</span>
-                      <span className="text-muted-foreground"> {accepted ? "joined your tree" : "declined your invite"}</span>
-                    </span>
-                  </Link>
-                </DropdownMenuItem>
-              )
-            })}
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Link
+      href="/messages"
+      aria-label={unreadCount > 0 ? `${unreadCount} unread messages` : "Messages"}
+      className="relative rounded-full glass border-0 h-9 w-9 inline-flex items-center justify-center hover:bg-accent/50 transition-colors"
+    >
+      <Bell className="h-4 w-4" />
+      {unreadCount > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
+          {unreadCount}
+        </span>
+      )}
+    </Link>
   )
 }
 
 interface HeaderProps {
   userName?: string | null
   userImage?: string | null
-  notifications?: BellNotifications
+  unreadCount?: number
 }
 
-const EMPTY_NOTIFICATIONS: BellNotifications = {
-  tributePending: [], tributeDecided: [], familyPending: [], familyDecided: [], totalUnread: 0,
-}
-
-export function Header({ userName, userImage, notifications = EMPTY_NOTIFICATIONS }: HeaderProps) {
+export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
   const { resolvedTheme, setTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -162,7 +56,7 @@ export function Header({ userName, userImage, notifications = EMPTY_NOTIFICATION
 
   const controls = (
     <>
-      <BellNotification notifications={notifications} />
+      <BellLink unreadCount={unreadCount} />
 
       <Button
         variant="ghost"
