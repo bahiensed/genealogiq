@@ -50,16 +50,22 @@ export const getFreeSubscription = cache(async (): Promise<SubscriptionFeatures>
 })
 
 /**
- * Resolves the feature limits for a given memorial:
- * - if the memorial has appSaleId → return its sale's subscription features
- * - else → return the FREE-tier features
+ * Resolves the feature limits for a given profile:
+ *   1. If the profile is a memorial assigned to a live AppSale (appSaleId set)
+ *      → use that sale's subscription features.
+ *   2. Else if the profile itself is the buyer of any live AppSale
+ *      (i.e. this is an active user's own profile, not a memorial)
+ *      → use that buyer's highest-tier active plan.
+ *   3. Else → FREE tier.
  *
- * Cached per (memorialId, request) so multiple components asking on the same
- * render share one DB hit.
+ * Cached per (profileId, request) so repeated callers share a single DB hit.
  */
-export const getMemorialFeatures = cache(async (memorialId: string): Promise<SubscriptionFeatures> => {
-  const memorial = await prisma.appUser.findUnique({
-    where: { id: memorialId },
+export const getMemorialFeatures = cache(async (profileId: string): Promise<SubscriptionFeatures> => {
+  const now = new Date()
+
+  // 1. Direct memorial assignment via appSaleId
+  const profile = await prisma.appUser.findUnique({
+    where: { id: profileId },
     select: {
       appSale: {
         select: {
@@ -71,12 +77,28 @@ export const getMemorialFeatures = cache(async (memorialId: string): Promise<Sub
     },
   })
 
-  const sale = memorial?.appSale
-  const isLive =
-    !!sale &&
-    (sale.status === "active" || sale.status === "trialing") &&
-    sale.currentPeriodEnd > new Date()
+  const assignedSale = profile?.appSale
+  const assignedIsLive =
+    !!assignedSale &&
+    (assignedSale.status === "active" || assignedSale.status === "trialing") &&
+    assignedSale.currentPeriodEnd > now
 
-  if (isLive && sale.subscription) return sale.subscription
+  if (assignedIsLive && assignedSale.subscription) return assignedSale.subscription
+
+  // 2. Buyer-side: this user owns a live subscription (their own active profile)
+  const buyerSale = await prisma.appSale.findFirst({
+    where: {
+      appUserId:        profileId,
+      status:           { in: ["active", "trialing"] },
+      currentPeriodEnd: { gt: now },
+    },
+    // Highest tier wins when multiple — sort by subscription.price desc.
+    orderBy: { subscription: { price: "desc" } },
+    select:  { subscription: { select: FEATURE_SELECT } },
+  })
+
+  if (buyerSale?.subscription) return buyerSale.subscription
+
+  // 3. Fall back to FREE
   return getFreeSubscription()
 })

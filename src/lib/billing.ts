@@ -66,6 +66,11 @@ export async function upsertSaleFromSubscription(
     canceledAt:        sub.canceled_at ? new Date(sub.canceled_at * 1000) : null,
     endedAt:           sub.ended_at    ? new Date(sub.ended_at * 1000)    : null,
     stripePriceId:     priceId,
+    // Include subscriptionId + cadence on update too so plan upgrades/downgrades
+    // are reflected — Stripe gives us the new metadata after a subscriptions.update,
+    // and without this the AppSale row keeps pointing at the previous tier.
+    subscriptionId,
+    cadence,
   }
 
   await tx.appSale.upsert({
@@ -73,9 +78,7 @@ export async function upsertSaleFromSubscription(
     create: {
       ...common,
       appUserId,
-      subscriptionId,
       stripeSubscriptionId: sub.id,
-      cadence,
     },
     update: common,
   })
