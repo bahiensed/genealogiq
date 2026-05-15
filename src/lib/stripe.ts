@@ -1,7 +1,17 @@
 import Stripe from "stripe"
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("STRIPE_SECRET_KEY is required")
+let client: Stripe | undefined
+
+function getClient(): Stripe {
+  if (!client) {
+    if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY is required")
+    client = new Stripe(process.env.STRIPE_SECRET_KEY)
+  }
+  return client
 }
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+// Lazy proxy so importing this module never throws — only the first real Stripe
+// API call fails if the env var is missing.
+export const stripe = new Proxy({} as Stripe, {
+  get: (_target, prop, receiver) => Reflect.get(getClient(), prop, receiver),
+})
