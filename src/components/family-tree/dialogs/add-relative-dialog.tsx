@@ -205,19 +205,21 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <Select value={kind} onValueChange={(v) => setKind(v as RelationKind)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {(Object.entries(KIND_LABELS) as [RelationKind, string][]).map(([k, label]) => (
-                <SelectItem key={k} value={k}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {kind === "spouse" && (
-            <>
+          <div className="grid grid-cols-2 gap-2 items-end">
+            <div className="space-y-1.5">
+              <Label>Kind:</Label>
+              <Select value={kind} onValueChange={(v) => setKind(v as RelationKind)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {(Object.entries(KIND_LABELS) as [RelationKind, string][]).map(([k, label]) => (
+                    <SelectItem key={k} value={k}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {kind === "spouse" && (
               <div className="space-y-1.5">
-                <Label>Partner type</Label>
+                <Label>Type:</Label>
                 <Select value={spouseSubtype} onValueChange={(v) => setSpouseSubtype(v as SpouseSubtype)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -227,19 +229,22 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="rel-start">{startLabel}</Label>
-                  <Input id="rel-start" type="date" value={marriedAt} onChange={(e) => setMarriedAt(e.target.value)} />
-                </div>
-                {needsEndDate && (
-                  <div className="space-y-1.5">
-                    <Label htmlFor="rel-end">{endLabel}</Label>
-                    <Input id="rel-end" type="date" value={endedAt} onChange={(e) => setEndedAt(e.target.value)} />
-                  </div>
-                )}
+            )}
+          </div>
+
+          {kind === "spouse" && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="rel-start">{startLabel}:</Label>
+                <Input id="rel-start" type="date" value={marriedAt} onChange={(e) => setMarriedAt(e.target.value)} />
               </div>
-            </>
+              {needsEndDate && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="rel-end">{endLabel}:</Label>
+                  <Input id="rel-end" type="date" value={endedAt} onChange={(e) => setEndedAt(e.target.value)} />
+                </div>
+              )}
+            </div>
           )}
 
           {showSpouseLink && (
@@ -310,28 +315,28 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-first">First name</Label>
+                  <Label htmlFor="g-first">First name:</Label>
                   <Input id="g-first" value={firstName} onChange={(e) => setFirstName(e.target.value)} maxLength={64} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-last">Last name</Label>
+                  <Label htmlFor="g-last">Last name:</Label>
                   <Input id="g-last" value={lastName} onChange={(e) => setLastName(e.target.value)} maxLength={64} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-maiden">Maiden name <span className="text-muted-foreground">(optional)</span></Label>
+                  <Label htmlFor="g-maiden">Maiden name:</Label>
                   <Input id="g-maiden" value={maidenName} onChange={(e) => setMaidenName(e.target.value)} maxLength={64} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-nick">Nickname <span className="text-muted-foreground">(optional)</span></Label>
+                  <Label htmlFor="g-nick">Nickname:</Label>
                   <Input id="g-nick" value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={40} />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Gender</Label>
+                <Label>Gender:</Label>
                 <Select value={gender} onValueChange={(v) => setGender(v as "MALE" | "FEMALE" | "OTHER")}>
-                  <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="FEMALE">Female</SelectItem>
                     <SelectItem value="MALE">Male</SelectItem>
@@ -341,11 +346,11 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-birth">Birth date</Label>
+                  <Label htmlFor="g-birth">Birth date:</Label>
                   <Input id="g-birth" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-death">Death date</Label>
+                  <Label htmlFor="g-death">Death date:</Label>
                   <Input id="g-death" type="date" value={deathDate} onChange={(e) => setDeathDate(e.target.value)} />
                 </div>
               </div>

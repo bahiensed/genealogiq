@@ -230,40 +230,13 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: P
           ? `M ${Math.min(x1, x2)} ${y1} L ${Math.max(x1, x2)} ${y1}`
           : `M ${a.x + NODE_W / 2} ${a.y + NODE_H} C ${a.x + NODE_W / 2} ${(a.y + b.y) / 2 + Y_GEN / 4} ${b.x + NODE_W / 2} ${(a.y + b.y) / 2 + Y_GEN / 4} ${b.x + NODE_W / 2} ${b.y}`
 
-        // Year badge for ended relationships ("✕ 2019" / "† 2019").
-        const showBadge = c.endDate && (c.subtype === "divorced" || c.subtype === "widowed")
-        const midX = sameRow ? (Math.min(x1, x2) + Math.max(x1, x2)) / 2 : (a.x + b.x) / 2 + NODE_W / 2
-        const midY = sameRow ? y1 : (a.y + b.y) / 2 + NODE_H / 2
-        const year = c.endDate ? c.endDate.getUTCFullYear() : null
-        const mark = c.subtype === "widowed" ? "†" : "✕"
-
         return (
-          <Fragment key={`sp-${i}`}>
-            <path
-              d={d}
-              stroke={style.stroke} strokeWidth={style.width}
-              strokeDasharray={style.dashArray} strokeLinecap="round" fill="none"
-            />
-            {showBadge && year !== null && (
-              <g>
-                <rect
-                  x={midX - 22} y={midY - 9}
-                  width={44} height={18} rx={9}
-                  fill="hsl(var(--background) / 0.92)"
-                  stroke={style.stroke} strokeWidth={0.8}
-                />
-                <text
-                  x={midX} y={midY + 4}
-                  textAnchor="middle"
-                  fill={style.stroke}
-                  fontSize={11}
-                  fontWeight={500}
-                >
-                  {mark} {year}
-                </text>
-              </g>
-            )}
-          </Fragment>
+          <path
+            key={`sp-${i}`}
+            d={d}
+            stroke={style.stroke} strokeWidth={style.width}
+            strokeDasharray={style.dashArray} strokeLinecap="round" fill="none"
+          />
         )
       })}
 

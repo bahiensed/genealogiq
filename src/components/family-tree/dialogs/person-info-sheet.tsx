@@ -228,7 +228,7 @@ export function PersonInfoSheet({
             <div className="grid grid-cols-2 gap-1.5">
               <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "parent")}>+ Parent</Button>
               <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "sibling")}>+ Sibling</Button>
-              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "spouse")}>+ Spouse</Button>
+              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "spouse")}>+ Partner</Button>
               <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "child")}>+ Child</Button>
             </div>
           </div>
@@ -258,8 +258,8 @@ export function PersonInfoSheet({
                   <AlertDialogTitle>Remove from tree?</AlertDialogTitle>
                   <AlertDialogDescription>
                     {isGhost
-                      ? <>{displayName} will be deleted permanently along with their relations to others in the tree. This cannot be undone.</>
-                      : <>{displayName} will be removed from your tree. Their profile stays untouched and they remain in the system. People who were only connected to your tree through them will also disappear from this view.</>}
+                      ? <>{displayName} will be deleted permanently from the tree and from the system along with their relations to others in the tree. This cannot be undone.</>
+                      : <>{displayName} will be removed from your tree. The profile stays untouched and remains in the system. People who are only connected to your tree through this profile will also disappear from this view.</>}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
