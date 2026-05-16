@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(git commit -m ' *)",
-      "Bash(grep -n \"^import\\\\|from \\\\\"@vercel/blob\\\\|toast\\\\|fetch\\\\\\(\\\\`/api\" /home/douglas/Projects/genealogiq/genealogiq-app/src/components/bio-edit-form.tsx)"
+      "Bash(grep -n \"^import\\\\|from \\\\\"@vercel/blob\\\\|toast\\\\|fetch\\\\\\(\\\\`/api\" /home/douglas/Projects/genealogiq/genealogiq-app/src/components/bio-edit-form.tsx)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq add prisma/migrations/20260516000000_co_guardianship)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq commit -m ' *)"
     ]
   }
 }

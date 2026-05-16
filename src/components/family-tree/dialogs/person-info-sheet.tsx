@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Trash2, SquarePen, Cake, Heart, HeartCrack, Flower, ArrowUpRight } from "lucide-react"
+import { Trash2, SquarePen, Cake, Heart, HeartCrack, Flower, ArrowUpRight, Shield, Hourglass } from "lucide-react"
 import { toast } from "sonner"
 import {
   Sheet,
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
 import { removeMember } from "@/actions/family-tree"
+import { requestGuardianship } from "@/actions/guardian"
 import { relationFromRoot } from "@/lib/family-relation-label"
 import { formatLongDate } from "@/lib/format-date"
 import type { TreePerson, TreeRelation } from "@/queries/family-tree"
@@ -38,6 +40,8 @@ interface Props {
   persons:        Record<string, TreePerson>
   relations:      TreeRelation[]
   canManage:      boolean
+  managedIds:     string[]
+  requestedIds:   string[]
   sessionUserId?: string
   onEdit:         () => void
   onAddRelative:  (anchorId: string, kind: Kind) => void
@@ -114,9 +118,12 @@ function eventLabel(e: Event): string {
 
 export function PersonInfoSheet({
   open, onClose, person, rootId, persons, relations,
-  canManage, onEdit, onAddRelative, onSuccess,
+  canManage, managedIds, requestedIds,
+  onEdit, onAddRelative, onSuccess,
 }: Props) {
+  const router = useRouter()
   const [removing, setRemoving] = useState(false)
+  const [requesting, startRequest] = useTransition()
 
   if (!person) return null
 
@@ -124,12 +131,25 @@ export function PersonInfoSheet({
   const isGhost     = person.role === "APP_GHOST"
   const isMemorial  = person.role === "APP_MEMO"
 
-  // Editable = guardian-managed (your own profile, your memorial, your ghost).
-  // The action does the real check; this gates the button UI.
-  const canEditMember = canManage && (isGhost || isMemorial || isSelf)
-  // Anyone in the tree (except the root) can be removed by a guardian.
+  const userManagesThis = managedIds.includes(person.id)
+  const alreadyRequested = requestedIds.includes(person.id)
+
+  // Editable = current user is an active guardian of THIS specific person.
+  const canEditMember = userManagesThis && (isGhost || isMemorial || isSelf)
+  // Anyone in the tree (except the root) can be removed by a tree-level manager.
   // Ghosts get deleted entirely; real users/memorials are just disconnected.
   const canRemoveMember = canManage && !isSelf
+  // Co-management requests apply to ghosts/memorials the user does not yet manage.
+  const canRequestCoManage = (isGhost || isMemorial) && !userManagesThis && !alreadyRequested
+
+  const handleRequestCoManage = () => {
+    startRequest(async () => {
+      const result = await requestGuardianship({ profileId: person.id })
+      if (result?.error) { toast.error(result.error); return }
+      toast.success("Request sent. The current guardian will be notified.")
+      router.refresh()
+    })
+  }
 
   const label = relationFromRoot(persons, relations, rootId, person.id)
   const displayName = person.maidenName
@@ -195,6 +215,34 @@ export function PersonInfoSheet({
             Edit
           </Button>
         </div>
+
+        {/* Co-management row — only for ghosts/memorials the user doesn't already manage */}
+        {(isGhost || isMemorial) && !userManagesThis && (
+          <div className="px-5 py-4 flex items-center justify-between gap-3 border-b border-border/60">
+            <p className="text-xs text-muted-foreground leading-snug max-w-[220px]">
+              {alreadyRequested
+                ? "Waiting for the current guardian to approve."
+                : "Ask the current guardian to let you co-manage this profile."}
+            </p>
+            {alreadyRequested ? (
+              <Button variant="outline" size="sm" className="gap-1.5 shrink-0" disabled>
+                <Hourglass className="h-3.5 w-3.5" />
+                Pending
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 shrink-0"
+                onClick={handleRequestCoManage}
+                disabled={requesting || !canRequestCoManage}
+              >
+                <Shield className="h-3.5 w-3.5" />
+                Co-manage
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* Timeline */}
         {events.length > 0 && (

@@ -300,7 +300,7 @@ export async function deleteAccount(
     ])
 
   const memorials = await prisma.appUser.findMany({
-    where: { role: "APP_MEMO", guardedBy: { some: { guardianId: userId } } },
+    where: { role: "APP_MEMO", guardedBy: { some: { guardianId: userId, status: "ACCEPTED" } } },
     select: { id: true, avatarUrl: true },
   })
   const memorialIds = memorials.map((m) => m.id)

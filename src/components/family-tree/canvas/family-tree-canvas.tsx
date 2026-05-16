@@ -20,9 +20,11 @@ interface Props {
   rootId:         string
   sessionUserId:  string
   canManage:      boolean
+  managedIds:     string[]
+  requestedIds:   string[]
 }
 
-export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, canManage }: Props) {
+export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, canManage, managedIds, requestedIds }: Props) {
   const router = useRouter()
   const layout = useMemo(() => computeLayout(persons, relations, rootId), [persons, relations, rootId])
 
@@ -145,6 +147,9 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
         persons={persons}
         relations={relations}
         canManage={canManage}
+        managedIds={managedIds}
+        requestedIds={requestedIds}
+        sessionUserId={sessionUserId}
         onEdit={handleEdit}
         onAddRelative={handleAdd}
         onSuccess={onSuccess}

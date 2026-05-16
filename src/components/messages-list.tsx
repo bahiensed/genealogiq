@@ -3,12 +3,13 @@
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Check, X, User, Flower2, ArrowUpRight } from "lucide-react"
+import { Check, X, User, Flower2, ArrowUpRight, Shield } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { approveTribute, rejectTribute } from "@/actions/tribute"
 import { acceptFamilyRequest, rejectFamilyRequest } from "@/actions/family-tree"
+import { approveGuardianship, rejectGuardianship } from "@/actions/guardian"
 import type { MessagesData } from "@/queries/notifications"
 
 const dateFmt = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" })
@@ -76,8 +77,8 @@ interface Props {
 }
 
 export function MessagesList({ data, sessionUserId }: Props) {
-  const { pendingTributes, pendingFamilyRequests, recentActivity } = data
-  const hasPending  = pendingTributes.length > 0 || pendingFamilyRequests.length > 0
+  const { pendingTributes, pendingFamilyRequests, pendingGuardianRequests, recentActivity } = data
+  const hasPending  = pendingTributes.length > 0 || pendingFamilyRequests.length > 0 || pendingGuardianRequests.length > 0
   const hasActivity = recentActivity.length > 0
 
   if (!hasPending && !hasActivity) {
@@ -96,6 +97,7 @@ export function MessagesList({ data, sessionUserId }: Props) {
           <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending action</h2>
           {pendingTributes.map((t) => <PendingTribute key={`t-${t.id}`} tribute={t} />)}
           {pendingFamilyRequests.map((r) => <PendingFamilyRequest key={`f-${r.id}`} request={r} sessionUserId={sessionUserId} />)}
+          {pendingGuardianRequests.map((g) => <PendingGuardianRequest key={`g-${g.id}`} request={g} />)}
         </section>
       )}
 
@@ -183,6 +185,47 @@ function PendingFamilyRequest({ request, sessionUserId }: { request: MessagesDat
   )
 }
 
+function PendingGuardianRequest({ request }: { request: MessagesData["pendingGuardianRequests"][number] }) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  const profileName = `${request.profile.firstName} ${request.profile.lastName}`.trim()
+
+  const handle = (action: "approve" | "reject") => {
+    startTransition(async () => {
+      const result = action === "approve"
+        ? await approveGuardianship({ guardianshipId: request.id })
+        : await rejectGuardianship({ guardianshipId: request.id })
+      if (result?.error) { toast.error(result.error); return }
+      toast.success(action === "approve" ? "Co-management approved." : "Co-management declined.")
+      router.refresh()
+    })
+  }
+
+  return (
+    <MessageCard
+      actor={request.requester}
+      description={
+        <>
+          wants to co-manage{" "}
+          <span className="font-medium text-foreground">{profileName || "this profile"}</span>.
+        </>
+      }
+      timestamp={request.createdAt}
+      footer={
+        <>
+          <Button size="sm" variant="outline" onClick={() => handle("reject")} disabled={isPending} className="gap-1.5">
+            <X className="h-3.5 w-3.5" /> Decline
+          </Button>
+          <Button size="sm" onClick={() => handle("approve")} disabled={isPending} className="gap-1.5">
+            <Shield className="h-3.5 w-3.5" /> Approve
+          </Button>
+        </>
+      }
+    />
+  )
+}
+
 function ActivityCard({ item }: { item: MessagesData["recentActivity"][number] }) {
   const counterparty: Actor = item.actor ?? { firstName: "Someone", lastName: "", avatarUrl: null }
   const counterpartyName = `${counterparty.firstName} ${counterparty.lastName}`.trim() || "Someone"
@@ -203,6 +246,15 @@ function ActivityCard({ item }: { item: MessagesData["recentActivity"][number] }
     description = item.viewerActed
       ? <>declined {counterpartyName}&apos;s tree invitation.</>
       : <>declined your tree invitation.</>
+  } else if (item.type === "GUARDIAN_REQUEST_ACCEPTED") {
+    description = item.viewerActed
+      ? <>granted {counterpartyName} co-management.</>
+      : <>granted you co-management of a profile.</>
+    href = item.profileId ? `/profile/${item.profileId}` : null
+  } else if (item.type === "GUARDIAN_REQUEST_REJECTED") {
+    description = item.viewerActed
+      ? <>declined {counterpartyName}&apos;s co-management request.</>
+      : <>declined your co-management request.</>
   } else {
     return null
   }

@@ -55,7 +55,10 @@ export async function getProfileById(id: string) {
       },
       // Relations
       appSaleId: true,
-      guardedBy: { select: { guardianId: true } },
+      guardedBy: {
+        where:  { status: "ACCEPTED" },
+        select: { guardianId: true },
+      },
     },
   })
 }

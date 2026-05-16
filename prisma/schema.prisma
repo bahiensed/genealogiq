@@ -386,6 +386,7 @@ model AppUser {
   // Guardian relationships
   guardiansOf AppUserGuardian[] @relation("GuardianOf")
   guardedBy   AppUserGuardian[] @relation("GuardedBy")
+  guardianRequestsMade AppUserGuardian[] @relation("GuardianRequestedBy")
 
   // APP-specific content
   // userId field on each model maps to app_user_id column (kept for minimal code churn)
@@ -429,10 +430,25 @@ model AppUserGuardian {
   guardianId String  @map("guardian_id")
   guardian   AppUser @relation("GuardianOf", fields: [guardianId], references: [id], onDelete: Cascade)
 
+  // Co-guardianship requests workflow:
+  // - Ghosts created by their guardian start ACCEPTED.
+  // - Requests submitted by another user start PENDING; an existing guardian
+  //   approves (status -> ACCEPTED) or rejects (row deleted).
+  status        GuardianStatus @default(ACCEPTED)
+  requestedById String?        @map("requested_by_id")
+  requestedBy   AppUser?       @relation("GuardianRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+
+  notifications Notification[]
+
   createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([appUserId, guardianId])
   @@map("app_user_guardians")
+}
+
+enum GuardianStatus {
+  PENDING
+  ACCEPTED
 }
 
 // ─── Bio ─────────────────────────────────────────────────────────────────────
@@ -607,6 +623,9 @@ enum NotificationType {
   FAMILY_REQUEST_PENDING
   FAMILY_REQUEST_ACCEPTED
   FAMILY_REQUEST_REJECTED
+  GUARDIAN_REQUEST_PENDING
+  GUARDIAN_REQUEST_ACCEPTED
+  GUARDIAN_REQUEST_REJECTED
 }
 
 model Notification {
@@ -624,6 +643,9 @@ model Notification {
 
   familyRelationId String?         @map("family_relation_id")
   familyRelation   FamilyRelation? @relation(fields: [familyRelationId], references: [id], onDelete: Cascade)
+
+  appUserGuardianId String?           @map("app_user_guardian_id")
+  appUserGuardian   AppUserGuardian?  @relation(fields: [appUserGuardianId], references: [id], onDelete: Cascade)
 
   readAt    DateTime? @map("read_at")
   createdAt DateTime  @default(now()) @map("created_at")

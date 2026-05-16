@@ -14,7 +14,7 @@ export async function createMemorial(data: unknown) {
 
   const [createdCount, sales] = await Promise.all([
     prisma.appUser.count({
-      where: { role: "APP_MEMO", guardedBy: { some: { guardianId: session.user.id } } },
+      where: { role: "APP_MEMO", guardedBy: { some: { guardianId: session.user.id, status: "ACCEPTED" } } },
     }),
     prisma.appSale.findMany({
       where: { appUserId: session.user.id },

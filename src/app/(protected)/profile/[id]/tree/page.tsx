@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import { verifySession } from "@/lib/dal"
+import { prisma } from "@/lib/prisma"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getFamilyTree } from "@/queries/family-tree"
@@ -22,10 +23,23 @@ export default async function TreePage({ params }: Props) {
 
   const canManage = canManageProfile(profile, session.user.id)
 
-  const [{ persons, relations }, features] = await Promise.all([
+  const [{ persons, relations }, features, guardianRows] = await Promise.all([
     getFamilyTree(id),
     getMemorialFeatures(id),
+    prisma.appUserGuardian.findMany({
+      where:  { guardianId: session.user.id },
+      select: { appUserId: true, status: true },
+    }),
   ])
+
+  // Sets of person ids the session user can edit (ACCEPTED guardian or self)
+  // and those with a pending co-management request from the session user.
+  const managedIds   = new Set<string>([session.user.id])
+  const requestedIds = new Set<string>()
+  for (const g of guardianRows) {
+    if (g.status === "ACCEPTED") managedIds.add(g.appUserId)
+    else if (g.status === "PENDING") requestedIds.add(g.appUserId)
+  }
 
   // Layout once on the server purely to extract generation count for the header
   // (the client recomputes its own positions; this is just metadata).
@@ -68,6 +82,8 @@ export default async function TreePage({ params }: Props) {
           rootId={id}
           sessionUserId={session.user.id}
           canManage={canManage}
+          managedIds={Array.from(managedIds)}
+          requestedIds={Array.from(requestedIds)}
         />
       </div>
     </div>

@@ -388,7 +388,7 @@ export async function acceptFamilyRequest(relationId: string) {
 
   const relation = await prisma.familyRelation.findUnique({
     where:  { id: relationId },
-    select: { id: true, fromId: true, toId: true, status: true, requestedById: true },
+    select: { id: true, type: true, fromId: true, toId: true, status: true, requestedById: true },
   })
   if (!relation) return { error: "Request not found." }
   if (relation.status !== "PENDING") return { error: "This request has already been decided." }
@@ -417,7 +417,61 @@ export async function acceptFamilyRequest(relationId: string) {
     })
   }
 
+  // Bonus: when accepting a SIBLING invitation, the accepter automatically
+  // files a PENDING co-guardianship request for each ghost/memorial parent of
+  // the inviter — those are the shared parents the accepter now also "owns".
+  // The inviter (current guardian) gets a notification and approves/declines.
+  if (relation.type === "SIBLING" && relation.requestedById) {
+    const inviterId  = relation.requestedById
+    const accepterId = session.user.id
+
+    const parentRels = await prisma.familyRelation.findMany({
+      where: {
+        type:   "PARENT_OF",
+        toId:   inviterId,
+        status: { not: "REJECTED" },
+      },
+      select: { fromId: true },
+    })
+
+    for (const pr of parentRels) {
+      const parent = await prisma.appUser.findUnique({
+        where:  { id: pr.fromId },
+        select: {
+          id: true, role: true,
+          guardedBy: { select: { guardianId: true, status: true } },
+        },
+      })
+      if (!parent) continue
+      if (parent.role !== "APP_GHOST" && parent.role !== "APP_MEMO") continue
+      if (parent.guardedBy.some((g) => g.guardianId === accepterId)) continue
+
+      const created = await prisma.appUserGuardian.create({
+        data: {
+          appUserId:     parent.id,
+          guardianId:    accepterId,
+          status:        "PENDING",
+          requestedById: accepterId,
+        },
+        select: { id: true },
+      })
+
+      const recipients = parent.guardedBy
+        .filter((g) => g.status === "ACCEPTED")
+        .map((g) => g.guardianId)
+      for (const uid of recipients) {
+        await notify({
+          type:              "GUARDIAN_REQUEST_PENDING",
+          userId:            uid,
+          actorId:           accepterId,
+          appUserGuardianId: created.id,
+        })
+      }
+    }
+  }
+
   revalidatePath("/family-requests")
+  revalidatePath("/messages")
   return { success: true }
 }
 
