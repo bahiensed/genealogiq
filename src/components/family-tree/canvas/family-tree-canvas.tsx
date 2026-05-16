@@ -79,33 +79,41 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
     router.refresh()
   }, [router])
 
+  const edges = (
+    <FamilyEdges
+      nodes={layout.nodes}
+      parentLines={layout.parentLines}
+      coupleLines={layout.coupleLines}
+      siblingLines={layout.siblingLines}
+    />
+  )
+
+  const nodes = layout.nodes.map((n) => {
+    const p = persons[n.id]
+    if (!p) return null
+    return (
+      <PersonNode
+        key={n.id}
+        person={p}
+        x={n.x}
+        y={n.y}
+        isRoot={n.id === rootId}
+        isSessionUser={n.id === sessionUserId}
+        isSelected={selectedId === n.id}
+        onActivate={() => handleNodeActivate(n.id)}
+      />
+    )
+  })
+
   return (
     <div className="absolute inset-0">
-      <SvgCanvas bounds={paddedBounds} initialTarget={rootCenter} overlays={<ViewportControls rootCenter={rootCenter} />}>
-        <FamilyEdges
-          nodes={layout.nodes}
-          parentLines={layout.parentLines}
-          coupleLines={layout.coupleLines}
-          siblingLines={layout.siblingLines}
-        />
-
-        {layout.nodes.map((n) => {
-          const p = persons[n.id]
-          if (!p) return null
-          return (
-            <PersonNode
-              key={n.id}
-              person={p}
-              x={n.x}
-              y={n.y}
-              isRoot={n.id === rootId}
-              isSessionUser={n.id === sessionUserId}
-              isSelected={selectedId === n.id}
-              onActivate={() => handleNodeActivate(n.id)}
-            />
-          )
-        })}
-      </SvgCanvas>
+      <SvgCanvas
+        bounds={paddedBounds}
+        initialTarget={rootCenter}
+        edges={edges}
+        nodes={nodes}
+        overlays={<ViewportControls rootCenter={rootCenter} />}
+      />
 
       {adder && (
         <AddRelativeDialog

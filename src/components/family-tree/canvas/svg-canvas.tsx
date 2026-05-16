@@ -41,7 +41,12 @@ const FALLBACK_VIEWPORT: Viewport = { tx: 0, ty: 0, scale: 1 }
 
 interface SvgCanvasProps {
   bounds:    { minX: number; maxX: number; minY: number; maxY: number }
-  children:  ReactNode
+  /** Pure SVG content (lines, paths) rendered inside <svg><g transform=…>. */
+  edges:     ReactNode
+  /** HTML content (cards) rendered inside an absolutely-positioned <div> that
+   *  carries the SAME transform via CSS. Keeps Safari/WebKit happy — the SVG
+   *  foreignObject + transform combo desyncs cards from edges on macOS. */
+  nodes:     ReactNode
   overlays?: ReactNode
   className?: string
   // When set, the page-load viewport centers on this point at INITIAL_SCALE
@@ -49,7 +54,7 @@ interface SvgCanvasProps {
   initialTarget?: { x: number; y: number } | null
 }
 
-export function SvgCanvas({ bounds, children, overlays, className, initialTarget = null }: SvgCanvasProps) {
+export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTarget = null }: SvgCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ w: 0, h: 0 })
 
@@ -233,11 +238,20 @@ export function SvgCanvas({ bounds, children, overlays, className, initialTarget
         onPointerCancel={onPointerUp}
         style={{ cursor: "grab" }}
       >
-        <svg width="100%" height="100%" style={{ display: "block" }}>
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ display: "block" }}>
           <g transform={`translate(${viewport.tx} ${viewport.ty}) scale(${viewport.scale})`}>
-            {children}
+            {edges}
           </g>
         </svg>
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            transform:       `translate(${viewport.tx}px, ${viewport.ty}px) scale(${viewport.scale})`,
+            transformOrigin: "0 0",
+          }}
+        >
+          {nodes}
+        </div>
         {overlays}
       </div>
     </ViewportContext.Provider>
