@@ -140,12 +140,32 @@ export function buildFamilyGraph(
     }
   }
 
-  // 8. Siblings: same birthUnit, excluding self.
-  const siblingsOf = new Map<string, string[]>()
+  // 8. Siblings: same birthUnit, plus explicit SIBLING relations for people
+  //    whose shared parents aren't recorded yet. Dedupe and age-sort.
+  const siblingSets = new Map<string, Set<string>>()
+  const ensureSet = (k: string) => {
+    let s = siblingSets.get(k)
+    if (!s) { s = new Set(); siblingSets.set(k, s) }
+    return s
+  }
   for (const pid of Object.keys(persons)) {
     const bu = birthUnit.get(pid) ?? null
-    if (!bu) { siblingsOf.set(pid, []); continue }
-    siblingsOf.set(pid, bu.children.filter((c) => c !== pid))
+    if (!bu) { ensureSet(pid); continue }
+    const s = ensureSet(pid)
+    for (const c of bu.children) if (c !== pid) s.add(c)
+  }
+  for (const r of relations) {
+    if (r.type !== "SIBLING") continue
+    if (r.status === "REJECTED") continue
+    if (!persons[r.fromId] || !persons[r.toId]) continue
+    ensureSet(r.fromId).add(r.toId)
+    ensureSet(r.toId).add(r.fromId)
+  }
+  const siblingsOf = new Map<string, string[]>()
+  for (const [pid, set] of siblingSets.entries()) {
+    const arr = Array.from(set)
+    arr.sort((a, b) => ageMs(persons, a) - ageMs(persons, b))
+    siblingsOf.set(pid, arr)
   }
 
   return { units, birthUnit, marriageUnit, spouseOf, siblingsOf, spouseSubtype }
