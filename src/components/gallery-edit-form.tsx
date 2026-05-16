@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { upload } from "@vercel/blob/client"
 import { saveGallery, deleteGallery } from "@/actions/gallery"
 import {
   isAllowedImage,
@@ -141,16 +142,17 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
       const file = toProcess[i]
       const localUrl = placeholders[i].url
       try {
-        const res = await fetch(`/api/gallery/upload?filename=${encodeURIComponent(file.name)}`, {
-          method: "POST",
-          body: file,
+        // Client uploads: the file PUTs directly to Vercel Blob, bypassing the
+        // 4.5 MB serverless body limit. The route returns a signed token.
+        const blob = await upload(`gallery/${file.name}`, file, {
+          access: "public",
+          handleUploadUrl: "/api/gallery/upload",
+          contentType: file.type,
         })
-        const data = await res.json() as { url?: string; error?: string }
-        if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
         setItems((prev) => {
           const next = [...prev]
           const idx = next.findIndex((item) => item.uploading && item.url === localUrl)
-          if (idx !== -1) next[idx] = { kind: "image", url: data.url! }
+          if (idx !== -1) next[idx] = { kind: "image", url: blob.url }
           return next
         })
       } catch (err) {
@@ -221,16 +223,15 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
       }
 
       try {
-        const res = await fetch(`/api/gallery/upload?filename=${encodeURIComponent(payload.name)}`, {
-          method: "POST",
-          body: payload,
+        const blob = await upload(`gallery/${payload.name}`, payload, {
+          access: "public",
+          handleUploadUrl: "/api/gallery/upload",
+          contentType: payload.type,
         })
-        const data = await res.json() as { url?: string; error?: string }
-        if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
         setItems((prev) => {
           const next = [...prev]
           const idx = next.findIndex((item) => item.uploading && item.url === localUrl)
-          if (idx !== -1) next[idx] = { kind: "video", url: data.url!, durationSec }
+          if (idx !== -1) next[idx] = { kind: "video", url: blob.url, durationSec }
           return next
         })
       } catch (err) {

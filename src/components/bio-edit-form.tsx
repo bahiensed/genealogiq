@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { upload } from "@vercel/blob/client"
 import { saveBio, deleteBio } from "@/actions/bio"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import type { BioRow } from "@/queries/bio"
@@ -86,16 +87,15 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
     for (let i = 0; i < toProcess.length; i++) {
       const file = toProcess[i]
       try {
-        const res = await fetch(`/api/bio/upload?filename=${encodeURIComponent(file.name)}`, {
-          method: "POST",
-          body: file,
+        const blob = await upload(`bio/${file.name}`, file, {
+          access: "public",
+          handleUploadUrl: "/api/bio/upload",
+          contentType: file.type,
         })
-        const data = await res.json() as { url?: string; error?: string }
-        if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
         setImages((prev) => {
           const next = [...prev]
           const idx = next.findIndex((img) => img.uploading && img.url === placeholders[i].url)
-          if (idx !== -1) next[idx] = { url: data.url!, aspect: "square" }
+          if (idx !== -1) next[idx] = { url: blob.url, aspect: "square" }
           return next
         })
       } catch (err) {

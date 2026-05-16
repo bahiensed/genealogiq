@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { CalendarIcon, ImagePlus, RotateCcw, Save, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { upload } from "@vercel/blob/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -106,13 +107,12 @@ export function MemorialCreateForm() {
     setUploading(true)
     update("avatarUrl", URL.createObjectURL(file))
     try {
-      const res = await fetch(`/api/bio/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: "POST",
-        body: file,
+      const blob = await upload(`bio/${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/bio/upload",
+        contentType: file.type,
       })
-      const data = await res.json() as { url?: string; error?: string }
-      if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
-      update("avatarUrl", data.url)
+      update("avatarUrl", blob.url)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to upload avatar.")
       update("avatarUrl", "")

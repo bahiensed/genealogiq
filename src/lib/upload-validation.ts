@@ -2,7 +2,7 @@ export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "im
 export const ALLOWED_IMAGE_EXTS  = [".jpg", ".jpeg", ".png", ".webp", ".gif"] as const
 
 export const ALLOWED_VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime", "video/x-m4v"] as const
-export const ALLOWED_VIDEO_EXTS  = [".mp4", ".webm", ".mov", ".m4v"] as const
+export const ALLOWED_VIDEO_EXTS  = [".mp4", ".webm", ".mov", ".m4v", ".qt"] as const
 
 export const IMAGE_FORMATS_LABEL = "JPG, PNG, WebP or GIF"
 export const VIDEO_FORMATS_LABEL = "MP4, WebM or MOV (QuickTime)"

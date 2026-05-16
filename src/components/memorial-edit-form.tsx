@@ -10,6 +10,7 @@ import {
   CalendarIcon, Image as ImageIcon, Trash2, Save, RotateCcw,
 } from "lucide-react"
 import { toast } from "sonner"
+import { upload } from "@vercel/blob/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -191,10 +192,12 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
     setUploading(true)
     setValue("avatarUrl", URL.createObjectURL(file))
     try {
-      const res  = await fetch(`/api/bio/upload?filename=${encodeURIComponent(file.name)}`, { method: "POST", body: file })
-      const data = await res.json() as { url?: string; error?: string }
-      if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
-      setValue("avatarUrl", data.url)
+      const blob = await upload(`bio/${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/bio/upload",
+        contentType: file.type,
+      })
+      setValue("avatarUrl", blob.url)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to upload avatar.")
       setValue("avatarUrl", initial.avatarUrl ?? null)

@@ -1,36 +1,38 @@
-import { put } from "@vercel/blob"
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client"
 import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 
-const ALLOWED_TYPES = new Set([
+const ALLOWED_TYPES = [
   "image/jpeg", "image/png", "image/webp", "image/gif",
   "video/mp4", "video/webm", "video/quicktime",
-])
-const MAX_SIZE = 100 * 1024 * 1024
+]
 
+// Client-uploads route: returns a short-lived blob token so the browser PUTs
+// straight to Vercel Blob storage instead of sending the file through the
+// serverless function (which would 413 anything over ~4.5 MB).
 export async function POST(request: Request): Promise<NextResponse> {
-  const session = await auth()
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
-  const filename = new URL(request.url).searchParams.get("filename")
-  if (!filename) return NextResponse.json({ error: "filename is required" }, { status: 400 })
-
-  const contentType = request.headers.get("content-type") ?? ""
-  if (!ALLOWED_TYPES.has(contentType)) return NextResponse.json({ error: "File type not allowed" }, { status: 400 })
-
-  const contentLength = Number(request.headers.get("content-length") ?? 0)
-  if (contentLength > MAX_SIZE) return NextResponse.json({ error: "File too large (max 100 MB)" }, { status: 400 })
-
-  if (!request.body) return NextResponse.json({ error: "No file provided" }, { status: 400 })
+  const body = (await request.json()) as HandleUploadBody
 
   try {
-    const blob = await put(`gallery/${filename}`, request.body, {
-      access: "public",
-      addRandomSuffix: true,
-      contentType,
+    const json = await handleUpload({
+      body,
+      request,
+      onBeforeGenerateToken: async () => {
+        const session = await auth()
+        if (!session?.user) throw new Error("Unauthorized")
+        return {
+          allowedContentTypes: ALLOWED_TYPES,
+          maximumSizeInBytes:  100 * 1024 * 1024,
+          addRandomSuffix:     true,
+        }
+      },
+      onUploadCompleted: async () => {
+        // No-op for now — the gallery row is created by the gallery save action,
+        // which gets the URL back from the client after a successful upload.
+      },
     })
-    return NextResponse.json({ url: blob.url })
+    return NextResponse.json(json)
   } catch (error) {
-    return NextResponse.json({ error: (error as Error).message }, { status: 500 })
+    return NextResponse.json({ error: (error as Error).message }, { status: 400 })
   }
 }

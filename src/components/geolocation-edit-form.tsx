@@ -6,6 +6,7 @@ import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ImagePlus, X, Save, RotateCcw, Trash2, LocateFixed, Lock } from "lucide-react"
 import { toast } from "sonner"
+import { upload } from "@vercel/blob/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -167,13 +168,12 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
     setPhotoAt(slot, preview)
     setUploading((prev) => { const u = [...prev]; u[slot] = true; return u })
     try {
-      const res = await fetch(`/api/geolocation/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: "POST",
-        body: file,
+      const blob = await upload(`geolocation/${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/geolocation/upload",
+        contentType: file.type,
       })
-      const data = await res.json() as { url?: string; error?: string }
-      if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
-      setPhotoAt(slot, data.url)
+      setPhotoAt(slot, blob.url)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to upload photo.")
       setPhotoAt(slot, null)

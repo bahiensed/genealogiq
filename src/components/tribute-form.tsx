@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ImagePlus, X, Save, Send, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import { upload } from "@vercel/blob/client"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -30,7 +31,7 @@ const initials = (name: string) =>
 interface Props {
   profileId: string
   authorName: string
-  existing?: { text: string; imageUrl?: string | null } | null
+  existing?: { id: string; text: string; imageUrl?: string | null } | null
 }
 
 export function TributeForm({ profileId, authorName, existing }: Props) {
@@ -54,13 +55,12 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
     const preview = URL.createObjectURL(file)
     setImageUrl(preview)
     try {
-      const res = await fetch(`/api/tribute/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: "POST",
-        body: file,
+      const blob = await upload(`tributes/${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/tribute/upload",
+        contentType: file.type,
       })
-      const data = await res.json() as { url?: string; error?: string }
-      if (!res.ok || !data.url) throw new Error(data.error ?? "Upload failed")
-      setImageUrl(data.url)
+      setImageUrl(blob.url)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to upload image.")
       setImageUrl(existing?.imageUrl ?? undefined)
@@ -83,8 +83,10 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
   }
 
   const handleDelete = () => {
+    if (!existing) return
     startTransition(async () => {
-      await deleteTribute(profileId)
+      const result = await deleteTribute(existing.id)
+      if (result?.error) { toast.error(result.error); return }
       toast.success("Tribute deleted.")
       router.push(`/profile/${profileId}/tributes`)
     })

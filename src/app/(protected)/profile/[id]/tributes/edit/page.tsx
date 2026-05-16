@@ -50,7 +50,7 @@ export default async function TributeWritePage({ params }: Props) {
         <TributeForm
           profileId={id}
           authorName={authorName}
-          existing={existing ? { text: existing.text, imageUrl: existing.imageUrl } : null}
+          existing={existing ? { id: existing.id, text: existing.text, imageUrl: existing.imageUrl } : null}
         />
       </main>
     </div>

@@ -31,7 +31,7 @@ export function inspectVideo(file: File): Promise<VideoMeta> {
 }
 
 const APPLE_MIME = new Set(["video/quicktime", "video/x-m4v"])
-const APPLE_EXT = new Set([".mov", ".m4v"])
+const APPLE_EXT = new Set([".mov", ".m4v", ".qt"])
 
 export function needsTranscode(file: File, meta: VideoMeta): boolean {
   if (APPLE_MIME.has(file.type)) return true
