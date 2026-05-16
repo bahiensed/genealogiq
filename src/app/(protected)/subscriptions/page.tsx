@@ -37,7 +37,7 @@ export default async function SubscriptionsPage({ searchParams }: Props) {
           <section className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
             <div className="flex flex-col gap-1 min-w-0">
               <p className="text-muted-foreground italic">
-                Choose the perfect way to stay in touch with your beloved ones
+                The perfect way to stay in touch
               </p>
               {activePlan && (
                 <p className="text-xs text-muted-foreground">
