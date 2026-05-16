@@ -4,7 +4,11 @@ import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifyTenantSession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
+
+// User management (invite, edit, deactivate, delete tenant employees) is
+// restricted to OWNER / ADMIN / SUPER_ADMIN of the tenant — see verifyAdmin().
+// Self-profile edits go through a different action (not exposed here).
 import { sendWelcomeEmail } from '@/lib/email'
 import { userSchema, type UserFormValues } from '@/schemas/user.schema'
 
@@ -28,7 +32,7 @@ function buildAddressWrite(address: UserFormValues['address']): any {
 }
 
 export async function createUser(data: UserFormValues): Promise<ActionError | ActionSuccess> {
-  const { customerId } = await verifyTenantSession()
+  const { customerId } = await verifyAdmin()
 
   const validated = userSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -69,7 +73,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
 }
 
 export async function updateUser(id: string, data: UserFormValues): Promise<ActionError | ActionSuccess> {
-  const { customerId } = await verifyTenantSession()
+  const { customerId } = await verifyAdmin()
 
   const validated = userSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -100,7 +104,7 @@ export async function updateUser(id: string, data: UserFormValues): Promise<Acti
 }
 
 export async function deleteUser(userId: string): Promise<ActionError | void> {
-  const session = await verifyTenantSession()
+  const session = await verifyAdmin()
 
   if (session.user!.id === userId) return { error: 'You cannot delete your own account.' }
 
@@ -117,7 +121,7 @@ export async function deleteUser(userId: string): Promise<ActionError | void> {
 }
 
 export async function toggleUserActive(userId: string): Promise<ActionError | void> {
-  const session = await verifyTenantSession()
+  const session = await verifyAdmin()
 
   if (session.user!.id === userId) return { error: 'You cannot deactivate your own account.' }
 
@@ -129,7 +133,7 @@ export async function toggleUserActive(userId: string): Promise<ActionError | vo
 }
 
 export async function resendWelcomeEmail(userId: string): Promise<ActionError | void> {
-  const { customerId } = await verifyTenantSession()
+  const { customerId } = await verifyAdmin()
 
   const user = await prisma.user.findUnique({ where: { id: userId, tenantId: customerId }, select: { email: true, password: true } })
   if (!user) return { error: 'User not found.' }
