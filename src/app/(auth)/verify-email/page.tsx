@@ -25,7 +25,9 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
     where: { token },
   })
 
-  if (!record || record.expiresAt < new Date()) {
+  // userId is nullable in the schema (also supports AppUser tokens written by
+  // APP); SEQ only ever issues User-bound tokens, so reject if absent.
+  if (!record || !record.userId || record.expiresAt < new Date()) {
     if (record) {
       await prisma.emailToken.delete({ where: { token } })
     }
@@ -40,11 +42,12 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
       />
     )
   }
+  const userId = record.userId
 
   if (record.type === 'CHANGE') {
     await prisma.$transaction([
       prisma.user.update({
-        where: { id: record.userId },
+        where: { id: userId },
         data: { email: record.newEmail!, emailVerified: new Date() },
       }),
       prisma.emailToken.delete({ where: { token } }),
@@ -64,7 +67,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
   // VERIFICATION
   await prisma.$transaction([
     prisma.user.update({
-      where: { id: record.userId },
+      where: { id: userId },
       data: { emailVerified: new Date() },
     }),
     prisma.emailToken.delete({ where: { token } }),
