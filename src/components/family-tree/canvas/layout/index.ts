@@ -19,12 +19,15 @@
 //   - Extras at gen <= -2 (great-aunts/uncles, etc.) render as couple slots
 //     only — their own descendants are not shown to keep deep generations
 //     compact. gen=-1 aunts/uncles still render with their cousin subtree.
-//   - Multiple-marriages are folded into a single active spouse (the same
-//     selection rule already used elsewhere).
-//   - Half-siblings treated as full siblings for family-unit grouping.
+//   - Multi-marriage is supported for the subject (gen=0) and the subject's
+//     parents (gen=-1) via half-blocks; deeper levels still fold non-primary
+//     marriages into the active spouse.
+//   - Half-siblings emerge naturally from per-unit `children` lists — the
+//     SIBLING-line emitter still treats explicit cross-unit SIBLING relations
+//     uniformly (no dashed-line distinction yet; that's a v2 polish).
 
 import type { TreePerson, TreeRelation } from "@/queries/family-tree"
-import { buildFamilyGraph, type FamilyGraph } from "./family-units"
+import { buildFamilyGraph, type FamilyGraph, type FamilyUnit } from "./family-units"
 
 // ─── Constants (unchanged from the previous layout) ─────────────────────────
 
@@ -307,6 +310,51 @@ function layoutAncestorCoupleBlock(
   return mergeBlocks(husbandBlock, wifeBlock)
 }
 
+// ─── Half-marriage block ────────────────────────────────────────────────────
+//
+// Used when a person has more than one marriage. The "primary" marriage is
+// rendered by layoutDescendantSubtree (active spouse + children below). For
+// every NON-primary marriage we emit a half-block: just the OTHER spouse at
+// `gen` plus their joint children at gen+1, rendered as full descendant
+// subtrees. The block anchors with the other spouse's card at x=0, and the
+// children are centered under that card. The couple connector itself, and the
+// PARENT_OF lines from the central person to the half-children, are drawn by
+// the edge pass at the end.
+
+function layoutHalfMarriageBlock(
+  otherSpouseId: string,
+  unit:          FamilyUnit,
+  gen:           number,
+  graph:         FamilyGraph,
+  persons:       Record<string, TreePerson>,
+  visited:       Set<string>,
+): Block {
+  if (visited.has(otherSpouseId)) return emptyBlock()
+  visited.add(otherSpouseId)
+
+  const positions = new Map<string, { x: number; y: number }>()
+  positions.set(otherSpouseId, { x: 0, y: gen * Y_GEN })
+  let block: Block = { positions, leftX: 0, rightX: NODE_W }
+
+  if (unit.children.length === 0) return block
+
+  const childBlocks: Block[] = []
+  for (const childId of unit.children) {
+    const cb = layoutDescendantSubtree(childId, graph, persons, gen + 1, visited)
+    if (cb.positions.size > 0) childBlocks.push(cb)
+  }
+  if (childBlocks.length === 0) return block
+
+  let kids = childBlocks[0]
+  for (let i = 1; i < childBlocks.length; i++) {
+    kids = placeRightOf(kids, childBlocks[i], X_SIBLING)
+  }
+  const childrenMidX = (kids.leftX + kids.rightX) / 2
+  shiftBlock(kids, NODE_W / 2 - childrenMidX)
+
+  return mergeBlocks(block, kids)
+}
+
 // ─── Top-level orchestration ────────────────────────────────────────────────
 
 export function computeLayout(
@@ -354,6 +402,38 @@ export function computeLayout(
   const subjectAge = ageOf(rootId)
 
   let combined = descendantBlock
+
+  // 1b. Subject's OTHER marriages → render each other spouse + their children
+  //     as a half-block adjacent to the primary couple, on the side opposite
+  //     to the primary spouse. Subject's full siblings (step 2) will then sit
+  //     beyond the half-marriages.
+  const subjectMarriages = graph.marriageUnits.get(rootId) ?? []
+  const subjectPrimary   = graph.marriageUnit.get(rootId) ?? null
+  const subjectOthers    = subjectMarriages.filter((u) => u !== subjectPrimary)
+  if (subjectOthers.length > 0) {
+    const primarySpouseId  = subjectPrimary?.parents.find((p) => p !== rootId)
+    const primarySpousePos = primarySpouseId ? combined.positions.get(primarySpouseId) : null
+    const focalPos         = combined.positions.get(rootId)
+    // If primary spouse sits on the RIGHT (focal older), others go LEFT, and
+    // vice versa. Default LEFT when there's no primary spouse to compare.
+    const othersOnLeft = primarySpousePos && focalPos
+      ? primarySpousePos.x > focalPos.x
+      : true
+    for (const unit of subjectOthers) {
+      const otherSpouseId = unit.parents.find((p) => p !== rootId)
+      if (!otherSpouseId) continue
+      const halfBlock = layoutHalfMarriageBlock(otherSpouseId, unit, 0, graph, persons, visited)
+      if (halfBlock.positions.size === 0) continue
+      if (othersOnLeft) {
+        const dx = combined.leftX - X_FAMILY - halfBlock.rightX
+        shiftBlock(halfBlock, dx)
+        combined = mergeBlocks(combined, halfBlock)
+      } else {
+        combined = placeRightOf(combined, halfBlock, X_FAMILY)
+      }
+    }
+  }
+
   // Older siblings (left of subject)
   for (let i = siblings.length - 1; i >= 0; i--) {
     const sib = siblings[i]
@@ -386,6 +466,35 @@ export function computeLayout(
     // If subject has siblings, they extend to the side; the parents stay above
     // the subject. This matches the user's "subject is the focus" convention.
     combined = mergeBlocks(combined, parentsBlock)
+
+    // 3b. Parents' OTHER marriages → subject's half-siblings. For each parent
+    //     in the central couple, render any non-subjectBirth marriage as a
+    //     half-block (other spouse at gen=-1 + their joint children at gen=0)
+    //     placed adjacent to the parent on the outer side.
+    for (const parentId of subjectBirth.parents) {
+      const allMarriages = graph.marriageUnits.get(parentId) ?? []
+      const otherUnits   = allMarriages.filter((u) => u !== subjectBirth)
+      if (otherUnits.length === 0) continue
+      const partnerInCouple = subjectBirth.parents.find((p) => p !== parentId)
+      const parentPos  = combined.positions.get(parentId)
+      const partnerPos = partnerInCouple ? combined.positions.get(partnerInCouple) : null
+      const onLeft = parentPos && partnerPos
+        ? parentPos.x < partnerPos.x
+        : true
+      for (const unit of otherUnits) {
+        const otherSpouseId = unit.parents.find((p) => p !== parentId)
+        if (!otherSpouseId) continue
+        const halfBlock = layoutHalfMarriageBlock(otherSpouseId, unit, -1, graph, persons, visited)
+        if (halfBlock.positions.size === 0) continue
+        if (onLeft) {
+          const dx = combined.leftX - X_FAMILY - halfBlock.rightX
+          shiftBlock(halfBlock, dx)
+          combined = mergeBlocks(combined, halfBlock)
+        } else {
+          combined = placeRightOf(combined, halfBlock, X_FAMILY)
+        }
+      }
+    }
 
     // Add gen=-1 sibling row (aunts/uncles): siblings of each parent that are
     // NOT in the central couple. Each extra renders its full descendant

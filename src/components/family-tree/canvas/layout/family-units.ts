@@ -17,17 +17,20 @@ export interface FamilyUnit {
 
 export interface FamilyGraph {
   /** Every unit keyed by its synthetic id. */
-  units:        Map<string, FamilyUnit>
+  units:         Map<string, FamilyUnit>
   /** For each person, the unit they were born into (where they appear in `children`). */
-  birthUnit:    Map<string, FamilyUnit | null>
-  /** For each person, the unit they are a parent in (where they appear in `parents`). */
-  marriageUnit: Map<string, FamilyUnit | null>
+  birthUnit:     Map<string, FamilyUnit | null>
+  /** For each person, the "primary" (active) unit they are a parent in. */
+  marriageUnit:  Map<string, FamilyUnit | null>
+  /** For each person, ALL units they are a parent in, sorted chronologically
+   *  (oldest marriage first). Length >= 1 when present. */
+  marriageUnits: Map<string, FamilyUnit[]>
   /** Active spouse for each person, or null if single / no active marriage. */
-  spouseOf:     Map<string, string | null>
+  spouseOf:      Map<string, string | null>
   /** Siblings (same birth unit) of each person, age-sorted, excluding self. */
-  siblingsOf:   Map<string, string[]>
+  siblingsOf:    Map<string, string[]>
   /** Subtype of the spouse relation, for line styling later. */
-  spouseSubtype:Map<string, string>
+  spouseSubtype: Map<string, string>
 }
 
 const ageMs = (persons: Record<string, TreePerson>, id: string) =>
@@ -124,19 +127,41 @@ export function buildFamilyGraph(
     if (c) spouseSubtype.set(pid, c.subtype)
   }
 
-  // 7. Finalise marriageUnit: pick the unit whose other parent matches the active spouse.
-  //    If single-parent unit (no spouse stored), still pick the unit if there's exactly one.
+  // 7a. SPOUSE start date for each unordered pair (used to sort marriageUnits).
+  //     Returns Infinity when no SPOUSE relation is found (single-parent unit,
+  //     or PARENT_OF without a SPOUSE record) so those sort to the end.
+  const spouseStart = new Map<string, number>()
+  const pairKey = (a: string, b: string) => (a < b ? `${a}|${b}` : `${b}|${a}`)
+  for (const r of relations) {
+    if (r.type !== "SPOUSE") continue
+    if (r.status === "REJECTED") continue
+    const t = r.startDate?.getTime() ?? Number.POSITIVE_INFINITY
+    const k = pairKey(r.fromId, r.toId)
+    const cur = spouseStart.get(k)
+    if (cur === undefined || t < cur) spouseStart.set(k, t)
+  }
+  const unitStart = (u: FamilyUnit): number => {
+    if (u.parents.length !== 2) return Number.POSITIVE_INFINITY
+    return spouseStart.get(pairKey(u.parents[0], u.parents[1])) ?? Number.POSITIVE_INFINITY
+  }
+
+  // 7b. Finalise marriageUnit: pick the unit whose other parent matches the active spouse.
+  //     If single-parent unit (no spouse stored), still pick the unit if there's exactly one.
   const marriageUnit = new Map<string, FamilyUnit | null>()
+  const marriageUnits = new Map<string, FamilyUnit[]>()
   for (const pid of Object.keys(persons)) {
     const cands = marriageUnitCandidates.get(pid) ?? []
-    if (cands.length === 0) { marriageUnit.set(pid, null); continue }
-    if (cands.length === 1) { marriageUnit.set(pid, cands[0]); continue }
+    // Sort cands chronologically (oldest start first; unknown last).
+    const sorted = [...cands].sort((a, b) => unitStart(a) - unitStart(b))
+    marriageUnits.set(pid, sorted)
+    if (sorted.length === 0) { marriageUnit.set(pid, null); continue }
+    if (sorted.length === 1) { marriageUnit.set(pid, sorted[0]); continue }
     const spouse = spouseOf.get(pid)
     if (spouse) {
-      const match = cands.find((u) => u.parents.includes(spouse))
-      marriageUnit.set(pid, match ?? cands[0])
+      const match = sorted.find((u) => u.parents.includes(spouse))
+      marriageUnit.set(pid, match ?? sorted[0])
     } else {
-      marriageUnit.set(pid, cands[0])
+      marriageUnit.set(pid, sorted[0])
     }
   }
 
@@ -168,5 +193,5 @@ export function buildFamilyGraph(
     siblingsOf.set(pid, arr)
   }
 
-  return { units, birthUnit, marriageUnit, spouseOf, siblingsOf, spouseSubtype }
+  return { units, birthUnit, marriageUnit, marriageUnits, spouseOf, siblingsOf, spouseSubtype }
 }
