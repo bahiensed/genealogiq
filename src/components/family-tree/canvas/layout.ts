@@ -108,11 +108,33 @@ export function computeLayout(
     cx += NODE_W + X_TIGHT
   }
 
-  // Same-gen siblings of root (no spouse linking) placed after, then before root if needed.
+  // Same-gen siblings of root, each followed by their own spouses, so siblings'
+  // spouses don't fall through to the (0, 0) fallback and stack on top of the root.
   const sib0 = Array.from(siblings.get(rootId) ?? []).filter((s) => generation.get(s) === 0 && !position.has(s))
   for (const id of sib0) {
     position.set(id, { x: cx, y: 0 })
     cx += NODE_W + X_TIGHT
+    for (const sp of spouses.get(id) ?? []) {
+      if (!position.has(sp) && generation.get(sp) === 0) {
+        position.set(sp, { x: cx, y: 0 })
+        cx += NODE_W + X_TIGHT
+      }
+    }
+  }
+
+  // Defensive: anyone else the BFS reached at gen 0 (e.g. only linked via a
+  // SIBLING edge we didn't recurse into) — place them adjacent so the (0, 0)
+  // fallback can never bury the root.
+  const stragglers0 = (byGen.get(0) ?? []).filter((id) => !position.has(id))
+  for (const id of stragglers0) {
+    position.set(id, { x: cx, y: 0 })
+    cx += NODE_W + X_TIGHT
+    for (const sp of spouses.get(id) ?? []) {
+      if (!position.has(sp) && generation.get(sp) === 0) {
+        position.set(sp, { x: cx, y: 0 })
+        cx += NODE_W + X_TIGHT
+      }
+    }
   }
 
   // Walk other generations outward, closest to root first.
