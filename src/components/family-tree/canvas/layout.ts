@@ -1,5 +1,17 @@
 import type { TreePerson, TreeRelation } from "@/queries/family-tree"
 
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Comparator that puts the older person first (leftmost). Unknown birth dates
+ *  sort to the end. */
+function byBirthAsc(persons: Record<string, TreePerson>) {
+  return (a: string, b: string) => {
+    const ba = persons[a]?.birthDate?.getTime() ?? Number.POSITIVE_INFINITY
+    const bb = persons[b]?.birthDate?.getTime() ?? Number.POSITIVE_INFINITY
+    return ba - bb
+  }
+}
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 export const NODE_W    = 168
@@ -100,40 +112,48 @@ export function computeLayout(
   // Position map.
   const position = new Map<string, { x: number; y: number }>()
 
-  // Place root + its same-gen spouse(s) at x = 0.
-  const rootCluster = [rootId, ...Array.from(spouses.get(rootId) ?? []).filter((s) => generation.get(s) === 0)]
+  // Oldest first → leftmost.
+  const byAge = byBirthAsc(persons)
+
+  // Place root + its same-gen spouse(s) at x = 0, ordered by age (oldest leftmost).
+  const rootCluster = [
+    rootId,
+    ...Array.from(spouses.get(rootId) ?? []).filter((s) => generation.get(s) === 0),
+  ].sort(byAge)
   let cx = 0
   for (const id of rootCluster) {
     position.set(id, { x: cx, y: 0 })
     cx += NODE_W + X_TIGHT
   }
 
-  // Same-gen siblings of root, each followed by their own spouses, so siblings'
-  // spouses don't fall through to the (0, 0) fallback and stack on top of the root.
-  const sib0 = Array.from(siblings.get(rootId) ?? []).filter((s) => generation.get(s) === 0 && !position.has(s))
+  // Same-gen siblings of root (oldest first), each followed by their own spouses,
+  // so siblings' spouses don't fall through to the (0, 0) fallback and stack on
+  // top of the root.
+  const sib0 = Array.from(siblings.get(rootId) ?? [])
+    .filter((s) => generation.get(s) === 0 && !position.has(s))
+    .sort(byAge)
   for (const id of sib0) {
-    position.set(id, { x: cx, y: 0 })
-    cx += NODE_W + X_TIGHT
-    for (const sp of spouses.get(id) ?? []) {
-      if (!position.has(sp) && generation.get(sp) === 0) {
-        position.set(sp, { x: cx, y: 0 })
-        cx += NODE_W + X_TIGHT
-      }
+    // Sibling on the left of its couple if older than the spouse, else its
+    // spouse goes left.
+    const spouseList = Array.from(spouses.get(id) ?? [])
+      .filter((sp) => !position.has(sp) && generation.get(sp) === 0)
+    const couple = [id, ...spouseList].sort(byAge)
+    for (const memberId of couple) {
+      position.set(memberId, { x: cx, y: 0 })
+      cx += NODE_W + X_TIGHT
     }
   }
 
-  // Defensive: anyone else the BFS reached at gen 0 (e.g. only linked via a
-  // SIBLING edge we didn't recurse into) — place them adjacent so the (0, 0)
-  // fallback can never bury the root.
-  const stragglers0 = (byGen.get(0) ?? []).filter((id) => !position.has(id))
+  // Defensive: anyone else the BFS reached at gen 0 — place them adjacent so the
+  // (0, 0) fallback can never bury the root.
+  const stragglers0 = (byGen.get(0) ?? []).filter((id) => !position.has(id)).sort(byAge)
   for (const id of stragglers0) {
-    position.set(id, { x: cx, y: 0 })
-    cx += NODE_W + X_TIGHT
-    for (const sp of spouses.get(id) ?? []) {
-      if (!position.has(sp) && generation.get(sp) === 0) {
-        position.set(sp, { x: cx, y: 0 })
-        cx += NODE_W + X_TIGHT
-      }
+    const spouseList = Array.from(spouses.get(id) ?? [])
+      .filter((sp) => !position.has(sp) && generation.get(sp) === 0)
+    const couple = [id, ...spouseList].sort(byAge)
+    for (const memberId of couple) {
+      position.set(memberId, { x: cx, y: 0 })
+      cx += NODE_W + X_TIGHT
     }
   }
 
@@ -141,8 +161,9 @@ export function computeLayout(
   const sortedGens = Array.from(byGen.keys()).sort((a, b) => Math.abs(a) - Math.abs(b))
 
   // Compute couple groups for a generation: greedy pair-up of spouses at same gen.
+  // Iteration order and intra-cluster order are both age-ascending (oldest leftmost).
   const buildClusters = (gen: number): string[][] => {
-    const ids = (byGen.get(gen) ?? []).filter((id) => !position.has(id))
+    const ids = (byGen.get(gen) ?? []).filter((id) => !position.has(id)).sort(byAge)
     const seen = new Set<string>()
     const clusters: string[][] = []
     for (const id of ids) {
@@ -155,6 +176,8 @@ export function computeLayout(
           seen.add(sp)
         }
       }
+      // Reorder the couple so the older spouse is on the left.
+      cluster.sort(byAge)
       clusters.push(cluster)
     }
     return clusters
@@ -212,6 +235,8 @@ export function computeLayout(
 
     let lastRight = -Infinity
     for (const group of orderedGroups) {
+      // Within a sibling-group, place oldest-sibling-cluster leftmost.
+      group.sort((g1, g2) => byAge(g1.c[0], g2.c[0]))
       const anchor = group[0].anchor
 
       const totalWidth =
