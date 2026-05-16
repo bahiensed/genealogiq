@@ -1,17 +1,31 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import Link from "next/link"
-import { Send, SquarePen, Flower2, ArrowDownUp } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Send, SquarePen, Flower2, ArrowDownUp, Trash2 } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { deleteTribute } from "@/actions/tribute"
 import type { ApprovedTributeRow } from "@/queries/tribute"
 
 const PAGE_SIZE = 10
@@ -32,12 +46,22 @@ interface Props {
 }
 
 export function TributesClient({ items, profileId, sessionUserId, canWrite, hasPendingFromMe }: Props) {
+  const router = useRouter()
+  const [isDeleting, startDelete] = useTransition()
   const myTribute = items.find((t) => t.authorId === sessionUserId)
   const [sort, setSort] = useState<SortDir>("newest")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const listTopRef = useRef<HTMLDivElement | null>(null)
   const didMountRef = useRef(false)
+
+  const handleDelete = () => {
+    startDelete(async () => {
+      await deleteTribute(profileId)
+      toast.success("Tribute deleted.")
+      router.refresh()
+    })
+  }
 
   const sorted = useMemo(() => {
     return [...items].sort((a, b) =>
@@ -148,6 +172,39 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, hasP
                         </div>
                         <div className="text-xs text-muted-foreground">{formatDate(t.createdAt)}</div>
                       </div>
+                      {isMine && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                              aria-label="Delete your tribute"
+                              disabled={isDeleting}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete your tribute?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This cannot be undone. The tribute and its image will be removed from this profile.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                {isDeleting ? "Deleting…" : "Delete"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </div>
                   </div>
                 </article>

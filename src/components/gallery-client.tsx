@@ -47,10 +47,13 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
 
   const items = useMemo(() => {
     return [...rawItems].sort((a, b) => {
-      // Use takenAt when available, fall back to createdAt (upload date)
+      // Primary: takenAt (EXIF), falling back to createdAt (upload date).
       const da = new Date(a.takenAt ?? a.createdAt).getTime()
       const db = new Date(b.takenAt ?? b.createdAt).getTime()
-      return sort === "newest" ? db - da : da - db
+      if (da !== db) return sort === "newest" ? db - da : da - db
+      // Tiebreaker: cuid (lexicographic ≈ creation order) so identical timestamps
+      // still produce a deterministic, visibly different order on toggle.
+      return sort === "newest" ? b.id.localeCompare(a.id) : a.id.localeCompare(b.id)
     })
   }, [rawItems, sort])
 
@@ -143,13 +146,13 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
         </div>
       ) : (
         <>
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
             {visible.map((item, idx) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setLightboxIndex(idx)}
-                className="mb-4 break-inside-avoid w-full block group rounded-2xl overflow-hidden border border-border/60 bg-card/40 transition-transform hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full block group rounded-2xl overflow-hidden border border-border/60 bg-card/40 transition-transform hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {item.kind === "image" ? (
                   // eslint-disable-next-line @next/next/no-img-element

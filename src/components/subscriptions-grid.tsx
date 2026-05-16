@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Check, CalendarDays, Calendar1, Settings } from "lucide-react"
+import { Check, CalendarDays, Calendar1 } from "lucide-react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { changeSubscription, createCheckoutSession, createPortalSession } from "@/actions/billing"
+import { changeSubscription, createCheckoutSession } from "@/actions/billing"
 import type { SubscriptionRow } from "@/queries/subscriptions"
 import type { ActivePlan } from "@/queries/billing"
 
@@ -57,8 +57,6 @@ export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Pr
 
   return (
     <div className="space-y-6">
-      {activePlan && <ActivePlanBanner plan={activePlan} />}
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {subscriptions.map((s, i) => {
           const isActive = activeSubscriptionId
@@ -82,31 +80,6 @@ export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Pr
         activePlan={activePlan}
         onClose={() => setPendingChange(null)}
       />
-    </div>
-  )
-}
-
-function ActivePlanBanner({ plan }: { plan: ActivePlan }) {
-  const [isPending, startTransition] = useTransition()
-  const router = useRouter()
-
-  const summary = `Currently on ${plan.subscription.name} until ${longDate.format(plan.currentPeriodEnd)}.`
-
-  const handleManage = () => {
-    startTransition(async () => {
-      const result = await createPortalSession()
-      if ("error" in result) { toast.error(result.error); return }
-      router.push(result.url)
-    })
-  }
-
-  return (
-    <div className="glass-card no-sheen px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
-      <p className="text-sm text-foreground/90">{summary}</p>
-      <Button variant="outline" size="sm" className="gap-1.5 shrink-0" onClick={handleManage} disabled={isPending}>
-        <Settings className="h-3.5 w-3.5" />
-        {isPending ? "Opening…" : "Manage subscription"}
-      </Button>
     </div>
   )
 }

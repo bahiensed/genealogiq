@@ -80,18 +80,33 @@ export async function transcodeToHD(
   const progressHandler = ({ progress }: { progress: number }) => {
     if (progress >= 0 && progress <= 1) onProgress?.(progress)
   }
+  // Collect ffmpeg log lines so we can include them in any thrown error — a
+  // silent 100% failure used to surface as just "transcode failed".
+  const logLines: string[] = []
+  const logHandler = (entry: { message: string }) => {
+    logLines.push(entry.message)
+    if (logLines.length > 200) logLines.splice(0, logLines.length - 200)
+  }
   ffmpeg.on("progress", progressHandler)
+  ffmpeg.on("log", logHandler)
 
   try {
     await ffmpeg.writeFile(inputName, await fetchFile(file))
+    // Lightest sensible config for memorial-gallery videos:
+    //  - cap at 1280 wide (plenty for in-page viewing, much faster than 1080p)
+    //  - ultrafast preset (lowest CPU)
+    //  - yuv420p (universal playback, normalises HEVC 10-bit Apple sources)
+    //  - CRF 28 (good enough at 1280p, dramatically smaller file)
+    //  - stereo audio (avoids weird 5.1 layouts re-encode quirks)
     await ffmpeg.exec([
       "-i", inputName,
-      "-vf", "scale='min(1920,iw)':'-2'",
+      "-vf", "scale='min(1280,iw)':'-2'",
       "-c:v", "libx264",
-      "-preset", "veryfast",
-      "-crf", "23",
+      "-preset", "ultrafast",
+      "-pix_fmt", "yuv420p",
+      "-crf", "28",
       "-c:a", "aac",
-      "-b:a", "128k",
+      "-ac", "2",
       "-movflags", "+faststart",
       "-y", outputName,
     ])
@@ -100,8 +115,14 @@ export async function transcodeToHD(
     const blob = new Blob([bytes], { type: "video/mp4" })
     const baseName = dot >= 0 ? file.name.slice(0, dot) : file.name
     return new File([blob], `${baseName}.mp4`, { type: "video/mp4" })
+  } catch (err) {
+    const tail = logLines.slice(-30).join("\n")
+    console.error("[video-transcode] failed", err, "\nffmpeg log:\n", tail)
+    const message = err instanceof Error ? err.message : "Video transcode failed"
+    throw new Error(`${message}${tail ? `\n${tail}` : ""}`)
   } finally {
     ffmpeg.off("progress", progressHandler)
+    ffmpeg.off("log", logHandler)
     try { await ffmpeg.deleteFile(inputName) } catch {}
     try { await ffmpeg.deleteFile(outputName) } catch {}
   }

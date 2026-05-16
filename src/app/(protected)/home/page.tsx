@@ -3,58 +3,16 @@ import { Clock, Heart, BrickWall, User, ArrowRight } from "lucide-react"
 import { verifySession } from "@/lib/dal"
 import { GlassIcon } from "@/components/glass-icon"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
-import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
-import { getProfileGradient } from "@/lib/avatar-color"
 import { HomeSearch } from "@/components/home-search"
+import { HomeFavorites } from "@/components/home-favorites"
+import { HomeMemorials } from "@/components/home-memorials"
 import { RecentlyViewedSection } from "@/components/recently-viewed-section"
 import { RecentlyViewedCount } from "@/components/recently-viewed-count"
 import { Greeting } from "@/components/greeting"
 import { ScanQrButton } from "@/components/scan-qr-button"
 import { prisma } from "@/lib/prisma"
-import { getFavoritesByUserId, type FavoriteRow } from "@/queries/favorite"
-import { getMemorialsByCreatorId, type MemorialRow } from "@/queries/memorial"
-
-function favToMiniProfile(fav: FavoriteRow): MiniProfile {
-  const t = fav.target
-  const isMemorialized = t.role === "APP_MEMO"
-  return {
-    id: t.id,
-    name: `${t.firstName} ${t.lastName}`,
-    subtitle: t.birthPlace
-      ? `${t.birthPlace}${t.birthCountry ? `, ${t.birthCountry}` : ""}`
-      : isMemorialized ? "Memorialized profile" : "",
-    status: isMemorialized ? "Memorialized" : "Living",
-    metric: isMemorialized && t.deathDate
-      ? `✦ ${t.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
-      : t.birthDate
-        ? `Born ${t.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
-        : "",
-    initials: `${t.firstName[0]}${t.lastName[0]}`.toUpperCase(),
-    gradient: getProfileGradient(t.id),
-    href: `/profile/${t.id}`,
-    avatarUrl: t.avatarUrl,
-  }
-}
-
-function memToMiniProfile(m: MemorialRow): MiniProfile {
-  return {
-    id: m.id,
-    name: `${m.firstName} ${m.lastName}`,
-    subtitle: m.birthPlace
-      ? `${m.birthPlace}${m.birthCountry ? `, ${m.birthCountry}` : ""}`
-      : "Memorialized profile",
-    status: "Memorialized",
-    metric: m.deathDate
-      ? `✦ ${m.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
-      : m.birthDate
-        ? `Born ${m.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
-        : "",
-    initials: `${m.firstName[0]}${m.lastName[0]}`.toUpperCase(),
-    gradient: getProfileGradient(m.id),
-    href: `/profile/${m.id}`,
-    avatarUrl: m.avatarUrl,
-  }
-}
+import { getFavoritesByUserId } from "@/queries/favorite"
+import { getMemorialsByCreatorId } from "@/queries/memorial"
 
 export default async function HomePage() {
   const session = await verifySession()
@@ -74,14 +32,14 @@ export default async function HomePage() {
 
       <main className="container relative pt-24 pb-32">
         {/* Hero */}
-        <section className="mb-10 animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-semibold tracking-tight">
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
             <Greeting firstName={firstName} />
           </h1>
-          <p className="text-base md:text-lg text-muted-foreground mt-3 max-w-xl">
+          <p className="text-muted-foreground mt-2 italic">
             Scan, search & visit a profile
           </p>
-        </section>
+        </div>
 
         {/* Action row */}
         <section className="relative z-10 mb-8 flex flex-col-reverse lg:flex-row gap-3 md:gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
@@ -147,18 +105,7 @@ export default async function HomePage() {
           emptyIcon={Heart}
           emptyText="No favorite profile yet."
         >
-          {favorites.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {favorites.slice(0, 6).map((fav, i) => (
-                <ProfileMiniCard
-                  key={fav.targetId}
-                  profile={favToMiniProfile(fav)}
-                  delay={i * 40}
-                  hideLivingBadge={fav.target.role !== "APP_MEMO"}
-                />
-              ))}
-            </div>
-          ) : undefined}
+          {favorites.length > 0 ? <HomeFavorites items={favorites} /> : undefined}
         </HomeSection>
 
         {/* Profiles I guard */}
@@ -166,19 +113,13 @@ export default async function HomePage() {
           id="guarded"
           icon={BrickWall}
           title="Profiles I guard"
-          subtitle="Memorials watched over with quiet care."
+          subtitle="Memorials watched over with quiet care"
           delay={320}
           seeMoreHref={`/profile/${userId}/memorialized`}
           emptyIcon={BrickWall}
           emptyText="No guarded profile yet."
         >
-          {memorials.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {memorials.slice(0, 6).map((m, i) => (
-                <ProfileMiniCard key={m.id} profile={memToMiniProfile(m)} delay={i * 40} />
-              ))}
-            </div>
-          ) : undefined}
+          {memorials.length > 0 ? <HomeMemorials items={memorials} /> : undefined}
         </HomeSection>
       </main>
     </div>
