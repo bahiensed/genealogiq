@@ -50,7 +50,29 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 16/05/2026 — BIG REVIEW Fase 1: Auth + Authorization hardening (3 apps).
+Last session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + indexes + dead code drop.
+
+**Fase 2 entregue (DB schema + migrations):**
+- 4 migrations idempotentes em SEQ (com IF NOT EXISTS / IF EXISTS):
+  - `20260517000000_align_app_sale_stripe`: AppSale ganha colunas Stripe (NULLABLE) + StripeEvent table + AppUser.stripeCustomerId. Valor/tenantId/soldById também NULLABLE → SEQ vendor sales e APP Stripe sales coexistem.
+  - `20260517010000_relax_token_user_id`: PasswordResetToken/EmailToken.user_id viram nullable + ganham app_user_id FK. Inclui DELETE de orphan rows antes do FK (havia 1+ orphan em `password_reset_tokens` apontando pra AppUser deletado).
+  - `20260517020000_hot_indexes`: 4 indexes faltando — `app_bio_images.bio_id`, `app_users.tenant_id`, `app_tributes.app_author_id`, `app_notifications.app_user_guardian_id`.
+  - `20260517030000_drop_dead_seq_fields`: dropa `users.created_by_id/updated_by_id` (zero usage) + redundant global `suppliers_tax_id_key` constraint (scoped `@@unique([tenant_id, tax_id])` permanece).
+- Schema sync nos 3 repos:
+  - **SEQ**: AppSale com Stripe fields; AppUserGuardian com status+requestedById; AppUser com stripeCustomerId + @@index([tenantId]); drop @unique de appSaleId; novos @@index. Drop createdById/updatedById em User. EmailToken.user_id nullable + appUserId.
+  - **APP**: AppSale Stripe fields → NULLABLE (era NOT NULL); novos @@index em BioImage/AppUser/Tribute/Notification/AppUserGuardian.
+  - **BMS**: EmailToken/PasswordResetToken.user_id nullable + appUserId column (sem relation field — BMS não declara AppUser).
+- Code fixes p/ acomodar nullables:
+  - APP `queries/billing.ts`: getActivePlan retorna null se status ou currentPeriodEnd ausentes.
+  - APP `actions/billing.ts`: filter `stripeSubscriptionId: { not: null }` + bind local.
+  - APP `lib/subscription.ts`: guard `!!currentPeriodEnd` antes do compare.
+  - BMS `actions/auth.ts:resetPassword`: guard `!record.userId` rejeita AppUser tokens.
+  - BMS `app/(auth)/verify-email/page.tsx`: idem.
+  - SEQ `app/(auth)/verify-email/page.tsx`: idem.
+- Snapshot Neon criado pelo user antes de aplicar Migration 4 (drops). Migration 2 falhou na primeira tentativa por orphan row no FK → fix em SQL + re-deploy.
+- Verificação: `tsc --noEmit` ✅ nos 3 apps. `prisma migrate status` ✅ ("Database schema is up to date!"). Lint sem novos erros.
+
+**Convenção AppSale Stripe NULLABLE**: a partir de agora, Stripe fields populados → fluxo APP; tenantId+soldById populados → fluxo SEQ vendor. Ambos fluxos escrevem na mesma tabela `app_sales`. Quando Fase 3 implementar Stripe real pra QR Packages em SEQ, esses fluxos podem convergir.
 
 **Fase 1 entregue (auth/authorization):**
 - BMS: 9 actions migradas de `verifySession()` → `verifyAdmin()` (subscription, customer, company, user, discount-coupon, package, sale, supplier, supplier-category, customer-category). `auth.ts` self-ops mantém `verifySession()`. `/api/entity-name` agora exige admin.
@@ -62,7 +84,6 @@ Last session: 16/05/2026 — BIG REVIEW Fase 1: Auth + Authorization hardening (
 - Verificação: `tsc --noEmit` ✅ nos 3 apps. Lint ✅ nos 3 apps.
 
 **Roadmap remanescente da BIG REVIEW** (sessões futuras, plan-mode dedicado pra cada):
-- Fase 2: DB schema reconciliation + indexes + dead code drop (AppSale Stripe fields em SEQ, AppUserGuardian status em SEQ, PasswordResetToken/EmailToken nullability em BMS, Supplier taxId dedup em SEQ, BioImage/AppUser indexes, drop `Geolocation.address`/`photo1-3`/`User.createdById|updatedById` em SEQ)
 - Fase 3: SEQ Stripe real pra QR Packages + sync BMS (deletar `/stripe-mock`, criar webhook idempotente)
 - Fase 4: SEQ Sales — validação de margem mínima (100% markup sugerido)
 - Fase 5: APP /messages padronização por NotificationType + paginação + auditoria de routes
