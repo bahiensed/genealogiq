@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 import { sendWelcomeEmail } from '@/lib/email'
 import { userSchema, type UserFormValues } from '@/schemas/user.schema'
 
@@ -21,7 +21,7 @@ function buildAddressWrite(address: UserFormValues['address'], mode: 'create' | 
 }
 
 export async function createUser(data: UserFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = userSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -61,7 +61,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
 }
 
 export async function updateUser(id: string, data: UserFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = userSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -92,7 +92,7 @@ export async function updateUser(id: string, data: UserFormValues): Promise<Acti
 }
 
 export async function deleteUser(userId: string): Promise<ActionError | void> {
-  const session = await verifySession()
+  const session = await verifyAdmin()
 
   if (session.user!.id === userId) return { error: 'You cannot delete your own account.' }
 
@@ -109,7 +109,7 @@ export async function deleteUser(userId: string): Promise<ActionError | void> {
 }
 
 export async function toggleUserActive(userId: string): Promise<ActionError | void> {
-  const session = await verifySession()
+  const session = await verifyAdmin()
 
   if (session.user!.id === userId) return { error: 'You cannot deactivate your own account.' }
 
@@ -121,7 +121,7 @@ export async function toggleUserActive(userId: string): Promise<ActionError | vo
 }
 
 export async function resendWelcomeEmail(userId: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true, password: true } })
   if (!user) return { error: 'User not found.' }

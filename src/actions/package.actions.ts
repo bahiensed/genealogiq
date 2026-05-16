@@ -3,14 +3,14 @@
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 import { packageSchema, type PackageFormValues } from '@/schemas/package.schema'
 
 type ActionError   = { error: string }
 type ActionSuccess = { success: string }
 
 export async function createPackage(data: PackageFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = packageSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -26,7 +26,7 @@ export async function createPackage(data: PackageFormValues): Promise<ActionErro
 }
 
 export async function updatePackage(id: string, data: PackageFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = packageSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -50,7 +50,7 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
 }
 
 export async function deletePackage(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   try {
     await prisma.package.delete({ where: { id } })
@@ -68,7 +68,7 @@ export async function deletePackage(id: string): Promise<ActionError | void> {
 }
 
 export async function togglePackageActive(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const pkg = await prisma.package.findUnique({ where: { id }, select: { isActive: true } })
   if (!pkg) return { error: 'Package not found.' }

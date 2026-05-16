@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 import { companySchema, type CompanyFormValues } from '@/schemas/company.schema'
 
 type ActionError = { error: string }
@@ -15,7 +15,7 @@ function buildAddressWrite(address: CompanyFormValues['address']) {
 }
 
 export async function updateCompany(id: string, data: CompanyFormValues): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = companySchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }

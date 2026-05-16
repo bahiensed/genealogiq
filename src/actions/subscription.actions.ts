@@ -3,14 +3,14 @@
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 import { subscriptionSchema, type SubscriptionFormValues } from '@/schemas/subscription.schema'
 
 type ActionError   = { error: string }
 type ActionSuccess = { success: string }
 
 export async function createSubscription(data: SubscriptionFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = subscriptionSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -23,7 +23,7 @@ export async function createSubscription(data: SubscriptionFormValues): Promise<
 }
 
 export async function updateSubscription(id: string, data: SubscriptionFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = subscriptionSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -44,7 +44,7 @@ export async function updateSubscription(id: string, data: SubscriptionFormValue
 }
 
 export async function deleteSubscription(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   try {
     await prisma.subscription.delete({ where: { id } })
@@ -60,7 +60,7 @@ export async function deleteSubscription(id: string): Promise<ActionError | void
 }
 
 export async function toggleSubscriptionActive(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const subscription = await prisma.subscription.findUnique({ where: { id }, select: { isActive: true } })
   if (!subscription) return { error: 'Subscription not found.' }

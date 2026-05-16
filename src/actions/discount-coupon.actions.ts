@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 import { discountCouponSchema, type DiscountCouponFormValues } from '@/schemas/discount-coupon.schema'
 // NOTE: stripe is imported lazily inside each action below — see comment in createDiscountCoupon.
 
@@ -12,7 +12,7 @@ type ActionSuccess = { success: string }
 type CreateSuccess = { success: string; coupon: { id: string; code: string } }
 
 export async function createDiscountCoupon(data: DiscountCouponFormValues): Promise<ActionError | CreateSuccess> {
-  const session = await verifySession()
+  const session = await verifyAdmin()
 
   const validated = discountCouponSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -120,7 +120,7 @@ export async function updateDiscountCoupon(
   id: string,
   data: { description: string | null },
 ): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const coupon = await prisma.discountCoupon.findUnique({ where: { id }, select: { id: true } })
   if (!coupon) return { error: 'Coupon not found.' }
@@ -141,7 +141,7 @@ export async function updateDiscountCoupon(
 }
 
 export async function toggleDiscountCouponActive(id: string): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const coupon = await prisma.discountCoupon.findUnique({
     where:  { id },

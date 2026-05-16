@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 
 const ENTITY_TYPES = ['users', 'customers', 'suppliers', 'subscriptions', 'packages', 'supplier-categories', 'customer-categories'] as const
 type EntityType = (typeof ENTITY_TYPES)[number]
@@ -39,7 +39,7 @@ async function resolveName(type: EntityType, id: string): Promise<string | null>
 }
 
 export async function GET(req: NextRequest) {
-  await verifySession()
+  await verifyAdmin()
 
   const { searchParams } = req.nextUrl
   const type = searchParams.get('type') as EntityType | null

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 import { supplierCategorySchema, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
 
 type ActionError = { error: string }
@@ -11,7 +11,7 @@ type ActionSuccess = { success: string }
 type CreateSuccess = { success: string; category: { id: string; name: string } }
 
 export async function createSupplierCategory(data: SupplierCategoryFormValues): Promise<ActionError | CreateSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = supplierCategorySchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -31,7 +31,7 @@ export async function createSupplierCategory(data: SupplierCategoryFormValues): 
 }
 
 export async function updateSupplierCategory(id: string, data: SupplierCategoryFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = supplierCategorySchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -53,7 +53,7 @@ export async function updateSupplierCategory(id: string, data: SupplierCategoryF
 }
 
 export async function deleteSupplierCategory(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const count = await prisma.supplier.count({ where: { categoryId: id } })
   if (count > 0) return { error: 'Cannot delete: category is assigned to one or more suppliers.' }
@@ -71,7 +71,7 @@ export async function deleteSupplierCategory(id: string): Promise<ActionError | 
 }
 
 export async function toggleSupplierCategoryActive(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const category = await prisma.supplierCategory.findUnique({ where: { id }, select: { isActive: true } })
   if (!category) return { error: 'Category not found.' }

@@ -3,14 +3,14 @@
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 import { saleSchema, type SaleFormValues } from '@/schemas/sale.schema'
 
 type ActionError   = { error: string }
 type ActionSuccess = { success: string }
 
 export async function createSale(data: SaleFormValues): Promise<ActionError | ActionSuccess> {
-  const session = await verifySession()
+  const session = await verifyAdmin()
 
   const validated = saleSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -47,7 +47,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
 }
 
 export async function reverseSale(id: number): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const sale = await prisma.sale.findUnique({
     where:  { id },

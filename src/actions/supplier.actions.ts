@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 import { supplierSchema, type SupplierFormValues } from '@/schemas/supplier.schema'
 
 type ActionError = { error: string }
@@ -20,7 +20,7 @@ function buildAddressWrite(address: SupplierFormValues['address'], mode: 'create
 }
 
 export async function createSupplier(data: SupplierFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = supplierSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -51,7 +51,7 @@ export async function createSupplier(data: SupplierFormValues): Promise<ActionEr
 }
 
 export async function updateSupplier(id: string, data: SupplierFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = supplierSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -83,7 +83,7 @@ export async function updateSupplier(id: string, data: SupplierFormValues): Prom
 }
 
 export async function deleteSupplier(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   try {
     await prisma.supplier.delete({ where: { id } })
@@ -98,7 +98,7 @@ export async function deleteSupplier(id: string): Promise<ActionError | void> {
 }
 
 export async function toggleSupplierActive(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const supplier = await prisma.supplier.findUnique({ where: { id }, select: { isActive: true } })
   if (!supplier) return { error: 'Supplier not found.' }

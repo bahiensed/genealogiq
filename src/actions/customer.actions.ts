@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifyAdmin } from '@/lib/dal'
 import { sendSequoiaWelcomeEmail } from '@/lib/email'
 import {
   customerSchema,
@@ -27,7 +27,7 @@ function buildAddressWrite(address: CustomerFormValues['address'], mode: 'create
 }
 
 export async function createCustomer(data: CustomerCreateFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = customerCreateSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -87,7 +87,7 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
 }
 
 export async function updateCustomer(id: string, data: CustomerFormValues): Promise<ActionError | ActionSuccess> {
-  await verifySession()
+  await verifyAdmin()
 
   const validated = customerSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -119,7 +119,7 @@ export async function updateCustomer(id: string, data: CustomerFormValues): Prom
 }
 
 export async function deleteCustomer(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const salesCount = await prisma.sale.count({ where: { tenantId: id } })
   if (salesCount > 0) {
@@ -142,7 +142,7 @@ export async function deleteCustomer(id: string): Promise<ActionError | void> {
 }
 
 export async function resendCustomerEmail(tenantId: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const owner = await prisma.user.findFirst({
     where:  { tenantId, role: 'OWNER' },
@@ -162,7 +162,7 @@ export async function resendCustomerEmail(tenantId: string): Promise<ActionError
 }
 
 export async function toggleCustomerActive(id: string): Promise<ActionError | void> {
-  await verifySession()
+  await verifyAdmin()
 
   const customer = await prisma.tenant.findUnique({ where: { id }, select: { isActive: true } })
   if (!customer) return { error: 'Customer not found.' }

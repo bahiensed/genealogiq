@@ -49,7 +49,3 @@ export const DeleteAccountSchema = z.object({
 })
 
 export const SetupSchema = SignUpSchema
-
-export type SignInInput = z.infer<typeof SignInSchema>
-export type SignUpInput = z.infer<typeof SignUpSchema>
-export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>
