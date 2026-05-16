@@ -206,6 +206,58 @@ export async function addGhostRelative(rootId: string, data: unknown) {
       }
     }
 
+    // Auto-link: keep the new node attached to the anchor's existing family
+    // so we don't end up with orphan branches (no parents/no siblings/no co-parent).
+    const createParentOf = async (parentId: string, childId: string) => {
+      if (parentId === childId) return
+      const [a, b] = normalizePair("PARENT_OF", parentId, childId)
+      try {
+        await tx.familyRelation.create({
+          data: { fromId: a, toId: b, type: "PARENT_OF", subtype: null, status: "ACCEPTED" },
+        })
+      } catch {
+        // Already exists — ignore.
+      }
+    }
+
+    if (kind === "sibling") {
+      // The new sibling inherits the anchor's parents.
+      const parentRels = await tx.familyRelation.findMany({
+        where: { toId: anchorId, type: "PARENT_OF", status: { not: "REJECTED" } },
+        select: { fromId: true },
+      })
+      for (const pr of parentRels) await createParentOf(pr.fromId, ghost.id)
+    } else if (kind === "child") {
+      // The new child inherits the anchor's active spouse as the other parent.
+      const spouseRels = await tx.familyRelation.findMany({
+        where: {
+          type:    "SPOUSE",
+          status:  "ACCEPTED",
+          endDate: null,
+          OR: [{ fromId: anchorId }, { toId: anchorId }],
+        },
+        select: { fromId: true, toId: true },
+      })
+      for (const sr of spouseRels) {
+        const spouseId = sr.fromId === anchorId ? sr.toId : sr.fromId
+        await createParentOf(spouseId, ghost.id)
+      }
+    } else if (kind === "parent") {
+      // The new parent inherits the anchor's siblings as additional children.
+      const sibRels = await tx.familyRelation.findMany({
+        where: {
+          type:   "SIBLING",
+          status: { not: "REJECTED" },
+          OR: [{ fromId: anchorId }, { toId: anchorId }],
+        },
+        select: { fromId: true, toId: true },
+      })
+      for (const sr of sibRels) {
+        const sibId = sr.fromId === anchorId ? sr.toId : sr.fromId
+        await createParentOf(ghost.id, sibId)
+      }
+    }
+
     return ghost.id
   })
 
