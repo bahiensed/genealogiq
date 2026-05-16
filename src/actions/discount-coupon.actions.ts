@@ -3,9 +3,9 @@
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { stripe } from '@/lib/stripe'
 import { verifySession } from '@/lib/dal'
 import { discountCouponSchema, type DiscountCouponFormValues } from '@/schemas/discount-coupon.schema'
+// NOTE: stripe is imported lazily inside each action below — see comment in createDiscountCoupon.
 
 type ActionError   = { error: string }
 type ActionSuccess = { success: string }
@@ -29,6 +29,12 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
   }
 
   try {
+    // Dynamic import so the action module never forces stripe.ts to load at
+    // module-init time — only when this action is actually invoked. Keeps the
+    // /sales/discount-coupons list page renderable even if STRIPE_SECRET_KEY
+    // is missing on the deployment.
+    const { stripe } = await import('@/lib/stripe')
+
     // 1. Create Stripe Coupon
     const stripeCoupon = await stripe.coupons.create({
       percent_off:        input.discountType === 'percent' ? input.discountValue : undefined,
@@ -91,6 +97,7 @@ export async function toggleDiscountCouponActive(id: string): Promise<ActionErro
   const nextActive = !coupon.isActive
 
   try {
+    const { stripe } = await import('@/lib/stripe')
     // Mirror the active flag onto the Stripe Promotion Code so checkout enforcement stays in sync.
     if (coupon.stripePromotionCodeId) {
       await stripe.promotionCodes.update(coupon.stripePromotionCodeId, { active: nextActive })
