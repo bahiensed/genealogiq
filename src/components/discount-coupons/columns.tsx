@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
 import { useTransition } from 'react'
@@ -56,6 +57,9 @@ function ActionsCell({ row }: { row: { original: DiscountCouponRow } }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link href={`/sales/discount-coupons/${coupon.id}`}>Edit description</Link>
+        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => startTransition(async () => {
             const result = await toggleDiscountCouponActive(coupon.id)
@@ -75,7 +79,11 @@ export function getColumns(_currentUserRole: string): ColumnDef<DiscountCouponRo
     {
       accessorKey: 'code',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Code" />,
-      cell: ({ row }) => <span className="font-mono">{row.original.code}</span>,
+      cell: ({ row }) => (
+        <Link href={`/sales/discount-coupons/${row.original.id}`} className="font-mono hover:underline">
+          {row.original.code}
+        </Link>
+      ),
     },
     {
       accessorKey: 'description',

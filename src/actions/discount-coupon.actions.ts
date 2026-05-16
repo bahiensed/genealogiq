@@ -85,6 +85,38 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
   }
 }
 
+/**
+ * Updates the only safely-editable field on a coupon: the internal `description`.
+ * Stripe Coupons and Promotion Codes are immutable for every commercially
+ * meaningful attribute (percent_off, amount_off, duration, max_redemptions,
+ * expires_at). Touching those would desync our DB from Stripe enforcement, so
+ * we don't expose them. To change terms in practice: deactivate this coupon
+ * and create a new one.
+ */
+export async function updateDiscountCoupon(
+  id: string,
+  data: { description: string | null },
+): Promise<ActionError | ActionSuccess> {
+  await verifySession()
+
+  const coupon = await prisma.discountCoupon.findUnique({ where: { id }, select: { id: true } })
+  if (!coupon) return { error: 'Coupon not found.' }
+
+  try {
+    await prisma.discountCoupon.update({
+      where: { id },
+      data:  { description: data.description },
+    })
+  } catch (e) {
+    console.error('[discount-coupon] update failed', e)
+    return { error: (e as Error).message ?? 'Could not update coupon.' }
+  }
+
+  revalidatePath('/sales/discount-coupons')
+  revalidatePath(`/sales/discount-coupons/${id}`)
+  return { success: 'Description updated.' }
+}
+
 export async function toggleDiscountCouponActive(id: string): Promise<ActionError | ActionSuccess> {
   await verifySession()
 
