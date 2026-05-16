@@ -42,12 +42,14 @@ interface Props {
   profileId: string
   sessionUserId: string
   canWrite: boolean
+  isManager?: boolean
   hasPendingFromMe?: boolean
 }
 
-export function TributesClient({ items, profileId, sessionUserId, canWrite, hasPendingFromMe }: Props) {
+export function TributesClient({ items, profileId, sessionUserId, canWrite, isManager = false, hasPendingFromMe }: Props) {
   const router = useRouter()
-  const [isDeleting, startDelete] = useTransition()
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [, startDelete] = useTransition()
   const myTribute = items.find((t) => t.authorId === sessionUserId)
   const [sort, setSort] = useState<SortDir>("newest")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -55,9 +57,12 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, hasP
   const listTopRef = useRef<HTMLDivElement | null>(null)
   const didMountRef = useRef(false)
 
-  const handleDelete = () => {
+  const handleDelete = (tributeId: string) => {
+    setDeletingId(tributeId)
     startDelete(async () => {
-      await deleteTribute(profileId)
+      const result = await deleteTribute(tributeId)
+      setDeletingId(null)
+      if (result?.error) { toast.error(result.error); return }
       toast.success("Tribute deleted.")
       router.refresh()
     })
@@ -172,34 +177,36 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, hasP
                         </div>
                         <div className="text-xs text-muted-foreground">{formatDate(t.createdAt)}</div>
                       </div>
-                      {isMine && (
+                      {(isMine || isManager) && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                              aria-label="Delete your tribute"
-                              disabled={isDeleting}
+                              aria-label="Delete tribute"
+                              disabled={deletingId === t.id}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete your tribute?</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                {isMine ? "Delete your tribute?" : "Delete this tribute?"}
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
                                 This cannot be undone. The tribute and its image will be removed from this profile.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel disabled={deletingId === t.id}>Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={handleDelete}
-                                disabled={isDeleting}
+                                onClick={() => handleDelete(t.id)}
+                                disabled={deletingId === t.id}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
-                                {isDeleting ? "Deleting…" : "Delete"}
+                                {deletingId === t.id ? "Deleting…" : "Delete"}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

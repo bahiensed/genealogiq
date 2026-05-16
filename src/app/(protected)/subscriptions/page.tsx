@@ -30,21 +30,27 @@ export default async function SubscriptionsPage({ searchParams }: Props) {
 
       <main className="container relative pt-24 pb-32 max-w-6xl">
         <div className="mb-8 animate-fade-in">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 md:gap-4 min-w-0">
-              <BackButton href="/home" label="Back to home" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Subscriptions</h1>
-            </div>
-            {activePlan && <ManageSubscriptionButton />}
+          <div className="flex items-center gap-3 md:gap-4">
+            <BackButton href="/home" label="Back to home" />
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Subscriptions</h1>
           </div>
-          <p className="text-muted-foreground mt-2 italic">
-            Choose the perfect way to stay in touch with your beloved ones
-          </p>
-          {activePlan && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Currently on {activePlan.subscription.name} until {longDate.format(activePlan.currentPeriodEnd)}
-            </p>
-          )}
+          <section className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+            <div className="flex flex-col gap-1 min-w-0">
+              <p className="text-muted-foreground italic">
+                Choose the perfect way to stay in touch with your beloved ones
+              </p>
+              {activePlan && (
+                <p className="text-xs text-muted-foreground">
+                  Currently on {activePlan.subscription.name} until {longDate.format(activePlan.currentPeriodEnd)}
+                </p>
+              )}
+            </div>
+            {activePlan && (
+              <div className="shrink-0 self-end lg:self-auto">
+                <ManageSubscriptionButton />
+              </div>
+            )}
+          </section>
         </div>
 
         <SubscriptionsGrid subscriptions={subscriptions} activePlan={activePlan} flashStatus={flashStatus} />

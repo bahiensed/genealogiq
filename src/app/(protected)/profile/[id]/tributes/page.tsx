@@ -54,6 +54,7 @@ export default async function TributesPage({ params }: Props) {
           profileId={id}
           sessionUserId={session.user.id}
           canWrite={canWrite}
+          isManager={isManager}
           hasPendingFromMe={hasPendingFromMe}
         />
       </main>

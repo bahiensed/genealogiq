@@ -114,19 +114,39 @@ export async function rejectTribute(tributeId: string, profileId: string) {
   return { success: true }
 }
 
-export async function deleteTribute(profileId: string) {
+export async function deleteTribute(tributeId: string) {
   const session = await verifySession()
 
-  const tribute = await prisma.tribute.findFirst({
-    where: { authorId: session.user.id, profileId },
-    select: { id: true, imageUrl: true },
+  const tribute = await prisma.tribute.findUnique({
+    where:  { id: tributeId },
+    select: {
+      id: true,
+      authorId: true,
+      profileId: true,
+      imageUrl: true,
+      profile: {
+        select: {
+          id:         true,
+          guardedBy:  { select: { guardianId: true } },
+        },
+      },
+    },
   })
-  if (tribute?.id) {
-    await markNotificationsRead(session.user.id, { tributeId: tribute.id })
-  }
-  await deleteBlobs([tribute?.imageUrl])
+  if (!tribute) return { error: "Tribute not found." }
 
-  await prisma.tribute.deleteMany({ where: { authorId: session.user.id, profileId } })
-  revalidatePath(`/profile/${profileId}/tributes`)
+  // Permission: the author OR anyone who can manage the target profile
+  // (the profile owner themselves, or any guardian).
+  const isAuthor  = tribute.authorId === session.user.id
+  const isManager = !!tribute.profile && (
+    tribute.profile.id === session.user.id ||
+    tribute.profile.guardedBy.some((g) => g.guardianId === session.user.id)
+  )
+  if (!isAuthor && !isManager) return { error: "Not authorized." }
+
+  await markNotificationsRead(session.user.id, { tributeId: tribute.id })
+  await deleteBlobs([tribute.imageUrl])
+  await prisma.tribute.delete({ where: { id: tribute.id } })
+
+  revalidatePath(`/profile/${tribute.profileId}/tributes`)
   return { success: true }
 }

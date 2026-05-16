@@ -146,13 +146,13 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
+          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
             {visible.map((item, idx) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => setLightboxIndex(idx)}
-                className="w-full block group rounded-2xl overflow-hidden border border-border/60 bg-card/40 transition-transform hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="mb-4 break-inside-avoid w-full block group rounded-2xl overflow-hidden border border-border/60 bg-card/40 transition-transform hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {item.kind === "image" ? (
                   // eslint-disable-next-line @next/next/no-img-element
