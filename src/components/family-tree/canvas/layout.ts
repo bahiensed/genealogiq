@@ -200,6 +200,27 @@ export function computeLayout(
     }
 
     if (placedParents.length > 0) {
+      // Special case: exactly one placed parent AND that parent has a placed
+      // spouse at the same generation. Anchor on the couple's midpoint with a
+      // L/R side marker so the placement loop can flank both ancestor branches
+      // symmetrically around the couple.
+      if (placedParents.length === 1) {
+        const linkedParent = placedParents[0]
+        const linkedParentGen = generation.get(linkedParent)!
+        const couplePartner = Array.from(spouses.get(linkedParent) ?? [])
+          .find((s) => position.has(s) && generation.get(s) === linkedParentGen)
+        if (couplePartner) {
+          const lpX = position.get(linkedParent)!.x
+          const lsX = position.get(couplePartner)!.x
+          const coupleMidX = (lpX + lsX + NODE_W) / 2  // center of the couple
+          const side: "L" | "R" = lpX < lsX ? "L" : "R"
+          const coupleKey = [linkedParent, couplePartner].sort().join("|")
+          return {
+            anchor: coupleMidX - NODE_W / 2,
+            key:    `__couple_${coupleKey}_${side}`,
+          }
+        }
+      }
       const key = [...placedParents].sort().join("|")
       const anchor = placedParents.reduce((s, p) => s + position.get(p)!.x, 0) / placedParents.length
       return { anchor, key }
@@ -217,6 +238,30 @@ export function computeLayout(
 
   const clusterWidth = (c: string[]) => c.length * NODE_W + (c.length - 1) * X_TIGHT
 
+  // Helper: place a sibling-group (list of clusters that share an anchor) at a
+  // given leftX. Returns the rightX after placement.
+  const placeGroup = (group: { c: string[]; anchor: number }[], leftX: number, y: number): number => {
+    // Within a sibling-group, place oldest-sibling-cluster leftmost.
+    group.sort((g1, g2) => byAge(g1.c[0], g2.c[0]))
+    const totalWidth =
+      group.reduce((sum, g) => sum + clusterWidth(g.c), 0) +
+      (group.length - 1) * X_SIBLING
+    let px = leftX
+    for (let i = 0; i < group.length; i++) {
+      const { c } = group[i]
+      for (const id of c) {
+        position.set(id, { x: px, y })
+        px += NODE_W + X_TIGHT
+      }
+      px -= X_TIGHT
+      if (i < group.length - 1) px += X_SIBLING
+    }
+    return leftX + totalWidth
+  }
+
+  const groupWidth = (group: { c: string[]; anchor: number }[]) =>
+    group.reduce((sum, g) => sum + clusterWidth(g.c), 0) + (group.length - 1) * X_SIBLING
+
   for (const gen of sortedGens) {
     if (gen === 0) continue
     const y = gen * Y_GEN
@@ -230,34 +275,79 @@ export function computeLayout(
       grouped.get(key)!.push({ c, anchor })
     }
 
-    // Order groups by anchor (left to right). All clusters within a group share the same anchor.
-    const orderedGroups = Array.from(grouped.values()).sort((a, b) => a[0].anchor - b[0].anchor)
+    // Identify couple-flank pairs (ancestors of one half vs the other half of
+    // a placed couple). Pair them up so the two branches flank the couple's
+    // midpoint symmetrically. Everything else is a "solo" sibling-group.
+    type Unit =
+      | { kind: "pair"; midX: number; leftEntries: typeof clusters extends never ? never : { c: string[]; anchor: number }[]; rightEntries: { c: string[]; anchor: number }[]; preferredLeftX: number; preferredRightEnd: number }
+      | { kind: "solo"; entries: { c: string[]; anchor: number }[]; preferredLeftX: number; preferredRightEnd: number }
+
+    const units: Unit[] = []
+    const flankL = new Map<string, { entries: { c: string[]; anchor: number }[]; midX: number }>()
+    const flankR = new Map<string, { entries: { c: string[]; anchor: number }[]; midX: number }>()
+
+    for (const [key, entries] of grouped.entries()) {
+      const m = key.match(/^__couple_(.+)_([LR])$/)
+      if (m) {
+        const coupleKey = m[1]
+        const side = m[2] as "L" | "R"
+        // Stored anchor was midX - NODE_W/2.
+        const midX = entries[0].anchor + NODE_W / 2
+        if (side === "L") flankL.set(coupleKey, { entries, midX })
+        else flankR.set(coupleKey, { entries, midX })
+      } else {
+        const totalW = groupWidth(entries)
+        const leftX = entries[0].anchor + NODE_W / 2 - totalW / 2
+        units.push({ kind: "solo", entries, preferredLeftX: leftX, preferredRightEnd: leftX + totalW })
+      }
+    }
+
+    for (const [coupleKey, lFlank] of flankL.entries()) {
+      const rFlank = flankR.get(coupleKey)
+      if (rFlank) {
+        flankR.delete(coupleKey)
+        const totalWL = groupWidth(lFlank.entries)
+        const totalWR = groupWidth(rFlank.entries)
+        const leftXL = lFlank.midX - X_FAMILY / 2 - totalWL
+        const rightEnd = lFlank.midX + X_FAMILY / 2 + totalWR
+        units.push({
+          kind:              "pair",
+          midX:              lFlank.midX,
+          leftEntries:       lFlank.entries,
+          rightEntries:      rFlank.entries,
+          preferredLeftX:    leftXL,
+          preferredRightEnd: rightEnd,
+        })
+      } else {
+        // Lone left flank — treat as solo, anchor on midX.
+        const totalW = groupWidth(lFlank.entries)
+        const leftX = lFlank.midX - totalW / 2
+        units.push({ kind: "solo", entries: lFlank.entries, preferredLeftX: leftX, preferredRightEnd: leftX + totalW })
+      }
+    }
+    for (const [, rFlank] of flankR.entries()) {
+      const totalW = groupWidth(rFlank.entries)
+      const leftX = rFlank.midX - totalW / 2
+      units.push({ kind: "solo", entries: rFlank.entries, preferredLeftX: leftX, preferredRightEnd: leftX + totalW })
+    }
+
+    // Sort all units by their preferred leftmost X and place left-to-right,
+    // shifting right when needed to avoid collisions. Flank pairs shift as a
+    // single block, preserving their internal symmetry.
+    units.sort((a, b) => a.preferredLeftX - b.preferredLeftX)
 
     let lastRight = -Infinity
-    for (const group of orderedGroups) {
-      // Within a sibling-group, place oldest-sibling-cluster leftmost.
-      group.sort((g1, g2) => byAge(g1.c[0], g2.c[0]))
-      const anchor = group[0].anchor
-
-      const totalWidth =
-        group.reduce((sum, g) => sum + clusterWidth(g.c), 0) +
-        (group.length - 1) * X_SIBLING
-
-      // Center the whole group on the anchor's center (anchor is a top-left, so add NODE_W/2 for its center).
-      let leftX = anchor + NODE_W / 2 - totalWidth / 2
-      if (leftX < lastRight + X_FAMILY) leftX = lastRight + X_FAMILY
-
-      let px = leftX
-      for (let i = 0; i < group.length; i++) {
-        const { c } = group[i]
-        for (const id of c) {
-          position.set(id, { x: px, y })
-          px += NODE_W + X_TIGHT
-        }
-        px -= X_TIGHT  // undo the trailing X_TIGHT from the last cluster member
-        if (i < group.length - 1) px += X_SIBLING
+    for (const u of units) {
+      const shift = Math.max(0, (lastRight + X_FAMILY) - u.preferredLeftX)
+      if (u.kind === "solo") {
+        const leftX = u.preferredLeftX + shift
+        lastRight = placeGroup(u.entries, leftX, y)
+      } else {
+        const leftXL = u.preferredLeftX + shift
+        const leftXR = u.midX + X_FAMILY / 2 + shift
+        placeGroup(u.leftEntries, leftXL, y)
+        lastRight = placeGroup(u.rightEntries, leftXR, y)
       }
-      lastRight = leftX + totalWidth
     }
   }
 
