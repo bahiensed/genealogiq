@@ -198,6 +198,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         access: "public",
         handleUploadUrl: "/api/bio/upload",
         contentType: payload.type,
+        clientPayload: JSON.stringify({ profileId: initial.id }),
       })
       setValue("avatarUrl", blob.url)
     } catch (err) {

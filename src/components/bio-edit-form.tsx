@@ -93,6 +93,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
           access: "public",
           handleUploadUrl: "/api/bio/upload",
           contentType: payload.type,
+          clientPayload: JSON.stringify({ profileId }),
         })
         setImages((prev) => {
           const next = [...prev]

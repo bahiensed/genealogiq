@@ -61,6 +61,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
         access: "public",
         handleUploadUrl: "/api/tribute/upload",
         contentType: payload.type,
+        clientPayload: JSON.stringify({ profileId }),
       })
       setImageUrl(blob.url)
     } catch (err) {

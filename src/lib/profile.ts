@@ -1,5 +1,8 @@
-import type { ProfileRow } from "@/queries/profile"
+export type Manageable = {
+  id: string
+  guardedBy: { guardianId: string }[]
+}
 
-export function canManageProfile(profile: ProfileRow, sessionUserId: string): boolean {
+export function canManageProfile(profile: Manageable, sessionUserId: string): boolean {
   return profile.id === sessionUserId || profile.guardedBy.some((g) => g.guardianId === sessionUserId)
 }

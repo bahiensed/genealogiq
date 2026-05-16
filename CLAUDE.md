@@ -50,7 +50,38 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 16/05/2026 — Family Tree layout v1 rewrite + co-guardianship workflow.
+Last session: 16/05/2026 — BIG REVIEW Fase 1: Auth + Authorization hardening (3 apps).
+
+**Fase 1 entregue (auth/authorization):**
+- BMS: 9 actions migradas de `verifySession()` → `verifyAdmin()` (subscription, customer, company, user, discount-coupon, package, sale, supplier, supplier-category, customer-category). `auth.ts` self-ops mantém `verifySession()`. `/api/entity-name` agora exige admin.
+- SEQ: `user.actions.ts` migrado pra `verifyAdmin()` (invites/gerenciamento de funcionários da funerária = OWNER/ADMIN only). Comentário documenta a política no topo.
+- APP: upload routes (`/api/bio/upload`, `/api/gallery/upload`, `/api/tribute/upload`) agora exigem `clientPayload` e validam ownership via `canManageProfile()`. Bio upload suporta dois modos: `{ profileId }` (validação ownership) ou `{ scope: "create-memorial" }` (memorial create flow — quota enforced no `createMemorial` action). Tribute upload bloqueia auto-tributo (`session.user.id === profileId`).
+- APP: `lib/profile.ts` afrouxou tipo de `canManageProfile` pra `{ id, guardedBy: { guardianId }[] }` (estrutural mínimo, compatível com `ProfileRow`).
+- APP: `/api/search` documentado como público por design (memoriais são naturalmente discoverable).
+- Limpeza: removidos `SignInInput`/`SignUpInput`/`ResetPasswordInput` type exports não usados nos 3 apps.
+- Verificação: `tsc --noEmit` ✅ nos 3 apps. Lint ✅ nos 3 apps.
+
+**Roadmap remanescente da BIG REVIEW** (sessões futuras, plan-mode dedicado pra cada):
+- Fase 2: DB schema reconciliation + indexes + dead code drop (AppSale Stripe fields em SEQ, AppUserGuardian status em SEQ, PasswordResetToken/EmailToken nullability em BMS, Supplier taxId dedup em SEQ, BioImage/AppUser indexes, drop `Geolocation.address`/`photo1-3`/`User.createdById|updatedById` em SEQ)
+- Fase 3: SEQ Stripe real pra QR Packages + sync BMS (deletar `/stripe-mock`, criar webhook idempotente)
+- Fase 4: SEQ Sales — validação de margem mínima (100% markup sugerido)
+- Fase 5: APP /messages padronização por NotificationType + paginação + auditoria de routes
+- Fase 6: SEQ profile redesign (layout shadcn)
+- Fase 7: Dashboards (BMS + SEQ) — agregações eficientes
+- Phase 5 cleanup SQL (drop legacy `deceased`/`users` com role APP_*): plan separado.
+
+**BIG REVIEW achados pendentes** (consulta: `/home/douglas/.claude/plans/big-code-review-vamos-polished-meteor.md`):
+- Vercel env prod: confirmar que cada app tem `AUTH_SECRET` próprio (gap não-fechado, depende de validação no painel)
+- Sem rate limiting em auth endpoints (lockout por user existe; falta IP-based)
+- APP não tem `prisma/migrations/` — migrations vivem em SEQ. Decisão de ownership formal pendente.
+
+In progress: —
+Next: começar Fase 2 (DB schema reconciliation).
+Blockers: —
+
+---
+
+Previous session: 16/05/2026 — Family Tree layout v1 rewrite + co-guardianship workflow.
 
 **Layout rewrite (Buchheim-inspired, family-unit blocks)** — jogamos fora o `layout.ts` antigo (heurísticas ad-hoc, 4 rounds de patch). Novo pipeline em `src/components/family-tree/canvas/layout/`:
 - `family-units.ts` → graph com `units`, `birthUnit`, `marriageUnit` (active), `marriageUnits` (lista cronológica completa), `spouseOf`, `siblingsOf` (deriva de birthUnit compartilhado + SIBLING relations explícitas), `spouseSubtype`.
@@ -143,8 +174,9 @@ Blockers: —
 BMS, SEQ e APP compartilham o mesmo banco. Roles APP_USER e APP_MEMO foram adicionados ao enum Role do schema.
 
 ### Padrão de autorização para guardiões
-- `canManageProfile(profile, userId)` — `profile.id === userId || profile.createdById === userId`
+- `canManageProfile(profile, userId)` — `profile.id === userId || profile.guardedBy.some(g => g.guardianId === userId)`. Tipo estrutural mínimo: `{ id, guardedBy: { guardianId }[] }`.
 - **Todas as actions de escrita** (bio, geolocation, tribute moderate, memorial update/delete) devem usar este helper
+- **Upload routes** (`/api/bio/upload`, `/api/gallery/upload`, `/api/tribute/upload`) exigem `clientPayload: JSON.stringify({ profileId })` e validam ownership antes de gerar o blob token. Memorial create form usa `clientPayload: { scope: "create-memorial" }` porque o profile ainda não existe.
 - `isExactOwn = id === session.user.id` — usado apenas para impedir que o próprio dono escreva tributo para si
 
 ## MANDATORY RULES
@@ -153,6 +185,8 @@ BMS, SEQ e APP compartilham o mesmo banco. Roles APP_USER e APP_MEMO foram adici
 3. Use shadcn component if available
 4. Comments, variable, constant and function names in English
 5. All UI content such as labels, placeholders, titles, buttons in English
+6. **Authorization**: BMS mutations sobre dados globais ou outros usuários usam `verifyAdmin()`. Operações sobre a própria conta usam `verifySession()`. SEQ idem — `verifyAdmin()` (que já inclui tenant scoping) pra gerenciamento de funcionários. APP usa `canManageProfile()` em toda escrita relacionada a perfil.
+7. **Upload routes** no APP exigem `clientPayload` no body (`{ profileId }` ou `{ scope: "create-memorial" }`) e validam ownership antes de gerar token Vercel Blob.
 
 ## FORBIDDEN
 - NEVER use `any` in TypeScript without comment explaining why

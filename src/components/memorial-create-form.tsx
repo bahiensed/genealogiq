@@ -113,6 +113,7 @@ export function MemorialCreateForm() {
         access: "public",
         handleUploadUrl: "/api/bio/upload",
         contentType: payload.type,
+        clientPayload: JSON.stringify({ scope: "create-memorial" }),
       })
       update("avatarUrl", blob.url)
     } catch (err) {

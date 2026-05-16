@@ -150,6 +150,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
           access: "public",
           handleUploadUrl: "/api/gallery/upload",
           contentType: payload.type,
+          clientPayload: JSON.stringify({ profileId }),
         })
         setItems((prev) => {
           const next = [...prev]
@@ -229,6 +230,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
           access: "public",
           handleUploadUrl: "/api/gallery/upload",
           contentType: payload.type,
+          clientPayload: JSON.stringify({ profileId }),
         })
         setItems((prev) => {
           const next = [...prev]

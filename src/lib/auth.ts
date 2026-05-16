@@ -48,6 +48,3 @@ export const DeleteAccountSchema = z.object({
   currentPassword: z.string().min(1, "Password is required"),
 })
 
-export type SignInInput = z.infer<typeof SignInSchema>
-export type SignUpInput = z.infer<typeof SignUpSchema>
-export type ResetPasswordInput = z.infer<typeof ResetPasswordSchema>
