@@ -49,81 +49,81 @@ enum EntityType {
 // ─── Subscriptions & Packages ────────────────────────────────────────────────
 
 model Subscription {
-  id                    String  @id @default(cuid())
-  code                  String  @unique
-  name                  String
-  description           String?
-  isActive              Boolean @default(true) @map("is_active")
+  id          String  @id @default(cuid())
+  code        String  @unique
+  name        String
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
 
   // Commercial
-  maxProfiles           Int     @map("max_profiles")
-  termLength            Int     @map("term_length")
-  price                 Decimal @db.Decimal(10, 2)
+  maxProfiles Int     @map("max_profiles")
+  termLength  Int     @map("term_length")
+  price       Decimal @db.Decimal(10, 2)
 
   // Feature limits
-  treeMaxMembers        Int     @map("tree_max_members")
-  bioMaxChars           Int     @map("bio_max_chars")
-  bioMaxImages          Int     @map("bio_max_images")
-  galleryMaxImages      Int     @map("gallery_max_images")
-  galleryMaxVideos      Int     @map("gallery_max_videos")
+  treeMaxMembers   Int @map("tree_max_members")
+  bioMaxChars      Int @map("bio_max_chars")
+  bioMaxImages     Int @map("bio_max_images")
+  galleryMaxImages Int @map("gallery_max_images")
+  galleryMaxVideos Int @map("gallery_max_videos")
 
   // Feature flags
   geolocationFullAccess Boolean @default(false) @map("geolocation_full_access")
   qrCodeAccess          Boolean @default(false) @map("qr_code_access")
 
   // Stripe
-  stripeProductId       String? @unique @map("stripe_product_id")
-  stripeAnnualPriceId   String? @unique @map("stripe_annual_price_id")
-  stripeMonthlyPriceId  String? @unique @map("stripe_monthly_price_id")
+  stripeProductId      String? @unique @map("stripe_product_id")
+  stripeAnnualPriceId  String? @unique @map("stripe_annual_price_id")
+  stripeMonthlyPriceId String? @unique @map("stripe_monthly_price_id")
 
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  appSales              AppSale[]
-  coupons               DiscountCoupon[] @relation("CouponSubscriptions")
+  appSales AppSale[]
+  coupons  DiscountCoupon[] @relation("CouponSubscriptions")
 
   @@map("subscriptions")
 }
 
 model DiscountCoupon {
-  id                    String   @id @default(cuid())
-  code                  String   @unique
-  description           String?
+  id          String  @id @default(cuid())
+  code        String  @unique
+  description String?
 
   // Discount config
-  discountType          String   @map("discount_type")               // "percent" | "amount"
-  discountValue         Decimal  @db.Decimal(10, 2) @map("discount_value")
-  duration              String                                       // "once" | "forever" | "repeating"
-  durationInMonths      Int?     @map("duration_in_months")
+  discountType     String  @map("discount_type") // "percent" | "amount"
+  discountValue    Decimal @map("discount_value") @db.Decimal(10, 2)
+  duration         String // "once" | "forever" | "repeating"
+  durationInMonths Int?    @map("duration_in_months")
 
   // Limits
-  maxRedemptions        Int?     @map("max_redemptions")
-  redeemBy              DateTime? @map("redeem_by")
+  maxRedemptions Int?      @map("max_redemptions")
+  redeemBy       DateTime? @map("redeem_by")
 
   // Scope — empty = all paid subs
-  appliesTo             Subscription[] @relation("CouponSubscriptions")
+  appliesTo Subscription[] @relation("CouponSubscriptions")
 
   // Stripe mirror
-  stripeCouponId        String?  @unique @map("stripe_coupon_id")
-  stripePromotionCodeId String?  @unique @map("stripe_promotion_code_id")
+  stripeCouponId        String? @unique @map("stripe_coupon_id")
+  stripePromotionCodeId String? @unique @map("stripe_promotion_code_id")
 
   // Audit (createdById is a BMS User id, not an AppUser; not modeled as relation here)
-  createdById           String   @map("created_by_id")
-  isActive              Boolean  @default(true) @map("is_active")
+  createdById String  @map("created_by_id")
+  isActive    Boolean @default(true) @map("is_active")
 
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("discount_coupons")
 }
 
 model Package {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2) @map("price")
-  quantity    Int      @default(1)
-  isActive    Boolean  @default(true) @map("is_active")
+  price       Decimal @map("price") @db.Decimal(10, 2)
+  quantity    Int     @default(1)
+  isActive    Boolean @default(true) @map("is_active")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -134,14 +134,14 @@ model Package {
 }
 
 model Sale {
-  id       Int      @id @default(autoincrement())
-  quantity Int      @default(1)
+  id       Int @id @default(autoincrement())
+  quantity Int @default(1)
 
-  packageId  String   @map("package_id")
-  package    Package  @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  packageId String  @map("package_id")
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Restrict)
 
-  tenantId   String   @map("tenant_id")
-  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenantId String @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
 
   soldById String @map("sold_by_id")
   soldBy   User   @relation(fields: [soldById], references: [id], onDelete: Restrict)
@@ -168,37 +168,38 @@ model QrInventory {
 }
 
 model AppSale {
-  id                   String   @id @default(cuid())
+  id String @id @default(cuid())
 
   // Legacy SEQUOIA fields (seller-driven QR-code sales). Nullable here because
   // Stripe direct purchases originating from the APP have no tenant or seller.
-  value                Decimal? @db.Decimal(10, 2)
-  tenantId             String?  @map("tenant_id")
-  soldById             String?  @map("sold_by_id")
+  value    Decimal? @db.Decimal(10, 2)
+  tenantId String?  @map("tenant_id")
+  soldById String?  @map("sold_by_id")
 
-  appUserId            String   @map("app_user_id")
-  appUser              AppUser  @relation("AppSaleBuyer", fields: [appUserId], references: [id], onDelete: Cascade)
+  appUserId String  @map("app_user_id")
+  appUser   AppUser @relation("AppSaleBuyer", fields: [appUserId], references: [id], onDelete: Cascade)
 
   // Memorials assigned to this sale (up to subscription.maxProfiles)
-  assignedTo           AppUser[] @relation("AppSaleMemorial")
+  assignedTo AppUser[] @relation("AppSaleMemorial")
 
-  subscriptionId       String       @map("subscription_id")
-  subscription         Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
+  subscriptionId String       @map("subscription_id")
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
 
-  // Stripe
-  stripeSubscriptionId String   @unique @map("stripe_subscription_id")
-  stripePriceId        String   @map("stripe_price_id")
-  cadence              String   // "annual" | "monthly"
+  // Stripe (NULLABLE so SEQ vendor sales — which never touch Stripe — coexist
+  // in the same table as APP direct purchases).
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+  stripePriceId        String? @map("stripe_price_id")
+  cadence              String? // "annual" | "monthly"
 
   // Lifecycle
-  status               String   // "active" | "trialing" | "past_due" | "canceled" | "incomplete" | "unpaid"
-  currentPeriodEnd     DateTime @map("current_period_end")
-  cancelAtPeriodEnd    Boolean  @default(false) @map("cancel_at_period_end")
-  canceledAt           DateTime? @map("canceled_at")
-  endedAt              DateTime? @map("ended_at")
+  status            String? // "active" | "trialing" | "past_due" | "canceled" | "incomplete" | "unpaid"
+  currentPeriodEnd  DateTime? @map("current_period_end")
+  cancelAtPeriodEnd Boolean   @default(false) @map("cancel_at_period_end")
+  canceledAt        DateTime? @map("canceled_at")
+  endedAt           DateTime? @map("ended_at")
 
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt    @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("app_sales")
 }
@@ -222,7 +223,7 @@ model EmailToken {
   expiresAt DateTime       @map("expires_at")
   createdAt DateTime       @default(now()) @map("created_at")
 
-  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   appUserId String?  @map("app_user_id")
   appUser   AppUser? @relation(fields: [appUserId], references: [id], onDelete: Cascade)
@@ -237,7 +238,7 @@ model PasswordResetToken {
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   appUserId String?  @map("app_user_id")
   appUser   AppUser? @relation(fields: [appUserId], references: [id], onDelete: Cascade)
@@ -273,16 +274,16 @@ model Address {
 // ─── Company ─────────────────────────────────────────────────────────────────
 
 model Company {
-  id                    String   @id @default(cuid())
-  legalName             String   @map("legal_name")
-  tradeName             String   @map("trade_name")
-  taxId                 String   @unique @map("tax_id")
-  stateRegistration     String?  @map("state_registration")
-  municipalRegistration String?  @map("municipal_registration")
-  email                 String   @unique
-  phoneCountryCode      String   @default("55") @map("phone_country_code")
+  id                    String  @id @default(cuid())
+  legalName             String  @map("legal_name")
+  tradeName             String  @map("trade_name")
+  taxId                 String  @unique @map("tax_id")
+  stateRegistration     String? @map("state_registration")
+  municipalRegistration String? @map("municipal_registration")
+  email                 String  @unique
+  phoneCountryCode      String  @default("55") @map("phone_country_code")
   phone                 String
-  isActive              Boolean  @default(true) @map("is_active")
+  isActive              Boolean @default(true) @map("is_active")
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -313,8 +314,8 @@ model User {
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
 
-  tenantId   String?   @map("tenant_id")
-  tenant     Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  tenantId String? @map("tenant_id")
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -332,28 +333,28 @@ model User {
 // ─── AppUser ──────────────────────────────────────────────────────────────────
 
 model AppUser {
-  id    String  @id @default(cuid())
-  role  AppRole @default(APP_USER)
+  id   String  @id @default(cuid())
+  role AppRole @default(APP_USER)
 
-  firstName           String    @map("first_name")
-  lastName            String    @map("last_name")
-  maidenName          String?   @map("maiden_name")
-  nickname            String?
-  gender              Gender?
-  birthDate           DateTime? @map("birth_date")
-  birthPlace          String?   @map("birth_place")
-  birthCity           String?   @map("birth_city")
-  birthState          String?   @map("birth_state")
-  birthCountry        String?   @map("birth_country")
-  avatarUrl           String?   @map("avatar_url")
-  nationalId          String?   @map("national_id")
-  notes               String?
+  firstName    String    @map("first_name")
+  lastName     String    @map("last_name")
+  maidenName   String?   @map("maiden_name")
+  nickname     String?
+  gender       Gender?
+  birthDate    DateTime? @map("birth_date")
+  birthPlace   String?   @map("birth_place")
+  birthCity    String?   @map("birth_city")
+  birthState   String?   @map("birth_state")
+  birthCountry String?   @map("birth_country")
+  avatarUrl    String?   @map("avatar_url")
+  nationalId   String?   @map("national_id")
+  notes        String?
 
-  deathDate           DateTime? @map("death_date")
-  deathPlace          String?   @map("death_place")
-  deathState          String?   @map("death_state")
-  deathCountry        String?   @map("death_country")
-  deathCause          String?   @map("death_cause")
+  deathDate    DateTime? @map("death_date")
+  deathPlace   String?   @map("death_place")
+  deathState   String?   @map("death_state")
+  deathCountry String?   @map("death_country")
+  deathCause   String?   @map("death_cause")
 
   // Auth (only APP_USER that can log in)
   email               String?
@@ -363,45 +364,45 @@ model AppUser {
   lockedUntil         DateTime? @map("locked_until")
   isActive            Boolean   @default(true) @map("is_active")
 
-  phoneCountryCode    String    @default("55") @map("phone_country_code")
-  phone               String?
-  fb                  String?
-  instagram           String?
-  linkedin            String?
-  tiktok              String?
-  x                   String?
-  youtube             String?
-  otherSocial         String?   @map("other_social")
-  website             String?
+  phoneCountryCode String  @default("55") @map("phone_country_code")
+  phone            String?
+  fb               String?
+  instagram        String?
+  linkedin         String?
+  tiktok           String?
+  x                String?
+  youtube          String?
+  otherSocial      String? @map("other_social")
+  website          String?
 
-  tenantId  String?   @map("tenant_id")
-  tenant    Tenant? @relation("AppUserTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  tenantId String? @map("tenant_id")
+  tenant   Tenant? @relation("AppUserTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
-  addressId String?   @unique @map("address_id")
-  address   Address?  @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  addressId String?  @unique @map("address_id")
+  address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Guardian relationships
-  guardiansOf AppUserGuardian[] @relation("GuardianOf")
-  guardedBy   AppUserGuardian[] @relation("GuardedBy")
+  guardiansOf          AppUserGuardian[] @relation("GuardianOf")
+  guardedBy            AppUserGuardian[] @relation("GuardedBy")
   guardianRequestsMade AppUserGuardian[] @relation("GuardianRequestedBy")
 
   // APP-specific content
   // userId field on each model maps to app_user_id column (kept for minimal code churn)
-  bio              Bio?
-  galleryItems     GalleryItem[]
-  tributesAuthored Tribute[]      @relation("TributeAuthor")
-  tributesReceived Tribute[]      @relation("TributeProfile")
-  favoritesGiven   Favorite[]     @relation("FavoriteUser")
-  favoritesReceived Favorite[]    @relation("FavoriteTarget")
-  geolocation      Geolocation?
-  familyFrom       FamilyRelation[] @relation("FamilyFrom")
-  familyTo         FamilyRelation[] @relation("FamilyTo")
+  bio               Bio?
+  galleryItems      GalleryItem[]
+  tributesAuthored  Tribute[]        @relation("TributeAuthor")
+  tributesReceived  Tribute[]        @relation("TributeProfile")
+  favoritesGiven    Favorite[]       @relation("FavoriteUser")
+  favoritesReceived Favorite[]       @relation("FavoriteTarget")
+  geolocation       Geolocation?
+  familyFrom        FamilyRelation[] @relation("FamilyFrom")
+  familyTo          FamilyRelation[] @relation("FamilyTo")
 
-  notifications     Notification[]   @relation("UserNotifications")
-  actorNotifications Notification[]  @relation("ActorNotifications")
+  notifications      Notification[] @relation("UserNotifications")
+  actorNotifications Notification[] @relation("ActorNotifications")
 
   // Stripe Customer (one per AppUser, created on first checkout)
   stripeCustomerId String? @unique @map("stripe_customer_id")
@@ -418,14 +419,15 @@ model AppUser {
   emailTokens         EmailToken[]
   passwordResetTokens PasswordResetToken[]
 
+  @@index([tenantId])
   @@map("app_users")
 }
 
 model AppUserGuardian {
-  id        String  @id @default(cuid())
+  id String @id @default(cuid())
 
-  appUserId  String  @map("app_user_id")
-  appUser    AppUser @relation("GuardedBy", fields: [appUserId], references: [id], onDelete: Cascade)
+  appUserId String  @map("app_user_id")
+  appUser   AppUser @relation("GuardedBy", fields: [appUserId], references: [id], onDelete: Cascade)
 
   guardianId String  @map("guardian_id")
   guardian   AppUser @relation("GuardianOf", fields: [guardianId], references: [id], onDelete: Cascade)
@@ -443,6 +445,8 @@ model AppUserGuardian {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@unique([appUserId, guardianId])
+  @@index([appUserId])
+  @@index([guardianId])
   @@map("app_user_guardians")
 }
 
@@ -471,30 +475,31 @@ model Bio {
 }
 
 model BioImage {
-  id     String  @id @default(cuid())
+  id     String @id @default(cuid())
   url    String
-  aspect String  @default("square")
-  order  Int     @default(0)
+  aspect String @default("square")
+  order  Int    @default(0)
 
   bioId String @map("bio_id")
   bio   Bio    @relation(fields: [bioId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
 
+  @@index([bioId])
   @@map("app_bio_images")
 }
 
 // ─── Tributes ────────────────────────────────────────────────────────────────
 
 model Tribute {
-  id       String         @id @default(cuid())
-  text     String         @db.VarChar(512)
-  imageUrl String?        @map("image_url")
-  status   TributeStatus  @default(PENDING)
+  id       String        @id @default(cuid())
+  text     String        @db.VarChar(512)
+  imageUrl String?       @map("image_url")
+  status   TributeStatus @default(PENDING)
 
   // authorId/profileId map to app_author_id/app_profile_id columns
-  authorId  String  @map("app_author_id")
-  author    AppUser @relation("TributeAuthor",  fields: [authorId],  references: [id], onDelete: Cascade)
+  authorId String  @map("app_author_id")
+  author   AppUser @relation("TributeAuthor", fields: [authorId], references: [id], onDelete: Cascade)
 
   profileId String  @map("app_profile_id")
   profile   AppUser @relation("TributeProfile", fields: [profileId], references: [id], onDelete: Cascade)
@@ -505,6 +510,7 @@ model Tribute {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([authorId, profileId])
+  @@index([authorId])
   @@index([profileId])
   @@map("app_tributes")
 }
@@ -537,8 +543,8 @@ model GalleryItem {
 
 model Favorite {
   // userId/targetId map to app_user_id/app_target_id columns
-  userId   String  @map("app_user_id")
-  user     AppUser @relation("FavoriteUser",   fields: [userId],   references: [id], onDelete: Cascade)
+  userId String  @map("app_user_id")
+  user   AppUser @relation("FavoriteUser", fields: [userId], references: [id], onDelete: Cascade)
 
   targetId String  @map("app_target_id")
   target   AppUser @relation("FavoriteTarget", fields: [targetId], references: [id], onDelete: Cascade)
@@ -552,26 +558,26 @@ model Favorite {
 // ─── Geolocation ─────────────────────────────────────────────────────────────
 
 model Geolocation {
-  id           String  @id @default(cuid())
-  placeName    String  @map("place_name") @db.VarChar(120)
+  id           String    @id @default(cuid())
+  placeName    String    @map("place_name") @db.VarChar(120)
   // Legacy free-form address (kept for backward compatibility — superseded by structured fields below)
-  address      String? @db.VarChar(200)
+  address      String?   @db.VarChar(200)
   zip          String?
-  street       String? @db.VarChar(200)
-  number       String? @db.VarChar(20)
-  complement   String? @db.VarChar(200)
-  neighborhood String? @db.VarChar(100)
-  city         String? @db.VarChar(100)
-  state        String? @db.VarChar(100)
-  country      String? @db.VarChar(100)
-  section      String? @db.VarChar(200)
+  street       String?   @db.VarChar(200)
+  number       String?   @db.VarChar(20)
+  complement   String?   @db.VarChar(200)
+  neighborhood String?   @db.VarChar(100)
+  city         String?   @db.VarChar(100)
+  state        String?   @db.VarChar(100)
+  country      String?   @db.VarChar(100)
+  section      String?   @db.VarChar(200)
   lat          Float
   lon          Float
   date         DateTime?
-  notes        String? @db.VarChar(500)
-  photo1    String? @map("photo_1")
-  photo2    String? @map("photo_2")
-  photo3    String? @map("photo_3")
+  notes        String?   @db.VarChar(500)
+  photo1       String?   @map("photo_1")
+  photo2       String?   @map("photo_2")
+  photo3       String?   @map("photo_3")
 
   // userId maps to app_user_id column
   userId String  @unique @map("app_user_id")
@@ -594,8 +600,8 @@ model FamilyRelation {
   fromId String  @map("app_from_id")
   from   AppUser @relation("FamilyFrom", fields: [fromId], references: [id], onDelete: Cascade)
 
-  toId   String  @map("app_to_id")
-  to     AppUser @relation("FamilyTo",   fields: [toId],   references: [id], onDelete: Cascade)
+  toId String  @map("app_to_id")
+  to   AppUser @relation("FamilyTo", fields: [toId], references: [id], onDelete: Cascade)
 
   startDate DateTime? @map("start_date")
   endDate   DateTime? @map("end_date")
@@ -629,8 +635,8 @@ enum NotificationType {
 }
 
 model Notification {
-  id    String           @id @default(cuid())
-  type  NotificationType
+  id   String           @id @default(cuid())
+  type NotificationType
 
   userId String  @map("user_id")
   user   AppUser @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
@@ -644,14 +650,15 @@ model Notification {
   familyRelationId String?         @map("family_relation_id")
   familyRelation   FamilyRelation? @relation(fields: [familyRelationId], references: [id], onDelete: Cascade)
 
-  appUserGuardianId String?           @map("app_user_guardian_id")
-  appUserGuardian   AppUserGuardian?  @relation(fields: [appUserGuardianId], references: [id], onDelete: Cascade)
+  appUserGuardianId String?          @map("app_user_guardian_id")
+  appUserGuardian   AppUserGuardian? @relation(fields: [appUserGuardianId], references: [id], onDelete: Cascade)
 
   readAt    DateTime? @map("read_at")
   createdAt DateTime  @default(now()) @map("created_at")
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
+  @@index([appUserGuardianId])
   @@map("app_notifications")
 }
 
@@ -663,7 +670,7 @@ model SupplierCategory {
   description String?
   isActive    Boolean @default(true) @map("is_active")
 
-  tenantId String?   @map("tenant_id")
+  tenantId String? @map("tenant_id")
   tenant   Tenant? @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime   @default(now()) @map("created_at")
@@ -692,7 +699,7 @@ model Supplier {
   categoryId String?           @map("category_id")
   category   SupplierCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
-  tenantId String?   @map("tenant_id")
+  tenantId String? @map("tenant_id")
   tenant   Tenant? @relation("SupplierTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   addressId String?  @unique @map("address_id")
@@ -712,12 +719,12 @@ model TenantCategory {
   description String?
   isActive    Boolean @default(true) @map("is_active")
 
-  tenantId String?   @map("tenant_id")
+  tenantId String? @map("tenant_id")
   tenant   Tenant? @relation("TenantCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
-  tenants    Tenant[] @relation("TenantCategory")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  tenants   Tenant[] @relation("TenantCategory")
 
   @@unique([tenantId, name])
   @@map("tenant_categories")
@@ -749,10 +756,10 @@ model Tenant {
   moduleInventoryProducts   Boolean @default(false) @map("module_inventory_products")
   moduleFinance             Boolean @default(false) @map("module_finance")
 
-  categoryId String?           @map("category_id")
+  categoryId String?         @map("category_id")
   category   TenantCategory? @relation("TenantCategory", fields: [categoryId], references: [id], onDelete: SetNull)
 
-  tenantId String?   @map("tenant_id")
+  tenantId String? @map("tenant_id")
   tenant   Tenant? @relation("TenantParent", fields: [tenantId], references: [id], onDelete: Cascade)
 
   addressId String?  @unique @map("address_id")
@@ -763,10 +770,10 @@ model Tenant {
 
   users        User[]
   appUsers     AppUser[]          @relation("AppUserTenant")
-  subTenants Tenant[]         @relation("TenantParent")
+  subTenants   Tenant[]           @relation("TenantParent")
   suppliers    Supplier[]         @relation("SupplierTenant")
   supplierCats SupplierCategory[] @relation("SupplierCategoryTenant")
-  tenantCats TenantCategory[] @relation("TenantCategoryTenant")
+  tenantCats   TenantCategory[]   @relation("TenantCategoryTenant")
   sales        Sale[]
   qrInventory  QrInventory?
 

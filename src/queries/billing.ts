@@ -22,8 +22,15 @@ export async function getActivePlan(userId: string) {
       },
     },
   })
-  if (!row) return null
-  return { ...row, subscription: { ...row.subscription, price: Number(row.subscription.price) } }
+  // currentPeriodEnd / status are nullable in schema (SEQ vendor sales share
+  // this table) but the where-clause above guarantees both are set on hit.
+  if (!row || !row.currentPeriodEnd || !row.status) return null
+  return {
+    ...row,
+    currentPeriodEnd: row.currentPeriodEnd,
+    status:           row.status,
+    subscription:     { ...row.subscription, price: Number(row.subscription.price) },
+  }
 }
 
 export type ActivePlan = NonNullable<Awaited<ReturnType<typeof getActivePlan>>>

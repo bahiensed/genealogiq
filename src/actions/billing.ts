@@ -58,12 +58,16 @@ export async function changeSubscription(
 ): Promise<ActionResult<{ effect: "upgraded" | "scheduled" }>> {
   const session = await verifySession()
 
-  // Active subscription (none = caller should use createCheckoutSession instead)
+  // Active subscription (none = caller should use createCheckoutSession instead).
+  // `stripeSubscriptionId: { not: null }` excludes SEQ vendor sales sharing
+  // this table; the same filter is implicit via status/currentPeriodEnd, but
+  // declaring it explicitly narrows the type in code below.
   const active = await prisma.appSale.findFirst({
     where: {
       appUserId: session.user.id,
       status:    { in: ["active", "trialing"] },
       currentPeriodEnd: { gt: new Date() },
+      stripeSubscriptionId: { not: null },
     },
     orderBy: { currentPeriodEnd: "desc" },
     select: {
@@ -71,7 +75,8 @@ export async function changeSubscription(
       subscription: { select: { price: true, termLength: true } },
     },
   })
-  if (!active) return { error: "No active subscription to switch from." }
+  if (!active || !active.stripeSubscriptionId) return { error: "No active subscription to switch from." }
+  const stripeSubId = active.stripeSubscriptionId
 
   const target = await prisma.subscription.findUnique({
     where:  { id: subscriptionId, isActive: true },
@@ -91,11 +96,11 @@ export async function changeSubscription(
   try {
     if (cmp >= 0) {
       // Upgrade or cadence-only swap: replace the price on the existing subscription, prorate, charge now.
-      const sub = await stripe.subscriptions.retrieve(active.stripeSubscriptionId)
+      const sub = await stripe.subscriptions.retrieve(stripeSubId)
       const itemId = sub.items.data[0]?.id
       if (!itemId) return { error: "Active subscription has no items in Stripe." }
 
-      const updated = await stripe.subscriptions.update(active.stripeSubscriptionId, {
+      const updated = await stripe.subscriptions.update(stripeSubId, {
         items:              [{ id: itemId, price: targetPriceId }],
         proration_behavior: "always_invoice",
         metadata,
@@ -113,7 +118,7 @@ export async function changeSubscription(
 
     // Downgrade: schedule the switch for end of current period.
     const schedule = await stripe.subscriptionSchedules.create({
-      from_subscription: active.stripeSubscriptionId,
+      from_subscription: stripeSubId,
     })
     const currentPhase = schedule.phases[0]
     if (!currentPhase) return { error: "Could not read current schedule phase." }

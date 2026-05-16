@@ -81,6 +81,7 @@ export const getMemorialFeatures = cache(async (profileId: string): Promise<Subs
   const assignedIsLive =
     !!assignedSale &&
     (assignedSale.status === "active" || assignedSale.status === "trialing") &&
+    !!assignedSale.currentPeriodEnd &&
     assignedSale.currentPeriodEnd > now
 
   if (assignedIsLive && assignedSale.subscription) return assignedSale.subscription
