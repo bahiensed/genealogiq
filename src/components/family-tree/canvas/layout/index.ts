@@ -16,9 +16,8 @@
 //   5. Build edge geometry arrays and bounds from the placed positions.
 //
 // v1 limitations (out of scope here, documented for later upgrades):
-//   - Sibling/aunt EXTRAS do not recursively expand their own descendants.
-//     A subject's sibling shows with their spouse but NOT with their own
-//     children (cousins of subject's kids). Same for aunts/uncles.
+//   - Ancestor "extras" only flank the immediate parents (gen=-1). Siblings
+//     of grandparents (great-aunts/uncles) are not rendered.
 //   - Multiple-marriages are folded into a single active spouse (the same
 //     selection rule already used elsewhere).
 //   - Half-siblings treated as full siblings for family-unit grouping.
@@ -388,9 +387,8 @@ export function computeLayout(
     combined = mergeBlocks(combined, parentsBlock)
 
     // Add gen=-1 sibling row (aunts/uncles): siblings of each parent that are
-    // NOT in the central couple. They live in the same row as the parents.
-    // v1: render each extra as a couple slot (extra + spouse if any) without
-    // recursing into their descendants.
+    // NOT in the central couple. Each extra renders its full descendant
+    // subtree, so subject's cousins appear at gen=0 under their aunt/uncle.
     for (const parentId of subjectBirth.parents) {
       const auntsUncles = (graph.siblingsOf.get(parentId) ?? []).filter((id) => persons[id])
       const partnerInCouple = subjectBirth.parents.find((p) => p !== parentId)
@@ -404,22 +402,21 @@ export function computeLayout(
         : true   // default left if single parent
       // Sort the extras by age (oldest first).
       auntsUncles.sort((a, b) => ageOf(a) - ageOf(b))
+      // When extras live on the LEFT we want the oldest furthest from the parent
+      // couple, so iterate youngest-first (and prepend to the left repeatedly).
+      const iterOrder = onLeft ? [...auntsUncles].reverse() : auntsUncles
 
-      for (const auId of auntsUncles) {
+      for (const auId of iterOrder) {
         if (visited.has(auId)) continue
-        // Build an extra slot (extra + their spouse if any, oldest-leftmost).
-        const slot = buildCoupleSlot(auId, graph, persons)
-        const slotBlock = slotToBlock(slot, -1)
+        const auBlock = layoutDescendantSubtree(auId, graph, persons, -1, visited)
+        if (auBlock.positions.size === 0) continue
         if (onLeft) {
-          // Place slotBlock LEFT of combined with X_SIBLING gap.
-          const dx = combined.leftX - X_SIBLING - slotBlock.rightX
-          shiftBlock(slotBlock, dx)
-          combined = mergeBlocks(combined, slotBlock)
+          const dx = combined.leftX - X_FAMILY - auBlock.rightX
+          shiftBlock(auBlock, dx)
+          combined = mergeBlocks(combined, auBlock)
         } else {
-          combined = placeRightOf(combined, slotBlock, X_SIBLING)
+          combined = placeRightOf(combined, auBlock, X_FAMILY)
         }
-        visited.add(auId)
-        // Also mark their spouse to avoid double-placement.
         const sp = graph.spouseOf.get(auId)
         if (sp) visited.add(sp)
       }
