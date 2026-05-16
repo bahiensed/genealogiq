@@ -18,6 +18,13 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
   if (!validated.success) return { error: 'Invalid data' }
   const input = validated.data
 
+  // Pre-flight 1: the code must be free in our DB
+  const dbDup = await prisma.discountCoupon.findFirst({
+    where:  { code: input.code },
+    select: { id: true },
+  })
+  if (dbDup) return { error: 'A coupon with this code already exists.' }
+
   // Resolve Subscription ids → Stripe Product ids for Stripe's applies_to (if any specified)
   let stripeProductIds: string[] = []
   if (input.appliesTo.length > 0) {
@@ -28,15 +35,24 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
     stripeProductIds = subs.map((s) => s.stripeProductId).filter((id): id is string => !!id)
   }
 
-  try {
-    // Dynamic import so the action module never forces stripe.ts to load at
-    // module-init time — only when this action is actually invoked. Keeps the
-    // /sales/discount-coupons list page renderable even if STRIPE_SECRET_KEY
-    // is missing on the deployment.
-    const { stripe } = await import('@/lib/stripe')
+  // Dynamic import so the action module never forces stripe.ts to load at
+  // module-init time — only when this action is actually invoked.
+  const { stripe } = await import('@/lib/stripe')
 
+  // Pre-flight 2: the code must be free on Stripe too (catches orphans from
+  // earlier failed runs — without this the user gets stuck unable to use a
+  // code that doesn't exist in our DB).
+  const stripeDup = await stripe.promotionCodes.list({ code: input.code, active: true, limit: 1 })
+  if (stripeDup.data.length > 0) {
+    return { error: `Code "${input.code}" is already active in Stripe (orphan from a failed previous run). Ask an admin to clean it up.` }
+  }
+
+  let stripeCoupon: Awaited<ReturnType<typeof stripe.coupons.create>> | null = null
+  let promo:        Awaited<ReturnType<typeof stripe.promotionCodes.create>> | null = null
+
+  try {
     // 1. Create Stripe Coupon
-    const stripeCoupon = await stripe.coupons.create({
+    stripeCoupon = await stripe.coupons.create({
       percent_off:        input.discountType === 'percent' ? input.discountValue : undefined,
       amount_off:         input.discountType === 'amount'  ? Math.round(input.discountValue * 100) : undefined,
       currency:           input.discountType === 'amount'  ? 'usd' : undefined,
@@ -46,7 +62,7 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
     })
 
     // 2. Create Stripe Promotion Code (the customer-facing string)
-    const promo = await stripe.promotionCodes.create({
+    promo = await stripe.promotionCodes.create({
       promotion:       { type: 'coupon', coupon: stripeCoupon.id },
       code:            input.code,
       max_redemptions: input.maxRedemptions ?? undefined,
@@ -77,6 +93,13 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
     revalidatePath('/sales/discount-coupons')
     return { success: 'Coupon created successfully.', coupon: created }
   } catch (e) {
+    // Roll back anything we created on Stripe so we don't leak orphans.
+    if (promo) {
+      try { await stripe.promotionCodes.update(promo.id, { active: false }) } catch {}
+    }
+    if (stripeCoupon) {
+      try { await stripe.coupons.del(stripeCoupon.id) } catch {}
+    }
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
       return { error: 'A coupon with this code already exists.' }
     }
