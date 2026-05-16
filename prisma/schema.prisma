@@ -72,8 +72,8 @@ model DiscountCoupon {
   description           String?
 
   // Discount config
-  discountType          String                                       // "percent" | "amount"
-  discountValue         Decimal  @db.Decimal(10, 2)
+  discountType          String   @map("discount_type")               // "percent" | "amount"
+  discountValue         Decimal  @db.Decimal(10, 2) @map("discount_value")
   duration              String                                       // "once" | "forever" | "repeating"
   durationInMonths      Int?     @map("duration_in_months")
 
