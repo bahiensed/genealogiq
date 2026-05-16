@@ -50,10 +50,29 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 12/05/2026 — Family Tree v3 + unified Notifications. Nova tabela `app_notifications` substitui o `getPendingTributeNotifications` derivado; tribute author agora recebe TRIBUTE_APPROVED / TRIBUTE_REJECTED no bell. FamilyRelation ganhou `status` (PENDING|ACCEPTED) e `requestedById`: adicionar APP_USER real cria pending; alvo aceita/recusa em `/family-requests`; nó renderiza acizentado enquanto pendente. Tree page: icon Network, stats reordenadas ("3 generations · 4/5 people · Need a bigger tree? Upgrade your plan"), background limpo (sem pontos), QuickAddOverlay removida — adicionar parentes só via header "+ Add relative" e quick-add no info sheet. Info sheet redesenhada: timeline vertical (Born/Married/Divorced/Died com ícones), edit button c/ helper "you can only edit own/memorials/ghosts", 4 quick-add buttons, footer "See profile →". Bug do duplo X corrigido (Sheet do shadcn já tem). Bug de timezone fixado via `formatLongDate`/`formatYear` com `timeZone: "UTC"`. ViewportControls: clicks agora não disparam pan (skip em button/a/input/[data-no-pan]); novo focusOn() na context + novo botão Maximize2 que centraliza no root no zoom máximo; fit-view virou ícone Crosshair. shortBio foi removido (DB + Prisma + Zod + dialog + info sheet + node).
+Last session: 16/05/2026 — Family Tree layout v1 rewrite + co-guardianship workflow.
+
+**Layout rewrite (Buchheim-inspired, family-unit blocks)** — jogamos fora o `layout.ts` antigo (heurísticas ad-hoc, 4 rounds de patch). Novo pipeline em `src/components/family-tree/canvas/layout/`:
+- `family-units.ts` → graph com `units`, `birthUnit`, `marriageUnit` (active), `marriageUnits` (lista cronológica completa), `spouseOf`, `siblingsOf` (deriva de birthUnit compartilhado + SIBLING relations explícitas), `spouseSubtype`.
+- `index.ts` → recursive block-based layout. Subject's descendant subtree + sibling row (older esquerda, younger direita) + parents couple block + ancestors going up. Cada FamilyUnit é bloco rígido — nunca ordena across boundary, então tia 1944 não invade lado materno.
+- Extras: gen=-1 tias/tios renderizadas com descendant subtree completa (cousins aparecem em gen=0); gen<=-2 great-aunts/uncles renderizadas como couple slots (sem descendentes — manter compacto). Determinado por sinal de x (paternal=left, maternal=right).
+- Multi-marriage + half-siblings: `layoutHalfMarriageBlock(otherSpouseId, unit, gen)` builda spouse + descendant subtree de cada filho, centrado no spouse. Subject e parents (gen=0 e gen=-1) renderizam casamentos não-primary como half-blocks adjacentes ao lado oposto do primary spouse. Deeper levels ainda usam só active marriage.
+
+**Auto-link em addGhostRelative** — sibling herda PARENT_OF dos pais do âncora; child herda spouse ativo do âncora como segundo pai; parent herda siblings do âncora como filhos extras. Idempotente via try/catch no unique constraint.
+
+**Co-guardianship workflow (per-profile guardian model, convenção WikiTree/Geni)**:
+- `AppUserGuardian.status` (PENDING/ACCEPTED, default ACCEPTED — linhas antigas preservadas) + `requestedById`.
+- `NotificationType` ganhou GUARDIAN_REQUEST_PENDING/ACCEPTED/REJECTED + `Notification.appUserGuardianId`.
+- `src/actions/guardian.ts`: `requestGuardianship({profileId})` (só ghosts/memorials), `approveGuardianship`, `rejectGuardianship`. Cada action notifica a contraparte.
+- `canManageProfile` + todos os readers de `guardedBy` (queries de profile/memorial/notifications, actions de tribute/auth/memorial) agora filtram `status: "ACCEPTED"` — rows PENDING não dão acesso silenciosamente.
+- UI: messages page mostra co-management requests em "Pending action" + entries GUARDIAN_REQUEST_* em Recent activity. Info-sheet ganhou linha "Co-manage" pra ghosts/memorials que o usuário não gerencia (vira "Pending" enquanto aguarda). Tree page query passa `managedIds`/`requestedIds` pra canvas via array.
+- Bônus auto-link: aceitar SIBLING dispara PENDING guardian request automático em cada parent ghost/memorial do convidante.
+
+**V2 backlog** (memorizado): visual styles por subtype (linhas tracejadas pra meio-irmãos, pontilhadas pra adoção), descendentes opcionais de extras profundos sob demanda, mini-map + lazy/foldable subtrees, drag-to-tune offsets manuais.
+
 In progress: —
-Next: testar layout em casos diversos (grandparents, multiple marriages, sibling sem pai); polishes (animação no fit-view, ghost upload de avatar)
-Blockers: aplicar a migration na Neon
+Next: testar fluxo end-to-end de co-guardianship (request → notification → approve → edit liberado); testar layouts em casos extremos (3+ marriages, half-siblings com avós conhecidos).
+Blockers: —
 
 ### Design System — concluído ✅
 - `src/styles/globals.css` — Liquid Glass design system (brand tokens, glass utilities, aurora keyframes)
@@ -208,4 +227,4 @@ Quando completar uma tarefa, mostre o diff e pergunte se pode continuar.
 
 
 ---
-*Claude Code Elite — Pack CLAUDE.md | Atualizado em: 20/04/2026*
+*Claude Code Elite — Pack CLAUDE.md | Atualizado em: 16/05/2026*
