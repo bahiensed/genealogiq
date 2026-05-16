@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { upload } from "@vercel/blob/client"
+import { compressImage } from "@/lib/image-compress"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -192,10 +193,11 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
     setUploading(true)
     setValue("avatarUrl", URL.createObjectURL(file))
     try {
-      const blob = await upload(`bio/${file.name}`, file, {
+      const payload = await compressImage(file, { maxDim: 512 })
+      const blob = await upload(`bio/${payload.name}`, payload, {
         access: "public",
         handleUploadUrl: "/api/bio/upload",
-        contentType: file.type,
+        contentType: payload.type,
       })
       setValue("avatarUrl", blob.url)
     } catch (err) {

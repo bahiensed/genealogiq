@@ -27,6 +27,7 @@ import {
   IMAGE_FORMATS_LABEL,
   VIDEO_FORMATS_LABEL,
 } from "@/lib/upload-validation"
+import { compressImage } from "@/lib/image-compress"
 import { inspectVideo, needsTranscode, transcodeToHD } from "@/lib/video-transcode"
 import type { GalleryItemRow } from "@/queries/gallery"
 
@@ -142,12 +143,13 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
       const file = toProcess[i]
       const localUrl = placeholders[i].url
       try {
+        const payload = await compressImage(file, { maxDim: 2048 })
         // Client uploads: the file PUTs directly to Vercel Blob, bypassing the
         // 4.5 MB serverless body limit. The route returns a signed token.
-        const blob = await upload(`gallery/${file.name}`, file, {
+        const blob = await upload(`gallery/${payload.name}`, payload, {
           access: "public",
           handleUploadUrl: "/api/gallery/upload",
-          contentType: file.type,
+          contentType: payload.type,
         })
         setItems((prev) => {
           const next = [...prev]

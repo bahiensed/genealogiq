@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { ImagePlus, X, Save, Send, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { upload } from "@vercel/blob/client"
+import { compressImage } from "@/lib/image-compress"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -55,10 +56,11 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
     const preview = URL.createObjectURL(file)
     setImageUrl(preview)
     try {
-      const blob = await upload(`tributes/${file.name}`, file, {
+      const payload = await compressImage(file, { maxDim: 2048 })
+      const blob = await upload(`tributes/${payload.name}`, payload, {
         access: "public",
         handleUploadUrl: "/api/tribute/upload",
-        contentType: file.type,
+        contentType: payload.type,
       })
       setImageUrl(blob.url)
     } catch (err) {

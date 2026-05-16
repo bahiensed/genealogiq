@@ -22,6 +22,7 @@ import {
 import { upload } from "@vercel/blob/client"
 import { saveBio, deleteBio } from "@/actions/bio"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
+import { compressImage } from "@/lib/image-compress"
 import type { BioRow } from "@/queries/bio"
 
 const MAX_QUOTE = 128
@@ -87,10 +88,11 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
     for (let i = 0; i < toProcess.length; i++) {
       const file = toProcess[i]
       try {
-        const blob = await upload(`bio/${file.name}`, file, {
+        const payload = await compressImage(file, { maxDim: 2048 })
+        const blob = await upload(`bio/${payload.name}`, payload, {
           access: "public",
           handleUploadUrl: "/api/bio/upload",
-          contentType: file.type,
+          contentType: payload.type,
         })
         setImages((prev) => {
           const next = [...prev]

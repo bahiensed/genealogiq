@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { ImagePlus, X, Save, RotateCcw, Trash2, LocateFixed, Lock } from "lucide-react"
 import { toast } from "sonner"
 import { upload } from "@vercel/blob/client"
+import { compressImage } from "@/lib/image-compress"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -168,10 +169,11 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
     setPhotoAt(slot, preview)
     setUploading((prev) => { const u = [...prev]; u[slot] = true; return u })
     try {
-      const blob = await upload(`geolocation/${file.name}`, file, {
+      const payload = await compressImage(file, { maxDim: 2048 })
+      const blob = await upload(`geolocation/${payload.name}`, payload, {
         access: "public",
         handleUploadUrl: "/api/geolocation/upload",
-        contentType: file.type,
+        contentType: payload.type,
       })
       setPhotoAt(slot, blob.url)
     } catch (err) {

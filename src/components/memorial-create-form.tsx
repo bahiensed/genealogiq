@@ -6,6 +6,7 @@ import { format } from "date-fns"
 import { CalendarIcon, ImagePlus, RotateCcw, Save, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { upload } from "@vercel/blob/client"
+import { compressImage } from "@/lib/image-compress"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -107,10 +108,11 @@ export function MemorialCreateForm() {
     setUploading(true)
     update("avatarUrl", URL.createObjectURL(file))
     try {
-      const blob = await upload(`bio/${file.name}`, file, {
+      const payload = await compressImage(file, { maxDim: 512 })
+      const blob = await upload(`bio/${payload.name}`, payload, {
         access: "public",
         handleUploadUrl: "/api/bio/upload",
-        contentType: file.type,
+        contentType: payload.type,
       })
       update("avatarUrl", blob.url)
     } catch (err) {
