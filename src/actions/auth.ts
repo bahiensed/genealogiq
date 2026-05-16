@@ -144,15 +144,18 @@ export async function resetPassword(
     select: { userId: true, expiresAt: true },
   })
 
-  if (!record || record.expiresAt < new Date()) {
+  // userId is nullable in the schema (also supports AppUser tokens written by
+  // SEQ/APP); BMS only ever issues User-bound tokens, so reject if absent.
+  if (!record || !record.userId || record.expiresAt < new Date()) {
     return { error: "Invalid or expired link. Please request a new one." }
   }
+  const userId = record.userId
 
   const hashedPassword = await bcrypt.hash(validated.data.password, 12)
 
   await prisma.$transaction([
     prisma.user.update({
-      where: { id: record.userId },
+      where: { id: userId },
       data: { password: hashedPassword },
     }),
     prisma.passwordResetToken.delete({ where: { token } }),

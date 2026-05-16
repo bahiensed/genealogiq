@@ -31,80 +31,80 @@ enum EntityType {
 // ─── Subscriptions & Packages ────────────────────────────────────────────────
 
 model Subscription {
-  id                    String  @id @default(cuid())
-  code                  String  @unique
-  name                  String
-  description           String?
-  isActive              Boolean @default(true) @map("is_active")
+  id          String  @id @default(cuid())
+  code        String  @unique
+  name        String
+  description String?
+  isActive    Boolean @default(true) @map("is_active")
 
   // Commercial
-  maxProfiles           Int     @map("max_profiles")
-  termLength            Int     @map("term_length")
-  price                 Decimal @db.Decimal(10, 2)
+  maxProfiles Int     @map("max_profiles")
+  termLength  Int     @map("term_length")
+  price       Decimal @db.Decimal(10, 2)
 
   // Feature limits
-  treeMaxMembers        Int     @map("tree_max_members")
-  bioMaxChars           Int     @map("bio_max_chars")
-  bioMaxImages          Int     @map("bio_max_images")
-  galleryMaxImages      Int     @map("gallery_max_images")
-  galleryMaxVideos      Int     @map("gallery_max_videos")
+  treeMaxMembers   Int @map("tree_max_members")
+  bioMaxChars      Int @map("bio_max_chars")
+  bioMaxImages     Int @map("bio_max_images")
+  galleryMaxImages Int @map("gallery_max_images")
+  galleryMaxVideos Int @map("gallery_max_videos")
 
   // Feature flags
   geolocationFullAccess Boolean @default(false) @map("geolocation_full_access")
   qrCodeAccess          Boolean @default(false) @map("qr_code_access")
 
   // Stripe
-  stripeProductId       String? @unique @map("stripe_product_id")
-  stripeAnnualPriceId   String? @unique @map("stripe_annual_price_id")
-  stripeMonthlyPriceId  String? @unique @map("stripe_monthly_price_id")
+  stripeProductId      String? @unique @map("stripe_product_id")
+  stripeAnnualPriceId  String? @unique @map("stripe_annual_price_id")
+  stripeMonthlyPriceId String? @unique @map("stripe_monthly_price_id")
 
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  coupons               DiscountCoupon[] @relation("CouponSubscriptions")
+  coupons DiscountCoupon[] @relation("CouponSubscriptions")
 
   @@map("subscriptions")
 }
 
 model DiscountCoupon {
-  id                    String   @id @default(cuid())
-  code                  String   @unique
-  description           String?
+  id          String  @id @default(cuid())
+  code        String  @unique
+  description String?
 
   // Discount config
-  discountType          String   @map("discount_type")               // "percent" | "amount"
-  discountValue         Decimal  @db.Decimal(10, 2) @map("discount_value")
-  duration              String                                       // "once" | "forever" | "repeating"
-  durationInMonths      Int?     @map("duration_in_months")
+  discountType     String  @map("discount_type") // "percent" | "amount"
+  discountValue    Decimal @map("discount_value") @db.Decimal(10, 2)
+  duration         String // "once" | "forever" | "repeating"
+  durationInMonths Int?    @map("duration_in_months")
 
   // Limits
-  maxRedemptions        Int?     @map("max_redemptions")
-  redeemBy              DateTime? @map("redeem_by")
+  maxRedemptions Int?      @map("max_redemptions")
+  redeemBy       DateTime? @map("redeem_by")
 
   // Scope — empty = all paid subs
-  appliesTo             Subscription[] @relation("CouponSubscriptions")
+  appliesTo Subscription[] @relation("CouponSubscriptions")
 
   // Stripe mirror
-  stripeCouponId        String?  @unique @map("stripe_coupon_id")
-  stripePromotionCodeId String?  @unique @map("stripe_promotion_code_id")
+  stripeCouponId        String? @unique @map("stripe_coupon_id")
+  stripePromotionCodeId String? @unique @map("stripe_promotion_code_id")
 
   // Audit
-  createdById           String   @map("created_by_id")
-  isActive              Boolean  @default(true) @map("is_active")
+  createdById String  @map("created_by_id")
+  isActive    Boolean @default(true) @map("is_active")
 
-  createdAt             DateTime @default(now()) @map("created_at")
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("discount_coupons")
 }
 
 model Package {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2) @map("price")
-  quantity    Int      @default(1)
-  isActive    Boolean  @default(true) @map("is_active")
+  price       Decimal @map("price") @db.Decimal(10, 2)
+  quantity    Int     @default(1)
+  isActive    Boolean @default(true) @map("is_active")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -115,14 +115,14 @@ model Package {
 }
 
 model Sale {
-  id       Int      @id @default(autoincrement())
-  quantity Int      @default(1)
+  id       Int @id @default(autoincrement())
+  quantity Int @default(1)
 
-  packageId  String   @map("package_id")
-  package    Package  @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  packageId String  @map("package_id")
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Restrict)
 
-  tenantId   String   @map("tenant_id")
-  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  tenantId String @map("tenant_id")
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Restrict)
 
   soldById String @map("sold_by_id")
   soldBy   User   @relation(fields: [soldById], references: [id], onDelete: Restrict)
@@ -154,12 +154,17 @@ model EmailToken {
   id        String         @id @default(cuid())
   token     String         @unique
   type      EmailTokenType
-  userId    String         @map("user_id")
+  userId    String?        @map("user_id")
   newEmail  String?        @map("new_email")
   expiresAt DateTime       @map("expires_at")
   createdAt DateTime       @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // app_user_id column exists in the shared DB (referenced by AppUser in SEQ/APP).
+  // BMS does not declare AppUser, so the FK is not modeled as a Prisma relation
+  // here; BMS code never reads or writes this column.
+  appUserId String? @map("app_user_id")
 
   @@map("email_tokens")
 }
@@ -167,11 +172,13 @@ model EmailToken {
 model PasswordResetToken {
   id        String   @id @default(cuid())
   token     String   @unique
-  userId    String   @map("user_id")
+  userId    String?  @map("user_id")
   expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  appUserId String? @map("app_user_id")
 
   @@map("password_reset_tokens")
 }
@@ -203,16 +210,16 @@ model Address {
 // ─── Company ─────────────────────────────────────────────────────────────────
 
 model Company {
-  id                    String   @id @default(cuid())
-  legalName             String   @map("legal_name")
-  tradeName             String   @map("trade_name")
-  taxId                 String   @unique @map("tax_id")
-  stateRegistration     String?  @map("state_registration")
-  municipalRegistration String?  @map("municipal_registration")
-  email                 String   @unique
-  phoneCountryCode      String   @default("55") @map("phone_country_code")
+  id                    String  @id @default(cuid())
+  legalName             String  @map("legal_name")
+  tradeName             String  @map("trade_name")
+  taxId                 String  @unique @map("tax_id")
+  stateRegistration     String? @map("state_registration")
+  municipalRegistration String? @map("municipal_registration")
+  email                 String  @unique
+  phoneCountryCode      String  @default("55") @map("phone_country_code")
   phone                 String
-  isActive              Boolean  @default(true) @map("is_active")
+  isActive              Boolean @default(true) @map("is_active")
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -243,8 +250,8 @@ model User {
   failedLoginAttempts Int       @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime? @map("locked_until")
 
-  tenantId   String?   @map("tenant_id")
-  tenant     Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  tenantId String? @map("tenant_id")
+  tenant   Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
 
   addressId String?  @unique @map("address_id")
   address   Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
@@ -267,7 +274,7 @@ model SupplierCategory {
   description String?
   isActive    Boolean @default(true) @map("is_active")
 
-  tenantId String?   @map("tenant_id")
+  tenantId String? @map("tenant_id")
   tenant   Tenant? @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   createdAt DateTime   @default(now()) @map("created_at")
@@ -296,7 +303,7 @@ model Supplier {
   categoryId String?           @map("category_id")
   category   SupplierCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
-  tenantId String?   @map("tenant_id")
+  tenantId String? @map("tenant_id")
   tenant   Tenant? @relation("SupplierTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
   addressId String?  @unique @map("address_id")
@@ -316,12 +323,12 @@ model TenantCategory {
   description String?
   isActive    Boolean @default(true) @map("is_active")
 
-  tenantId String?   @map("tenant_id")
+  tenantId String? @map("tenant_id")
   tenant   Tenant? @relation("TenantCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
-  tenants Tenant[] @relation("TenantCategory")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  tenants   Tenant[] @relation("TenantCategory")
 
   @@unique([tenantId, name])
   @@map("tenant_categories")
@@ -353,10 +360,10 @@ model Tenant {
   moduleInventoryProducts   Boolean @default(false) @map("module_inventory_products")
   moduleFinance             Boolean @default(false) @map("module_finance")
 
-  categoryId String?           @map("category_id")
+  categoryId String?         @map("category_id")
   category   TenantCategory? @relation("TenantCategory", fields: [categoryId], references: [id], onDelete: SetNull)
 
-  tenantId String?   @map("tenant_id")
+  tenantId String? @map("tenant_id")
   tenant   Tenant? @relation("TenantParent", fields: [tenantId], references: [id], onDelete: Cascade)
 
   addressId String?  @unique @map("address_id")
@@ -366,10 +373,10 @@ model Tenant {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   users        User[]
-  subTenants   Tenant[]         @relation("TenantParent")
+  subTenants   Tenant[]           @relation("TenantParent")
   suppliers    Supplier[]         @relation("SupplierTenant")
   supplierCats SupplierCategory[] @relation("SupplierCategoryTenant")
-  tenantCats TenantCategory[] @relation("TenantCategoryTenant")
+  tenantCats   TenantCategory[]   @relation("TenantCategoryTenant")
   sales        Sale[]
   qrInventory  QrInventory?
 
