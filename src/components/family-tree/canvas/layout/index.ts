@@ -16,8 +16,9 @@
 //   5. Build edge geometry arrays and bounds from the placed positions.
 //
 // v1 limitations (out of scope here, documented for later upgrades):
-//   - Ancestor "extras" only flank the immediate parents (gen=-1). Siblings
-//     of grandparents (great-aunts/uncles) are not rendered.
+//   - Extras at gen <= -2 (great-aunts/uncles, etc.) render as couple slots
+//     only — their own descendants are not shown to keep deep generations
+//     compact. gen=-1 aunts/uncles still render with their cousin subtree.
 //   - Multiple-marriages are folded into a single active spouse (the same
 //     selection rule already used elsewhere).
 //   - Half-siblings treated as full siblings for family-unit grouping.
@@ -419,6 +420,61 @@ export function computeLayout(
         }
         const sp = graph.spouseOf.get(auId)
         if (sp) visited.add(sp)
+      }
+    }
+
+    // Add extras at gen <= -2 (great-aunts/uncles and deeper). Each extra is
+    // rendered as a couple slot only — no descendants — to keep deep branches
+    // compact and avoid pulling cousins-of-grandparents into the subject row.
+    // Side is decided per-ancestor by x sign: x<0 → paternal/left, x>=0 → maternal/right.
+    const ancestorsByGen = new Map<number, string[]>()
+    for (const [id, pos] of combined.positions.entries()) {
+      const g = Math.round(pos.y / Y_GEN)
+      if (g > -2) continue
+      const arr = ancestorsByGen.get(g) ?? []
+      arr.push(id)
+      ancestorsByGen.set(g, arr)
+    }
+    const ancestorGens = Array.from(ancestorsByGen.keys()).sort((a, b) => b - a)   // -2, -3, ...
+    for (const g of ancestorGens) {
+      const ancIds = ancestorsByGen.get(g)!
+      // Process left-side ancestors first (paternal column), then right-side.
+      // Within a side, iterate by x to keep placement deterministic: the
+      // ancestor closer to the centre is processed first so its siblings land
+      // adjacent to it, and farther-out ancestors push beyond.
+      const onLeft  = ancIds.filter((id) => (combined.positions.get(id)!.x) <  0)
+                            .sort((a, b) => (combined.positions.get(b)!.x) - (combined.positions.get(a)!.x))
+      const onRight = ancIds.filter((id) => (combined.positions.get(id)!.x) >= 0)
+                            .sort((a, b) => (combined.positions.get(a)!.x) - (combined.positions.get(b)!.x))
+
+      for (const ancId of onLeft) {
+        const sibs = (graph.siblingsOf.get(ancId) ?? []).filter((id) => persons[id])
+        sibs.sort((a, b) => ageOf(a) - ageOf(b))
+        // Place oldest furthest from focal by iterating youngest-first.
+        for (const sibId of [...sibs].reverse()) {
+          if (visited.has(sibId)) continue
+          const slot = buildCoupleSlot(sibId, graph, persons)
+          const slotBlock = slotToBlock(slot, g)
+          const dx = combined.leftX - X_SIBLING - slotBlock.rightX
+          shiftBlock(slotBlock, dx)
+          combined = mergeBlocks(combined, slotBlock)
+          visited.add(sibId)
+          const sp = graph.spouseOf.get(sibId)
+          if (sp) visited.add(sp)
+        }
+      }
+      for (const ancId of onRight) {
+        const sibs = (graph.siblingsOf.get(ancId) ?? []).filter((id) => persons[id])
+        sibs.sort((a, b) => ageOf(a) - ageOf(b))
+        for (const sibId of sibs) {
+          if (visited.has(sibId)) continue
+          const slot = buildCoupleSlot(sibId, graph, persons)
+          const slotBlock = slotToBlock(slot, g)
+          combined = placeRightOf(combined, slotBlock, X_SIBLING)
+          visited.add(sibId)
+          const sp = graph.spouseOf.get(sibId)
+          if (sp) visited.add(sp)
+        }
       }
     }
   }
