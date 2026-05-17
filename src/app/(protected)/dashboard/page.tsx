@@ -1,9 +1,11 @@
-import { Layers, Users, ShoppingCart, Banknote, TrendingUp } from 'lucide-react'
+import { Layers, Users, ShoppingCart, Banknote, TrendingUp, UserPlus, QrCode } from 'lucide-react'
 import { verifyTenantSession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
 import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@/components/ui/card'
 import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart'
 import { RevenueByPlanChart } from '@/components/dashboard/revenue-by-plan-chart'
+import { CustomerGrowthChart } from '@/components/dashboard/customer-growth-chart'
+import { QrConsumptionChart } from '@/components/dashboard/qr-consumption-chart'
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
@@ -97,6 +99,30 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <RevenueByPlanChart data={stats.revenueByPlanChart} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Growth insights */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle><UserPlus className="inline h-5 w-5 mr-2 align-text-bottom" />New Customers</CardTitle>
+            <CardDescription>New end customers per month · last 12 months</CardDescription>
+            <CardAction><Users className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <CustomerGrowthChart data={stats.customerGrowthChart} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle><QrCode className="inline h-5 w-5 mr-2 align-text-bottom" />QR Consumption</CardTitle>
+            <CardDescription>QR codes sold per month · last 12 months</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <QrConsumptionChart data={stats.qrConsumptionChart} />
           </CardContent>
         </Card>
       </div>

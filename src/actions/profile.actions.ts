@@ -40,3 +40,19 @@ export async function updateProfile(data: ProfileFormValues): Promise<ActionResu
   revalidatePath('/profile')
   return { success: 'Profile updated successfully.' }
 }
+
+export async function updateAvatar(url: string): Promise<ActionResult> {
+  const session = await verifySession()
+
+  if (!/^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//.test(url)) {
+    return { error: 'Invalid avatar URL' }
+  }
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data:  { avatarUrl: url },
+  })
+
+  revalidatePath('/profile')
+  return { success: 'Avatar updated.' }
+}

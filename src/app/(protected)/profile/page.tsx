@@ -1,11 +1,10 @@
 import { verifySession } from '@/lib/dal'
 import { prisma } from '@/lib/prisma'
-import { getInitials } from '@/lib/utils'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { ProfileForm } from '@/components/profile/profile-form'
+import { AvatarUpload } from '@/components/profile/avatar-upload'
 import { ChangeEmailDialog } from '@/components/auth/change-email-dialog'
 import { ChangePasswordDialog } from '@/components/auth/change-password-dialog'
 import { DeleteAccountDialog } from '@/components/auth/delete-account-dialog'
@@ -54,10 +53,7 @@ export default async function ProfilePage() {
   return (
     <div className="max-w-3xl space-y-6">
       <div className="flex items-center gap-4">
-        <Avatar className="size-20 text-xl">
-          <AvatarImage src={image} alt={fullName} />
-          <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
-        </Avatar>
+        <AvatarUpload defaultUrl={image} fullName={fullName} />
         <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight truncate">{fullName || 'Profile'}</h1>
           <p className="text-sm text-muted-foreground truncate">{email}</p>

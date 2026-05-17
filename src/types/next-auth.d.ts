@@ -4,6 +4,7 @@ declare module "next-auth" {
   interface User {
     role?: string
     customerId?: string | null
+    image?: string | null
   }
   interface Session {
     user: DefaultSession["user"] & {
@@ -19,5 +20,6 @@ declare module "next-auth/jwt" {
     id?: string
     role?: string
     customerId?: string | null
+    image?: string | null
   }
 }

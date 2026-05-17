@@ -1,5 +1,6 @@
 import { verifyTenantSession, getCustomerModules } from '@/lib/dal'
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { SessionProvider } from '@/components/providers/session-provider'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { AppBreadcrumb } from '@/components/breadcrumb/breadcrumb'
 import { ModeToggle } from '@/components/theme/mode-toggle'
@@ -14,6 +15,7 @@ export default async function ProtectPagesLayout({
   const modules = await getCustomerModules()
 
   return (
+    <SessionProvider>
     <SidebarProvider
       style={
         {
@@ -44,5 +46,6 @@ export default async function ProtectPagesLayout({
         </main>
       </div>
     </SidebarProvider>
+    </SessionProvider>
   )
 }
