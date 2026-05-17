@@ -291,6 +291,10 @@ model Tenant {
   moduleInventoryProducts   Boolean @default(false) @map("module_inventory_products")
   moduleFinance             Boolean @default(false) @map("module_finance")
 
+  // Stripe customer reference (one per Tenant, created on first SEQ QR
+  // package purchase). Consolidates billing across multiple employees.
+  stripeCustomerId String? @unique @map("stripe_customer_id")
+
   users        User[]
   subTenants   Tenant[]           @relation("TenantParent")
   suppliers    Supplier[]         @relation("SupplierTenant")
@@ -346,6 +350,12 @@ model Package {
   quantity    Int     @default(1)
   isActive    Boolean @default(true) @map("is_active")
 
+  // Stripe references. Provisioned by prisma/seed-stripe-packages.ts.
+  // Both nullable: a Package can exist before being synced to Stripe; the
+  // checkout action refuses to proceed until stripePriceId is set.
+  stripeProductId String? @unique @map("stripe_product_id")
+  stripePriceId   String? @unique @map("stripe_price_id")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -366,6 +376,11 @@ model Sale {
 
   soldById String @map("sold_by_id")
   soldBy   User   @relation(fields: [soldById], references: [id], onDelete: Restrict)
+
+  // Stripe references. stripeSessionId is the defensive idempotency key —
+  // a duplicate apply throws P2002 even if the StripeEvent dedup misses.
+  stripeSessionId       String? @unique @map("stripe_session_id")
+  stripePaymentIntentId String? @map("stripe_payment_intent_id")
 
   reversedAt DateTime? @map("reversed_at")
 
@@ -424,6 +439,14 @@ model AppSale {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("app_sales")
+}
+
+model StripeEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("stripe_events")
 }
 
 // ─── AppUser / Deceased ───────────────────────────────────────────────────────
