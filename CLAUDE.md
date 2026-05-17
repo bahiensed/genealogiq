@@ -50,7 +50,44 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 17/05/2026 — BIG REVIEW Fase 6: SEQ profile redesign (layout shadcn).
+Last session: 17/05/2026 — BIG REVIEW Fase 7 (Dashboards perf + new widgets) + Fase 6 leftovers (avatar upload + BMS profile redesign).
+
+**Fase 7 entregue (Dashboards BMS + SEQ — perf refactor + 2 widgets novos por app):**
+- BMS `src/queries/dashboard.ts` — rewrite. Antes: 4 `findMany` puxando linhas cruas de Sale + 6 JS reduce loops. Agora: **1 `$queryRaw` combinado** com `FILTER (WHERE ...)` + `SUM(s.quantity * p.price)` JOIN Package retorna todos os totais (monthly/yearly/all count + revenue) numa única ida ao DB; **1 `$queryRaw`** com `DATE_TRUNC('month', ...)` + GROUP BY 1, 2 retorna ~12×N linhas pivot pra monthly chart + revenue by package; **2 `$queryRaw` novos** pra top sellers (groupBy soldById + zip com User.firstName/lastName via Prisma client) e customer growth (groupBy DATE_TRUNC sobre tenants.created_at).
+- SEQ `src/queries/dashboard.ts` — last12MonthsSales virou `$queryRaw` `DATE_TRUNC` + GROUP BY 1, 2 (month + subscription_id). Subscription name resolved via 1 `prisma.subscription.findMany({ id: { in: ids } })`. **2 `$queryRaw` novos** pra customer growth (app_users.role = APP_USER + created_at GROUP BY month) e QR consumption (app_sales COUNT GROUP BY month).
+- Novos components BMS: `src/components/dashboard/customer-growth-chart.tsx` (BarChart) + `src/components/dashboard/top-sellers-card.tsx` (lista com Avatar + count + revenue formatado USD).
+- Novos components SEQ: `src/components/dashboard/customer-growth-chart.tsx` (BarChart) + `src/components/dashboard/qr-consumption-chart.tsx` (LineChart).
+- Dashboard pages atualizadas com nova row "Growth insights".
+- Month-spine pattern preservado (loop 12 meses + lookup no map) — months sem dado mostram count/revenue: 0.
+- BigInt → Number cast explícito em todos os `$queryRaw` (Postgres COUNT retorna BigInt; Prisma serializa Decimal como string).
+
+**Fase 6 leftover 1 — Avatar upload (BMS + SEQ):**
+- Novos: `src/app/api/profile/upload/route.ts` (BMS + SEQ) — mirror do APP `bio/upload` pattern mas SEM `clientPayload` (escopo é trivialmente o próprio user via `session.user.id`). ALLOWED_TYPES = `image/jpeg|png|webp|gif`, max **5 MB** (avatar não precisa dos 10MB de bio).
+- `@vercel/blob@^2.3.3` instalado em BMS + SEQ (não estava, só em APP).
+- BMS + SEQ `src/actions/profile.actions.ts` ganhou `updateAvatar(url)` — valida regex `^https://*.public.blob.vercel-storage.com/`, grava `prisma.user.update({ avatarUrl: url })`, `revalidatePath('/profile')`.
+- BMS + SEQ `src/auth.ts` — `authorize()` retorna `image: user.avatarUrl`. **`jwt` callback** ganhou `trigger === 'update'` handling — quando `useSession().update({ image })` é chamado do client, JWT cookie é regravado com novo image. **`session` callback** propaga `token.image → session.user.image`.
+- BMS + SEQ `src/types/next-auth.d.ts` — adicionado `image?: string | null` em User + JWT (Session.user já herda de DefaultSession que tem image).
+- Novos: `src/components/providers/session-provider.tsx` (BMS + SEQ) — client wrapper de NextAuth SessionProvider. Adicionado no `(protected)/layout.tsx` wrapping todo o tree → habilita `useSession()` no client.
+- Novos: `src/components/profile/avatar-upload.tsx` (BMS + SEQ) — Avatar clicável com Camera icon overlay no hover. Fluxo: pick file → `upload()` do `@vercel/blob/client` (token from `/api/profile/upload`) → `updateAvatar(blob.url)` → optimistic local state + `useSession().update({ image: blob.url })` → `router.refresh()`. Header avatar atualiza imediatamente (sem precisar relogin) porque o JWT cookie foi regravado.
+- Validation client-side: tipo image/* + size ≤ 5MB. Orphan blobs aceitos (bounded pelo size limit).
+- Profile pages atualizadas pra renderizar `<AvatarUpload defaultUrl={image} fullName={fullName} />` no lugar do `<Avatar>` static.
+
+**Fase 6 leftover 2 — BMS /profile redesign (copy direta de SEQ):**
+- Novos: `src/schemas/profile.schema.ts` + `src/actions/profile.actions.ts` + `src/components/profile/profile-form.tsx` em BMS — copy verbatim de SEQ.
+- `src/app/(protected)/profile/page.tsx` em BMS — rewrite total (de 51 linhas labels PT "Nome:"/"E-mail:" + flex side-by-side para layout 3-card shadcn idêntico ao SEQ). Header com Avatar 20×20 + nome/email; Cards: Personal information / Account & security / Danger zone.
+- BMS `src/components/auth/{change-email,change-password,delete-account}-dialog.tsx` — DialogTrigger trocado de `<button className="text-sm underline">` PT-style pra `<Button variant="outline" size="sm">` (delete: `variant="destructive"`). Placeholder "novo@email.com" → "new@email.com".
+
+**Verificação:**
+- `tsc --noEmit` ✅ em BMS + SEQ.
+- Lint baseline mantido: BMS 16 errors (pré-existentes em landingpage privacy/terms, cookie-consent, forgot-password-form, customer-form, discount-coupons, package-form, sale-form, user-form, data-table); SEQ 15 errors (pré-existentes em sales-form, data-table, proxy). **Zero novos errors em arquivos criados/modificados.**
+
+**Pendência operacional**: garantir que `BLOB_READ_WRITE_TOKEN` está setado em BMS + SEQ Vercel prod (já existe no .env local porque APP usa o mesmo provider).
+
+**Convenção avatar storage**: `Tenant.stripeCustomerId`-equivalente para imagens — todos os apps gravam blobs públicos em `avatars/<timestamp>-<filename>` no mesmo bucket Vercel Blob. User.avatarUrl (BMS/SEQ) e AppUser.avatarUrl (APP) são URLs absolutas independentes.
+
+---
+
+Previous session: 17/05/2026 — BIG REVIEW Fase 6: SEQ profile redesign (layout shadcn).
 
 **Fase 6 entregue (SEQ /profile redesign + self-edit):**
 - `src/schemas/profile.schema.ts` — **novo** — `profileSchema` (subset de user.schema sem role/email/isActive): firstName, lastName, nationalId, birthDate, phoneCountryCode, phone, address. Exporta `profileResolver` + `profileDefaultValues`.
@@ -194,10 +231,12 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - Verificação: `tsc --noEmit` ✅ nos 3 apps. Lint ✅ nos 3 apps.
 
 **Roadmap remanescente da BIG REVIEW** (sessões futuras, plan-mode dedicado pra cada):
-- Fase 7: Dashboards (BMS + SEQ) — agregações eficientes
-- BMS profile redesign (copy from SEQ — quase mesmo código)
-- SEQ avatar upload (blob route + `session.update()` no JWT callback)
+- ~~Fase 7: Dashboards (BMS + SEQ) — agregações eficientes~~ ✅ entregue 17/05/2026
+- ~~BMS profile redesign (copy from SEQ)~~ ✅ entregue 17/05/2026
+- ~~SEQ/BMS avatar upload (blob route + `session.update()` no JWT callback)~~ ✅ entregue 17/05/2026
 - Phase 5 cleanup SQL (drop legacy `deceased`/`users` com role APP_*): plan separado.
+
+**BIG REVIEW status**: todas as fases concluídas. Sessões futuras: feature work + Phase 5 cleanup SQL quando estiver confortável com dados de prod.
 
 **BIG REVIEW achados pendentes** (consulta: `/home/douglas/.claude/plans/big-code-review-vamos-polished-meteor.md`):
 - Vercel env prod: confirmar que cada app tem `AUTH_SECRET` próprio (gap não-fechado, depende de validação no painel)
@@ -205,8 +244,8 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - APP não tem `prisma/migrations/` — migrations vivem em SEQ. Decisão de ownership formal pendente.
 
 In progress: —
-Next: setup operacional Stripe (env vars + webhook endpoint + rodar seed); depois Fase 7 (Dashboards BMS + SEQ).
-Blockers: STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET ausentes em SEQ `.env` (user precisa preencher antes do primeiro purchase test).
+Next: smoke test end-to-end (avatar upload em BMS + SEQ; dashboards com tenants reais — comparar números pré/pós refactor); setup operacional Stripe (env vars + webhook endpoint + rodar seed) ainda pendente; Phase 5 cleanup SQL.
+Blockers: STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET ausentes em SEQ `.env`; `BLOB_READ_WRITE_TOKEN` precisa estar em BMS + SEQ Vercel prod.
 
 ---
 

@@ -4,7 +4,26 @@
       "Bash(git commit -m ' *)",
       "Bash(grep -n \"^import\\\\|from \\\\\"@vercel/blob\\\\|toast\\\\|fetch\\\\\\(\\\\`/api\" /home/douglas/Projects/genealogiq/genealogiq-app/src/components/bio-edit-form.tsx)",
       "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq add prisma/migrations/20260516000000_co_guardianship)",
-      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq commit -m ' *)"
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq commit -m ' *)",
+      "Bash(xargs file *)",
+      "Bash(grep -E \"\\\\.sql$\")",
+      "Bash(grep -A 60 \"^model AppUser \\\\b\\\\|^model AppUser$\" /tmp/seq-pull.prisma)",
+      "Bash(git rm *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(git status *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(echo \"BMS exit=$?\")",
+      "Bash(tee /tmp/bms-tsc.log)",
+      "Bash(echo \"SEQ exit=$?\")",
+      "Bash(echo \"BMS-tsc=$?\")",
+      "Bash(echo \"SEQ-tsc=$?\")",
+      "Bash(echo \"BMS-lint=$?\")",
+      "Bash(echo \"SEQ-lint=$?\")"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/home/douglas/Projects/genealogiq/genealogiq-seq",
+      "/home/douglas/.claude/plans"
     ]
   }
 }
