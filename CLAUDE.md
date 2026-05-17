@@ -50,7 +50,38 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 16/05/2026 — BIG REVIEW Fase 4: SEQ Sales suggested price (100% markup hint).
+Last session: 17/05/2026 — BIG REVIEW Fase 5: APP /messages padronização por NotificationType + paginação + auditoria de routes.
+
+**Fase 5 entregue (APP /messages refactor + audit):**
+- `src/queries/notifications.ts` — rewrite total:
+  - `getMessages(userId)` agora faz **1 query unificada** sobre `Notification` (antes misturava 4 sources: Tribute/FamilyRelation/AppUserGuardian + Notification). PENDING_TYPES e ACTIVITY_TYPES driven pelo enum `NotificationType`.
+  - Novo `getActivityPage(userId, cursor?)` — cursor-based pagination, page size 20. Extraído pra ser reusado pelo `getMessages` e `loadMoreActivity`.
+  - Novo formato uniforme `InboxItem` com `tribute`/`familyRelation`/`guardianProfile` pre-resolvidos no server. `viewerActed` calculado uma vez via `requestedById ≠ viewerId`.
+  - `getUnreadCount` inalterado (header bell continua usando).
+- `src/actions/messages.ts` — **novo** — server action `loadMoreActivity({ id, createdAt })` que verifica session + chama `getActivityPage`.
+- `src/components/messages-list.tsx` — refator pra dispatch-by-type:
+  - Eliminou 3 componentes `PendingTribute`/`PendingFamilyRequest`/`PendingGuardianRequest` + os 9 if-branches do `ActivityCard`. Substituído por DISPATCH map `Record<NotificationType, { describe, body?, image?, href?, Footer? }>`.
+  - Footers de pending (`TributeActions`, `FamilyRequestActions`, `GuardianRequestActions`) ficam no dispatch e só renderizam em pending mode.
+  - Novo `<LoadMoreButton>` client com `useState<InboxItem[]>` + `useTransition` que concatena páginas.
+  - Removida prop `sessionUserId` (viewer-acted resolvido server-side agora).
+- `src/app/(protected)/messages/page.tsx` — simplificado pra passar `data` (já contém pending + activity + nextCursor). `totalPending = data.pending.length` (antes somava tributes + family separadamente).
+- **Bug fix incidental**: family-request requester não vê mais seu próprio pending request no inbox (antes filtro `OR fromId/toId = userId` incluía ambos; agora notification só vai pro consent target via `notify({ userId: otherId })`).
+- **Auditoria das 9 routes APP** — fix incluído em `/api/geolocation/upload`:
+  - Antes: só auth check, sem `clientPayload` → qualquer logged-in user gerava blob token
+  - Depois: exige `clientPayload: { profileId }` + `canManageProfile` ownership check (espelha bio/gallery upload pattern)
+  - Caller `geolocation-edit-form.tsx` atualizado pra passar `clientPayload: JSON.stringify({ profileId })`
+  - Restantes routes (search, address/suggestions, geolocation/places, bio/gallery/tribute upload, stripe webhook, [...nextauth]) — auditadas, sem gaps.
+- `src/actions/guardian.ts` — comment fix em `requestGuardianship` (comentário antigo dizia "plus profile itself if real APP_USER" mas o código restringe a APP_GHOST/APP_MEMO).
+- Verificação: `tsc --noEmit` ✅. Lint baseline mantido (4 errors pré-existentes em home-favorites/home-memorials/memorial-edit-form — nenhum nos arquivos tocados).
+
+**Out of scope (intencional)**:
+- PENDING notifications retroativos pra rows antigas — produto pré-prod, histórico minúsculo
+- Bell badge unchanged — `getUnreadCount` já era Notification-driven
+- Sem testes automatizados — `Tests: N/A` por design
+
+---
+
+Previous session: 16/05/2026 — BIG REVIEW Fase 4: SEQ Sales suggested price (100% markup hint).
 
 **Fase 4 entregue (SEQ Sales suggested price):**
 - `src/queries/sales.ts`: adicionado `getSuggestedSalePrice(tenantId)` privado — busca o último `Sale` não-revertido do tenant (`reversedAt: null`, `orderBy createdAt desc`), retorna `(package.price / package.quantity) * SUGGESTED_MARKUP` (constante `SUGGESTED_MARKUP = 2`). Null se tenant nunca comprou Package. Integrado em `getInventoryData` no return.
@@ -145,7 +176,6 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - Verificação: `tsc --noEmit` ✅ nos 3 apps. Lint ✅ nos 3 apps.
 
 **Roadmap remanescente da BIG REVIEW** (sessões futuras, plan-mode dedicado pra cada):
-- Fase 5: APP /messages padronização por NotificationType + paginação + auditoria de routes
 - Fase 6: SEQ profile redesign (layout shadcn)
 - Fase 7: Dashboards (BMS + SEQ) — agregações eficientes
 - Phase 5 cleanup SQL (drop legacy `deceased`/`users` com role APP_*): plan separado.
@@ -156,7 +186,7 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - APP não tem `prisma/migrations/` — migrations vivem em SEQ. Decisão de ownership formal pendente.
 
 In progress: —
-Next: setup operacional Stripe (env vars + webhook endpoint + rodar seed); depois Fase 5 (APP /messages padronização).
+Next: setup operacional Stripe (env vars + webhook endpoint + rodar seed); depois Fase 6 (SEQ profile redesign).
 Blockers: STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET ausentes em SEQ `.env` (user precisa preencher antes do primeiro purchase test).
 
 ---

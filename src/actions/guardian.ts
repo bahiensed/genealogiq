@@ -11,9 +11,10 @@ import {
 
 // ─── requestGuardianship ─────────────────────────────────────────────────────
 //
-// A user who is NOT yet a guardian of `profileId` asks to co-manage it. The
-// row lands as PENDING and every existing guardian (plus the profile itself
-// if it's a real APP_USER) gets notified.
+// A user who is NOT yet a guardian of `profileId` asks to co-manage it.
+// Restricted to APP_GHOST / APP_MEMO profiles (real APP_USERs already manage
+// themselves). The row lands as PENDING and every existing accepted guardian
+// gets notified.
 
 export async function requestGuardianship(data: unknown) {
   const session = await verifySession()

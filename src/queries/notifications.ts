@@ -1,6 +1,28 @@
 import "server-only"
 
 import { prisma } from "@/lib/prisma"
+import type { NotificationType } from "@/generated/prisma/enums"
+
+const PENDING_TYPES = [
+  "TRIBUTE_PENDING",
+  "FAMILY_REQUEST_PENDING",
+  "GUARDIAN_REQUEST_PENDING",
+] as const satisfies readonly NotificationType[]
+
+const ACTIVITY_TYPES = [
+  "TRIBUTE_APPROVED",
+  "TRIBUTE_REJECTED",
+  "FAMILY_REQUEST_ACCEPTED",
+  "FAMILY_REQUEST_REJECTED",
+  "GUARDIAN_REQUEST_ACCEPTED",
+  "GUARDIAN_REQUEST_REJECTED",
+] as const satisfies readonly NotificationType[]
+
+export const ACTIVITY_PAGE_SIZE = 20
+
+export async function getUnreadCount(userId: string): Promise<number> {
+  return prisma.notification.count({ where: { userId, readAt: null } })
+}
 
 interface ActorSummary {
   id:        string
@@ -9,175 +31,183 @@ interface ActorSummary {
   avatarUrl: string | null
 }
 
-export async function getUnreadCount(userId: string): Promise<number> {
-  return prisma.notification.count({ where: { userId, readAt: null } })
+interface ProfileSummary {
+  id:        string
+  firstName: string
+  lastName:  string
+  avatarUrl: string | null
+  role:      string
+}
+
+export interface InboxItem {
+  id:        string
+  type:      NotificationType
+  createdAt: Date
+  /** Whoever's avatar/name should headline the card (the counterparty). Null only when actor was deleted. */
+  actor:     ActorSummary | null
+  /** True when the viewer was the one who took the action; false when they received it. */
+  viewerActed: boolean
+  /** Optional related ids for action buttons + deep-links. */
+  tributeId:         string | null
+  familyRelationId:  string | null
+  appUserGuardianId: string | null
+  /** Type-specific extras eagerly resolved server-side so the renderer stays dumb. */
+  tribute?:          { text: string; imageUrl: string | null; profileId: string; profileName: string } | null
+  familyRelation?:   { type: string; subtype: string | null; requesterIsParent: boolean } | null
+  guardianProfile?:  ProfileSummary | null
 }
 
 export interface MessagesData {
-  pendingTributes: {
-    id: string
+  pending:    InboxItem[]
+  activity:   InboxItem[]
+  nextCursor: ActivityCursor | null
+}
+
+export interface ActivityCursor {
+  id:        string
+  createdAt: string // ISO — serializable across server/client
+}
+
+const COMMON_SELECT = {
+  id: true, type: true, createdAt: true,
+  userId: true,
+  tributeId: true, familyRelationId: true, appUserGuardianId: true,
+  actor: {
+    select: { id: true, firstName: true, lastName: true, avatarUrl: true },
+  },
+  tribute: {
+    select: {
+      text: true, imageUrl: true, profileId: true, authorId: true,
+      profile: { select: { firstName: true, lastName: true } },
+    },
+  },
+  familyRelation: {
+    select: { type: true, subtype: true, fromId: true, toId: true, requestedById: true },
+  },
+  appUserGuardian: {
+    select: {
+      requestedById: true, appUserId: true,
+      appUser: { select: { id: true, firstName: true, lastName: true, avatarUrl: true, role: true } },
+    },
+  },
+} as const
+
+type RawNotification = {
+  id: string
+  type: NotificationType
+  createdAt: Date
+  userId: string
+  tributeId: string | null
+  familyRelationId: string | null
+  appUserGuardianId: string | null
+  actor: ActorSummary | null
+  tribute: {
     text: string
     imageUrl: string | null
-    createdAt: Date
     profileId: string
-    profileName: string
-    author: ActorSummary
-  }[]
-  pendingFamilyRequests: {
-    id:        string
-    type:      string
-    subtype:   string | null
-    fromId:    string
-    toId:      string
-    createdAt: Date
-    from:      ActorSummary
-    to:        ActorSummary
-  }[]
-  pendingGuardianRequests: {
-    id:          string
-    createdAt:   Date
-    requester:   ActorSummary
-    profile: {
-      id:        string
-      firstName: string
-      lastName:  string
-      avatarUrl: string | null
-      role:      string
-    }
-  }[]
-  recentActivity: {
-    id:        string
-    type:      string
-    createdAt: Date
-    actor:     ActorSummary | null
-    tributeId: string | null
-    profileId: string | null
-    /** True when the viewer was the one who took the action (moderator/accepter), false when they received it (author/requester). */
-    viewerActed: boolean
-    familyRelationId:  string | null
-    appUserGuardianId: string | null
-  }[]
+    authorId: string
+    profile: { firstName: string; lastName: string }
+  } | null
+  familyRelation: {
+    type: string
+    subtype: string | null
+    fromId: string
+    toId: string
+    requestedById: string | null
+  } | null
+  appUserGuardian: {
+    requestedById: string | null
+    appUserId: string
+    appUser: ProfileSummary
+  } | null
+}
+
+function toInboxItem(n: RawNotification, viewerId: string): InboxItem {
+  let viewerActed = false
+  if (n.tribute) {
+    // Viewer is the moderator when they are NOT the tribute's author.
+    viewerActed = n.tribute.authorId !== viewerId
+  } else if (n.familyRelation && n.familyRelation.requestedById) {
+    viewerActed = n.familyRelation.requestedById !== viewerId
+  } else if (n.appUserGuardian && n.appUserGuardian.requestedById) {
+    viewerActed = n.appUserGuardian.requestedById !== viewerId
+  }
+
+  const tribute = n.tribute
+    ? {
+        text:        n.tribute.text,
+        imageUrl:    n.tribute.imageUrl,
+        profileId:   n.tribute.profileId,
+        profileName: `${n.tribute.profile.firstName} ${n.tribute.profile.lastName}`.trim(),
+      }
+    : null
+
+  const familyRelation = n.familyRelation
+    ? {
+        type:    n.familyRelation.type,
+        subtype: n.familyRelation.subtype,
+        // For PARENT_OF the requester is the parent when they sit on the fromId side.
+        requesterIsParent:
+          n.familyRelation.type === "PARENT_OF" &&
+          n.familyRelation.requestedById === n.familyRelation.fromId,
+      }
+    : null
+
+  const guardianProfile = n.appUserGuardian?.appUser ?? null
+
+  return {
+    id:               n.id,
+    type:             n.type,
+    createdAt:        n.createdAt,
+    actor:            n.actor,
+    viewerActed,
+    tributeId:         n.tributeId,
+    familyRelationId:  n.familyRelationId,
+    appUserGuardianId: n.appUserGuardianId,
+    tribute,
+    familyRelation,
+    guardianProfile,
+  }
+}
+
+export async function getActivityPage(
+  userId: string,
+  cursor: ActivityCursor | null,
+): Promise<{ items: InboxItem[]; nextCursor: ActivityCursor | null }> {
+  const rows = await prisma.notification.findMany({
+    where:   { userId, type: { in: [...ACTIVITY_TYPES] } },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take:    ACTIVITY_PAGE_SIZE + 1,
+    ...(cursor ? { cursor: { id: cursor.id }, skip: 1 } : {}),
+    select:  COMMON_SELECT,
+  })
+
+  const hasMore = rows.length > ACTIVITY_PAGE_SIZE
+  const sliced  = hasMore ? rows.slice(0, ACTIVITY_PAGE_SIZE) : rows
+  const last    = sliced.at(-1)
+  const nextCursor: ActivityCursor | null = hasMore && last
+    ? { id: last.id, createdAt: last.createdAt.toISOString() }
+    : null
+
+  return {
+    items:      sliced.map((r) => toInboxItem(r as RawNotification, userId)),
+    nextCursor,
+  }
 }
 
 export async function getMessages(userId: string): Promise<MessagesData> {
-  const [pendingTributes, pendingFamilyRequests, pendingGuardianRequests, recentActivity] = await Promise.all([
-    // Tributes awaiting moderation by this user (they manage the target profile)
-    prisma.tribute.findMany({
-      where: {
-        status: "PENDING",
-        profile: {
-          OR: [
-            { id: userId },
-            { guardedBy: { some: { guardianId: userId, status: "ACCEPTED" } } },
-          ],
-        },
-      },
-      orderBy: { createdAt: "asc" },
-      select: {
-        id: true, text: true, imageUrl: true, createdAt: true,
-        profileId: true,
-        profile: { select: { firstName: true, lastName: true } },
-        author:  { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-      },
-    }),
-    // Family-tree invitations awaiting this user's response
-    prisma.familyRelation.findMany({
-      where:   { status: "PENDING", OR: [{ fromId: userId }, { toId: userId }] },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true, type: true, subtype: true, fromId: true, toId: true, createdAt: true,
-        from: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-        to:   { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-      },
-    }),
-    // Co-guardianship requests awaiting this user's approval (they manage the target profile)
-    prisma.appUserGuardian.findMany({
-      where: {
-        status: "PENDING",
-        appUser: {
-          OR: [
-            { id: userId },
-            { guardedBy: { some: { guardianId: userId, status: "ACCEPTED" } } },
-          ],
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id:        true,
-        createdAt: true,
-        requestedBy: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-        appUser: {
-          select: { id: true, firstName: true, lastName: true, avatarUrl: true, role: true },
-        },
-      },
-    }),
-    // Recent info-only notifications (everything read for activity log)
+  const [pending, activity] = await Promise.all([
     prisma.notification.findMany({
-      where:   { userId, type: { in: ["TRIBUTE_APPROVED", "TRIBUTE_REJECTED", "FAMILY_REQUEST_ACCEPTED", "FAMILY_REQUEST_REJECTED", "GUARDIAN_REQUEST_ACCEPTED", "GUARDIAN_REQUEST_REJECTED"] } },
-      orderBy: { createdAt: "desc" },
-      take:    50,
-      select: {
-        id: true, type: true, createdAt: true,
-        tributeId: true,
-        familyRelationId: true,
-        appUserGuardianId: true,
-        // Pull tribute.authorId so we can tell whether the viewer is the tribute
-        // author ("your tribute was approved") or the moderator ("you approved …").
-        tribute:        { select: { profileId: true, authorId: true } },
-        // Pull familyRelation.requestedById so we can tell whether the viewer
-        // sent the invite ("X joined your tree") or received and acted on it
-        // ("you joined X's tree").
-        familyRelation:  { select: { requestedById: true } },
-        // Same idea for guardianship requests.
-        appUserGuardian: { select: { requestedById: true, appUserId: true } },
-        actor:           { select: { id: true, firstName: true, lastName: true, avatarUrl: true } },
-      },
+      where:   { userId, type: { in: [...PENDING_TYPES] } },
+      orderBy: [{ createdAt: "asc" }],
+      select:  COMMON_SELECT,
     }),
+    getActivityPage(userId, null),
   ])
 
   return {
-    pendingTributes: pendingTributes.map((t) => ({
-      id:          t.id,
-      text:        t.text,
-      imageUrl:    t.imageUrl,
-      createdAt:   t.createdAt,
-      profileId:   t.profileId,
-      profileName: `${t.profile.firstName} ${t.profile.lastName}`,
-      author:      t.author,
-    })),
-    pendingFamilyRequests,
-    pendingGuardianRequests: pendingGuardianRequests
-      .filter((g) => g.requestedBy !== null)
-      .map((g) => ({
-        id:        g.id,
-        createdAt: g.createdAt,
-        requester: g.requestedBy!,
-        profile:   g.appUser,
-      })),
-    recentActivity: recentActivity.map((n) => {
-      let viewerActed = false
-      let profileId: string | null = n.tribute?.profileId ?? null
-      if (n.tribute) {
-        // Viewer is the moderator when they are NOT the tribute's author.
-        viewerActed = n.tribute.authorId !== userId
-      } else if (n.familyRelation) {
-        // Viewer accepted/rejected when they are NOT the one who sent the invite.
-        viewerActed = n.familyRelation.requestedById !== userId
-      } else if (n.appUserGuardian) {
-        viewerActed = n.appUserGuardian.requestedById !== userId
-        profileId   = n.appUserGuardian.appUserId
-      }
-      return {
-        id:                n.id,
-        type:              n.type,
-        createdAt:         n.createdAt,
-        actor:             n.actor,
-        tributeId:         n.tributeId,
-        profileId,
-        familyRelationId:  n.familyRelationId,
-        appUserGuardianId: n.appUserGuardianId,
-        viewerActed,
-      }
-    }),
+    pending:    pending.map((r) => toInboxItem(r as RawNotification, userId)),
+    activity:   activity.items,
+    nextCursor: activity.nextCursor,
   }
 }

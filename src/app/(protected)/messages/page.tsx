@@ -15,7 +15,7 @@ export default async function MessagesPage() {
     data:  { readAt: new Date() },
   })
 
-  const totalPending = data.pendingTributes.length + data.pendingFamilyRequests.length
+  const totalPending = data.pending.length
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -34,7 +34,7 @@ export default async function MessagesPage() {
           )}
         </div>
 
-        <MessagesList data={data} sessionUserId={session.user.id} />
+        <MessagesList data={data} />
       </main>
     </div>
   )

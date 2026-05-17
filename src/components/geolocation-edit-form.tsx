@@ -174,6 +174,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
         access: "public",
         handleUploadUrl: "/api/geolocation/upload",
         contentType: payload.type,
+        clientPayload: JSON.stringify({ profileId }),
       })
       setPhotoAt(slot, blob.url)
     } catch (err) {
