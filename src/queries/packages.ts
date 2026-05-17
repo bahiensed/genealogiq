@@ -40,12 +40,14 @@ export async function getPackage(id: string) {
   return prisma.package.findUnique({
     where: { id },
     select: {
-      id:          true,
-      name:        true,
-      description: true,
-      price:       true,
-      quantity:    true,
-      isActive:    true,
+      id:              true,
+      name:            true,
+      description:     true,
+      price:           true,
+      quantity:        true,
+      isActive:        true,
+      stripeProductId: true,
+      stripePriceId:   true,
     },
   })
 }

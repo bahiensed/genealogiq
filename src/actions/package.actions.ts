@@ -32,11 +32,28 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
   if (!validated.success) return { error: 'Invalid data' }
 
   const { price, ...rest } = validated.data
+  const newPrice = new Prisma.Decimal(price)
+
+  const current = await prisma.package.findUnique({
+    where:  { id },
+    select: { price: true, stripePriceId: true },
+  })
+  if (!current) return { error: 'Package not found.' }
+
+  // Stripe Prices are immutable. If admin changes price on a synced package,
+  // clear the Stripe refs — checkout action will refuse purchases until the
+  // SEQ seed script re-runs and provisions a fresh Price.
+  const priceChanged = !current.price.equals(newPrice)
+  const clearStripeRefs = priceChanged && !!current.stripePriceId
 
   try {
     await prisma.package.update({
       where: { id },
-      data:  { ...rest, price: new Prisma.Decimal(price) },
+      data:  {
+        ...rest,
+        price: newPrice,
+        ...(clearStripeRefs && { stripeProductId: null, stripePriceId: null }),
+      },
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
@@ -46,7 +63,11 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
   }
 
   revalidatePath('/packages')
-  return { success: 'Package updated successfully.' }
+  return {
+    success: clearStripeRefs
+      ? 'Package updated — Stripe references cleared. Re-run prisma/seed-stripe-packages.ts in SEQ.'
+      : 'Package updated successfully.',
+  }
 }
 
 export async function deletePackage(id: string): Promise<ActionError | void> {

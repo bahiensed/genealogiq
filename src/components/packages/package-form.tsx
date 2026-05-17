@@ -16,12 +16,15 @@ import { CurrencyInput } from '@/components/ui/currency-input'
 interface PackageFormProps {
   id?: string
   defaultValues?: PackageFormValues
+  stripeProductId?: string | null
+  stripePriceId?:   string | null
 }
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
-export function PackageForm({ id, defaultValues }: PackageFormProps) {
+export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId }: PackageFormProps) {
   const isEditing = !!id
+  const isSynced  = isEditing && !!stripePriceId
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
@@ -147,6 +150,26 @@ export function PackageForm({ id, defaultValues }: PackageFormProps) {
             </Field>
           )}
         />
+
+        {isEditing && (
+          <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground uppercase tracking-wider">Stripe sync</span>
+              {isSynced
+                ? <span className="font-medium text-emerald-600">Synced</span>
+                : <span className="font-medium text-amber-600">Not synced — run prisma/seed-stripe-packages.ts in SEQ</span>}
+            </div>
+            {isSynced && (
+              <div className="flex flex-col gap-1 font-mono text-muted-foreground">
+                <span>product: {stripeProductId}</span>
+                <span>price:   {stripePriceId}</span>
+              </div>
+            )}
+            <p className="text-muted-foreground">
+              Changing the price clears the Stripe references — purchases will be blocked until the seed script re-runs.
+            </p>
+          </div>
+        )}
       </FieldGroup>
 
       {serverError && <FieldError>{serverError}</FieldError>}
