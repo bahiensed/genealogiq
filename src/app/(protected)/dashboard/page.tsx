@@ -1,10 +1,12 @@
 import Link from 'next/link'
-import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Building2, Factory, IdCard, Layers, QrCode, ArrowUpRight } from 'lucide-react'
+import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Building2, Factory, IdCard, Layers, QrCode, ArrowUpRight, Trophy, UserPlus } from 'lucide-react'
 import { verifySession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
 import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@/components/ui/card'
 import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart'
 import { RevenueByPackageChart } from '@/components/dashboard/revenue-by-package-chart'
+import { CustomerGrowthChart } from '@/components/dashboard/customer-growth-chart'
+import { TopSellersCard } from '@/components/dashboard/top-sellers-card'
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
@@ -109,6 +111,29 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             <RevenueByPackageChart data={stats.revenueByPackageChart} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 3.5 — Growth insights */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle><UserPlus className="inline h-5 w-5 mr-2 align-text-bottom" />New Customers</CardTitle>
+            <CardDescription>New tenants per month · last 12 months</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CustomerGrowthChart data={stats.customerGrowthChart} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle><Trophy className="inline h-5 w-5 mr-2 align-text-bottom" />Top Sellers</CardTitle>
+            <CardDescription>By revenue · last 12 months</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TopSellersCard data={stats.topSellersChart} />
           </CardContent>
         </Card>
       </div>

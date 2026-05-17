@@ -29,9 +29,7 @@ export function ChangePasswordDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="text-sm text-foreground underline underline-offset-4 hover:no-underline cursor-pointer">
-          Change Password
-        </button>
+        <Button variant="outline" size="sm">Change password</Button>
       </DialogTrigger>
 
       <DialogContent>
