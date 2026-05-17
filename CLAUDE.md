@@ -50,7 +50,49 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + indexes + dead code drop.
+Last session: 16/05/2026 — BIG REVIEW Fase 3: SEQ Stripe real pra QR Packages (mock killed).
+
+**Fase 3 entregue (SEQ Stripe real one-time + sync BMS):**
+- Schema (3 repos sincronizados):
+  - `Package` ganha `stripeProductId` + `stripePriceId` (ambos `String? @unique`)
+  - `Tenant` ganha `stripeCustomerId` (`String? @unique`) — **um Stripe Customer por funerária**, billing consolidado
+  - `Sale` ganha `stripeSessionId` (`String? @unique`, idempotency defensiva) + `stripePaymentIntentId`
+  - SEQ schema também ganhou `StripeEvent` model (estava só em APP/BMS; tabela existia desde Fase 2 mas SEQ schema não declarava — webhook precisava). Sem migration nova pra essa adição (DDL já existia).
+- Migration: `20260518000000_seq_stripe_packages/migration.sql` em SEQ — idempotente (IF NOT EXISTS), aplicada com `prisma migrate deploy` ✅
+- SEQ novos arquivos:
+  - `src/lib/stripe.ts` — lazy `Stripe` proxy (copy do padrão APP/BMS)
+  - `src/lib/billing.ts` — `ensureTenantStripeCustomer(tenantId)` (cria customer com tenant.email/tradeName, metadata `{ tenantId }`) + `applyCheckoutSession(session, ctx)` (wrap em `$transaction`, Sale create + QrInventory upsert atômicos, P2002 no Sale = early return idempotente)
+  - `src/app/api/stripe/webhook/route.ts` — endpoint idempotente (`StripeEvent` PK = event.id, P2002 → 200 `{ duplicate: true }`). Eventos: `checkout.session.completed`, `checkout.session.async_payment_succeeded`. Filtra `mode === "payment"` + `payment_status === "paid"` antes de aplicar.
+  - `prisma/seed-stripe-packages.ts` — espelha APP `seed-stripe.ts`. `npx tsx prisma/seed-stripe-packages.ts` cria Stripe Product+Price (USD, one-time) pra cada `Package where isActive: true AND price > 0`.
+  - `src/components/purchasing/purchase-status-toast.tsx` — client component em `<Suspense>` que lê `?status=success|cancel`, toast + `router.replace('/purchasing/packages')`.
+- SEQ rewrites:
+  - `src/actions/checkout.actions.ts:createPackageCheckoutSession` — agora chama Stripe Checkout real (`mode: "payment"`, `customer` do tenant, `metadata: { tenantId, packageId, quantity, soldById }`, `success_url`/`cancel_url` apontam pra `/purchasing/packages?status=...`). Falha cedo com mensagem clara se `package.stripePriceId` é null ("Run prisma/seed-stripe-packages.ts.").
+  - `src/app/(protected)/purchasing/packages/page.tsx` — embute `<PurchaseStatusToast />`.
+- SEQ deletados:
+  - `src/app/(protected)/stripe-mock/` (page + dir inteiro)
+  - `src/components/stripe-mock-content.tsx`
+  - `src/actions/purchase.actions.ts` (mock-only — fluxo real cria Sale no webhook)
+- BMS rewrites:
+  - `src/queries/packages.ts:getPackage` — agora seleciona `stripeProductId` + `stripePriceId`
+  - `src/components/packages/package-form.tsx` — nova prop `stripeProductId`/`stripePriceId`; bloco "Stripe sync" abaixo da description com badge Synced/Not synced + IDs em monospace
+  - `src/app/(protected)/(records)/packages/[id]/page.tsx` — passa IDs Stripe pro form
+  - `src/actions/package.actions.ts:updatePackage` — se `data.price !== current.price` AND `current.stripePriceId !== null`, **nullifica `stripeProductId` + `stripePriceId`** (Stripe Prices são immutable). Mensagem de sucesso instrui re-rodar seed. Próxima compra falha com mensagem clara até seed re-rodar.
+- SEQ env: `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` adicionados a `.env` e `.env.example` (valores vazios — user preenche local + Vercel prod). BMS continua só com `STRIPE_SECRET_KEY` (não hospeda webhook).
+- Dep nova em SEQ: `stripe@^22.1.1` (match APP/BMS).
+- Verificação: `tsc --noEmit` ✅ nos 3 apps. `prisma generate` ✅. Lint baseline mantido (errors pré-existentes em data-table, proxy, privacy/terms pages — nenhum nos arquivos novos/modificados).
+
+**Pendências operacionais (não-código, user faz):**
+- Adicionar `STRIPE_SECRET_KEY` real (test mode) em SEQ `.env` local
+- Criar Stripe webhook endpoint apontando pra `https://sequoia.rip/api/stripe/webhook` em prod; copiar signing secret pra `STRIPE_WEBHOOK_SECRET` (dev: `stripe listen --forward-to localhost:3002/api/stripe/webhook`)
+- Rodar `npx tsx prisma/seed-stripe-packages.ts` em dev pra provisionar packages existentes
+- Adicionar `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` no Vercel prod do SEQ
+- **Decisão currency**: seed atual usa USD. Se BR-focused, mudar pra BRL antes de rodar seed em prod (Stripe Prices são immutable — não tem "switch later")
+
+**Convenção Stripe Customer model (Fase 3)**: SEQ vendor flow → `Tenant.stripeCustomerId`. APP subscription flow → `AppUser.stripeCustomerId` (já existia). Dois universos de customers vivem na mesma DB sem conflito porque metadata `{ tenantId }` vs `{ appUserId }` discrimina.
+
+---
+
+Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + indexes + dead code drop.
 
 **Fase 2 entregue (DB schema + migrations):**
 - 4 migrations idempotentes em SEQ (com IF NOT EXISTS / IF EXISTS):
@@ -84,7 +126,6 @@ Last session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + index
 - Verificação: `tsc --noEmit` ✅ nos 3 apps. Lint ✅ nos 3 apps.
 
 **Roadmap remanescente da BIG REVIEW** (sessões futuras, plan-mode dedicado pra cada):
-- Fase 3: SEQ Stripe real pra QR Packages + sync BMS (deletar `/stripe-mock`, criar webhook idempotente)
 - Fase 4: SEQ Sales — validação de margem mínima (100% markup sugerido)
 - Fase 5: APP /messages padronização por NotificationType + paginação + auditoria de routes
 - Fase 6: SEQ profile redesign (layout shadcn)
@@ -97,8 +138,8 @@ Last session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + index
 - APP não tem `prisma/migrations/` — migrations vivem em SEQ. Decisão de ownership formal pendente.
 
 In progress: —
-Next: começar Fase 2 (DB schema reconciliation).
-Blockers: —
+Next: setup operacional Stripe (env vars + webhook endpoint + rodar seed); depois Fase 4 (validação margem em SEQ Sales).
+Blockers: STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET ausentes em SEQ `.env` (user precisa preencher antes do primeiro purchase test).
 
 ---
 
