@@ -50,7 +50,26 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 16/05/2026 — BIG REVIEW Fase 3: SEQ Stripe real pra QR Packages (mock killed).
+Last session: 16/05/2026 — BIG REVIEW Fase 4: SEQ Sales suggested price (100% markup hint).
+
+**Fase 4 entregue (SEQ Sales suggested price):**
+- `src/queries/sales.ts`: adicionado `getSuggestedSalePrice(tenantId)` privado — busca o último `Sale` não-revertido do tenant (`reversedAt: null`, `orderBy createdAt desc`), retorna `(package.price / package.quantity) * SUGGESTED_MARKUP` (constante `SUGGESTED_MARKUP = 2`). Null se tenant nunca comprou Package. Integrado em `getInventoryData` no return.
+- `src/app/(protected)/sales/page.tsx`: passa `suggestedValue` pro `<SalesForm />`.
+- `src/components/sales/sales-form.tsx`:
+  - Nova prop `suggestedValue?: number | null`
+  - Pre-fill do input `value` com `maskCurrency(formatValueAsDigits(suggestedValue))` (helper local converte número → digits "1050" → "10.50")
+  - Hint condicional abaixo do `<FieldDescription>`:
+    - Cinza/muted: `Suggested: $10.00 (2× last package cost)` quando valor ≥ suggested
+    - Âmbar (text-amber-600): `Below suggested $10.00 (2× last package cost) — selling at a loss?` quando valor < suggested
+  - Hint não aparece se `suggestedValue === null` (cold-start tenant). **Warning é puramente visual — nada bloqueia o submit.**
+  - Adicionado `usd` Intl formatter (consistente com qr-store.tsx)
+- Decisões alinhadas: cost basis = last Package (não weighted-avg); markup default = 100% (constante hardcoded — não DB-configurable); enforcement = só warning visual; sem override (qualquer user pode vender abaixo).
+- Sem schema change, sem migration, sem mudança em `createAppSale`. Escopo mínimo.
+- Verificação: `tsc --noEmit` ✅ em SEQ. Lint baseline mantido (errors pré-existentes em sales-form.tsx:83 useEffect e outros — nenhum introduzido por mim).
+
+---
+
+Previous session: 16/05/2026 — BIG REVIEW Fase 3: SEQ Stripe real pra QR Packages (mock killed).
 
 **Fase 3 entregue (SEQ Stripe real one-time + sync BMS):**
 - Schema (3 repos sincronizados):
@@ -126,7 +145,6 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - Verificação: `tsc --noEmit` ✅ nos 3 apps. Lint ✅ nos 3 apps.
 
 **Roadmap remanescente da BIG REVIEW** (sessões futuras, plan-mode dedicado pra cada):
-- Fase 4: SEQ Sales — validação de margem mínima (100% markup sugerido)
 - Fase 5: APP /messages padronização por NotificationType + paginação + auditoria de routes
 - Fase 6: SEQ profile redesign (layout shadcn)
 - Fase 7: Dashboards (BMS + SEQ) — agregações eficientes
@@ -138,7 +156,7 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - APP não tem `prisma/migrations/` — migrations vivem em SEQ. Decisão de ownership formal pendente.
 
 In progress: —
-Next: setup operacional Stripe (env vars + webhook endpoint + rodar seed); depois Fase 4 (validação margem em SEQ Sales).
+Next: setup operacional Stripe (env vars + webhook endpoint + rodar seed); depois Fase 5 (APP /messages padronização).
 Blockers: STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET ausentes em SEQ `.env` (user precisa preencher antes do primeiro purchase test).
 
 ---
