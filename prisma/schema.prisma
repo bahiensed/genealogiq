@@ -125,6 +125,11 @@ model Package {
   quantity    Int     @default(1)
   isActive    Boolean @default(true) @map("is_active")
 
+  // Stripe references owned by SEQ (provisioned via SEQ seed script).
+  // Mirrored here so the Prisma client matches the shared DB schema.
+  stripeProductId String? @unique @map("stripe_product_id")
+  stripePriceId   String? @unique @map("stripe_price_id")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -145,6 +150,9 @@ model Sale {
 
   soldById String @map("sold_by_id")
   soldBy   User   @relation(fields: [soldById], references: [id], onDelete: Restrict)
+
+  stripeSessionId       String? @unique @map("stripe_session_id")
+  stripePaymentIntentId String? @map("stripe_payment_intent_id")
 
   reversedAt DateTime? @map("reversed_at")
 
@@ -755,6 +763,9 @@ model Tenant {
   modulePurchasingServices  Boolean @default(false) @map("module_purchasing_services")
   moduleInventoryProducts   Boolean @default(false) @map("module_inventory_products")
   moduleFinance             Boolean @default(false) @map("module_finance")
+
+  // Stripe customer reference owned by SEQ (QR package billing per tenant).
+  stripeCustomerId String? @unique @map("stripe_customer_id")
 
   categoryId String?         @map("category_id")
   category   TenantCategory? @relation("TenantCategory", fields: [categoryId], references: [id], onDelete: SetNull)
