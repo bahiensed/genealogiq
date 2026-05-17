@@ -5,7 +5,7 @@ import { SalesForm } from '@/components/sales/sales-form'
 
 export default async function SalesPage() {
   const { customerId } = await verifyTenantSession()
-  const { qrCodeCount, subscriptions } = await getInventoryData(customerId)
+  const { qrCodeCount, subscriptions, suggestedValue } = await getInventoryData(customerId)
 
   return (
     <div className="flex flex-col gap-6">
@@ -21,7 +21,7 @@ export default async function SalesPage() {
           </Link>
         </p>
       ) : (
-        <SalesForm subscriptions={subscriptions} />
+        <SalesForm subscriptions={subscriptions} suggestedValue={suggestedValue} />
       )}
     </div>
   )

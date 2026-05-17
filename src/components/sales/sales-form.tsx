@@ -40,7 +40,14 @@ interface Subscription {
 }
 
 interface SalesFormProps {
-  subscriptions: Subscription[]
+  subscriptions:   Subscription[]
+  suggestedValue?: number | null
+}
+
+const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+
+function formatValueAsDigits(value: number): string {
+  return String(Math.round(value * 100))
 }
 
 interface FieldErrors {
@@ -49,7 +56,7 @@ interface FieldErrors {
   value?:          string
 }
 
-export function SalesForm({ subscriptions }: SalesFormProps) {
+export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
   const router = useRouter()
 
   const [query,          setQuery]          = useState('')
@@ -57,7 +64,12 @@ export function SalesForm({ subscriptions }: SalesFormProps) {
   const [open,           setOpen]           = useState(false)
   const [selected,       setSelected]       = useState<AppUserResult | null>(null)
   const [subscriptionId, setSubscriptionId] = useState('')
-  const [value,          setValue]          = useState('')
+  const [value,          setValue]          = useState(
+    suggestedValue != null ? maskCurrency(formatValueAsDigits(suggestedValue)) : '',
+  )
+
+  const numericValue = parseCurrencyDigits(value)
+  const isBelowSuggested = suggestedValue != null && numericValue > 0 && numericValue < suggestedValue
   const [fieldErrors,    setFieldErrors]    = useState<FieldErrors>({})
   const [serverError,    setServerError]    = useState<string | null>(null)
   const [confirmOpen,    setConfirmOpen]    = useState(false)
@@ -226,6 +238,19 @@ export function SalesForm({ subscriptions }: SalesFormProps) {
             aria-invalid={!!fieldErrors.value}
           />
           <FieldDescription>The total price charged for the QR Codes.</FieldDescription>
+          {suggestedValue != null && (
+            isBelowSuggested
+              ? (
+                <p className="text-xs font-medium text-amber-600">
+                  Below suggested {usd.format(suggestedValue)} (2× last package cost) — selling at a loss?
+                </p>
+              )
+              : (
+                <p className="text-xs text-muted-foreground">
+                  Suggested: {usd.format(suggestedValue)} (2× last package cost)
+                </p>
+              )
+          )}
           {fieldErrors.value && <FieldError>{fieldErrors.value}</FieldError>}
         </Field>
       </FieldGroup>
