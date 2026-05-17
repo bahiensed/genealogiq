@@ -50,7 +50,25 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 17/05/2026 — BIG REVIEW Fase 5: APP /messages padronização por NotificationType + paginação + auditoria de routes.
+Last session: 17/05/2026 — BIG REVIEW Fase 6: SEQ profile redesign (layout shadcn).
+
+**Fase 6 entregue (SEQ /profile redesign + self-edit):**
+- `src/schemas/profile.schema.ts` — **novo** — `profileSchema` (subset de user.schema sem role/email/isActive): firstName, lastName, nationalId, birthDate, phoneCountryCode, phone, address. Exporta `profileResolver` + `profileDefaultValues`.
+- `src/actions/profile.actions.ts` — **novo** — `updateProfile(data)` self-scoped via `verifySession()` + `where: { id: session.user.id }`. Reusa pattern `buildAddressWrite` upsert. Fields sensíveis (role/email/isActive/tenantId) ficam fora do schema → trivialmente seguro contra DOM-payload forgery.
+- `src/components/profile/profile-form.tsx` — **novo** — Client form (RHF + Controller + Field + AddressSection), espelha visualmente o `users/user-form.tsx`. Submit chama `updateProfile()`, toast + `router.refresh()`, fica na página (não navega).
+- `src/app/(protected)/profile/page.tsx` — **rewrite total**:
+  - Server Component busca `prisma.user.findUnique` com `include: { address: true }` pra preencher `defaultValues`
+  - Header com Avatar + nome/email
+  - **3 Cards**: Personal information (form editável) / Account & security (email read-only + 2 dialogs) / Danger zone (delete dialog, border destructive)
+  - Labels PT antigas ("Nome:", "E-mail:") removidas
+- `src/components/auth/{change-email,change-password,delete-account}-dialog.tsx` — DialogTrigger trocado de `<button className="text-sm underline">` pra `<Button variant="outline" size="sm">` (delete: `variant="destructive"`). Placeholder PT "novo@email.com" → "new@email.com".
+- Avatar upload deferido (exige `/api/profile/upload` + `session.update()` no JWT callback — fora de escopo); avatar fallback continua usando iniciais.
+- BMS profile page é idêntico, mas escopo era SEQ-only — BMS fica pra futura cópia.
+- Verificação: `tsc --noEmit` ✅. Lint baseline mantido (15 errors pré-existentes em sales-form/data-table/proxy — nenhum nos arquivos novos).
+
+---
+
+Previous session: 17/05/2026 — BIG REVIEW Fase 5: APP /messages padronização por NotificationType + paginação + auditoria de routes.
 
 **Fase 5 entregue (APP /messages refactor + audit):**
 - `src/queries/notifications.ts` — rewrite total:
@@ -176,8 +194,9 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - Verificação: `tsc --noEmit` ✅ nos 3 apps. Lint ✅ nos 3 apps.
 
 **Roadmap remanescente da BIG REVIEW** (sessões futuras, plan-mode dedicado pra cada):
-- Fase 6: SEQ profile redesign (layout shadcn)
 - Fase 7: Dashboards (BMS + SEQ) — agregações eficientes
+- BMS profile redesign (copy from SEQ — quase mesmo código)
+- SEQ avatar upload (blob route + `session.update()` no JWT callback)
 - Phase 5 cleanup SQL (drop legacy `deceased`/`users` com role APP_*): plan separado.
 
 **BIG REVIEW achados pendentes** (consulta: `/home/douglas/.claude/plans/big-code-review-vamos-polished-meteor.md`):
@@ -186,7 +205,7 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - APP não tem `prisma/migrations/` — migrations vivem em SEQ. Decisão de ownership formal pendente.
 
 In progress: —
-Next: setup operacional Stripe (env vars + webhook endpoint + rodar seed); depois Fase 6 (SEQ profile redesign).
+Next: setup operacional Stripe (env vars + webhook endpoint + rodar seed); depois Fase 7 (Dashboards BMS + SEQ).
 Blockers: STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET ausentes em SEQ `.env` (user precisa preencher antes do primeiro purchase test).
 
 ---
