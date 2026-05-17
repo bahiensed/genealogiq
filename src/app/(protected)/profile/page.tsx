@@ -1,51 +1,106 @@
 import { verifySession } from '@/lib/dal'
+import { prisma } from '@/lib/prisma'
 import { getInitials } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { ProfileForm } from '@/components/profile/profile-form'
 import { ChangeEmailDialog } from '@/components/auth/change-email-dialog'
 import { ChangePasswordDialog } from '@/components/auth/change-password-dialog'
 import { DeleteAccountDialog } from '@/components/auth/delete-account-dialog'
+import { profileDefaultValues, type ProfileFormValues } from '@/schemas/profile.schema'
+
+function toDateInputValue(date: Date | null | undefined): string {
+  if (!date) return ''
+  return date.toISOString().slice(0, 10)
+}
 
 export default async function ProfilePage() {
   const session = await verifySession()
-  const name = session.user?.name ?? ""
-  const email = session.user?.email ?? ""
-  const image = session.user?.image ?? ""
+
+  const user = await prisma.user.findUnique({
+    where:   { id: session.user.id },
+    include: { address: true },
+  })
+
+  const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : (session.user?.name ?? '')
+  const email    = user?.email ?? session.user?.email ?? ''
+  const image    = user?.avatarUrl ?? session.user?.image ?? ''
+
+  const defaultValues: ProfileFormValues = user
+    ? {
+        firstName:        user.firstName,
+        lastName:         user.lastName,
+        nationalId:       user.nationalId ?? '',
+        birthDate:        toDateInputValue(user.birthDate),
+        phoneCountryCode: user.phoneCountryCode,
+        phone:            user.phone ?? '',
+        address: user.address
+          ? {
+              zip:          user.address.zip          ?? '',
+              street:       user.address.street       ?? '',
+              number:       user.address.number       ?? '',
+              complement:   user.address.complement   ?? '',
+              neighborhood: user.address.neighborhood ?? '',
+              city:         user.address.city         ?? '',
+              state:        user.address.state        ?? '',
+              country:      user.address.country      ?? 'BR',
+            }
+          : profileDefaultValues.address,
+      }
+    : profileDefaultValues
 
   return (
-    <div className="flex flex-col gap-6 max-w-xl">
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Profile
-      </h1>
+    <div className="max-w-3xl space-y-6">
+      <div className="flex items-center gap-4">
+        <Avatar className="size-20 text-xl">
+          <AvatarImage src={image} alt={fullName} />
+          <AvatarFallback>{getInitials(fullName)}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold tracking-tight truncate">{fullName || 'Profile'}</h1>
+          <p className="text-sm text-muted-foreground truncate">{email}</p>
+        </div>
+      </div>
 
-      <div className="flex gap-8">
-        <div className="flex flex-col space-y-8">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="profile-name">Nome:</Label>
-              <Input id="profile-name" value={name} readOnly />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="profile-email">E-mail:</Label>
-              <Input id="profile-email" type="email" value={email} readOnly />
-            </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Personal information</CardTitle>
+          <CardDescription>Update your name, document, and contact details.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ProfileForm defaultValues={defaultValues} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Account &amp; security</CardTitle>
+          <CardDescription>Manage your sign-in email and password.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Field>
+            <FieldLabel>Email</FieldLabel>
+            <Input value={email} readOnly disabled />
+            <FieldDescription>To change your email, use the button below — a confirmation link is sent to the new address.</FieldDescription>
+          </Field>
+          <div className="flex flex-wrap gap-2">
+            <ChangeEmailDialog />
+            <ChangePasswordDialog />
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <div>
-          <Avatar className="size-32 text-xl">
-            <AvatarImage src={image} alt={name} />
-            <AvatarFallback>{getInitials(name)}</AvatarFallback>
-          </Avatar>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-start gap-2">
-        <ChangeEmailDialog />
-        <ChangePasswordDialog />
-        <DeleteAccountDialog />
-      </div>
+      <Card className="border border-destructive/40 ring-destructive/30">
+        <CardHeader>
+          <CardTitle className="text-destructive">Danger zone</CardTitle>
+          <CardDescription>Permanently delete your account and all related data.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DeleteAccountDialog />
+        </CardContent>
+      </Card>
     </div>
   )
 }
