@@ -19,12 +19,24 @@
       "Bash(echo \"SEQ-tsc=$?\")",
       "Bash(echo \"BMS-lint=$?\")",
       "Bash(echo \"SEQ-lint=$?\")",
-      "Bash(echo \"APP-tsc=$?\")"
+      "Bash(echo \"APP-tsc=$?\")",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-bms status --short)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq status --short)",
+      "Bash(STRIPE_SECRET_KEY=\"sk_test_51Sswo4IYiaGZjy4LXiGzjq0scdtAofGAA3MIa857BiNV1XoSC6mbzvk9T2yMl1rUnWtYp9b0TDpkXzKhMwfQJSaU00oR36xDvd\" npx tsx -)",
+      "Bash(git commit -m 'feat\\(discounts\\): migrate coupon scope from Subscription to Package *)",
+      "Bash(git commit -m 'fix\\(auth\\): unique session cookie name to prevent localhost collision *)",
+      "Bash(git commit -m 'feat\\(scripts\\): add cleanup-tenant utility for test data management *)",
+      "Bash(node -e ' *)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq add scripts/apply-checkout-session.ts)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq diff src/actions/sale.actions.ts)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq add src/actions/sale.actions.ts)"
     ],
     "additionalDirectories": [
       "/tmp",
       "/home/douglas/Projects/genealogiq/genealogiq-seq",
-      "/home/douglas/.claude/plans"
+      "/home/douglas/.claude/plans",
+      "/home/douglas/Projects/genealogiq/genealogiq-bms",
+      "/home/douglas/Projects/genealogiq/genealogiq-seq/scripts"
     ]
   }
 }

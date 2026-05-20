@@ -50,7 +50,41 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 17/05/2026 — Phase 5 cleanup SQL (no-op) + APP/BMS migrations setup + PostgreSQL-backed rate limiting.
+Last session: 20/05/2026 — Stripe/webhook fixes, coupon scope migration, cookie collision fix, vendor subscription activation bug.
+
+**Coupon scope: Subscription → Package:**
+- `DiscountCoupon.appliesTo` migrated from `Subscription[]` to `Package[]`. Migration `20260520010000_coupon_applies_to_packages` idempotent, mirrored in all 3 apps. `prisma migrate deploy` run ✅.
+- BMS queries/actions/form updated: `getActivePackagesForSelect`, display shows package name + QR count + price.
+- DataTable crash fixed: `filterColumn="code"` passed explicitly (default `"name"` doesn't exist on DiscountCouponRow).
+- `Decimal` RSC boundary fix: `discountValue` converted to `number` in Server Component before passing to Client Component.
+
+**NextAuth cookie collision (localhost):**
+- All 3 apps shared default `authjs.session-token` cookie name → wrong `AUTH_SECRET` used for decryption → `JWTSessionError`.
+- Fixed: unique cookie names in each `auth.config.ts`: `bms.session-token`, `seq.session-token`, `app.session-token`.
+
+**SEQ Stripe webhook trailing slash:**
+- Webhook URL in Stripe was `https://sequoia.rip/api/stripe/webhook/` (trailing slash) → Next.js redirect broke Stripe signature verification → inventory never updated.
+- Fixed URL via `stripe.webhookEndpoints.update(...)`. APP webhook (`https://genealogiq.app/api/stripe/webhook`) was clean.
+- Missed Aereus purchase applied manually via `scripts/apply-checkout-session.ts` (new reusable script in SEQ).
+
+**Vendor AppSale subscription activation bug:**
+- `createAppSale` in SEQ created `AppSale` with `status=null` and `currentPeriodEnd=null`.
+- APP `getActivePlan` filters for `status IN ('active','trialing') AND currentPeriodEnd > now()` → vendor sales invisible as active plans.
+- Fixed: `createAppSale` now fetches `subscription.termLength`, sets `status: 'active'`, `currentPeriodEnd = now + termLength months`.
+- Existing broken sale patched directly in DB.
+
+**Operational — all done ✅:**
+- `npx prisma migrate deploy` run → `rate_limit_attempts` + `_CouponPackages` tables live in Neon.
+- `STRIPE_WEBHOOK_SECRET` set in Vercel prod for SEQ and BMS.
+- `BLOB_READ_WRITE_TOKEN` set in Vercel prod for SEQ and BMS.
+
+In progress: —
+Next: feature work.
+Blockers: none.
+
+---
+
+Previous session: 17/05/2026 — Phase 5 cleanup SQL (no-op) + APP/BMS migrations setup + PostgreSQL-backed rate limiting.
 
 **Phase 5 cleanup SQL — entregue como no-op:**
 - Queries de discovery no Neon: `deceased` table NÃO existe mais (já foi removida antes); `users WHERE role::text LIKE 'APP_%'` retornou 0 rows; role distribution só tem OWNER (4) / ADMIN (2) / SUPER_ADMIN (1) — todos valores válidos no enum atual.
@@ -79,7 +113,7 @@ Last session: 17/05/2026 — Phase 5 cleanup SQL (no-op) + APP/BMS migrations se
 - Lint baseline mantido nos 3 apps (zero novos errors em arquivos criados/modificados).
 - `prisma generate` ✅ nos 3 (cliente regenerado pra incluir `RateLimitAttempt` model).
 
-**Pendência operacional**: rodar `npx prisma migrate deploy` em **um** dos 3 apps (qualquer um — todos têm o mesmo migration file) pra criar a tabela `rate_limit_attempts` no Neon. Snapshot opcional (não-destrutivo, só CREATE TABLE).
+**Pendência operacional**: ~~rodar `npx prisma migrate deploy`~~ ✅ done 20/05/2026.
 
 ---
 
