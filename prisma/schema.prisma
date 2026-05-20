@@ -222,6 +222,16 @@ model StripeEvent {
 
 // ─── Auth tokens ─────────────────────────────────────────────────────────────
 
+model RateLimitAttempt {
+  id          Int      @id @default(autoincrement())
+  key         String
+  attemptedAt DateTime @default(now()) @map("attempted_at")
+
+  @@index([key, attemptedAt])
+  @@index([attemptedAt])
+  @@map("rate_limit_attempts")
+}
+
 model EmailToken {
   id        String         @id @default(cuid())
   token     String         @unique

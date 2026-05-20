@@ -18,7 +18,8 @@
       "Bash(echo \"BMS-tsc=$?\")",
       "Bash(echo \"SEQ-tsc=$?\")",
       "Bash(echo \"BMS-lint=$?\")",
-      "Bash(echo \"SEQ-lint=$?\")"
+      "Bash(echo \"SEQ-lint=$?\")",
+      "Bash(echo \"APP-tsc=$?\")"
     ],
     "additionalDirectories": [
       "/tmp",

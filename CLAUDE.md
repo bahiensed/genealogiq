@@ -50,7 +50,40 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 17/05/2026 — BIG REVIEW Fase 7 (Dashboards perf + new widgets) + Fase 6 leftovers (avatar upload + BMS profile redesign).
+Last session: 17/05/2026 — Phase 5 cleanup SQL (no-op) + APP/BMS migrations setup + PostgreSQL-backed rate limiting.
+
+**Phase 5 cleanup SQL — entregue como no-op:**
+- Queries de discovery no Neon: `deceased` table NÃO existe mais (já foi removida antes); `users WHERE role::text LIKE 'APP_%'` retornou 0 rows; role distribution só tem OWNER (4) / ADMIN (2) / SUPER_ADMIN (1) — todos valores válidos no enum atual.
+- **Conclusão**: schema já está limpo. Roadmap item baseado em estado hipotético que não existe. Zero migrations criadas.
+
+**APP/BMS migrations setup — paridade com SEQ:**
+- SEQ continua canonical. APP recebeu cópia integral de `prisma/migrations/` (antes: vazio; agora: 25 migrations idênticas). BMS teve seu dir antigo renomeado pra `prisma/migrations.legacy-backup/` (15 migrations antigas com nomes ex: `add_user_model`, `add_tenant_scoping`) e substituído pelo dir canonical de SEQ.
+- BMS-legacy migration names ficam orphans em `_prisma_migrations` table — harmless, append-only, e idempotent SQL skipa.
+- **Convenção going forward** (memorizado): toda nova migration é authored idempotente (`CREATE TABLE IF NOT EXISTS`, `ALTER TABLE IF EXISTS`, `DROP IF EXISTS`) E mirrored verbatim nos 3 dirs `prisma/migrations/` (SEQ + APP + BMS). Naming: timestamp + descrição (sem prefixo de app — todos os 3 dirs têm o mesmo arquivo).
+
+**PostgreSQL-backed rate limiting (IP-based, all 3 apps):**
+- Nova tabela `rate_limit_attempts` (id SERIAL, key TEXT, attempted_at TIMESTAMP). 2 indexes: `(key, attempted_at)` e `(attempted_at)` standalone pra cleanup.
+- Migration `20260520000000_rate_limit_attempts/migration.sql` — idempotente, mirrored nos 3 prisma/migrations dirs.
+- `RateLimitAttempt` model adicionado nas 3 `schema.prisma` (idêntico).
+- Novo helper `src/lib/rate-limit.ts` em cada app: `getClientIp()` lê `x-forwarded-for` (primeiro IP) com fallback `x-real-ip`; `checkRateLimit({ key, maxAttempts, windowSeconds })` faz sliding-window check via `findMany take=maxAttempts` + `count >= max → bail`, else `create({ key })`. Opportunistic cleanup (~1% das checks) `deleteMany` rows > 1h.
+- Wired em `src/actions/auth.ts` de cada app:
+  - **login**: 10 / 5 min / IP (todos os 3)
+  - **signUp**: 5 / 1h / IP (apenas APP — único com public signup)
+  - **forgotPassword**: 3 / 1h / IP (todos os 3)
+  - **resetPassword**: 5 / 1h / IP (todos os 3)
+  - **requestEmailChange**: 5 / 1h / IP (todos os 3)
+- Rate limit é check **antes** do trabalho caro (lookup de user, bcrypt). Per-user lockout pré-existente (`failedLoginAttempts` + `lockedUntil`) continua intacto — IP-based é defense in depth.
+
+**Verificação:**
+- `tsc --noEmit` ✅ em APP + BMS + SEQ.
+- Lint baseline mantido nos 3 apps (zero novos errors em arquivos criados/modificados).
+- `prisma generate` ✅ nos 3 (cliente regenerado pra incluir `RateLimitAttempt` model).
+
+**Pendência operacional**: rodar `npx prisma migrate deploy` em **um** dos 3 apps (qualquer um — todos têm o mesmo migration file) pra criar a tabela `rate_limit_attempts` no Neon. Snapshot opcional (não-destrutivo, só CREATE TABLE).
+
+---
+
+Previous session: 17/05/2026 — BIG REVIEW Fase 7 (Dashboards perf + new widgets) + Fase 6 leftovers (avatar upload + BMS profile redesign).
 
 **Fase 7 entregue (Dashboards BMS + SEQ — perf refactor + 2 widgets novos por app):**
 - BMS `src/queries/dashboard.ts` — rewrite. Antes: 4 `findMany` puxando linhas cruas de Sale + 6 JS reduce loops. Agora: **1 `$queryRaw` combinado** com `FILTER (WHERE ...)` + `SUM(s.quantity * p.price)` JOIN Package retorna todos os totais (monthly/yearly/all count + revenue) numa única ida ao DB; **1 `$queryRaw`** com `DATE_TRUNC('month', ...)` + GROUP BY 1, 2 retorna ~12×N linhas pivot pra monthly chart + revenue by package; **2 `$queryRaw` novos** pra top sellers (groupBy soldById + zip com User.firstName/lastName via Prisma client) e customer growth (groupBy DATE_TRUNC sobre tenants.created_at).
@@ -234,9 +267,11 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - ~~Fase 7: Dashboards (BMS + SEQ) — agregações eficientes~~ ✅ entregue 17/05/2026
 - ~~BMS profile redesign (copy from SEQ)~~ ✅ entregue 17/05/2026
 - ~~SEQ/BMS avatar upload (blob route + `session.update()` no JWT callback)~~ ✅ entregue 17/05/2026
-- Phase 5 cleanup SQL (drop legacy `deceased`/`users` com role APP_*): plan separado.
+- ~~Phase 5 cleanup SQL~~ ✅ no-op (DB já estava limpo, discovery confirmou) 17/05/2026
+- ~~APP migrations próprio (parar piggybacking em SEQ)~~ ✅ entregue 17/05/2026
+- ~~Rate limiting IP-based (auth endpoints)~~ ✅ entregue 17/05/2026 (PostgreSQL-backed)
 
-**BIG REVIEW status**: todas as fases concluídas. Sessões futuras: feature work + Phase 5 cleanup SQL quando estiver confortável com dados de prod.
+**BIG REVIEW status**: 100% concluída. Próximas sessões: feature work.
 
 **BIG REVIEW achados pendentes** (consulta: `/home/douglas/.claude/plans/big-code-review-vamos-polished-meteor.md`):
 - Vercel env prod: confirmar que cada app tem `AUTH_SECRET` próprio (gap não-fechado, depende de validação no painel)
@@ -244,8 +279,8 @@ Previous session: 16/05/2026 — BIG REVIEW Fase 2: DB schema reconciliation + i
 - APP não tem `prisma/migrations/` — migrations vivem em SEQ. Decisão de ownership formal pendente.
 
 In progress: —
-Next: smoke test end-to-end (avatar upload em BMS + SEQ; dashboards com tenants reais — comparar números pré/pós refactor); setup operacional Stripe (env vars + webhook endpoint + rodar seed) ainda pendente; Phase 5 cleanup SQL.
-Blockers: STRIPE_SECRET_KEY + STRIPE_WEBHOOK_SECRET ausentes em SEQ `.env`; `BLOB_READ_WRITE_TOKEN` precisa estar em BMS + SEQ Vercel prod.
+Next: rodar `npx prisma migrate deploy` em qualquer app pra criar `rate_limit_attempts` table no Neon; smoke tests end-to-end (avatar BMS+SEQ, dashboards, BMS profile redesign, rate limiting); setup operacional Stripe SEQ webhook endpoint em prod.
+Blockers: `rate_limit_attempts` table não existe no DB ainda (até user rodar migrate deploy, qualquer call em auth action vai falhar com "table doesn't exist"); `STRIPE_WEBHOOK_SECRET` SEQ + APP em prod; `BLOB_READ_WRITE_TOKEN` em BMS+SEQ Vercel prod.
 
 ---
 

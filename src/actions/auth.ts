@@ -22,6 +22,7 @@ import {
 } from "@/lib/email"
 import { verifySession } from "@/lib/dal"
 import { deleteBlobs } from "@/lib/blob"
+import { getClientIp, checkRateLimit } from "@/lib/rate-limit"
 import { randomBytes } from "crypto"
 
 type AuthState = {
@@ -41,6 +42,10 @@ export async function login(
 
   const validated = SignInSchema.safeParse(data)
   if (!validated.success) return { error: "Invalid data" }
+
+  const ip    = await getClientIp()
+  const limit = await checkRateLimit({ key: `signin:ip:${ip}`, maxAttempts: 10, windowSeconds: 300 })
+  if (!limit.allowed) return { error: `Too many sign-in attempts. Try again in ${limit.retryAfter}s.` }
 
   const user = await prisma.appUser.findFirst({
     where: { email: validated.data.email },
@@ -93,6 +98,10 @@ export async function signUp(
     return { errors: flattenError(validated.error).fieldErrors }
   }
 
+  const ip    = await getClientIp()
+  const limit = await checkRateLimit({ key: `signup:ip:${ip}`, maxAttempts: 5, windowSeconds: 3600 })
+  if (!limit.allowed) return { error: `Too many sign-up attempts. Try again in ${Math.ceil(limit.retryAfter / 60)} minute(s).` }
+
   const existing = await prisma.appUser.findFirst({
     where: { email: validated.data.email },
     select: { id: true },
@@ -139,6 +148,10 @@ export async function forgotPassword(
   const validated = z.string().email("Invalid email").safeParse(email)
   if (!validated.success) return { error: "Invalid email" }
 
+  const ip    = await getClientIp()
+  const limit = await checkRateLimit({ key: `forgot:ip:${ip}`, maxAttempts: 3, windowSeconds: 3600 })
+  if (!limit.allowed) return { error: `Too many requests. Try again in ${Math.ceil(limit.retryAfter / 60)} minute(s).` }
+
   const user = await prisma.appUser.findFirst({
     where: { email: validated.data },
     select: { id: true, email: true },
@@ -167,6 +180,10 @@ export async function resetPassword(
   if (!validated.success) {
     return { errors: flattenError(validated.error).fieldErrors }
   }
+
+  const ip    = await getClientIp()
+  const limit = await checkRateLimit({ key: `reset:ip:${ip}`, maxAttempts: 5, windowSeconds: 3600 })
+  if (!limit.allowed) return { error: `Too many attempts. Try again in ${Math.ceil(limit.retryAfter / 60)} minute(s).` }
 
   const record = await prisma.passwordResetToken.findUnique({
     where: { token },
@@ -234,6 +251,10 @@ export async function requestEmailChange(
     currentPassword: formData.get("currentPassword"),
   })
   if (!validated.success) return { errors: flattenError(validated.error).fieldErrors }
+
+  const ip    = await getClientIp()
+  const limit = await checkRateLimit({ key: `change-email:ip:${ip}`, maxAttempts: 5, windowSeconds: 3600 })
+  if (!limit.allowed) return { error: `Too many attempts. Try again in ${Math.ceil(limit.retryAfter / 60)} minute(s).` }
 
   const userId = session.user!.id!
   const user = await prisma.appUser.findUnique({
