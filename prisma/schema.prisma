@@ -80,7 +80,6 @@ model Subscription {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   appSales AppSale[]
-  coupons  DiscountCoupon[] @relation("CouponSubscriptions")
 
   @@map("subscriptions")
 }
@@ -100,8 +99,8 @@ model DiscountCoupon {
   maxRedemptions Int?      @map("max_redemptions")
   redeemBy       DateTime? @map("redeem_by")
 
-  // Scope — empty = all paid subs
-  appliesTo Subscription[] @relation("CouponSubscriptions")
+  // Scope — empty = all active packages
+  appliesTo Package[] @relation("CouponPackages")
 
   // Stripe mirror
   stripeCouponId        String? @unique @map("stripe_coupon_id")
@@ -133,7 +132,8 @@ model Package {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sales Sale[]
+  sales   Sale[]
+  coupons DiscountCoupon[] @relation("CouponPackages")
 
   @@map("packages")
 }
