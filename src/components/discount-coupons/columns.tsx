@@ -5,7 +5,6 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
-import type { Prisma } from '@/generated/prisma/client'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -22,7 +21,7 @@ export type DiscountCouponRow = {
   code:             string
   description:      string | null
   discountType:     string
-  discountValue:    Prisma.Decimal
+  discountValue:    number
   duration:         string
   durationInMonths: number | null
   maxRedemptions:   number | null
@@ -34,8 +33,9 @@ export type DiscountCouponRow = {
 const dateFmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'short' })
 
 function formatDiscount(row: DiscountCouponRow) {
-  const value = Number(row.discountValue)
-  return row.discountType === 'percent' ? `${value}% off` : `$${value.toFixed(2)} off`
+  return row.discountType === 'percent'
+    ? `${row.discountValue}% off`
+    : `$${row.discountValue.toFixed(2)} off`
 }
 
 function formatDuration(row: DiscountCouponRow) {

@@ -24,6 +24,8 @@ export function DiscountCouponsDataTable({ currentUserRole, data }: DiscountCoup
     <DataTable
       columns={getColumns(currentUserRole)}
       data={data}
+      filterColumn="code"
+      filterPlaceholder="Search by code..."
       emptyMessage="No discount coupons yet."
       columnLabels={COLUMN_LABELS}
     />
