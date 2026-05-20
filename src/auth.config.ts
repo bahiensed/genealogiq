@@ -2,6 +2,9 @@ import type { NextAuthConfig } from "next-auth"
 
 // Edge-safe config — sem imports de banco de dados
 export const authConfig = {
+  cookies: {
+    sessionToken: { name: "bms.session-token" },
+  },
   pages: {
     signIn: "/sign-in",
   },
