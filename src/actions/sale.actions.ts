@@ -30,6 +30,15 @@ export async function createAppSale(
   })
   if (!inventory || inventory.quantity < 1) return { error: 'No QR codes available.' }
 
+  const subscription = await prisma.subscription.findUnique({
+    where:  { id: subscriptionId },
+    select: { termLength: true },
+  })
+  if (!subscription) return { error: 'Subscription not found.' }
+
+  const currentPeriodEnd = new Date()
+  currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + subscription.termLength)
+
   const token = randomBytes(32).toString('hex')
 
   try {
@@ -44,8 +53,10 @@ export async function createAppSale(
           appUserId,
           subscriptionId,
           value,
-          tenantId: customerId,
-          soldById: user.id,
+          tenantId:        customerId,
+          soldById:        user.id,
+          status:          'active',
+          currentPeriodEnd,
         },
       })
 
