@@ -17,17 +17,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 
-interface PaidPlanOption {
-  id:   string
-  name: string
-  code: string
+interface PackageOption {
+  id:       string
+  name:     string
+  price:    number
+  quantity: number
 }
 
 interface DiscountCouponFormProps {
-  paidPlans: PaidPlanOption[]
+  packages: PackageOption[]
 }
 
-export function DiscountCouponForm({ paidPlans }: DiscountCouponFormProps) {
+const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+
+export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
@@ -210,16 +213,16 @@ export function DiscountCouponForm({ paidPlans }: DiscountCouponFormProps) {
           />
         </div>
 
-        {paidPlans.length > 0 && (
+        {packages.length > 0 && (
           <Controller
             name="appliesTo"
             control={control}
             render={({ field }) => (
               <Field>
-                <FieldLabel>Applies to specific plans (optional):</FieldLabel>
-                <p className="text-xs text-muted-foreground">Leave all unchecked to apply to every paid plan.</p>
+                <FieldLabel>Applies to specific packages (optional):</FieldLabel>
+                <p className="text-xs text-muted-foreground">Leave all unchecked to apply to every package.</p>
                 <div className="flex flex-col gap-2 mt-1">
-                  {paidPlans.map((p) => {
+                  {packages.map((p) => {
                     const checked = field.value.includes(p.id)
                     return (
                       <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer">
@@ -232,7 +235,10 @@ export function DiscountCouponForm({ paidPlans }: DiscountCouponFormProps) {
                             field.onChange(next)
                           }}
                         />
-                        <span>{p.name} <span className="text-muted-foreground">({p.code})</span></span>
+                        <span>
+                          {p.name}
+                          <span className="text-muted-foreground"> — {p.quantity} QR codes · {usd.format(p.price)}</span>
+                        </span>
                       </label>
                     )
                   })}

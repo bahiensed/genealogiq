@@ -42,19 +42,19 @@ export async function getDiscountCoupon(id: string) {
       isActive:              true,
       stripeCouponId:        true,
       stripePromotionCodeId: true,
-      appliesTo:             { select: { id: true, name: true, code: true } },
+      appliesTo:             { select: { id: true, name: true } },
       createdAt:             true,
     },
   })
   return coupon
 }
 
-export async function getPaidSubscriptionsForSelect() {
+export async function getActivePackagesForSelect() {
   await verifySession()
 
-  return prisma.subscription.findMany({
+  return prisma.package.findMany({
     where:   { isActive: true, price: { gt: 0 } },
     orderBy: { price: 'asc' },
-    select:  { id: true, name: true, code: true, stripeProductId: true },
+    select:  { id: true, name: true, price: true, quantity: true, stripeProductId: true },
   })
 }

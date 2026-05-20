@@ -25,14 +25,14 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
   })
   if (dbDup) return { error: 'A coupon with this code already exists.' }
 
-  // Resolve Subscription ids → Stripe Product ids for Stripe's applies_to (if any specified)
+  // Resolve Package ids → Stripe Product ids for Stripe's applies_to (if any specified)
   let stripeProductIds: string[] = []
   if (input.appliesTo.length > 0) {
-    const subs = await prisma.subscription.findMany({
+    const pkgs = await prisma.package.findMany({
       where:  { id: { in: input.appliesTo } },
       select: { stripeProductId: true },
     })
-    stripeProductIds = subs.map((s) => s.stripeProductId).filter((id): id is string => !!id)
+    stripeProductIds = pkgs.map((p) => p.stripeProductId).filter((id): id is string => !!id)
   }
 
   // Dynamic import so the action module never forces stripe.ts to load at
