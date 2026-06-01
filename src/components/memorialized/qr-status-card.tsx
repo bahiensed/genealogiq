@@ -8,11 +8,13 @@ import { Printer, MapPin, QrCode } from 'lucide-react'
 import { markQrPrinted, markQrInstalled } from '@/actions/qr-code.actions'
 
 type QrCodeData = {
-  id:          string
-  url:         string
-  status:      string
-  printedAt:   Date | null
-  installedAt: Date | null
+  id:            string
+  url:           string
+  status:        string
+  printedAt:     Date | null
+  installedAt:   Date | null
+  scanCount:     number
+  lastScannedAt: Date | null
 }
 
 const STATUS_BADGE: Record<string, { label: string; variant: 'secondary' | 'default' | 'outline' }> = {
@@ -56,6 +58,12 @@ export function QrStatusCard({ appUserId, qrCode }: { appUserId: string; qrCode:
             Installed: {new Date(qrCode.installedAt).toLocaleDateString()}
           </p>
         )}
+        <p className="text-xs text-muted-foreground">
+          {qrCode.scanCount > 0
+            ? `${qrCode.scanCount} scan${qrCode.scanCount === 1 ? '' : 's'} — last: ${new Date(qrCode.lastScannedAt!).toLocaleDateString()}`
+            : 'No scans yet'
+          }
+        </p>
 
         <div className="flex flex-col gap-2 pt-1">
           {qrCode.status === 'PENDING' && (

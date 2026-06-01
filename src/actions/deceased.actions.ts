@@ -47,12 +47,24 @@ export async function createDeceased(
 
   const guardian = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
-    select: { id: true, _count: { select: { appSales: true, guardiansOf: true } } },
+    select: {
+      id: true,
+      appSales: {
+        where:  { status: 'active' },
+        select: {
+          id:           true,
+          subscription: { select: { maxProfiles: true } },
+          _count:       { select: { assignedTo: true } },
+        },
+      },
+    },
   })
   if (!guardian) return { error: 'Customer not found.' }
 
-  const available = guardian._count.appSales - guardian._count.guardiansOf
-  if (available <= 0) return { error: 'No QR codes available for this customer.' }
+  const availableSale = guardian.appSales.find(
+    (s) => s._count.assignedTo < s.subscription.maxProfiles
+  )
+  if (!availableSale) return { error: 'No QR codes available for this customer.' }
 
   const validated = deceasedSchema.safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
@@ -77,12 +89,18 @@ export async function createDeceased(
           deathDate:  toDate(deathDate),
           deathPlace: deathCity ?? null,
           tenantId:   customerId,
+          appSaleId:  availableSale.id,
         },
         select: { id: true },
       })
 
       await tx.appUserGuardian.create({
         data: { appUserId: memorial.id, guardianId: appUserId },
+      })
+
+      await tx.appSale.update({
+        where: { id: availableSale.id },
+        data:  { assignedTo: { connect: { id: memorial.id } } },
       })
 
       if (geoData) {

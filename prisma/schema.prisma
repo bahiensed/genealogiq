@@ -623,17 +623,33 @@ model Geolocation {
 }
 
 model QrCode {
-  id          String    @id @default(cuid())
-  url         String
-  status      QrStatus  @default(PENDING)
-  printedAt   DateTime? @map("printed_at")
-  installedAt DateTime? @map("installed_at")
+  id            String    @id @default(cuid())
+  url           String
+  status        QrStatus  @default(PENDING)
+  printedAt     DateTime? @map("printed_at")
+  installedAt   DateTime? @map("installed_at")
+  scanCount     Int       @default(0) @map("scan_count")
+  lastScannedAt DateTime? @map("last_scanned_at")
 
-  appUserId   String    @unique @map("app_user_id")
-  appUser     AppUser   @relation(fields: [appUserId], references: [id], onDelete: Cascade)
+  appUserId     String    @unique @map("app_user_id")
+  appUser       AppUser   @relation(fields: [appUserId], references: [id], onDelete: Cascade)
+  scans         QrScan[]
 
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   @@map("qr_codes")
+}
+
+model QrScan {
+  id        String   @id @default(cuid())
+  qrCodeId  String   @map("qr_code_id")
+  qrCode    QrCode   @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+  scannedAt DateTime @default(now()) @map("scanned_at")
+  userAgent String?  @map("user_agent") @db.VarChar(512)
+  ipHash    String?  @map("ip_hash")
+
+  @@index([qrCodeId])
+  @@index([scannedAt])
+  @@map("qr_scans")
 }

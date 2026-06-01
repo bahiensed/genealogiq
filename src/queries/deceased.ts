@@ -47,11 +47,13 @@ export async function getDeceased(id: string) {
       },
       qrCode: {
         select: {
-          id:          true,
-          url:         true,
-          status:      true,
-          printedAt:   true,
-          installedAt: true,
+          id:            true,
+          url:           true,
+          status:        true,
+          printedAt:     true,
+          installedAt:   true,
+          scanCount:     true,
+          lastScannedAt: true,
         },
       },
     },
