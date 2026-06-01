@@ -88,6 +88,13 @@ export async function createDeceased(
       if (geoData) {
         await tx.geolocation.create({ data: { userId: memorial.id, ...geoData } })
       }
+
+      await tx.qrCode.create({
+        data: {
+          appUserId: memorial.id,
+          url: `${process.env.APP_URL}/profile/${memorial.id}`,
+        },
+      })
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {

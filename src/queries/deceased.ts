@@ -45,14 +45,24 @@ export async function getDeceased(id: string) {
           country:  true,
         },
       },
+      qrCode: {
+        select: {
+          id:          true,
+          url:         true,
+          status:      true,
+          printedAt:   true,
+          installedAt: true,
+        },
+      },
     },
   })
 
   if (!record) return null
 
-  const { deathPlace, geolocation, ...rest } = record
+  const { deathPlace, geolocation, qrCode, ...rest } = record
   return {
     ...rest,
+    qrCode,
     deathCity:          deathPlace         ?? '',
     burialDate:         geolocation?.date?.toISOString().slice(0, 10) ?? '',
     burialLatitude:     geolocation?.lat   ?? null,

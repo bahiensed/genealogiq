@@ -2,9 +2,8 @@ import { notFound } from 'next/navigation'
 import { getDeceased } from '@/queries/deceased'
 import { MemorializedForm } from '@/components/memorialized/memorialized-form'
 import { QrCodePresets } from '@/components/memorialized/qr-code-presets'
+import { QrStatusCard } from '@/components/memorialized/qr-status-card'
 import type { DeceasedFormValues } from '@/schemas/deceased.schema'
-
-const APP_URL = 'https://genealogiq.app'
 
 export default async function MemorializedDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -47,7 +46,7 @@ export default async function MemorializedDetailPage({ params }: { params: Promi
     notes:              deceased.notes              ?? '',
   }
 
-  const profileUrl = `${APP_URL}/profile/${id}`
+  const profileUrl = deceased.qrCode?.url ?? `https://genealogiq.app/profile/${id}`
   const filename = `qr-${deceased.firstName}-${deceased.lastName}`.toLowerCase().replace(/\s+/g, '-')
 
   return (
@@ -60,8 +59,11 @@ export default async function MemorializedDetailPage({ params }: { params: Promi
         <div className="lg:col-span-2">
           <MemorializedForm id={id} defaultValues={defaultValues} />
         </div>
-        <aside className="lg:col-span-1">
-          <div className="lg:sticky lg:top-20">
+        <aside className="lg:col-span-1 flex flex-col gap-4">
+          <div className="lg:sticky lg:top-20 flex flex-col gap-4">
+            {deceased.qrCode && (
+              <QrStatusCard appUserId={id} qrCode={deceased.qrCode} />
+            )}
             <QrCodePresets profileUrl={profileUrl} filename={filename} />
           </div>
         </aside>

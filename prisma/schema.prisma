@@ -45,6 +45,12 @@ enum GuardianStatus {
   ACCEPTED
 }
 
+enum QrStatus {
+  PENDING
+  PRINTED
+  INSTALLED
+}
+
 // ─── Auth tokens ─────────────────────────────────────────────────────────────
 
 model RateLimitAttempt {
@@ -558,6 +564,7 @@ model AppUser {
   guardiansOf         AppUserGuardian[]    @relation("GuardianOf")
   guardedBy           AppUserGuardian[]    @relation("GuardedBy")
   geolocation         Geolocation?
+  qrCode              QrCode?
 
   @@index([tenantId])
   @@map("app_users")
@@ -613,4 +620,20 @@ model Geolocation {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("app_geolocations")
+}
+
+model QrCode {
+  id          String    @id @default(cuid())
+  url         String
+  status      QrStatus  @default(PENDING)
+  printedAt   DateTime? @map("printed_at")
+  installedAt DateTime? @map("installed_at")
+
+  appUserId   String    @unique @map("app_user_id")
+  appUser     AppUser   @relation(fields: [appUserId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("qr_codes")
 }
