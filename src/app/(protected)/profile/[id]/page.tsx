@@ -14,6 +14,7 @@ import { ProfileBanner, type ProfileData } from "@/components/profile-banner"
 import { BentoGrid, type SectionCard } from "@/components/bento-grid"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { ProfileViewTracker } from "@/components/profile-view-tracker"
+import { QrScanTracker } from "@/components/qr-scan-tracker"
 import type { MiniProfile } from "@/components/profile-mini-card"
 import {
   TreePreview,
@@ -263,6 +264,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     <div className="min-h-screen relative overflow-x-hidden mt-16">
       <AuroraBackdrop variant="page" intensity="bold" />
       <ProfileViewTracker profile={miniProfile} />
+      {isMemorialized && user.appSaleId && <QrScanTracker profileId={id} />}
       <main className="relative z-10">
         <ProfileBanner profile={profile} />
         <BentoGrid cards={isMemorialized ? memorializedCards : livingCards} />
