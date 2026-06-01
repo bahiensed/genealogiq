@@ -437,6 +437,8 @@ model AppUser {
   emailTokens         EmailToken[]
   passwordResetTokens PasswordResetToken[]
 
+  qrCode QrCode?
+
   @@index([tenantId])
   @@map("app_users")
 }
@@ -471,6 +473,12 @@ model AppUserGuardian {
 enum GuardianStatus {
   PENDING
   ACCEPTED
+}
+
+enum QrStatus {
+  PENDING
+  PRINTED
+  INSTALLED
 }
 
 // ─── Bio ─────────────────────────────────────────────────────────────────────
@@ -799,4 +807,20 @@ model Tenant {
   qrInventory  QrInventory?
 
   @@map("tenants")
+}
+
+model QrCode {
+  id          String    @id @default(cuid())
+  url         String
+  status      QrStatus  @default(PENDING)
+  printedAt   DateTime? @map("printed_at")
+  installedAt DateTime? @map("installed_at")
+
+  appUserId   String    @unique @map("app_user_id")
+  appUser     AppUser   @relation(fields: [appUserId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("qr_codes")
 }

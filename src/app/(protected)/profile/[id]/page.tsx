@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
-import { verifySession } from "@/lib/dal"
+import { auth } from "@/auth"
 import { getProfileById } from "@/queries/profile"
 import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
 import { getGeolocationByUserId } from "@/queries/geolocation"
@@ -36,14 +36,17 @@ interface Props {
 
 export default async function ProfileByIdPage({ params }: Props) {
   const { id } = await params
-  const session = await verifySession()
+  const session = await auth()
+  const sessionUserId = session?.user?.id
 
   const user = await getProfileById(id)
   if (!user) notFound()
 
-  const isOwn = user.id === session.user.id
+  const isOwn = sessionUserId ? user.id === sessionUserId : false
   const isMemorialized = user.role === "APP_MEMO"
-  const isGuardian = isMemorialized && user.guardedBy.some((g) => g.guardianId === session.user.id)
+  const isGuardian = isMemorialized && sessionUserId
+    ? user.guardedBy.some((g) => g.guardianId === sessionUserId)
+    : false
   const name = `${user.firstName} ${user.lastName}`
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
 
@@ -62,7 +65,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     treeCount,
   ] = await Promise.all([
     getFavoriteCount(id),
-    isOwn ? Promise.resolve(false) : isFavoritedByUser(session.user.id, id),
+    isOwn || !sessionUserId ? Promise.resolve(false) : isFavoritedByUser(sessionUserId, id),
     isMemorialized ? getGeolocationByUserId(id) : Promise.resolve(null),
     getGalleryImageUrls(id, 4),
     getGalleryCount(id),

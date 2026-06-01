@@ -14,7 +14,8 @@ export const authConfig = {
       const isLoggedIn = !!auth?.user
       const pathname = nextUrl.pathname
 
-      const isProtected = ["/home", "/profile", "/tree"].some((r) => pathname.startsWith(r))
+      // /profile is intentionally public — memorials must be accessible to anyone scanning a QR code
+      const isProtected = ["/home", "/tree"].some((r) => pathname.startsWith(r))
 
       const isAuthRoute = ["/sign-in", "/sign-up", "/forgot-password"].some((r) =>
         pathname.startsWith(r)
