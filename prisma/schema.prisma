@@ -96,13 +96,19 @@ model DiscountCoupon {
   @@map("discount_coupons")
 }
 
+enum PackageType {
+  DIGITAL
+  PHYSICAL
+}
+
 model Package {
-  id          String  @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   description String?
-  price       Decimal @map("price") @db.Decimal(10, 2)
-  quantity    Int     @default(1)
-  isActive    Boolean @default(true) @map("is_active")
+  price       Decimal     @map("price") @db.Decimal(10, 2)
+  quantity    Int         @default(1)
+  isActive    Boolean     @default(true) @map("is_active")
+  type        PackageType @default(DIGITAL)
 
   // Stripe references — provisioned in SEQ via prisma/seed-stripe-packages.ts.
   // BMS only displays them; nullified by updatePackage if price changes.

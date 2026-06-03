@@ -6,11 +6,12 @@ import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
 import { packageResolver, packageDefaultValues, type PackageFormValues } from '@/schemas/package.schema'
 import { createPackage, updatePackage } from '@/actions/package.actions'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldDescription } from '@/components/ui/field'
 import { CurrencyInput } from '@/components/ui/currency-input'
 
 interface PackageFormProps {
@@ -147,6 +148,38 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId 
               <FieldLabel>Description:</FieldLabel>
               <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={256} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        {/* Package Type */}
+        <Controller
+          name="type"
+          control={control}
+          render={({ field }) => (
+            <Field>
+              <FieldLabel>Package Type</FieldLabel>
+              <div className="flex gap-3">
+                {(['DIGITAL', 'PHYSICAL'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => field.onChange(t)}
+                    className={cn(
+                      'rounded-md border px-4 py-2 text-sm font-medium transition-colors',
+                      field.value === t
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border bg-background text-muted-foreground hover:bg-muted',
+                    )}
+                  >
+                    {t === 'DIGITAL' ? 'Digital (QR Inventory)' : 'Physical (Print Licenses)'}
+                  </button>
+                ))}
+              </div>
+              <FieldDescription>
+                Digital packages increment the funeral home&apos;s QR inventory.
+                Physical packages generate individual license codes for printing companies.
+              </FieldDescription>
             </Field>
           )}
         />

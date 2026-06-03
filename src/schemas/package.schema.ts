@@ -11,6 +11,7 @@ export const packageSchema = z.object({
     .max(256, 'Must be at most 256 characters'),
   price:       z.number().positive('Must be greater than zero'),
   isActive:    z.boolean(),
+  type:        z.enum(['DIGITAL', 'PHYSICAL']),
 })
 
 export type PackageFormValues = z.infer<typeof packageSchema>
@@ -23,4 +24,5 @@ export const packageDefaultValues: PackageFormValues = {
   description: '',
   price:       0,
   isActive:    true,
+  type:        'DIGITAL',
 }

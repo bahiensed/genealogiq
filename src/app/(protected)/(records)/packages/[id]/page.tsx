@@ -16,6 +16,7 @@ export default async function EditPackagePage({ params }: { params: Promise<{ id
         description: pkg.description ?? '',
         price:       Number(pkg.price),
         isActive:    pkg.isActive,
+        type:        pkg.type,
       }}
       stripeProductId={pkg.stripeProductId}
       stripePriceId={pkg.stripePriceId}

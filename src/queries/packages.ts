@@ -14,6 +14,7 @@ export async function getPackages() {
       price:       true,
       quantity:    true,
       isActive:    true,
+      type:        true,
       createdAt:   true,
     },
     orderBy: { name: 'asc' },
@@ -27,7 +28,7 @@ export async function getActivePackages() {
 
   const rows = await prisma.package.findMany({
     where:   { isActive: true },
-    select:  { id: true, name: true, price: true, quantity: true },
+    select:  { id: true, name: true, price: true, quantity: true, type: true },
     orderBy: { name: 'asc' },
   })
 
@@ -46,6 +47,7 @@ export async function getPackage(id: string) {
       price:           true,
       quantity:        true,
       isActive:        true,
+      type:            true,
       stripeProductId: true,
       stripePriceId:   true,
     },

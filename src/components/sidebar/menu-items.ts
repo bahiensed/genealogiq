@@ -4,6 +4,7 @@ import {
   ChartNoAxesCombined,
   Coins,
   FactoryIcon,
+  Fingerprint,
   HandCoinsIcon,
   IdCardIcon,
   Layers,
@@ -16,11 +17,12 @@ import {
 } from 'lucide-react'
 
 export const main = [
-  { name: 'Dashboard',         url: '/dashboard',    icon: LayoutDashboard },
-  { name: 'Subscriptions (B2C)', url: '/subscriptions', icon: Layers       },
-  { name: 'QR Codes (B2B)',    url: '/packages',     icon: QrCodeIcon      },
-  { name: 'Customers',         url: '/customers',    icon: Building2       },
-  { name: 'Manual Sales',      url: '/manual-sales', icon: HandCoinsIcon   },
+  { name: 'Dashboard',          url: '/dashboard',    icon: LayoutDashboard },
+  { name: 'Subscriptions (B2C)', url: '/subscriptions', icon: Layers        },
+  { name: 'QR Codes (B2B)',     url: '/packages',     icon: QrCodeIcon      },
+  { name: 'Physical QR Codes',  url: '/physical-qr',  icon: Fingerprint     },
+  { name: 'Customers',          url: '/customers',    icon: Building2       },
+  { name: 'Manual Sales',       url: '/manual-sales', icon: HandCoinsIcon   },
 ]
 
 export const system = [
