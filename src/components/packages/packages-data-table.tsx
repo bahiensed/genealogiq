@@ -6,6 +6,8 @@ import { getColumns, type PackageRow } from './columns'
 interface PackagesDataTableProps {
   currentUserRole: string
   data: PackageRow[]
+  basePath?: string
+  emptyMessage?: string
 }
 
 const COLUMN_LABELS: Record<string, string> = {
@@ -17,12 +19,12 @@ const COLUMN_LABELS: Record<string, string> = {
   createdAt:   'Created at',
 }
 
-export function PackagesDataTable({ currentUserRole, data }: PackagesDataTableProps) {
+export function PackagesDataTable({ currentUserRole, data, basePath, emptyMessage }: PackagesDataTableProps) {
   return (
     <DataTable
-      columns={getColumns(currentUserRole)}
+      columns={getColumns(currentUserRole, basePath)}
       data={data}
-      emptyMessage="No packages found."
+      emptyMessage={emptyMessage ?? 'No packages found.'}
       initialSorting={[{ id: 'quantity', desc: false }]}
       columnLabels={COLUMN_LABELS}
     />

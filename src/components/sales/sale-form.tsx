@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
-import { QrCode } from 'lucide-react'
+import { Fingerprint, QrCode } from 'lucide-react'
 import { saleResolver, saleDefaultValues, type SaleFormValues } from '@/schemas/sale.schema'
 import { createSale } from '@/actions/sale.actions'
 import { Button } from '@/components/ui/button'
@@ -29,19 +29,20 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 
 interface Package {
-  id: string
-  name: string
-  price: number
+  id:       string
+  name:     string
+  price:    number
   quantity: number
+  type:     'DIGITAL' | 'PHYSICAL'
 }
 
 interface Customer {
-  id: string
+  id:   string
   name: string
 }
 
 interface SaleFormProps {
-  packages?: Package[]
+  packages?:  Package[]
   customers?: Customer[]
 }
 
@@ -64,6 +65,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   const selectedQty       = watch('quantity') || 0
   const selectedPkg       = packages.find(p => p.id === selectedPackageId)
 
+  const isPhysical     = selectedPkg?.type === 'PHYSICAL'
   const totalQRCodes   = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.quantity : 0
   const totalPrice     = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.price : 0
   const unitPrice      = selectedPkg && selectedPkg.quantity > 0 ? selectedPkg.price / selectedPkg.quantity : 0
@@ -107,7 +109,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                   <SelectContent>
                     {packages.map((p) => (
                       <SelectItem key={p.id} value={p.id}>
-                        {p.name} | {p.quantity.toLocaleString('en-US')} QR codes | {usd.format(p.price)}
+                        {p.name} · {p.type === 'DIGITAL' ? 'Digital' : 'Physical'} · {p.quantity.toLocaleString('en-US')} codes · {usd.format(p.price)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -160,15 +162,19 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
           />
         </FieldGroup>
 
-        {/* QR Code summary card */}
+        {/* Summary card — adapts by package type */}
         {totalQRCodes > 0 && (
           <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5 flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <QrCode className="h-5 w-5 text-primary" />
+                {isPhysical
+                  ? <Fingerprint className="h-5 w-5 text-primary" />
+                  : <QrCode      className="h-5 w-5 text-primary" />}
               </div>
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">QR Codes to be issued</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                  {isPhysical ? 'Physical license codes to be generated' : 'QR Codes to be added to inventory'}
+                </p>
                 <p className="text-3xl font-extrabold tabular-nums leading-none">
                   {totalQRCodes.toLocaleString('en-US')}
                 </p>
@@ -180,7 +186,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                 <p className="text-lg font-bold tabular-nums">{usd.format(totalPrice)}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-muted-foreground">Unit price / QR code</p>
+                <p className="text-xs text-muted-foreground">Unit price / code</p>
                 <p className="text-lg font-bold tabular-nums">{usd.format(unitPrice)}</p>
               </div>
             </div>

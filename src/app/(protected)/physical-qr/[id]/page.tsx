@@ -2,10 +2,10 @@ import { notFound } from 'next/navigation'
 import { getPackage } from '@/queries/packages'
 import { PackageForm } from '@/components/packages/package-form'
 
-export default async function EditPackagePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditPhysicalPackagePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const pkg = await getPackage(id)
-  if (!pkg) notFound()
+  if (!pkg || pkg.type !== 'PHYSICAL') notFound()
 
   return (
     <PackageForm
@@ -16,12 +16,12 @@ export default async function EditPackagePage({ params }: { params: Promise<{ id
         description: pkg.description ?? '',
         price:       Number(pkg.price),
         isActive:    pkg.isActive,
-        type:        pkg.type,
+        type:        'PHYSICAL',
       }}
       stripeProductId={pkg.stripeProductId}
       stripePriceId={pkg.stripePriceId}
-      fixedType={pkg.type}
-      backHref={pkg.type === 'PHYSICAL' ? '/physical-qr' : '/packages'}
+      fixedType="PHYSICAL"
+      backHref="/physical-qr"
     />
   )
 }

@@ -19,10 +19,11 @@ export type PackageRow = {
   price: number
   quantity: number
   isActive: boolean
+  type: 'DIGITAL' | 'PHYSICAL'
   createdAt: Date
 }
 
-function ActionsCell({ row, currentUserRole }: { row: { original: PackageRow }; currentUserRole: string }) {
+function ActionsCell({ row, currentUserRole, basePath }: { row: { original: PackageRow }; currentUserRole: string; basePath: string }) {
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const pkg = row.original
@@ -38,7 +39,7 @@ function ActionsCell({ row, currentUserRole }: { row: { original: PackageRow }; 
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/packages/${pkg.id}`}>Edit</Link>
+            <Link href={`${basePath}/${pkg.id}`}>Edit</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
@@ -50,14 +51,12 @@ function ActionsCell({ row, currentUserRole }: { row: { original: PackageRow }; 
             {pkg.isActive ? 'Deactivate' : 'Reactivate'}
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-            <>
-                  <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onSelect={() => setDeleteOpen(true)}
-              >
-                Delete
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={() => setDeleteOpen(true)}
+            >
+              Delete
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -81,13 +80,13 @@ function ActionsCell({ row, currentUserRole }: { row: { original: PackageRow }; 
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
-export function getColumns(currentUserRole: string): ColumnDef<PackageRow>[] {
+export function getColumns(currentUserRole: string, basePath = '/packages'): ColumnDef<PackageRow>[] {
   return [
     {
       accessorKey: 'name',
       header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Name</>} />,
       cell: ({ row }) => (
-        <Link href={`/packages/${row.original.id}`} className="hover:underline">
+        <Link href={`${basePath}/${row.original.id}`} className="hover:underline">
           {row.original.name}
         </Link>
       ),
@@ -122,10 +121,11 @@ export function getColumns(currentUserRole: string): ColumnDef<PackageRow>[] {
       header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
       cell: ({ row }) =>
         new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
-    },    {
+    },
+    {
       id: 'actions',
       enableHiding: false,
-      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} />,
+      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} basePath={basePath} />,
     },
   ]
 }

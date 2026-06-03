@@ -22,6 +22,7 @@ export async function createPackage(data: PackageFormValues): Promise<ActionErro
   })
 
   revalidatePath('/packages')
+  revalidatePath('/physical-qr')
   return { success: 'Package created successfully.' }
 }
 
@@ -63,6 +64,7 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
   }
 
   revalidatePath('/packages')
+  revalidatePath('/physical-qr')
   return {
     success: clearStripeRefs
       ? 'Package updated — Stripe references cleared. Re-run prisma/seed-stripe-packages.ts in SEQ.'
@@ -86,6 +88,7 @@ export async function deletePackage(id: string): Promise<ActionError | void> {
   }
 
   revalidatePath('/packages')
+  revalidatePath('/physical-qr')
 }
 
 export async function togglePackageActive(id: string): Promise<ActionError | void> {
@@ -96,4 +99,5 @@ export async function togglePackageActive(id: string): Promise<ActionError | voi
 
   await prisma.package.update({ where: { id }, data: { isActive: !pkg.isActive } })
   revalidatePath('/packages')
+  revalidatePath('/physical-qr')
 }

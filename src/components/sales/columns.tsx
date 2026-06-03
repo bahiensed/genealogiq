@@ -29,7 +29,7 @@ export type SaleRow = {
   quantity: number
   reversedAt: Date | null
   createdAt: Date
-  package:  { name: string; price: number; quantity: number }
+  package:  { name: string; price: number; quantity: number; type: 'DIGITAL' | 'PHYSICAL' }
   tenant:   { name: string }
   soldBy:   { firstName: string; lastName: string }
 }
@@ -67,8 +67,10 @@ function ActionsCell({ row, currentUserRole }: { row: { original: SaleRow }; cur
           <DialogHeader>
             <DialogTitle>Confirm reversal</DialogTitle>
             <DialogDescription>
-              The sale of package &quot;{sale.package.name}&quot; to &quot;{sale.tenant.name}&quot; will be
-              marked as reversed and the QR codes will be returned to inventory. The record is kept for audit purposes.
+              {sale.package.type === 'PHYSICAL'
+                ? <>The sale of package &quot;{sale.package.name}&quot; to &quot;{sale.tenant.name}&quot; will be marked as reversed. Available license codes will be invalidated. Activated codes remain linked to their memorials. The record is kept for audit purposes.</>
+                : <>The sale of package &quot;{sale.package.name}&quot; to &quot;{sale.tenant.name}&quot; will be marked as reversed and the QR codes will be returned to inventory. The record is kept for audit purposes.</>
+              }
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

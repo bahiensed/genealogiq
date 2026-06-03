@@ -101,6 +101,11 @@ enum PackageType {
   PHYSICAL
 }
 
+enum PhysicalQrStatus {
+  AVAILABLE
+  ACTIVATED
+}
+
 model Package {
   id          String      @id @default(cuid())
   name        String
@@ -118,8 +123,9 @@ model Package {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sales   Sale[]
-  coupons DiscountCoupon[] @relation("CouponPackages")
+  sales            Sale[]
+  coupons          DiscountCoupon[]    @relation("CouponPackages")
+  physicalLicenses PhysicalQrLicense[]
 
   @@map("packages")
 }
@@ -144,6 +150,8 @@ model Sale {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  physicalLicenses PhysicalQrLicense[]
 
   @@map("sales")
 }
@@ -403,8 +411,32 @@ model Tenant {
   suppliers    Supplier[]         @relation("SupplierTenant")
   supplierCats SupplierCategory[] @relation("SupplierCategoryTenant")
   tenantCats   TenantCategory[]   @relation("TenantCategoryTenant")
-  sales        Sale[]
-  qrInventory  QrInventory?
+  sales            Sale[]
+  qrInventory      QrInventory?
+  physicalLicenses PhysicalQrLicense[]
 
   @@map("tenants")
+}
+
+model PhysicalQrLicense {
+  id      String           @id
+  genCode String           @unique @map("gen_code")
+  status  PhysicalQrStatus @default(AVAILABLE)
+
+  saleId    Int    @map("sale_id")
+  sale      Sale   @relation(fields: [saleId],    references: [id], onDelete: Restrict)
+  packageId String @map("package_id")
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  tenantId  String @map("tenant_id")
+  tenant    Tenant @relation(fields: [tenantId],  references: [id], onDelete: Restrict)
+
+  // appUserId is owned by APP — BMS only reads it for reporting, no relation declared
+  appUserId   String?   @unique @map("app_user_id")
+  activatedAt DateTime? @map("activated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  @@index([tenantId, status])
+  @@map("physical_qr_licenses")
 }

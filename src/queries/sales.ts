@@ -13,7 +13,7 @@ export async function getSales() {
       reversedAt: true,
       createdAt:  true,
       package: {
-        select: { name: true, price: true, quantity: true },
+        select: { name: true, price: true, quantity: true, type: true },
       },
       tenant: {
         select: { name: true },

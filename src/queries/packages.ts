@@ -3,10 +3,11 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 
-export async function getPackages() {
+export async function getPackages(type?: 'DIGITAL' | 'PHYSICAL') {
   await verifySession()
 
   const rows = await prisma.package.findMany({
+    where:   type ? { type } : undefined,
     select: {
       id:          true,
       name:        true,

@@ -5,6 +5,7 @@ import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/dal'
 import { saleSchema, type SaleFormValues } from '@/schemas/sale.schema'
+import { generateGenCode } from '@/lib/gen-code'
 
 type ActionError   = { error: string }
 type ActionSuccess = { success: string }
@@ -19,14 +20,14 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId },
-    select: { quantity: true },
+    select: { quantity: true, type: true },
   })
   if (!pkg) return { error: 'Package not found.' }
 
-  const totalQRCodes = pkg.quantity * quantity
+  const totalCodes = pkg.quantity * quantity
 
   await prisma.$transaction(async (tx) => {
-    await tx.sale.create({
+    const sale = await tx.sale.create({
       data: {
         packageId,
         tenantId,
@@ -35,14 +36,26 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
       },
     })
 
-    await tx.qrInventory.upsert({
-      where:  { tenantId },
-      create: { tenantId, quantity: totalQRCodes },
-      update: { quantity: { increment: totalQRCodes } },
-    })
+    if (pkg.type === 'PHYSICAL') {
+      const licenses = Array.from({ length: totalCodes }, () => ({
+        id:        crypto.randomUUID(),
+        genCode:   generateGenCode(),
+        saleId:    sale.id,
+        packageId,
+        tenantId,
+      }))
+      await tx.physicalQrLicense.createMany({ data: licenses })
+    } else {
+      await tx.qrInventory.upsert({
+        where:  { tenantId },
+        create: { tenantId, quantity: totalCodes },
+        update: { quantity: { increment: totalCodes } },
+      })
+    }
   })
 
   revalidatePath('/manual-sales')
+  revalidatePath('/physical-qr')
   return { success: 'Sale recorded successfully.' }
 }
 
@@ -55,13 +68,11 @@ export async function reverseSale(id: number): Promise<ActionError | void> {
       quantity:   true,
       tenantId:   true,
       reversedAt: true,
-      package:    { select: { quantity: true } },
+      package:    { select: { quantity: true, type: true } },
     },
   })
   if (!sale) return { error: 'Sale not found.' }
   if (sale.reversedAt) return { error: 'This sale has already been reversed.' }
-
-  const totalQRCodes = sale.package.quantity * sale.quantity
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -70,17 +81,25 @@ export async function reverseSale(id: number): Promise<ActionError | void> {
         data:  { reversedAt: new Date() },
       })
 
-      const inv = await tx.qrInventory.findUnique({
-        where:  { tenantId: sale.tenantId },
-        select: { id: true, quantity: true },
-      })
+      if (sale.package.type === 'PHYSICAL') {
+        // Delete only AVAILABLE licenses — ACTIVATED ones remain linked to memorials
+        await tx.physicalQrLicense.deleteMany({
+          where: { saleId: id, status: 'AVAILABLE' },
+        })
+      } else {
+        const totalQRCodes = sale.package.quantity * sale.quantity
+        const inv = await tx.qrInventory.findUnique({
+          where:  { tenantId: sale.tenantId },
+          select: { id: true, quantity: true },
+        })
 
-      if (inv) {
-        const newQty = inv.quantity - totalQRCodes
-        if (newQty <= 0) {
-          await tx.qrInventory.delete({ where: { id: inv.id } })
-        } else {
-          await tx.qrInventory.update({ where: { id: inv.id }, data: { quantity: newQty } })
+        if (inv) {
+          const newQty = inv.quantity - totalQRCodes
+          if (newQty <= 0) {
+            await tx.qrInventory.delete({ where: { id: inv.id } })
+          } else {
+            await tx.qrInventory.update({ where: { id: inv.id }, data: { quantity: newQty } })
+          }
         }
       }
     })
@@ -92,4 +111,5 @@ export async function reverseSale(id: number): Promise<ActionError | void> {
   }
 
   revalidatePath('/manual-sales')
+  revalidatePath('/physical-qr')
 }

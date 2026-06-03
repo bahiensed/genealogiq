@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 
 export default async function PackagesPage() {
   const session = await verifySession()
-  const packages = await getPackages()
+  const packages = await getPackages('DIGITAL')
 
   return (
     <div className="flex flex-col gap-6">

@@ -6,32 +6,40 @@ import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
 import { packageResolver, packageDefaultValues, type PackageFormValues } from '@/schemas/package.schema'
 import { createPackage, updatePackage } from '@/actions/package.actions'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldDescription } from '@/components/ui/field'
+import { Badge } from '@/components/ui/badge'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { CurrencyInput } from '@/components/ui/currency-input'
 
 interface PackageFormProps {
-  id?: string
-  defaultValues?: PackageFormValues
+  id?:              string
+  defaultValues?:   PackageFormValues
   stripeProductId?: string | null
   stripePriceId?:   string | null
+  /** When provided the type field is hidden and this value is injected automatically. */
+  fixedType?:       'DIGITAL' | 'PHYSICAL'
+  /** Where to navigate after creating a new package. Defaults to '/packages'. */
+  backHref?:        string
 }
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
-export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId }: PackageFormProps) {
+export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId, fixedType, backHref = '/packages' }: PackageFormProps) {
   const isEditing = !!id
   const isSynced  = isEditing && !!stripePriceId
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
+  const resolvedDefaults: PackageFormValues = defaultValues
+    ? { ...defaultValues, ...(fixedType ? { type: fixedType } : {}) }
+    : { ...packageDefaultValues, ...(fixedType ? { type: fixedType } : {}) }
+
   const form = useForm<PackageFormValues>({
     resolver: packageResolver,
-    defaultValues: defaultValues ?? packageDefaultValues,
+    defaultValues: resolvedDefaults,
   })
 
   const { control, handleSubmit, watch, formState: { isSubmitting } } = form
@@ -41,14 +49,15 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId 
 
   async function onSubmit(data: PackageFormValues) {
     setServerError(null)
+    const payload = fixedType ? { ...data, type: fixedType } : data
     const result = isEditing
-      ? await updatePackage(id, data)
-      : await createPackage(data)
+      ? await updatePackage(id, payload)
+      : await createPackage(payload)
     if ('error' in result) {
       setServerError(result.error)
     } else {
       toast.success(result.success)
-      if (!isEditing) router.push('/packages')
+      if (!isEditing) router.push(backHref)
     }
   }
 
@@ -58,18 +67,25 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId 
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
           {isEditing ? 'Edit package' : 'New package'}
         </h1>
-        {isEditing && (
-          <Controller
-            name="isActive"
-            control={control}
-            render={({ field }) => (
-              <div className="flex items-center gap-2">
-                <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-                <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
-              </div>
-            )}
-          />
-        )}
+        <div className="flex items-center gap-3">
+          {fixedType && (
+            <Badge variant={fixedType === 'PHYSICAL' ? 'outline' : 'secondary'} className="text-xs">
+              {fixedType === 'DIGITAL' ? 'Digital' : 'Physical'}
+            </Badge>
+          )}
+          {isEditing && (
+            <Controller
+              name="isActive"
+              control={control}
+              render={({ field }) => (
+                <div className="flex items-center gap-2">
+                  <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
+                  <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
+                </div>
+              )}
+            />
+          )}
+        </div>
       </div>
 
       <FieldGroup>
@@ -148,38 +164,6 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId 
               <FieldLabel>Description:</FieldLabel>
               <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={256} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
-
-        {/* Package Type */}
-        <Controller
-          name="type"
-          control={control}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel>Package Type</FieldLabel>
-              <div className="flex gap-3">
-                {(['DIGITAL', 'PHYSICAL'] as const).map((t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => field.onChange(t)}
-                    className={cn(
-                      'rounded-md border px-4 py-2 text-sm font-medium transition-colors',
-                      field.value === t
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border bg-background text-muted-foreground hover:bg-muted',
-                    )}
-                  >
-                    {t === 'DIGITAL' ? 'Digital (QR Inventory)' : 'Physical (Print Licenses)'}
-                  </button>
-                ))}
-              </div>
-              <FieldDescription>
-                Digital packages increment the funeral home&apos;s QR inventory.
-                Physical packages generate individual license codes for printing companies.
-              </FieldDescription>
             </Field>
           )}
         />
