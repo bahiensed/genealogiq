@@ -1,4 +1,4 @@
-import { BarChart2, BoxIcon, BuildingIcon, FolderIcon, HandPlatterIcon, IdCardIcon, LayoutDashboard, QrCodeIcon, ShoppingCartIcon, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
+import { BarChart2, BoxIcon, BuildingIcon, Fingerprint, FolderIcon, HandPlatterIcon, IdCardIcon, LayoutDashboard, QrCodeIcon, ShoppingCartIcon, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
 
 export type ModuleKey =
   | 'moduleRecordsSuppliers'
@@ -25,6 +25,7 @@ export const main: MenuItem[] = [
   { name: 'Dashboard',    url: '/dashboard',            icon: LayoutDashboard  },
   { name: 'Buy QR Codes', url: '/purchasing/packages',  icon: QrCodeIcon       },
   { name: 'My QR Codes',  url: '/inventory/packages',   icon: QrCodeIcon       },
+  { name: 'QR Licenses',  url: '/licenses',             icon: Fingerprint      },
   { name: 'Customers',    url: '/customers',            icon: UsersIcon        },
   { name: 'Sales',        url: '/sales',                icon: ShoppingCartIcon },
 ]

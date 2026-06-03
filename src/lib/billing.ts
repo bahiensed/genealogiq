@@ -1,6 +1,7 @@
 import type Stripe from "stripe"
 import { stripe } from "@/lib/stripe"
 import { prisma } from "@/lib/prisma"
+import { generateGenCode } from "@/lib/gen-code"
 
 /**
  * One Stripe Customer per Tenant — billing/invoices are consolidated across
@@ -47,18 +48,18 @@ export async function applyCheckoutSession(
 ): Promise<void> {
   const pkg = await prisma.package.findUnique({
     where:  { id: ctx.packageId },
-    select: { quantity: true },
+    select: { quantity: true, type: true },
   })
   if (!pkg) throw new Error(`Package ${ctx.packageId} not found`)
 
-  const totalQRCodes = pkg.quantity * ctx.quantity
+  const totalUnits = pkg.quantity * ctx.quantity
   const paymentIntentId = typeof session.payment_intent === "string"
     ? session.payment_intent
     : session.payment_intent?.id ?? null
 
   try {
     await prisma.$transaction(async (tx) => {
-      await tx.sale.create({
+      const sale = await tx.sale.create({
         data: {
           packageId:             ctx.packageId,
           tenantId:              ctx.tenantId,
@@ -69,11 +70,27 @@ export async function applyCheckoutSession(
         },
       })
 
-      await tx.qrInventory.upsert({
-        where:  { tenantId: ctx.tenantId },
-        create: { tenantId: ctx.tenantId, quantity: totalQRCodes },
-        update: { quantity: { increment: totalQRCodes } },
-      })
+      if (pkg.type === "PHYSICAL") {
+        // Generate N unique license codes — one per QR unit ordered.
+        // The @unique constraint on gen_code defends against the astronomically
+        // unlikely collision (80-bit entropy); P2002 aborts the tx and Stripe retries.
+        const licenses = Array.from({ length: totalUnits }, () => ({
+          id:        crypto.randomUUID(),
+          genCode:   generateGenCode(),
+          saleId:    sale.id,
+          packageId: ctx.packageId,
+          tenantId:  ctx.tenantId,
+        }))
+        await tx.physicalQrLicense.createMany({ data: licenses })
+        // QrInventory is NOT touched for PHYSICAL packages
+      } else {
+        // DIGITAL: existing behaviour — increment the tenant's QR inventory.
+        await tx.qrInventory.upsert({
+          where:  { tenantId: ctx.tenantId },
+          create: { tenantId: ctx.tenantId, quantity: totalUnits },
+          update: { quantity: { increment: totalUnits } },
+        })
+      }
     })
   } catch (err: unknown) {
     if ((err as { code?: string }).code === "P2002") {
