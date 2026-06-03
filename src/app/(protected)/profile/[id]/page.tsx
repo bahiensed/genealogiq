@@ -81,7 +81,7 @@ export default async function ProfileByIdPage({ params }: Props) {
 
   const hasBio = !!bio && !!(bio.text || bio.quote || bio.images.length > 0)
   const memorialCount = memorials.length
-  const isFreeMemorial = isMemorialized && user.appSaleId == null
+  const isFreeMemorial = isMemorialized && user.appSaleId == null && user.physicalQrLicense == null
   const showQrPurchaseCTA = isFreeMemorial && isGuardian
   const showQrVisitorEmpty = isFreeMemorial && !isGuardian
 
@@ -264,7 +264,9 @@ export default async function ProfileByIdPage({ params }: Props) {
     <div className="min-h-screen relative overflow-x-hidden mt-16">
       <AuroraBackdrop variant="page" intensity="bold" />
       <ProfileViewTracker profile={miniProfile} />
-      {isMemorialized && user.appSaleId && <QrScanTracker profileId={id} />}
+      {isMemorialized && (user.appSaleId != null || user.physicalQrLicense != null) && (
+        <QrScanTracker profileId={id} />
+      )}
       <main className="relative z-10">
         <ProfileBanner profile={profile} />
         <BentoGrid cards={isMemorialized ? memorializedCards : livingCards} />

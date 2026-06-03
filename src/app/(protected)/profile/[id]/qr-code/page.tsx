@@ -19,7 +19,7 @@ export default async function QrCodePage({ params }: Props) {
   const profile = await getProfileById(id)
   if (!profile) notFound()
 
-  const isFreeMemorial = profile.role === "APP_MEMO" && profile.appSaleId == null
+  const isFreeMemorial = profile.role === "APP_MEMO" && profile.appSaleId == null && profile.physicalQrLicense == null
   const isGuardian = profile.role === "APP_MEMO" && profile.guardedBy.some((g) => g.guardianId === session.user.id)
 
   const appUrl = process.env.APP_URL ?? "https://genealogiq.app"

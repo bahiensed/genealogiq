@@ -116,13 +116,24 @@ model DiscountCoupon {
   @@map("discount_coupons")
 }
 
+enum PackageType {
+  DIGITAL
+  PHYSICAL
+}
+
+enum PhysicalQrStatus {
+  AVAILABLE
+  ACTIVATED
+}
+
 model Package {
-  id          String  @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   description String?
-  price       Decimal @map("price") @db.Decimal(10, 2)
-  quantity    Int     @default(1)
-  isActive    Boolean @default(true) @map("is_active")
+  price       Decimal     @map("price") @db.Decimal(10, 2)
+  quantity    Int         @default(1)
+  isActive    Boolean     @default(true) @map("is_active")
+  type        PackageType @default(DIGITAL)
 
   // Stripe references owned by SEQ (provisioned via SEQ seed script).
   // Mirrored here so the Prisma client matches the shared DB schema.
@@ -132,8 +143,9 @@ model Package {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sales   Sale[]
-  coupons DiscountCoupon[] @relation("CouponPackages")
+  sales            Sale[]
+  coupons          DiscountCoupon[]    @relation("CouponPackages")
+  physicalLicenses PhysicalQrLicense[]
 
   @@map("packages")
 }
@@ -158,6 +170,8 @@ model Sale {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  physicalLicenses PhysicalQrLicense[]
 
   @@map("sales")
 }
@@ -437,7 +451,8 @@ model AppUser {
   emailTokens         EmailToken[]
   passwordResetTokens PasswordResetToken[]
 
-  qrCode QrCode?
+  qrCode            QrCode?
+  physicalQrLicense PhysicalQrLicense?
 
   @@index([tenantId])
   @@map("app_users")
@@ -803,8 +818,9 @@ model Tenant {
   suppliers    Supplier[]         @relation("SupplierTenant")
   supplierCats SupplierCategory[] @relation("SupplierCategoryTenant")
   tenantCats   TenantCategory[]   @relation("TenantCategoryTenant")
-  sales        Sale[]
-  qrInventory  QrInventory?
+  sales            Sale[]
+  qrInventory      QrInventory?
+  physicalLicenses PhysicalQrLicense[]
 
   @@map("tenants")
 }
@@ -839,4 +855,30 @@ model QrScan {
   @@index([qrCodeId])
   @@index([scannedAt])
   @@map("qr_scans")
+}
+
+// ─── Physical QR Code Licenses ───────────────────────────────────────────────
+
+model PhysicalQrLicense {
+  id      String           @id @default(cuid())
+  genCode String           @unique @map("gen_code")
+  status  PhysicalQrStatus @default(AVAILABLE)
+
+  saleId    Int     @map("sale_id")
+  sale      Sale    @relation(fields: [saleId],    references: [id], onDelete: Restrict)
+  packageId String  @map("package_id")
+  package   Package @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  tenantId  String  @map("tenant_id")
+  tenant    Tenant  @relation(fields: [tenantId],  references: [id], onDelete: Restrict)
+
+  // Set on activation — the APP_MEMO memorial created by the end-user.
+  appUserId   String?  @unique @map("app_user_id")
+  appUser     AppUser? @relation(fields: [appUserId], references: [id], onDelete: SetNull)
+  activatedAt DateTime? @map("activated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  @@index([tenantId, status])
+  @@map("physical_qr_licenses")
 }

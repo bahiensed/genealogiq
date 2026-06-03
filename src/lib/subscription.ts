@@ -25,6 +25,17 @@ const FEATURE_SELECT = {
   qrCodeAccess:          true,
 } as const
 
+export const PHYSICAL_QR_FEATURES: SubscriptionFeatures = {
+  code: "PHYSICAL_QR",
+  treeMaxMembers: 50,
+  bioMaxChars: 5000,
+  bioMaxImages: 10,
+  galleryMaxImages: 50,
+  galleryMaxVideos: 10,
+  geolocationFullAccess: true,
+  qrCodeAccess: true,
+}
+
 const FREE_FALLBACK: SubscriptionFeatures = {
   code: "FREE",
   treeMaxMembers: 5,
@@ -63,10 +74,11 @@ export const getFreeSubscription = cache(async (): Promise<SubscriptionFeatures>
 export const getMemorialFeatures = cache(async (profileId: string): Promise<SubscriptionFeatures> => {
   const now = new Date()
 
-  // 1. Direct memorial assignment via appSaleId
+  // 0. Physical QR license — no AppSale needed, fixed feature set
   const profile = await prisma.appUser.findUnique({
     where: { id: profileId },
     select: {
+      physicalQrLicense: { select: { id: true } },
       appSale: {
         select: {
           status:           true,
@@ -76,6 +88,8 @@ export const getMemorialFeatures = cache(async (profileId: string): Promise<Subs
       },
     },
   })
+
+  if (profile?.physicalQrLicense) return PHYSICAL_QR_FEATURES
 
   const assignedSale = profile?.appSale
   const assignedIsLive =
