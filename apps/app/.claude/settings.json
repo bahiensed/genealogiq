@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m ' *)",
+      "Bash(grep -n \"^import\\\\|from \\\\\"@vercel/blob\\\\|toast\\\\|fetch\\\\\\(\\\\`/api\" /home/douglas/Projects/genealogiq/genealogiq-app/src/components/bio-edit-form.tsx)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq add prisma/migrations/20260516000000_co_guardianship)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq commit -m ' *)",
+      "Bash(xargs file *)",
+      "Bash(grep -E \"\\\\.sql$\")",
+      "Bash(grep -A 60 \"^model AppUser \\\\b\\\\|^model AppUser$\" /tmp/seq-pull.prisma)",
+      "Bash(git rm *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(git status *)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(echo \"BMS exit=$?\")",
+      "Bash(tee /tmp/bms-tsc.log)",
+      "Bash(echo \"SEQ exit=$?\")",
+      "Bash(echo \"BMS-tsc=$?\")",
+      "Bash(echo \"SEQ-tsc=$?\")",
+      "Bash(echo \"BMS-lint=$?\")",
+      "Bash(echo \"SEQ-lint=$?\")",
+      "Bash(echo \"APP-tsc=$?\")",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-bms status --short)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq status --short)",
+      "Bash(STRIPE_SECRET_KEY=\"sk_test_51Sswo4IYiaGZjy4LXiGzjq0scdtAofGAA3MIa857BiNV1XoSC6mbzvk9T2yMl1rUnWtYp9b0TDpkXzKhMwfQJSaU00oR36xDvd\" npx tsx -)",
+      "Bash(git commit -m 'feat\\(discounts\\): migrate coupon scope from Subscription to Package *)",
+      "Bash(git commit -m 'fix\\(auth\\): unique session cookie name to prevent localhost collision *)",
+      "Bash(git commit -m 'feat\\(scripts\\): add cleanup-tenant utility for test data management *)",
+      "Bash(node -e ' *)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq add scripts/apply-checkout-session.ts)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq diff src/actions/sale.actions.ts)",
+      "Bash(git -C /home/douglas/Projects/genealogiq/genealogiq-seq add src/actions/sale.actions.ts)"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/home/douglas/Projects/genealogiq/genealogiq-seq",
+      "/home/douglas/.claude/plans",
+      "/home/douglas/Projects/genealogiq/genealogiq-bms",
+      "/home/douglas/Projects/genealogiq/genealogiq-seq/scripts"
+    ]
+  }
+}

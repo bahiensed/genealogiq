@@ -1,0 +1,28 @@
+"use client"
+
+import { useTransition } from "react"
+import { useRouter } from "next/navigation"
+import { Settings } from "lucide-react"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { createPortalSession } from "@/actions/billing"
+
+export function ManageSubscriptionButton() {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  const handle = () => {
+    startTransition(async () => {
+      const result = await createPortalSession()
+      if ("error" in result) { toast.error(result.error); return }
+      router.push(result.url)
+    })
+  }
+
+  return (
+    <Button className="shrink-0 gap-2" onClick={handle} disabled={isPending}>
+      <Settings className="h-4 w-4" />
+      {isPending ? "Opening…" : "Manage subscription"}
+    </Button>
+  )
+}
