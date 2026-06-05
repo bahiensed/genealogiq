@@ -1,0 +1,223 @@
+import Link from 'next/link'
+import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Building2, Factory, IdCard, Layers, QrCode, ArrowUpRight, Trophy, UserPlus } from 'lucide-react'
+import { verifySession } from '@/lib/dal'
+import { getDashboardStats } from '@/queries/dashboard'
+import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@/components/ui/card'
+import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart'
+import { RevenueByPackageChart } from '@/components/dashboard/revenue-by-package-chart'
+import { CustomerGrowthChart } from '@/components/dashboard/customer-growth-chart'
+import { TopSellersCard } from '@/components/dashboard/top-sellers-card'
+
+const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+
+export default async function DashboardPage() {
+  await verifySession()
+  const stats = await getDashboardStats()
+
+  return (
+    <div className="flex flex-col gap-6">
+      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+        Dashboard
+      </h1>
+
+      {/* Row 1 — Sales count */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Sales</CardTitle>
+            <CardAction><ShoppingCart className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.monthlyCount}</p>
+            <p className="text-sm text-muted-foreground mt-1">Sales this month</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Annual Sales</CardTitle>
+            <CardAction><BarChart3 className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.yearlyCount}</p>
+            <p className="text-sm text-muted-foreground mt-1">Sales this year</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Sales</CardTitle>
+            <CardAction><TrendingUp className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.totalCount}</p>
+            <p className="text-sm text-muted-foreground mt-1">All-time sales</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 2 — Revenue */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Revenue</CardTitle>
+            <CardAction><Banknote className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{usd.format(stats.monthlyRevenue)}</p>
+            <p className="text-sm text-muted-foreground mt-1">Revenue this month</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Annual Revenue</CardTitle>
+            <CardAction><DollarSign className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{usd.format(stats.yearlyRevenue)}</p>
+            <p className="text-sm text-muted-foreground mt-1">Revenue this year</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Revenue</CardTitle>
+            <CardAction><CircleDollarSign className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{usd.format(stats.totalRevenue)}</p>
+            <p className="text-sm text-muted-foreground mt-1">All-time revenue</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 3 — Charts */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Monthly Revenue</CardTitle>
+            <CardDescription>Last 12 months · active sales only</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MonthlyRevenueChart data={stats.monthlyRevenueChart} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Revenue by Package</CardTitle>
+            <CardDescription>Last 12 months · active sales only</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RevenueByPackageChart data={stats.revenueByPackageChart} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 3.5 — Growth insights */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle><UserPlus className="inline h-5 w-5 mr-2 align-text-bottom" />New Customers</CardTitle>
+            <CardDescription>New tenants per month · last 12 months</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CustomerGrowthChart data={stats.customerGrowthChart} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle><Trophy className="inline h-5 w-5 mr-2 align-text-bottom" />Top Sellers</CardTitle>
+            <CardDescription>By revenue · last 12 months</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <TopSellersCard data={stats.topSellersChart} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 4 — Entities */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Link href="/customers" className="inline-flex items-center gap-1 hover:underline">
+                Customers <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </CardTitle>
+            <CardAction><Building2 className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.customers}</p>
+            <p className="text-sm text-muted-foreground mt-1">Registered customers</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Link href="/suppliers" className="inline-flex items-center gap-1 hover:underline">
+                Suppliers <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </CardTitle>
+            <CardAction><Factory className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.suppliers}</p>
+            <p className="text-sm text-muted-foreground mt-1">Registered suppliers</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Link href="/users" className="inline-flex items-center gap-1 hover:underline">
+                System Users <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </CardTitle>
+            <CardAction><IdCard className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.systemUsers}</p>
+            <p className="text-sm text-muted-foreground mt-1">BMS operators</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Row 5 — Catalog */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Link href="/subscriptions" className="inline-flex items-center gap-1 hover:underline">
+                Subscriptions (B2C) <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </CardTitle>
+            <CardAction><Layers className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.subscriptions}</p>
+            <p className="text-sm text-muted-foreground mt-1">Active subscriptions</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Link href="/packages" className="inline-flex items-center gap-1 hover:underline">
+                QR Code Packages <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </CardTitle>
+            <CardAction><QrCode className="h-5 w-5 text-muted-foreground" /></CardAction>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{stats.packages}</p>
+            <p className="text-sm text-muted-foreground mt-1">Active packages</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
