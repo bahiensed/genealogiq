@@ -57,6 +57,15 @@ export async function approveTribute(tributeId: string, profileId: string) {
   const profile = await getProfileById(profileId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
 
+  // Ensure the tribute actually belongs to the profile the caller manages.
+  // Without this, a manager of profile A could moderate tributes on any other
+  // profile by passing their own profileId + an arbitrary tributeId (IDOR).
+  const owned = await prisma.tribute.findUnique({
+    where:  { id: tributeId },
+    select: { profileId: true },
+  })
+  if (!owned || owned.profileId !== profileId) return { error: "Not authorized." }
+
   const tribute = await prisma.tribute.update({
     where: { id: tributeId },
     data:  { status: "APPROVED" },
@@ -89,6 +98,14 @@ export async function rejectTribute(tributeId: string, profileId: string) {
 
   const profile = await getProfileById(profileId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+
+  // Ensure the tribute actually belongs to the profile the caller manages (see
+  // approveTribute) — prevents cross-profile moderation via a forged profileId.
+  const owned = await prisma.tribute.findUnique({
+    where:  { id: tributeId },
+    select: { profileId: true },
+  })
+  if (!owned || owned.profileId !== profileId) return { error: "Not authorized." }
 
   const tribute = await prisma.tribute.update({
     where: { id: tributeId },
