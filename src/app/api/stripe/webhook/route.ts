@@ -34,17 +34,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
-  try {
-    // Idempotency: stripe_events.id is the PK. A duplicate delivery throws P2002.
-    await prisma.stripeEvent.create({ data: { id: event.id, type: event.type } })
-  } catch (err: unknown) {
-    if ((err as { code?: string }).code === "P2002") {
-      return NextResponse.json({ received: true, duplicate: true })
-    }
-    console.error("[seq-stripe-webhook] stripeEvent insert failed", err)
-    return NextResponse.json({ error: "internal" }, { status: 500 })
-  }
-
   const session = event.data.object as Stripe.Checkout.Session
 
   // Only one-time payment checkouts produced by createPackageCheckoutSession.
@@ -69,8 +58,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true, ignored: "bad metadata" })
   }
 
+  // Fast-path idempotency: skip events we've already fully processed.
+  const seen = await prisma.stripeEvent.findUnique({ where: { id: event.id }, select: { id: true } })
+  if (seen) return NextResponse.json({ received: true, duplicate: true })
+
   try {
+    // Process FIRST (idempotent via Sale.stripeSessionId unique), then record the
+    // event. Recording only after a successful apply means a failed apply leaves
+    // no StripeEvent row, so Stripe's retry reprocesses it instead of being
+    // skipped as a duplicate — closing the "event seen but sale missing" gap.
     await applyCheckoutSession(session, ctx as CheckoutContext)
+    await prisma.stripeEvent.create({ data: { id: event.id, type: event.type } }).catch((err: unknown) => {
+      // A concurrent delivery may have recorded it first — harmless, since the
+      // apply above is idempotent. Re-throw anything that isn't a unique-violation.
+      if ((err as { code?: string }).code !== "P2002") throw err
+    })
   } catch (err: unknown) {
     console.error("[seq-stripe-webhook] applyCheckoutSession failed", err)
     return NextResponse.json({ error: "internal" }, { status: 500 })
