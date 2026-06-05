@@ -2,6 +2,7 @@
 
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
@@ -10,12 +11,21 @@ import { sendAppWelcomeEmail } from '@/lib/email'
 type ActionError   = { error: string }
 type ActionSuccess = { success: string }
 
+// The sale price is supplied by the client form, so it must be validated
+// server-side: a finite, non-negative amount within a sane upper bound. Without
+// this, a tenant user could register a sale at an arbitrary/forged value.
+const saleValueSchema = z.number().finite().min(0).max(1_000_000)
+
 export async function createAppSale(
   appUserId: string,
   subscriptionId: string,
   value: number,
 ): Promise<ActionError | ActionSuccess> {
   const { customerId, user } = await verifyTenantSession()
+
+  const parsedValue = saleValueSchema.safeParse(value)
+  if (!parsedValue.success) return { error: 'Invalid sale value.' }
+  const saleValue = parsedValue.data
 
   const appUser = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
@@ -52,7 +62,7 @@ export async function createAppSale(
         data: {
           appUserId,
           subscriptionId,
-          value,
+          value:           saleValue,
           tenantId:        customerId,
           soldById:        user.id,
           status:          'active',
