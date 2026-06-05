@@ -174,7 +174,13 @@ async function upsertAddress(
 
   if (!hasData) {
     if (existingId) {
-      await prisma.address.delete({ where: { id: existingId } }).catch(() => {})
+      // Orphan-address cleanup is best-effort: a missing row (P2025) is fine,
+      // but any other failure should surface in logs, not be swallowed silently.
+      await prisma.address.delete({ where: { id: existingId } }).catch((err: unknown) => {
+        if ((err as { code?: string }).code !== "P2025") {
+          console.error("[upsertAddress] failed to delete orphan address", existingId, err)
+        }
+      })
     }
     return null
   }
