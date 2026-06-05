@@ -34,20 +34,19 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Idempotency: stripe_events.id is the PK. A duplicate delivery throws P2002.
-    await prisma.stripeEvent.create({ data: { id: event.id, type: event.type } })
+    // Idempotency + atomicity: the StripeEvent PK insert and the sale upsert run
+    // in one transaction. A duplicate delivery throws P2002 (caught below); if the
+    // upsert fails, the StripeEvent row rolls back too, so Stripe's retry can
+    // reprocess the event instead of it being permanently marked as "seen".
+    await prisma.$transaction(async (tx) => {
+      await tx.stripeEvent.create({ data: { id: event.id, type: event.type } })
+      await upsertSaleFromSubscription(tx, event.data.object as Stripe.Subscription)
+    })
   } catch (err: unknown) {
     if ((err as { code?: string }).code === "P2002") {
       return NextResponse.json({ received: true, duplicate: true })
     }
-    console.error("[stripe-webhook] stripeEvent insert failed", err)
-    return NextResponse.json({ error: "internal" }, { status: 500 })
-  }
-
-  try {
-    await upsertSaleFromSubscription(prisma, event.data.object as Stripe.Subscription)
-  } catch (err: unknown) {
-    console.error("[stripe-webhook] upsertSaleFromSubscription failed", err)
+    console.error("[stripe-webhook] processing failed", err)
     return NextResponse.json({ error: "internal" }, { status: 500 })
   }
 
