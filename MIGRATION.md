@@ -6,6 +6,20 @@ Guia passo a passo para consolidar `genealogiq-bms`, `genealogiq-seq` e `genealo
 
 ---
 
+## Status de execução
+
+- ✅ **Fase 1a** (esqueleto) — pronto.
+- ✅ **Fase 1b** (import + workspace-ize) — **executado e validado localmente** neste diretório (`monorepo/` já é um repo git com 344 commits). Detalhes:
+  - `git init` + 3× `git subtree add` a partir dos **repos locais** (não dos URLs do GitHub, pois o sandbox não tinha credenciais) — histórico preservado, e já inclui os commits de correção de segurança/P1 ainda não empurrados.
+  - Pacotes renomeados para `@genealogiq/{bms,seq,app}` (o SEQ tinha typo `genealogic-seq`), scripts `typecheck`/`db:generate` adicionados, `.github` e `package-lock.json` por app removidos, CI raiz pnpm+turbo adicionada.
+  - `pnpm install` (1 lockfile), `pnpm db:generate` e **`pnpm typecheck` passam 0 erros nos 3** (6/6 tasks do Turbo).
+  - **Achado:** o pnpm (estrito) expôs **deps fantasma** herdadas do npm (ex.: `@radix-ui/react-avatar` importado sem ser declarado — só `radix-ui` está no `package.json`). Desbloqueado com `.npmrc` `shamefully-hoist=true` (transitório). _Follow-up:_ declarar as deps reais e remover o flag.
+- ⏭️ **Resta a você** (precisa de credencial/painel): criar o repo vazio `bahiensed/genealogiq` no GitHub, `git remote add origin …` + `git push -u origin main`, e a **Fase 1c (Vercel)** abaixo.
+
+> Nota: o `monorepo/` vive dentro de `Projects/genealogiq/` só para revisão; mova-o para onde quiser. Os 3 repos originais continuam intactos ao lado. O `node_modules/` instalado é grande e ignorado pelo git — pode apagar (`rm -rf monorepo/node_modules`) e reinstalar com `pnpm install` quando precisar.
+
+---
+
 ## Estado atual deste esqueleto (Fase 1a — pronto)
 
 ```
