@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Monorepo quality gates. typecheck is blocking; schema-parity and lint are
+# informational until Phase 4 (single schema) and the lint baseline cleanup.
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      # Prisma generate/validate never connect to the DB — a dummy URL suffices.
+      DATABASE_URL: postgresql://user:pass@localhost:5432/db
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma clients
+        run: pnpm db:generate
+
+      - name: Type check (blocking)
+        run: pnpm typecheck
+
+      - name: Schema parity (informational until Phase 4)
+        run: pnpm check:schema-parity || true
+
+      - name: Lint (non-blocking — pre-existing baseline)
+        run: pnpm lint || true

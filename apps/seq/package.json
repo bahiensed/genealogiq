@@ -1,5 +1,5 @@
 {
-  "name": "genealogic-seq",
+  "name": "@genealogiq/seq",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "npx prisma generate"
+    "postinstall": "npx prisma generate",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
