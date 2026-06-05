@@ -1,0 +1,29 @@
+'use client'
+
+import { DataTable } from '@/components/ui/data-table'
+import { getColumns, type UserRow } from './columns'
+
+interface UsersDataTableProps {
+  currentUserId: string
+  data: UserRow[]
+}
+
+const COLUMN_LABELS: Record<string, string> = {
+  name:      'Name',
+  email:     'E-mail',
+  role:      'Role',
+  isActive:  'Status',
+  createdAt: 'Created at',
+}
+
+export function UsersDataTable({ currentUserId, data }: UsersDataTableProps) {
+  const columns = getColumns(currentUserId)
+  return (
+    <DataTable
+      columns={columns}
+      data={data}
+      emptyMessage="No users found."
+      columnLabels={COLUMN_LABELS}
+    />
+  )
+}
