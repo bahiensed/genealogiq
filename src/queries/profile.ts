@@ -58,7 +58,7 @@ export async function getProfileById(id: string) {
       physicalQrLicense: { select: { id: true } },
       guardedBy: {
         where:  { status: "ACCEPTED" },
-        select: { guardianId: true },
+        select: { guardianId: true, status: true },
       },
     },
   })

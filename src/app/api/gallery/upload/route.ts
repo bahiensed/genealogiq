@@ -26,7 +26,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         const { profileId } = parseClientPayload(clientPayload)
         const profile = await prisma.appUser.findUnique({
           where:  { id: profileId },
-          select: { id: true, guardedBy: { where: { status: "ACCEPTED" }, select: { guardianId: true } } },
+          select: { id: true, guardedBy: { where: { status: "ACCEPTED" }, select: { guardianId: true, status: true } } },
         })
         if (!profile) throw new Error("Profile not found")
         if (!canManageProfile(profile, session.user.id)) throw new Error("Forbidden")
