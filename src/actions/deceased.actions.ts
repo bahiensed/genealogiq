@@ -199,7 +199,14 @@ export async function addGuardian(
   memorialId: string,
   guardianId: string,
 ): Promise<ActionError | ActionSuccess> {
-  await verifyTenantSession()
+  const { customerId } = await verifyTenantSession()
+
+  // Both the memorial and the guardian must belong to the caller's tenant,
+  // otherwise a tenant user could link profiles across tenants (IDOR).
+  const scoped = await prisma.appUser.count({
+    where: { id: { in: [memorialId, guardianId] }, tenantId: customerId },
+  })
+  if (scoped !== 2) return { error: 'Profile not found.' }
 
   try {
     await prisma.appUserGuardian.create({
@@ -220,7 +227,14 @@ export async function removeGuardian(
   memorialId: string,
   guardianId: string,
 ): Promise<ActionError | void> {
-  await verifyTenantSession()
+  const { customerId } = await verifyTenantSession()
+
+  // Both ids must belong to the caller's tenant (see addGuardian) — prevents
+  // unlinking guardians of memorials owned by another tenant (IDOR).
+  const scoped = await prisma.appUser.count({
+    where: { id: { in: [memorialId, guardianId] }, tenantId: customerId },
+  })
+  if (scoped !== 2) return { error: 'Relation not found.' }
 
   try {
     await prisma.appUserGuardian.delete({
