@@ -279,8 +279,14 @@ export async function updateMember(rootId: string, memberId: string, data: unkno
   })
   if (!member) return { error: "Member not found." }
 
-  // Non-ghost members can only be edited via canManageProfile (own/guardian).
-  if (member.role !== "APP_GHOST") {
+  if (member.role === "APP_GHOST") {
+    // Ghosts have no owner, so authorize by tree membership: the ghost must be
+    // reachable from rootId (which the caller manages). Without this, a manager
+    // of one tree could overwrite a ghost belonging to another user's tree (IDOR).
+    const memberIds = await getTreeMemberIds(rootId)
+    if (!memberIds.has(memberId)) return { error: "Not authorized." }
+  } else {
+    // Real members (own/guardian) are authorized via canManageProfile.
     const target = await getProfileById(memberId)
     if (!target || !canManageProfile(target, session.user.id)) return { error: "Not authorized." }
   }
@@ -318,6 +324,18 @@ export async function updateRelation(rootId: string, relationId: string, data: u
   const parsed = updateRelationSchema.safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
+  // The relation must belong to rootId's tree (both endpoints reachable from
+  // root). Without this, any manager could edit arbitrary relations by id (IDOR).
+  const relation = await prisma.familyRelation.findUnique({
+    where:  { id: relationId },
+    select: { fromId: true, toId: true },
+  })
+  if (!relation) return { error: "Relation not found." }
+  const memberIds = await getTreeMemberIds(rootId)
+  if (!memberIds.has(relation.fromId) || !memberIds.has(relation.toId)) {
+    return { error: "Not authorized." }
+  }
+
   const { subtype, startDate, endDate } = parsed.data
 
   await prisma.familyRelation.update({
@@ -336,6 +354,18 @@ export async function removeRelation(rootId: string, relationId: string) {
 
   const profile = await getProfileById(rootId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+
+  // The relation must belong to rootId's tree (see updateRelation) — prevents
+  // deleting arbitrary relations from other users' trees by id (IDOR).
+  const relation = await prisma.familyRelation.findUnique({
+    where:  { id: relationId },
+    select: { fromId: true, toId: true },
+  })
+  if (!relation) return { error: "Relation not found." }
+  const memberIds = await getTreeMemberIds(rootId)
+  if (!memberIds.has(relation.fromId) || !memberIds.has(relation.toId)) {
+    return { error: "Not authorized." }
+  }
 
   await prisma.familyRelation.delete({ where: { id: relationId } })
   revalidatePath(`/profile/${rootId}/tree`)
@@ -359,7 +389,11 @@ export async function removeMember(rootId: string, memberId: string) {
   if (!member) return { error: "Member not found." }
 
   if (member.role === "APP_GHOST") {
-    // Ghosts only live inside one tree — full delete.
+    // Ghosts only live inside one tree — full delete. Authorize by tree
+    // membership first: the ghost must be reachable from rootId, otherwise a
+    // manager of one tree could delete a ghost from another tree (IDOR).
+    const memberIds = await getTreeMemberIds(rootId)
+    if (!memberIds.has(memberId)) return { error: "Not authorized." }
     await prisma.appUser.delete({ where: { id: memberId } })
   } else {
     // Real users / memorials keep their profile. Disconnect them from THIS
