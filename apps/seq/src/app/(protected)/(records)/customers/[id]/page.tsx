@@ -4,9 +4,9 @@ import { getCustomer } from '@/queries/customers'
 import { getCustomerCategories } from '@/queries/customer-categories'
 import { CustomerForm } from '@/components/customers/customer-form'
 import { MemorializedDataTable } from '@/components/memorialized/memorialized-data-table'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@genealogiq/ui/button'
+import { Badge } from '@genealogiq/ui/badge'
+import { Separator } from '@genealogiq/ui/separator'
 import type { AppUserFormValues } from '@/schemas/app-user.schema'
 
 export default async function EditCustomerPage({ params }: { params: Promise<{ id: string }> }) {

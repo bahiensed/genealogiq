@@ -8,10 +8,10 @@ import { userResolver, userDefaultValues, ASSIGNABLE_ROLES, type UserFormValues 
 import { createUser, updateUser } from '@/actions/user.actions'
 import { maskCpf, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { MaskedInput } from '@/components/ui/masked-input'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Switch } from '@genealogiq/ui/switch'
+import { MaskedInput } from '@genealogiq/ui/masked-input'
 import { AddressSection } from '@/components/address/address-section'
 import {
   Select,
@@ -19,14 +19,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@genealogiq/ui/select'
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from '@/components/ui/field'
+} from '@genealogiq/ui/field'
 
 const ROLE_LABELS: Record<string, string> = {
   OWNER:     'Owner',

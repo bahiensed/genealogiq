@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { Button } from '@genealogiq/ui/button'
 
 const COOKIE_NAME = 'cookie_consent'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365

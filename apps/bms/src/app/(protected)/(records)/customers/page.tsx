@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { verifySession } from '@/lib/dal'
 import { getCustomers } from '@/queries/customers'
 import { CustomersDataTable } from '@/components/customers/customers-data-table'
-import { Button } from '@/components/ui/button'
+import { Button } from '@genealogiq/ui/button'
 
 export default async function CustomersPage() {
   const session = await verifySession()

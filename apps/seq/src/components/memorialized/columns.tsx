@@ -3,14 +3,14 @@
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@genealogiq/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
+} from '@genealogiq/ui/dropdown-menu'
+import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 
 export type MemorializedRow = {
   id:        string

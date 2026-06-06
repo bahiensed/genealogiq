@@ -1,6 +1,6 @@
 'use client'
 
-import { DataTable } from '@/components/ui/data-table'
+import { DataTable } from '@genealogiq/ui/data-table'
 import { buildLicenseColumns } from './columns'
 import type { LicenseRow } from '@/queries/licenses'
 

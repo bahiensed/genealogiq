@@ -5,16 +5,16 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@genealogiq/ui/button'
+import { Badge } from '@genealogiq/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
-import { ConfirmDeleteDialog } from '@/components/ui/confirm-delete-dialog'
+} from '@genealogiq/ui/dropdown-menu'
+import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
+import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
 import { toggleCustomerActive, deleteCustomer, resendCustomerEmail } from '@/actions/customer.actions'
 
 export type CustomerRow = {

@@ -8,7 +8,7 @@ import {
   ChartLegend,
   ChartLegendContent,
   type ChartConfig,
-} from '@/components/ui/chart'
+} from '@genealogiq/ui/chart'
 
 const PALETTE = [
   'var(--chart-1)',

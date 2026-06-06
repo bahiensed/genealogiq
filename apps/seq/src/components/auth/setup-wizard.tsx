@@ -14,14 +14,14 @@ import { setupSystem } from '@/actions/auth'
 
 import { Eye, EyeOff } from 'lucide-react'
 import { AddressSection } from '@/components/address/address-section'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
-import { MaskedInput } from '@/components/ui/masked-input'
-import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@genealogiq/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@genealogiq/ui/card'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
+import { Input } from '@genealogiq/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@genealogiq/ui/input-group'
+import { MaskedInput } from '@genealogiq/ui/masked-input'
+import { Progress } from '@genealogiq/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@genealogiq/ui/select'
 
 type AdminFormValues = z.infer<typeof SetupSchema>
 

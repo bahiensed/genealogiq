@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@genealogiq/ui/select'
 
 const PRIORITY_CODES = ['BR', 'MX', 'US']
 const priority = COUNTRIES.filter((c) => PRIORITY_CODES.includes(c.code))

@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@genealogiq/ui/avatar'
 import { getInitials } from '@/lib/utils'
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })

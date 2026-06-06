@@ -4,7 +4,7 @@ import { getPackages } from '@/queries/packages'
 import { getPhysicalQrSummary, getPhysicalQrTotals } from '@/queries/physical-qr'
 import { PackagesDataTable } from '@/components/packages/packages-data-table'
 import { PhysicalQrDataTable } from '@/components/physical-qr/physical-qr-data-table'
-import { Button } from '@/components/ui/button'
+import { Button } from '@genealogiq/ui/button'
 
 export default async function PhysicalQrPage() {
   const session = await verifySession()

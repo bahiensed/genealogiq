@@ -1,6 +1,6 @@
 'use client'
 
-import { DataTable } from '@/components/ui/data-table'
+import { DataTable } from '@genealogiq/ui/data-table'
 import { getColumns, type UserRow } from './columns'
 
 interface UsersDataTableProps {

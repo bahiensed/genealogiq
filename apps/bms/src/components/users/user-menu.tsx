@@ -3,14 +3,14 @@
 import { useTransition } from "react"
 import Link from "next/link"
 import { LogOut, User } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@genealogiq/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@genealogiq/ui/dropdown-menu"
 import { logout } from "@/actions/auth"
 
 interface UserMenuProps {

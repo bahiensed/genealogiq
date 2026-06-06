@@ -10,12 +10,12 @@ import {
   type DiscountCouponFormValues,
 } from '@/schemas/discount-coupon.schema'
 import { createDiscountCoupon } from '@/actions/discount-coupon.actions'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Textarea } from '@genealogiq/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@genealogiq/ui/select'
+import { Checkbox } from '@genealogiq/ui/checkbox'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 
 interface PackageOption {
   id:       string

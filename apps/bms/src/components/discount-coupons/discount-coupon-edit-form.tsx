@@ -4,10 +4,10 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { updateDiscountCoupon } from '@/actions/discount-coupon.actions'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Textarea } from '@genealogiq/ui/textarea'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 
 interface DiscountCouponEditFormProps {
   id:           string

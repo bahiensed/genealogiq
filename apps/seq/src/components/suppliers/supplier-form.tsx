@@ -8,11 +8,11 @@ import { supplierResolver, supplierDefaultValues, type SupplierFormValues } from
 import { createSupplier, updateSupplier } from '@/actions/supplier.actions'
 import { maskCpf, maskCnpj, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
-import { MaskedInput } from '@/components/ui/masked-input'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Textarea } from '@genealogiq/ui/textarea'
+import { Switch } from '@genealogiq/ui/switch'
+import { MaskedInput } from '@genealogiq/ui/masked-input'
 import { AddressSection } from '@/components/address/address-section'
 import {
   Select,
@@ -20,14 +20,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@genealogiq/ui/select'
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from '@/components/ui/field'
+} from '@genealogiq/ui/field'
 
 interface Category {
   id: string

@@ -7,15 +7,15 @@ import { toast } from 'sonner'
 import { Fingerprint, QrCode } from 'lucide-react'
 import { saleResolver, saleDefaultValues, type SaleFormValues } from '@/schemas/sale.schema'
 import { createSale } from '@/actions/sale.actions'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@genealogiq/ui/select'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +26,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 
 interface Package {
   id:       string

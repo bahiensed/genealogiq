@@ -1,9 +1,9 @@
 'use client'
 
 import { useTransition } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
+import { Badge } from '@genealogiq/ui/badge'
+import { Button } from '@genealogiq/ui/button'
 import { Printer, MapPin, QrCode } from 'lucide-react'
 import { markQrPrinted, markQrInstalled } from '@/actions/qr-code.actions'
 

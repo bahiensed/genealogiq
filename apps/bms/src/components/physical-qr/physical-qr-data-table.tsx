@@ -1,7 +1,7 @@
 'use client'
 
 import type { ColumnDef } from '@tanstack/react-table'
-import { DataTable } from '@/components/ui/data-table'
+import { DataTable } from '@genealogiq/ui/data-table'
 import type { PhysicalQrRow } from '@/queries/physical-qr'
 
 const columns: ColumnDef<PhysicalQrRow>[] = [

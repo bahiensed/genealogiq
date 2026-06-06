@@ -3,9 +3,9 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { Copy, Check } from 'lucide-react'
 import { useState } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
+import { Badge } from '@genealogiq/ui/badge'
+import { Button } from '@genealogiq/ui/button'
+import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { formatGenCode } from '@/lib/gen-code'
 import type { LicenseRow } from '@/queries/licenses'
 

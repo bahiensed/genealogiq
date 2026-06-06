@@ -10,7 +10,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
+} from '@genealogiq/ui/breadcrumb'
 
 const RESOLVABLE = ['users', 'customers', 'suppliers', 'memorialized', 'supplier-categories', 'customer-categories'] as const
 type ResolvableType = (typeof RESOLVABLE)[number]

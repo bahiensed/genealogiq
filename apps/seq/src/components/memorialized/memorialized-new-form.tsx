@@ -9,10 +9,10 @@ import { deceasedResolver, deceasedDefaultValues, type DeceasedFormValues } from
 import { createDeceased } from '@/actions/deceased.actions'
 import { GenderSelect } from '@/components/ui/gender-select'
 import { CountrySelect } from '@/components/ui/country-select'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Textarea } from '@genealogiq/ui/textarea'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 import { cn } from '@/lib/utils'
 
 interface Props {

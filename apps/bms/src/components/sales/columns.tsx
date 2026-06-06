@@ -4,14 +4,14 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal, Undo2 } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@genealogiq/ui/button'
+import { Badge } from '@genealogiq/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@genealogiq/ui/dropdown-menu'
 import {
   Dialog,
   DialogClose,
@@ -20,8 +20,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
+} from '@genealogiq/ui/dialog'
+import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { reverseSale } from '@/actions/sale.actions'
 
 export type SaleRow = {

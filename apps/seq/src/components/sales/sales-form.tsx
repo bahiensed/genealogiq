@@ -6,17 +6,17 @@ import { toast } from 'sonner'
 import { Search, X } from 'lucide-react'
 import { createAppSale } from '@/actions/sale.actions'
 import { maskCurrency, parseCurrencyDigits } from '@/lib/masks'
-import { MaskedInput } from '@/components/ui/masked-input'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { MaskedInput } from '@genealogiq/ui/masked-input'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@genealogiq/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -24,7 +24,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@genealogiq/ui/dialog'
 
 interface AppUserResult {
   id:        string

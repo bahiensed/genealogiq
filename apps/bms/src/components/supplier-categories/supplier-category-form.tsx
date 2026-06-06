@@ -6,11 +6,11 @@ import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
 import { supplierCategoryResolver, supplierCategoryDefaultValues, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
 import { createSupplierCategory, updateSupplierCategory } from '@/actions/supplier-category.actions'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Textarea } from '@genealogiq/ui/textarea'
+import { Switch } from '@genealogiq/ui/switch'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 
 interface SupplierCategoryFormProps {
   id?: string
