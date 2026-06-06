@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { hashToken } from '@/lib/token'
 import { VerifyEmailCard } from '@/components/auth/verify-email-card'
 
 interface Props {
@@ -22,12 +23,12 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
   }
 
   const record = await prisma.emailToken.findUnique({
-    where: { token },
+    where: { token: hashToken(token) },
   })
 
   if (!record || record.expiresAt < new Date()) {
     if (record) {
-      await prisma.emailToken.delete({ where: { token } })
+      await prisma.emailToken.delete({ where: { token: hashToken(token) } })
     }
     return (
       <VerifyEmailCard
@@ -50,7 +51,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
         where: { id: appUserId },
         data: { email: record.newEmail!, emailVerified: new Date() },
       }),
-      prisma.emailToken.delete({ where: { token } }),
+      prisma.emailToken.delete({ where: { token: hashToken(token) } }),
     ])
 
     return (
@@ -69,7 +70,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
       where: { id: appUserId },
       data: { emailVerified: new Date() },
     }),
-    prisma.emailToken.delete({ where: { token } }),
+    prisma.emailToken.delete({ where: { token: hashToken(token) } }),
   ])
 
   return (

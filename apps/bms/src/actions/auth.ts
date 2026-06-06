@@ -11,6 +11,7 @@ import { companySchema, type CompanyFormValues } from "@/schemas/company.schema"
 import { sendPasswordResetEmail, sendEmailChangeEmail, sendAccountDeletionEmail } from "@/lib/email"
 import { verifySession } from "@/lib/dal"
 import { getClientIp, checkRateLimit } from "@/lib/rate-limit"
+import { hashToken } from "@/lib/token"
 import { randomBytes } from "crypto"
 
 type AuthState = {
@@ -130,7 +131,7 @@ export async function forgotPassword(
 
   const token = randomBytes(32).toString("hex")
   await prisma.passwordResetToken.create({
-    data: { token, userId: user.id, expiresAt: new Date(Date.now() + 60 * 60 * 1000) },
+    data: { token: hashToken(token), userId: user.id, expiresAt: new Date(Date.now() + 60 * 60 * 1000) },
   })
 
   await sendPasswordResetEmail(validated.data, token)
@@ -153,7 +154,7 @@ export async function resetPassword(
   if (!limit.allowed) return { error: `Too many attempts. Try again in ${Math.ceil(limit.retryAfter / 60)} minute(s).` }
 
   const record = await prisma.passwordResetToken.findUnique({
-    where: { token },
+    where: { token: hashToken(token) },
     select: { userId: true, expiresAt: true },
   })
 
@@ -171,7 +172,7 @@ export async function resetPassword(
       where: { id: userId },
       data: { password: hashedPassword },
     }),
-    prisma.passwordResetToken.delete({ where: { token } }),
+    prisma.passwordResetToken.delete({ where: { token: hashToken(token) } }),
   ])
 
   redirect("/sign-in?reset=true")
@@ -246,7 +247,7 @@ export async function requestEmailChange(
   const token = randomBytes(32).toString("hex")
   await prisma.emailToken.create({
     data: {
-      token,
+      token: hashToken(token),
       type: 'CHANGE',
       userId,
       newEmail: validated.data.newEmail,

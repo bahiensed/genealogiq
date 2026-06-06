@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
+import { hashToken } from '@/lib/token'
 import { verifyAdmin } from '@/lib/dal'
 import { sendWelcomeEmail } from '@/lib/email'
 import { userSchema, type UserFormValues } from '@/schemas/user.schema'
@@ -43,7 +44,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
       })
       const t = randomBytes(32).toString('hex')
       await tx.passwordResetToken.create({
-        data: { token: t, userId: user.id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
+        data: { token: hashToken(t), userId: user.id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
       })
       return { token: t }
     }))
@@ -131,7 +132,7 @@ export async function resendWelcomeEmail(userId: string): Promise<ActionError | 
 
   const token = randomBytes(32).toString('hex')
   await prisma.passwordResetToken.create({
-    data: { token, userId, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
+    data: { token: hashToken(token), userId, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
   })
 
   await sendWelcomeEmail(user.email, token)
