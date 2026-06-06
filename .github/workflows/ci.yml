@@ -35,6 +35,9 @@ jobs:
       - name: Type check (blocking)
         run: pnpm typecheck
 
+      - name: Unit tests (blocking)
+        run: pnpm test
+
       - name: Schema parity (informational until Phase 4)
         run: pnpm check:schema-parity || true
 
