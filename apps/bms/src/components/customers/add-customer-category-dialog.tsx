@@ -4,17 +4,17 @@ import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { createCustomerCategory } from '@/actions/customer-category.actions'
 import { customerCategoryResolver, customerCategoryDefaultValues, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Textarea } from '@genealogiq/ui/textarea'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '@genealogiq/ui/dialog'
 
 interface AddCustomerCategoryDialogProps {
   onCreated: (category: { id: string; name: string }) => void

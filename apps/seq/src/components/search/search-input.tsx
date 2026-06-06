@@ -2,9 +2,9 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from '@/components/ui/input-group'
+} from '@genealogiq/ui/input-group'
 import { SearchIcon } from 'lucide-react'
-import { Kbd } from '@/components/ui/kbd'
+import { Kbd } from '@genealogiq/ui/kbd'
 
 export function SearchInput() {
   return (

@@ -3,7 +3,7 @@ import { forbidden } from 'next/navigation'
 import { getCustomerModules } from '@/lib/dal'
 import { getSupplierCategories } from '@/queries/supplier-categories'
 import { SupplierCategoriesDataTable } from '@/components/supplier-categories/supplier-categories-data-table'
-import { Button } from '@/components/ui/button'
+import { Button } from '@genealogiq/ui/button'
 
 export default async function SupplierCategoriesPage() {
   const modules = await getCustomerModules()

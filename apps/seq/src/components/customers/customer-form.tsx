@@ -9,11 +9,11 @@ import { CountrySelect } from '@/components/ui/country-select'
 import { updateCustomer } from '@/actions/customer.actions'
 import { maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
-import { MaskedInput } from '@/components/ui/masked-input'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Textarea } from '@genealogiq/ui/textarea'
+import { Switch } from '@genealogiq/ui/switch'
+import { MaskedInput } from '@genealogiq/ui/masked-input'
 import { AddressSection } from '@/components/address/address-section'
 import { AddCustomerCategoryDialog } from '@/components/customer-categories/add-customer-category-dialog'
 import {
@@ -22,14 +22,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+} from '@genealogiq/ui/select'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
+} from '@genealogiq/ui/accordion'
 
 interface Category {
   id: string

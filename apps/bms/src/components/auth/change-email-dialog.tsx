@@ -3,11 +3,11 @@
 import { useState, useActionState } from 'react'
 import { requestEmailChange } from '@/actions/auth'
 import { Eye, EyeOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
-import { Label } from '@/components/ui/label'
+import { Button } from '@genealogiq/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@genealogiq/ui/dialog'
+import { Input } from '@genealogiq/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@genealogiq/ui/input-group'
+import { Label } from '@genealogiq/ui/label'
 
 export function ChangeEmailDialog() {
   const [open, setOpen] = useState(false)

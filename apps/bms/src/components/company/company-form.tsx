@@ -7,19 +7,19 @@ import { companyResolver, type CompanyFormValues } from '@/schemas/company.schem
 import { updateCompany } from '@/actions/company.actions'
 import { maskCnpj, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { MaskedInput } from '@/components/ui/masked-input'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Switch } from '@genealogiq/ui/switch'
+import { MaskedInput } from '@genealogiq/ui/masked-input'
 import { AddressSection } from '@/components/address/address-section'
-import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel, FieldSeparator } from '@genealogiq/ui/field'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@genealogiq/ui/select'
 
 interface CompanyFormProps {
   id: string

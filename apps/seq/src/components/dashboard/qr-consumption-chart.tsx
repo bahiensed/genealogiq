@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from '@/components/ui/chart'
+} from '@genealogiq/ui/chart'
 
 const chartConfig = {
   count: { label: 'QR codes sold', color: 'var(--primary)' },

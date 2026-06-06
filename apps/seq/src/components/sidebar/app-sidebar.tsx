@@ -16,7 +16,7 @@ import {
   type ModuleKey,
 } from '@/components/sidebar/menu-items'
 import { ChevronDown } from 'lucide-react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@genealogiq/ui/collapsible'
 import {
   Sidebar,
   SidebarContent,
@@ -28,7 +28,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar'
+} from '@genealogiq/ui/sidebar'
 
 type Modules = Record<ModuleKey, boolean>
 

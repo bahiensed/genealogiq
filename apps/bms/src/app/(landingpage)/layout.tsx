@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { auth } from "@/auth"
 import { getCurrentYear } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button } from "@genealogiq/ui/button"
 import { ModeToggle } from "@/components/theme/mode-toggle"
 
 export default async function Layout({

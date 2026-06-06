@@ -7,10 +7,10 @@ import { toast } from 'sonner'
 import { lookupZip } from '@/lib/zipLookup'
 import { maskCep, maskUsZip, maskMxZip, unmaskDigits } from '@/lib/masks'
 import { STATES_BY_COUNTRY } from '@/constants/states'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { Field, FieldError, FieldLabel } from '@genealogiq/ui/field'
+import { Input } from '@genealogiq/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@genealogiq/ui/select'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@genealogiq/ui/input-group'
 
 const SUPPORTED_COUNTRIES = [
   { code: 'BR', label: 'Brazil' },

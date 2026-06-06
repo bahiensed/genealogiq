@@ -8,9 +8,9 @@ import { profileResolver, profileDefaultValues, type ProfileFormValues } from '@
 import { updateProfile } from '@/actions/profile.actions'
 import { maskCpf, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { MaskedInput } from '@/components/ui/masked-input'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { MaskedInput } from '@genealogiq/ui/masked-input'
 import { AddressSection } from '@/components/address/address-section'
 import {
   Select,
@@ -18,14 +18,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@genealogiq/ui/select'
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
-} from '@/components/ui/field'
+} from '@genealogiq/ui/field'
 
 interface ProfileFormProps {
   defaultValues?: ProfileFormValues

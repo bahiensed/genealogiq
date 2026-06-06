@@ -1,8 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@genealogiq/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@genealogiq/ui/card'
 
 interface Props {
   searchParams: Promise<{ sent?: string }>

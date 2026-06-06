@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
 import { Copy, Download } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Button } from '@genealogiq/ui/button'
+import { Card } from '@genealogiq/ui/card'
 
 type Preset = {
   key:         string

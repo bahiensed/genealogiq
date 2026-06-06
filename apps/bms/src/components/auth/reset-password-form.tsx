@@ -5,10 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { resetPassword } from '@/actions/auth'
 import { Eye, EyeOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { Button } from '@genealogiq/ui/button'
+import { Label } from '@genealogiq/ui/label'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@genealogiq/ui/card'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@genealogiq/ui/input-group'
 
 interface Props {
   token: string

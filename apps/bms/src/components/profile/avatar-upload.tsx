@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react'
 import { upload } from '@vercel/blob/client'
 import { Camera, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@genealogiq/ui/avatar'
 import { updateAvatar } from '@/actions/profile.actions'
 import { getInitials } from '@/lib/utils'
 

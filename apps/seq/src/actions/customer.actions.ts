@@ -3,7 +3,7 @@
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
-import { hashToken } from '@/lib/token'
+import { hashToken } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail } from '@/lib/email'

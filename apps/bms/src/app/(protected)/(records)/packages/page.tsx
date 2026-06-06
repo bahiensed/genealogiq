@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { verifySession } from '@/lib/dal'
 import { getPackages } from '@/queries/packages'
 import { PackagesDataTable } from '@/components/packages/packages-data-table'
-import { Button } from '@/components/ui/button'
+import { Button } from '@genealogiq/ui/button'
 
 export default async function PackagesPage() {
   const session = await verifySession()

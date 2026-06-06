@@ -3,7 +3,7 @@ import { verifySession } from '@/lib/dal'
 import { getDiscountCoupons } from '@/queries/discount-coupons'
 import { DiscountCouponsDataTable } from '@/components/discount-coupons/discount-coupons-data-table'
 import type { DiscountCouponRow } from '@/components/discount-coupons/columns'
-import { Button } from '@/components/ui/button'
+import { Button } from '@genealogiq/ui/button'
 
 export default async function DiscountCouponsPage() {
   const session = await verifySession()

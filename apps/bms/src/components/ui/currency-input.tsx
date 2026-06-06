@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Input } from '@/components/ui/input'
+import { Input } from '@genealogiq/ui/input'
 import { maskUsdAmount } from '@/lib/masks'
 
 interface CurrencyInputProps extends Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange' | 'type'> {

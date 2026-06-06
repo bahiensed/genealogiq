@@ -9,21 +9,21 @@ import { deceasedResolver, deceasedDefaultValues, type DeceasedFormValues } from
 import { createDeceased, updateDeceased } from '@/actions/deceased.actions'
 import { GenderSelect } from '@/components/ui/gender-select'
 import { CountrySelect } from '@/components/ui/country-select'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@genealogiq/ui/button'
+import { Input } from '@genealogiq/ui/input'
+import { Textarea } from '@genealogiq/ui/textarea'
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@/components/ui/field'
+} from '@genealogiq/ui/field'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion'
+} from '@genealogiq/ui/accordion'
 
 interface MemorializedFormProps {
   /** Create mode: appUserId to link the new deceased to */

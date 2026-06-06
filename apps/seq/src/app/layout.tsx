@@ -4,8 +4,8 @@ import { inter } from '@/fonts'
 import '@/styles/globals.css'
 
 import { ThemeProvider } from '@/components/theme/theme-provider'
-import { TooltipProvider } from '@/components/ui/tooltip'
-import { Toaster } from "@/components/ui/sonner"
+import { TooltipProvider } from '@genealogiq/ui/tooltip'
+import { Toaster } from "@genealogiq/ui/sonner"
 import { CookieConsent } from '@/components/cookies/cookie-consent'
 
 export const metadata: Metadata = {

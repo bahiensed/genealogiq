@@ -5,15 +5,15 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal } from 'lucide-react'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Button } from '@genealogiq/ui/button'
+import { Badge } from '@genealogiq/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { DataTableColumnHeader } from '@/components/ui/data-table-column-header'
+} from '@genealogiq/ui/dropdown-menu'
+import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { toggleDiscountCouponActive } from '@/actions/discount-coupon.actions'
 
 export type DiscountCouponRow = {

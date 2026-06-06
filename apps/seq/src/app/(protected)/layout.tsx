@@ -1,5 +1,5 @@
 import { verifyTenantSession, getCustomerModules } from '@/lib/dal'
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarProvider, SidebarTrigger } from '@genealogiq/ui/sidebar'
 import { SessionProvider } from '@/components/providers/session-provider'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { AppBreadcrumb } from '@/components/breadcrumb/breadcrumb'

@@ -4,7 +4,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@genealogiq/ui/select'
 
 interface GenderSelectProps {
   value?: string | null

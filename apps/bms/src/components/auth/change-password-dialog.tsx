@@ -2,8 +2,8 @@
 
 import { useState, useActionState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { Button } from '@genealogiq/ui/button'
+import { Label } from '@genealogiq/ui/label'
 import {
   Dialog,
   DialogContent,
@@ -11,13 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '@genealogiq/ui/dialog'
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from '@/components/ui/input-group'
+} from '@genealogiq/ui/input-group'
 import { changePassword } from '@/actions/auth'
 
 export function ChangePasswordDialog() {

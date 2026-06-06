@@ -1,7 +1,7 @@
 import { Layers, Users, ShoppingCart, Banknote, TrendingUp, UserPlus, QrCode } from 'lucide-react'
 import { verifyTenantSession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
-import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@genealogiq/ui/card'
 import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart'
 import { RevenueByPlanChart } from '@/components/dashboard/revenue-by-plan-chart'
 import { CustomerGrowthChart } from '@/components/dashboard/customer-growth-chart'

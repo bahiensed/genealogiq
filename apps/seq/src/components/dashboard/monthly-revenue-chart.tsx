@@ -6,7 +6,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from '@/components/ui/chart'
+} from '@genealogiq/ui/chart'
 
 const chartConfig = {
   revenue: { label: 'Revenue', color: 'var(--primary)' },

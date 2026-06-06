@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { verifyTenantSession } from '@/lib/dal'
 import { prisma } from '@/lib/prisma'
-import { Button } from '@/components/ui/button'
+import { Button } from '@genealogiq/ui/button'
 
 export default async function InventoryPackagesPage() {
   const session = await verifyTenantSession()
