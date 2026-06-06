@@ -58,7 +58,7 @@ export const inventory = [
 export const sales = [
   { name: 'Discount Coupons',   url: '/sales/discount-coupons',   icon: TicketPercent  },
   { name: 'Manual Sales',       url: '/manual-sales',             icon: HandCoinsIcon  },
-  { name: 'Sale Reports',       url: '/sales',                    icon: Coins          },
+  { name: 'Sales Reports',      url: '/sales-reports',            icon: Coins          },
 ]
 
 export const finance = [
