@@ -16,7 +16,7 @@ export default async function SalesPage() {
       {qrCodeCount === 0 ? (
         <p className="text-muted-foreground">
           No QR codes in inventory.{' '}
-          <Link href="/purchasing/packages" className="underline underline-offset-4 hover:text-primary">
+          <Link href="/purchasing/digital-qr" className="underline underline-offset-4 hover:text-primary">
             Buy QR codes
           </Link>
         </p>

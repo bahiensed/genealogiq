@@ -19,15 +19,24 @@ export interface MenuItem {
   moduleKey?: ModuleKey
 }
 
-// ─── Main (fast menu — always visible) ───────────────────────────────────────
+// ─── Main (fast menu — sub-sections separated by a divider) ──────────────────
 
-export const main: MenuItem[] = [
-  { name: 'Dashboard',    url: '/dashboard',            icon: LayoutDashboard  },
-  { name: 'Buy QR Codes', url: '/purchasing/packages',  icon: QrCodeIcon       },
-  { name: 'My QR Codes',  url: '/inventory/packages',   icon: QrCodeIcon       },
-  { name: 'QR Licenses',  url: '/licenses',             icon: Fingerprint      },
-  { name: 'Customers',    url: '/customers',            icon: UsersIcon        },
-  { name: 'Sales',        url: '/sales',                icon: ShoppingCartIcon },
+export const main: MenuItem[][] = [
+  [
+    { name: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+  ],
+  [
+    { name: 'Buy Physical QR Codes', url: '/purchasing/physical-qr', icon: Fingerprint },
+    { name: 'My Physical QR Codes',  url: '/inventory/physical-qr',  icon: Fingerprint },
+  ],
+  [
+    { name: 'Buy Digital QR Codes', url: '/purchasing/digital-qr', icon: QrCodeIcon },
+    { name: 'My Digital QR Codes',  url: '/inventory/digital-qr',  icon: QrCodeIcon },
+  ],
+  [
+    { name: 'Customers', url: '/customers', icon: UsersIcon },
+    { name: 'Sales',     url: '/sales',     icon: ShoppingCartIcon },
+  ],
 ]
 
 // ─── System (always visible) ─────────────────────────────────────────────────
@@ -55,19 +64,21 @@ export const categories: MenuItem[] = [
   { name: 'Customer Categories', url: '/customer-categories', icon: TagIcon     }, // always-on
 ]
 
-// ─── Purchasing (Packages always-on) ─────────────────────────────────────────
+// ─── Purchasing (QR always-on) ───────────────────────────────────────────────
 
 export const purchasing: MenuItem[] = [
-  { name: 'Buy QR Codes', url: '/purchasing/packages', icon: QrCodeIcon      },
-  { name: 'Products',     url: '/purchasing/products', icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
-  { name: 'Services',     url: '/purchasing/services', icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
+  { name: 'Buy Physical QR Codes', url: '/purchasing/physical-qr', icon: Fingerprint     },
+  { name: 'Buy Digital QR Codes',  url: '/purchasing/digital-qr',  icon: QrCodeIcon      },
+  { name: 'Products',              url: '/purchasing/products',    icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
+  { name: 'Services',              url: '/purchasing/services',    icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
 ]
 
-// ─── Inventory (QR Codes always-on) ──────────────────────────────────────────
+// ─── Inventory (QR always-on) ────────────────────────────────────────────────
 
 export const inventory: MenuItem[] = [
-  { name: 'My QR Codes', url: '/inventory/packages', icon: QrCodeIcon },
-  { name: 'Products',    url: '/inventory/products',  icon: BoxIcon,    moduleKey: 'moduleInventoryProducts' },
+  { name: 'My Physical QR Codes', url: '/inventory/physical-qr', icon: Fingerprint },
+  { name: 'My Digital QR Codes',  url: '/inventory/digital-qr',  icon: QrCodeIcon  },
+  { name: 'Products',             url: '/inventory/products',    icon: BoxIcon,     moduleKey: 'moduleInventoryProducts' },
 ]
 
 // ─── Sales (always visible) ───────────────────────────────────────────────────
