@@ -15,10 +15,10 @@ export default async function InventoryPackagesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          My QR Codes
+          My Digital QR Codes
         </h1>
         <Button asChild>
-          <Link href="/purchasing/packages">Buy QR codes</Link>
+          <Link href="/purchasing/digital-qr">Buy digital QR codes</Link>
         </Button>
       </div>
 

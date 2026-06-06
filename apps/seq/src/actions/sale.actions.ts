@@ -93,6 +93,6 @@ export async function createAppSale(
   }
 
   revalidatePath('/sales')
-  revalidatePath('/inventory/packages')
+  revalidatePath('/inventory/digital-qr')
   return { success: 'Sale registered and access sent successfully.' }
 }

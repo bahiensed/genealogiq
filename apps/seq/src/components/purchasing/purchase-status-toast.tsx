@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 
 export function PurchaseStatusToast() {
   const router = useRouter()
+  const pathname = usePathname()
   const params = useSearchParams()
   const status = params.get('status')
 
@@ -15,8 +16,8 @@ export function PurchaseStatusToast() {
     } else if (status === 'cancel') {
       toast.info('Purchase canceled.')
     }
-    if (status) router.replace('/purchasing/packages')
-  }, [status, router])
+    if (status) router.replace(pathname)
+  }, [status, pathname, router])
 
   return null
 }
