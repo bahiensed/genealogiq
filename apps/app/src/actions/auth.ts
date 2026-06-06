@@ -23,7 +23,7 @@ import {
 import { verifySession } from "@/lib/dal"
 import { deleteBlobs } from "@/lib/blob"
 import { getClientIp, checkRateLimit } from "@/lib/rate-limit"
-import { hashToken } from "@/lib/token"
+import { hashToken } from "@genealogiq/core"
 import { randomBytes } from "crypto"
 
 type AuthState = {

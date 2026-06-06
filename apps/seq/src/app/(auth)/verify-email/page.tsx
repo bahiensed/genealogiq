@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { hashToken } from '@/lib/token'
+import { hashToken } from '@genealogiq/core'
 import { VerifyEmailCard } from '@/components/auth/verify-email-card'
 
 interface Props {

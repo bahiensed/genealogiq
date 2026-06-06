@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
-import { hashToken } from '@/lib/token'
+import { hashToken } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 
 // User management (invite, edit, deactivate, delete tenant employees) is

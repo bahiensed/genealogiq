@@ -7,7 +7,7 @@ import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail } from '@/lib/email'
-import { hashToken } from '@/lib/token'
+import { hashToken } from '@genealogiq/core'
 
 type ActionError   = { error: string }
 type ActionSuccess = { success: string }
