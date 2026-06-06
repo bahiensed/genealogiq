@@ -25,8 +25,8 @@ export const main = [
 ]
 
 export const system = [
-  { name: 'Company Data',  url: '/company', icon: BuildingIcon },
-  { name: 'System Users',  url: '/users',   icon: IdCardIcon   },
+  { name: 'Company Data',  url: '/system/company', icon: BuildingIcon },
+  { name: 'System Users',  url: '/system/users',   icon: IdCardIcon   },
 ]
 
 export const records = [
@@ -40,10 +40,10 @@ export const records = [
 ]
 
 export const categories = [
-  { name: 'Supplier Categories', url: '/supplier-categories', icon: TagIcon },
-  { name: 'Product Categories',  url: '/product-categories',  icon: TagIcon },
-  { name: 'Service Categories',  url: '/service-categories',  icon: TagIcon },
-  { name: 'Customer Categories', url: '/customer-categories', icon: TagIcon },
+  { name: 'Supplier Categories', url: '/categories/suppliers', icon: TagIcon },
+  { name: 'Product Categories',  url: '/categories/products',  icon: TagIcon },
+  { name: 'Service Categories',  url: '/categories/services',  icon: TagIcon },
+  { name: 'Customer Categories', url: '/categories/customers', icon: TagIcon },
 ]
 
 export const purchasing = [

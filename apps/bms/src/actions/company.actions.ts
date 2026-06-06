@@ -30,5 +30,5 @@ export async function updateCompany(id: string, data: CompanyFormValues): Promis
     },
   })
 
-  revalidatePath('/company')
+  revalidatePath('/system/company')
 }

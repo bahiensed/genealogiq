@@ -26,7 +26,7 @@ export async function createCustomerCategory(data: CustomerCategoryFormValues): 
     throw e
   }
 
-  revalidatePath('/customer-categories')
+  revalidatePath('/categories/customers')
   return { success: 'Category created successfully.', category: created }
 }
 
@@ -48,7 +48,7 @@ export async function updateCustomerCategory(id: string, data: CustomerCategoryF
     throw e
   }
 
-  revalidatePath('/customer-categories')
+  revalidatePath('/categories/customers')
   return { success: 'Category updated successfully.' }
 }
 
@@ -67,7 +67,7 @@ export async function deleteCustomerCategory(id: string): Promise<ActionError | 
     throw e
   }
 
-  revalidatePath('/customer-categories')
+  revalidatePath('/categories/customers')
 }
 
 export async function toggleCustomerCategoryActive(id: string): Promise<ActionError | void> {
@@ -77,5 +77,5 @@ export async function toggleCustomerCategoryActive(id: string): Promise<ActionEr
   if (!category) return { error: 'Category not found.' }
 
   await prisma.tenantCategory.update({ where: { id }, data: { isActive: !category.isActive } })
-  revalidatePath('/customer-categories')
+  revalidatePath('/categories/customers')
 }

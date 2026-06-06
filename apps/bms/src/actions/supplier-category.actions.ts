@@ -26,7 +26,7 @@ export async function createSupplierCategory(data: SupplierCategoryFormValues): 
     throw e
   }
 
-  revalidatePath('/supplier-categories')
+  revalidatePath('/categories/suppliers')
   return { success: 'Category created successfully.', category: created }
 }
 
@@ -48,7 +48,7 @@ export async function updateSupplierCategory(id: string, data: SupplierCategoryF
     throw e
   }
 
-  revalidatePath('/supplier-categories')
+  revalidatePath('/categories/suppliers')
   return { success: 'Category updated successfully.' }
 }
 
@@ -67,7 +67,7 @@ export async function deleteSupplierCategory(id: string): Promise<ActionError | 
     throw e
   }
 
-  revalidatePath('/supplier-categories')
+  revalidatePath('/categories/suppliers')
 }
 
 export async function toggleSupplierCategoryActive(id: string): Promise<ActionError | void> {
@@ -77,5 +77,5 @@ export async function toggleSupplierCategoryActive(id: string): Promise<ActionEr
   if (!category) return { error: 'Category not found.' }
 
   await prisma.supplierCategory.update({ where: { id }, data: { isActive: !category.isActive } })
-  revalidatePath('/supplier-categories')
+  revalidatePath('/categories/suppliers')
 }

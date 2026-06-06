@@ -173,7 +173,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>
-              <Link href="/users" className="inline-flex items-center gap-1 hover:underline">
+              <Link href="/system/users" className="inline-flex items-center gap-1 hover:underline">
                 System Users <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
