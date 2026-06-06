@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import { hashToken } from '@/lib/token'
 import { VerifyEmailCard } from '@/components/auth/verify-email-card'
 
 interface Props {
@@ -22,14 +23,14 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
   }
 
   const record = await prisma.emailToken.findUnique({
-    where: { token },
+    where: { token: hashToken(token) },
   })
 
   // userId is nullable in the schema (also supports AppUser tokens written by
   // APP); SEQ only ever issues User-bound tokens, so reject if absent.
   if (!record || !record.userId || record.expiresAt < new Date()) {
     if (record) {
-      await prisma.emailToken.delete({ where: { token } })
+      await prisma.emailToken.delete({ where: { token: hashToken(token) } })
     }
     return (
       <VerifyEmailCard
@@ -50,7 +51,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
         where: { id: userId },
         data: { email: record.newEmail!, emailVerified: new Date() },
       }),
-      prisma.emailToken.delete({ where: { token } }),
+      prisma.emailToken.delete({ where: { token: hashToken(token) } }),
     ])
 
     return (
@@ -70,7 +71,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
       where: { id: userId },
       data: { emailVerified: new Date() },
     }),
-    prisma.emailToken.delete({ where: { token } }),
+    prisma.emailToken.delete({ where: { token: hashToken(token) } }),
   ])
 
   return (

@@ -3,6 +3,7 @@
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@/generated/prisma/client'
+import { hashToken } from '@/lib/token'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail } from '@/lib/email'
@@ -222,7 +223,7 @@ export async function resendCustomerEmail(id: string): Promise<ActionError | voi
 
   const token = randomBytes(32).toString('hex')
   await prisma.passwordResetToken.create({
-    data: { token, appUserId: id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
+    data: { token: hashToken(token), appUserId: id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
   })
 
   await sendAppWelcomeEmail(appUser.email, token)
