@@ -17,12 +17,11 @@ import {
 } from 'lucide-react'
 
 export const main = [
-  { name: 'Dashboard',          url: '/dashboard',    icon: LayoutDashboard },
-  { name: 'Subscriptions (B2C)', url: '/subscriptions', icon: Layers        },
-  { name: 'QR Codes (B2B)',     url: '/packages',     icon: QrCodeIcon      },
-  { name: 'Physical QR Codes',  url: '/physical-qr',  icon: Fingerprint     },
-  { name: 'Customers',          url: '/customers',    icon: Building2       },
-  { name: 'Manual Sales',       url: '/manual-sales', icon: HandCoinsIcon   },
+  { name: 'Dashboard',              url: '/dashboard',     icon: LayoutDashboard },
+  { name: 'Physical QR Codes',      url: '/physical-qr',   icon: Fingerprint     },
+  { name: 'Digital QR Codes (B2B)', url: '/packages',      icon: QrCodeIcon      },
+  { name: 'Subscriptions (B2C)',    url: '/subscriptions', icon: Layers          },
+  { name: 'Customers',              url: '/customers',     icon: Building2       },
 ]
 
 export const system = [
@@ -31,12 +30,13 @@ export const system = [
 ]
 
 export const records = [
-  { name: 'Subscriptions (B2C)', url: '/subscriptions', icon: Layers      },
-  { name: 'QR Codes (B2B)',      url: '/packages',      icon: QrCodeIcon  },
-  { name: 'Suppliers',           url: '/suppliers',     icon: FactoryIcon },
-  { name: 'Products',            url: '/products',      icon: PackageIcon },
-  { name: 'Services',            url: '/services',      icon: LifeBuoy    },
-  { name: 'Customers',           url: '/customers',     icon: Building2   },
+  { name: 'Physical QR Codes',      url: '/physical-qr',   icon: Fingerprint },
+  { name: 'Digital QR Codes (B2B)', url: '/packages',      icon: QrCodeIcon  },
+  { name: 'Subscriptions (B2C)',    url: '/subscriptions', icon: Layers      },
+  { name: 'Suppliers',              url: '/suppliers',     icon: FactoryIcon },
+  { name: 'Products',               url: '/products',      icon: PackageIcon },
+  { name: 'Services',               url: '/services',      icon: LifeBuoy    },
+  { name: 'Customers',              url: '/customers',     icon: Building2   },
 ]
 
 export const categories = [
@@ -56,9 +56,9 @@ export const inventory = [
 ]
 
 export const sales = [
-  { name: 'Sales',              url: '/sales',                    icon: Coins          },
-  { name: 'Manual Sales',       url: '/manual-sales',             icon: HandCoinsIcon  },
   { name: 'Discount Coupons',   url: '/sales/discount-coupons',   icon: TicketPercent  },
+  { name: 'Manual Sales',       url: '/manual-sales',             icon: HandCoinsIcon  },
+  { name: 'Sale Reports',       url: '/sales',                    icon: Coins          },
 ]
 
 export const finance = [
