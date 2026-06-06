@@ -11,9 +11,12 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "db:generate": "turbo run db:generate",
-    "check:schema-parity": "node scripts/check-schema-parity.mjs"
+    "check:schema-parity": "node scripts/check-schema-parity.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
-    "turbo": "^2.3.0"
+    "turbo": "^2.3.0",
+    "vitest": "^3.0.0"
   }
 }
