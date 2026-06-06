@@ -15,7 +15,7 @@ export const authConfig = {
       const pathname = nextUrl.pathname
 
       const isProtected = [
-        "/profile", "/dashboard", "/users", "/company",
+        "/profile", "/dashboard", "/system", "/categories",
         "/suppliers", "/subscriptions", "/products", "/services", "/customers",
         "/purchasing", "/inventory", "/sales", "/finance",
       ].some((r) => pathname.startsWith(r))

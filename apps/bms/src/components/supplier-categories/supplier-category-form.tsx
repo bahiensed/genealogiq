@@ -38,7 +38,7 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
       setServerError(result.error)
     } else {
       toast.success(result.success)
-      if (!isEditing) router.push('/supplier-categories')
+      if (!isEditing) router.push('/categories/suppliers')
     }
   }
 

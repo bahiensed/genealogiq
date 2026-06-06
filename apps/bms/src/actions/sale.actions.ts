@@ -54,7 +54,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
     }
   })
 
-  revalidatePath('/manual-sales')
+  revalidatePath('/sales/manual-sales')
   revalidatePath('/physical-qr')
   return { success: 'Sale recorded successfully.' }
 }
@@ -110,6 +110,6 @@ export async function reverseSale(id: number): Promise<ActionError | void> {
     throw e
   }
 
-  revalidatePath('/manual-sales')
+  revalidatePath('/sales/manual-sales')
   revalidatePath('/physical-qr')
 }

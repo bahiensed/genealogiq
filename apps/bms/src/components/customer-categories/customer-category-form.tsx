@@ -38,7 +38,7 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
       setServerError(result.error)
     } else {
       toast.success(result.success)
-      if (!isEditing) router.push('/customer-categories')
+      if (!isEditing) router.push('/categories/customers')
     }
   }
 

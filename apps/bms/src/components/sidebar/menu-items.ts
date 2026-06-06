@@ -17,33 +17,33 @@ import {
 } from 'lucide-react'
 
 export const main = [
-  { name: 'Dashboard',          url: '/dashboard',    icon: LayoutDashboard },
-  { name: 'Subscriptions (B2C)', url: '/subscriptions', icon: Layers        },
-  { name: 'QR Codes (B2B)',     url: '/packages',     icon: QrCodeIcon      },
-  { name: 'Physical QR Codes',  url: '/physical-qr',  icon: Fingerprint     },
-  { name: 'Customers',          url: '/customers',    icon: Building2       },
-  { name: 'Manual Sales',       url: '/manual-sales', icon: HandCoinsIcon   },
+  { name: 'Dashboard',              url: '/dashboard',     icon: LayoutDashboard },
+  { name: 'Physical QR Codes',      url: '/physical-qr',   icon: Fingerprint     },
+  { name: 'Digital QR Codes (B2B)', url: '/packages',      icon: QrCodeIcon      },
+  { name: 'Subscriptions (B2C)',    url: '/subscriptions', icon: Layers          },
+  { name: 'Customers',              url: '/customers',     icon: Building2       },
 ]
 
 export const system = [
-  { name: 'Company Data',  url: '/company', icon: BuildingIcon },
-  { name: 'System Users',  url: '/users',   icon: IdCardIcon   },
+  { name: 'Company Data',  url: '/system/company', icon: BuildingIcon },
+  { name: 'System Users',  url: '/system/users',   icon: IdCardIcon   },
 ]
 
 export const records = [
-  { name: 'Subscriptions (B2C)', url: '/subscriptions', icon: Layers      },
-  { name: 'QR Codes (B2B)',      url: '/packages',      icon: QrCodeIcon  },
-  { name: 'Suppliers',           url: '/suppliers',     icon: FactoryIcon },
-  { name: 'Products',            url: '/products',      icon: PackageIcon },
-  { name: 'Services',            url: '/services',      icon: LifeBuoy    },
-  { name: 'Customers',           url: '/customers',     icon: Building2   },
+  { name: 'Physical QR Codes',      url: '/physical-qr',   icon: Fingerprint },
+  { name: 'Digital QR Codes (B2B)', url: '/packages',      icon: QrCodeIcon  },
+  { name: 'Subscriptions (B2C)',    url: '/subscriptions', icon: Layers      },
+  { name: 'Suppliers',              url: '/suppliers',     icon: FactoryIcon },
+  { name: 'Products',               url: '/products',      icon: PackageIcon },
+  { name: 'Services',               url: '/services',      icon: LifeBuoy    },
+  { name: 'Customers',              url: '/customers',     icon: Building2   },
 ]
 
 export const categories = [
-  { name: 'Supplier Categories', url: '/supplier-categories', icon: TagIcon },
-  { name: 'Product Categories',  url: '/product-categories',  icon: TagIcon },
-  { name: 'Service Categories',  url: '/service-categories',  icon: TagIcon },
-  { name: 'Customer Categories', url: '/customer-categories', icon: TagIcon },
+  { name: 'Supplier Categories', url: '/categories/suppliers', icon: TagIcon },
+  { name: 'Product Categories',  url: '/categories/products',  icon: TagIcon },
+  { name: 'Service Categories',  url: '/categories/services',  icon: TagIcon },
+  { name: 'Customer Categories', url: '/categories/customers', icon: TagIcon },
 ]
 
 export const purchasing = [
@@ -56,9 +56,9 @@ export const inventory = [
 ]
 
 export const sales = [
-  { name: 'Sales',              url: '/sales',                    icon: Coins          },
-  { name: 'Manual Sales',       url: '/manual-sales',             icon: HandCoinsIcon  },
   { name: 'Discount Coupons',   url: '/sales/discount-coupons',   icon: TicketPercent  },
+  { name: 'Manual Sales',       url: '/sales/manual-sales',             icon: HandCoinsIcon  },
+  { name: 'Sales Reports',      url: '/sales/reports',            icon: Coins          },
 ]
 
 export const finance = [

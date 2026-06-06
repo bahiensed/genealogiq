@@ -1,19 +1,13 @@
 import Link from 'next/link'
 import { verifySession } from '@/lib/dal'
 import { getPackages } from '@/queries/packages'
-import { getPhysicalQrSummary, getPhysicalQrTotals } from '@/queries/physical-qr'
 import { PackagesDataTable } from '@/components/packages/packages-data-table'
-import { PhysicalQrDataTable } from '@/components/physical-qr/physical-qr-data-table'
 import { Button } from '@genealogiq/ui/button'
 
 export default async function PhysicalQrPage() {
   const session = await verifySession()
 
-  const [packages, rows, totals] = await Promise.all([
-    getPackages('PHYSICAL'),
-    getPhysicalQrSummary(),
-    getPhysicalQrTotals(),
-  ])
+  const packages = await getPackages('PHYSICAL')
 
   return (
     <div className="flex flex-col gap-10">
@@ -35,30 +29,6 @@ export default async function PhysicalQrPage() {
           basePath="/physical-qr"
           emptyMessage="No physical QR packages yet."
         />
-      </div>
-
-      {/* ── License Issuance ─────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-6">
-        <h2 className="scroll-m-20 text-2xl font-bold tracking-tight">
-          License Issuance
-        </h2>
-
-        <div className="grid grid-cols-3 gap-4">
-          <div className="rounded-lg border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Total issued</p>
-            <p className="text-3xl font-bold tabular-nums">{totals.total}</p>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Activated</p>
-            <p className="text-3xl font-bold tabular-nums text-emerald-600">{totals.activated}</p>
-          </div>
-          <div className="rounded-lg border bg-card p-4">
-            <p className="text-sm text-muted-foreground">Available</p>
-            <p className="text-3xl font-bold tabular-nums">{totals.available}</p>
-          </div>
-        </div>
-
-        <PhysicalQrDataTable data={rows} />
       </div>
 
     </div>

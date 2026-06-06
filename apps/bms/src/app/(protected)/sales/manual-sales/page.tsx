@@ -15,7 +15,7 @@ export default async function ManualSalesPage() {
           Manual Sales
         </h1>
         <Button asChild>
-          <Link href="/manual-sales/new">New sale</Link>
+          <Link href="/sales/manual-sales/new">New sale</Link>
         </Button>
       </div>
 

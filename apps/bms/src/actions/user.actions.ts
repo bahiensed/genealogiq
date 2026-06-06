@@ -57,7 +57,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
 
   await sendWelcomeEmail(rest.email, token)
 
-  revalidatePath('/users')
+  revalidatePath('/system/users')
   return { success: 'User created successfully.' }
 }
 
@@ -88,7 +88,7 @@ export async function updateUser(id: string, data: UserFormValues): Promise<Acti
     throw e
   }
 
-  revalidatePath('/users')
+  revalidatePath('/system/users')
   return { success: 'User updated successfully.' }
 }
 
@@ -106,7 +106,7 @@ export async function deleteUser(userId: string): Promise<ActionError | void> {
     throw e
   }
 
-  revalidatePath('/users')
+  revalidatePath('/system/users')
 }
 
 export async function toggleUserActive(userId: string): Promise<ActionError | void> {
@@ -118,7 +118,7 @@ export async function toggleUserActive(userId: string): Promise<ActionError | vo
   if (!user) return { error: 'User not found.' }
 
   await prisma.user.update({ where: { id: userId }, data: { isActive: !user.isActive } })
-  revalidatePath('/users')
+  revalidatePath('/system/users')
 }
 
 export async function resendWelcomeEmail(userId: string): Promise<ActionError | void> {
