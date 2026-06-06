@@ -84,7 +84,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
       setServerError(result.error)
     } else {
       toast.success(result.success)
-      router.push('/manual-sales')
+      router.push('/sales/manual-sales')
     }
   }
 
