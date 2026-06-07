@@ -13,6 +13,7 @@
     "db:pull": "prisma db pull",
     "db:studio": "prisma studio",
     "db:migrate:status": "prisma migrate status",
+    "postinstall": "prisma generate",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

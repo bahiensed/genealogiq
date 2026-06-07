@@ -8,7 +8,7 @@ const { prismaMock } = vi.hoisted(() => ({
 }))
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
-vi.mock("@/generated/prisma/client", () => ({
+vi.mock('@genealogiq/db', () => ({
   Prisma: { PrismaClientKnownRequestError: class extends Error {} },
 }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))

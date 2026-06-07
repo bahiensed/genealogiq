@@ -5,7 +5,7 @@ const { prismaMock } = vi.hoisted(() => ({
 }))
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
-vi.mock("@/generated/prisma/client", () => ({ Prisma: {} }))
+vi.mock('@genealogiq/db', () => ({ Prisma: {} }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyTenantSession: vi.fn() }))
 vi.mock("@/lib/email", () => ({ sendAppWelcomeEmail: vi.fn() }))
