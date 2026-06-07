@@ -1,0 +1,20 @@
+// @genealogiq/db — single source of truth for the Prisma schema shared by
+// BMS, SEQ and APP. All three apps point their Prisma client at this package.
+//
+// The model definitions below are the CANONICAL schema, derived by introspecting
+// the live Neon database (`prisma db pull`) — NOT hand-copied from any one app —
+// because the three former per-app schemas had drifted from the migration history
+// in both directions (see docs/PHASE-4-DB-CONSOLIDATION.md).
+//
+// TODO(phase-4): paste the reconciled models from the `prisma db pull` output here.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── models pending db-pull introspection ────────────────────────────────────
