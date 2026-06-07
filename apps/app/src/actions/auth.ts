@@ -1,13 +1,11 @@
 "use server"
 
 import { redirect } from "next/navigation"
-import { AuthError } from "next-auth"
 import bcrypt from "bcryptjs"
 import { z, flattenError } from "zod"
 import { signIn, signOut } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import {
-  SignInSchema,
   SignUpSchema,
   ResetPasswordSchema,
   ChangePasswordSchema,
@@ -24,6 +22,7 @@ import { verifySession } from "@/lib/dal"
 import { deleteBlobs } from "@/lib/blob"
 import { getClientIp, checkRateLimit } from "@/lib/rate-limit"
 import { hashToken } from "@genealogiq/core"
+import { createLoginAction } from "@genealogiq/auth/login"
 import { randomBytes } from "crypto"
 
 type AuthState = {
@@ -32,55 +31,19 @@ type AuthState = {
   success?: string
 } | undefined
 
-export async function login(
-  _prevState: AuthState,
-  formData: FormData,
-): Promise<AuthState> {
-  const data = {
-    email: formData.get("email"),
-    password: formData.get("password"),
-  }
+const _login = createLoginAction({
+  signIn,
+  loadLockoutFields: (email) =>
+    prisma.appUser.findFirst({
+      where: { email },
+      select: { id: true, emailVerified: true, lockedUntil: true, failedLoginAttempts: true },
+    }),
+  persistFailedLogin: (id, data) => prisma.appUser.update({ where: { id }, data }),
+  redirectTo: "/home",
+})
 
-  const validated = SignInSchema.safeParse(data)
-  if (!validated.success) return { error: "Invalid data" }
-
-  const ip    = await getClientIp()
-  const limit = await checkRateLimit({ key: `signin:ip:${ip}`, maxAttempts: 10, windowSeconds: 300 })
-  if (!limit.allowed) return { error: `Too many sign-in attempts. Try again in ${limit.retryAfter}s.` }
-
-  const user = await prisma.appUser.findFirst({
-    where: { email: validated.data.email },
-    select: { id: true, emailVerified: true, lockedUntil: true, failedLoginAttempts: true },
-  })
-
-  if (user?.lockedUntil && user.lockedUntil > new Date()) {
-    const minutes = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000)
-    return { error: `Account temporarily locked. Try again in ${minutes} minute(s).` }
-  }
-
-  if (user && user.emailVerified === null) {
-    return { error: "Please verify your email before signing in. Check your inbox." }
-  }
-
-  try {
-    await signIn("credentials", { ...validated.data, redirectTo: "/home" })
-  } catch (error) {
-    if (error instanceof AuthError) {
-      if (user) {
-        const base = user.lockedUntil && user.lockedUntil < new Date() ? 0 : user.failedLoginAttempts
-        const newCount = base + 1
-        await prisma.appUser.update({
-          where: { id: user.id },
-          data: {
-            failedLoginAttempts: newCount,
-            lockedUntil: newCount >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null,
-          },
-        })
-      }
-      return { error: "Incorrect email or password" }
-    }
-    throw error
-  }
+export async function login(prevState: AuthState, formData: FormData): Promise<AuthState> {
+  return _login(prevState, formData)
 }
 
 export async function signUp(

@@ -6,6 +6,8 @@
     ".": "./src/node.ts",
     "./edge": "./src/edge.ts",
     "./dal": "./src/dal.ts",
+    "./login": "./src/login.ts",
+    "./lockout": "./src/lockout.ts",
     "./schemas": "./src/schemas.ts",
     "./types": "./src/types.ts"
   },
@@ -13,6 +15,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@genealogiq/services": "workspace:*",
     "bcryptjs": "^3.0.3",
     "zod": "^4.3.6",
     "server-only": "^0.0.1"

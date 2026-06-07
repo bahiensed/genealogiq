@@ -44,6 +44,7 @@
     "zod": "^4.3.6",
     "@genealogiq/auth": "workspace:*",
     "@genealogiq/core": "workspace:*",
+    "@genealogiq/email": "workspace:*",
     "@genealogiq/db": "workspace:*",
     "@genealogiq/services": "workspace:*"
   },
