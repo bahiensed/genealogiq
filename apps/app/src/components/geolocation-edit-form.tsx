@@ -37,8 +37,7 @@ interface PlaceSuggestion {
   placeName: string
   zip: string | null
   street: string | null
-  number: string | null
-  complement: string | null
+  // number/complement are not returned by the places API (privacy, B1)
   neighborhood: string | null
   city: string | null
   state: string | null
@@ -138,8 +137,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
     setValue("placeName",            s.placeName,               { shouldValidate: true })
     setValue("address.zip",          s.zip          ?? "")
     setValue("address.street",       s.street       ?? "")
-    setValue("address.number",       s.number       ?? "")
-    setValue("address.complement",   s.complement   ?? "")
+    // number/complement are not autofilled from another place (privacy, B1)
     setValue("address.neighborhood", s.neighborhood ?? "")
     setValue("address.city",         s.city         ?? "")
     setValue("address.state",        s.state        ?? "")

@@ -41,7 +41,7 @@ import { getAvatarColor } from "@/lib/avatar-color"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { COUNTRIES } from "@/consts/countries"
 import { cn } from "@/lib/utils"
-import type { ProfileRow } from "@/queries/profile"
+import type { EditProfileRow } from "@/queries/profile"
 
 // ─── Date picker helper ───────────────────────────────────────────────────────
 
@@ -109,7 +109,7 @@ function SectionTrigger({ icon: Icon, label }: { icon: React.ElementType; label:
 
 // ─── Default values ───────────────────────────────────────────────────────────
 
-function buildDefaults(initial: ProfileRow): ProfileEditValues {
+function buildDefaults(initial: EditProfileRow): ProfileEditValues {
   return {
     firstName:        initial.firstName,
     lastName:         initial.lastName,
@@ -155,7 +155,7 @@ function buildDefaults(initial: ProfileRow): ProfileEditValues {
 
 interface Props {
   profileId: string
-  initial: ProfileRow
+  initial: EditProfileRow
   isMemorialized?: boolean
 }
 

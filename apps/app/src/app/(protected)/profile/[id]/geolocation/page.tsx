@@ -6,7 +6,7 @@ import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
-import { getGeolocationByUserId } from "@/queries/geolocation"
+import { getGeolocationForViewer } from "@/queries/geolocation"
 import { canManageProfile } from "@/lib/profile"
 
 interface Props {
@@ -19,7 +19,7 @@ export default async function GeolocationPage({ params }: Props) {
 
   const [profile, geo] = await Promise.all([
     getProfileById(id),
-    getGeolocationByUserId(id),
+    getGeolocationForViewer(id),
   ])
   if (!profile) notFound()
 
