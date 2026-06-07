@@ -21,7 +21,10 @@ export interface EdgeAuthOptions {
 
 // Canonical session callback (edge-safe: reads the JWT only). Shared by the edge
 // config and the node config so middleware and server both see the same shape.
-function applySession(session: { user: Record<string, unknown> }, token: Record<string, unknown>) {
+// `session` is the full NextAuth Session (incl. `expires`); we mutate user fields
+// and return it as-is.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function applySession(session: any, token: Record<string, unknown>) {
   if (token.id) session.user.id = token.id as string
   if (token.role) session.user.role = token.role as string
   if (token.image !== undefined) session.user.image = token.image as string | null

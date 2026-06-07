@@ -3,13 +3,12 @@ import "server-only"
 import { cache } from "react"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
-import { createDal } from "@genealogiq/auth/dal"
+import { createTenantDal } from "@genealogiq/auth/dal"
 
 export const { verifySession, verifyTenantSession, verifyAdmin, canViewSensitive, REDACTED } =
-  createDal({
+  createTenantDal({
     auth: () => auth(),
     adminRoles: ["SUPER_ADMIN", "OWNER", "ADMIN"],
-    tenantScoped: true,
   })
 
 // Sequoia-specific: the current tenant's enabled feature modules.

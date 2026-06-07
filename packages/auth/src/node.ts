@@ -12,8 +12,9 @@ export interface CreateAuthOptions<Row extends AuthUserRow> {
   loadUserByEmail: (email: string) => Promise<Row | null>
   /** Map the loaded row to the canonical principal stored in the session. */
   toPrincipal: (row: Row) => AppPrincipal
-  /** Clear failedLoginAttempts/lockedUntil on the app's identity table. */
-  resetLockout: (id: string) => Promise<void>
+  /** Clear failedLoginAttempts/lockedUntil on the app's identity table.
+   *  Returns the prisma update promise (any value) — we only await it. */
+  resetLockout: (id: string) => Promise<unknown>
   /** Optional extra gate after password check (SEQ: row must have a tenantId). */
   extraGate?: (row: Row) => boolean
 }

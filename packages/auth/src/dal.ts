@@ -3,18 +3,26 @@ import "server-only"
 import { cache } from "react"
 import { redirect, forbidden } from "next/navigation"
 
-// Minimal session shape the DAL relies on (matches the canonical augmentation).
-interface SessionLike {
-  user: { id: string; role: string; customerId?: string | null }
+// The session shape the DAL relies on. Generic `S` flows the app's real Session
+// type through (so session.user.name/email/image stay available); this is just
+// the minimum the guards read.
+export interface SessionUser {
+  id: string
+  name?: string | null
+  email?: string | null
+  image?: string | null
+  role: string
+  customerId?: string | null
+}
+export interface BaseSession {
+  user: SessionUser
 }
 
-export interface CreateDalOptions {
+export interface CreateDalOptions<S extends BaseSession> {
   /** The app's NextAuth `auth()` accessor. */
-  auth: () => Promise<SessionLike | null>
+  auth: () => Promise<S | null>
   /** Roles allowed through verifyAdmin / treated as privileged. */
   adminRoles: string[]
-  /** SEQ: verifyAdmin and the base session require a tenant (`customerId`). */
-  tenantScoped?: boolean
 }
 
 /** Redaction marker for PII shown to non-privileged roles (M3). */
@@ -24,12 +32,35 @@ export function isPrivileged(role: string | null | undefined, adminRoles: string
   return adminRoles.includes(role ?? "")
 }
 
+/** Non-tenant guards (BMS back-office, APP consumer). */
+export function createDal<S extends BaseSession>(opts: CreateDalOptions<S>) {
+  const verifySession = cache(async (): Promise<S> => {
+    const session = await opts.auth()
+    if (!session?.user) redirect("/sign-in")
+    return session
+  })
+
+  const verifyAdmin = cache(async (): Promise<S> => {
+    const session = await verifySession()
+    if (!opts.adminRoles.includes(session.user.role ?? "")) forbidden()
+    return session
+  })
+
+  const canViewSensitive = async (): Promise<boolean> => {
+    const session = await verifySession()
+    return opts.adminRoles.includes(session.user.role ?? "")
+  }
+
+  return { verifySession, verifyAdmin, canViewSensitive, REDACTED }
+}
+
 /**
- * Canonical data-access guards for all three apps. One implementation; the only
- * per-app facts are `adminRoles` and whether the app is `tenantScoped` (SEQ).
+ * Tenant-scoped guards (SEQ). verifyTenantSession and verifyAdmin both require a
+ * tenant and return it at the top level (`session.customerId`), matching the
+ * existing call sites.
  */
-export function createDal(opts: CreateDalOptions) {
-  const verifySession = cache(async () => {
+export function createTenantDal<S extends BaseSession>(opts: CreateDalOptions<S>) {
+  const verifySession = cache(async (): Promise<S> => {
     const session = await opts.auth()
     if (!session?.user) redirect("/sign-in")
     return session
@@ -42,10 +73,8 @@ export function createDal(opts: CreateDalOptions) {
     return { ...session, customerId }
   })
 
-  const base = opts.tenantScoped ? verifyTenantSession : verifySession
-
   const verifyAdmin = cache(async () => {
-    const session = await base()
+    const session = await verifyTenantSession()
     if (!opts.adminRoles.includes(session.user.role ?? "")) forbidden()
     return session
   })
