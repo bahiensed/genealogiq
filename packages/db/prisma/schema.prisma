@@ -181,6 +181,7 @@ model Sale {
   package               Package             @relation(fields: [packageId], references: [id])
   soldBy                User                @relation(fields: [soldById], references: [id])
 
+  @@index([tenantId, createdAt(sort: Desc)])
   @@map("sales")
 }
 
@@ -218,6 +219,7 @@ model AppSale {
   tenant               Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   assignedTo           AppUser[]    @relation("AppSaleMemorial")
 
+  @@index([appUserId])
   @@map("app_sales")
 }
 
@@ -355,6 +357,7 @@ model User {
   address             Address?             @relation(fields: [addressId], references: [id])
   tenant              Tenant?              @relation(fields: [tenantId], references: [id], map: "users_customer_id_fkey")
 
+  @@index([tenantId])
   @@map("users")
 }
 
@@ -433,6 +436,7 @@ model AppUser {
   qrCode              QrCode?
 
   @@index([tenantId])
+  @@index([categoryId])
   @@map("app_users")
 }
 
@@ -651,6 +655,7 @@ model Supplier {
   updatedBy             User?             @relation("suppliers_updated_by_idTousers", fields: [updatedById], references: [id])
 
   @@unique([tenantId, taxId])
+  @@index([categoryId])
   @@map("suppliers")
 }
 
@@ -716,6 +721,7 @@ model Tenant {
   subTenants                Tenant[]            @relation("TenantParent")
   users                     User[]
 
+  @@index([categoryId])
   @@map("tenants")
 }
 
