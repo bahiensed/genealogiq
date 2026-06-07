@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifySession, canViewSensitive, REDACTED } from '@/lib/dal'
 
 const addressSelect = {
   zip:          true,
@@ -33,9 +33,9 @@ export async function getCustomers() {
 }
 
 export async function getCustomer(id: string) {
-  await verifySession()
+  const privileged = await canViewSensitive()
 
-  return prisma.tenant.findUnique({
+  const row = await prisma.tenant.findUnique({
     where: { id },
     select: {
       id:                    true,
@@ -65,6 +65,19 @@ export async function getCustomer(id: string) {
       address:               { select: addressSelect },
     },
   })
+
+  if (!row || privileged) return row
+
+  // M3: redact third-party PII for non-privileged roles (navigation preserved).
+  return {
+    ...row,
+    taxId:                 REDACTED,
+    stateRegistration:     row.stateRegistration ? REDACTED : null,
+    municipalRegistration: row.municipalRegistration ? REDACTED : null,
+    phone:                 REDACTED,
+    notes:                 row.notes ? REDACTED : null,
+    address:               null,
+  }
 }
 
 export async function getActiveCustomers() {

@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { prisma } from '@/lib/prisma'
-import { verifySession } from '@/lib/dal'
+import { verifySession, canViewSensitive, REDACTED } from '@/lib/dal'
 
 const addressSelect = {
   zip:          true,
@@ -33,9 +33,9 @@ export async function getSuppliers() {
 }
 
 export async function getSupplier(id: string) {
-  await verifySession()
+  const privileged = await canViewSensitive()
 
-  return prisma.supplier.findUnique({
+  const row = await prisma.supplier.findUnique({
     where: { id },
     select: {
       id:                    true,
@@ -55,4 +55,17 @@ export async function getSupplier(id: string) {
       address:               { select: addressSelect },
     },
   })
+
+  if (!row || privileged) return row
+
+  // M3: redact third-party PII for non-privileged roles (navigation preserved).
+  return {
+    ...row,
+    taxId:                 REDACTED,
+    stateRegistration:     row.stateRegistration ? REDACTED : null,
+    municipalRegistration: row.municipalRegistration ? REDACTED : null,
+    phone:                 REDACTED,
+    notes:                 row.notes ? REDACTED : null,
+    address:               null,
+  }
 }
