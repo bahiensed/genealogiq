@@ -43,3 +43,9 @@ jobs:
 
       - name: Lint (non-blocking — pre-existing baseline)
         run: pnpm lint || true
+
+      # Surfaces known high/critical advisories in dependencies. Informational
+      # for now (Dependabot opens the fix PRs); flip to blocking once the audit
+      # baseline is clean.
+      - name: Dependency audit (informational)
+        run: pnpm audit --audit-level high || true

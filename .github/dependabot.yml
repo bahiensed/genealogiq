@@ -1,0 +1,26 @@
+version: 2
+updates:
+  # JS/TS dependencies across the pnpm workspace (root + apps + packages).
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    # Group updates to keep PR noise low: one PR for dev deps, one for
+    # non-major production bumps; majors come as individual PRs to review.
+    groups:
+      dev-dependencies:
+        dependency-type: "development"
+      production-minor-patch:
+        dependency-type: "production"
+        update-types: ["minor", "patch"]
+    labels:
+      - "dependencies"
+
+  # Keep the GitHub Actions used in CI up to date.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "ci"
