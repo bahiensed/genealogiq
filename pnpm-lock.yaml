@@ -32,6 +32,9 @@ importers:
       '@genealogiq/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@genealogiq/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@genealogiq/services':
         specifier: workspace:*
         version: link:../../packages/services
@@ -171,6 +174,9 @@ importers:
       '@genealogiq/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@genealogiq/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@genealogiq/services':
         specifier: workspace:*
         version: link:../../packages/services
@@ -301,6 +307,9 @@ importers:
       '@genealogiq/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@genealogiq/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@genealogiq/services':
         specifier: workspace:*
         version: link:../../packages/services
@@ -496,6 +505,19 @@ importers:
       prisma:
         specifier: ^7.7.0
         version: 7.8.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  packages/email:
+    dependencies:
+      resend:
+        specifier: ^6.9.4
+        version: 6.12.4
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.39
+        version: 20.19.41
       typescript:
         specifier: ^5
         version: 5.9.3

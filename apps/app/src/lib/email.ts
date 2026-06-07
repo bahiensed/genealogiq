@@ -1,61 +1,15 @@
-import { Resend } from "resend"
+// Canonical templates + transport live in @genealogiq/email. This adapter keeps
+// the app's call signatures and injects the APP base URL.
+import {
+  sendVerificationEmail as _verify,
+  sendEmailChangeEmail as _change,
+  sendPasswordResetEmail as _reset,
+  sendAccountDeletionEmail as _delete,
+} from "@genealogiq/email"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const APP = () => process.env.APP_URL ?? ""
 
-export async function sendVerificationEmail(to: string, token: string): Promise<void> {
-  const url = `${process.env.APP_URL}/verify-email?token=${token}`
-  await resend.emails.send({
-    from: "no-reply@rohling.com.br",
-    to,
-    subject: "Confirm your email",
-    html: `
-      <p>Thank you for creating your account.</p>
-      <p>Click the link below to confirm your email (expires in 24h):</p>
-      <p><a href="${url}">Confirm email</a></p>
-      <p>If you did not create this account, ignore this email.</p>
-    `,
-  })
-}
-
-export async function sendEmailChangeEmail(to: string, token: string): Promise<void> {
-  const url = `${process.env.APP_URL}/verify-email?token=${token}`
-  await resend.emails.send({
-    from: "no-reply@rohling.com.br",
-    to,
-    subject: "Confirm your new email",
-    html: `
-      <p>We received a request to change the email address on your account.</p>
-      <p>Click the link below to confirm the new address (expires in 1h):</p>
-      <p><a href="${url}">Confirm new email</a></p>
-      <p>If you did not request this, ignore this email.</p>
-    `,
-  })
-}
-
-export async function sendAccountDeletionEmail(to: string): Promise<void> {
-  await resend.emails.send({
-    from: "no-reply@rohling.com.br",
-    to,
-    subject: "Your account has been deleted",
-    html: `
-      <p>Your account has been successfully deleted.</p>
-      <p>We'll miss you. If you ever want to return, we'll be here.</p>
-      <p>If you did not request account deletion, contact us immediately.</p>
-    `,
-  })
-}
-
-export async function sendPasswordResetEmail(to: string, token: string): Promise<void> {
-  const url = `${process.env.APP_URL}/reset-password?token=${token}`
-  await resend.emails.send({
-    from: "no-reply@rohling.com.br",
-    to,
-    subject: "Password reset",
-    html: `
-      <p>We received a request to reset your password.</p>
-      <p>Click the link below to create a new password (expires in 1h):</p>
-      <p><a href="${url}">Reset password</a></p>
-      <p>If you did not request this, ignore this email.</p>
-    `,
-  })
-}
+export const sendVerificationEmail   = (to: string, token: string) => _verify({ to, token, baseUrl: APP() })
+export const sendEmailChangeEmail    = (to: string, token: string) => _change({ to, token, baseUrl: APP() })
+export const sendPasswordResetEmail  = (to: string, token: string) => _reset({ to, token, baseUrl: APP() })
+export const sendAccountDeletionEmail = (to: string) => _delete({ to })
