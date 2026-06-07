@@ -428,6 +428,9 @@ importers:
 
   packages/auth:
     dependencies:
+      '@genealogiq/services':
+        specifier: workspace:*
+        version: link:../services
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
