@@ -56,10 +56,10 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
   async function onSubmit(data: UserFormValues) {
     setServerError(null)
     const result = isEditing ? await updateUser(id, data) : await createUser(data)
-    if ('error' in result) {
+    if (!result.ok) {
       setServerError(result.error)
     } else {
-      toast.success(result.success)
+      toast.success(result.data)
       if (!isEditing) router.push('/system/users')
     }
   }
