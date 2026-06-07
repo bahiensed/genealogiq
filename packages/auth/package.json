@@ -1,0 +1,33 @@
+{
+  "name": "@genealogiq/auth",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/node.ts",
+    "./edge": "./src/edge.ts",
+    "./dal": "./src/dal.ts",
+    "./schemas": "./src/schemas.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "zod": "^4.3.6",
+    "server-only": "^0.0.1"
+  },
+  "peerDependencies": {
+    "next": "16.2.7",
+    "next-auth": "^5.0.0-beta.30",
+    "react": "19.2.4"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20.19.39",
+    "@types/bcryptjs": "^2.4.6",
+    "next": "16.2.7",
+    "next-auth": "^5.0.0-beta.30",
+    "react": "19.2.4"
+  }
+}
