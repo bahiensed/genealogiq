@@ -51,25 +51,35 @@ Consequences:
 Each row resolved against the migration SQL (the DB), then cross-checked against source usage
 to confirm the change breaks nothing.
 
-| # | Model.field | BMS today | SEQ today | DB truth (migration SQL) | Canonical | Source-safety check |
-|---|---|---|---|---|---|---|
-| 1 | `Supplier.taxId` uniqueness | global `@unique` | scoped `@@unique([tenantId, taxId])` | global `suppliers_tax_id_key` **dropped** in `20260517030000`; composite `suppliers_tenant_id_tax_id_key` created in `20260415000000` | **scoped** (SEQ) | BMS dedups via `supplier.findFirst({where:{taxId}})` — `findFirst` needs no unique → safe |
-| 2 | `Tenant.taxId` uniqueness | `@unique` | plain | **no** `tenants_tax_id` index in any migration | **plain** (SEQ) | BMS dedups via `tenant.findFirst({where:{taxId}})` → safe |
-| 3 | Audit FKs on `Supplier` / `SupplierCategory` (`createdBy`/`createdById`/`updatedBy`/`updatedById`) + back-relations on `User` | absent | present | columns **never created** in any migration | **absent** (BMS) | SEQ source has **zero** references to these fields → dead schema, safe to drop |
-| 4 | `Subscription.stripeProductId` / `stripeMonthlyPriceId` / `stripeAnnualPriceId` | present | absent | columns **never created** (only `packages.stripe_product_id`, `tenants.stripe_customer_id`, `sales.stripe_*` exist) | **absent** (SEQ) | No source references the Subscription-level fields (BMS `stripeProductId` usage is all on `Package`) → safe to drop |
-| 5 | `PhysicalQrLicense.id` | `@id` (no default) | `@id @default(cuid())` | `id TEXT NOT NULL`, **no DB default** | **`@id @default(cuid())`** | both `createMany` callers pass `id` explicitly (`crypto.randomUUID()`); default is a harmless safety net → safe |
-| 6 | App-domain models (`AppUser`, `AppSale`, `Geolocation`, `QrCode`, `QrScan`, `StripeEvent`, enums…) | mostly absent | present | tables **exist** in DB | **superset = include** | BMS simply won't query them; extra client types are inert |
+> **The `db pull` (2026-06-07) overturned the migration-SQL guesses below.** The live DB is the
+> truth, and it differs from what the tracked migrations implied — several columns/constraints
+> were applied to the DB outside the migration history. Resolved against introspection:
 
-**Net:** the canonical schema ≈ **SEQ's schema, minus the phantom audit fields (#3)**. BMS gains
-the app-domain models (inert) and loses three phantom constraints/fields (#1, #2, #4) that its
-code never relied on. Every removal was confirmed unused by grep, so no app code changes are
-forced by the schema change itself.
+| # | Model.field | What the migration SQL implied | What the **live DB actually has** | Canonical |
+|---|---|---|---|---|
+| 1 | `Supplier.taxId` | global unique dropped → scoped only | **BOTH** `@unique` (global) **and** `@@unique([tenantId, taxId])` | keep **both** |
+| 2 | `Tenant.taxId` | no unique | **`@unique`**, constraint legacy-named `customers_tax_id_key` (grep missed it — table was renamed customers→tenants) | **`@unique(map: "customers_tax_id_key")`** |
+| 3 | Audit FKs on `Supplier`/`SupplierCategory`/`AppUserCategory`/`AppUser` + `User` back-relations | columns never created | columns **exist** | **keep** (SEQ was right) |
+| 4 | `Subscription.stripeProductId/Monthly/Annual` | columns never created | columns **exist** (APP billing depends on them — not broken) | **keep** (APP was right) |
+| 5 | `PhysicalQrLicense.id` | no DB default | `@default(cuid())` app-side | **`@id @default(cuid())`** |
+| 6 | App-domain models + many `@db.VarChar`/`@db.Timestamptz` types, legacy FK `map:` names, partial unique on `app_users.email`, `@db.VarChar(30)` on guardians | not visible in SQL | all **exist** in DB | **keep verbatim from introspection** |
 
-> **APP note (out of scope, but flagged):** APP shares the same DB and carries the *same* phantom
-> drift as BMS for #1, #2, #4 (global `@unique` on Supplier/Tenant taxId; Subscription stripe
-> fields). These are latent — `findUnique`/selects on non-existent constraints/columns would fail
-> at runtime. Recommend a follow-up pass to align APP to the same canonical even though it keeps
-> its own (superset) schema file. Tracked as a separate cleanup, not part of this phase.
+**Lesson:** every hand-maintained `schema.prisma` (BMS, SEQ **and** APP) had drifted from the live
+DB in different ways. Hand-reconciling against the migrations would have produced a wrong schema
+(it would have dropped the audit columns and the Subscription Stripe columns that production
+actually uses, breaking SEQ and APP). The canonical was therefore taken straight from `prisma db
+pull`, with only the auto-generated identifiers renamed back to the apps' conventions so existing
+code compiles. Structure (types, constraint names, partial indexes, referential actions) is kept
+verbatim, so the schema is `migrate diff`-clean against production.
+
+**Acceptance gate (you run it — I have no DB access):**
+```bash
+cd monorepo/apps/app   # any app; they share the DB
+DATABASE_URL="<prod-url>" npx prisma migrate diff \
+  --from-schema-datamodel ../../packages/db/prisma/schema.prisma \
+  --to-url "$DATABASE_URL"
+# Expect: "No difference detected."  (proves the canonical exactly matches production)
+```
 
 ---
 
