@@ -6,7 +6,9 @@ const { prismaMock, headersMock } = vi.hoisted(() => ({
   },
   headersMock: vi.fn(),
 }))
-vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
+// rate-limit's logic now lives in @genealogiq/services and imports prisma from
+// @genealogiq/db, so we mock that module (not the local @/lib/prisma shim).
+vi.mock("@genealogiq/db", () => ({ prisma: prismaMock }))
 vi.mock("next/headers", () => ({ headers: headersMock }))
 
 import { checkRateLimit, getClientIp } from "./rate-limit"
