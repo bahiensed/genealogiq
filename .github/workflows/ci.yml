@@ -6,8 +6,8 @@ on:
   pull_request:
     branches: [main]
 
-# Monorepo quality gates. typecheck, tests and the single-schema guard are
-# blocking; lint stays informational until the baseline cleanup.
+# Monorepo quality gates: typecheck, tests, the single-schema guard and lint are
+# all blocking. Dependency audit is informational (Dependabot opens the fix PRs).
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -41,5 +41,11 @@ jobs:
       - name: Single-schema guard (blocking)
         run: pnpm check:schema-parity
 
-      - name: Lint (non-blocking — pre-existing baseline)
-        run: pnpm lint || true
+      - name: Lint (blocking)
+        run: pnpm lint
+
+      # Surfaces known high/critical advisories in dependencies. Informational
+      # for now (Dependabot opens the fix PRs); flip to blocking once the audit
+      # baseline is clean.
+      - name: Dependency audit (informational)
+        run: pnpm audit --audit-level high || true

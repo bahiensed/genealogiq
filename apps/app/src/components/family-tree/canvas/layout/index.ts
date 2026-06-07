@@ -334,7 +334,7 @@ function layoutHalfMarriageBlock(
 
   const positions = new Map<string, { x: number; y: number }>()
   positions.set(otherSpouseId, { x: 0, y: gen * Y_GEN })
-  let block: Block = { positions, leftX: 0, rightX: NODE_W }
+  const block: Block = { positions, leftX: 0, rightX: NODE_W }
 
   if (unit.children.length === 0) return block
 

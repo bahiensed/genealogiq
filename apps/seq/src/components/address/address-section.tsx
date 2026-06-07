@@ -18,10 +18,12 @@ const SUPPORTED_COUNTRIES = [
   { code: 'MX', label: 'Mexico' },
 ]
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface AddressSectionProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: UseFormSetValue<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: FieldErrors<any>
   prefix: string
 }
@@ -43,8 +45,10 @@ function zipPlaceholder(country: string): string {
 export function AddressSection({ control, setValue, errors, prefix }: AddressSectionProps) {
   const [isSearching, setIsSearching] = useState(false)
 
-  const country: string = useWatch({ control, name: `${prefix}.country` }) ?? 'BR'
-  const zip: string     = useWatch({ control, name: `${prefix}.zip` })     ?? ''
+  const country: string    = useWatch({ control, name: `${prefix}.country` }) ?? 'BR'
+  const zip: string        = useWatch({ control, name: `${prefix}.zip` })     ?? ''
+  // Hoisted so the hook is called unconditionally (was inside the state ternary).
+  const stateValue: string = useWatch({ control, name: `${prefix}.state` })   ?? ''
 
   const states = STATES_BY_COUNTRY[country] ?? []
 
@@ -173,7 +177,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
         <FieldLabel>State / Province:</FieldLabel>
         {states.length > 0 ? (
           <Select
-            value={useWatch({ control, name: `${prefix}.state` }) ?? ''}
+            value={stateValue}
             onValueChange={(val) => setValue(`${prefix}.state`, val)}
           >
             <SelectTrigger>
@@ -187,7 +191,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
           </Select>
         ) : (
           <Input
-            value={useWatch({ control, name: `${prefix}.state` }) ?? ''}
+            value={stateValue}
             onChange={(e) => setValue(`${prefix}.state`, e.target.value)}
           />
         )}
