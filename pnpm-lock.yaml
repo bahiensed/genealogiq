@@ -29,6 +29,9 @@ importers:
       '@genealogiq/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@genealogiq/services':
+        specifier: workspace:*
+        version: link:../../packages/services
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.4.0(react-hook-form@7.77.0(react@19.2.4))
@@ -162,6 +165,9 @@ importers:
       '@genealogiq/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@genealogiq/services':
+        specifier: workspace:*
+        version: link:../../packages/services
       '@genealogiq/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -286,6 +292,9 @@ importers:
       '@genealogiq/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@genealogiq/services':
+        specifier: workspace:*
+        version: link:../../packages/services
       '@genealogiq/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -438,6 +447,28 @@ importers:
       prisma:
         specifier: ^7.7.0
         version: 7.8.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+
+  packages/services:
+    dependencies:
+      '@genealogiq/db':
+        specifier: workspace:*
+        version: link:../db
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
+      stripe:
+        specifier: ^22.1.1
+        version: 22.2.0(@types/node@20.19.41)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.39
+        version: 20.19.41
+      next:
+        specifier: 16.2.7
+        version: 16.2.7(@babel/core@7.29.7)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       typescript:
         specifier: ^5
         version: 5.9.3
@@ -4771,6 +4802,9 @@ packages:
   serve-static@2.2.1:
     resolution: {integrity: sha512-xRXBn0pPqQTVQiC8wyQrKs2MOlX24zQ0POGaj0kultvoOCstBQM5yvOhAVSUwOMjQtTvsPWoNCHfPGwaaQJhTw==}
     engines: {node: '>= 18'}
+
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
   set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
@@ -9843,6 +9877,8 @@ snapshots:
       send: 1.2.1
     transitivePeerDependencies:
       - supports-color
+
+  server-only@0.0.1: {}
 
   set-blocking@2.0.0: {}
 
