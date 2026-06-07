@@ -99,6 +99,14 @@ of PK-vs-unique, so `coupon.appliesTo` / `package.coupons` (`connect`/`disconnec
 Optional future cleanup (own maintenance window, touches only the join table): one migration to
 convert the unique index to a primary key, making `migrate diff` perfectly empty.
 
+**Second intentional deviation — `Subscription.maxProfiles` / `termLength` / `price`.** The live DB
+allows NULL on these columns, but all three apps' schemas have always declared them required and the
+code does arithmetic on them (e.g. `assignedTo < subscription.maxProfiles`, `+ subscription.termLength`).
+The seed always populates them, so no row is ever null. Kept **non-null** in the canonical to match
+the application contract — declaring them nullable would force `?? 0` / `!` across SEQ and APP for a
+case that never occurs. This adds two "would set NOT NULL" lines to `migrate diff`; the proper fix is
+a future migration adding the `NOT NULL` constraint to the DB.
+
 ---
 
 ## Target package layout
