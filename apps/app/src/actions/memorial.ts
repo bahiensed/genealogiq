@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { memorialSchema } from "@/schemas/memorial"
 import { profileEditSchema } from "@/schemas/profile"
-import { getProfileById } from "@/queries/profile"
+import { getProfileById, getProfileForEdit } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 
@@ -104,7 +104,8 @@ export async function deleteMemorial(profileId: string) {
 export async function updateMemorial(profileId: string, data: unknown) {
   const session = await verifySession()
 
-  const profile = await getProfileById(profileId)
+  // Manager-only edit path — uses the full projection (needs address id).
+  const profile = await getProfileForEdit(profileId)
   if (!profile || profile.role !== "APP_MEMO") return { error: "Profile not found." }
   if (!canManageProfile(profile, session.user.id)) return { error: "Unauthorized." }
 

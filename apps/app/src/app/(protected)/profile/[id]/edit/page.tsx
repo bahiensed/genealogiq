@@ -5,7 +5,7 @@ import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { MemorialEditForm } from "@/components/memorial-edit-form"
 import { verifySession } from "@/lib/dal"
-import { getProfileById } from "@/queries/profile"
+import { getProfileForEdit } from "@/queries/profile"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -15,7 +15,7 @@ export default async function ProfileEditPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
 
-  const profile = await getProfileById(id)
+  const profile = await getProfileForEdit(id)
   if (!profile) notFound()
 
   const isOwn = id === session.user.id

@@ -9,14 +9,16 @@ export async function GET(request: Request): Promise<NextResponse> {
   const q = new URL(request.url).searchParams.get("q")?.trim() ?? ""
   if (q.length < 2) return NextResponse.json([])
 
+  // Cross-user place lookup. Coordinates are public by design (a resting place is
+  // meant to be findable), but `number`/`complement` (unit-level identifiers) are
+  // omitted so this name search can't be used to enumerate other users' precise
+  // unit addresses. (Security B1.)
   const results = await prisma.geolocation.findMany({
     where: { placeName: { contains: q, mode: "insensitive" } },
     select: {
       placeName: true,
       zip: true,
       street: true,
-      number: true,
-      complement: true,
       neighborhood: true,
       city: true,
       state: true,

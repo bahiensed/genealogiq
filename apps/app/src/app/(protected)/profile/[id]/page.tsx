@@ -3,7 +3,7 @@ import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } 
 import { auth } from "@/auth"
 import { getProfileById } from "@/queries/profile"
 import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
-import { getGeolocationByUserId } from "@/queries/geolocation"
+import { getGeolocationForViewer } from "@/queries/geolocation"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
 import { countTreeMembers } from "@/queries/family-tree"
 import { getGalleryImageUrls, getGalleryCount, getGalleryHasVideos } from "@/queries/gallery"
@@ -67,7 +67,7 @@ export default async function ProfileByIdPage({ params }: Props) {
   ] = await Promise.all([
     getFavoriteCount(id),
     isOwn || !sessionUserId ? Promise.resolve(false) : isFavoritedByUser(sessionUserId, id),
-    isMemorialized ? getGeolocationByUserId(id) : Promise.resolve(null),
+    isMemorialized ? getGeolocationForViewer(id) : Promise.resolve(null),
     getGalleryImageUrls(id, 4),
     getGalleryCount(id),
     getGalleryHasVideos(id),

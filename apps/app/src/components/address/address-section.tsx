@@ -13,11 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group"
 import { Button } from "@/components/ui/button"
 
+// Postal-level only — the suggestions API never returns unit-level fields
+// (number/complement) to avoid leaking other users' addresses (B1).
 interface AddressSuggestion {
   zip: string
   street: string | null
-  number: string | null
-  complement: string | null
   neighborhood: string | null
   city: string | null
   state: string | null
@@ -98,8 +98,8 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
   function applySuggestion(s: AddressSuggestion) {
     setValue(`${prefix}.zip`,          s.zip ?? "")
     setValue(`${prefix}.street`,       s.street ?? "")
-    setValue(`${prefix}.number`,       s.number ?? "")
-    setValue(`${prefix}.complement`,   s.complement ?? "")
+    // number/complement are deliberately not autofilled (not returned by the API
+    // for privacy) — the user enters their own unit details.
     setValue(`${prefix}.neighborhood`, s.neighborhood ?? "")
     setValue(`${prefix}.city`,         s.city ?? "")
     setValue(`${prefix}.state`,        s.state ?? "")
@@ -178,7 +178,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
                     className="w-full justify-start rounded-none px-3 py-2 text-left text-sm h-auto"
                     onClick={() => applySuggestion(s)}
                   >
-                    {[s.street, s.number].filter(Boolean).join(", ")}
+                    {[s.street, s.neighborhood].filter(Boolean).join(", ")}
                     {s.city ? ` – ${s.city}` : ""}
                     {s.state ? `, ${s.state}` : ""}
                   </Button>
