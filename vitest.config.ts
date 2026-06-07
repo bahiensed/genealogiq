@@ -5,6 +5,6 @@ import { defineConfig } from "vitest/config"
 // though all three share the same alias name. See apps/<app>/vitest.config.ts.
 export default defineConfig({
   test: {
-    projects: ["apps/app", "apps/seq", "apps/bms", "packages/core"],
+    projects: ["apps/app", "apps/seq", "apps/bms", "packages/core", "packages/auth"],
   },
 })

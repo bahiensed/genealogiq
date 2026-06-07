@@ -1,7 +1,6 @@
 import NextAuth, { type NextAuthConfig } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import bcrypt from "bcryptjs"
-import { SignInSchema } from "./schemas"
+import { authorizeUser } from "./authorize"
 import type { AppPrincipal, AuthUserRow } from "./types"
 
 export interface CreateAuthOptions<Row extends AuthUserRow> {
@@ -32,30 +31,9 @@ export function createAuth<Row extends AuthUserRow>(opts: CreateAuthOptions<Row>
       Credentials({
         credentials: { email: {}, password: {} },
         authorize: async (credentials) => {
-          const validated = SignInSchema.safeParse(credentials)
-          if (!validated.success) return null
-
-          const { email, password } = validated.data
-
-          const row = await opts.loadUserByEmail(email)
-          if (!row) return null
-
-          if (row.emailVerified === null) return null   // unverified
-          if (!row.isActive) return null                // deactivated
-          if (!row.password) return null                // invited, no password yet
-          if (row.lockedUntil && row.lockedUntil > new Date()) return null // locked out
-
-          const match = await bcrypt.compare(password, row.password)
-          if (!match) return null
-
-          if (row.failedLoginAttempts > 0 || row.lockedUntil) {
-            await opts.resetLockout(row.id)
-          }
-
-          if (opts.extraGate && !opts.extraGate(row)) return null
-
+          const principal = await authorizeUser(credentials, opts)
           // AppPrincipal is assignable to the (augmented) NextAuth User.
-          return opts.toPrincipal(row) as unknown as ReturnType<typeof opts.toPrincipal> & { id: string }
+          return principal as unknown as (AppPrincipal & { id: string }) | null
         },
       }),
     ],
