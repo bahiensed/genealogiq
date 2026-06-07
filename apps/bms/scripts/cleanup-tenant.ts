@@ -22,8 +22,7 @@
 import 'dotenv/config'
 import * as readline from 'node:readline/promises'
 import { stdin as input, stdout as output } from 'node:process'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '../src/generated/prisma/client'
+import { prisma } from '@genealogiq/db'
 
 // ─── Args ─────────────────────────────────────────────────────────────────────
 
@@ -38,10 +37,7 @@ if (!nameOrId) {
 }
 
 // ─── DB ───────────────────────────────────────────────────────────────────────
-
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
-})
+// prisma singleton imported from @genealogiq/db
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

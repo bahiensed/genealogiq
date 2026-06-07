@@ -6,8 +6,8 @@ on:
   pull_request:
     branches: [main]
 
-# Monorepo quality gates. typecheck is blocking; schema-parity and lint are
-# informational until Phase 4 (single schema) and the lint baseline cleanup.
+# Monorepo quality gates. typecheck, tests and the single-schema guard are
+# blocking; lint stays informational until the baseline cleanup.
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -38,8 +38,8 @@ jobs:
       - name: Unit tests (blocking)
         run: pnpm test
 
-      - name: Schema parity (informational until Phase 4)
-        run: pnpm check:schema-parity || true
+      - name: Single-schema guard (blocking)
+        run: pnpm check:schema-parity
 
       - name: Lint (non-blocking — pre-existing baseline)
         run: pnpm lint || true

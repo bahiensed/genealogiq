@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { Prisma } from '@/generated/prisma/client'
+import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { deceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'

@@ -12,7 +12,7 @@ import { acceptFamilyRequest, rejectFamilyRequest } from "@/actions/family-tree"
 import { approveGuardianship, rejectGuardianship } from "@/actions/guardian"
 import { loadMoreActivity } from "@/actions/messages"
 import type { ActivityCursor, InboxItem, MessagesData } from "@/queries/notifications"
-import type { NotificationType } from "@/generated/prisma/enums"
+import type { NotificationType } from '@genealogiq/db'
 
 const dateFmt = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" })
 

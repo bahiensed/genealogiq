@@ -9,8 +9,7 @@
 
 import 'dotenv/config'
 import Stripe from 'stripe'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '../src/generated/prisma/client'
+import { prisma } from '@genealogiq/db'
 
 // ─── Args ─────────────────────────────────────────────────────────────────────
 
@@ -26,9 +25,6 @@ if (!sessionId) {
 // ─── Clients ──────────────────────────────────────────────────────────────────
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-const prisma  = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
-})
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 

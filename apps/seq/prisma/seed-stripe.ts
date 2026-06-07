@@ -7,14 +7,11 @@
 
 import "dotenv/config"
 import Stripe from "stripe"
-import { PrismaPg } from "@prisma/adapter-pg"
-import { PrismaClient } from "../src/generated/prisma/client"
+import { prisma } from "@genealogiq/db"
 
-const connectionString = process.env.DATABASE_URL
-if (!connectionString) throw new Error("DATABASE_URL is required")
+if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required")
 if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY is required")
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) })
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 async function main() {

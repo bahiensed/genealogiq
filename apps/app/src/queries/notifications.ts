@@ -1,7 +1,7 @@
 import "server-only"
 
 import { prisma } from "@/lib/prisma"
-import type { NotificationType } from "@/generated/prisma/enums"
+import type { NotificationType } from '@genealogiq/db'
 
 const PENDING_TYPES = [
   "TRIBUTE_PENDING",

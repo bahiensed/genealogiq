@@ -1,0 +1,793 @@
+// @genealogiq/db — single source of truth for the Prisma schema shared by
+// BMS, SEQ and APP. All three apps point their Prisma client at this package.
+//
+// This schema was derived by introspecting the live Neon database (`prisma db
+// pull`) — the only representation that exactly matches production — and then
+// renaming Prisma's auto-generated identifiers back to the apps' conventions so
+// existing code keeps compiling. Structural attributes (column types, legacy
+// constraint names via `map:`, partial indexes, referential actions) are kept
+// verbatim from the introspection. See docs/PHASE-4-DB-CONSOLIDATION.md.
+//
+// Acceptance gate: `prisma migrate diff --from-schema-datamodel
+// prisma/schema.prisma --to-url $DATABASE_URL` must report no difference.
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  OWNER
+  ADMIN
+  COMERCIAL
+  FINANCE
+  USER
+}
+
+enum AppRole {
+  APP_USER
+  APP_MEMO
+  APP_GHOST
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum EmailTokenType {
+  VERIFICATION
+  CHANGE
+}
+
+enum TributeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum EntityType {
+  INDIVIDUAL
+  COMPANY
+}
+
+enum PackageType {
+  DIGITAL
+  PHYSICAL
+}
+
+enum PhysicalQrStatus {
+  AVAILABLE
+  ACTIVATED
+}
+
+enum GuardianStatus {
+  PENDING
+  ACCEPTED
+}
+
+enum QrStatus {
+  PENDING
+  PRINTED
+  INSTALLED
+}
+
+enum NotificationType {
+  TRIBUTE_PENDING
+  TRIBUTE_APPROVED
+  TRIBUTE_REJECTED
+  FAMILY_REQUEST_PENDING
+  FAMILY_REQUEST_ACCEPTED
+  FAMILY_REQUEST_REJECTED
+  GUARDIAN_REQUEST_PENDING
+  GUARDIAN_REQUEST_ACCEPTED
+  GUARDIAN_REQUEST_REJECTED
+}
+
+// ─── Subscriptions, Packages & Sales ─────────────────────────────────────────
+
+model Subscription {
+  id                    String    @id @default(cuid())
+  name                  String
+  description           String?
+  isActive              Boolean   @default(true) @map("is_active")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  // DB permits NULL on these three, but every app's schema has always declared
+  // them required and the seed always populates them — kept non-null to match
+  // the application contract (see docs "intentional deviations"). A future
+  // migration should add the NOT NULL constraint to remove the DB-level drift.
+  maxProfiles           Int       @map("max_profiles")
+  termLength            Int       @map("term_length")
+  price                 Decimal   @db.Decimal(10, 2)
+  code                  String    @unique
+  treeMaxMembers        Int       @map("tree_max_members")
+  bioMaxChars           Int       @map("bio_max_chars")
+  bioMaxImages          Int       @map("bio_max_images")
+  galleryMaxImages      Int       @map("gallery_max_images")
+  galleryMaxVideos      Int       @map("gallery_max_videos")
+  geolocationFullAccess Boolean   @default(false) @map("geolocation_full_access")
+  qrCodeAccess          Boolean   @default(false) @map("qr_code_access")
+  stripeProductId       String?   @unique @map("stripe_product_id")
+  stripeAnnualPriceId   String?   @unique @map("stripe_annual_price_id")
+  stripeMonthlyPriceId  String?   @unique @map("stripe_monthly_price_id")
+  appSales              AppSale[]
+
+  @@map("subscriptions")
+}
+
+model DiscountCoupon {
+  id                    String    @id @default(cuid())
+  code                  String    @unique
+  description           String?
+  discountType          String    @map("discount_type")
+  discountValue         Decimal   @map("discount_value") @db.Decimal(10, 2)
+  duration              String
+  durationInMonths      Int?      @map("duration_in_months")
+  maxRedemptions        Int?      @map("max_redemptions")
+  redeemBy              DateTime? @map("redeem_by")
+  stripeCouponId        String?   @unique @map("stripe_coupon_id")
+  stripePromotionCodeId String?   @unique @map("stripe_promotion_code_id")
+  createdById           String    @map("created_by_id")
+  isActive              Boolean   @default(true) @map("is_active")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  appliesTo             Package[] @relation("CouponPackages")
+
+  @@map("discount_coupons")
+}
+
+model Package {
+  id               String              @id @default(cuid())
+  name             String
+  description      String?
+  price            Decimal             @map("price") @db.Decimal(10, 2)
+  isActive         Boolean             @default(true) @map("is_active")
+  createdAt        DateTime            @default(now()) @map("created_at")
+  updatedAt        DateTime            @updatedAt @map("updated_at")
+  quantity         Int                 @default(1)
+  stripeProductId  String?             @unique @map("stripe_product_id")
+  stripePriceId    String?             @unique @map("stripe_price_id")
+  type             PackageType         @default(DIGITAL)
+  physicalLicenses PhysicalQrLicense[]
+  sales            Sale[]
+  coupons          DiscountCoupon[]    @relation("CouponPackages")
+
+  @@map("packages")
+}
+
+model Sale {
+  id                    Int                 @id @default(autoincrement())
+  quantity              Int                 @default(1)
+  packageId             String              @map("package_id")
+  tenantId              String              @map("tenant_id")
+  soldById              String              @map("sold_by_id")
+  createdAt             DateTime            @default(now()) @map("created_at")
+  updatedAt             DateTime            @updatedAt @map("updated_at")
+  reversedAt            DateTime?           @map("reversed_at")
+  stripeSessionId       String?             @unique @map("stripe_session_id")
+  stripePaymentIntentId String?             @map("stripe_payment_intent_id")
+  physicalLicenses      PhysicalQrLicense[]
+  tenant                Tenant              @relation(fields: [tenantId], references: [id], map: "sales_customer_id_fkey")
+  package               Package             @relation(fields: [packageId], references: [id])
+  soldBy                User                @relation(fields: [soldById], references: [id])
+
+  @@map("sales")
+}
+
+model QrInventory {
+  id        String   @id @default(cuid())
+  quantity  Int      @default(0)
+  tenantId  String   @unique @map("tenant_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("qr_inventory")
+}
+
+model AppSale {
+  id                   String       @id @default(cuid())
+  value                Decimal?     @db.Decimal(10, 2)
+  appUserId            String       @map("app_user_id")
+  subscriptionId       String       @map("subscription_id")
+  tenantId             String?      @map("tenant_id")
+  soldById             String?      @map("sold_by_id")
+  createdAt            DateTime     @default(now()) @map("created_at")
+  updatedAt            DateTime     @updatedAt @map("updated_at")
+  stripeSubscriptionId String?      @unique @map("stripe_subscription_id")
+  stripePriceId        String?      @map("stripe_price_id")
+  cadence              String?
+  status               String?
+  currentPeriodEnd     DateTime?    @map("current_period_end")
+  cancelAtPeriodEnd    Boolean      @default(false) @map("cancel_at_period_end")
+  canceledAt           DateTime?    @map("canceled_at")
+  endedAt              DateTime?    @map("ended_at")
+  appUser              AppUser      @relation("AppSaleBuyer", fields: [appUserId], references: [id], onDelete: Cascade)
+  soldBy               User?        @relation(fields: [soldById], references: [id], onDelete: Restrict)
+  subscription         Subscription @relation(fields: [subscriptionId], references: [id])
+  tenant               Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  assignedTo           AppUser[]    @relation("AppSaleMemorial")
+
+  @@map("app_sales")
+}
+
+model StripeEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("stripe_events")
+}
+
+// ─── Auth tokens & rate limiting ─────────────────────────────────────────────
+
+model RateLimitAttempt {
+  id          Int      @id @default(autoincrement())
+  key         String
+  attemptedAt DateTime @default(now()) @map("attempted_at")
+
+  @@index([key, attemptedAt])
+  @@index([attemptedAt])
+  @@map("rate_limit_attempts")
+}
+
+model EmailToken {
+  id        String         @id @default(cuid())
+  token     String         @unique
+  type      EmailTokenType
+  userId    String?        @map("user_id")
+  newEmail  String?        @map("new_email")
+  expiresAt DateTime       @map("expires_at")
+  createdAt DateTime       @default(now()) @map("created_at")
+  appUserId String?        @map("app_user_id") @db.VarChar
+  appUser   AppUser?       @relation(fields: [appUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user      User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("email_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String?  @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  appUserId String?  @map("app_user_id") @db.VarChar
+  appUser   AppUser? @relation(fields: [appUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// ─── Address & Company ───────────────────────────────────────────────────────
+
+model Address {
+  id           String    @id @default(cuid())
+  zip          String?
+  street       String?
+  number       String?
+  complement   String?
+  neighborhood String?
+  city         String?
+  state        String?
+  country      String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  appUser      AppUser?
+  company      Company?
+  supplier     Supplier?
+  tenant       Tenant?
+  user         User?
+
+  @@map("addresses")
+}
+
+model Company {
+  id                    String   @id @default(cuid())
+  legalName             String   @map("legal_name")
+  tradeName             String   @map("trade_name")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  taxId                 String   @unique @map("tax_id")
+  email                 String   @unique
+  phone                 String
+  phoneCountryCode      String   @default("55") @map("phone_country_code")
+  stateRegistration     String?  @map("state_registration")
+  municipalRegistration String?  @map("municipal_registration")
+  isActive              Boolean  @default(true) @map("is_active")
+  addressId             String?  @unique @map("address_id")
+  address               Address? @relation(fields: [addressId], references: [id])
+
+  @@map("companies")
+}
+
+// ─── User (BMS/SEQ operators only) ───────────────────────────────────────────
+
+model User {
+  id                  String               @id @default(cuid())
+  firstName           String               @map("first_name")
+  lastName            String               @map("last_name")
+  email               String               @unique
+  password            String?
+  role                Role                 @default(USER)
+  isActive            Boolean              @default(true) @map("is_active")
+  emailVerified       DateTime?            @map("email_verified")
+  failedLoginAttempts Int                  @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?            @map("locked_until")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+  nationalId          String?              @map("national_id")
+  birthDate           DateTime?            @map("birth_date")
+  phoneCountryCode    String               @default("55") @map("phone_country_code")
+  phone               String?
+  addressId           String?              @unique @map("address_id")
+  tenantId            String?              @map("tenant_id")
+  birth_place         String?
+  birth_country       String?
+  death_date          DateTime?
+  death_place         String?
+  death_country       String?
+  avatarUrl           String?              @map("avatar_url")
+  cover_url           String?
+  gender              String?              @map("gender") @db.VarChar(10)
+  appSales            AppSale[]
+  createdAppUserCats  AppUserCategory[]    @relation("app_user_categories_created_by_idTousers")
+  updatedAppUserCats  AppUserCategory[]    @relation("app_user_categories_updated_by_idTousers")
+  createdAppUsers     AppUser[]            @relation("app_users_created_by_idTousers")
+  updatedAppUsers     AppUser[]            @relation("app_users_updated_by_idTousers")
+  emailTokens         EmailToken[]
+  passwordResetTokens PasswordResetToken[]
+  sales               Sale[]
+  createdSupplierCats SupplierCategory[]   @relation("supplier_categories_created_by_idTousers")
+  updatedSupplierCats SupplierCategory[]   @relation("supplier_categories_updated_by_idTousers")
+  createdSuppliers    Supplier[]           @relation("suppliers_created_by_idTousers")
+  updatedSuppliers    Supplier[]           @relation("suppliers_updated_by_idTousers")
+  address             Address?             @relation(fields: [addressId], references: [id])
+  tenant              Tenant?              @relation(fields: [tenantId], references: [id], map: "users_customer_id_fkey")
+
+  @@map("users")
+}
+
+// ─── AppUser (deceased memorials + APP login users) ──────────────────────────
+
+model AppUser {
+  id                  String               @id @default(cuid())
+  firstName           String               @map("first_name")
+  lastName            String               @map("last_name")
+  gender              Gender?
+  birthDate           DateTime?            @map("birth_date")
+  birthCity           String?              @map("birth_city")
+  birthState          String?              @map("birth_state")
+  birthCountry        String?              @map("birth_country")
+  email               String?              @unique(map: "app_users_email_unique", where: raw("(email IS NOT NULL)"))
+  phoneCountryCode    String               @default("55") @map("phone_country_code")
+  phone               String?
+  notes               String?
+  isActive            Boolean              @default(true) @map("is_active")
+  fb                  String?
+  instagram           String?
+  linkedin            String?
+  tiktok              String?
+  x                   String?
+  youtube             String?
+  website             String?
+  tenantId            String?              @map("tenant_id")
+  categoryId          String?              @map("category_id")
+  addressId           String?              @unique @map("address_id")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+  createdById         String?              @map("created_by_id")
+  otherSocial         String?              @map("other_social")
+  updatedById         String?              @map("updated_by_id")
+  role                AppRole              @default(APP_USER)
+  birthPlace          String?              @map("birth_place") @db.VarChar
+  avatarUrl           String?              @map("avatar_url") @db.VarChar
+  nationalId          String?              @map("national_id") @db.VarChar
+  deathDate           DateTime?            @map("death_date")
+  deathPlace          String?              @map("death_place") @db.VarChar
+  deathCountry        String?              @map("death_country") @db.VarChar
+  password            String?              @db.VarChar
+  emailVerified       DateTime?            @map("email_verified")
+  failedLoginAttempts Int                  @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?            @map("locked_until")
+  deathCause          String?              @map("death_cause") @db.VarChar
+  deathState          String?              @map("death_state") @db.VarChar
+  appSaleId           String?              @map("app_sale_id")
+  maidenName          String?              @map("maiden_name")
+  nickname            String?
+  stripeCustomerId    String?              @unique @map("stripe_customer_id")
+  bio                 Bio?
+  familyFrom          FamilyRelation[]     @relation("FamilyFrom")
+  familyTo            FamilyRelation[]     @relation("FamilyTo")
+  favoritesReceived   Favorite[]           @relation("FavoriteTarget")
+  favoritesGiven      Favorite[]           @relation("FavoriteUser")
+  galleryItems        GalleryItem[]
+  geolocation         Geolocation?
+  actorNotifications  Notification[]       @relation("ActorNotifications")
+  notifications       Notification[]       @relation("UserNotifications")
+  appSales            AppSale[]            @relation("AppSaleBuyer")
+  tributesAuthored    Tribute[]            @relation("TributeAuthor")
+  tributesReceived    Tribute[]            @relation("TributeProfile")
+  guardianRequestsMade AppUserGuardian[]   @relation("GuardianRequestedBy")
+  guardedBy           AppUserGuardian[]    @relation("GuardedBy")
+  guardiansOf         AppUserGuardian[]    @relation("GuardianOf")
+  address             Address?             @relation(fields: [addressId], references: [id])
+  appSale             AppSale?             @relation("AppSaleMemorial", fields: [appSaleId], references: [id])
+  category            AppUserCategory?     @relation(fields: [categoryId], references: [id])
+  createdBy           User?                @relation("app_users_created_by_idTousers", fields: [createdById], references: [id])
+  tenant              Tenant?              @relation("AppUserTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedBy           User?                @relation("app_users_updated_by_idTousers", fields: [updatedById], references: [id])
+  emailTokens         EmailToken[]
+  passwordResetTokens PasswordResetToken[]
+  physicalQrLicense   PhysicalQrLicense?
+  qrCode              QrCode?
+
+  @@index([tenantId])
+  @@map("app_users")
+}
+
+model AppUserGuardian {
+  id            String         @id @default(cuid()) @db.VarChar(30)
+  appUserId     String         @map("app_user_id") @db.VarChar(30)
+  guardianId    String         @map("guardian_id") @db.VarChar(30)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  status        GuardianStatus @default(ACCEPTED)
+  requestedById String?        @map("requested_by_id")
+  notifications Notification[]
+  requestedBy   AppUser?       @relation("GuardianRequestedBy", fields: [requestedById], references: [id], onUpdate: NoAction)
+  appUser       AppUser        @relation("GuardedBy", fields: [appUserId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_aug_appuser")
+  guardian      AppUser        @relation("GuardianOf", fields: [guardianId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_aug_guardian")
+
+  @@unique([appUserId, guardianId], map: "app_user_guardians_unique")
+  @@index([appUserId], map: "idx_aug_app_user_id")
+  @@index([guardianId], map: "idx_aug_guardian_id")
+  @@map("app_user_guardians")
+}
+
+// ─── APP memorial content ────────────────────────────────────────────────────
+
+model Bio {
+  id        String     @id(map: "bios_pkey") @default(cuid())
+  quote     String?    @db.VarChar(140)
+  text      String?
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  userId    String     @unique(map: "bios_app_user_id_key") @map("app_user_id") @db.VarChar
+  images    BioImage[]
+  user      AppUser    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "bios_app_user_id_fkey")
+
+  @@map("app_bios")
+}
+
+model BioImage {
+  id        String   @id(map: "bio_images_pkey") @default(cuid())
+  url       String
+  aspect    String   @default("square")
+  order     Int      @default(0)
+  bioId     String   @map("bio_id")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  bio       Bio      @relation(fields: [bioId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "bio_images_bio_id_fkey")
+
+  @@index([bioId])
+  @@map("app_bio_images")
+}
+
+model Tribute {
+  id            String         @id(map: "tributes_pkey") @default(cuid())
+  text          String         @db.VarChar(512)
+  imageUrl      String?        @map("image_url")
+  status        TributeStatus  @default(PENDING)
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  authorId      String         @map("app_author_id") @db.VarChar
+  profileId     String         @map("app_profile_id") @db.VarChar
+  notifications Notification[]
+  author        AppUser        @relation("TributeAuthor", fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tributes_app_author_id_fkey")
+  profile       AppUser        @relation("TributeProfile", fields: [profileId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tributes_app_profile_id_fkey")
+
+  @@unique([authorId, profileId], map: "tributes_app_author_profile_key")
+  @@index([authorId])
+  @@index([profileId], map: "tributes_app_profile_id_idx")
+  @@map("app_tributes")
+}
+
+model GalleryItem {
+  id          String   @id(map: "gallery_items_pkey") @default(cuid())
+  kind        String   @default("image")
+  url         String
+  poster      String?
+  durationSec Float?   @map("duration_sec")
+  takenAt     String?  @map("taken_at")
+  location    String?
+  description String?  @db.VarChar(280)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  userId      String   @map("app_user_id") @db.VarChar
+  user        AppUser  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "gallery_items_app_user_id_fkey")
+
+  @@index([userId], map: "gallery_items_app_user_id_idx")
+  @@map("app_gallery_items")
+}
+
+model Favorite {
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  userId    String   @map("app_user_id") @db.VarChar
+  targetId  String   @map("app_target_id") @db.VarChar
+  target    AppUser  @relation("FavoriteTarget", fields: [targetId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "favorites_app_target_id_fkey")
+  user      AppUser  @relation("FavoriteUser", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "favorites_app_user_id_fkey")
+
+  @@id([userId, targetId], map: "favorites_app_pkey")
+  @@map("app_favorites")
+}
+
+model Geolocation {
+  id           String    @id(map: "geolocations_pkey") @default(cuid())
+  placeName    String    @map("place_name") @db.VarChar(120)
+  address      String?   @db.VarChar(200)
+  city         String?   @db.VarChar(100)
+  state        String?   @db.VarChar(100)
+  country      String?   @db.VarChar(100)
+  section      String?   @db.VarChar(200)
+  lat          Float
+  lon          Float
+  notes        String?   @db.VarChar(500)
+  photo1       String?   @map("photo_1")
+  photo2       String?   @map("photo_2")
+  photo3       String?   @map("photo_3")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  userId       String    @unique(map: "geolocations_app_user_id_key") @map("app_user_id") @db.VarChar
+  date         DateTime? @db.Timestamp(6)
+  zip          String?   @db.VarChar
+  street       String?   @db.VarChar(200)
+  number       String?   @db.VarChar(20)
+  complement   String?   @db.VarChar(200)
+  neighborhood String?   @db.VarChar(100)
+  user         AppUser   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "geolocations_app_user_id_fkey")
+
+  @@map("app_geolocations")
+}
+
+model FamilyRelation {
+  id            String         @id(map: "family_relations_pkey") @default(cuid())
+  type          String         @map("type")
+  subtype       String?        @map("subtype")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  fromId        String         @map("app_from_id") @db.VarChar
+  toId          String         @map("app_to_id") @db.VarChar
+  startDate     DateTime?      @map("start_date") @db.Timestamp(6)
+  endDate       DateTime?      @map("end_date") @db.Timestamp(6)
+  status        String         @default("ACCEPTED") @map("status")
+  requestedById String?        @map("requested_by")
+  from          AppUser        @relation("FamilyFrom", fields: [fromId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "family_relations_app_from_id_fkey")
+  to            AppUser        @relation("FamilyTo", fields: [toId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "family_relations_app_to_id_fkey")
+  notifications Notification[]
+
+  @@unique([fromId, toId, type], map: "family_relations_app_from_to_type_key")
+  @@index([fromId], map: "family_relations_app_from_id_idx")
+  @@index([toId], map: "family_relations_app_to_id_idx")
+  @@map("app_family_relations")
+}
+
+model Notification {
+  id                String           @id @default(cuid())
+  userId            String           @map("user_id")
+  type              NotificationType
+  tributeId         String?          @map("tribute_id")
+  familyRelationId  String?          @map("family_relation_id")
+  actorId           String?          @map("actor_id")
+  readAt            DateTime?        @map("read_at") @db.Timestamp(6)
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamp(6)
+  appUserGuardianId String?          @map("app_user_guardian_id")
+  actor             AppUser?         @relation("ActorNotifications", fields: [actorId], references: [id], onUpdate: NoAction)
+  appUserGuardian   AppUserGuardian? @relation(fields: [appUserGuardianId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  familyRelation    FamilyRelation?  @relation(fields: [familyRelationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tribute           Tribute?         @relation(fields: [tributeId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user              AppUser          @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([appUserGuardianId])
+  @@index([userId, createdAt(sort: Desc)], map: "app_notifications_user_created")
+  @@index([userId], map: "app_notifications_user_unread", where: raw("(read_at IS NULL)"))
+  @@map("app_notifications")
+}
+
+// ─── Suppliers ───────────────────────────────────────────────────────────────
+
+model SupplierCategory {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean    @default(true) @map("is_active")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  tenantId    String?    @map("tenant_id")
+  createdById String?    @map("created_by_id")
+  updatedById String?    @map("updated_by_id")
+  createdBy   User?      @relation("supplier_categories_created_by_idTousers", fields: [createdById], references: [id])
+  tenant      Tenant?    @relation("SupplierCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedBy   User?      @relation("supplier_categories_updated_by_idTousers", fields: [updatedById], references: [id])
+  suppliers   Supplier[]
+
+  @@unique([tenantId, name])
+  @@map("supplier_categories")
+}
+
+model Supplier {
+  id                    String            @id @default(cuid())
+  email                 String
+  isActive              Boolean           @default(true) @map("is_active")
+  createdAt             DateTime          @default(now()) @map("created_at")
+  updatedAt             DateTime          @updatedAt @map("updated_at")
+  entityType            EntityType        @map("entity_type")
+  name                  String
+  tradeName             String            @map("trade_name")
+  taxId                 String            @unique @map("tax_id")
+  stateRegistration     String?           @map("state_registration")
+  municipalRegistration String?           @map("municipal_registration")
+  phoneCountryCode      String            @default("55") @map("phone_country_code")
+  phone                 String
+  notes                 String?
+  categoryId            String?           @map("category_id")
+  addressId             String?           @unique @map("address_id")
+  birthDate             DateTime?         @map("birth_date")
+  tenantId              String?           @map("tenant_id")
+  createdById           String?           @map("created_by_id")
+  updatedById           String?           @map("updated_by_id")
+  address               Address?          @relation(fields: [addressId], references: [id])
+  category              SupplierCategory? @relation(fields: [categoryId], references: [id])
+  createdBy             User?             @relation("suppliers_created_by_idTousers", fields: [createdById], references: [id])
+  tenant                Tenant?           @relation("SupplierTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedBy             User?             @relation("suppliers_updated_by_idTousers", fields: [updatedById], references: [id])
+
+  @@unique([tenantId, taxId])
+  @@map("suppliers")
+}
+
+// ─── Tenants (funeral homes) ─────────────────────────────────────────────────
+
+model TenantCategory {
+  id          String   @id(map: "customer_categories_pkey") @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  tenantId    String?  @map("tenant_id")
+  tenant      Tenant?  @relation("TenantCategoryTenant", fields: [tenantId], references: [id], onDelete: Cascade, map: "customer_categories_tenant_id_fkey")
+  tenants     Tenant[] @relation("TenantCategory")
+
+  @@unique([tenantId, name], map: "customer_categories_tenant_id_name_key")
+  @@map("tenant_categories")
+}
+
+model Tenant {
+  id                        String              @id(map: "customers_pkey") @default(cuid())
+  email                     String
+  isActive                  Boolean             @default(true) @map("is_active")
+  createdAt                 DateTime            @default(now()) @map("created_at")
+  updatedAt                 DateTime            @updatedAt @map("updated_at")
+  entityType                EntityType          @map("entity_type")
+  name                      String
+  tradeName                 String              @map("trade_name")
+  taxId                     String              @unique(map: "customers_tax_id_key") @map("tax_id")
+  stateRegistration         String?             @map("state_registration")
+  municipalRegistration     String?             @map("municipal_registration")
+  phoneCountryCode          String              @default("55") @map("phone_country_code")
+  phone                     String
+  notes                     String?
+  categoryId                String?             @map("category_id")
+  addressId                 String?             @unique(map: "customers_address_id_key") @map("address_id")
+  birthDate                 DateTime?           @map("birth_date")
+  tenantId                  String?             @map("tenant_id")
+  moduleFinance             Boolean             @default(false) @map("module_finance")
+  moduleInventoryProducts   Boolean             @default(false) @map("module_inventory_products")
+  modulePurchasingProducts  Boolean             @default(false) @map("module_purchasing_products")
+  modulePurchasingServices  Boolean             @default(false) @map("module_purchasing_services")
+  moduleRecordsProducts     Boolean             @default(false) @map("module_records_products")
+  moduleRecordsServices     Boolean             @default(false) @map("module_records_services")
+  moduleRecordsSuppliers    Boolean             @default(false) @map("module_records_suppliers")
+  moduleCategoriesProducts  Boolean             @default(false) @map("module_categories_products")
+  moduleCategoriesServices  Boolean             @default(false) @map("module_categories_services")
+  moduleCategoriesSuppliers Boolean             @default(false) @map("module_categories_suppliers")
+  stripeCustomerId          String?             @unique @map("stripe_customer_id")
+  appSales                  AppSale[]
+  appUserCats               AppUserCategory[]
+  appUsers                  AppUser[]           @relation("AppUserTenant")
+  physicalLicenses          PhysicalQrLicense[]
+  qrInventory               QrInventory?
+  sales                     Sale[]
+  supplierCats              SupplierCategory[]  @relation("SupplierCategoryTenant")
+  suppliers                 Supplier[]          @relation("SupplierTenant")
+  tenantCats                TenantCategory[]    @relation("TenantCategoryTenant")
+  address                   Address?            @relation(fields: [addressId], references: [id], map: "customers_address_id_fkey")
+  category                  TenantCategory?     @relation("TenantCategory", fields: [categoryId], references: [id], map: "customers_category_id_fkey")
+  tenant                    Tenant?             @relation("TenantParent", fields: [tenantId], references: [id], onDelete: Cascade, map: "customers_tenant_id_fkey")
+  subTenants                Tenant[]            @relation("TenantParent")
+  users                     User[]
+
+  @@map("tenants")
+}
+
+// ─── AppUser categories ──────────────────────────────────────────────────────
+
+model AppUserCategory {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  isActive    Boolean   @default(true) @map("is_active")
+  tenantId    String?   @map("tenant_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  createdById String?   @map("created_by_id")
+  updatedById String?   @map("updated_by_id")
+  createdBy   User?     @relation("app_user_categories_created_by_idTousers", fields: [createdById], references: [id])
+  tenant      Tenant?   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  updatedBy   User?     @relation("app_user_categories_updated_by_idTousers", fields: [updatedById], references: [id])
+  appUsers    AppUser[]
+
+  @@unique([tenantId, name])
+  @@map("app_user_categories")
+}
+
+// ─── QR codes (digital) & physical licenses ──────────────────────────────────
+
+model QrCode {
+  id            String    @id @default(cuid())
+  url           String
+  status        QrStatus  @default(PENDING)
+  printedAt     DateTime? @map("printed_at")
+  installedAt   DateTime? @map("installed_at")
+  appUserId     String    @unique @map("app_user_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+  scanCount     Int       @default(0) @map("scan_count")
+  lastScannedAt DateTime? @map("last_scanned_at")
+  appUser       AppUser   @relation(fields: [appUserId], references: [id], onDelete: Cascade)
+  scans         QrScan[]
+
+  @@map("qr_codes")
+}
+
+model QrScan {
+  id        String   @id @default(cuid())
+  qrCodeId  String   @map("qr_code_id")
+  scannedAt DateTime @default(now()) @map("scanned_at")
+  userAgent String?  @map("user_agent") @db.VarChar(512)
+  ipHash    String?  @map("ip_hash")
+  qrCode    QrCode   @relation(fields: [qrCodeId], references: [id], onDelete: Cascade)
+
+  @@index([qrCodeId])
+  @@index([scannedAt])
+  @@map("qr_scans")
+}
+
+model PhysicalQrLicense {
+  id          String           @id @default(cuid())
+  genCode     String           @unique @map("gen_code")
+  status      PhysicalQrStatus @default(AVAILABLE)
+  saleId      Int              @map("sale_id")
+  packageId   String           @map("package_id")
+  tenantId    String           @map("tenant_id")
+  appUserId   String?          @unique @map("app_user_id")
+  activatedAt DateTime?        @map("activated_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at")
+  appUser     AppUser?         @relation(fields: [appUserId], references: [id])
+  package     Package          @relation(fields: [packageId], references: [id])
+  sale        Sale             @relation(fields: [saleId], references: [id])
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, status])
+  @@map("physical_qr_licenses")
+}

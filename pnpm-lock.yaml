@@ -26,6 +26,9 @@ importers:
       '@genealogiq/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@genealogiq/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.4.0(react-hook-form@7.77.0(react@19.2.4))
@@ -34,7 +37,7 @@ importers:
         version: 7.8.0
       '@prisma/client':
         specifier: ^7.7.0
-        version: 7.8.0(prisma@7.8.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
+        version: 7.8.0(prisma@7.8.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
       '@types/qrcode':
         specifier: ^1.5.6
         version: 1.5.6
@@ -156,6 +159,9 @@ importers:
       '@genealogiq/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@genealogiq/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@genealogiq/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -167,7 +173,7 @@ importers:
         version: 7.8.0
       '@prisma/client':
         specifier: ^7.6.0
-        version: 7.8.0(prisma@7.8.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
+        version: 7.8.0(prisma@7.8.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -277,6 +283,9 @@ importers:
       '@genealogiq/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@genealogiq/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@genealogiq/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -288,7 +297,7 @@ importers:
         version: 7.8.0
       '@prisma/client':
         specifier: ^7.6.0
-        version: 7.8.0(prisma@7.8.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
+        version: 7.8.0(prisma@7.8.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -410,6 +419,28 @@ importers:
       vitest:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@20.19.41)(jiti@2.7.0)(lightningcss@1.32.0)(msw@2.14.6(@types/node@20.19.41)(typescript@5.9.3))
+
+  packages/db:
+    dependencies:
+      '@prisma/adapter-pg':
+        specifier: ^7.7.0
+        version: 7.8.0
+      '@prisma/client':
+        specifier: ^7.7.0
+        version: 7.8.0(prisma@7.8.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.19.39
+        version: 20.19.41
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
+      prisma:
+        specifier: ^7.7.0
+        version: 7.8.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      typescript:
+        specifier: ^5
+        version: 5.9.3
 
   packages/ui:
     dependencies:
@@ -3037,6 +3068,10 @@ packages:
   doctrine@2.1.0:
     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
     engines: {node: '>=0.10.0'}
+
+  dotenv@16.6.1:
+    resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
 
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
@@ -6030,7 +6065,7 @@ snapshots:
 
   '@prisma/client-runtime-utils@7.8.0': {}
 
-  '@prisma/client@7.8.0(prisma@7.8.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)':
+  '@prisma/client@7.8.0(prisma@7.8.0(@types/react@19.2.17)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)':
     dependencies:
       '@prisma/client-runtime-utils': 7.8.0
     optionalDependencies:
@@ -7823,6 +7858,8 @@ snapshots:
   doctrine@2.1.0:
     dependencies:
       esutils: 2.0.3
+
+  dotenv@16.6.1: {}
 
   dotenv@17.4.2: {}
 
