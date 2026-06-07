@@ -9,7 +9,7 @@ export default async function CompanyPage() {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Company
+        Company Data
       </h1>
       <CompanyForm
         id={company.id}
