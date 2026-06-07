@@ -15,7 +15,7 @@ jobs:
       # Prisma generate/validate never connect to the DB — a dummy URL suffices.
       DATABASE_URL: postgresql://user:pass@localhost:5432/db
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # pnpm version comes from the root package.json "packageManager" field —
       # do NOT also set "version" here, or action-setup errors on the mismatch.
