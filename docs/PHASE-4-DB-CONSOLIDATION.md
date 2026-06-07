@@ -81,6 +81,24 @@ DATABASE_URL="<prod-url>" npx prisma migrate diff \
 # Expect: "No difference detected."  (proves the canonical exactly matches production)
 ```
 
+**Result (2026-06-07):** clean except for one benign, pre-existing item:
+```
+[*] Changed the `_CouponPackages` table
+  [-] Dropped the primary key on columns (A, B)
+  [+] Added unique index on columns (A, B)
+```
+This is the implicit many-to-many join table for `DiscountCoupon.appliesTo` ↔ `Package.coupons`.
+The live DB has a **unique index** on (A,B) (created by an older Prisma); Prisma 7's expected
+datamodel for an implicit m2m uses a **primary key** on (A,B). The two are functionally identical
+(both enforce uniqueness of the pair, both not-null). This diff is **not introduced by Phase 4** —
+every app's current schema already declares this relation as implicit m2m, so it predates the
+consolidation. Every real table/column/constraint/index otherwise matches production exactly.
+
+Decision: **accept as-is.** The Prisma client treats `_CouponPackages` as implicit m2m regardless
+of PK-vs-unique, so `coupon.appliesTo` / `package.coupons` (`connect`/`disconnect`) work unchanged.
+Optional future cleanup (own maintenance window, touches only the join table): one migration to
+convert the unique index to a primary key, making `migrate diff` perfectly empty.
+
 ---
 
 ## Target package layout
