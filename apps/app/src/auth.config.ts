@@ -1,32 +1,11 @@
-import type { NextAuthConfig } from "next-auth"
+import { createEdgeAuthConfig } from "@genealogiq/auth/edge"
 
-// Edge-safe config — no database imports
-export const authConfig = {
-  cookies: {
-    sessionToken: { name: "app.session-token" },
+// /profile is intentionally public — memorials must be reachable by anyone scanning a QR.
+export const authConfig = createEdgeAuthConfig({
+  cookieName: "app.session-token",
+  routes: {
+    protected: ["/home", "/tree"],
+    auth: ["/sign-in", "/sign-up", "/forgot-password"],
+    afterLogin: "/home",
   },
-  pages: {
-    signIn: "/sign-in",
-  },
-  providers: [],
-  callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user
-      const pathname = nextUrl.pathname
-
-      // /profile is intentionally public — memorials must be accessible to anyone scanning a QR code
-      const isProtected = ["/home", "/tree"].some((r) => pathname.startsWith(r))
-
-      const isAuthRoute = ["/sign-in", "/sign-up", "/forgot-password"].some((r) =>
-        pathname.startsWith(r)
-      )
-
-      if (isProtected && !isLoggedIn) return false
-      if (isAuthRoute && isLoggedIn) {
-        return Response.redirect(new URL("/home", nextUrl))
-      }
-
-      return true
-    },
-  },
-} satisfies NextAuthConfig
+})

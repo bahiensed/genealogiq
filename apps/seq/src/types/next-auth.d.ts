@@ -1,5 +1,7 @@
 import type { DefaultSession } from "next-auth"
 
+// Canonical session augmentation — identical across all three apps.
+// customerId is optional (populated only by SEQ).
 declare module "next-auth" {
   interface User {
     role?: string
@@ -10,7 +12,8 @@ declare module "next-auth" {
     user: DefaultSession["user"] & {
       id: string
       role: string
-      customerId: string
+      customerId?: string
+      image?: string | null
     }
   }
 }
