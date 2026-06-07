@@ -60,7 +60,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
       setServerError(result.error)
     } else {
       toast.success(result.success)
-      if (!isEditing) router.push('/users')
+      if (!isEditing) router.push('/system/users')
     }
   }
 

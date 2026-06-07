@@ -42,8 +42,8 @@ export const main: MenuItem[][] = [
 // ─── System (always visible) ─────────────────────────────────────────────────
 
 export const system: MenuItem[] = [
-  { name: 'Company Data', url: '/company', icon: BuildingIcon },
-  { name: 'Employees',    url: '/users',   icon: IdCardIcon   },
+  { name: 'Company Data', url: '/system/company', icon: BuildingIcon },
+  { name: 'Employees',    url: '/system/users',   icon: IdCardIcon   },
 ]
 
 // ─── Records (Customers always-on) ───────────────────────────────────────────
@@ -58,10 +58,10 @@ export const records: MenuItem[] = [
 // ─── Categories (Customer Categories always-on) ───────────────────────────────
 
 export const categories: MenuItem[] = [
-  { name: 'Supplier Categories', url: '/supplier-categories', icon: TagIcon,    moduleKey: 'moduleCategoriesSuppliers' },
-  { name: 'Product Categories',  url: '/product-categories',  icon: FolderIcon, moduleKey: 'moduleCategoriesProducts'  },
-  { name: 'Service Categories',  url: '/service-categories',  icon: FolderIcon, moduleKey: 'moduleCategoriesServices'  },
-  { name: 'Customer Categories', url: '/customer-categories', icon: TagIcon     }, // always-on
+  { name: 'Supplier Categories', url: '/categories/suppliers', icon: TagIcon,    moduleKey: 'moduleCategoriesSuppliers' },
+  { name: 'Product Categories',  url: '/categories/products',  icon: FolderIcon, moduleKey: 'moduleCategoriesProducts'  },
+  { name: 'Service Categories',  url: '/categories/services',  icon: FolderIcon, moduleKey: 'moduleCategoriesServices'  },
+  { name: 'Customer Categories', url: '/categories/customers', icon: TagIcon     }, // always-on
 ]
 
 // ─── Purchasing (QR always-on) ───────────────────────────────────────────────
