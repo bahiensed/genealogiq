@@ -1,23 +1,18 @@
 import "server-only"
 
 import { cache } from "react"
-import { redirect, forbidden } from "next/navigation"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { createDal } from "@genealogiq/auth/dal"
 
-export const verifySession = cache(async () => {
-  const session = await auth()
-  if (!session?.user) redirect("/sign-in")
-  return session
-})
+export const { verifySession, verifyTenantSession, verifyAdmin, canViewSensitive, REDACTED } =
+  createDal({
+    auth: () => auth(),
+    adminRoles: ["SUPER_ADMIN", "OWNER", "ADMIN"],
+    tenantScoped: true,
+  })
 
-export const verifyTenantSession = cache(async () => {
-  const session = await verifySession()
-  const customerId = session.user.customerId
-  if (!customerId) redirect("/sign-in")
-  return { ...session, customerId }
-})
-
+// Sequoia-specific: the current tenant's enabled feature modules.
 export const getCustomerModules = cache(async () => {
   const session = await verifyTenantSession()
   return prisma.tenant.findUnique({
@@ -35,12 +30,4 @@ export const getCustomerModules = cache(async () => {
       moduleFinance:             true,
     },
   })
-})
-
-const ADMIN_ROLES = ["SUPER_ADMIN", "OWNER", "ADMIN"]
-
-export const verifyAdmin = cache(async () => {
-  const session = await verifyTenantSession()
-  if (!ADMIN_ROLES.includes(session.user?.role ?? "")) forbidden()
-  return session
 })

@@ -1,66 +1,16 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
-import bcrypt from "bcryptjs"
+import { createAuth } from "@genealogiq/auth"
 import { prisma } from "@/lib/prisma"
 import { authConfig } from "@/auth.config"
-import { SignInSchema } from "@/lib/auth"
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  ...authConfig,
-  providers: [
-    Credentials({
-      credentials: {
-        email: {},
-        password: {},
-      },
-      authorize: async (credentials) => {
-        const validated = SignInSchema.safeParse(credentials)
-        if (!validated.success) return null
-
-        const { email, password } = validated.data
-
-        const user = await prisma.appUser.findFirst({ where: { email } })
-        if (!user) return null
-
-        if (user.emailVerified === null) return null
-        if (!user.isActive) return null
-        if (!user.password) return null
-
-        if (user.lockedUntil && user.lockedUntil > new Date()) return null
-
-        const match = await bcrypt.compare(password, user.password)
-        if (!match) return null
-
-        if (user.failedLoginAttempts > 0 || user.lockedUntil) {
-          await prisma.appUser.update({
-            where: { id: user.id },
-            data: { failedLoginAttempts: 0, lockedUntil: null },
-          })
-        }
-
-        return {
-          id: user.id,
-          email: user.email!,
-          name: `${user.firstName} ${user.lastName}`,
-          role: user.role,
-        }
-      },
-    }),
-  ],
-  callbacks: {
-    ...authConfig.callbacks,
-    jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-        token.name = user.name
-        token.role = user.role
-      }
-      return token
-    },
-    session({ session, token }) {
-      if (token.id) session.user.id = token.id as string
-      if (token.role) session.user.role = token.role as string
-      return session
-    },
-  },
+export const { handlers, auth, signIn, signOut } = createAuth({
+  edgeConfig: authConfig,
+  loadUserByEmail: (email) => prisma.appUser.findFirst({ where: { email } }),
+  resetLockout: (id) =>
+    prisma.appUser.update({ where: { id }, data: { failedLoginAttempts: 0, lockedUntil: null } }),
+  toPrincipal: (u) => ({
+    id:    u.id,
+    email: u.email ?? "",
+    name:  `${u.firstName} ${u.lastName}`,
+    role:  u.role,
+  }),
 })
