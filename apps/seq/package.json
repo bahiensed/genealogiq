@@ -40,6 +40,7 @@
     "zod": "^4.3.6",
     "@genealogiq/core": "workspace:*",
     "@genealogiq/db": "workspace:*",
+    "@genealogiq/services": "workspace:*",
     "@genealogiq/ui": "workspace:*"
   },
   "devDependencies": {

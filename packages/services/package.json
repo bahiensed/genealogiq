@@ -1,0 +1,25 @@
+{
+  "name": "@genealogiq/services",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./rate-limit": "./src/rate-limit.ts",
+    "./stripe": "./src/stripe.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@genealogiq/db": "workspace:*",
+    "stripe": "^22.1.1",
+    "server-only": "^0.0.1"
+  },
+  "peerDependencies": {
+    "next": "16.2.7"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20.19.39",
+    "next": "16.2.7"
+  }
+}
