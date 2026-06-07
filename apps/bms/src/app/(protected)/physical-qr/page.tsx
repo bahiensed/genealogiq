@@ -12,11 +12,11 @@ export default async function PhysicalQrPage() {
   return (
     <div className="flex flex-col gap-10">
 
-      {/* ── Physical QR Packages ─────────────────────────────────────────── */}
+      {/* ── Physical QR Codes ─────────────────────────────────────────── */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-            Physical QR Packages
+            Physical QR Codes
           </h1>
           <Button asChild>
             <Link href="/physical-qr/new">New package</Link>
