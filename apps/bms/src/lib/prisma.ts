@@ -1,13 +1,3 @@
-import 'dotenv/config'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '../generated/prisma/client'
-
-const connectionString = `${process.env.DATABASE_URL}`
-
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
-
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({ adapter: new PrismaPg({ connectionString }) })
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// The Prisma client + singleton now live in @genealogiq/db (single shared schema).
+// Re-exported here so existing `@/lib/prisma` imports keep working unchanged.
+export { prisma } from '@genealogiq/db'

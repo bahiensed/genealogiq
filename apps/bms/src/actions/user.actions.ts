@@ -2,7 +2,7 @@
 
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
-import { Prisma } from '@/generated/prisma/client'
+import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { hashToken } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
