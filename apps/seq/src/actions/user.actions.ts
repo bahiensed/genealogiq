@@ -4,7 +4,7 @@ import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
-import { hashToken } from '@genealogiq/core'
+import { hashToken, ok, err, type Result } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 
 // User management (invite, edit, deactivate, delete tenant employees) is
@@ -14,7 +14,6 @@ import { sendWelcomeEmail } from '@/lib/email'
 import { userSchema, type UserFormValues } from '@/schemas/user.schema'
 
 type ActionError = { error: string }
-type ActionSuccess = { success: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildAddressCreate(address: UserFormValues['address']): any {
@@ -32,11 +31,11 @@ function buildAddressWrite(address: UserFormValues['address']): any {
   return { upsert: { create: address, update: address } }
 }
 
-export async function createUser(data: UserFormValues): Promise<ActionError | ActionSuccess> {
+export async function createUser(data: UserFormValues): Promise<Result<string>> {
   const { customerId } = await verifyAdmin()
 
   const validated = userSchema.safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return err('Invalid data')
 
   const { address, birthDate, ...rest } = validated.data
 
@@ -62,7 +61,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
     }))
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'This email is already in use' }
+      return err('This email is already in use')
     }
     throw e
   }
@@ -70,20 +69,20 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
   await sendWelcomeEmail(rest.email, token)
 
   revalidatePath('/system/users')
-  return { success: 'User created successfully.' }
+  return ok('User created successfully.')
 }
 
-export async function updateUser(id: string, data: UserFormValues): Promise<ActionError | ActionSuccess> {
+export async function updateUser(id: string, data: UserFormValues): Promise<Result<string>> {
   const { customerId } = await verifyAdmin()
 
   const validated = userSchema.safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return err('Invalid data')
 
   const { address, birthDate, ...rest } = validated.data
 
   try {
     const existing = await prisma.user.findUnique({ where: { email: rest.email }, select: { id: true } })
-    if (existing && existing.id !== id) return { error: 'This email is already in use' }
+    if (existing && existing.id !== id) return err('This email is already in use')
 
     await prisma.user.update({
       where: { id, tenantId: customerId },
@@ -95,13 +94,13 @@ export async function updateUser(id: string, data: UserFormValues): Promise<Acti
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'User not found.' }
+      return err('User not found.')
     }
     throw e
   }
 
   revalidatePath('/system/users')
-  return { success: 'User updated successfully.' }
+  return ok('User updated successfully.')
 }
 
 export async function deleteUser(userId: string): Promise<ActionError | void> {
