@@ -166,3 +166,51 @@ jobs:
 
 > `check:schema-parity` hoje **falha** (6 modelos divergem). Mantê-lo não-bloqueante
 > (`|| true`) ou só informativo até a Fase 4, quando passa a ser um no-op com schema único.
+
+---
+
+## Baseline do histórico de migrations (`packages/db`) — estado canônico
+
+Depois da Fase 4 (schema único derivado via `prisma db pull`), o **histórico de
+migrations foi rebaseado**: `0_init` é o baseline e várias migrations antigas e
+granulares foram colapsadas. Por isso a tabela `_prisma_migrations` do banco tem
+**mais linhas do que a pasta `prisma/migrations/`** — são resquícios anteriores ao
+baseline. **Isto é esperado e benigno**: `prisma migrate status` reporta
+"Database schema is up to date!" e o Prisma tolera linhas órfãs de histórico.
+
+### As 7 linhas órfãs (existem no banco, não na pasta) — **não apagar**
+
+Todas datadas de 2026-04-07, anteriores ao `0_init`:
+
+```
+20260324165458_add_user_model
+20260325084009_add_email_verification_and_password_reset
+20260325100017_add_rate_limiting_and_email_change
+20260406130806_add_owner_relation_to_customer
+20260406172552_add_tenant_scoping
+20260407000000_add_customer_modules
+20260415000000_add_tax_id_unique
+```
+
+Apagar linhas de `_prisma_migrations` à mão é **desencorajado pelo Prisma** e não
+traz benefício — `migrate status` já está verde. Deixe-as como histórico.
+
+### Reconciliação de drift de schema (`20260607010000_reconcile_schema_drift`)
+
+`prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma`
+acusava **2 desvios** de longa data entre o banco e o schema canônico. A migration
+acima os fecha (diff → vazio):
+
+1. **`_CouponPackages`** (join table M2M implícita): Prisma antigo criava índice
+   `@unique` em (A, B); o Prisma atual espera `PRIMARY KEY` composta. Equivalente —
+   PK construída a partir do índice único existente, depois o índice redundante é
+   removido. Não há como expressar a forma antiga no schema, então o banco é que
+   migra.
+2. **`subscriptions.max_profiles / term_length / price`**: o schema os trata como
+   obrigatórios (o client gerado já os tipa non-null), mas as colunas eram
+   anuláveis. Verificado **0 linhas NULL** (de 3) antes de aplicar `SET NOT NULL`.
+
+> Aplicada em produção via SQL Editor do Neon (após snapshot) + `migrate resolve
+> --applied 20260607010000_reconcile_schema_drift`, seguindo o mesmo padrão de
+> `20260607000000_add_backoffice_indexes` — porque o histórico diverge e
+> `migrate deploy` não é usado neste banco.
