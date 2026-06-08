@@ -1,4 +1,14 @@
 version: 2
+# Posture: security-and-minor only.
+#
+# Routine MAJOR version bumps are ignored across the board, so Dependabot stops
+# opening PRs for them (TypeScript 6, ESLint 10, etc. won't show up as noise).
+# Tackle majors deliberately, on your own schedule, one at a time.
+#
+# This does NOT weaken security: Dependabot *security* updates are a separate
+# feature and ignore the `ignore`/`update-types` rules below — they still open
+# PRs to the minimum patched version for any vulnerable dependency. Make sure
+# "Dependabot security updates" is enabled in repo Settings -> Code security.
 updates:
   # JS/TS dependencies across the pnpm workspace (root + apps + packages).
   - package-ecosystem: "npm"
@@ -6,21 +16,29 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
-    # Group updates to keep PR noise low: one PR for dev deps, one for
-    # non-major production bumps; majors come as individual PRs to review.
+    # Two grouped PRs, both restricted to minor/patch: one for dev deps, one
+    # for production deps. Keeps routine churn to at most two low-risk PRs.
     groups:
       dev-dependencies:
         dependency-type: "development"
+        update-types: ["minor", "patch"]
       production-minor-patch:
         dependency-type: "production"
         update-types: ["minor", "patch"]
+    ignore:
+      # No routine major-version PRs (security updates are exempt from this).
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     labels:
       - "dependencies"
 
-  # Keep the GitHub Actions used in CI up to date.
+  # GitHub Actions used in CI — keep minor/patch current, skip routine majors.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     labels:
       - "ci"
