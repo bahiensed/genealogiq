@@ -319,9 +319,9 @@ export async function deleteAccount(
   await sendAccountDeletionEmail(user.email!)
   await prisma.appUser.delete({ where: { id: userId } })
 
-  await signOut({ redirectTo: "/" })
+  await signOut({ redirectTo: "/sign-in" })
 }
 
 export async function logout(): Promise<void> {
-  await signOut({ redirectTo: "/" })
+  await signOut({ redirectTo: "/sign-in" })
 }
