@@ -29,7 +29,7 @@ export default async function PurchasingPhysicalQrPage() {
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
         Buy Physical QR Codes
       </h1>
-      <QRStore packages={data} />
+      <QRStore packages={data} variant="physical" />
     </div>
   )
 }
