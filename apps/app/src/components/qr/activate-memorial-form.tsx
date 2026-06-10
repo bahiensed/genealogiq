@@ -224,7 +224,7 @@ export function ActivateMemorialForm({ genCode }: ActivateMemorialFormProps) {
               <Label htmlFor="birth-country">Country</Label>
               <Select value={form.birthCountry} onValueChange={(v) => update("birthCountry", v)}>
                 <SelectTrigger id="birth-country"><SelectValue placeholder="Country" /></SelectTrigger>
-                <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>
@@ -248,7 +248,7 @@ export function ActivateMemorialForm({ genCode }: ActivateMemorialFormProps) {
               <Label htmlFor="death-country">Country</Label>
               <Select value={form.deathCountry} onValueChange={(v) => update("deathCountry", v)} disabled={!form.deathDate}>
                 <SelectTrigger id="death-country"><SelectValue placeholder="Country" /></SelectTrigger>
-                <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>

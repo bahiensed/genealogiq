@@ -7,16 +7,11 @@ import { toast } from 'sonner'
 import { lookupZip } from '@/lib/zipLookup'
 import { maskCep, maskUsZip, maskMxZip, unmaskDigits } from '@/lib/masks'
 import { STATES_BY_COUNTRY } from '@/constants/states'
+import { COUNTRIES } from '@genealogiq/core'
 import { Field, FieldError, FieldLabel } from '@genealogiq/ui/field'
 import { Input } from '@genealogiq/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@genealogiq/ui/select'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@genealogiq/ui/input-group'
-
-const SUPPORTED_COUNTRIES = [
-  { code: 'BR', label: 'Brazil' },
-  { code: 'US', label: 'USA' },
-  { code: 'MX', label: 'Mexico' },
-]
 
 interface AddressSectionProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -98,8 +93,8 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
-            {SUPPORTED_COUNTRIES.map((c) => (
-              <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+            {COUNTRIES.map((c) => (
+              <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
