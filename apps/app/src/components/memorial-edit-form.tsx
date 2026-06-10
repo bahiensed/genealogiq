@@ -345,7 +345,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                     render={({ field }) => (
                       <Select value={field.value ?? ""} onValueChange={field.onChange}>
                         <SelectTrigger id="birth-country"><SelectValue placeholder="Country" /></SelectTrigger>
-                        <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                        <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
                       </Select>
                     )}
                   />
@@ -393,7 +393,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                       render={({ field }) => (
                         <Select value={field.value ?? ""} onValueChange={field.onChange} disabled={!deathDate}>
                           <SelectTrigger id="death-country"><SelectValue placeholder="Country" /></SelectTrigger>
-                          <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                          <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
                         </Select>
                       )}
                     />

@@ -8,25 +8,30 @@ interface PackagesDataTableProps {
   data: PackageRow[]
   basePath?: string
   emptyMessage?: string
+  /** Noun used in column headers/labels. 'product' for Physical QR, 'package' for Digital. */
+  noun?: 'package' | 'product'
 }
 
-const COLUMN_LABELS: Record<string, string> = {
-  name:        'Package Name',
-  quantity:    'QR-Codes / Package',
-  price:       'Package Price',
-  description: 'Package Description',
-  isActive:    'Status',
-  createdAt:   'Created at',
+function columnLabels(noun: 'package' | 'product'): Record<string, string> {
+  const Noun = noun === 'product' ? 'Product' : 'Package'
+  return {
+    name:        `${Noun} Name`,
+    quantity:    'QR-Codes / Package',
+    price:       `${Noun} Price`,
+    description: `${Noun} Description`,
+    isActive:    'Status',
+    createdAt:   'Created at',
+  }
 }
 
-export function PackagesDataTable({ currentUserRole, data, basePath, emptyMessage }: PackagesDataTableProps) {
+export function PackagesDataTable({ currentUserRole, data, basePath, emptyMessage, noun = 'package' }: PackagesDataTableProps) {
   return (
     <DataTable
-      columns={getColumns(currentUserRole, basePath)}
+      columns={getColumns(currentUserRole, basePath, noun)}
       data={data}
       emptyMessage={emptyMessage ?? 'No packages found.'}
       initialSorting={[{ id: 'quantity', desc: false }]}
-      columnLabels={COLUMN_LABELS}
+      columnLabels={columnLabels(noun)}
     />
   )
 }

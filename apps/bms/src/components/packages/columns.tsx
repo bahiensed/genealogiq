@@ -80,11 +80,12 @@ function ActionsCell({ row, currentUserRole, basePath }: { row: { original: Pack
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
-export function getColumns(currentUserRole: string, basePath = '/packages'): ColumnDef<PackageRow>[] {
+export function getColumns(currentUserRole: string, basePath = '/packages', noun: 'package' | 'product' = 'package'): ColumnDef<PackageRow>[] {
+  const Noun = noun === 'product' ? 'Product' : 'Package'
   return [
     {
       accessorKey: 'name',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Name</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>{Noun}<br/>Name</>} />,
       cell: ({ row }) => (
         <Link href={`${basePath}/${row.original.id}`} className="hover:underline">
           {row.original.name}
@@ -98,12 +99,12 @@ export function getColumns(currentUserRole: string, basePath = '/packages'): Col
     },
     {
       accessorKey: 'price',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package<br/>Price</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>{Noun}<br/>Price</>} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{usd.format(row.original.price)}</div>,
     },
     {
       accessorKey: 'description',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Package Description</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={<>{Noun} Description</>} />,
       cell: ({ row }) => row.original.description ?? '—',
     },
     {

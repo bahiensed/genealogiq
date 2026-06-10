@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
+import { stripe } from '@/lib/stripe'
 import { verifyAdmin } from '@/lib/dal'
 import { packageSchema, type PackageFormValues } from '@/schemas/package.schema'
 
@@ -100,4 +101,64 @@ export async function togglePackageActive(id: string): Promise<ActionError | voi
   await prisma.package.update({ where: { id }, data: { isActive: !pkg.isActive } })
   revalidatePath('/packages')
   revalidatePath('/physical-qr')
+}
+
+// Push the saved package's data to Stripe: create/update the Product and, if missing,
+// create the Price. Mirrors apps/seq/prisma/seed-stripe.ts but runs on demand from BMS.
+// Stripe Prices are immutable — updatePackage() clears stripePriceId on a price change,
+// so a fresh Price is minted here on the next sync.
+export async function syncPackageWithStripe(id: string): Promise<ActionError | ActionSuccess> {
+  await verifyAdmin()
+
+  const pkg = await prisma.package.findUnique({
+    where:  { id },
+    select: {
+      id: true, name: true, description: true, price: true, quantity: true,
+      stripeProductId: true, stripePriceId: true,
+    },
+  })
+  if (!pkg) return { error: 'Package not found.' }
+
+  const priceCents = Math.round(Number(pkg.price) * 100)
+  if (priceCents <= 0) return { error: 'Set a price greater than zero before syncing.' }
+
+  try {
+    let productId = pkg.stripeProductId
+    if (productId) {
+      await stripe.products.update(productId, {
+        name:        pkg.name,
+        description: pkg.description ?? undefined,
+      })
+    } else {
+      const product = await stripe.products.create({
+        name:        pkg.name,
+        description: pkg.description ?? undefined,
+        metadata:    { packageId: pkg.id, qrPerPackage: String(pkg.quantity) },
+      })
+      productId = product.id
+    }
+
+    let priceId = pkg.stripePriceId
+    if (!priceId) {
+      const price = await stripe.prices.create({
+        product:     productId,
+        unit_amount: priceCents,
+        currency:    'usd',
+        nickname:    `${pkg.name} — ${pkg.quantity} QR`,
+      })
+      priceId = price.id
+    }
+
+    await prisma.package.update({
+      where: { id: pkg.id },
+      data:  { stripeProductId: productId, stripePriceId: priceId },
+    })
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Unknown error'
+    return { error: `Stripe sync failed: ${message}` }
+  }
+
+  revalidatePath('/packages')
+  revalidatePath('/physical-qr')
+  return { success: 'Synced with Stripe successfully.' }
 }

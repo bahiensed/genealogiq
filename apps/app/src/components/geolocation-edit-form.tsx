@@ -57,7 +57,7 @@ function buildDefaults(existing: GeolocationRow | null): GeolocationFormValues {
       neighborhood: existing?.neighborhood ?? "",
       city:         existing?.city         ?? "",
       state:        existing?.state        ?? "",
-      country:      existing?.country      ?? "Brazil",
+      country:      existing?.country      ?? "BR",
     },
     section: existing?.section ?? "",
     lat: existing?.lat ?? 0,
@@ -141,7 +141,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
     setValue("address.neighborhood", s.neighborhood ?? "")
     setValue("address.city",         s.city         ?? "")
     setValue("address.state",        s.state        ?? "")
-    setValue("address.country",      s.country      ?? "Brazil")
+    setValue("address.country",      s.country      ?? "BR")
     if (s.lat !== 0 || s.lon !== 0) {
       setValue("lat", s.lat)
       setValue("lon", s.lon)

@@ -21,5 +21,5 @@ export const addressDefaultValues: AddressFormValues = {
   neighborhood: '',
   city:         '',
   state:        '',
-  country:      'Brazil',
+  country:      'BR',
 }

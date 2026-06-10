@@ -6,7 +6,7 @@ import { SearchIcon } from "lucide-react"
 import { toast } from "sonner"
 import { lookupZip } from "@/lib/zipLookup"
 import { maskCep, maskUsZip, maskMxZip, unmaskDigits } from "@/lib/masks"
-import { COUNTRY_NAMES, COUNTRY_BY_NAME } from "@/consts/countries-data"
+import { COUNTRIES, COUNTRY_BY_ISO } from "@/consts/countries-data"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -34,17 +34,17 @@ interface AddressSectionProps {
   prefix: string
 }
 
-function applyZipMask(countryName: string, value: string): string {
-  if (countryName === "Brazil") return maskCep(value)
-  if (countryName === "United States") return maskUsZip(value)
-  if (countryName === "Mexico") return maskMxZip(value)
+function applyZipMask(iso: string, value: string): string {
+  if (iso === "BR") return maskCep(value)
+  if (iso === "US") return maskUsZip(value)
+  if (iso === "MX") return maskMxZip(value)
   return value
 }
 
-function zipPlaceholder(countryName: string): string {
-  if (countryName === "Brazil") return "00000-000"
-  if (countryName === "United States") return "00000-0000"
-  if (countryName === "Mexico") return "00000"
+function zipPlaceholder(iso: string): string {
+  if (iso === "BR") return "00000-000"
+  if (iso === "US") return "00000-0000"
+  if (iso === "MX") return "00000"
   return ""
 }
 
@@ -52,17 +52,17 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
   const [isSearching, setIsSearching] = useState(false)
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
 
-  const country: string = useWatch({ control, name: `${prefix}.country` }) ?? "Brazil"
+  const country: string = useWatch({ control, name: `${prefix}.country` }) ?? "BR"
   const zip: string     = useWatch({ control, name: `${prefix}.zip` })     ?? ""
 
-  const countryData = COUNTRY_BY_NAME[country]
+  const countryData = COUNTRY_BY_ISO[country]
   const states = countryData?.states ?? []
   const zipSupported = !!countryData?.zipProvider
 
   async function handleZipSearch() {
     const digits = unmaskDigits(zip)
     if (!digits) return
-    const lookupZipValue = (country === "United States" || country === "Mexico") ? digits.slice(0, 5) : digits
+    const lookupZipValue = (country === "US" || country === "MX") ? digits.slice(0, 5) : digits
     setIsSearching(true)
     setSuggestions([])
     try {
@@ -103,7 +103,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
     setValue(`${prefix}.neighborhood`, s.neighborhood ?? "")
     setValue(`${prefix}.city`,         s.city ?? "")
     setValue(`${prefix}.state`,        s.state ?? "")
-    setValue(`${prefix}.country`,      s.country ?? "Brazil")
+    setValue(`${prefix}.country`,      s.country ?? "BR")
     setSuggestions([])
   }
 
@@ -133,8 +133,8 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
-            {COUNTRY_NAMES.map((name) => (
-              <SelectItem key={name} value={name}>{name}</SelectItem>
+            {COUNTRIES.map((c) => (
+              <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>

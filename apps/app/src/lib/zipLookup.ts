@@ -1,4 +1,4 @@
-import { COUNTRY_BY_NAME } from "@/consts/countries-data"
+import { COUNTRY_BY_ISO } from "@/consts/countries-data"
 
 export interface ZipResult {
   zip: string
@@ -9,7 +9,7 @@ export interface ZipResult {
   country: string
 }
 
-async function lookupBrazilianCep(cep: string, countryName: string): Promise<ZipResult> {
+async function lookupBrazilianCep(cep: string, iso: string): Promise<ZipResult> {
   const digits = cep.replace(/\D/g, "")
   if (digits.length !== 8) throw new Error("CEP inválido")
 
@@ -25,11 +25,11 @@ async function lookupBrazilianCep(cep: string, countryName: string): Promise<Zip
     neighborhood: data.bairro     ?? "",
     city:         data.localidade ?? "",
     state:        data.uf         ?? "",
-    country:      countryName,
+    country:      iso,
   }
 }
 
-async function lookupZippopotam(iso: string, zip: string, countryName: string): Promise<ZipResult> {
+async function lookupZippopotam(iso: string, zip: string): Promise<ZipResult> {
   const res = await fetch(`https://api.zippopotam.us/${iso.toLowerCase()}/${zip}`)
   if (!res.ok) throw new Error("ZIP not found")
 
@@ -43,13 +43,13 @@ async function lookupZippopotam(iso: string, zip: string, countryName: string): 
     neighborhood: "",
     city:         place["place name"]         ?? "",
     state:        place["state abbreviation"] ?? "",
-    country:      countryName,
+    country:      iso,
   }
 }
 
-export async function lookupZip(countryName: string, zip: string): Promise<ZipResult> {
-  const c = COUNTRY_BY_NAME[countryName]
+export async function lookupZip(iso: string, zip: string): Promise<ZipResult> {
+  const c = COUNTRY_BY_ISO[iso]
   if (!c?.zipProvider) throw new Error("ZIP lookup not supported for this country")
-  if (c.zipProvider === "viacep") return lookupBrazilianCep(zip, countryName)
-  return lookupZippopotam(c.iso, zip, countryName)
+  if (c.zipProvider === "viacep") return lookupBrazilianCep(zip, c.iso)
+  return lookupZippopotam(c.iso, zip)
 }
