@@ -19,7 +19,7 @@ export default async function PhysicalQrPage() {
             Physical QR Codes
           </h1>
           <Button asChild>
-            <Link href="/physical-qr/new">New package</Link>
+            <Link href="/physical-qr/new">New product</Link>
           </Button>
         </div>
 
@@ -27,7 +27,8 @@ export default async function PhysicalQrPage() {
           currentUserRole={session.user.role}
           data={packages}
           basePath="/physical-qr"
-          emptyMessage="No physical QR packages yet."
+          noun="product"
+          emptyMessage="No physical QR products yet."
         />
       </div>
 

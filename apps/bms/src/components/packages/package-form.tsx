@@ -1,17 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'sonner'
 import { packageResolver, packageDefaultValues, type PackageFormValues } from '@/schemas/package.schema'
-import { createPackage, updatePackage } from '@/actions/package.actions'
+import { createPackage, updatePackage, syncPackageWithStripe } from '@/actions/package.actions'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
 import { Switch } from '@genealogiq/ui/switch'
 import { Badge } from '@genealogiq/ui/badge'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { CurrencyInput } from '@/components/ui/currency-input'
 
 interface PackageFormProps {
@@ -28,10 +39,28 @@ interface PackageFormProps {
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
 export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId, fixedType, backHref = '/packages' }: PackageFormProps) {
-  const isEditing = !!id
-  const isSynced  = isEditing && !!stripePriceId
+  const isEditing  = !!id
+  const isSynced   = isEditing && !!stripePriceId
+  const isPhysical = fixedType === 'PHYSICAL'
+  const noun       = isPhysical ? 'product' : 'package'
+  const Noun       = isPhysical ? 'Product' : 'Package'
   const [serverError, setServerError] = useState<string | null>(null)
+  const [syncOpen, setSyncOpen]       = useState(false)
+  const [isSyncing, startSync]        = useTransition()
   const router = useRouter()
+
+  function handleSync() {
+    if (!id) return
+    startSync(async () => {
+      const result = await syncPackageWithStripe(id)
+      if ('error' in result) {
+        toast.error(result.error)
+      } else {
+        toast.success(result.success)
+        router.refresh()
+      }
+    })
+  }
 
   const resolvedDefaults: PackageFormValues = defaultValues
     ? { ...defaultValues, ...(fixedType ? { type: fixedType } : {}) }
@@ -65,7 +94,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 max-w-lg">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          {isEditing ? 'Edit package' : 'New package'}
+          {isEditing ? `Edit ${noun}` : `New ${noun}`}
         </h1>
         <div className="flex items-center gap-3">
           {fixedType && (
@@ -95,8 +124,8 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Package Name:</FieldLabel>
-              <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+              <FieldLabel>{Noun} Name:</FieldLabel>
+              <Input {...field} maxLength={32} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -169,12 +198,12 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
         />
 
         {isEditing && (
-          <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-2 text-xs">
+          <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-3 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground uppercase tracking-wider">Stripe sync</span>
               {isSynced
                 ? <span className="font-medium text-emerald-600">Synced</span>
-                : <span className="font-medium text-amber-600">Not synced — run prisma/seed-stripe-packages.ts in SEQ</span>}
+                : <span className="font-medium text-amber-600">Not synced</span>}
             </div>
             {isSynced && (
               <div className="flex flex-col gap-1 font-mono text-muted-foreground">
@@ -183,8 +212,30 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
               </div>
             )}
             <p className="text-muted-foreground">
-              Changing the price clears the Stripe references — purchases will be blocked until the seed script re-runs.
+              Pushes this {noun}&apos;s name, description and price to Stripe (creating or updating the
+              matching Product and Price). Save your changes first — sync uses the saved data. Changing
+              the price provisions a fresh Stripe Price.
             </p>
+            <AlertDialog open={syncOpen} onOpenChange={setSyncOpen}>
+              <AlertDialogTrigger asChild>
+                <Button type="button" variant="outline" size="sm" className="self-start" disabled={isSyncing}>
+                  {isSyncing ? 'Syncing…' : 'Sync with Stripe'}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Sync with Stripe?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Please confirm that this {noun}&apos;s data is correct. This will create or update the
+                    matching Product and Price in Stripe. Are you sure you want to synchronize?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isSyncing}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSync} disabled={isSyncing}>Sync now</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </FieldGroup>
