@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { useLocale } from "next-intl"
+import { getCountryName } from "@genealogiq/core"
 import { Search, X, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -22,6 +24,7 @@ interface Props {
 }
 
 export function HeaderSearch({ onNavigate }: Props = {}) {
+  const locale = useLocale()
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -121,7 +124,7 @@ export function HeaderSearch({ onNavigate }: Props = {}) {
                 const initials = `${r.firstName[0]}${r.lastName[0]}`.toUpperCase()
                 const isMemorialized = r.role === "APP_MEMO"
                 const sub = r.birthPlace
-                  ? `${r.birthPlace}${r.birthCountry ? `, ${r.birthCountry}` : ""}`
+                  ? `${r.birthPlace}${r.birthCountry ? `, ${getCountryName(r.birthCountry, locale)}` : ""}`
                   : isMemorialized ? "Memorialized profile" : ""
                 return (
                   <li key={r.id}>

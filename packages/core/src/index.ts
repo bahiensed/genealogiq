@@ -7,6 +7,8 @@ export {
   COUNTRY_BY_NAME,
   COUNTRY_BY_ISO,
   STATES_BY_ISO,
+  getCountryName,
+  getLocalizedCountries,
   type Country,
   type ZipProvider,
 } from "./countries"

@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation"
+import { getLocale } from "next-intl/server"
+import { getCountryName } from "@genealogiq/core"
 import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
 import { auth } from "@/auth"
 import { getProfileById } from "@/queries/profile"
@@ -242,11 +244,12 @@ export default async function ProfileByIdPage({ params }: Props) {
     },
   ]
 
+  const locale = await getLocale()
   const miniProfile: MiniProfile = {
     id: user.id,
     name,
     subtitle: user.birthPlace
-      ? `${user.birthPlace}${user.birthCountry ? `, ${user.birthCountry}` : ""}`
+      ? `${user.birthPlace}${user.birthCountry ? `, ${getCountryName(user.birthCountry, locale)}` : ""}`
       : isMemorialized ? "Memorialized profile" : "",
     status: isMemorialized ? "Memorialized" : "Living",
     metric: isMemorialized && user.deathDate

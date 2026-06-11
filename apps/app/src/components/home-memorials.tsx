@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useLocale } from "next-intl"
+import { getCountryName } from "@genealogiq/core"
 import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
 import { getProfileGradient } from "@/lib/avatar-color"
 import type { MemorialRow } from "@/queries/memorial"
@@ -16,12 +18,12 @@ function shuffle<T>(arr: T[]): T[] {
   return copy
 }
 
-function toMiniProfile(m: MemorialRow): MiniProfile {
+function toMiniProfile(m: MemorialRow, locale: string): MiniProfile {
   return {
     id: m.id,
     name: `${m.firstName} ${m.lastName}`,
     subtitle: m.birthPlace
-      ? `${m.birthPlace}${m.birthCountry ? `, ${m.birthCountry}` : ""}`
+      ? `${m.birthPlace}${m.birthCountry ? `, ${getCountryName(m.birthCountry, locale)}` : ""}`
       : "Memorialized profile",
     status: "Memorialized",
     metric: m.deathDate
@@ -41,6 +43,7 @@ interface Props {
 }
 
 export function HomeMemorials({ items }: Props) {
+  const locale = useLocale()
   const [order, setOrder] = useState(items)
 
   useEffect(() => {
@@ -53,7 +56,7 @@ export function HomeMemorials({ items }: Props) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {visible.map((m, i) => (
-        <ProfileMiniCard key={m.id} profile={toMiniProfile(m)} delay={i * 40} />
+        <ProfileMiniCard key={m.id} profile={toMiniProfile(m, locale)} delay={i * 40} />
       ))}
     </div>
   )

@@ -23,7 +23,8 @@ import {
 import { cn } from "@/lib/utils"
 import { createMemorial } from "@/actions/memorial"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
-import { COUNTRIES } from "@/consts/countries"
+import { useLocale } from "next-intl"
+import { getLocalizedCountries } from "@/consts/countries-data"
 
 interface FormState {
   firstName: string
@@ -87,6 +88,8 @@ const DateField = ({ id, label, value, onChange, disabled, disabledDays }: {
 )
 
 export function MemorialCreateForm() {
+  const locale = useLocale()
+  const countryOptions = getLocalizedCountries(locale)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [uploading, setUploading] = useState(false)
@@ -215,7 +218,7 @@ export function MemorialCreateForm() {
             <Label htmlFor="birth-country">Country</Label>
             <Select value={form.birthCountry} onValueChange={(v) => update("birthCountry", v)}>
               <SelectTrigger id="birth-country"><SelectValue placeholder="Country" /></SelectTrigger>
-              <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
+              <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
         </div>
@@ -239,7 +242,7 @@ export function MemorialCreateForm() {
             <Label htmlFor="death-country">Country</Label>
             <Select value={form.deathCountry} onValueChange={(v) => update("deathCountry", v)} disabled={!form.deathDate}>
               <SelectTrigger id="death-country"><SelectValue placeholder="Country" /></SelectTrigger>
-              <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
+              <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
         </div>

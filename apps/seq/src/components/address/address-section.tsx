@@ -6,8 +6,9 @@ import { SearchIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { lookupZip } from '@/lib/zipLookup'
 import { maskCep, maskUsZip, maskMxZip, unmaskDigits } from '@/lib/masks'
+import { useLocale } from 'next-intl'
 import { STATES_BY_COUNTRY } from '@/constants/states'
-import { COUNTRIES } from '@genealogiq/core'
+import { getLocalizedCountries } from '@genealogiq/core'
 import { Field, FieldError, FieldLabel } from '@genealogiq/ui/field'
 import { Input } from '@genealogiq/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@genealogiq/ui/select'
@@ -38,6 +39,8 @@ function zipPlaceholder(country: string): string {
 }
 
 export function AddressSection({ control, setValue, errors, prefix }: AddressSectionProps) {
+  const locale = useLocale()
+  const countryOptions = getLocalizedCountries(locale)
   const [isSearching, setIsSearching] = useState(false)
 
   const country: string    = useWatch({ control, name: `${prefix}.country` }) ?? 'BR'
@@ -93,7 +96,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
-            {COUNTRIES.map((c) => (
+            {countryOptions.map((c) => (
               <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
             ))}
           </SelectContent>

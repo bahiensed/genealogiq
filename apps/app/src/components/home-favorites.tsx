@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useLocale } from "next-intl"
+import { getCountryName } from "@genealogiq/core"
 import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
 import { getProfileGradient } from "@/lib/avatar-color"
 import type { FavoriteRow } from "@/queries/favorite"
@@ -16,14 +18,14 @@ function shuffle<T>(arr: T[]): T[] {
   return copy
 }
 
-function toMiniProfile(fav: FavoriteRow): MiniProfile {
+function toMiniProfile(fav: FavoriteRow, locale: string): MiniProfile {
   const t = fav.target
   const isMemorialized = t.role === "APP_MEMO"
   return {
     id: t.id,
     name: `${t.firstName} ${t.lastName}`,
     subtitle: t.birthPlace
-      ? `${t.birthPlace}${t.birthCountry ? `, ${t.birthCountry}` : ""}`
+      ? `${t.birthPlace}${t.birthCountry ? `, ${getCountryName(t.birthCountry, locale)}` : ""}`
       : isMemorialized ? "Memorialized profile" : "",
     status: isMemorialized ? "Memorialized" : "Living",
     metric: isMemorialized && t.deathDate
@@ -43,6 +45,7 @@ interface Props {
 }
 
 export function HomeFavorites({ items }: Props) {
+  const locale = useLocale()
   // Render the original order on SSR to avoid hydration mismatch; shuffle on mount.
   const [order, setOrder] = useState(items)
 
@@ -58,7 +61,7 @@ export function HomeFavorites({ items }: Props) {
       {visible.map((fav, i) => (
         <ProfileMiniCard
           key={fav.targetId}
-          profile={toMiniProfile(fav)}
+          profile={toMiniProfile(fav, locale)}
           delay={i * 40}
           hideLivingBadge={fav.target.role !== "APP_MEMO"}
         />
