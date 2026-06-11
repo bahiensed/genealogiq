@@ -1,0 +1,36 @@
+{
+  "Nav": {
+    "profile": "Perfil",
+    "signOut": "Sair",
+    "signingOut": "Saindo…",
+    "language": "Idioma",
+    "toggleTheme": "Alternar tema"
+  },
+  "Auth": {
+    "title": "Entrar",
+    "description": "Digite seu e-mail e senha para acessar sua conta.",
+    "email": "E-mail:",
+    "emailPlaceholder": "seu@email.com",
+    "password": "Senha:",
+    "forgotPassword": "Esqueceu a senha?",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha",
+    "signIn": "Entrar",
+    "signingIn": "Entrando…"
+  },
+  "Dashboard": {
+    "title": "Painel",
+    "monthlySales": "Vendas no mês",
+    "salesThisMonth": "Vendas neste mês",
+    "annualSales": "Vendas no ano",
+    "salesThisYear": "Vendas neste ano",
+    "totalSales": "Vendas totais",
+    "allTimeSales": "Vendas de todo o período",
+    "monthlyRevenue": "Receita do mês",
+    "revenueThisMonth": "Receita neste mês",
+    "annualRevenue": "Receita do ano",
+    "revenueThisYear": "Receita neste ano",
+    "totalRevenue": "Receita total",
+    "allTimeRevenue": "Receita de todo o período"
+  }
+}

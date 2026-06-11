@@ -17,7 +17,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { HeaderSearch } from "@/components/header-search"
+import { LanguageSwitcher } from "@/components/language-switcher"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 import { signOut } from "next-auth/react"
 
 function BellLink({ unreadCount }: { unreadCount: number }) {
@@ -45,6 +47,7 @@ interface HeaderProps {
 
 export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
   const { resolvedTheme, setTheme } = useTheme()
+  const t = useTranslations("Nav")
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const pathname = usePathname()
@@ -58,11 +61,13 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
     <>
       <BellLink unreadCount={unreadCount} />
 
+      <LanguageSwitcher />
+
       <Button
         variant="ghost"
         size="icon"
         onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-        aria-label="Toggle theme"
+        aria-label={t("toggleTheme")}
         className="rounded-full glass border-0 h-9 w-9"
       >
         <Sun className="h-4 w-4 hidden dark:block" />
@@ -72,7 +77,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
-            aria-label="User menu"
+            aria-label={t("userMenu")}
             className="rounded-full ring-2 ring-transparent hover:ring-primary/40 transition-all"
           >
             <Avatar className="h-9 w-9">
@@ -93,13 +98,13 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
           <DropdownMenuItem asChild>
             <Link href="/profile" className="gap-2 cursor-pointer">
               <User className="h-4 w-4" />
-              My profile
+              {t("myProfile")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/subscriptions" className="gap-2 cursor-pointer">
               <Sprout className="h-4 w-4" />
-              Subscriptions
+              {t("subscriptions")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -108,7 +113,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
             onSelect={() => signOut({ callbackUrl: "/" })}
           >
             <LogOut className="h-4 w-4" />
-            Sign out
+            {t("signOut")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

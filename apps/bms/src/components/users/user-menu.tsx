@@ -2,6 +2,7 @@
 
 import { useTransition } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { LogOut, User } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@genealogiq/ui/avatar"
 import {
@@ -31,6 +32,7 @@ function getInitials(name?: string | null): string {
 }
 
 export function UserMenu({ name, email, image }: UserMenuProps) {
+  const t = useTranslations("Nav")
   const [isPending, startTransition] = useTransition()
 
   function handleLogout() {
@@ -60,7 +62,7 @@ export function UserMenu({ name, email, image }: UserMenuProps) {
         <DropdownMenuItem asChild>
           <Link href="/profile" className="flex items-center gap-2">
             <User className="size-4" />
-            Profile
+            {t("profile")}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
@@ -70,7 +72,7 @@ export function UserMenu({ name, email, image }: UserMenuProps) {
           disabled={isPending}
         >
           <LogOut className="size-4" />
-          {isPending ? "Saindo…" : "Sair"}
+          {isPending ? t("signingOut") : t("signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,0 +1,34 @@
+{
+  "Nav": {
+    "profile": "Profile",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "language": "Language",
+    "toggleTheme": "Toggle theme"
+  },
+  "Auth": {
+    "title": "Sign in",
+    "description": "Enter your email and password to access your account.",
+    "email": "E-mail:",
+    "emailPlaceholder": "you@email.com",
+    "password": "Password:",
+    "forgotPassword": "Forgot password?",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "availableQr": "Available QR Codes for Sale",
+    "currentlyInStock": "Currently in stock",
+    "totalCustomers": "Total Customers",
+    "registeredCustomers": "Registered customers",
+    "qrSoldThisMonth": "QR Codes Sold this Month",
+    "salesThisMonth": "Sales this month",
+    "monthlyRevenue": "Monthly Revenue",
+    "revenueThisMonth": "Revenue this month",
+    "averageTicket": "Average Ticket",
+    "avgRevenuePerSale": "Avg. revenue per sale this month"
+  }
+}

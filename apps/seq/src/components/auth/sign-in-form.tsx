@@ -9,9 +9,11 @@ import { Input } from '@genealogiq/ui/input'
 import { Label } from '@genealogiq/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@genealogiq/ui/input-group'
+import { useTranslations } from 'next-intl'
 import { login } from '@/actions/auth'
 
 export function SignInForm() {
+  const t = useTranslations('Auth')
   const [state, dispatch, isPending] = useActionState(login, undefined)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -40,9 +42,9 @@ export function SignInForm() {
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Sign in</CardTitle>
+          <CardTitle>{t('title')}</CardTitle>
           <CardDescription>
-            Enter your email and password to access your account.
+            {t('description')}
           </CardDescription>
         </CardHeader>
 
@@ -53,24 +55,24 @@ export function SignInForm() {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">E-mail:</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder="seu@email.com"
+                placeholder={t('emailPlaceholder')}
                 autoComplete="email"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password:</Label>
+                <Label htmlFor="password">{t('password')}</Label>
                 <Link
                   href="/forgot-password"
                   className="text-xs text-muted-foreground underline underline-offset-4 hover:no-underline"
                 >
-                  Forgot password?
+                  {t('forgotPassword')}
                 </Link>
               </div>
               <InputGroup>
@@ -83,7 +85,7 @@ export function SignInForm() {
                 <InputGroupAddon align="inline-end">
                   <InputGroupButton
                     onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                   >
                     {showPassword ? <EyeOff /> : <Eye />}
                   </InputGroupButton>
@@ -94,7 +96,7 @@ export function SignInForm() {
 
           <CardFooter className="mt-6 flex flex-col gap-3">
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Signing in…" : "Sign in"}
+              {isPending ? t('signingIn') : t('signIn')}
             </Button>
           </CardFooter>
         </form>

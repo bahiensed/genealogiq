@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Building2, Factory, IdCard, Layers, QrCode, ArrowUpRight, Trophy, UserPlus } from 'lucide-react'
 import { verifySession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
@@ -13,45 +14,46 @@ const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' 
 export default async function DashboardPage() {
   await verifySession()
   const stats = await getDashboardStats()
+  const t = await getTranslations('Dashboard')
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Dashboard
+        {t('title')}
       </h1>
 
       {/* Row 1 — Sales count */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Sales</CardTitle>
+            <CardTitle>{t('monthlySales')}</CardTitle>
             <CardAction><ShoppingCart className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.monthlyCount}</p>
-            <p className="text-sm text-muted-foreground mt-1">Sales this month</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('salesThisMonth')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Annual Sales</CardTitle>
+            <CardTitle>{t('annualSales')}</CardTitle>
             <CardAction><BarChart3 className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.yearlyCount}</p>
-            <p className="text-sm text-muted-foreground mt-1">Sales this year</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('salesThisYear')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Total Sales</CardTitle>
+            <CardTitle>{t('totalSales')}</CardTitle>
             <CardAction><TrendingUp className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.totalCount}</p>
-            <p className="text-sm text-muted-foreground mt-1">All-time sales</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('allTimeSales')}</p>
           </CardContent>
         </Card>
       </div>
@@ -60,34 +62,34 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Revenue</CardTitle>
+            <CardTitle>{t('monthlyRevenue')}</CardTitle>
             <CardAction><Banknote className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{usd.format(stats.monthlyRevenue)}</p>
-            <p className="text-sm text-muted-foreground mt-1">Revenue this month</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('revenueThisMonth')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Annual Revenue</CardTitle>
+            <CardTitle>{t('annualRevenue')}</CardTitle>
             <CardAction><DollarSign className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{usd.format(stats.yearlyRevenue)}</p>
-            <p className="text-sm text-muted-foreground mt-1">Revenue this year</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('revenueThisYear')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Total Revenue</CardTitle>
+            <CardTitle>{t('totalRevenue')}</CardTitle>
             <CardAction><CircleDollarSign className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{usd.format(stats.totalRevenue)}</p>
-            <p className="text-sm text-muted-foreground mt-1">All-time revenue</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('allTimeRevenue')}</p>
           </CardContent>
         </Card>
       </div>

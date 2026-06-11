@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 import { Clock, Heart, BrickWall, User, ArrowRight } from "lucide-react"
 import { verifySession } from "@/lib/dal"
 import { GlassIcon } from "@/components/glass-icon"
@@ -17,6 +18,7 @@ import { getMemorialsByCreatorId } from "@/queries/memorial"
 export default async function HomePage() {
   const session = await verifySession()
   const userId = session.user.id
+  const t = await getTranslations("Home")
 
   const [favorites, memorials, currentUser] = await Promise.all([
     getFavoritesByUserId(userId),
@@ -37,7 +39,7 @@ export default async function HomePage() {
             <Greeting firstName={firstName} />
           </h1>
           <p className="text-muted-foreground mt-2 italic">
-            Scan, search & visit a profile
+            {t("tagline")}
           </p>
         </div>
 
@@ -53,8 +55,8 @@ export default async function HomePage() {
           <Link href="/profile" className="glass-card flex items-center gap-3 px-4 py-3">
             <GlassIcon icon={User} size="sm" />
             <div className="min-w-0">
-              <p className="text-sm font-semibold leading-tight truncate">My Profile</p>
-              <p className="text-xs text-muted-foreground truncate">View your page</p>
+              <p className="text-sm font-semibold leading-tight truncate">{t("myProfileTitle")}</p>
+              <p className="text-xs text-muted-foreground truncate">{t("myProfileSubtitle")}</p>
             </div>
           </Link>
 
@@ -62,7 +64,7 @@ export default async function HomePage() {
             <GlassIcon icon={Clock} size="sm" />
             <div className="min-w-0">
               <p className="text-lg font-semibold leading-tight"><RecentlyViewedCount /></p>
-              <p className="text-xs text-muted-foreground truncate">recently viewed</p>
+              <p className="text-xs text-muted-foreground truncate">{t("recentlyViewedShort")}</p>
             </div>
           </a>
 
@@ -70,7 +72,7 @@ export default async function HomePage() {
             <GlassIcon icon={Heart} size="sm" />
             <div className="min-w-0">
               <p className="text-lg font-semibold leading-tight">{favorites.length}</p>
-              <p className="text-xs text-muted-foreground truncate">favorites</p>
+              <p className="text-xs text-muted-foreground truncate">{t("favoritesShort")}</p>
             </div>
           </a>
 
@@ -78,7 +80,7 @@ export default async function HomePage() {
             <GlassIcon icon={BrickWall} size="sm" />
             <div className="min-w-0">
               <p className="text-lg font-semibold leading-tight">{memorials.length}</p>
-              <p className="text-xs text-muted-foreground truncate">guarded</p>
+              <p className="text-xs text-muted-foreground truncate">{t("guardedShort")}</p>
             </div>
           </a>
         </section>
@@ -87,8 +89,9 @@ export default async function HomePage() {
         <HomeSection
           id="recently-viewed"
           icon={Clock}
-          title="Recently viewed"
-          subtitle="Recently viewed profiles appear here"
+          title={t("recentlyViewedTitle")}
+          subtitle={t("recentlyViewedSubtitle")}
+          seeAllLabel={t("seeAll")}
           delay={200}
         >
           <RecentlyViewedSection />
@@ -98,12 +101,13 @@ export default async function HomePage() {
         <HomeSection
           id="favorites"
           icon={Heart}
-          title="My favorites"
-          subtitle="The ones closest to the heart"
+          title={t("favoritesTitle")}
+          subtitle={t("favoritesSubtitle")}
+          seeAllLabel={t("seeAll")}
           delay={260}
           seeMoreHref={`/profile/${userId}/favorites`}
           emptyIcon={Heart}
-          emptyText="No favorite profile yet."
+          emptyText={t("favoritesEmpty")}
         >
           {favorites.length > 0 ? <HomeFavorites items={favorites} /> : undefined}
         </HomeSection>
@@ -112,12 +116,13 @@ export default async function HomePage() {
         <HomeSection
           id="guarded"
           icon={BrickWall}
-          title="Profiles I guard"
-          subtitle="Memorials watched over with quiet care"
+          title={t("guardedTitle")}
+          subtitle={t("guardedSubtitle")}
+          seeAllLabel={t("seeAll")}
           delay={320}
           seeMoreHref={`/profile/${userId}/memorialized`}
           emptyIcon={BrickWall}
-          emptyText="No guarded profile yet."
+          emptyText={t("guardedEmpty")}
         >
           {memorials.length > 0 ? <HomeMemorials items={memorials} /> : undefined}
         </HomeSection>
@@ -131,6 +136,7 @@ interface HomeSectionProps {
   icon: typeof Clock
   title: string
   subtitle: string
+  seeAllLabel: string
   delay: number
   seeMoreHref?: string
   emptyIcon?: typeof Clock
@@ -138,7 +144,7 @@ interface HomeSectionProps {
   children?: React.ReactNode
 }
 
-function HomeSection({ id, icon, title, subtitle, delay, seeMoreHref, emptyIcon: EmptyIcon, emptyText, children }: HomeSectionProps) {
+function HomeSection({ id, icon, title, subtitle, seeAllLabel, delay, seeMoreHref, emptyIcon: EmptyIcon, emptyText, children }: HomeSectionProps) {
   return (
     <section id={id} className="mb-[3.75rem] animate-fade-in scroll-mt-24" style={{ animationDelay: `${delay}ms` }}>
       <div className="flex items-end justify-between mb-4 gap-3">
@@ -154,7 +160,7 @@ function HomeSection({ id, icon, title, subtitle, delay, seeMoreHref, emptyIcon:
             href={seeMoreHref}
             className="shrink-0 inline-flex items-center gap-1 text-sm font-medium text-[hsl(var(--brand-indigo-deep))] dark:text-[hsl(var(--brand-slate-soft))] hover:opacity-80 transition-opacity"
           >
-            See all
+            {seeAllLabel}
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         )}

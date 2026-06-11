@@ -44,7 +44,10 @@
     "zod": "^4.3.6",
     "@genealogiq/auth": "workspace:*",
     "@genealogiq/core": "workspace:*",
+    "@genealogiq/i18n": "workspace:*",
     "@genealogiq/email": "workspace:*",
+    "country-flag-icons": "^1.5.13",
+    "next-intl": "^4.12.0",
     "@genealogiq/db": "workspace:*",
     "@genealogiq/services": "workspace:*"
   },

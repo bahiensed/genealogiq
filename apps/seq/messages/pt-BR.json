@@ -1,0 +1,34 @@
+{
+  "Nav": {
+    "profile": "Perfil",
+    "signOut": "Sair",
+    "signingOut": "Saindo…",
+    "language": "Idioma",
+    "toggleTheme": "Alternar tema"
+  },
+  "Auth": {
+    "title": "Entrar",
+    "description": "Digite seu e-mail e senha para acessar sua conta.",
+    "email": "E-mail:",
+    "emailPlaceholder": "seu@email.com",
+    "password": "Senha:",
+    "forgotPassword": "Esqueceu a senha?",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha",
+    "signIn": "Entrar",
+    "signingIn": "Entrando…"
+  },
+  "Dashboard": {
+    "title": "Painel",
+    "availableQr": "QR Codes disponíveis para venda",
+    "currentlyInStock": "Em estoque no momento",
+    "totalCustomers": "Total de clientes",
+    "registeredCustomers": "Clientes cadastrados",
+    "qrSoldThisMonth": "QR Codes vendidos no mês",
+    "salesThisMonth": "Vendas neste mês",
+    "monthlyRevenue": "Receita do mês",
+    "revenueThisMonth": "Receita neste mês",
+    "averageTicket": "Ticket médio",
+    "avgRevenuePerSale": "Receita média por venda neste mês"
+  }
+}

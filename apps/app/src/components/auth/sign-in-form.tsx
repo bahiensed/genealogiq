@@ -3,6 +3,7 @@
 import { useState, useActionState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { login } from '@/actions/auth'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export function SignInForm() {
+  const t = useTranslations('Auth')
   const [state, dispatch, isPending] = useActionState(login, undefined)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -26,24 +28,24 @@ export function SignInForm() {
         )}
 
         <div className="space-y-1.5">
-          <Label htmlFor="email">E-mail</Label>
+          <Label htmlFor="email">{t('email')}</Label>
           <Input
             id="email"
             name="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
             autoComplete="email"
           />
         </div>
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('password')}</Label>
             <Link
               href="/forgot-password"
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              Forgot password?
+              {t('forgotPassword')}
             </Link>
           </div>
           <div className="relative">
@@ -58,7 +60,7 @@ export function SignInForm() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? t('hidePassword') : t('showPassword')}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -66,13 +68,13 @@ export function SignInForm() {
         </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Signing in…" : "Sign in"}
+          {isPending ? t('signingIn') : t('signIn')}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          New here?{" "}
+          {t('newHere')}{" "}
           <Link href="/sign-up" className="text-primary hover:underline font-medium">
-            Create an account
+            {t('createAccount')}
           </Link>
         </p>
       </form>
