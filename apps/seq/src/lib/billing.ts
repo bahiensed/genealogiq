@@ -74,8 +74,14 @@ export async function applyCheckoutSession(
         // Generate N unique license codes — one per QR unit ordered.
         // The @unique constraint on gen_code defends against the astronomically
         // unlikely collision (80-bit entropy); P2002 aborts the tx and Stripe retries.
+        //
+        // `id` is intentionally omitted: Prisma fills it via @default(cuid()). The
+        // previous `id: crypto.randomUUID()` relied on an unimported `crypto` global
+        // that is undefined in the deployed Node runtime, so it threw here and rolled
+        // back the whole transaction — every physical purchase was charged in Stripe
+        // but never written to the DB. (Unit tests masked it: Node/vitest expose a
+        // global `crypto`, so the throw only happened in production.)
         const licenses = Array.from({ length: totalUnits }, () => ({
-          id:        crypto.randomUUID(),
           genCode:   generateGenCode(),
           saleId:    sale.id,
           packageId: ctx.packageId,
