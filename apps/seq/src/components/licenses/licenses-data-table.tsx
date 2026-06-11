@@ -10,9 +10,11 @@ interface LicensesDataTableProps {
 }
 
 const COLUMN_LABELS: Record<string, string> = {
-  genCode:     'Code',
-  status:      'Status',
-  activatedAt: 'Activated',
+  genCode:  'Code',
+  status:   'Status',
+  printed:  'Printed',
+  soldTo:   'Sold to',
+  memorial: 'Memorial',
 }
 
 export function LicensesDataTable({ data, appUrl }: LicensesDataTableProps) {

@@ -10,7 +10,8 @@ export default async function LicensesPage({
   searchParams: Promise<{ status?: string }>
 }) {
   const { status } = await searchParams
-  const validStatus = status === 'AVAILABLE' || status === 'ACTIVATED' ? status : undefined
+  const validStatus =
+    status === 'AVAILABLE' || status === 'SOLD' || status === 'ACTIVATED' ? status : undefined
 
   const [licenses, summary] = await Promise.all([
     getLicenses(validStatus),
@@ -33,17 +34,25 @@ export default async function LicensesPage({
         </div>
       </div>
 
-      {/* Available balance — mirrors the Digital QR inventory page */}
-      <div className="rounded-lg border bg-card p-4">
-        <p className="text-sm text-muted-foreground">Available for sale</p>
-        <p className="text-3xl font-bold tabular-nums text-emerald-600">{summary.available}</p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {summary.total} total · {summary.activated} activated
-        </p>
+      {/* Summary */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <SummaryCard label="Available for sale" value={summary.available} accent="text-emerald-600" />
+        <SummaryCard label="Sold" value={summary.sold} accent="text-amber-600" />
+        <SummaryCard label="Activated" value={summary.activated} />
+        <SummaryCard label="Printed" value={summary.printed} />
       </div>
 
       {/* Licenses (one row per printable QR code) */}
       <LicensesDataTable data={licenses} appUrl={appUrl} />
+    </div>
+  )
+}
+
+function SummaryCard({ label, value, accent }: { label: string; value: number; accent?: string }) {
+  return (
+    <div className="rounded-lg border bg-card p-4">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className={`text-3xl font-bold tabular-nums ${accent ?? ''}`}>{value}</p>
     </div>
   )
 }

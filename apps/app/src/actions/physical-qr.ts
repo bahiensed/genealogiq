@@ -13,7 +13,9 @@ export async function activatePhysicalQr(genCode: string, data: unknown) {
     select: { id: true, status: true },
   })
   if (!license)                       return { error: "QR code not found." }
-  if (license.status !== "AVAILABLE") return { error: "This code has already been activated." }
+  // A code can be activated whether it's still in stock (AVAILABLE) or already
+  // sold/written-off (SOLD) — only an already-ACTIVATED code is rejected.
+  if (license.status === "ACTIVATED") return { error: "This code has already been activated." }
 
   const parsed = memorialSchema.safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }

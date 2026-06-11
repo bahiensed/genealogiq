@@ -3,7 +3,7 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 
-export type LicenseStatus = 'AVAILABLE' | 'ACTIVATED'
+export type LicenseStatus = 'AVAILABLE' | 'SOLD' | 'ACTIVATED'
 
 export async function getLicenses(status?: LicenseStatus) {
   const { customerId } = await verifyTenantSession()
@@ -17,14 +17,15 @@ export async function getLicenses(status?: LicenseStatus) {
       id:          true,
       genCode:     true,
       status:      true,
+      printedAt:   true,
+      soldAt:      true,
+      soldVia:     true,
+      soldToName:  true,
       activatedAt: true,
       createdAt:   true,
-      appUser: {
-        select: { firstName: true, lastName: true },
-      },
-      sale: {
-        select: { id: true },
-      },
+      appUser:       { select: { firstName: true, lastName: true } },
+      soldToAppUser: { select: { firstName: true, lastName: true } },
+      sale:          { select: { id: true } },
     },
     orderBy: { createdAt: 'desc' },
   })
@@ -32,13 +33,42 @@ export async function getLicenses(status?: LicenseStatus) {
 
 export async function getLicenseSummary() {
   const { customerId } = await verifyTenantSession()
+  const where = { tenantId: customerId }
 
-  const [total, activated] = await Promise.all([
-    prisma.physicalQrLicense.count({ where: { tenantId: customerId } }),
-    prisma.physicalQrLicense.count({ where: { tenantId: customerId, status: 'ACTIVATED' } }),
+  const [total, available, sold, activated, printed] = await Promise.all([
+    prisma.physicalQrLicense.count({ where }),
+    prisma.physicalQrLicense.count({ where: { ...where, status: 'AVAILABLE' } }),
+    prisma.physicalQrLicense.count({ where: { ...where, status: 'SOLD' } }),
+    prisma.physicalQrLicense.count({ where: { ...where, status: 'ACTIVATED' } }),
+    prisma.physicalQrLicense.count({ where: { ...where, printedAt: { not: null } } }),
   ])
 
-  return { total, activated, available: total - activated }
+  return { total, available, sold, activated, printed }
+}
+
+/** Single license by genCode, tenant-scoped — for the detail page. */
+export async function getLicenseByGenCode(genCode: string) {
+  const { customerId } = await verifyTenantSession()
+
+  return prisma.physicalQrLicense.findFirst({
+    where:  { genCode, tenantId: customerId },
+    select: {
+      id:          true,
+      genCode:     true,
+      status:      true,
+      printedAt:   true,
+      soldAt:      true,
+      soldVia:     true,
+      soldToName:  true,
+      soldValue:   true,
+      activatedAt: true,
+      createdAt:   true,
+      appUser:       { select: { id: true, firstName: true, lastName: true } },
+      soldToAppUser: { select: { id: true, firstName: true, lastName: true, email: true } },
+      soldBy:        { select: { firstName: true, lastName: true } },
+    },
+  })
 }
 
 export type LicenseRow = Awaited<ReturnType<typeof getLicenses>>[number]
+export type LicenseDetail = NonNullable<Awaited<ReturnType<typeof getLicenseByGenCode>>>
