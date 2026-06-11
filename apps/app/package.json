@@ -54,12 +54,12 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^20.19.39",
+    "@types/node": "^20.19.43",
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "16.2.9",
     "prisma": "^7.7.0",
     "tailwindcss": "^4",
     "typescript": "^5"
