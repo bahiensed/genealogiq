@@ -67,7 +67,13 @@ enum PackageType {
 
 enum PhysicalQrStatus {
   AVAILABLE
+  SOLD
   ACTIVATED
+}
+
+enum PhysicalQrSaleChannel {
+  PLATFORM
+  MANUAL
 }
 
 enum GuardianStatus {
@@ -350,6 +356,7 @@ model User {
   emailTokens         EmailToken[]
   passwordResetTokens PasswordResetToken[]
   sales               Sale[]
+  physicalQrSales     PhysicalQrLicense[]
   createdSupplierCats SupplierCategory[]   @relation("supplier_categories_created_by_idTousers")
   updatedSupplierCats SupplierCategory[]   @relation("supplier_categories_updated_by_idTousers")
   createdSuppliers    Supplier[]           @relation("suppliers_created_by_idTousers")
@@ -432,7 +439,8 @@ model AppUser {
   updatedBy           User?                @relation("app_users_updated_by_idTousers", fields: [updatedById], references: [id])
   emailTokens         EmailToken[]
   passwordResetTokens PasswordResetToken[]
-  physicalQrLicense   PhysicalQrLicense?
+  physicalQrLicense   PhysicalQrLicense?   @relation("PhysicalQrMemorial")
+  physicalQrPurchases PhysicalQrLicense[]  @relation("PhysicalQrBuyer")
   qrCode              QrCode?
 
   @@index([tenantId])
@@ -779,20 +787,30 @@ model QrScan {
 }
 
 model PhysicalQrLicense {
-  id          String           @id @default(cuid())
-  genCode     String           @unique @map("gen_code")
-  status      PhysicalQrStatus @default(AVAILABLE)
-  saleId      Int              @map("sale_id")
-  packageId   String           @map("package_id")
-  tenantId    String           @map("tenant_id")
-  appUserId   String?          @unique @map("app_user_id")
-  activatedAt DateTime?        @map("activated_at")
-  createdAt   DateTime         @default(now()) @map("created_at")
-  updatedAt   DateTime         @default(now()) @updatedAt @map("updated_at")
-  appUser     AppUser?         @relation(fields: [appUserId], references: [id])
-  package     Package          @relation(fields: [packageId], references: [id])
-  sale        Sale             @relation(fields: [saleId], references: [id])
-  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  id              String                 @id @default(cuid())
+  genCode         String                 @unique @map("gen_code")
+  status          PhysicalQrStatus       @default(AVAILABLE)
+  saleId          Int                    @map("sale_id")
+  packageId       String                 @map("package_id")
+  tenantId        String                 @map("tenant_id")
+  appUserId       String?                @unique @map("app_user_id")
+  activatedAt     DateTime?              @map("activated_at")
+  printedAt       DateTime?              @map("printed_at")
+  // Write-off ("baixa"): a code is SOLD before it is ACTIVATED by the consumer.
+  soldAt          DateTime?              @map("sold_at")
+  soldVia         PhysicalQrSaleChannel? @map("sold_via")
+  soldById        String?                @map("sold_by_id")
+  soldToAppUserId String?                @map("sold_to_app_user_id")
+  soldToName      String?                @map("sold_to_name")
+  soldValue       Decimal?               @map("sold_value") @db.Decimal(10, 2)
+  createdAt       DateTime               @default(now()) @map("created_at")
+  updatedAt       DateTime               @default(now()) @updatedAt @map("updated_at")
+  appUser         AppUser?               @relation("PhysicalQrMemorial", fields: [appUserId], references: [id])
+  soldToAppUser   AppUser?               @relation("PhysicalQrBuyer", fields: [soldToAppUserId], references: [id])
+  soldBy          User?                  @relation(fields: [soldById], references: [id])
+  package         Package                @relation(fields: [packageId], references: [id])
+  sale            Sale                   @relation(fields: [saleId], references: [id])
+  tenant          Tenant                 @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId, status])
   @@map("physical_qr_licenses")
