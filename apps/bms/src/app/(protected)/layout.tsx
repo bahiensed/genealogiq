@@ -4,6 +4,7 @@ import { SessionProvider } from '@/components/providers/session-provider'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { AppBreadcrumb } from '@/components/breadcrumb/breadcrumb'
 import { ModeToggle } from '@/components/theme/mode-toggle'
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { UserMenu } from '@/components/users/user-menu'
 
 export default async function ProtectPagesLayout({
@@ -31,6 +32,7 @@ export default async function ProtectPagesLayout({
             <AppBreadcrumb />
           </div>
           <div className="flex gap-4 items-center">
+            <LanguageSwitcher />
             <ModeToggle />
             <UserMenu
               name={session?.user?.name}

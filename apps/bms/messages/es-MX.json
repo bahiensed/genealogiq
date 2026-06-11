@@ -1,0 +1,36 @@
+{
+  "Nav": {
+    "profile": "Perfil",
+    "signOut": "Cerrar sesión",
+    "signingOut": "Cerrando sesión…",
+    "language": "Idioma",
+    "toggleTheme": "Cambiar tema"
+  },
+  "Auth": {
+    "title": "Iniciar sesión",
+    "description": "Ingresa tu correo y contraseña para acceder a tu cuenta.",
+    "email": "Correo:",
+    "emailPlaceholder": "tu@correo.com",
+    "password": "Contraseña:",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "signIn": "Iniciar sesión",
+    "signingIn": "Iniciando sesión…"
+  },
+  "Dashboard": {
+    "title": "Panel",
+    "monthlySales": "Ventas del mes",
+    "salesThisMonth": "Ventas este mes",
+    "annualSales": "Ventas del año",
+    "salesThisYear": "Ventas este año",
+    "totalSales": "Ventas totales",
+    "allTimeSales": "Ventas históricas",
+    "monthlyRevenue": "Ingresos del mes",
+    "revenueThisMonth": "Ingresos este mes",
+    "annualRevenue": "Ingresos del año",
+    "revenueThisYear": "Ingresos este año",
+    "totalRevenue": "Ingresos totales",
+    "allTimeRevenue": "Ingresos históricos"
+  }
+}
