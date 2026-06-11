@@ -12,12 +12,13 @@ interface LicensesCsvButtonProps {
 
 export function LicensesCsvButton({ licenses, appUrl }: LicensesCsvButtonProps) {
   function download() {
-    const header = 'code,url,status,activated_at\n'
+    const header = 'code,url,status,printed_at,sold_at,sold_via,sold_to,activated_at\n'
     const rows = licenses
       .map((l) => {
-        const code = formatGenCode(l.genCode)
-        const url  = `${appUrl}/qr/${l.genCode}`
-        return `${code},${url},${l.status},${l.activatedAt?.toISOString() ?? ''}`
+        const code   = formatGenCode(l.genCode)
+        const url    = `${appUrl}/qr/${l.genCode}`
+        const soldTo = (l.soldToName ?? (l.soldToAppUser ? `${l.soldToAppUser.firstName} ${l.soldToAppUser.lastName}` : '')).replace(/,/g, ' ')
+        return `${code},${url},${l.status},${l.printedAt?.toISOString() ?? ''},${l.soldAt?.toISOString() ?? ''},${l.soldVia ?? ''},${soldTo},${l.activatedAt?.toISOString() ?? ''}`
       })
       .join('\n')
     const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
