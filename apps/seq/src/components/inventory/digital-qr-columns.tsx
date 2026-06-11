@@ -16,7 +16,7 @@ export const digitalQrStatementColumns: ColumnDef<StatementRow>[] = [
   },
   {
     accessorKey: 'description',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="QR Codes" />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title={<>Transaction<br/>Description</>} />,
     cell: ({ row }) => (
       <span className={row.original.reversed ? 'text-muted-foreground line-through' : undefined}>
         {row.original.description}
@@ -41,6 +41,15 @@ export const digitalQrStatementColumns: ColumnDef<StatementRow>[] = [
     cell: ({ row }) => (
       <div className="text-right tabular-nums">
         {row.original.unitPrice != null ? usd.format(row.original.unitPrice) : '—'}
+      </div>
+    ),
+  },
+  {
+    accessorKey: 'totalPrice',
+    header: ({ column }) => <DataTableColumnHeader column={column} title={<>Total<br/>Price</>} className="justify-end" />,
+    cell: ({ row }) => (
+      <div className="text-right tabular-nums">
+        {row.original.totalPrice != null ? usd.format(row.original.totalPrice) : '—'}
       </div>
     ),
   },
