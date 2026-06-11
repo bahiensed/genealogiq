@@ -213,7 +213,7 @@ export async function resendCustomerEmail(id: string): Promise<ActionError | voi
 
   const appUser = await prisma.appUser.findUnique({
     where:  { id, tenantId: customerId },
-    select: { id: true, email: true, password: true },
+    select: { id: true, email: true, password: true, firstName: true },
   })
   if (!appUser) return { error: 'Customer not found.' }
   if (!appUser.email) return { error: 'Customer has no email address.' }
@@ -226,7 +226,7 @@ export async function resendCustomerEmail(id: string): Promise<ActionError | voi
     data: { token: hashToken(token), appUserId: id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
   })
 
-  await sendAppWelcomeEmail(appUser.email, token)
+  await sendAppWelcomeEmail(appUser.email, token, appUser.firstName)
 }
 
 export async function toggleCustomerActive(id: string): Promise<ActionError | void> {

@@ -77,3 +77,36 @@ export function sendWelcomeEmail({
     <p>If you were not expecting this email, please contact your administrator.</p>
   `)
 }
+
+// Welcome email for an APP consumer (memorial guardian) — distinct copy/tone from
+// the staff welcome above. Sent when a tenant registers/sells access to a
+// consumer; the link sets their password.
+export function sendAppConsumerWelcomeEmail({
+  to,
+  token,
+  baseUrl,
+  name,
+}: TokenEmail & { name?: string }): Promise<void> {
+  const url = `${baseUrl}/reset-password?token=${token}`
+  const greeting = name ? `Olá ${name},` : "Olá,"
+  return send(to, "Bem-vindo à Genealogiq — crie o seu acesso", `
+    <p>${greeting}</p>
+    <p>Seja bem-vindo à Genealogiq.</p>
+    <p>A partir de agora, você não é apenas um usuário. Você se tornou um <strong>guardião de histórias</strong> que merecem continuar vivas.</p>
+    <p>A maioria das memórias se perde com o tempo. Aqui, você muda esse destino.</p>
+    <p>A Genealogiq foi criada para que famílias possam preservar, organizar e eternizar aquilo que realmente importa: a história de quem veio antes de nós. E agora, isso está nas suas mãos.</p>
+    <p><strong>Para começar agora, siga esses passos simples:</strong></p>
+    <p>Clique no link abaixo para criar a sua senha (expira em 72h):</p>
+    <p><a href="${url}">Criar minha senha</a></p>
+    <p>Depois:</p>
+    <ul>
+      <li>Complete os seus dados de perfil.</li>
+      <li>Crie o primeiro perfil de alguém especial.</li>
+      <li>Adicione fotos ou memórias marcantes.</li>
+      <li>Conecte essa pessoa à sua árvore familiar.</li>
+    </ul>
+    <p>Tudo isso leva menos de 2 minutos. Mas o impacto atravessa gerações.</p>
+    <p>Se precisar de ajuda, estamos aqui.<br/>Bem-vindo ao início de algo maior que você.</p>
+    <p>Equipe Genealogiq®️<br/><em>"As pessoas só morrem quando são esquecidas".</em></p>
+  `)
+}

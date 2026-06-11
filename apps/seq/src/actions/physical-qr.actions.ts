@@ -89,7 +89,7 @@ export async function sellPhysicalQrViaPlatform(
 
   const consumer = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
-    select: { id: true, email: true },
+    select: { id: true, email: true, firstName: true },
   })
   if (!consumer) return { error: 'Customer not found.' }
   if (!consumer.email) return { error: 'Customer has no email address.' }
@@ -130,7 +130,7 @@ export async function sellPhysicalQrViaPlatform(
   }
 
   try {
-    await sendAppWelcomeEmail(consumer.email, token)
+    await sendAppWelcomeEmail(consumer.email, token, consumer.firstName)
   } catch {
     // Email failure doesn't roll back the sale.
   }
