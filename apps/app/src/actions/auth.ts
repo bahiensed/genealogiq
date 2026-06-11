@@ -103,7 +103,7 @@ export async function signUp(
   // Carry the post-verification destination (e.g. /qr/<code>) into the email link
   // so the buyer returns to the activation flow after confirming their email.
   const callbackUrl = safeCallback(formData.get("callbackUrl") as string | null)
-  await sendVerificationEmail(validated.data.email, token, callbackUrl ?? undefined)
+  await sendVerificationEmail(validated.data.email, token, validated.data.firstName, callbackUrl ?? undefined)
 
   redirect("/verify-email")
 }

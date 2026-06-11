@@ -24,17 +24,8 @@ export interface TokenEmail {
   baseUrl: string
 }
 
-export function sendVerificationEmail({
-  to,
-  token,
-  baseUrl,
-  callbackUrl,
-}: TokenEmail & { callbackUrl?: string }): Promise<void> {
-  // callbackUrl threads a post-verification destination (e.g. /qr/<code>) so the
-  // user returns to where they started after confirming their email. Only the
-  // APP passes it; BMS/SEQ omit it and the link is unchanged.
-  const cb = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
-  const url = `${baseUrl}/verify-email?token=${token}${cb}`
+export function sendVerificationEmail({ to, token, baseUrl }: TokenEmail): Promise<void> {
+  const url = `${baseUrl}/verify-email?token=${token}`
   return send(to, "Confirm your email", `
     <p>Thank you for creating your account.</p>
     <p>Click the link below to confirm your email (expires in 24h):</p>
@@ -87,6 +78,38 @@ export function sendWelcomeEmail({
   `)
 }
 
+// Shared Genealogiq consumer email body. Both the welcome (tenant-created access,
+// link sets the password) and the self-sign-up verification (user already chose a
+// password, link confirms the email) use the exact same brand copy — only the
+// call-to-action block (intro line + button label) and the link differ.
+function appConsumerBody(opts: {
+  greeting: string
+  ctaIntro: string
+  url: string
+  ctaLabel: string
+}): string {
+  return `
+    <p>${opts.greeting}</p>
+    <p>Seja bem-vindo à Genealogiq.</p>
+    <p>A partir de agora, você não é apenas um usuário. Você se tornou um <strong>guardião de histórias</strong> que merecem continuar vivas.</p>
+    <p>A maioria das memórias se perde com o tempo. Aqui, você muda esse destino.</p>
+    <p>A Genealogiq foi criada para que famílias possam preservar, organizar e eternizar aquilo que realmente importa: a história de quem veio antes de nós. E agora, isso está nas suas mãos.</p>
+    <p><strong>Para começar agora, siga esses passos simples:</strong></p>
+    <p>${opts.ctaIntro}</p>
+    <p><a href="${opts.url}">${opts.ctaLabel}</a></p>
+    <p>Depois:</p>
+    <ul>
+      <li>Complete os seus dados de perfil.</li>
+      <li>Crie o primeiro perfil de alguém especial.</li>
+      <li>Adicione fotos ou memórias marcantes.</li>
+      <li>Conecte essa pessoa à sua árvore familiar.</li>
+    </ul>
+    <p>Tudo isso leva menos de 2 minutos. Mas o impacto atravessa gerações.</p>
+    <p>Se precisar de ajuda, estamos aqui.<br/>Bem-vindo ao início de algo maior que você.</p>
+    <p>Equipe Genealogiq®️<br/><em>"As pessoas só morrem quando são esquecidas".</em></p>
+  `
+}
+
 // Welcome email for an APP consumer (memorial guardian) — distinct copy/tone from
 // the staff welcome above. Sent when a tenant registers/sells access to a
 // consumer; the link sets their password.
@@ -103,26 +126,33 @@ export function sendAppConsumerWelcomeEmail({
   const cb = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
   const url = `${baseUrl}/reset-password?token=${token}${cb}`
   const greeting = name ? `Olá ${name},` : "Olá,"
-  return send(to, "Bem-vindo à Genealogiq — crie o seu acesso", `
-    <p>${greeting}</p>
-    <p>Seja bem-vindo à Genealogiq.</p>
-    <p>A partir de agora, você não é apenas um usuário. Você se tornou um <strong>guardião de histórias</strong> que merecem continuar vivas.</p>
-    <p>A maioria das memórias se perde com o tempo. Aqui, você muda esse destino.</p>
-    <p>A Genealogiq foi criada para que famílias possam preservar, organizar e eternizar aquilo que realmente importa: a história de quem veio antes de nós. E agora, isso está nas suas mãos.</p>
-    <p><strong>Para começar agora, siga esses passos simples:</strong></p>
-    <p>Clique no link abaixo para criar a sua senha (expira em 72h):</p>
-    <p><a href="${url}">Criar minha senha</a></p>
-    <p>Depois:</p>
-    <ul>
-      <li>Complete os seus dados de perfil.</li>
-      <li>Crie o primeiro perfil de alguém especial.</li>
-      <li>Adicione fotos ou memórias marcantes.</li>
-      <li>Conecte essa pessoa à sua árvore familiar.</li>
-    </ul>
-    <p>Tudo isso leva menos de 2 minutos. Mas o impacto atravessa gerações.</p>
-    <p>Se precisar de ajuda, estamos aqui.<br/>Bem-vindo ao início de algo maior que você.</p>
-    <p>Equipe Genealogiq®️<br/><em>"As pessoas só morrem quando são esquecidas".</em></p>
-  `)
+  return send(to, "Bem-vindo à Genealogiq — crie o seu acesso", appConsumerBody({
+    greeting,
+    ctaIntro: "Clique no link abaixo para criar a sua senha (expira em 72h):",
+    url,
+    ctaLabel: "Criar minha senha",
+  }))
+}
+
+// Verification email for an APP consumer who signed up themselves. Same brand copy
+// as the welcome above, but the account already has a password — the link only
+// confirms the email (24h). callbackUrl threads the post-verification destination.
+export function sendAppConsumerVerificationEmail({
+  to,
+  token,
+  baseUrl,
+  name,
+  callbackUrl,
+}: TokenEmail & { name?: string; callbackUrl?: string }): Promise<void> {
+  const cb = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+  const url = `${baseUrl}/verify-email?token=${token}${cb}`
+  const greeting = name ? `Olá ${name},` : "Olá,"
+  return send(to, "Bem-vindo à Genealogiq — confirme o seu e-mail", appConsumerBody({
+    greeting,
+    ctaIntro: "Clique no link abaixo para confirmar o seu e-mail (expira em 24h):",
+    url,
+    ctaLabel: "Confirmar meu e-mail",
+  }))
 }
 
 // Welcome email for a Sequoia (SEQ) tenant staff member — distinct copy/tone from
