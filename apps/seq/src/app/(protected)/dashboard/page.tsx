@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { Layers, Users, ShoppingCart, Banknote, TrendingUp, UserPlus, QrCode } from 'lucide-react'
 import { verifyTenantSession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
@@ -12,34 +13,35 @@ const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' 
 export default async function DashboardPage() {
   const { customerId } = await verifyTenantSession()
   const stats = await getDashboardStats(customerId)
+  const t = await getTranslations('Dashboard')
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Dashboard
+        {t('title')}
       </h1>
 
       {/* Row 1 — Inventory + Customers */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Available QR Codes for Sale</CardTitle>
+            <CardTitle>{t('availableQr')}</CardTitle>
             <CardAction><Layers className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.availableQRCodes}</p>
-            <p className="text-sm text-muted-foreground mt-1">Currently in stock</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('currentlyInStock')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Total Customers</CardTitle>
+            <CardTitle>{t('totalCustomers')}</CardTitle>
             <CardAction><Users className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.totalCustomers}</p>
-            <p className="text-sm text-muted-foreground mt-1">Registered customers</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('registeredCustomers')}</p>
           </CardContent>
         </Card>
       </div>
@@ -48,34 +50,34 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>QR Codes Sold this Month</CardTitle>
+            <CardTitle>{t('qrSoldThisMonth')}</CardTitle>
             <CardAction><ShoppingCart className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.monthlyCount}</p>
-            <p className="text-sm text-muted-foreground mt-1">Sales this month</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('salesThisMonth')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Revenue</CardTitle>
+            <CardTitle>{t('monthlyRevenue')}</CardTitle>
             <CardAction><Banknote className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{usd.format(stats.monthlyRevenue)}</p>
-            <p className="text-sm text-muted-foreground mt-1">Revenue this month</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('revenueThisMonth')}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Average Ticket</CardTitle>
+            <CardTitle>{t('averageTicket')}</CardTitle>
             <CardAction><TrendingUp className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{usd.format(stats.averageTicket)}</p>
-            <p className="text-sm text-muted-foreground mt-1">Avg. revenue per sale this month</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('avgRevenuePerSale')}</p>
           </CardContent>
         </Card>
       </div>
