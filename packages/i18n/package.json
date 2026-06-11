@@ -1,0 +1,23 @@
+{
+  "name": "@genealogiq/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "server-only": "^0.0.1"
+  },
+  "peerDependencies": {
+    "next": "16.2.7"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20.19.39",
+    "next": "16.2.7"
+  }
+}
