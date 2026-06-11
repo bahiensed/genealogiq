@@ -1,0 +1,41 @@
+{
+  "Nav": {
+    "myProfile": "Meu perfil",
+    "subscriptions": "Assinaturas",
+    "signOut": "Sair",
+    "messages": "Mensagens",
+    "messagesUnread": "{count} mensagens não lidas",
+    "toggleTheme": "Alternar tema",
+    "userMenu": "Menu do usuário",
+    "language": "Idioma"
+  },
+  "Home": {
+    "tagline": "Escaneie, busque e visite um perfil",
+    "myProfileTitle": "Meu perfil",
+    "myProfileSubtitle": "Veja sua página",
+    "recentlyViewedShort": "vistos recentemente",
+    "favoritesShort": "favoritos",
+    "guardedShort": "sob sua guarda",
+    "recentlyViewedTitle": "Vistos recentemente",
+    "recentlyViewedSubtitle": "Os perfis vistos recentemente aparecem aqui",
+    "favoritesTitle": "Meus favoritos",
+    "favoritesSubtitle": "Os mais próximos do coração",
+    "favoritesEmpty": "Nenhum perfil favorito ainda.",
+    "guardedTitle": "Perfis sob minha guarda",
+    "guardedSubtitle": "Memoriais cuidados com zelo silencioso",
+    "guardedEmpty": "Nenhum perfil sob sua guarda ainda.",
+    "seeAll": "Ver todos"
+  },
+  "Auth": {
+    "email": "E-mail",
+    "emailPlaceholder": "voce@exemplo.com",
+    "password": "Senha",
+    "forgotPassword": "Esqueceu a senha?",
+    "signIn": "Entrar",
+    "signingIn": "Entrando…",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha",
+    "newHere": "Novo por aqui?",
+    "createAccount": "Crie uma conta"
+  }
+}

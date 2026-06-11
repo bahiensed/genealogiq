@@ -1,0 +1,41 @@
+{
+  "Nav": {
+    "myProfile": "My profile",
+    "subscriptions": "Subscriptions",
+    "signOut": "Sign out",
+    "messages": "Messages",
+    "messagesUnread": "{count} unread messages",
+    "toggleTheme": "Toggle theme",
+    "userMenu": "User menu",
+    "language": "Language"
+  },
+  "Home": {
+    "tagline": "Scan, search & visit a profile",
+    "myProfileTitle": "My Profile",
+    "myProfileSubtitle": "View your page",
+    "recentlyViewedShort": "recently viewed",
+    "favoritesShort": "favorites",
+    "guardedShort": "guarded",
+    "recentlyViewedTitle": "Recently viewed",
+    "recentlyViewedSubtitle": "Recently viewed profiles appear here",
+    "favoritesTitle": "My favorites",
+    "favoritesSubtitle": "The ones closest to the heart",
+    "favoritesEmpty": "No favorite profile yet.",
+    "guardedTitle": "Profiles I guard",
+    "guardedSubtitle": "Memorials watched over with quiet care",
+    "guardedEmpty": "No guarded profile yet.",
+    "seeAll": "See all"
+  },
+  "Auth": {
+    "email": "E-mail",
+    "emailPlaceholder": "you@example.com",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "newHere": "New here?",
+    "createAccount": "Create an account"
+  }
+}
