@@ -10,6 +10,7 @@
 import 'dotenv/config'
 import Stripe from 'stripe'
 import { prisma } from '@genealogiq/db'
+import { generateGenCode } from '@genealogiq/core'
 
 // ─── Args ─────────────────────────────────────────────────────────────────────
 
@@ -71,20 +72,20 @@ async function main() {
   // 3. Resolve package
   const pkg = await prisma.package.findUnique({
     where:  { id: ctx.packageId },
-    select: { quantity: true, name: true },
+    select: { quantity: true, name: true, type: true },
   })
   if (!pkg) {
     console.error(`\nPackage ${ctx.packageId} not found in DB — abort.`)
     process.exit(1)
   }
 
-  const totalQRCodes   = pkg.quantity * ctx.quantity
+  const totalUnits     = pkg.quantity * ctx.quantity
   const paymentIntentId = typeof session.payment_intent === 'string'
     ? session.payment_intent
     : (session.payment_intent as { id: string } | null)?.id ?? null
 
-  console.log(`\nPackage     : ${pkg.name}`)
-  console.log(`QR codes    : ${pkg.quantity} × ${ctx.quantity} = ${totalQRCodes}`)
+  console.log(`\nPackage     : ${pkg.name} (${pkg.type})`)
+  console.log(`Units       : ${pkg.quantity} × ${ctx.quantity} = ${totalUnits}`)
   console.log(`Payment PI  : ${paymentIntentId ?? '(none)'}`)
   console.log(`Tenant ID   : ${ctx.tenantId}`)
   console.log(`Sold by     : ${ctx.soldById}`)
@@ -94,7 +95,7 @@ async function main() {
     return
   }
 
-  // 4. Apply atomically
+  // 4. Apply atomically — mirrors lib/billing.ts (PHYSICAL → licenses, DIGITAL → inventory).
   await prisma.$transaction(async (tx) => {
     const sale = await tx.sale.create({
       data: {
@@ -108,12 +109,23 @@ async function main() {
     })
     console.log(`\nCreated Sale    : ${sale.id}`)
 
-    const inv = await tx.qrInventory.upsert({
-      where:  { tenantId: ctx.tenantId! },
-      create: { tenantId: ctx.tenantId!, quantity: totalQRCodes },
-      update: { quantity: { increment: totalQRCodes } },
-    })
-    console.log(`QR Inventory    : ${inv.quantity} code(s) (tenant ${ctx.tenantId})`)
+    if (pkg.type === 'PHYSICAL') {
+      const licenses = Array.from({ length: totalUnits }, () => ({
+        genCode:   generateGenCode(),
+        saleId:    sale.id,
+        packageId: ctx.packageId!,
+        tenantId:  ctx.tenantId!,
+      }))
+      await tx.physicalQrLicense.createMany({ data: licenses })
+      console.log(`Licenses        : ${totalUnits} physical QR license(s) created`)
+    } else {
+      const inv = await tx.qrInventory.upsert({
+        where:  { tenantId: ctx.tenantId! },
+        create: { tenantId: ctx.tenantId!, quantity: totalUnits },
+        update: { quantity: { increment: totalUnits } },
+      })
+      console.log(`QR Inventory    : ${inv.quantity} code(s) (tenant ${ctx.tenantId})`)
+    }
   })
 
   // Sale.stripeSessionId unique constraint ensures future webhook replays are idempotent.
