@@ -66,7 +66,7 @@ export async function createUser(data: UserFormValues): Promise<Result<string>> 
     throw e
   }
 
-  await sendWelcomeEmail(rest.email, token)
+  await sendWelcomeEmail(rest.email, token, rest.firstName)
 
   revalidatePath('/system/users')
   return ok('User created successfully.')
@@ -135,7 +135,7 @@ export async function toggleUserActive(userId: string): Promise<ActionError | vo
 export async function resendWelcomeEmail(userId: string): Promise<ActionError | void> {
   const { customerId } = await verifyAdmin()
 
-  const user = await prisma.user.findUnique({ where: { id: userId, tenantId: customerId }, select: { email: true, password: true } })
+  const user = await prisma.user.findUnique({ where: { id: userId, tenantId: customerId }, select: { email: true, password: true, firstName: true } })
   if (!user) return { error: 'User not found.' }
   if (user.password) return { error: 'This user has already set their password.' }
 
@@ -146,5 +146,5 @@ export async function resendWelcomeEmail(userId: string): Promise<ActionError | 
     data: { token: hashToken(token), userId, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
   })
 
-  await sendWelcomeEmail(user.email, token)
+  await sendWelcomeEmail(user.email, token, user.firstName)
 }

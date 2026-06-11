@@ -30,7 +30,7 @@ export async function createAppSale(
 
   const appUser = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
-    select: { id: true, email: true },
+    select: { id: true, email: true, firstName: true },
   })
   if (!appUser) return { error: 'Customer not found.' }
   if (!appUser.email) return { error: 'Customer has no email address.' }
@@ -87,7 +87,7 @@ export async function createAppSale(
   }
 
   try {
-    await sendAppWelcomeEmail(appUser.email, token)
+    await sendAppWelcomeEmail(appUser.email, token, appUser.firstName)
   } catch {
     // Email failure doesn't roll back the sale
   }
