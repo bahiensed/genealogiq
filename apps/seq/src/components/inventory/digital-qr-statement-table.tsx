@@ -6,9 +6,10 @@ import type { StatementRow } from '@/queries/digital-qr-statement'
 
 const COLUMN_LABELS: Record<string, string> = {
   date:        'Date',
-  description: 'QR Codes',
+  description: 'Transaction Description',
   units:       'Units',
   unitPrice:   'Unit Price',
+  totalPrice:  'Total Price',
   balance:     'Available',
 }
 

@@ -11,8 +11,10 @@ export type StatementRow = {
   kind:        StatementKind
   /** +N for a purchase (credit), −1 for a sale to a consumer (debit), 0 if reversed. */
   units:       number
-  /** package.price / package.quantity for credits; null for debits. */
+  /** Per-QR price of the transaction: purchase cost (credit) or sale value (debit). */
   unitPrice:   number | null
+  /** Monetary total of the transaction (unitPrice × |units|). */
+  totalPrice:  number | null
   reversed:    boolean
   /** Running balance after this line (oldest → newest). */
   balance:     number
@@ -55,6 +57,7 @@ export async function getDigitalQrStatement(tenantId: string): Promise<DigitalQr
       select: {
         id:        true,
         createdAt: true,
+        value:     true,
         appUser:   { select: { firstName: true, lastName: true } },
       },
     }),
@@ -64,27 +67,34 @@ export async function getDigitalQrStatement(tenantId: string): Promise<DigitalQr
   type Pending = Omit<StatementRow, 'balance'>
 
   const credits: Pending[] = sales.map((s) => {
-    const reversed = s.reversedAt !== null
+    const reversed   = s.reversedAt !== null
+    const unitsAdded = s.package.quantity * s.quantity
+    const unitPrice  = s.package.quantity > 0 ? Number(s.package.price) / s.package.quantity : null
     return {
       id:          `sale-${s.id}`,
       date:        s.createdAt,
       description: s.package.name,
       kind:        'CREDIT',
-      units:       reversed ? 0 : s.package.quantity * s.quantity,
-      unitPrice:   s.package.quantity > 0 ? Number(s.package.price) / s.package.quantity : null,
+      units:       reversed ? 0 : unitsAdded,
+      unitPrice,
+      totalPrice:  reversed ? 0 : Number(s.package.price) * s.quantity,
       reversed,
     }
   })
 
-  const debits: Pending[] = appSales.map((a) => ({
-    id:          `appsale-${a.id}`,
-    date:        a.createdAt,
-    description: `Sale to ${`${a.appUser.firstName} ${a.appUser.lastName}`.trim()}`,
-    kind:        'DEBIT',
-    units:       -1,
-    unitPrice:   null,
-    reversed:    false,
-  }))
+  const debits: Pending[] = appSales.map((a) => {
+    const value = a.value != null ? Number(a.value) : null
+    return {
+      id:          `appsale-${a.id}`,
+      date:        a.createdAt,
+      description: `Sale to ${`${a.appUser.firstName} ${a.appUser.lastName}`.trim()}`,
+      kind:        'DEBIT',
+      units:       -1,
+      unitPrice:   value,
+      totalPrice:  value,
+      reversed:    false,
+    }
+  })
 
   const ascending = [...credits, ...debits].sort((a, b) => a.date.getTime() - b.date.getTime())
 
