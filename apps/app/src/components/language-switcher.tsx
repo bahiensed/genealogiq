@@ -42,7 +42,7 @@ export function LanguageSwitcher() {
       >
         <CurrentFlag className="h-3.5 w-5 rounded-[2px]" title={LOCALE_META[locale].label} />
       </SelectTrigger>
-      <SelectContent align="end">
+      <SelectContent position="popper" align="end">
         {LOCALE_DISPLAY_ORDER.map((code) => {
           const meta = LOCALE_META[code]
           const Flag = FLAGS[meta.country]
