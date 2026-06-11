@@ -17,4 +17,4 @@ export const sendEmailChangeEmail    = (to: string, token: string) => _change({ 
 export const sendPasswordResetEmail  = (to: string, token: string) => _reset({ to, token, baseUrl: SEQUOIA() })
 export const sendAccountDeletionEmail = (to: string) => _delete({ to })
 export const sendWelcomeEmail        = (to: string, token: string, name?: string) => _seqWelcome({ to, token, baseUrl: SEQUOIA(), name })
-export const sendAppWelcomeEmail     = (to: string, token: string, name?: string) => _appWelcome({ to, token, baseUrl: APP(), name })
+export const sendAppWelcomeEmail     = (to: string, token: string, name?: string, callbackUrl?: string) => _appWelcome({ to, token, baseUrl: APP(), name, callbackUrl })

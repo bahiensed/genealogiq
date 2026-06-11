@@ -19,6 +19,7 @@ import {
   sendAccountDeletionEmail,
 } from "@/lib/email"
 import { verifySession } from "@/lib/dal"
+import { safeCallback } from "@/lib/safe-callback"
 import { deleteBlobs } from "@/lib/blob"
 import { getClientIp, checkRateLimit } from "@/lib/rate-limit"
 import { hashToken } from "@genealogiq/core"
@@ -99,7 +100,10 @@ export async function signUp(
     },
   })
 
-  await sendVerificationEmail(validated.data.email, token)
+  // Carry the post-verification destination (e.g. /qr/<code>) into the email link
+  // so the buyer returns to the activation flow after confirming their email.
+  const callbackUrl = safeCallback(formData.get("callbackUrl") as string | null)
+  await sendVerificationEmail(validated.data.email, token, callbackUrl ?? undefined)
 
   redirect("/verify-email")
 }
@@ -170,7 +174,10 @@ export async function resetPassword(
     prisma.passwordResetToken.delete({ where: { token: hashToken(token) } }),
   ])
 
-  redirect("/sign-in?reset=true")
+  // Preserve a deep-link destination (e.g. /qr/<code> from a platform sale) so the
+  // user continues to it after signing in with their new password.
+  const callbackUrl = safeCallback(formData.get("callbackUrl") as string | null)
+  redirect(callbackUrl ? `/sign-in?reset=true&callbackUrl=${encodeURIComponent(callbackUrl)}` : "/sign-in?reset=true")
 }
 
 export async function changePassword(

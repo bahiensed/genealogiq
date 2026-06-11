@@ -9,7 +9,7 @@ import {
 
 const APP = () => process.env.APP_URL ?? ""
 
-export const sendVerificationEmail   = (to: string, token: string) => _verify({ to, token, baseUrl: APP() })
+export const sendVerificationEmail   = (to: string, token: string, callbackUrl?: string) => _verify({ to, token, baseUrl: APP(), callbackUrl })
 export const sendEmailChangeEmail    = (to: string, token: string) => _change({ to, token, baseUrl: APP() })
 export const sendPasswordResetEmail  = (to: string, token: string) => _reset({ to, token, baseUrl: APP() })
 export const sendAccountDeletionEmail = (to: string) => _delete({ to })

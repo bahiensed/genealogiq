@@ -10,9 +10,10 @@ import { resetPassword } from '@/actions/auth'
 
 interface Props {
   token: string
+  callbackUrl?: string
 }
 
-export function ResetPasswordForm({ token }: Props) {
+export function ResetPasswordForm({ token, callbackUrl }: Props) {
   const [state, dispatch, isPending] = useActionState(resetPassword, undefined)
   const [showPassword, setShowPassword] = useState(false)
 
@@ -20,6 +21,7 @@ export function ResetPasswordForm({ token }: Props) {
     <AuthCard title="Reset password" description="Enter your new password below.">
       <form action={dispatch} className="space-y-4">
         <input type="hidden" name="token" value={token} />
+        {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
 
         {state?.error && (
           <p className="text-sm text-destructive">{state.error}</p>

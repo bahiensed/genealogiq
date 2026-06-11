@@ -24,8 +24,17 @@ export interface TokenEmail {
   baseUrl: string
 }
 
-export function sendVerificationEmail({ to, token, baseUrl }: TokenEmail): Promise<void> {
-  const url = `${baseUrl}/verify-email?token=${token}`
+export function sendVerificationEmail({
+  to,
+  token,
+  baseUrl,
+  callbackUrl,
+}: TokenEmail & { callbackUrl?: string }): Promise<void> {
+  // callbackUrl threads a post-verification destination (e.g. /qr/<code>) so the
+  // user returns to where they started after confirming their email. Only the
+  // APP passes it; BMS/SEQ omit it and the link is unchanged.
+  const cb = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+  const url = `${baseUrl}/verify-email?token=${token}${cb}`
   return send(to, "Confirm your email", `
     <p>Thank you for creating your account.</p>
     <p>Click the link below to confirm your email (expires in 24h):</p>
@@ -86,8 +95,13 @@ export function sendAppConsumerWelcomeEmail({
   token,
   baseUrl,
   name,
-}: TokenEmail & { name?: string }): Promise<void> {
-  const url = `${baseUrl}/reset-password?token=${token}`
+  callbackUrl,
+}: TokenEmail & { name?: string; callbackUrl?: string }): Promise<void> {
+  // callbackUrl deep-links the consumer back to a destination (e.g. the physical
+  // QR code /qr/<code>) after they create their password and sign in. Only the
+  // physical-QR platform sale passes it; digital sales omit it.
+  const cb = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
+  const url = `${baseUrl}/reset-password?token=${token}${cb}`
   const greeting = name ? `Olá ${name},` : "Olá,"
   return send(to, "Bem-vindo à Genealogiq — crie o seu acesso", `
     <p>${greeting}</p>

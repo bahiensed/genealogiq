@@ -130,7 +130,9 @@ export async function sellPhysicalQrViaPlatform(
   }
 
   try {
-    await sendAppWelcomeEmail(consumer.email, token, consumer.firstName)
+    // Deep-link the welcome email back to this physical code so the buyer lands
+    // on /qr/<genCode> right after creating their password and signing in.
+    await sendAppWelcomeEmail(consumer.email, token, consumer.firstName, `/qr/${genCode}`)
   } catch {
     // Email failure doesn't roll back the sale.
   }
