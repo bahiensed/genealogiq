@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
+import { useLocale } from "next-intl"
+import { getCountryName } from "@genealogiq/core"
 import { Cake, Feather, Heart, Images, Flower2, MapPin, SquarePen, BrickWall } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -33,10 +35,11 @@ interface Props {
   profile: ProfileData
 }
 
-const formatPlace = (place: string, country?: string | null) =>
-  [place, country].filter(Boolean).join(", ")
+const formatPlace = (place: string, country: string | null | undefined, locale: string) =>
+  [place, getCountryName(country, locale)].filter(Boolean).join(", ")
 
 export function ProfileBanner({ profile }: Props) {
+  const locale = useLocale()
   const isMemorial = profile.type === "memorialized"
   const canEdit = profile.isOwn || profile.isGuardian
   const [favorited, setFavorited] = useState(profile.isFavoritedByMe ?? false)
@@ -172,7 +175,7 @@ export function ProfileBanner({ profile }: Props) {
                       <span className="truncate min-w-0">
                         Born on <span className="text-foreground font-medium">{profile.birth.date}</span>
                         {profile.birth.place && (
-                          <> in <span className="text-foreground font-medium">{formatPlace(profile.birth.place, profile.birth.country)}</span></>
+                          <> in <span className="text-foreground font-medium">{formatPlace(profile.birth.place, profile.birth.country, locale)}</span></>
                         )}
                       </span>
                     </div>
@@ -183,7 +186,7 @@ export function ProfileBanner({ profile }: Props) {
                       <span className="truncate min-w-0">
                         Deceased on <span className="text-foreground font-medium">{profile.death.date}</span>
                         {profile.death.place && (
-                          <> in <span className="text-foreground font-medium">{formatPlace(profile.death.place, profile.death.country)}</span></>
+                          <> in <span className="text-foreground font-medium">{formatPlace(profile.death.place, profile.death.country, locale)}</span></>
                         )}
                       </span>
                     </div>

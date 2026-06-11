@@ -9,4 +9,6 @@ export {
   COUNTRY_BY_NAME,
   COUNTRY_BY_ISO,
   STATES_BY_ISO,
+  getCountryName,
+  getLocalizedCountries,
 } from "@genealogiq/core"

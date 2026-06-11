@@ -364,3 +364,46 @@ export const COUNTRY_BY_ISO: Record<string, Country> = Object.fromEntries(
 export const STATES_BY_ISO: Record<string, { code: string; name: string }[]> = Object.fromEntries(
   COUNTRIES.map((c) => [c.iso, c.states ?? []]),
 )
+
+// --- Localized display ---------------------------------------------------------
+// Storage stays ISO; only the *label* shown to the user is localized, via the
+// built-in Intl.DisplayNames (full ICU on Node 24 / browsers). No translation
+// tables to maintain. en-US → "Brazil", pt-BR → "Brasil", es-MX → "México", etc.
+
+/**
+ * Localized country name for a stored value, in the given locale
+ * (e.g. "BR" + "pt-BR" → "Brasil"). Accepts an ISO code or a legacy English
+ * country name (mapped back to its ISO first). An unknown free-text value is
+ * returned as-is so nothing is ever lost.
+ */
+export function getCountryName(code: string | null | undefined, locale: string): string {
+  if (!code) return ""
+  const trimmed = code.trim()
+  const iso = COUNTRY_BY_ISO[trimmed.toUpperCase()]?.iso ?? COUNTRY_BY_NAME[trimmed]?.iso
+  if (!iso) return trimmed
+  try {
+    return new Intl.DisplayNames([locale], { type: "region" }).of(iso) ?? COUNTRY_BY_ISO[iso].name
+  } catch {
+    return COUNTRY_BY_ISO[iso].name
+  }
+}
+
+/**
+ * Country list for selects, localized + ordered for the given locale: the
+ * priority three (Brazil, Mexico, United States) first, then the rest
+ * alphabetically by their localized name. The stored value stays the ISO code.
+ */
+export function getLocalizedCountries(locale: string): { iso: string; name: string }[] {
+  let dn: Intl.DisplayNames | undefined
+  try {
+    dn = new Intl.DisplayNames([locale], { type: "region" })
+  } catch {
+    dn = undefined
+  }
+  const all = COUNTRIES.map((c) => ({ iso: c.iso, name: dn?.of(c.iso) ?? c.name }))
+  const priority = PRIORITY_ISO.map((iso) => all.find((c) => c.iso === iso)!).filter(Boolean)
+  const rest = all
+    .filter((c) => !PRIORITY_ISO.includes(c.iso as (typeof PRIORITY_ISO)[number]))
+    .sort((a, b) => a.name.localeCompare(b.name, locale))
+  return [...priority, ...rest]
+}

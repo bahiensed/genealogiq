@@ -39,7 +39,8 @@ import { updateProfile } from "@/actions/profile"
 import { updateMemorial, deleteMemorial } from "@/actions/memorial"
 import { getAvatarColor } from "@/lib/avatar-color"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
-import { COUNTRIES } from "@/consts/countries"
+import { useLocale } from "next-intl"
+import { getLocalizedCountries } from "@/consts/countries-data"
 import { cn } from "@/lib/utils"
 import type { EditProfileRow } from "@/queries/profile"
 
@@ -160,6 +161,8 @@ interface Props {
 }
 
 export function MemorialEditForm({ profileId, initial, isMemorialized = true }: Props) {
+  const locale        = useLocale()
+  const countryOptions = getLocalizedCountries(locale)
   const router        = useRouter()
   const [isPending, startTransition] = useTransition()
   const [uploading, setUploading]    = useState(false)
@@ -345,7 +348,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                     render={({ field }) => (
                       <Select value={field.value ?? ""} onValueChange={field.onChange}>
                         <SelectTrigger id="birth-country"><SelectValue placeholder="Country" /></SelectTrigger>
-                        <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
+                        <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
                       </Select>
                     )}
                   />
@@ -393,7 +396,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                       render={({ field }) => (
                         <Select value={field.value ?? ""} onValueChange={field.onChange} disabled={!deathDate}>
                           <SelectTrigger id="death-country"><SelectValue placeholder="Country" /></SelectTrigger>
-                          <SelectContent>{COUNTRIES.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
+                          <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
                         </Select>
                       )}
                     />

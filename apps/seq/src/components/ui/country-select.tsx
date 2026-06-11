@@ -1,4 +1,7 @@
-import { COUNTRIES } from '@/constants/countries'
+'use client'
+
+import { useLocale } from 'next-intl'
+import { getLocalizedCountries } from '@genealogiq/core'
 import {
   Select,
   SelectContent,
@@ -6,13 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@genealogiq/ui/select'
-
-const PRIORITY_CODES = ['BR', 'MX', 'US']
-const priority = COUNTRIES.filter((c) => PRIORITY_CODES.includes(c.code))
-const rest = COUNTRIES
-  .filter((c) => !PRIORITY_CODES.includes(c.code))
-  .sort((a, b) => a.name.localeCompare(b.name))
-const ORDERED_COUNTRIES = [...priority, ...rest]
 
 interface CountrySelectProps {
   value?: string | null
@@ -22,14 +18,16 @@ interface CountrySelectProps {
 }
 
 export function CountrySelect({ value, onChange, invalid, placeholder = 'Select' }: CountrySelectProps) {
+  // Stored value stays the ISO code; only the label is localized + reordered.
+  const countries = getLocalizedCountries(useLocale())
   return (
     <Select value={value ?? ''} onValueChange={onChange}>
       <SelectTrigger aria-invalid={invalid}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        {ORDERED_COUNTRIES.map((c) => (
-          <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+        {countries.map((c) => (
+          <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
         ))}
       </SelectContent>
     </Select>

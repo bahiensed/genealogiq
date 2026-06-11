@@ -10,7 +10,8 @@ import { deceasedResolver, deceasedDefaultValues, type DeceasedFormValues } from
 import { createCustomerWithDeceased } from '@/actions/customer.actions'
 import { maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
-import { COUNTRIES } from '@/constants/countries'
+import { useLocale } from 'next-intl'
+import { getLocalizedCountries } from '@genealogiq/core'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
@@ -73,6 +74,7 @@ function socialLabel(key: SocialKey): string {
 }
 
 export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
+  const countryOptions = getLocalizedCountries(useLocale())
   const [step, setStep] = useState(0)
   const [serverError, setServerError] = useState<string | null>(null)
   const [localCategories, setLocalCategories] = useState<Category[]>(categories)
@@ -252,8 +254,8 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                       >
                         <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder="Select" /></SelectTrigger>
                         <SelectContent>
-                          {COUNTRIES.map((c) => (
-                            <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                          {countryOptions.map((c) => (
+                            <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -495,8 +497,8 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                       <Select value={field.value ?? ''} onValueChange={field.onChange}>
                         <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder="Select" /></SelectTrigger>
                         <SelectContent>
-                          {COUNTRIES.map((c) => (
-                            <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                          {countryOptions.map((c) => (
+                            <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -594,8 +596,8 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                       <Select value={field.value ?? ''} onValueChange={field.onChange}>
                         <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder="Select" /></SelectTrigger>
                         <SelectContent>
-                          {COUNTRIES.map((c) => (
-                            <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                          {countryOptions.map((c) => (
+                            <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

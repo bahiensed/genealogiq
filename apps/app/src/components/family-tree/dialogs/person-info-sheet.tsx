@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useLocale } from "next-intl"
+import { getCountryName } from "@genealogiq/core"
 import Link from "next/link"
 import { Trash2, SquarePen, Cake, Heart, HeartCrack, Flower, ArrowUpRight, Shield, Hourglass } from "lucide-react"
 import { toast } from "sonner"
@@ -58,7 +60,7 @@ function eventDateMs(e: Event): number {
   return e.date ? new Date(e.date).getTime() : 0
 }
 
-function buildEvents(person: TreePerson, persons: Record<string, TreePerson>, relations: TreeRelation[]): Event[] {
+function buildEvents(person: TreePerson, persons: Record<string, TreePerson>, relations: TreeRelation[], locale: string): Event[] {
   const events: Event[] = []
 
   if (person.birthDate || person.birthPlace) {
@@ -67,7 +69,7 @@ function buildEvents(person: TreePerson, persons: Record<string, TreePerson>, re
       type:  "BORN",
       date:  person.birthDate,
       place: person.birthPlace
-        ? person.birthCountry ? `${person.birthPlace}, ${person.birthCountry}` : person.birthPlace
+        ? person.birthCountry ? `${person.birthPlace}, ${getCountryName(person.birthCountry, locale)}` : person.birthPlace
         : null,
     })
   }
@@ -93,7 +95,7 @@ function buildEvents(person: TreePerson, persons: Record<string, TreePerson>, re
       type:  "DIED",
       date:  person.deathDate,
       place: person.deathPlace
-        ? person.deathCountry ? `${person.deathPlace}, ${person.deathCountry}` : person.deathPlace
+        ? person.deathCountry ? `${person.deathPlace}, ${getCountryName(person.deathCountry, locale)}` : person.deathPlace
         : null,
     })
   }
@@ -121,6 +123,7 @@ export function PersonInfoSheet({
   canManage, managedIds, requestedIds,
   onEdit, onAddRelative, onSuccess,
 }: Props) {
+  const locale = useLocale()
   const router = useRouter()
   const [removing, setRemoving] = useState(false)
   const [requesting, startRequest] = useTransition()
@@ -157,7 +160,7 @@ export function PersonInfoSheet({
     : `${person.firstName} ${person.lastName}`
   const initials = `${person.firstName[0] ?? ""}${person.lastName[0] ?? ""}`.toUpperCase()
 
-  const events = buildEvents(person, persons, relations)
+  const events = buildEvents(person, persons, relations, locale)
 
   const handleRemove = async () => {
     setRemoving(true)

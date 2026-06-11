@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import { getLocale } from "next-intl/server"
+import { getCountryName } from "@genealogiq/core"
 import { MapPin, Plus, SquarePen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
@@ -26,6 +28,7 @@ export default async function GeolocationPage({ params }: Props) {
   const isOwn = canManageProfile(profile, session.user.id)
   const isEmpty = !geo
   const editHref = `/profile/${id}/geolocation/edit`
+  const locale = await getLocale()
 
   const photos = geo
     ? [geo.photo1, geo.photo2, geo.photo3].filter((p): p is string => !!p)
@@ -100,7 +103,7 @@ export default async function GeolocationPage({ params }: Props) {
                   <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">{geo.placeName}</h2>
                   <div className="text-base text-foreground/80 space-y-1">
                     {geo.address && <div>{geo.address}</div>}
-                    <div>{[geo.city, geo.state, geo.country].filter(Boolean).join(", ")}</div>
+                    <div>{[geo.city, geo.state, getCountryName(geo.country, locale)].filter(Boolean).join(", ")}</div>
                     {geo.section && (
                       <div className="text-sm text-muted-foreground pt-1">{geo.section}</div>
                     )}

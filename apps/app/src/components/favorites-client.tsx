@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useLocale } from "next-intl"
+import { getCountryName } from "@genealogiq/core"
 import { Heart } from "lucide-react"
 import { ProfileMiniCard, type MiniProfile, type AvatarGradient } from "@/components/profile-mini-card"
 import type { FavoriteRow } from "@/queries/favorite"
@@ -18,12 +20,12 @@ function shuffle<T>(arr: T[]): T[] {
   return copy
 }
 
-function toMiniProfile(fav: FavoriteRow, index: number): MiniProfile {
+function toMiniProfile(fav: FavoriteRow, index: number, locale: string): MiniProfile {
   const t = fav.target
   const name = `${t.firstName} ${t.lastName}`
   const isMemorialized = t.role === "APP_MEMO"
   const subtitle = t.birthPlace
-    ? `${t.birthPlace}${t.birthCountry ? `, ${t.birthCountry}` : ""}`
+    ? `${t.birthPlace}${t.birthCountry ? `, ${getCountryName(t.birthCountry, locale)}` : ""}`
     : isMemorialized
       ? "Memorialized profile"
       : ""
@@ -49,6 +51,7 @@ interface Props {
 }
 
 export function FavoritesClient({ items }: Props) {
+  const locale = useLocale()
   // Start with original order (SSR-safe); shuffle client-side on mount to avoid hydration mismatch
   const [shuffled, setShuffled] = useState(items)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -92,7 +95,7 @@ export function FavoritesClient({ items }: Props) {
           return (
             <ProfileMiniCard
               key={fav.targetId}
-              profile={toMiniProfile(fav, i)}
+              profile={toMiniProfile(fav, i, locale)}
               delay={i * 40}
               hideLivingBadge={!isMemorialized}
             />

@@ -4,9 +4,10 @@ import { useState } from "react"
 import { type Control, type FieldErrors, type UseFormSetValue, useWatch } from "react-hook-form"
 import { SearchIcon } from "lucide-react"
 import { toast } from "sonner"
+import { useLocale } from "next-intl"
 import { lookupZip } from "@/lib/zipLookup"
 import { maskCep, maskUsZip, maskMxZip, unmaskDigits } from "@/lib/masks"
-import { COUNTRIES, COUNTRY_BY_ISO } from "@/consts/countries-data"
+import { COUNTRY_BY_ISO, getLocalizedCountries } from "@/consts/countries-data"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -49,6 +50,8 @@ function zipPlaceholder(iso: string): string {
 }
 
 export function AddressSection({ control, setValue, errors, prefix }: AddressSectionProps) {
+  const locale = useLocale()
+  const countryOptions = getLocalizedCountries(locale)
   const [isSearching, setIsSearching] = useState(false)
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
 
@@ -133,7 +136,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
             <SelectValue placeholder="Select" />
           </SelectTrigger>
           <SelectContent>
-            {COUNTRIES.map((c) => (
+            {countryOptions.map((c) => (
               <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
             ))}
           </SelectContent>
