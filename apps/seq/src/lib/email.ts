@@ -5,8 +5,8 @@ import {
   sendEmailChangeEmail as _change,
   sendPasswordResetEmail as _reset,
   sendAccountDeletionEmail as _delete,
-  sendWelcomeEmail as _welcome,
   sendAppConsumerWelcomeEmail as _appWelcome,
+  sendSequoiaWelcomeEmail as _seqWelcome,
 } from "@genealogiq/email"
 
 const SEQUOIA = () => process.env.SEQUOIA_URL ?? ""
@@ -16,5 +16,5 @@ export const sendVerificationEmail   = (to: string, token: string) => _verify({ 
 export const sendEmailChangeEmail    = (to: string, token: string) => _change({ to, token, baseUrl: SEQUOIA() })
 export const sendPasswordResetEmail  = (to: string, token: string) => _reset({ to, token, baseUrl: SEQUOIA() })
 export const sendAccountDeletionEmail = (to: string) => _delete({ to })
-export const sendWelcomeEmail        = (to: string, token: string) => _welcome({ to, token, baseUrl: SEQUOIA(), productName: "Sequoia" })
+export const sendWelcomeEmail        = (to: string, token: string, name?: string) => _seqWelcome({ to, token, baseUrl: SEQUOIA(), name })
 export const sendAppWelcomeEmail     = (to: string, token: string, name?: string) => _appWelcome({ to, token, baseUrl: APP(), name })
