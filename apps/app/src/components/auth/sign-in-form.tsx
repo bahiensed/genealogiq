@@ -3,6 +3,7 @@
 import { useState, useActionState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { login } from '@/actions/auth'
 import { Eye, EyeOff } from 'lucide-react'
@@ -14,6 +15,7 @@ export function SignInForm() {
   const t = useTranslations('Auth')
   const [state, dispatch, isPending] = useActionState(login, undefined)
   const [showPassword, setShowPassword] = useState(false)
+  const callbackUrl = useSearchParams().get('callbackUrl')
 
   return (
     <div className="animate-fade-in w-full max-w-md">
@@ -23,6 +25,7 @@ export function SignInForm() {
       </div>
 
       <form action={dispatch} className="glass-card rounded-2xl p-6 space-y-4">
+        {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
         {state?.error && (
           <p className="text-sm text-destructive">{state.error}</p>
         )}
@@ -73,8 +76,17 @@ export function SignInForm() {
 
         <p className="text-center text-sm text-muted-foreground">
           {t('newHere')}{" "}
-          <Link href="/sign-up" className="text-primary hover:underline font-medium">
+          <Link
+            href={callbackUrl ? `/sign-up?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/sign-up"}
+            className="text-primary hover:underline font-medium"
+          >
             {t('createAccount')}
+          </Link>
+        </p>
+
+        <p className="text-center text-xs text-muted-foreground">
+          <Link href="/activate" className="hover:text-foreground transition-colors">
+            Have a physical QR code? Activate it
           </Link>
         </p>
       </form>

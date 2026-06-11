@@ -42,6 +42,16 @@ export function createLoginAction(opts: CreateLoginActionOptions) {
     })
     if (!validated.success) return { error: "Invalid data" }
 
+    // Optional post-login destination supplied by the form. Accept only an
+    // internal path (starts with "/" but not "//", which would be a
+    // protocol-relative open redirect); otherwise fall back to the app default.
+    // BMS/SEQ never send this field, so their behaviour is unchanged.
+    const rawCallback = formData.get("callbackUrl")
+    const redirectTo =
+      typeof rawCallback === "string" && rawCallback.startsWith("/") && !rawCallback.startsWith("//")
+        ? rawCallback
+        : opts.redirectTo
+
     const ip = await getClientIp()
     const limit = await checkRateLimit({ key: `signin:ip:${ip}`, maxAttempts: 10, windowSeconds: 300 })
     if (!limit.allowed) return { error: `Too many sign-in attempts. Try again in ${limit.retryAfter}s.` }
@@ -58,7 +68,7 @@ export function createLoginAction(opts: CreateLoginActionOptions) {
     }
 
     try {
-      await opts.signIn("credentials", { ...validated.data, redirectTo: opts.redirectTo })
+      await opts.signIn("credentials", { ...validated.data, redirectTo })
     } catch (error) {
       if (error instanceof AuthError) {
         if (user) await opts.persistFailedLogin(user.id, nextFailedLoginState(user))

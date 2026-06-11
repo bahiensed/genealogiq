@@ -1,13 +1,17 @@
 import { prisma } from '@/lib/prisma'
 import { hashToken } from '@genealogiq/core'
 import { VerifyEmailCard } from '@/components/auth/verify-email-card'
+import { safeCallback } from '@/lib/safe-callback'
 
 interface Props {
-  searchParams: Promise<{ token?: string }>
+  searchParams: Promise<{ token?: string; callbackUrl?: string }>
 }
 
 export default async function VerifyEmailPage({ searchParams }: Props) {
-  const { token } = await searchParams
+  const { token, callbackUrl: rawCallback } = await searchParams
+  // After verification, return the user to where they started (e.g. /qr/<code>).
+  const callbackUrl = safeCallback(rawCallback)
+  const signInHref = callbackUrl ? `/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/sign-in"
 
   if (!token) {
     return (
@@ -79,7 +83,7 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
       description="Your account has been verified successfully."
       body="You can now sign in with your e-mail and password."
       buttonText="Sign in"
-      buttonHref="/sign-in"
+      buttonHref={signInHref}
     />
   )
 }
