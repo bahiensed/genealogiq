@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
 import { Printer, ShoppingCart, Search, X, Undo2, Check, Store } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
@@ -40,10 +41,6 @@ export interface PhysicalQrDetail {
   soldByName: string | null
 }
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-const fmt = (d: Date | null) =>
-  d ? new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(d)) : null
-
 const STATUS_BADGE: Record<string, { variant: 'default' | 'secondary' | 'outline'; cls: string }> = {
   AVAILABLE: { variant: 'secondary', cls: '' },
   SOLD:      { variant: 'outline', cls: 'text-amber-600 border-amber-500/40' },
@@ -52,10 +49,16 @@ const STATUS_BADGE: Record<string, { variant: 'default' | 'secondary' | 'outline
 
 export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
   const router = useRouter()
+  const t = useTranslations('PhysicalQr')
+  const locale = useLocale()
   const [isPending, startTransition] = useTransition()
   const [platformOpen, setPlatformOpen] = useState(false)
   const [manualOpen, setManualOpen] = useState(false)
   const [undoOpen, setUndoOpen] = useState(false)
+
+  const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
+  const fmt = (d: Date | null) =>
+    d ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(d)) : null
 
   const badge = STATUS_BADGE[license.status]
   const printed = license.printedAt != null
@@ -64,7 +67,7 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
     startTransition(async () => {
       const res = await markPhysicalQrPrinted(license.genCode, !printed)
       if (res?.error) toast.error(res.error)
-      else { toast.success(printed ? 'Marked as not printed.' : 'Marked as printed.'); router.refresh() }
+      else { toast.success(printed ? t('toasts.markedNotPrinted') : t('toasts.markedPrinted')); router.refresh() }
     })
   }
 
@@ -80,33 +83,33 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
-          QR Code Status
-          <Badge variant={badge.variant} className={`ml-auto ${badge.cls}`}>{license.status}</Badge>
+          {t('statusCard.title')}
+          <Badge variant={badge.variant} className={`ml-auto ${badge.cls}`}>{t(`status.${license.status}`)}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
         {/* Lifecycle timeline */}
         <ul className="flex flex-col gap-1.5 text-muted-foreground">
-          <li>Created: <span className="text-foreground">{fmt(license.createdAt)}</span></li>
+          <li>{t('timeline.created')}: <span className="text-foreground">{fmt(license.createdAt)}</span></li>
           <li>
-            Printed: {printed
+            {t('timeline.printed')}: {printed
               ? <span className="text-emerald-600 inline-flex items-center gap-1"><Check className="h-3.5 w-3.5" />{fmt(license.printedAt)}</span>
               : <span>—</span>}
           </li>
           {license.status !== 'AVAILABLE' && (
             <li>
-              Sold: <span className="text-foreground">{fmt(license.soldAt)}</span>
-              {license.soldVia && <Badge variant="outline" className="ml-1.5 text-[10px]">{license.soldVia}</Badge>}
+              {t('timeline.sold')}: <span className="text-foreground">{fmt(license.soldAt)}</span>
+              {license.soldVia && <Badge variant="outline" className="ml-1.5 text-[10px]">{t(`soldVia.${license.soldVia}`)}</Badge>}
               {(license.buyer || license.soldToName) && (
-                <span className="block text-xs">to {license.buyer ? `${license.buyer.firstName} ${license.buyer.lastName} (${license.buyer.email})` : license.soldToName}</span>
+                <span className="block text-xs">{t('timeline.soldTo', { name: license.buyer ? `${license.buyer.firstName} ${license.buyer.lastName} (${license.buyer.email})` : (license.soldToName ?? '') })}</span>
               )}
-              {license.soldValue != null && <span className="block text-xs">for {usd.format(license.soldValue)}</span>}
-              {license.soldByName && <span className="block text-xs">by {license.soldByName}</span>}
+              {license.soldValue != null && <span className="block text-xs">{t('timeline.soldFor', { value: usd.format(license.soldValue) })}</span>}
+              {license.soldByName && <span className="block text-xs">{t('timeline.soldBy', { name: license.soldByName })}</span>}
             </li>
           )}
           {license.status === 'ACTIVATED' && license.memorial && (
-            <li>Activated: <span className="text-foreground">{fmt(license.activatedAt)}</span>
-              <span className="block text-xs">memorial: {license.memorial.firstName} {license.memorial.lastName}</span>
+            <li>{t('timeline.activated')}: <span className="text-foreground">{fmt(license.activatedAt)}</span>
+              <span className="block text-xs">{t('timeline.memorial', { name: `${license.memorial.firstName} ${license.memorial.lastName}` })}</span>
             </li>
           )}
         </ul>
@@ -115,18 +118,18 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
         <div className="flex flex-col gap-2 pt-1">
           <Button size="sm" variant="outline" disabled={isPending} onClick={togglePrinted} className="w-full justify-start">
             <Printer className="h-4 w-4 mr-2" />
-            {printed ? 'Mark as not printed' : 'Mark as printed'}
+            {printed ? t('actions.markNotPrinted') : t('actions.markPrinted')}
           </Button>
 
           {license.status === 'AVAILABLE' && (
             <>
               <Button size="sm" disabled={isPending} onClick={() => setPlatformOpen(true)} className="w-full justify-start">
                 <Store className="h-4 w-4 mr-2" />
-                Sell via platform
+                {t('actions.sellViaPlatform')}
               </Button>
               <Button size="sm" variant="outline" disabled={isPending} onClick={() => setManualOpen(true)} className="w-full justify-start">
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                Manual write-off (off-platform)
+                {t('actions.manualWriteOff')}
               </Button>
             </>
           )}
@@ -134,7 +137,7 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
           {license.status === 'SOLD' && (
             <Button size="sm" variant="outline" disabled={isPending} onClick={() => setUndoOpen(true)} className="w-full justify-start text-destructive">
               <Undo2 className="h-4 w-4 mr-2" />
-              Undo sale (back to available)
+              {t('actions.undoSale')}
             </Button>
           )}
         </div>
@@ -156,7 +159,7 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
         open={undoOpen}
         onOpenChange={setUndoOpen}
         isPending={isPending}
-        description="This will mark the code as available again. Only possible while it has not been activated by the consumer."
+        description={t('undo.confirm')}
         onConfirm={undo}
       />
     </Card>
@@ -168,6 +171,8 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
 function ManualSaleDialog({ genCode, open, onOpenChange, onDone }: {
   genCode: string; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void
 }) {
+  const t = useTranslations('PhysicalQr')
+  const tc = useTranslations('Common')
   const [buyerName, setBuyerName] = useState('')
   const [value, setValue] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -185,25 +190,25 @@ function ManualSaleDialog({ genCode, open, onOpenChange, onDone }: {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Manual write-off</DialogTitle>
+          <DialogTitle>{t('manualSale.title')}</DialogTitle>
           <DialogDescription>
-            Record a sale made outside the platform so this code can&apos;t be sold again.
+            {t('manualSale.description')}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-2">
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="buyer">Buyer name / contact</Label>
-            <Input id="buyer" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} placeholder="Who bought it?" autoComplete="off" />
+            <Label htmlFor="buyer">{t('fields.buyerName')}</Label>
+            <Input id="buyer" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} placeholder={t('placeholders.buyerName')} autoComplete="off" />
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="value">Sale value (optional)</Label>
+            <Label htmlFor="value">{t('fields.saleValue')}</Label>
             <Input id="value" type="number" min="0" step="0.01" value={value} onChange={(e) => setValue(e.target.value)} placeholder="0.00" />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>{tc('cancel')}</Button>
           <Button onClick={submit} disabled={isPending || !buyerName.trim()}>
-            {isPending ? 'Saving…' : 'Write off'}
+            {isPending ? tc('saving') : t('manualSale.submit')}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -218,6 +223,8 @@ interface AppUserResult { id: string; firstName: string; lastName: string; email
 function PlatformSaleDialog({ genCode, open, onOpenChange, onDone }: {
   genCode: string; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void
 }) {
+  const t = useTranslations('PhysicalQr')
+  const tc = useTranslations('Common')
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<AppUserResult[]>([])
   const [listOpen, setListOpen] = useState(false)
@@ -251,25 +258,25 @@ function PlatformSaleDialog({ genCode, open, onOpenChange, onDone }: {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Sell via platform</DialogTitle>
+          <DialogTitle>{t('platformSale.title')}</DialogTitle>
           <DialogDescription>
-            Assign this code to a registered customer and email them access to the app. The code is written off.
+            {t('platformSale.description')}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-2">
           <div className="flex flex-col gap-1.5">
-            <Label>Customer</Label>
+            <Label>{t('fields.customer')}</Label>
             {selected ? (
               <div className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
                 <span className="flex-1">{selected.firstName} {selected.lastName}<span className="ml-2 text-muted-foreground">{selected.email}</span></span>
-                <button type="button" onClick={() => setSelected(null)} aria-label="Remove customer">
+                <button type="button" onClick={() => setSelected(null)} aria-label={t('platformSale.removeCustomer')}>
                   <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                 </button>
               </div>
             ) : (
               <div className="relative" ref={dropdownRef}>
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input className="pl-9" placeholder="Type name or email…" value={query} onChange={(e) => setQuery(e.target.value)} autoComplete="off" />
+                <Input className="pl-9" placeholder={t('placeholders.customerSearch')} value={query} onChange={(e) => setQuery(e.target.value)} autoComplete="off" />
                 {listOpen && (
                   <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
                     {results.map((u) => (
@@ -285,14 +292,14 @@ function PlatformSaleDialog({ genCode, open, onOpenChange, onDone }: {
             )}
           </div>
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="pvalue">Sale value (optional)</Label>
+            <Label htmlFor="pvalue">{t('fields.saleValue')}</Label>
             <Input id="pvalue" type="number" min="0" step="0.01" value={value} onChange={(e) => setValue(e.target.value)} placeholder="0.00" />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>{tc('cancel')}</Button>
           <Button onClick={submit} disabled={isPending || !selected}>
-            {isPending ? 'Selling…' : 'Sell & send access'}
+            {isPending ? t('platformSale.submitting') : t('platformSale.submit')}
           </Button>
         </DialogFooter>
       </DialogContent>

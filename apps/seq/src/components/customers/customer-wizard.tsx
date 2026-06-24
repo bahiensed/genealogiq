@@ -10,7 +10,7 @@ import { deceasedResolver, deceasedDefaultValues, type DeceasedFormValues } from
 import { createCustomerWithDeceased } from '@/actions/customer.actions'
 import { maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { getLocalizedCountries } from '@genealogiq/core'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
@@ -32,21 +32,15 @@ interface CustomerWizardProps {
   categories?: Category[]
 }
 
-const GENDER_LABELS: Record<string, string> = {
-  FEMALE: 'Female',
-  MALE:   'Male',
-  OTHER:  'Other',
-}
-
-const STEPS = [
-  { section: 'Customer',  title: 'Personal data' },
-  { section: 'Customer',  title: 'Contact' },
-  { section: 'Customer',  title: 'Address' },
-  { section: 'Customer',  title: 'Social media' },
-  { section: 'Deceased',  title: 'Personal data' },
-  { section: 'Deceased',  title: 'Death' },
-  { section: 'Deceased',  title: 'Burial' },
-  { section: 'Deceased',  title: 'Social media' },
+const STEP_DEFS = [
+  { section: 'customer', title: 'personal' },
+  { section: 'customer', title: 'contact' },
+  { section: 'customer', title: 'address' },
+  { section: 'customer', title: 'social' },
+  { section: 'deceased', title: 'personal' },
+  { section: 'deceased', title: 'death' },
+  { section: 'deceased', title: 'burial' },
+  { section: 'deceased', title: 'social' },
 ] as const
 
 const APP_USER_STEP_FIELDS: Record<number, (keyof AppUserFormValues)[]> = {
@@ -66,19 +60,32 @@ const DECEASED_STEP_FIELDS: Record<number, (keyof DeceasedFormValues)[]> = {
 const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const
 type SocialKey = typeof SOCIAL_KEYS[number]
 
-function socialLabel(key: SocialKey): string {
+function socialLabel(key: SocialKey, otherLabel: string): string {
   if (key === 'fb') return 'Facebook'
   if (key === 'x') return 'X'
-  if (key === 'otherSocial') return 'Other'
+  if (key === 'otherSocial') return otherLabel
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
 export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
+  const t  = useTranslations('Customers')
+  const tc = useTranslations('Common')
   const countryOptions = getLocalizedCountries(useLocale())
   const [step, setStep] = useState(0)
   const [serverError, setServerError] = useState<string | null>(null)
   const [localCategories, setLocalCategories] = useState<Category[]>(categories)
   const router = useRouter()
+
+  const GENDER_LABELS: Record<string, string> = {
+    FEMALE: t('gender.female'),
+    MALE:   t('gender.male'),
+    OTHER:  t('gender.other'),
+  }
+
+  const STEPS = STEP_DEFS.map((s) => ({
+    section: t(`wizardSections.${s.section}`),
+    title:   t(`wizardSteps.${s.section}.${s.title}`),
+  }))
 
   const appUserForm = useForm<AppUserFormValues>({
     resolver:       appUserResolver,
@@ -98,20 +105,20 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
   const isAppUserSection = step < 4
 
   function handleUseMyLocation() {
-    if (!navigator.geolocation) { toast.error('Geolocation not supported by this browser.'); return }
+    if (!navigator.geolocation) { toast.error(t('geolocation.unsupported')); return }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         deceasedForm.setValue('burialLatitude',  pos.coords.latitude)
         deceasedForm.setValue('burialLongitude', pos.coords.longitude)
-        toast.success('Location detected.')
+        toast.success(t('geolocation.detected'))
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED)
-          toast.error('Location access denied. Enable it in your browser settings.')
+          toast.error(t('geolocation.denied'))
         else if (err.code === err.POSITION_UNAVAILABLE)
-          toast.error('Location unavailable. Check your GPS signal.')
+          toast.error(t('geolocation.unavailable'))
         else
-          toast.error('Location request timed out. Try again.')
+          toast.error(t('geolocation.timeout'))
       },
       { timeout: 10000, maximumAge: 60000 },
     )
@@ -190,7 +197,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>First Name:*</FieldLabel>
+                      <FieldLabel>{t('fields.firstNameRequired')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -201,7 +208,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Last Name:*</FieldLabel>
+                      <FieldLabel>{t('fields.lastNameRequired')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -215,9 +222,9 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Gender:*</FieldLabel>
+                      <FieldLabel>{t('fields.genderRequired')}</FieldLabel>
                       <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder={t('placeholders.select')} /></SelectTrigger>
                         <SelectContent>
                           {GENDERS.map((g) => (
                             <SelectItem key={g} value={g}>{GENDER_LABELS[g]}</SelectItem>
@@ -233,7 +240,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Birth date:*</FieldLabel>
+                      <FieldLabel>{t('fields.birthDateRequired')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -244,7 +251,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Birth country:*</FieldLabel>
+                      <FieldLabel>{t('fields.birthCountryRequired')}</FieldLabel>
                       <Select
                         value={field.value ?? ''}
                         onValueChange={(v) => {
@@ -252,7 +259,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                           uSetValue('address.country', v)
                         }}
                       >
-                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder={t('placeholders.select')} /></SelectTrigger>
                         <SelectContent>
                           {countryOptions.map((c) => (
                             <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
@@ -271,7 +278,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field }) => (
                     <Field className="col-span-6">
-                      <FieldLabel>Birth city:</FieldLabel>
+                      <FieldLabel>{t('fields.birthCity')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -281,7 +288,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field }) => (
                     <Field className="col-span-6">
-                      <FieldLabel>Birth state:</FieldLabel>
+                      <FieldLabel>{t('fields.birthState')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -303,7 +310,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Email:*</FieldLabel>
+                      <FieldLabel>{t('fields.emailRequired')}</FieldLabel>
                       <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -314,7 +321,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field }) => (
                     <Field className="col-span-2">
-                      <FieldLabel>Country code:</FieldLabel>
+                      <FieldLabel>{t('fields.countryCode')}</FieldLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -331,7 +338,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={uc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Phone:*</FieldLabel>
+                      <FieldLabel>{t('fields.phoneRequired')}</FieldLabel>
                       <MaskedInput
                         value={field.value ?? ''}
                         onChange={field.onChange}
@@ -351,7 +358,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                 render={({ field }) => (
                   <Field>
                     <div className="flex items-center justify-between">
-                      <FieldLabel>Category:</FieldLabel>
+                      <FieldLabel>{t('fields.category')}</FieldLabel>
                       <AddCustomerCategoryDialog
                         onCreated={(cat) => {
                           setLocalCategories((prev) => [...prev, cat])
@@ -361,7 +368,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                     </div>
                     <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder={t('placeholders.category')} />
                       </SelectTrigger>
                       <SelectContent>
                         {localCategories.map((cat) => (
@@ -378,7 +385,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                 control={uc}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Notes:</FieldLabel>
+                    <FieldLabel>{t('fields.notes')}</FieldLabel>
                     <Textarea {...field} value={field.value ?? ''} rows={3} />
                   </Field>
                 )}
@@ -416,7 +423,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                     control={uc}
                     render={({ field }) => (
                       <Field className="col-span-6 md:col-span-4">
-                        <FieldLabel>{socialLabel(key)}:</FieldLabel>
+                        <FieldLabel>{socialLabel(key, t('social.other'))}:</FieldLabel>
                         <Input {...field} value={field.value ?? ''} autoComplete="off" />
                       </Field>
                     )}
@@ -439,7 +446,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>First Name:*</FieldLabel>
+                      <FieldLabel>{t('fields.firstNameRequired')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -450,7 +457,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Last Name:*</FieldLabel>
+                      <FieldLabel>{t('fields.lastNameRequired')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -464,9 +471,9 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Gender:*</FieldLabel>
+                      <FieldLabel>{t('fields.genderRequired')}</FieldLabel>
                       <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder={t('placeholders.select')} /></SelectTrigger>
                         <SelectContent>
                           {GENDERS.map((g) => (
                             <SelectItem key={g} value={g}>{GENDER_LABELS[g]}</SelectItem>
@@ -482,7 +489,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Birth date:*</FieldLabel>
+                      <FieldLabel>{t('fields.birthDateRequired')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -493,9 +500,9 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Birth country:*</FieldLabel>
+                      <FieldLabel>{t('fields.birthCountryRequired')}</FieldLabel>
                       <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder={t('placeholders.select')} /></SelectTrigger>
                         <SelectContent>
                           {countryOptions.map((c) => (
                             <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
@@ -514,7 +521,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-6">
-                      <FieldLabel>Birth city:</FieldLabel>
+                      <FieldLabel>{t('fields.birthCity')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -524,7 +531,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Birth state:*</FieldLabel>
+                      <FieldLabel>{t('fields.birthStateRequired')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -537,7 +544,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                 control={dc}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Notes:</FieldLabel>
+                    <FieldLabel>{t('fields.notes')}</FieldLabel>
                     <Textarea {...field} value={field.value ?? ''} rows={3} />
                   </Field>
                 )}
@@ -558,7 +565,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Death date:*</FieldLabel>
+                      <FieldLabel>{t('fields.deathDateRequired')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -569,7 +576,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>City:</FieldLabel>
+                      <FieldLabel>{t('fields.city')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -579,7 +586,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>State:</FieldLabel>
+                      <FieldLabel>{t('fields.state')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -592,9 +599,9 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Country:*</FieldLabel>
+                      <FieldLabel>{t('fields.countryRequired')}</FieldLabel>
                       <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectTrigger aria-invalid={fieldState.invalid}><SelectValue placeholder={t('placeholders.select')} /></SelectTrigger>
                         <SelectContent>
                           {countryOptions.map((c) => (
                             <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>
@@ -610,7 +617,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-6">
-                      <FieldLabel>Cause:</FieldLabel>
+                      <FieldLabel>{t('fields.deathCause')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -632,7 +639,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>Burial date:</FieldLabel>
+                      <FieldLabel>{t('fields.burialDate')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" />
                     </Field>
                   )}
@@ -642,7 +649,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-8">
-                      <FieldLabel>Location (cemetery/crematorium):</FieldLabel>
+                      <FieldLabel>{t('fields.burialSite')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -655,7 +662,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-3">
-                      <FieldLabel>ZIP:</FieldLabel>
+                      <FieldLabel>{t('fields.zip')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -665,7 +672,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-6">
-                      <FieldLabel>Street:</FieldLabel>
+                      <FieldLabel>{t('fields.street')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -675,7 +682,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-3">
-                      <FieldLabel>Number:</FieldLabel>
+                      <FieldLabel>{t('fields.number')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -688,7 +695,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>Complement:</FieldLabel>
+                      <FieldLabel>{t('fields.complement')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -698,7 +705,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>Neighborhood:</FieldLabel>
+                      <FieldLabel>{t('fields.neighborhood')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -708,7 +715,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>City:</FieldLabel>
+                      <FieldLabel>{t('fields.city')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -721,7 +728,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>State:</FieldLabel>
+                      <FieldLabel>{t('fields.state')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -731,7 +738,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>Country:</FieldLabel>
+                      <FieldLabel>{t('fields.country')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -744,7 +751,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-5">
-                      <FieldLabel>Latitude:</FieldLabel>
+                      <FieldLabel>{t('fields.latitude')}</FieldLabel>
                       <Input
                         type="number"
                         step="any"
@@ -760,7 +767,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   control={dc}
                   render={({ field }) => (
                     <Field className="col-span-5">
-                      <FieldLabel>Longitude:</FieldLabel>
+                      <FieldLabel>{t('fields.longitude')}</FieldLabel>
                       <Input
                         type="number"
                         step="any"
@@ -772,9 +779,9 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                   )}
                 />
                 <div className="col-span-2 flex items-end">
-                  <Button type="button" variant="outline" size="sm" className="w-full" title="Get coordinates automatically" onClick={handleUseMyLocation}>
+                  <Button type="button" variant="outline" size="sm" className="w-full" title={t('fields.gpsTitle')} onClick={handleUseMyLocation}>
                     <MapPin className="h-4 w-4" />
-                    GPS
+                    {t('fields.gps')}
                   </Button>
                 </div>
               </div>
@@ -796,7 +803,7 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
                     control={dc}
                     render={({ field }) => (
                       <Field className="col-span-6 md:col-span-4">
-                        <FieldLabel>{socialLabel(key)}:</FieldLabel>
+                        <FieldLabel>{socialLabel(key, t('social.other'))}:</FieldLabel>
                         <Input {...field} value={field.value ?? ''} autoComplete="off" />
                       </Field>
                     )}
@@ -812,16 +819,16 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
       <Field orientation="horizontal">
         {step > 0 && (
           <Button type="button" variant="outline" onClick={() => setStep((s) => s - 1)}>
-            Back
+            {tc('back')}
           </Button>
         )}
         {isLastStep ? (
           <Button type="button" onClick={handleSubmit}>
-            Create customer
+            {t('createCustomer')}
           </Button>
         ) : (
           <Button type="button" onClick={handleNext}>
-            Next
+            {tc('next')}
           </Button>
         )}
       </Field>

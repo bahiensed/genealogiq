@@ -1,6 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Badge } from '@genealogiq/ui/badge'
 import { Button } from '@genealogiq/ui/button'
@@ -17,16 +18,26 @@ type QrCodeData = {
   lastScannedAt: Date | null
 }
 
-const STATUS_BADGE: Record<string, { label: string; variant: 'secondary' | 'default' | 'outline' }> = {
-  PENDING:   { label: 'Pending',   variant: 'secondary' },
-  PRINTED:   { label: 'Printed',   variant: 'default'   },
-  INSTALLED: { label: 'Installed', variant: 'outline'   },
+const STATUS_VARIANT: Record<string, 'secondary' | 'default' | 'outline'> = {
+  PENDING:   'secondary',
+  PRINTED:   'default',
+  INSTALLED: 'outline',
+}
+
+const STATUS_KEY: Record<string, string> = {
+  PENDING:   'pending',
+  PRINTED:   'printed',
+  INSTALLED: 'installed',
 }
 
 export function QrStatusCard({ appUserId, qrCode }: { appUserId: string; qrCode: QrCodeData }) {
+  const t = useTranslations('Memorialized')
+  const locale = useLocale()
   const [isPending, startTransition] = useTransition()
 
-  const badge = STATUS_BADGE[qrCode.status] ?? STATUS_BADGE.PENDING
+  const variant = STATUS_VARIANT[qrCode.status] ?? STATUS_VARIANT.PENDING
+  const statusKey = STATUS_KEY[qrCode.status] ?? STATUS_KEY.PENDING
+  const formatDate = (d: Date) => new Date(d).toLocaleDateString(locale)
 
   function handlePrinted() {
     startTransition(async () => { await markQrPrinted(appUserId) })
@@ -41,8 +52,8 @@ export function QrStatusCard({ appUserId, qrCode }: { appUserId: string; qrCode:
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium">
           <QrCode className="h-4 w-4" />
-          QR Code Status
-          <Badge variant={badge.variant} className="ml-auto">{badge.label}</Badge>
+          {t('qr.statusTitle')}
+          <Badge variant={variant} className="ml-auto">{t(`status.${statusKey}`)}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
@@ -50,18 +61,18 @@ export function QrStatusCard({ appUserId, qrCode }: { appUserId: string; qrCode:
 
         {qrCode.printedAt && (
           <p className="text-xs text-muted-foreground">
-            Printed: {new Date(qrCode.printedAt).toLocaleDateString()}
+            {t('qr.printedOn', { date: formatDate(qrCode.printedAt) })}
           </p>
         )}
         {qrCode.installedAt && (
           <p className="text-xs text-muted-foreground">
-            Installed: {new Date(qrCode.installedAt).toLocaleDateString()}
+            {t('qr.installedOn', { date: formatDate(qrCode.installedAt) })}
           </p>
         )}
         <p className="text-xs text-muted-foreground">
           {qrCode.scanCount > 0
-            ? `${qrCode.scanCount} scan${qrCode.scanCount === 1 ? '' : 's'} — last: ${new Date(qrCode.lastScannedAt!).toLocaleDateString()}`
-            : 'No scans yet'
+            ? t('qr.scans', { count: qrCode.scanCount, date: formatDate(qrCode.lastScannedAt!) })
+            : t('qr.noScans')
           }
         </p>
 
@@ -75,7 +86,7 @@ export function QrStatusCard({ appUserId, qrCode }: { appUserId: string; qrCode:
               className="w-full"
             >
               <Printer className="h-4 w-4 mr-2" />
-              Mark as printed
+              {t('qr.markPrinted')}
             </Button>
           )}
           {qrCode.status === 'PRINTED' && (
@@ -87,7 +98,7 @@ export function QrStatusCard({ appUserId, qrCode }: { appUserId: string; qrCode:
               className="w-full"
             >
               <MapPin className="h-4 w-4 mr-2" />
-              Mark as installed
+              {t('qr.markInstalled')}
             </Button>
           )}
         </div>

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { ArrowLeft } from 'lucide-react'
 import { getLicenseByGenCode } from '@/queries/licenses'
 import { QrCodePresets } from '@/components/memorialized/qr-code-presets'
@@ -16,6 +17,8 @@ export default async function PhysicalQrDetailPage({
 
   const license = await getLicenseByGenCode(genCode)
   if (!license) notFound()
+
+  const t = await getTranslations('PhysicalQr')
 
   const appUrl   = process.env.APP_URL ?? 'https://genealogiq.app'
   const qrUrl    = `${appUrl}/qr/${license.genCode}`
@@ -42,10 +45,10 @@ export default async function PhysicalQrDetailPage({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <Link href="/inventory/physical-qr" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground w-fit">
-          <ArrowLeft className="h-4 w-4" /> Back to inventory
+          <ArrowLeft className="h-4 w-4" /> {t('detail.backToInventory')}
         </Link>
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Physical QR Code
+          {t('detail.title')}
         </h1>
         <p className="font-mono text-sm tracking-wider text-muted-foreground">{formatGenCode(license.genCode)}</p>
         <p className="font-mono text-xs text-muted-foreground break-all">{qrUrl}</p>

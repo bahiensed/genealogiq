@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { MapPin } from 'lucide-react'
 import { deceasedResolver, deceasedDefaultValues, type DeceasedFormValues } from '@/schemas/deceased.schema'
@@ -36,14 +37,16 @@ interface MemorializedFormProps {
 const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const
 type SocialKey = typeof SOCIAL_KEYS[number]
 
-function socialLabel(key: SocialKey): string {
+function socialLabel(key: SocialKey, otherLabel: string): string {
   if (key === 'fb') return 'Facebook'
   if (key === 'x') return 'X (Twitter)'
-  if (key === 'otherSocial') return 'Other'
+  if (key === 'otherSocial') return otherLabel
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
 export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedFormProps) {
+  const t  = useTranslations('Memorialized')
+  const tc = useTranslations('Common')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
@@ -64,7 +67,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
     if ('error' in result) {
       setServerError(result.error)
     } else {
-      toast.success(isEditing ? 'Profile updated successfully.' : 'Profile created successfully.')
+      toast.success(isEditing ? t('toasts.updated') : t('toasts.created'))
       if (!isEditing) router.push(`/customers/${appUserId}`)
     }
   }
@@ -82,7 +85,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
         {/* ── Personal data ── */}
         <AccordionItem value="personal" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Personal data</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.personal')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
               <div className="grid grid-cols-12 gap-3">
@@ -91,7 +94,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>First Name:*</FieldLabel>
+                      <FieldLabel>{t('fields.firstName')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -102,7 +105,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Last Name:*</FieldLabel>
+                      <FieldLabel>{t('fields.lastName')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -116,7 +119,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Gender:</FieldLabel>
+                      <FieldLabel>{t('fields.gender')}</FieldLabel>
                       <GenderSelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -127,7 +130,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Birth date:*</FieldLabel>
+                      <FieldLabel>{t('fields.birthDate')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -138,7 +141,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Birth country:*</FieldLabel>
+                      <FieldLabel>{t('fields.birthCountry')}</FieldLabel>
                       <CountrySelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -152,7 +155,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-6">
-                      <FieldLabel>Birth city:</FieldLabel>
+                      <FieldLabel>{t('fields.birthCity')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -162,7 +165,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Birth state:*</FieldLabel>
+                      <FieldLabel>{t('fields.birthState')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -175,7 +178,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
         {/* ── Death ── */}
         <AccordionItem value="death" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Death</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.death')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
               <div className="grid grid-cols-12 gap-3">
@@ -184,7 +187,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Death date:*</FieldLabel>
+                      <FieldLabel>{t('fields.deathDate')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -195,7 +198,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>City:</FieldLabel>
+                      <FieldLabel>{t('fields.city')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -205,7 +208,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>State:</FieldLabel>
+                      <FieldLabel>{t('fields.state')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -218,7 +221,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Country:*</FieldLabel>
+                      <FieldLabel>{t('fields.countryRequired')}</FieldLabel>
                       <CountrySelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -229,7 +232,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-6">
-                      <FieldLabel>Cause:</FieldLabel>
+                      <FieldLabel>{t('fields.cause')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -241,7 +244,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
         {/* ── Burial ── */}
         <AccordionItem value="burial" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Burial</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.burial')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
               <div className="grid grid-cols-12 gap-3">
@@ -250,7 +253,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>Burial date:</FieldLabel>
+                      <FieldLabel>{t('fields.burialDate')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" />
                     </Field>
                   )}
@@ -260,7 +263,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-8">
-                      <FieldLabel>Location (cemetery/crematorium):</FieldLabel>
+                      <FieldLabel>{t('fields.burialSite')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -273,7 +276,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-3">
-                      <FieldLabel>ZIP:</FieldLabel>
+                      <FieldLabel>{t('fields.zip')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -283,7 +286,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-6">
-                      <FieldLabel>Street:</FieldLabel>
+                      <FieldLabel>{t('fields.street')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -293,7 +296,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-3">
-                      <FieldLabel>Number:</FieldLabel>
+                      <FieldLabel>{t('fields.number')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -306,7 +309,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>Complement:</FieldLabel>
+                      <FieldLabel>{t('fields.complement')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -316,7 +319,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>Neighborhood:</FieldLabel>
+                      <FieldLabel>{t('fields.neighborhood')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -326,7 +329,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>City:</FieldLabel>
+                      <FieldLabel>{t('fields.city')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -339,7 +342,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>State:</FieldLabel>
+                      <FieldLabel>{t('fields.state')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -349,7 +352,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-4">
-                      <FieldLabel>Country:</FieldLabel>
+                      <FieldLabel>{t('fields.country')}</FieldLabel>
                       <CountrySelect value={field.value} onChange={field.onChange} />
                     </Field>
                   )}
@@ -362,7 +365,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-5">
-                      <FieldLabel>Latitude:</FieldLabel>
+                      <FieldLabel>{t('fields.latitude')}</FieldLabel>
                       <Input
                         type="number"
                         step="any"
@@ -378,7 +381,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   control={control}
                   render={({ field }) => (
                     <Field className="col-span-5">
-                      <FieldLabel>Longitude:</FieldLabel>
+                      <FieldLabel>{t('fields.longitude')}</FieldLabel>
                       <Input
                         type="number"
                         step="any"
@@ -390,9 +393,9 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                   )}
                 />
                 <div className="col-span-2 flex items-end">
-                  <Button type="button" variant="outline" size="sm" className="w-full" title="Get coordinates automatically">
+                  <Button type="button" variant="outline" size="sm" className="w-full" title={t('fields.gpsTitle')}>
                     <MapPin className="h-4 w-4" />
-                    GPS
+                    {t('fields.gps')}
                   </Button>
                 </div>
               </div>
@@ -402,7 +405,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
         {/* ── Social media + Notes ── */}
         <AccordionItem value="social" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Social media</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.social')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
               <div className="grid grid-cols-12 gap-3">
@@ -413,7 +416,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                     control={control}
                     render={({ field }) => (
                       <Field className="col-span-6 md:col-span-4">
-                        <FieldLabel>{socialLabel(key)}:</FieldLabel>
+                        <FieldLabel>{socialLabel(key, t('fields.otherSocial'))}:</FieldLabel>
                         <Input {...field} value={field.value ?? ''} autoComplete="off" />
                       </Field>
                     )}
@@ -426,7 +429,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
                 control={control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Notes:</FieldLabel>
+                    <FieldLabel>{t('fields.notes')}</FieldLabel>
                     <Textarea {...field} value={field.value ?? ''} rows={3} />
                   </Field>
                 )}
@@ -441,11 +444,11 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create profile'}
+          {isSubmitting ? tc('saving') : isEditing ? t('saveChanges') : t('createProfile')}
         </Button>
         {isEditing && (
           <Button type="button" variant="outline" onClick={() => form.reset()}>
-            Reset
+            {tc('reset')}
           </Button>
         )}
       </Field>

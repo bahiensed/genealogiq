@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { upload } from '@vercel/blob/client'
 import { Camera, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -16,6 +17,7 @@ interface AvatarUploadProps {
 }
 
 export function AvatarUpload({ defaultUrl, fullName }: AvatarUploadProps) {
+  const t = useTranslations('Profile')
   const [url, setUrl]         = useState(defaultUrl)
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, startSaving] = useTransition()
@@ -25,11 +27,11 @@ export function AvatarUpload({ defaultUrl, fullName }: AvatarUploadProps) {
 
   async function handleFile(file: File) {
     if (!file.type.startsWith('image/')) {
-      toast.error('Please choose an image file.')
+      toast.error(t('avatar.invalidType'))
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be 5 MB or smaller.')
+      toast.error(t('avatar.tooLarge'))
       return
     }
 
@@ -52,7 +54,7 @@ export function AvatarUpload({ defaultUrl, fullName }: AvatarUploadProps) {
         router.refresh()
       })
     } catch (err) {
-      toast.error((err as Error).message || 'Upload failed')
+      toast.error((err as Error).message || t('avatar.uploadFailed'))
     } finally {
       setIsUploading(false)
     }
@@ -66,7 +68,7 @@ export function AvatarUpload({ defaultUrl, fullName }: AvatarUploadProps) {
       onClick={() => inputRef.current?.click()}
       disabled={busy}
       className="relative size-20 rounded-full overflow-hidden group focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed"
-      aria-label="Change avatar"
+      aria-label={t('avatar.change')}
     >
       <Avatar className="size-20 text-xl">
         <AvatarImage src={url} alt={fullName} />

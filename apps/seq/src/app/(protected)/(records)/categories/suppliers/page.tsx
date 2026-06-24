@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { forbidden } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { getCustomerModules } from '@/lib/dal'
 import { getSupplierCategories } from '@/queries/supplier-categories'
 import { SupplierCategoriesDataTable } from '@/components/supplier-categories/supplier-categories-data-table'
@@ -10,15 +11,16 @@ export default async function SupplierCategoriesPage() {
   if (!modules?.moduleCategoriesSuppliers) forbidden()
 
   const categories = await getSupplierCategories()
+  const t = await getTranslations('SupplierCategories')
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Supplier Categories
+          {t('title')}
         </h1>
         <Button asChild>
-          <Link href="/categories/suppliers/new">New category</Link>
+          <Link href="/categories/suppliers/new">{t('new')}</Link>
         </Button>
       </div>
 

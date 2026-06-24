@@ -1,4 +1,5 @@
 import { notFound, forbidden } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { getCustomerModules } from '@/lib/dal'
 import { getSupplier } from '@/queries/suppliers'
 import { getSupplierCategories } from '@/queries/supplier-categories'
@@ -15,10 +16,12 @@ export default async function EditSupplierPage({ params }: { params: Promise<{ i
   ])
   if (!supplier) notFound()
 
+  const t = await getTranslations('Suppliers')
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Edit supplier
+        {t('edit')}
       </h1>
       <SupplierForm
         id={id}

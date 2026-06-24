@@ -2,26 +2,28 @@
 
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
+import { useTranslations } from 'next-intl'
 import { Copy, Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@genealogiq/ui/button'
 import { Card } from '@genealogiq/ui/card'
 
+// Loose translator type so QrCard can receive the namespaced translator.
+type Translator = (key: string, values?: Record<string, string | number | Date>) => string
+
 type Preset = {
-  key:         string
-  name:        string
-  description: string
-  fg:          string
-  bg:          string
+  key: string
+  fg:  string
+  bg:  string
 }
 
 const PRESETS: Preset[] = [
-  { key: 'classic',  name: 'Classic',  description: 'Timeless black on white — safe for any surface.',  fg: '#0F172A', bg: '#FFFFFF' },
-  { key: 'indigo',   name: 'Indigo',   description: 'Brand indigo on white — warm and recognizable.',   fg: '#454575', bg: '#FFFFFF' },
-  { key: 'inverted', name: 'Inverted', description: 'White on near-black — striking on light stone.',   fg: '#FFFFFF', bg: '#0F172A' },
-  { key: 'soft',     name: 'Soft',     description: 'Muted slate on cream — quiet and editorial.',      fg: '#7B90AB', bg: '#F5F1EA' },
-  { key: 'bronze',   name: 'Bronze',   description: 'Warm metallic tones — classic for plaques.',       fg: '#7A5230', bg: '#F8F1E4' },
-  { key: 'forest',   name: 'Forest',   description: 'Deep green — at home in cemetery gardens.',        fg: '#1F4032', bg: '#FFFFFF' },
+  { key: 'classic',  fg: '#0F172A', bg: '#FFFFFF' },
+  { key: 'indigo',   fg: '#454575', bg: '#FFFFFF' },
+  { key: 'inverted', fg: '#FFFFFF', bg: '#0F172A' },
+  { key: 'soft',     fg: '#7B90AB', bg: '#F5F1EA' },
+  { key: 'bronze',   fg: '#7A5230', bg: '#F8F1E4' },
+  { key: 'forest',   fg: '#1F4032', bg: '#FFFFFF' },
 ]
 
 function downloadBlob(blob: Blob, filename: string) {
@@ -35,7 +37,7 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
-function QrCard({ preset, url, filename }: { preset: Preset; url: string; filename: string }) {
+function QrCard({ preset, url, filename, t }: { preset: Preset; url: string; filename: string; t: Translator }) {
   const [svg, setSvg] = useState('')
 
   useEffect(() => {
@@ -51,7 +53,7 @@ function QrCard({ preset, url, filename }: { preset: Preset; url: string; filena
 
   const handleSvg = () => {
     downloadBlob(new Blob([svg], { type: 'image/svg+xml' }), `${filename}-${preset.key}.svg`)
-    toast.success('SVG downloaded.')
+    toast.success(t('qr.svgDownloaded'))
   }
 
   const handlePng = async () => {
@@ -63,7 +65,7 @@ function QrCard({ preset, url, filename }: { preset: Preset; url: string; filena
     })
     const res = await fetch(dataUrl)
     downloadBlob(await res.blob(), `${filename}-${preset.key}.png`)
-    toast.success('PNG downloaded.')
+    toast.success(t('qr.pngDownloaded'))
   }
 
   return (
@@ -74,8 +76,8 @@ function QrCard({ preset, url, filename }: { preset: Preset; url: string; filena
         dangerouslySetInnerHTML={{ __html: svg }}
       />
       <div className="space-y-0.5">
-        <h3 className="text-sm font-semibold">{preset.name}</h3>
-        <p className="text-xs text-muted-foreground leading-snug">{preset.description}</p>
+        <h3 className="text-sm font-semibold">{t(`qr.presets.${preset.key}.name`)}</h3>
+        <p className="text-xs text-muted-foreground leading-snug">{t(`qr.presets.${preset.key}.description`)}</p>
       </div>
       <div className="flex gap-2 mt-auto">
         <Button onClick={handlePng} variant="outline" size="sm" className="flex-1 gap-1.5">
@@ -95,9 +97,11 @@ interface Props {
 }
 
 export function QrCodePresets({ profileUrl, filename }: Props) {
+  const t = useTranslations('Memorialized')
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(profileUrl)
-    toast.success('Profile link copied.')
+    toast.success(t('qr.linkCopied'))
   }
 
   return (
@@ -107,13 +111,13 @@ export function QrCodePresets({ profileUrl, filename }: Props) {
           {profileUrl}
         </code>
         <Button onClick={handleCopy} variant="ghost" size="sm" className="gap-1.5 shrink-0">
-          <Copy className="h-3.5 w-3.5" />Copy link
+          <Copy className="h-3.5 w-3.5" />{t('qr.copyLink')}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {PRESETS.map((p) => (
-          <QrCard key={p.key} preset={p} url={profileUrl} filename={filename} />
+          <QrCard key={p.key} preset={p} url={profileUrl} filename={filename} t={t} />
         ))}
       </div>
     </div>
