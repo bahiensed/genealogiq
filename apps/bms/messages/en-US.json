@@ -70,6 +70,19 @@
       "sortAsc": "Asc",
       "sortDesc": "Desc",
       "hide": "Hide"
+    },
+    "address": {
+      "country": "Country:",
+      "selectPlaceholder": "Select",
+      "zipCode": "ZIP Code:",
+      "lookupAria": "Look up address",
+      "lookupError": "Failed to look up ZIP/postal code.",
+      "street": "Street:",
+      "number": "Number:",
+      "complement": "Complement:",
+      "neighborhood": "Neighborhood:",
+      "city": "City:",
+      "state": "State / Province:"
     }
   },
   "Customers": {
@@ -182,6 +195,521 @@
         "customerCat": "Customer Cat.",
         "finance": "Finance"
       }
+    }
+  },
+  "Suppliers": {
+    "title": "Suppliers",
+    "new": "New supplier",
+    "edit": "Edit supplier",
+    "create": "Create supplier",
+    "active": "Active?",
+    "sections": {
+      "address": "Address"
+    },
+    "fields": {
+      "type": "Type:",
+      "firstName": "Name:",
+      "companyName": "Company Name:",
+      "lastName": "Last Name:",
+      "tradeName": "Trade Name:",
+      "cpf": "CPF:",
+      "cnpj": "CNPJ:",
+      "birthDate": "Date of Birth:",
+      "stateRegistration": "State Registration:",
+      "municipalRegistration": "Municipal Registration:",
+      "email": "Email:",
+      "countryCode": "Country Code:",
+      "phone": "Phone:",
+      "category": "Category:",
+      "notes": "Notes:"
+    },
+    "placeholders": {
+      "category": "Select a category"
+    },
+    "entityType": {
+      "company": "Company",
+      "individual": "Individual"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "category": "Category",
+      "email": "E-mail",
+      "status": "Status",
+      "createdAt": "Created at",
+      "empty": "No suppliers found."
+    },
+    "actions": {
+      "openMenu": "Open menu",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "delete": "Delete"
+    },
+    "toasts": {
+      "deactivated": "Supplier deactivated.",
+      "reactivated": "Supplier reactivated.",
+      "deleted": "Supplier deleted successfully.",
+      "deleteConfirm": "The supplier \"{name}\" will be permanently deleted."
+    },
+    "category": {
+      "add": "Add new category",
+      "title": "New supplier category",
+      "name": "Name:",
+      "description": "Description:",
+      "create": "Create category"
+    }
+  },
+  "Packages": {
+    "title": "Digital QR Codes (B2B)",
+    "physicalTitle": "Physical QR Codes",
+    "newPackage": "New package",
+    "newProduct": "New product",
+    "noun": {
+      "package": "Package",
+      "product": "Product"
+    },
+    "edit": "Edit {noun}",
+    "new": "New {noun}",
+    "createButton": "Create {noun}",
+    "saveChanges": "Save changes",
+    "active": "Active?",
+    "unitPrice": "Unit price per QR code",
+    "typeBadge": {
+      "digital": "Digital",
+      "physical": "Physical"
+    },
+    "fields": {
+      "name": "{noun} Name:",
+      "quantity": "QR-Code Quantity:",
+      "price": "Price (US$):",
+      "description": "Description:"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "name": "{noun} Name",
+      "quantity": "QR-Codes / Package",
+      "price": "{noun} Price",
+      "description": "{noun} Description",
+      "status": "Status",
+      "createdAt": "Created at",
+      "empty": "No packages found.",
+      "emptyProduct": "No physical QR products yet."
+    },
+    "actions": {
+      "openMenu": "Open menu",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "delete": "Delete"
+    },
+    "toasts": {
+      "deactivated": "Package deactivated.",
+      "reactivated": "Package reactivated.",
+      "deleted": "Package deleted successfully.",
+      "deleteConfirm": "The package \"{name}\" will be permanently deleted."
+    },
+    "stripe": {
+      "title": "Stripe sync",
+      "synced": "Synced",
+      "notSynced": "Not synced",
+      "productId": "product:",
+      "priceId": "price:",
+      "hint": "Pushes this {noun}'s name, description and price to Stripe (creating or updating the matching Product and Price). Save your changes first — sync uses the saved data. Changing the price provisions a fresh Stripe Price.",
+      "syncButton": "Sync with Stripe",
+      "syncing": "Syncing…",
+      "confirmTitle": "Sync with Stripe?",
+      "confirmDescription": "Please confirm that this {noun}'s data is correct. This will create or update the matching Product and Price in Stripe. Are you sure you want to synchronize?",
+      "syncNow": "Sync now"
+    }
+  },
+  "Users": {
+    "title": "System Users",
+    "new": "New user",
+    "edit": "Edit user",
+    "create": "Create user",
+    "saveChanges": "Save changes",
+    "active": "Active?",
+    "sections": {
+      "address": "Address"
+    },
+    "fields": {
+      "firstName": "First Name:",
+      "lastName": "Last Name:",
+      "gender": "Gender:",
+      "birthDate": "Date of Birth:",
+      "cpf": "CPF:",
+      "role": "Role:",
+      "email": "Email:",
+      "countryCode": "Code:",
+      "phone": "Phone:"
+    },
+    "placeholders": {
+      "role": "Select a role"
+    },
+    "gender": {
+      "female": "Female",
+      "male": "Male"
+    },
+    "roles": {
+      "SUPER_ADMIN": "Super Admin",
+      "OWNER": "Owner",
+      "ADMIN": "Admin",
+      "COMERCIAL": "Comercial",
+      "FINANCE": "Finance",
+      "USER": "User"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "name": "Name",
+      "email": "E-mail",
+      "role": "Role",
+      "status": "Status",
+      "createdAt": "Created at",
+      "empty": "No users found."
+    },
+    "actions": {
+      "openMenu": "Open menu",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "resendEmail": "Resend email",
+      "delete": "Delete"
+    },
+    "toasts": {
+      "deactivated": "User deactivated.",
+      "reactivated": "User reactivated.",
+      "emailResent": "Email resent successfully.",
+      "deleted": "User deleted successfully.",
+      "deleteConfirm": "The user \"{name}\" will be permanently deleted."
+    }
+  },
+  "Company": {
+    "title": "Company Data",
+    "save": "Save changes",
+    "sections": {
+      "address": "Address"
+    },
+    "fields": {
+      "legalName": "Legal Name:",
+      "tradeName": "Trade Name:",
+      "cnpj": "CNPJ:",
+      "stateRegistration": "State Registration:",
+      "municipalRegistration": "Municipal Registration:",
+      "email": "Email:",
+      "countryCode": "Country code:",
+      "phone": "Phone:",
+      "isActive": "Company active:"
+    },
+    "toasts": {
+      "updated": "Data updated successfully."
+    }
+  },
+  "DiscountCoupons": {
+    "title": "Discount Coupons",
+    "new": "New coupon",
+    "edit": "Edit discount coupon",
+    "create": "Create coupon",
+    "saveChanges": "Save changes",
+    "loadError": "Could not load coupons: {message}. Check Vercel function logs for details.",
+    "packageMeta": "{quantity} QR codes · {price}",
+    "fields": {
+      "code": "Code:",
+      "description": "Description:",
+      "discountType": "Discount type:",
+      "percent": "Percent (0-100):",
+      "amount": "Amount ($):",
+      "duration": "Duration:",
+      "durationInMonths": "Duration in months:",
+      "maxRedemptions": "Max redemptions:",
+      "expiresOn": "Expires on:",
+      "appliesTo": "Applies to specific packages (optional):"
+    },
+    "placeholders": {
+      "code": "WELCOME10",
+      "descriptionCreate": "Optional internal note",
+      "descriptionEdit": "Internal note (not shown to customers)",
+      "maxRedemptions": "Blank = unlimited"
+    },
+    "discountType": {
+      "percent": "Percent off",
+      "amount": "Fixed amount off (USD)"
+    },
+    "durationOption": {
+      "once": "Once (first invoice only)",
+      "forever": "Forever (every invoice)",
+      "repeating": "Repeating (N months)"
+    },
+    "discount": {
+      "percent": "{value}% off",
+      "amount": "{value} off"
+    },
+    "durationLabel": {
+      "once": "Once",
+      "forever": "Forever",
+      "repeating": "{months} months"
+    },
+    "hints": {
+      "appliesTo": "Leave all unchecked to apply to every package.",
+      "codeImmutable": "The promotion code is immutable. To change terms, deactivate this coupon and create a new one."
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "code": "Code",
+      "description": "Description",
+      "discount": "Discount",
+      "duration": "Duration",
+      "maxUses": "Max uses",
+      "expires": "Expires",
+      "status": "Status",
+      "createdAt": "Created at",
+      "empty": "No discount coupons yet.",
+      "searchByCode": "Search by code...",
+      "unlimited": "Unlimited",
+      "never": "Never"
+    },
+    "actions": {
+      "openMenu": "Open menu",
+      "editDescription": "Edit description",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate"
+    },
+    "toasts": {
+      "deactivated": "Coupon deactivated.",
+      "reactivated": "Coupon reactivated."
+    }
+  },
+  "Subscriptions": {
+    "Subscriptions": {
+      "title": "Subscriptions (B2C)",
+      "availableTitle": "Available Subscriptions",
+      "new": "New subscription",
+      "edit": "Edit Subscription",
+      "create": "Create subscription",
+      "active": "Active?",
+      "lifetime": "Lifetime",
+      "free": "Free",
+      "fields": {
+        "code": "Code:",
+        "name": "Name:",
+        "maxProfiles": "Max Memo Profiles:",
+        "treeMaxMembers": "Family Tree Max Members:",
+        "bioMaxChars": "Bio Max Characters:",
+        "bioMaxImages": "Bio Max Images:",
+        "galleryMaxImages": "Gallery Max Images:",
+        "galleryMaxVideos": "Gallery Max Videos:",
+        "geolocationFullAccess": "Geolocation Full Access",
+        "qrCodeAccess": "QR Code Access",
+        "termLength": "Term Length (in months):",
+        "price": "Price (US$):",
+        "description": "Description:"
+      },
+      "placeholders": {
+        "code": "DECADE"
+      },
+      "hints": {
+        "code": "Tier identification",
+        "freeCodeReserved": "FREE plan code is reserved.",
+        "termLength": "0 = Lifetime",
+        "price": "0 = Free"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "code": "Code",
+        "name": "Name",
+        "maxProfiles": "Memo",
+        "bioMaxChars": "Bio Chars",
+        "bioMaxImages": "Bio Images",
+        "galleryMaxImages": "Gallery Images",
+        "galleryMaxVideos": "Gallery Videos",
+        "geo": "Geo",
+        "qrCode": "QR Code",
+        "term": "Term",
+        "price": "Price",
+        "status": "Status",
+        "createdAt": "Created at",
+        "empty": "No subscriptions found"
+      },
+      "actions": {
+        "openMenu": "Open menu",
+        "edit": "Edit",
+        "deactivate": "Deactivate",
+        "reactivate": "Reactivate",
+        "delete": "Delete"
+      },
+      "toasts": {
+        "deactivated": "Subscription deactivated.",
+        "reactivated": "Subscription reactivated.",
+        "deleted": "Subscription deleted successfully.",
+        "deleteConfirm": "The subscription \"{name}\" will be permanently deleted."
+      }
+    }
+  },
+  "CustomerCategories": {
+    "title": "Customer Categories",
+    "new": "New category",
+    "newPage": "New customer category",
+    "editPage": "Edit customer category",
+    "create": "Create category",
+    "saveChanges": "Save changes",
+    "fields": {
+      "name": "Name:",
+      "description": "Description:",
+      "active": "Active category:"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "name": "Name",
+      "description": "Description",
+      "status": "Status",
+      "createdAt": "Created at",
+      "empty": "No customer categories found."
+    },
+    "actions": {
+      "openMenu": "Open menu",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "delete": "Delete"
+    },
+    "toasts": {
+      "deactivated": "Category deactivated.",
+      "reactivated": "Category reactivated.",
+      "deleted": "Category deleted successfully.",
+      "deleteConfirm": "The category \"{name}\" will be permanently deleted."
+    }
+  },
+  "SupplierCategories": {
+    "title": "Supplier Categories",
+    "new": "New supplier category",
+    "edit": "Edit supplier category",
+    "create": "Create category",
+    "fields": {
+      "name": "Name:",
+      "description": "Description:",
+      "activeCategory": "Active category:"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "name": "Name",
+      "description": "Description",
+      "status": "Status",
+      "createdAt": "Created at",
+      "empty": "No supplier categories found."
+    },
+    "actions": {
+      "openMenu": "Open menu",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "delete": "Delete"
+    },
+    "toasts": {
+      "deactivated": "Category deactivated.",
+      "reactivated": "Category reactivated.",
+      "deleted": "Category deleted successfully.",
+      "deleteConfirm": "The category \"{name}\" will be permanently deleted."
+    }
+  },
+  "PhysicalQr": {
+    "PhysicalQr": {
+      "table": {
+        "tenant": "Tenant",
+        "package": "Package",
+        "saleDate": "Sale Date",
+        "total": "Total",
+        "activated": "Activated",
+        "available": "Available",
+        "empty": "No physical QR codes found."
+      }
+    }
+  },
+  "Sales": {
+    "title": "Manual Sales",
+    "newButton": "New sale",
+    "new": "New QR Code Package Sale",
+    "submit": "Submit Sale",
+    "submitting": "Submitting…",
+    "fields": {
+      "package": "Package:",
+      "customer": "Customer:",
+      "quantity": "Package Quantity:"
+    },
+    "placeholders": {
+      "package": "Select a package",
+      "customer": "Select a customer"
+    },
+    "packageType": {
+      "digital": "Digital",
+      "physical": "Physical"
+    },
+    "packageOption": {
+      "codes": "{count, plural, one {# code} other {# codes}}"
+    },
+    "summary": {
+      "physicalCodes": "Physical license codes to be generated",
+      "digitalCodes": "QR Codes to be added to inventory",
+      "totalPrice": "Total price",
+      "unitPrice": "Unit price / code"
+    },
+    "status": {
+      "active": "Active",
+      "reversed": "Reversed"
+    },
+    "table": {
+      "date": "Date",
+      "status": "Status",
+      "customer": "Customer",
+      "package": "Package",
+      "quantity": "Package Qtd.",
+      "totalSubscriptions": "QR-Codes / Package",
+      "packagePrice": "Package Price",
+      "subscriptionUnitPrice": "QR-Code Un. Price",
+      "totalPrice": "Total Order Price",
+      "seller": "Seller",
+      "empty": "No sales found."
+    },
+    "actions": {
+      "openMenu": "Open menu",
+      "reverse": "Reverse",
+      "cancel": "Cancel"
+    },
+    "reverse": {
+      "title": "Confirm reversal",
+      "descriptionPhysical": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed. Available license codes will be invalidated. Activated codes remain linked to their memorials. The record is kept for audit purposes.",
+      "descriptionDigital": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed and the QR codes will be returned to inventory. The record is kept for audit purposes.",
+      "confirm": "Reverse sale",
+      "reversing": "Reversing…"
+    },
+    "confirm": {
+      "title": "Confirm sale",
+      "description": "Before completing this sale, please verify that payment has already been received.",
+      "confirm": "Confirm"
+    },
+    "toasts": {
+      "reversed": "Sale reversed successfully."
     }
   }
 }

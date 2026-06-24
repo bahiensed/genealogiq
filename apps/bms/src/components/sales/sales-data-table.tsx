@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations, useLocale } from 'next-intl'
 import { DataTable } from '@genealogiq/ui/data-table'
 import { getColumns, type SaleRow } from './columns'
 
@@ -8,33 +9,35 @@ interface SalesDataTableProps {
   data: SaleRow[]
 }
 
-const COLUMN_LABELS: Record<string, string> = {
-  createdAt:             'Date',
-  status:                'Status',
-  customer:              'Customer',
-  package:               'Package',
-  quantity:              'Package Qtd.',
-  totalSubscriptions:    'QR-Codes / Package',
-  packagePrice:          'Package Price',
-  subscriptionUnitPrice: 'QR-Code Un. Price',
-  totalPrice:            'Total Order Price',
-  seller:                'Seller',
-}
-
 const INITIAL_VISIBILITY = {
   totalSubscriptions:    false,
   subscriptionUnitPrice: false,
 }
 
 export function SalesDataTable({ currentUserRole, data }: SalesDataTableProps) {
+  const t = useTranslations('Sales')
+  const locale = useLocale()
+
+  const columnLabels: Record<string, string> = {
+    createdAt:             t('table.date'),
+    status:                t('table.status'),
+    customer:              t('table.customer'),
+    package:               t('table.package'),
+    quantity:              t('table.quantity'),
+    totalSubscriptions:    t('table.totalSubscriptions'),
+    packagePrice:          t('table.packagePrice'),
+    subscriptionUnitPrice: t('table.subscriptionUnitPrice'),
+    totalPrice:            t('table.totalPrice'),
+    seller:                t('table.seller'),
+  }
+
   return (
     <DataTable
-      columns={getColumns(currentUserRole)}
+      columns={getColumns(currentUserRole, t, locale)}
       data={data}
       filterColumn="customer"
-      filterPlaceholder="Search..."
-      emptyMessage="No sales found."
-      columnLabels={COLUMN_LABELS}
+      emptyMessage={t('table.empty')}
+      columnLabels={columnLabels}
       initialColumnVisibility={INITIAL_VISIBILITY}
     />
   )

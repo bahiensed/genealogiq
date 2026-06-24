@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller, type Control } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { subscriptionResolver, subscriptionDefaultValues, type SubscriptionFormValues } from '@/schemas/subscription.schema'
 import { createSubscription, updateSubscription } from '@/actions/subscription.actions'
@@ -76,6 +77,8 @@ function SwitchField({ control, name, label }: SwitchFieldProps) {
 }
 
 export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
+  const t  = useTranslations('Subscriptions')
+  const tc = useTranslations('Common')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
@@ -105,7 +108,7 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-3xl">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          {isEditing ? 'Edit Subscription' : 'New Subscription'}
+          {isEditing ? t('edit') : t('new')}
         </h1>
         {isEditing && (
           <Controller
@@ -114,7 +117,7 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
             render={({ field }) => (
               <div className="flex items-center gap-2">
                 <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-                <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
+                <label htmlFor="isActive" className="text-sm cursor-pointer">{t('active')}</label>
               </div>
             )}
           />
@@ -127,18 +130,18 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Code:</FieldLabel>
+              <FieldLabel>{t('fields.code')}</FieldLabel>
               <Input
                 {...field}
                 autoComplete="off"
                 aria-invalid={fieldState.invalid}
                 disabled={isFreePlan}
                 onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                placeholder="DECADE"
+                placeholder={t('placeholders.code')}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               <p className="text-xs text-muted-foreground">
-                {isFreePlan ? 'FREE plan code is reserved.' : 'Tier identification'}
+                {isFreePlan ? t('hints.freeCodeReserved') : t('hints.code')}
               </p>
             </Field>
           )}
@@ -148,7 +151,7 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid} className="lg:col-span-2">
-              <FieldLabel>Name:</FieldLabel>
+              <FieldLabel>{t('fields.name')}</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -157,41 +160,41 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <IntField control={control} name="maxProfiles" label="Max Memo Profiles:" min={1} />
-        <IntField control={control} name="treeMaxMembers" label="Family Tree Max Members:" />
+        <IntField control={control} name="maxProfiles" label={t('fields.maxProfiles')} min={1} />
+        <IntField control={control} name="treeMaxMembers" label={t('fields.treeMaxMembers')} />
         <div />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <IntField control={control} name="bioMaxChars" label="Bio Max Characters:" />
-        <IntField control={control} name="bioMaxImages" label="Bio Max Images:" />
+        <IntField control={control} name="bioMaxChars" label={t('fields.bioMaxChars')} />
+        <IntField control={control} name="bioMaxImages" label={t('fields.bioMaxImages')} />
         <div />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <IntField control={control} name="galleryMaxImages" label="Gallery Max Images:" />
-        <IntField control={control} name="galleryMaxVideos" label="Gallery Max Videos:" />
+        <IntField control={control} name="galleryMaxImages" label={t('fields.galleryMaxImages')} />
+        <IntField control={control} name="galleryMaxVideos" label={t('fields.galleryMaxVideos')} />
         <div />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <SwitchField control={control} name="geolocationFullAccess" label="Geolocation Full Access" />
-        <SwitchField control={control} name="qrCodeAccess" label="QR Code Access" />
+        <SwitchField control={control} name="geolocationFullAccess" label={t('fields.geolocationFullAccess')} />
+        <SwitchField control={control} name="qrCodeAccess" label={t('fields.qrCodeAccess')} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <IntField
           control={control}
           name="termLength"
-          label="Term Length (in months):"
-          helper="0 = Lifetime"
+          label={t('fields.termLength')}
+          helper={t('hints.termLength')}
         />
         <Controller
           name="price"
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Price (US$):</FieldLabel>
+              <FieldLabel>{t('fields.price')}</FieldLabel>
               <div className="relative">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">$</span>
                 <CurrencyInput
@@ -203,7 +206,7 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
                 />
               </div>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              <p className="text-xs text-muted-foreground">0 = Free</p>
+              <p className="text-xs text-muted-foreground">{t('hints.price')}</p>
             </Field>
           )}
         />
@@ -215,7 +218,7 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>Description:</FieldLabel>
+            <FieldLabel>{t('fields.description')}</FieldLabel>
             <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={256} aria-invalid={fieldState.invalid} />
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
           </Field>
@@ -225,10 +228,10 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
       {serverError && <FieldError>{serverError}</FieldError>}
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create subscription'}
+          {isSubmitting ? tc('saving') : isEditing ? tc('save') : t('create')}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { companyResolver, type CompanyFormValues } from '@/schemas/company.schema'
 import { updateCompany } from '@/actions/company.actions'
@@ -27,6 +28,8 @@ interface CompanyFormProps {
 }
 
 export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
+  const t  = useTranslations('Company')
+  const tc = useTranslations('Common')
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<CompanyFormValues>({
@@ -42,7 +45,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
     if (result?.error) {
       setServerError(result.error)
     } else {
-      toast.success('Data updated successfully.')
+      toast.success(t('toasts.updated'))
     }
   }
 
@@ -56,7 +59,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Legal Name:</FieldLabel>
+              <FieldLabel>{t('fields.legalName')}</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -68,7 +71,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Trade Name:</FieldLabel>
+              <FieldLabel>{t('fields.tradeName')}</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -80,7 +83,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>CNPJ:</FieldLabel>
+              <FieldLabel>{t('fields.cnpj')}</FieldLabel>
               <MaskedInput
                 value={field.value ?? ''}
                 onChange={field.onChange}
@@ -99,7 +102,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>State Registration:</FieldLabel>
+                <FieldLabel>{t('fields.stateRegistration')}</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -111,7 +114,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Municipal Registration:</FieldLabel>
+                <FieldLabel>{t('fields.municipalRegistration')}</FieldLabel>
                 <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -124,7 +127,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Email:</FieldLabel>
+              <FieldLabel>{t('fields.email')}</FieldLabel>
               <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -137,7 +140,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-2" data-invalid={fieldState.invalid}>
-                <FieldLabel>Country code:</FieldLabel>
+                <FieldLabel>{t('fields.countryCode')}</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger aria-invalid={fieldState.invalid}>
                     <SelectValue />
@@ -157,7 +160,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Phone:</FieldLabel>
+                <FieldLabel>{t('fields.phone')}</FieldLabel>
                 <MaskedInput
                   value={field.value ?? ''}
                   onChange={field.onChange}
@@ -181,7 +184,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
                 checked={field.value}
                 onCheckedChange={field.onChange}
               />
-              <FieldLabel htmlFor="isActive" className="cursor-pointer">Company active:</FieldLabel>
+              <FieldLabel htmlFor="isActive" className="cursor-pointer">{t('fields.isActive')}</FieldLabel>
             </Field>
           )}
         />
@@ -189,7 +192,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
 
       <FieldSeparator />
 
-      <p className="text-sm font-medium">Address</p>
+      <p className="text-sm font-medium">{t('sections.address')}</p>
       <AddressSection
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         control={control as any}
@@ -200,10 +203,10 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : 'Save changes'}
+          {isSubmitting ? tc('saving') : t('save')}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>

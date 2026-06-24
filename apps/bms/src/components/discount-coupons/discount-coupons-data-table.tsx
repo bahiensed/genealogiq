@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations, useLocale } from 'next-intl'
 import { DataTable } from '@genealogiq/ui/data-table'
 import { getColumns, type DiscountCouponRow } from './columns'
 
@@ -8,26 +9,29 @@ interface DiscountCouponsDataTableProps {
   data:            DiscountCouponRow[]
 }
 
-const COLUMN_LABELS: Record<string, string> = {
-  code:           'Code',
-  description:    'Description',
-  discount:       'Discount',
-  duration:       'Duration',
-  maxRedemptions: 'Max uses',
-  redeemBy:       'Expires',
-  isActive:       'Status',
-  createdAt:      'Created at',
-}
-
 export function DiscountCouponsDataTable({ currentUserRole, data }: DiscountCouponsDataTableProps) {
+  const t = useTranslations('DiscountCoupons')
+  const locale = useLocale()
+
+  const columnLabels: Record<string, string> = {
+    code:           t('table.code'),
+    description:    t('table.description'),
+    discount:       t('table.discount'),
+    duration:       t('table.duration'),
+    maxRedemptions: t('table.maxUses'),
+    redeemBy:       t('table.expires'),
+    isActive:       t('table.status'),
+    createdAt:      t('table.createdAt'),
+  }
+
   return (
     <DataTable
-      columns={getColumns(currentUserRole)}
+      columns={getColumns(currentUserRole, t, locale)}
       data={data}
       filterColumn="code"
-      filterPlaceholder="Search by code..."
-      emptyMessage="No discount coupons yet."
-      columnLabels={COLUMN_LABELS}
+      filterPlaceholder={t('table.searchByCode')}
+      emptyMessage={t('table.empty')}
+      columnLabels={columnLabels}
     />
   )
 }

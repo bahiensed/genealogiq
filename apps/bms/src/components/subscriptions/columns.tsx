@@ -12,6 +12,10 @@ import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
 import { toggleSubscriptionActive, deleteSubscription } from '@/actions/subscription.actions'
 
+// Loose translator type so getColumns can stay a plain function (not a hook).
+// The caller (subscriptions-data-table) passes useTranslations('Subscriptions').
+type Translator = (key: string, values?: Record<string, string | number | Date>) => string
+
 export type SubscriptionRow = {
   id: string
   code: string
@@ -31,7 +35,7 @@ export type SubscriptionRow = {
   createdAt: Date
 }
 
-function ActionsCell({ row, currentUserRole }: { row: { original: SubscriptionRow }; currentUserRole: string }) {
+function ActionsCell({ row, currentUserRole, t }: { row: { original: SubscriptionRow }; currentUserRole: string; t: Translator }) {
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const subscription = row.original
@@ -42,28 +46,28 @@ function ActionsCell({ row, currentUserRole }: { row: { original: SubscriptionRo
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" disabled={isPending}>
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('actions.openMenu')}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/subscriptions/${subscription.id}`}>Edit</Link>
+            <Link href={`/subscriptions/${subscription.id}`}>{t('actions.edit')}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleSubscriptionActive(subscription.id)
               if (result?.error) toast.error(result.error)
-              else toast.success(subscription.isActive ? 'Subscription deactivated.' : 'Subscription reactivated.')
+              else toast.success(subscription.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
-            {subscription.isActive ? 'Deactivate' : 'Reactivate'}
+            {subscription.isActive ? t('actions.deactivate') : t('actions.reactivate')}
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onSelect={() => setDeleteOpen(true)}
             >
-              Delete
+              {t('actions.delete')}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -74,11 +78,11 @@ function ActionsCell({ row, currentUserRole }: { row: { original: SubscriptionRo
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           isPending={isPending}
-          description={`The subscription "${subscription.name}" will be permanently deleted.`}
+          description={t('toasts.deleteConfirm', { name: subscription.name })}
           onConfirm={() => startTransition(async () => {
             const result = await deleteSubscription(subscription.id)
             if (result?.error) toast.error(result.error)
-            else { toast.success('Subscription deleted successfully.'); setDeleteOpen(false) }
+            else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
           })}
         />
       )}
@@ -86,20 +90,20 @@ function ActionsCell({ row, currentUserRole }: { row: { original: SubscriptionRo
   )
 }
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+export function getColumns(currentUserRole: string, t: Translator, locale: string): ColumnDef<SubscriptionRow>[] {
+  const currency = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
 
-export function getColumns(currentUserRole: string): ColumnDef<SubscriptionRow>[] {
   return [
     {
       accessorKey: 'code',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Code" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.code')} />,
       cell: ({ row }) => (
         <code className="text-xs font-mono bg-muted/60 px-1.5 py-0.5 rounded">{row.original.code}</code>
       ),
     },
     {
       accessorKey: 'name',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
       cell: ({ row }) => (
         <Link href={`/subscriptions/${row.original.id}`} className="hover:underline">
           {row.original.name}
@@ -108,81 +112,81 @@ export function getColumns(currentUserRole: string): ColumnDef<SubscriptionRow>[
     },
     {
       accessorKey: 'maxProfiles',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Memo" className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.maxProfiles')} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.maxProfiles}</div>,
     },
     {
       accessorKey: 'bioMaxChars',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Bio<br/>Chars</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.bioMaxChars')} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.bioMaxChars}</div>,
     },
     {
       accessorKey: 'bioMaxImages',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Bio<br/>Images</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.bioMaxImages')} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.bioMaxImages}</div>,
     },
     {
       accessorKey: 'galleryMaxImages',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Gallery<br/>Images</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.galleryMaxImages')} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.galleryMaxImages}</div>,
     },
     {
       accessorKey: 'galleryMaxVideos',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>Gallery<br/>Videos</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.galleryMaxVideos')} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.galleryMaxVideos}</div>,
     },
     {
       accessorKey: 'geolocationFullAccess',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Geo" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.geo')} />,
       cell: ({ row }) => (
         <span className="text-xs">{row.original.geolocationFullAccess ? '✓' : '∅'}</span>
       ),
     },
     {
       accessorKey: 'qrCodeAccess',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>QR<br/>Code</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.qrCode')} />,
       cell: ({ row }) => (
         <span className="text-xs">{row.original.qrCodeAccess ? '✓' : '∅'}</span>
       ),
     },
     {
       accessorKey: 'termLength',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Term" className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.term')} className="justify-end" />,
       cell: ({ row }) => (
         <div className="text-right">
-          {row.original.termLength === 0 ? <span title="Lifetime" className="text-base leading-none">∞</span> : row.original.termLength}
+          {row.original.termLength === 0 ? <span title={t('lifetime')} className="text-base leading-none">∞</span> : row.original.termLength}
         </div>
       ),
     },
     {
       accessorKey: 'price',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Price" className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.price')} className="justify-end" />,
       cell: ({ row }) => (
         <div className="text-right">
-          {row.original.price === 0 ? 'Free' : usd.format(row.original.price)}
+          {row.original.price === 0 ? t('free') : currency.format(row.original.price)}
         </div>
       ),
     },
     {
       accessorKey: 'isActive',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.status')} />,
       cell: ({ row }) =>
         row.original.isActive ? (
-          <Badge variant="default">Active</Badge>
+          <Badge variant="default">{t('status.active')}</Badge>
         ) : (
-          <Badge variant="destructive">Inactive</Badge>
+          <Badge variant="destructive">{t('status.inactive')}</Badge>
         ),
     },
     {
       accessorKey: 'createdAt',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.createdAt')} />,
       cell: ({ row }) =>
-        new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
+        new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(row.original.createdAt),
     },
     {
       id: 'actions',
       enableHiding: false,
-      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} />,
+      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} t={t} />,
     },
   ]
 }

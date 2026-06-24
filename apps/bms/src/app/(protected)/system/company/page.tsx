@@ -1,15 +1,17 @@
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { getCompany } from '@/queries/company'
 import { CompanyForm } from '@/components/company/company-form'
 
 export default async function CompanyPage() {
+  const t = await getTranslations('Company')
   const company = await getCompany()
   if (!company) notFound()
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Company Data
+        {t('title')}
       </h1>
       <CompanyForm
         id={company.id}
