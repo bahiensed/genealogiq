@@ -26,7 +26,8 @@ export function QrScannerModal({ onClose }: Props) {
 
     const stopSafely = () => {
       if (!started) return
-      try { scanner.stop().catch(() => {}) } catch { /* not running */ }
+      // stop() rejects when the camera never started — an expected, benign race, not a swallowed error.
+      try { scanner.stop().catch(() => { /* expected when not running */ }) } catch { /* not running */ }
     }
 
     scanner

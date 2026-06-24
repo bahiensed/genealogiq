@@ -457,6 +457,14 @@ BLOB_READ_WRITE_TOKEN=
 
 # resend
 RESEND_API_KEY=
+
+# sentry (observability) — provisioned in sentry.io; never commit real values.
+# NEXT_PUBLIC_SENTRY_DSN is per-app (public). SENTRY_AUTH_TOKEN/ORG/PROJECT are set in
+# the Vercel project env for source-map upload at build (no-op locally/CI without them).
+NEXT_PUBLIC_SENTRY_DSN=
+SENTRY_ORG=
+SENTRY_PROJECT=
+SENTRY_AUTH_TOKEN=
 ```
 
 ## HOOKS
