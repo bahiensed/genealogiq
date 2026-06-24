@@ -140,6 +140,7 @@
     }
   },
   "Errors": {
+    "description": "An unexpected error occurred. Please try again.",
     "invalidDate": "Invalid date",
     "invalidEmail": "Invalid email address",
     "invalidSubtypeForKind": "Subtype is not valid for this relation kind.",
@@ -147,6 +148,8 @@
     "maxChars": "Must be at most {count} characters",
     "minChars": "Must be at least {count} characters",
     "required": "Required",
+    "retry": "Try again",
+    "title": "Something went wrong",
     "tributeTextRequired": "Write something before publishing."
   },
   "FamilyTree": {

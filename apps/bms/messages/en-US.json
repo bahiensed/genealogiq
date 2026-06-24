@@ -330,6 +330,7 @@
     "codeFormat": "Use uppercase letters, numbers and underscores only",
     "countryCodeRequired": "Country code is required",
     "couponCodeFormat": "Only uppercase letters, numbers, hyphens and underscores",
+    "description": "An unexpected error occurred. Please try again.",
     "durationInMonthsRequired": "Required when duration is \"repeating\"",
     "greaterThanZero": "Must be greater than 0",
     "invalidCnpj": "Invalid CNPJ",
@@ -344,7 +345,9 @@
     "percentMax": "Percent must be 100 or less",
     "priceMin": "Must be 0 (free) or greater",
     "required": "Required",
+    "retry": "Try again",
     "termLengthMin": "Must be 0 (lifetime) or a positive number of months",
+    "title": "Something went wrong",
     "wholeNumber": "Must be a whole number"
   },
   "Nav": {
@@ -353,6 +356,11 @@
     "signOut": "Sign out",
     "signingOut": "Signing out…",
     "toggleTheme": "Toggle theme"
+  },
+  "NotFound": {
+    "description": "The page you are looking for does not exist or has been removed.",
+    "goHome": "Go home",
+    "title": "Page not found"
   },
   "Packages": {
     "actions": {

@@ -330,6 +330,7 @@
     "codeFormat": "Usa solo letras mayúsculas, números y guiones bajos",
     "countryCodeRequired": "El código de país es obligatorio",
     "couponCodeFormat": "Solo letras mayúsculas, números, guiones y guiones bajos",
+    "description": "Ocurrió un error inesperado. Inténtalo de nuevo.",
     "durationInMonthsRequired": "Obligatorio cuando la duración es \"repeating\"",
     "greaterThanZero": "Debe ser mayor que 0",
     "invalidCnpj": "CNPJ inválido",
@@ -344,7 +345,9 @@
     "percentMax": "El porcentaje debe ser como máximo 100",
     "priceMin": "Debe ser 0 (gratis) o mayor",
     "required": "Requerido",
+    "retry": "Intentar de nuevo",
     "termLengthMin": "Debe ser 0 (vitalicio) o un número positivo de meses",
+    "title": "Algo salió mal",
     "wholeNumber": "Debe ser un número entero"
   },
   "Nav": {
@@ -353,6 +356,11 @@
     "signOut": "Cerrar sesión",
     "signingOut": "Cerrando sesión…",
     "toggleTheme": "Cambiar tema"
+  },
+  "NotFound": {
+    "description": "La página que buscas no existe o ha sido eliminada.",
+    "goHome": "Ir al inicio",
+    "title": "Página no encontrada"
   },
   "Packages": {
     "actions": {

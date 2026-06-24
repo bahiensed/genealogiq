@@ -289,13 +289,16 @@
   "Errors": {
     "categoryRequired": "Category is required",
     "countryCodeRequired": "Country code is required",
+    "description": "An unexpected error occurred. Please try again.",
     "invalidCnpj": "Invalid CNPJ",
     "invalidCpf": "Invalid CPF",
     "invalidEmail": "Invalid email address",
     "invalidRole": "Invalid role",
     "maxChars": "Must be at most {count} characters",
     "minChars": "Must be at least {count} characters",
-    "required": "Required"
+    "required": "Required",
+    "retry": "Try again",
+    "title": "Something went wrong"
   },
   "Inventory": {
     "digital": {
@@ -479,6 +482,11 @@
     "signOut": "Sign out",
     "signingOut": "Signing out…",
     "toggleTheme": "Toggle theme"
+  },
+  "NotFound": {
+    "description": "The page you are looking for does not exist or has been removed.",
+    "goHome": "Go home",
+    "title": "Page not found"
   },
   "PhysicalQr": {
     "PhysicalQr": {

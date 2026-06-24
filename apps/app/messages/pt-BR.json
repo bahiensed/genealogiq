@@ -140,6 +140,7 @@
     }
   },
   "Errors": {
+    "description": "Ocorreu um erro inesperado. Tente novamente.",
     "invalidDate": "Data inválida",
     "invalidEmail": "Endereço de e-mail inválido",
     "invalidSubtypeForKind": "O subtipo não é válido para este tipo de parentesco.",
@@ -147,6 +148,8 @@
     "maxChars": "Deve ter no máximo {count} caracteres",
     "minChars": "Deve ter pelo menos {count} caracteres",
     "required": "Obrigatório",
+    "retry": "Tentar de novo",
+    "title": "Algo deu errado",
     "tributeTextRequired": "Escreva algo antes de publicar."
   },
   "FamilyTree": {

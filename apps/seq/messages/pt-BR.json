@@ -289,13 +289,16 @@
   "Errors": {
     "categoryRequired": "A categoria é obrigatória",
     "countryCodeRequired": "O código do país é obrigatório",
+    "description": "Ocorreu um erro inesperado. Tente novamente.",
     "invalidCnpj": "CNPJ inválido",
     "invalidCpf": "CPF inválido",
     "invalidEmail": "Endereço de e-mail inválido",
     "invalidRole": "Função inválida",
     "maxChars": "Deve ter no máximo {count} caracteres",
     "minChars": "Deve ter pelo menos {count} caracteres",
-    "required": "Obrigatório"
+    "required": "Obrigatório",
+    "retry": "Tentar de novo",
+    "title": "Algo deu errado"
   },
   "Inventory": {
     "digital": {
@@ -479,6 +482,11 @@
     "signOut": "Sair",
     "signingOut": "Saindo…",
     "toggleTheme": "Alternar tema"
+  },
+  "NotFound": {
+    "description": "A página que você procura não existe ou foi removida.",
+    "goHome": "Ir para o início",
+    "title": "Página não encontrada"
   },
   "PhysicalQr": {
     "PhysicalQr": {
