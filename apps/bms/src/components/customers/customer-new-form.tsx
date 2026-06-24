@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller, useWatch } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { CheckIcon } from 'lucide-react'
 import {
@@ -33,13 +34,14 @@ import { cn } from '@/lib/utils'
 interface Category { id: string; name: string }
 interface Props { categories?: Category[] }
 
-const STEPS = [
-  { title: 'Business',       desc: 'Legal info & identification' },
-  { title: 'Contact',        desc: 'Contact details & category'  },
-  { title: 'Address',        desc: 'Physical location'           },
-  { title: 'Administrator',  desc: 'Sequoia account owner'       },
-  { title: 'Modules',        desc: 'Sequoia access permissions'  },
-]
+// Step titles/descriptions resolve from the Customers namespace at render time.
+const STEP_KEYS = [
+  { title: 'business',      desc: 'businessDesc'      },
+  { title: 'contact',       desc: 'contactDesc'       },
+  { title: 'address',       desc: 'addressDesc'       },
+  { title: 'administrator', desc: 'administratorDesc' },
+  { title: 'modules',       desc: 'modulesDesc'       },
+] as const
 
 type StepIndex = 0 | 1 | 2 | 3 | 4
 
@@ -51,11 +53,31 @@ const STEP_FIELDS: Record<StepIndex, (keyof CustomerCreateFormValues | string)[]
   4: [],
 }
 
+const ALWAYS_ACTIVE = ['dashboard', 'buySubscriptions', 'viewSubscriptions', 'customers', 'sales', 'system'] as const
+const RECORDS_MODULES = [
+  { name: 'moduleRecordsSuppliers', labelKey: 'suppliers' },
+  { name: 'moduleRecordsProducts',  labelKey: 'products'  },
+  { name: 'moduleRecordsServices',  labelKey: 'services'  },
+] as const
+const CATEGORY_MODULES = [
+  { name: 'moduleCategoriesSuppliers', labelKey: 'supplierCat' },
+  { name: 'moduleCategoriesProducts',  labelKey: 'productCat'  },
+  { name: 'moduleCategoriesServices',  labelKey: 'serviceCat'  },
+] as const
+const PURCHASING_MODULES = [
+  { name: 'modulePurchasingProducts', labelKey: 'products' },
+  { name: 'modulePurchasingServices', labelKey: 'services' },
+] as const
+
 export function CustomerNewForm({ categories = [] }: Props) {
+  const t  = useTranslations('Customers')
+  const tc = useTranslations('Common')
   const [step, setStep]                 = useState<StepIndex>(0)
   const [localCategories, setLocalCats] = useState(categories)
   const [serverError, setServerError]   = useState<string | null>(null)
   const router = useRouter()
+
+  const STEPS = STEP_KEYS.map((s) => ({ title: t(`sections.${s.title}`), desc: t(`steps.${s.desc}`) }))
 
   const form = useForm<CustomerCreateFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -76,8 +98,6 @@ export function CustomerNewForm({ categories = [] }: Props) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ok = await trigger(fields as any)
       if (!ok) {
-        // trigger() does not set isTouched, so onChange re-validation wouldn't fire.
-        // Marking the fields as touched ensures errors clear as soon as the user corrects them.
         fields.forEach((f) =>
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           form.setValue(f as any, form.getValues(f as any), { shouldTouch: true, shouldValidate: false })
@@ -108,7 +128,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        New customer
+        {t('new')}
       </h1>
 
       {/* Stepper */}
@@ -169,19 +189,18 @@ export function CustomerNewForm({ categories = [] }: Props) {
         {step === 0 && (
           <div className="flex flex-col gap-6">
             <FieldGroup>
-              {/* Type */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Controller
                   name="entityType"
                   control={control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Type:</FieldLabel>
+                      <FieldLabel>{t('fields.type')}</FieldLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="COMPANY">Company</SelectItem>
-                          <SelectItem value="INDIVIDUAL">Individual</SelectItem>
+                          <SelectItem value="COMPANY">{t('entityType.company')}</SelectItem>
+                          <SelectItem value="INDIVIDUAL">{t('entityType.individual')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </Field>
@@ -189,37 +208,35 @@ export function CustomerNewForm({ categories = [] }: Props) {
                 />
               </div>
 
-              {/* Name + Trade name */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Controller name="name" control={control} render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{isIndividual ? 'First Name:' : 'Company Name:'}</FieldLabel>
+                    <FieldLabel>{isIndividual ? t('fields.firstName') : t('fields.companyName')}</FieldLabel>
                     <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )} />
                 <Controller name="tradeName" control={control} render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{isIndividual ? 'Last Name:' : 'Trade Name:'}</FieldLabel>
+                    <FieldLabel>{isIndividual ? t('fields.lastName') : t('fields.tradeName')}</FieldLabel>
                     <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )} />
               </div>
 
-              {/* Tax ID + extra fields */}
               {isIndividual ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Controller name="taxId" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>CPF:</FieldLabel>
+                      <FieldLabel>{t('fields.cpf')}</FieldLabel>
                       <MaskedInput value={field.value} onChange={field.onChange} maskFn={maskCpf} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
                   )} />
                   <Controller name="birthDate" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Date of Birth:</FieldLabel>
+                      <FieldLabel>{t('fields.birthDate')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -229,21 +246,21 @@ export function CustomerNewForm({ categories = [] }: Props) {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Controller name="taxId" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>CNPJ:</FieldLabel>
+                      <FieldLabel>{t('fields.cnpj')}</FieldLabel>
                       <MaskedInput value={field.value} onChange={field.onChange} maskFn={maskCnpj} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
                   )} />
                   <Controller name="stateRegistration" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>State Reg.:</FieldLabel>
+                      <FieldLabel>{t('fields.stateRegistrationShort')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
                   )} />
                   <Controller name="municipalRegistration" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Municipal Reg.:</FieldLabel>
+                      <FieldLabel>{t('fields.municipalRegistrationShort')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -259,7 +276,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
           <FieldGroup>
             <Controller name="email" control={control} render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Email:</FieldLabel>
+                <FieldLabel>{t('fields.email')}</FieldLabel>
                 <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -268,7 +285,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Controller name="phoneCountryCode" control={control} render={({ field }) => (
                 <Field>
-                  <FieldLabel>Country Code:</FieldLabel>
+                  <FieldLabel>{t('fields.countryCode')}</FieldLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -281,7 +298,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
               )} />
               <Controller name="phone" control={control} render={({ field, fieldState }) => (
                 <Field className="md:col-span-2" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Phone:</FieldLabel>
+                  <FieldLabel>{t('fields.phone')}</FieldLabel>
                   <MaskedInput value={field.value} onChange={field.onChange} maskFn={maskPhone} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -291,7 +308,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
             <Controller name="categoryId" control={control} render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <div className="flex items-center justify-between">
-                  <FieldLabel>Category:</FieldLabel>
+                  <FieldLabel>{t('fields.category')}</FieldLabel>
                   <AddCustomerCategoryDialog onCreated={(cat) => {
                     setLocalCats(prev => [...prev, cat])
                     field.onChange(cat.id)
@@ -299,7 +316,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
                 </div>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger aria-invalid={fieldState.invalid}>
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder={t('placeholders.category')} />
                   </SelectTrigger>
                   <SelectContent>
                     {localCategories.map((cat) => (
@@ -313,7 +330,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
 
             <Controller name="notes" control={control} render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Notes:</FieldLabel>
+                <FieldLabel>{t('fields.notes')}</FieldLabel>
                 <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -324,7 +341,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
         {/* ── Step 2: Address ── */}
         {step === 2 && (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-muted-foreground">Address is optional and can be filled in later.</p>
+            <p className="text-sm text-muted-foreground">{t('hints.addressOptional')}</p>
             <AddressSection
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               control={control as any}
@@ -339,23 +356,20 @@ export function CustomerNewForm({ categories = [] }: Props) {
         {step === 3 && (
           <div className="flex flex-col gap-6">
             <div className="rounded-lg border bg-muted/40 px-4 py-3">
-              <p className="text-sm text-muted-foreground">
-                Access credentials for the Sequoia system for the person responsible for this company.
-                An email will be sent with a link to set the password.
-              </p>
+              <p className="text-sm text-muted-foreground">{t('hints.admin')}</p>
             </div>
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Controller name="owner.firstName" control={control} render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>First Name:</FieldLabel>
+                    <FieldLabel>{t('owner.firstName')}</FieldLabel>
                     <Input {...field} autoComplete="given-name" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )} />
                 <Controller name="owner.lastName" control={control} render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Last Name:</FieldLabel>
+                    <FieldLabel>{t('owner.lastName')}</FieldLabel>
                     <Input {...field} autoComplete="family-name" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -363,7 +377,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
               </div>
               <Controller name="owner.email" control={control} render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Email:</FieldLabel>
+                  <FieldLabel>{t('owner.email')}</FieldLabel>
                   <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -376,118 +390,99 @@ export function CustomerNewForm({ categories = [] }: Props) {
         {step === 4 && (
           <div className="flex flex-col gap-6">
             <div className="rounded-lg border bg-muted/40 px-4 py-3">
-              <p className="text-sm text-muted-foreground">
-                Items shown in gray are always accessible and cannot be disabled.
-              </p>
+              <p className="text-sm text-muted-foreground">{t('hints.modulesGray')}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
-              {/* Always-on */}
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Always active</p>
+                <p className="text-sm font-semibold">{t('modules.groups.alwaysActive')}</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {['Dashboard', 'Buy Subscriptions', 'View Subscriptions', 'Customers', 'Sales', 'System'].map((label) => (
-                    <label key={label} className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
+                  {ALWAYS_ACTIVE.map((k) => (
+                    <label key={k} className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                       <Checkbox checked disabled />
-                      {label}
+                      {t(`modules.labels.${k}`)}
                     </label>
                   ))}
                 </div>
               </div>
 
-              {/* Records */}
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Records</p>
+                <p className="text-sm font-semibold">{t('modules.groups.records')}</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {([
-                    { name: 'moduleRecordsSuppliers', label: 'Suppliers' },
-                    { name: 'moduleRecordsProducts',  label: 'Products'  },
-                    { name: 'moduleRecordsServices',  label: 'Services'  },
-                  ] as const).map(({ name, label }) => (
+                  {RECORDS_MODULES.map(({ name, labelKey }) => (
                     <Controller key={name} name={name} control={control} render={({ field }) => (
                       <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        {label}
+                        {t(`modules.labels.${labelKey}`)}
                       </label>
                     )} />
                   ))}
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    Customers
+                    {t('modules.labels.customers')}
                   </label>
                 </div>
               </div>
 
-              {/* Categories */}
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Categories</p>
+                <p className="text-sm font-semibold">{t('modules.groups.categories')}</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {([
-                    { name: 'moduleCategoriesSuppliers', label: 'Supplier Cat.' },
-                    { name: 'moduleCategoriesProducts',  label: 'Product Cat.'  },
-                    { name: 'moduleCategoriesServices',  label: 'Service Cat.'  },
-                  ] as const).map(({ name, label }) => (
+                  {CATEGORY_MODULES.map(({ name, labelKey }) => (
                     <Controller key={name} name={name} control={control} render={({ field }) => (
                       <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        {label}
+                        {t(`modules.labels.${labelKey}`)}
                       </label>
                     )} />
                   ))}
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    Customer Cat.
+                    {t('modules.labels.customerCat')}
                   </label>
                 </div>
               </div>
 
-              {/* Purchasing */}
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Purchasing</p>
+                <p className="text-sm font-semibold">{t('modules.groups.purchasing')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    Buy Subscriptions
+                    {t('modules.labels.buySubscriptions')}
                   </label>
-                  {([
-                    { name: 'modulePurchasingProducts', label: 'Products' },
-                    { name: 'modulePurchasingServices', label: 'Services' },
-                  ] as const).map(({ name, label }) => (
+                  {PURCHASING_MODULES.map(({ name, labelKey }) => (
                     <Controller key={name} name={name} control={control} render={({ field }) => (
                       <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        {label}
+                        {t(`modules.labels.${labelKey}`)}
                       </label>
                     )} />
                   ))}
                 </div>
               </div>
 
-              {/* Inventory */}
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Inventory</p>
+                <p className="text-sm font-semibold">{t('modules.groups.inventory')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    View Subscriptions
+                    {t('modules.labels.viewSubscriptions')}
                   </label>
                   <Controller name="moduleInventoryProducts" control={control} render={({ field }) => (
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      Products
+                      {t('modules.labels.products')}
                     </label>
                   )} />
                 </div>
               </div>
 
-              {/* Finance */}
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Finance</p>
+                <p className="text-sm font-semibold">{t('modules.groups.finance')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <Controller name="moduleFinance" control={control} render={({ field }) => (
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      Finance
+                      {t('modules.labels.finance')}
                     </label>
                   )} />
                 </div>
@@ -501,26 +496,21 @@ export function CustomerNewForm({ categories = [] }: Props) {
 
         {/* Navigation */}
         <div className="flex items-center justify-between pt-2 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={goBack}
-            disabled={step === 0}
-          >
-            Back
+          <Button type="button" variant="outline" onClick={goBack} disabled={step === 0}>
+            {tc('back')}
           </Button>
 
           <span className="text-xs text-muted-foreground">
-            Step {step + 1} of {STEPS.length}
+            {t('stepOf', { step: step + 1, total: STEPS.length })}
           </span>
 
           {step < STEPS.length - 1 ? (
             <Button type="button" onClick={goNext}>
-              Next
+              {tc('next')}
             </Button>
           ) : (
             <Button type="button" onClick={() => handleSubmit(onSubmit)()} disabled={isSubmitting}>
-              {isSubmitting ? 'Creating…' : 'Create customer'}
+              {isSubmitting ? tc('creating') : t('create')}
             </Button>
           )}
         </div>

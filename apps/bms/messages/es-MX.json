@@ -71,5 +71,117 @@
       "sortDesc": "Desc.",
       "hide": "Ocultar"
     }
+  },
+  "Customers": {
+    "title": "Clientes",
+    "new": "Nuevo cliente",
+    "edit": "Editar cliente",
+    "create": "Crear cliente",
+    "stepOf": "Paso {step} de {total}",
+    "active": "¿Activo?",
+    "sections": {
+      "business": "Empresa",
+      "contact": "Contacto",
+      "address": "Dirección",
+      "administrator": "Administrador",
+      "modules": "Módulos Sequoia"
+    },
+    "steps": {
+      "businessDesc": "Datos legales e identificación",
+      "contactDesc": "Detalles de contacto y categoría",
+      "addressDesc": "Ubicación física",
+      "administratorDesc": "Responsable de la cuenta Sequoia",
+      "modulesDesc": "Permisos de acceso a Sequoia"
+    },
+    "hints": {
+      "addressOptional": "La dirección es opcional y se puede completar más tarde.",
+      "admin": "Credenciales de acceso al sistema Sequoia para el responsable de esta empresa. Se enviará un correo con un enlace para establecer la contraseña.",
+      "modulesGray": "Los elementos en gris siempre están accesibles y no se pueden desactivar."
+    },
+    "fields": {
+      "type": "Tipo:",
+      "firstName": "Nombre:",
+      "companyName": "Razón social:",
+      "lastName": "Apellido:",
+      "tradeName": "Nombre comercial:",
+      "cpf": "CPF:",
+      "cnpj": "CNPJ:",
+      "birthDate": "Fecha de nacimiento:",
+      "stateRegistration": "Inscripción estatal:",
+      "stateRegistrationShort": "Insc. est.:",
+      "municipalRegistration": "Inscripción municipal:",
+      "municipalRegistrationShort": "Insc. mun.:",
+      "email": "Correo:",
+      "countryCode": "Código de país:",
+      "phone": "Teléfono:",
+      "category": "Categoría:",
+      "notes": "Notas:"
+    },
+    "placeholders": {
+      "category": "Selecciona una categoría"
+    },
+    "entityType": {
+      "company": "Empresa",
+      "individual": "Persona física"
+    },
+    "owner": {
+      "firstName": "Nombre:",
+      "lastName": "Apellido:",
+      "email": "Correo:"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "table": {
+      "name": "Nombre",
+      "type": "Tipo",
+      "category": "Categoría",
+      "email": "Correo",
+      "status": "Estado",
+      "createdAt": "Creado el",
+      "empty": "No se encontraron clientes."
+    },
+    "actions": {
+      "openMenu": "Abrir menú",
+      "edit": "Editar",
+      "deactivate": "Desactivar",
+      "reactivate": "Reactivar",
+      "resendEmail": "Reenviar correo",
+      "delete": "Eliminar"
+    },
+    "toasts": {
+      "deactivated": "Cliente desactivado.",
+      "reactivated": "Cliente reactivado.",
+      "emailResent": "Correo reenviado con éxito.",
+      "deleted": "Cliente eliminado con éxito.",
+      "deleteConfirm": "El cliente \"{name}\" se eliminará permanentemente."
+    },
+    "modules": {
+      "groups": {
+        "alwaysActive": "Siempre activo",
+        "records": "Registros",
+        "categories": "Categorías",
+        "purchasing": "Compras",
+        "inventory": "Inventario",
+        "finance": "Finanzas"
+      },
+      "labels": {
+        "dashboard": "Panel",
+        "buySubscriptions": "Comprar suscripciones",
+        "viewSubscriptions": "Ver suscripciones",
+        "customers": "Clientes",
+        "sales": "Ventas",
+        "system": "Sistema",
+        "suppliers": "Proveedores",
+        "products": "Productos",
+        "services": "Servicios",
+        "supplierCat": "Cat. proveedor",
+        "productCat": "Cat. producto",
+        "serviceCat": "Cat. servicio",
+        "customerCat": "Cat. cliente",
+        "finance": "Finanzas"
+      }
+    }
   }
 }

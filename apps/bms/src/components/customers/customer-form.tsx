@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller, useWatch } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import {
   customerResolver,
@@ -43,7 +44,25 @@ interface CustomerFormProps {
   categories?: Category[]
 }
 
+const ALWAYS_ACTIVE = ['dashboard', 'buySubscriptions', 'viewSubscriptions', 'customers', 'sales', 'system'] as const
+const RECORDS_MODULES = [
+  { name: 'moduleRecordsSuppliers', labelKey: 'suppliers' },
+  { name: 'moduleRecordsProducts',  labelKey: 'products'  },
+  { name: 'moduleRecordsServices',  labelKey: 'services'  },
+] as const
+const CATEGORY_MODULES = [
+  { name: 'moduleCategoriesSuppliers', labelKey: 'supplierCat' },
+  { name: 'moduleCategoriesProducts',  labelKey: 'productCat'  },
+  { name: 'moduleCategoriesServices',  labelKey: 'serviceCat'  },
+] as const
+const PURCHASING_MODULES = [
+  { name: 'modulePurchasingProducts', labelKey: 'products' },
+  { name: 'modulePurchasingServices', labelKey: 'services' },
+] as const
+
 export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFormProps) {
+  const t  = useTranslations('Customers')
+  const tc = useTranslations('Common')
   const [serverError, setServerError]   = useState<string | null>(null)
   const [localCategories, setLocalCats] = useState(categories)
   const router = useRouter()
@@ -73,7 +92,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-2xl">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Edit customer
+          {t('edit')}
         </h1>
         <Controller
           name="isActive"
@@ -81,7 +100,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
           render={({ field }) => (
             <div className="flex items-center gap-2">
               <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-              <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
+              <label htmlFor="isActive" className="text-sm cursor-pointer">{t('active')}</label>
             </div>
           )}
         />
@@ -91,7 +110,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
         {/* ── Business ── */}
         <AccordionItem value="business" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Business</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.business')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -100,12 +119,12 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                   control={control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Type:</FieldLabel>
+                      <FieldLabel>{t('fields.type')}</FieldLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="COMPANY">Company</SelectItem>
-                          <SelectItem value="INDIVIDUAL">Individual</SelectItem>
+                          <SelectItem value="COMPANY">{t('entityType.company')}</SelectItem>
+                          <SelectItem value="INDIVIDUAL">{t('entityType.individual')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </Field>
@@ -116,14 +135,14 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Controller name="name" control={control} render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{isIndividual ? 'First Name:' : 'Company Name:'}</FieldLabel>
+                    <FieldLabel>{isIndividual ? t('fields.firstName') : t('fields.companyName')}</FieldLabel>
                     <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )} />
                 <Controller name="tradeName" control={control} render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>{isIndividual ? 'Last Name:' : 'Trade Name:'}</FieldLabel>
+                    <FieldLabel>{isIndividual ? t('fields.lastName') : t('fields.tradeName')}</FieldLabel>
                     <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -134,14 +153,14 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Controller name="taxId" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>CPF:</FieldLabel>
+                      <FieldLabel>{t('fields.cpf')}</FieldLabel>
                       <MaskedInput value={field.value} onChange={field.onChange} maskFn={maskCpf} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
                   )} />
                   <Controller name="birthDate" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Date of Birth:</FieldLabel>
+                      <FieldLabel>{t('fields.birthDate')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -151,21 +170,21 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Controller name="taxId" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>CNPJ:</FieldLabel>
+                      <FieldLabel>{t('fields.cnpj')}</FieldLabel>
                       <MaskedInput value={field.value} onChange={field.onChange} maskFn={maskCnpj} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
                   )} />
                   <Controller name="stateRegistration" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>State Registration:</FieldLabel>
+                      <FieldLabel>{t('fields.stateRegistration')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
                   )} />
                   <Controller name="municipalRegistration" control={control} render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Municipal Registration:</FieldLabel>
+                      <FieldLabel>{t('fields.municipalRegistration')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -178,12 +197,12 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
         {/* ── Contact ── */}
         <AccordionItem value="contact" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Contact</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.contact')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
               <Controller name="email" control={control} render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Email:</FieldLabel>
+                  <FieldLabel>{t('fields.email')}</FieldLabel>
                   <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -192,7 +211,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Controller name="phoneCountryCode" control={control} render={({ field }) => (
                   <Field>
-                    <FieldLabel>Country Code:</FieldLabel>
+                    <FieldLabel>{t('fields.countryCode')}</FieldLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -205,7 +224,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                 )} />
                 <Controller name="phone" control={control} render={({ field, fieldState }) => (
                   <Field className="md:col-span-2" data-invalid={fieldState.invalid}>
-                    <FieldLabel>Phone:</FieldLabel>
+                    <FieldLabel>{t('fields.phone')}</FieldLabel>
                     <MaskedInput value={field.value} onChange={field.onChange} maskFn={maskPhone} autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -215,7 +234,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               <Controller name="categoryId" control={control} render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <div className="flex items-center justify-between">
-                    <FieldLabel>Category:</FieldLabel>
+                    <FieldLabel>{t('fields.category')}</FieldLabel>
                     <AddCustomerCategoryDialog onCreated={(cat) => {
                       setLocalCats(prev => [...prev, cat])
                       field.onChange(cat.id)
@@ -223,7 +242,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                   </div>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger aria-invalid={fieldState.invalid}>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder={t('placeholders.category')} />
                     </SelectTrigger>
                     <SelectContent>
                       {localCategories.map((cat) => (
@@ -237,7 +256,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
               <Controller name="notes" control={control} render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Notes:</FieldLabel>
+                  <FieldLabel>{t('fields.notes')}</FieldLabel>
                   <Textarea {...field} value={field.value ?? ''} rows={3} aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -248,7 +267,7 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
         {/* ── Address ── */}
         <AccordionItem value="address" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Address</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.address')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <AddressSection
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -262,80 +281,69 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
 
         {/* ── Modules ── */}
         <AccordionItem value="modules" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Sequoia Modules</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.modules')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Always active</p>
+                <p className="text-sm font-semibold">{t('modules.groups.alwaysActive')}</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {['Dashboard', 'Buy Subscriptions', 'View Subscriptions', 'Customers', 'Sales', 'System'].map((label) => (
-                    <label key={label} className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
+                  {ALWAYS_ACTIVE.map((k) => (
+                    <label key={k} className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                       <Checkbox checked disabled />
-                      {label}
+                      {t(`modules.labels.${k}`)}
                     </label>
                   ))}
                 </div>
               </div>
 
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Records</p>
+                <p className="text-sm font-semibold">{t('modules.groups.records')}</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {([
-                    { name: 'moduleRecordsSuppliers', label: 'Suppliers' },
-                    { name: 'moduleRecordsProducts',  label: 'Products'  },
-                    { name: 'moduleRecordsServices',  label: 'Services'  },
-                  ] as const).map(({ name, label }) => (
+                  {RECORDS_MODULES.map(({ name, labelKey }) => (
                     <Controller key={name} name={name} control={control} render={({ field }) => (
                       <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        {label}
+                        {t(`modules.labels.${labelKey}`)}
                       </label>
                     )} />
                   ))}
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    Customers
+                    {t('modules.labels.customers')}
                   </label>
                 </div>
               </div>
 
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Categories</p>
+                <p className="text-sm font-semibold">{t('modules.groups.categories')}</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {([
-                    { name: 'moduleCategoriesSuppliers', label: 'Supplier Cat.' },
-                    { name: 'moduleCategoriesProducts',  label: 'Product Cat.'  },
-                    { name: 'moduleCategoriesServices',  label: 'Service Cat.'  },
-                  ] as const).map(({ name, label }) => (
+                  {CATEGORY_MODULES.map(({ name, labelKey }) => (
                     <Controller key={name} name={name} control={control} render={({ field }) => (
                       <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        {label}
+                        {t(`modules.labels.${labelKey}`)}
                       </label>
                     )} />
                   ))}
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    Customer Cat.
+                    {t('modules.labels.customerCat')}
                   </label>
                 </div>
               </div>
 
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Purchasing</p>
+                <p className="text-sm font-semibold">{t('modules.groups.purchasing')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    Buy Subscriptions
+                    {t('modules.labels.buySubscriptions')}
                   </label>
-                  {([
-                    { name: 'modulePurchasingProducts', label: 'Products' },
-                    { name: 'modulePurchasingServices', label: 'Services' },
-                  ] as const).map(({ name, label }) => (
+                  {PURCHASING_MODULES.map(({ name, labelKey }) => (
                     <Controller key={name} name={name} control={control} render={({ field }) => (
                       <label className="flex items-center gap-2 text-sm cursor-pointer">
                         <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                        {label}
+                        {t(`modules.labels.${labelKey}`)}
                       </label>
                     )} />
                   ))}
@@ -343,28 +351,28 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
               </div>
 
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Inventory</p>
+                <p className="text-sm font-semibold">{t('modules.groups.inventory')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
                     <Checkbox checked disabled />
-                    View Subscriptions
+                    {t('modules.labels.viewSubscriptions')}
                   </label>
                   <Controller name="moduleInventoryProducts" control={control} render={({ field }) => (
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      Products
+                      {t('modules.labels.products')}
                     </label>
                   )} />
                 </div>
               </div>
 
               <div className="flex flex-col gap-3">
-                <p className="text-sm font-semibold">Finance</p>
+                <p className="text-sm font-semibold">{t('modules.groups.finance')}</p>
                 <div className="grid grid-cols-2 gap-2">
                   <Controller name="moduleFinance" control={control} render={({ field }) => (
                     <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      Finance
+                      {t('modules.labels.finance')}
                     </label>
                   )} />
                 </div>
@@ -378,10 +386,10 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
       {serverError && <FieldError>{serverError}</FieldError>}
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : 'Save changes'}
+          {isSubmitting ? tc('saving') : tc('save')}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>

@@ -71,5 +71,117 @@
       "sortDesc": "Desc",
       "hide": "Hide"
     }
+  },
+  "Customers": {
+    "title": "Customers",
+    "new": "New customer",
+    "edit": "Edit customer",
+    "create": "Create customer",
+    "stepOf": "Step {step} of {total}",
+    "active": "Active?",
+    "sections": {
+      "business": "Business",
+      "contact": "Contact",
+      "address": "Address",
+      "administrator": "Administrator",
+      "modules": "Sequoia Modules"
+    },
+    "steps": {
+      "businessDesc": "Legal info & identification",
+      "contactDesc": "Contact details & category",
+      "addressDesc": "Physical location",
+      "administratorDesc": "Sequoia account owner",
+      "modulesDesc": "Sequoia access permissions"
+    },
+    "hints": {
+      "addressOptional": "Address is optional and can be filled in later.",
+      "admin": "Access credentials for the Sequoia system for the person responsible for this company. An email will be sent with a link to set the password.",
+      "modulesGray": "Items shown in gray are always accessible and cannot be disabled."
+    },
+    "fields": {
+      "type": "Type:",
+      "firstName": "First Name:",
+      "companyName": "Company Name:",
+      "lastName": "Last Name:",
+      "tradeName": "Trade Name:",
+      "cpf": "CPF:",
+      "cnpj": "CNPJ:",
+      "birthDate": "Date of Birth:",
+      "stateRegistration": "State Registration:",
+      "stateRegistrationShort": "State Reg.:",
+      "municipalRegistration": "Municipal Registration:",
+      "municipalRegistrationShort": "Municipal Reg.:",
+      "email": "Email:",
+      "countryCode": "Country Code:",
+      "phone": "Phone:",
+      "category": "Category:",
+      "notes": "Notes:"
+    },
+    "placeholders": {
+      "category": "Select a category"
+    },
+    "entityType": {
+      "company": "Company",
+      "individual": "Individual"
+    },
+    "owner": {
+      "firstName": "First Name:",
+      "lastName": "Last Name:",
+      "email": "Email:"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "category": "Category",
+      "email": "E-mail",
+      "status": "Status",
+      "createdAt": "Created at",
+      "empty": "No customers found."
+    },
+    "actions": {
+      "openMenu": "Open menu",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "resendEmail": "Resend email",
+      "delete": "Delete"
+    },
+    "toasts": {
+      "deactivated": "Customer deactivated.",
+      "reactivated": "Customer reactivated.",
+      "emailResent": "Email resent successfully.",
+      "deleted": "Customer deleted successfully.",
+      "deleteConfirm": "The customer \"{name}\" will be permanently deleted."
+    },
+    "modules": {
+      "groups": {
+        "alwaysActive": "Always active",
+        "records": "Records",
+        "categories": "Categories",
+        "purchasing": "Purchasing",
+        "inventory": "Inventory",
+        "finance": "Finance"
+      },
+      "labels": {
+        "dashboard": "Dashboard",
+        "buySubscriptions": "Buy Subscriptions",
+        "viewSubscriptions": "View Subscriptions",
+        "customers": "Customers",
+        "sales": "Sales",
+        "system": "System",
+        "suppliers": "Suppliers",
+        "products": "Products",
+        "services": "Services",
+        "supplierCat": "Supplier Cat.",
+        "productCat": "Product Cat.",
+        "serviceCat": "Service Cat.",
+        "customerCat": "Customer Cat.",
+        "finance": "Finance"
+      }
+    }
   }
 }
