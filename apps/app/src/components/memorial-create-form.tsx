@@ -23,7 +23,7 @@ import {
 import { cn } from "@/lib/utils"
 import { createMemorial } from "@/actions/memorial"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { getLocalizedCountries } from "@/consts/countries-data"
 
 interface FormState {
@@ -45,17 +45,18 @@ const empty: FormState = {
   deathDate: undefined, deathPlace: "", deathCountry: "",
 }
 
-const DateField = ({ id, label, value, onChange, disabled, disabledDays }: {
+const DateField = ({ id, label, value, onChange, disabled, disabledDays, clearLabel, pickLabel }: {
   id: string; label: string; value: Date | undefined
   onChange: (d: Date | undefined) => void; disabled?: boolean
   disabledDays?: (d: Date) => boolean
+  clearLabel: string; pickLabel: string
 }) => (
   <div className="space-y-2">
     <div className="flex items-center justify-between h-5">
       <Label htmlFor={id}>{label}</Label>
       {value && !disabled && (
         <button type="button" onClick={() => onChange(undefined)} className="text-xs text-muted-foreground hover:text-foreground">
-          Clear
+          {clearLabel}
         </button>
       )}
     </div>
@@ -68,7 +69,7 @@ const DateField = ({ id, label, value, onChange, disabled, disabledDays }: {
           className={cn("w-full justify-start text-left font-normal", !value && "text-muted-foreground")}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {value ? format(value, "PPP") : <span>Pick a date</span>}
+          {value ? format(value, "PPP") : <span>{pickLabel}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -89,6 +90,8 @@ const DateField = ({ id, label, value, onChange, disabled, disabledDays }: {
 
 export function MemorialCreateForm() {
   const locale = useLocale()
+  const t = useTranslations("Memorialized")
+  const tc = useTranslations("Common")
   const countryOptions = getLocalizedCountries(locale)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -105,7 +108,7 @@ export function MemorialCreateForm() {
     const file = files?.[0]
     if (!file) return
     if (!isAllowedImage(file)) {
-      toast.error(`Unsupported file. Use ${IMAGE_FORMATS_LABEL}.`)
+      toast.error(t("avatar.unsupportedFile", { formats: IMAGE_FORMATS_LABEL }))
       return
     }
     setUploading(true)
@@ -120,7 +123,7 @@ export function MemorialCreateForm() {
       })
       update("avatarUrl", blob.url)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to upload avatar.")
+      toast.error(err instanceof Error ? err.message : t("avatar.uploadError"))
       update("avatarUrl", "")
     } finally {
       setUploading(false)
@@ -128,7 +131,7 @@ export function MemorialCreateForm() {
   }
 
   const handleSave = () => {
-    if (uploading) { toast.warning("Please wait for the avatar to finish uploading."); return }
+    if (uploading) { toast.warning(t("avatar.waitUploading")); return }
     startTransition(async () => {
       const result = await createMemorial({
         firstName: form.firstName,
@@ -143,14 +146,14 @@ export function MemorialCreateForm() {
         avatarUrl: form.avatarUrl || null,
       })
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Memorial profile created.")
+      toast.success(t("toasts.created"))
       router.push(`/profile/${result.id}`)
     })
   }
 
   const handleReset = () => {
     setForm(empty)
-    toast("Form reset.")
+    toast(t("toasts.formReset"))
   }
 
   return (
@@ -170,11 +173,11 @@ export function MemorialCreateForm() {
         </Avatar>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-            <ImagePlus className="h-4 w-4" />Change Image
+            <ImagePlus className="h-4 w-4" />{t("avatar.change")}
           </Button>
           {form.avatarUrl && (
             <Button variant="ghost" className="gap-2 text-muted-foreground" onClick={() => update("avatarUrl", "")}>
-              <Trash2 className="h-4 w-4" />Remove
+              <Trash2 className="h-4 w-4" />{tc("remove")}
             </Button>
           )}
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { handleAvatarChange(e.target.files); e.target.value = "" }} />
@@ -184,40 +187,40 @@ export function MemorialCreateForm() {
       {/* Name */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="first-name">First name</Label>
-          <Input id="first-name" value={form.firstName} onChange={(e) => update("firstName", e.target.value)} placeholder="Name" maxLength={100} />
+          <Label htmlFor="first-name">{t("fields.firstName")}</Label>
+          <Input id="first-name" value={form.firstName} onChange={(e) => update("firstName", e.target.value)} placeholder={t("placeholders.firstName")} maxLength={100} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="last-name">Family name</Label>
-          <Input id="last-name" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} placeholder="Family name" maxLength={100} />
+          <Label htmlFor="last-name">{t("fields.lastName")}</Label>
+          <Input id="last-name" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} placeholder={t("placeholders.lastName")} maxLength={100} />
         </div>
       </div>
 
       {/* Gender */}
       <div className="space-y-2">
-        <Label htmlFor="gender">Gender</Label>
+        <Label htmlFor="gender">{t("fields.gender")}</Label>
         <Select value={form.gender} onValueChange={(v) => update("gender", v as FormState["gender"])}>
-          <SelectTrigger id="gender"><SelectValue placeholder="Not specified" /></SelectTrigger>
+          <SelectTrigger id="gender"><SelectValue placeholder={t("placeholders.notSpecified")} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="FEMALE">Female</SelectItem>
-            <SelectItem value="MALE">Male</SelectItem>
+            <SelectItem value="FEMALE">{t("gender.female")}</SelectItem>
+            <SelectItem value="MALE">{t("gender.male")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Birth */}
       <div className="space-y-3">
-        <Label className="text-base">Birth</Label>
+        <Label className="text-base">{t("sections.birth")}</Label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <DateField id="birth-date" label="Date" value={form.birthDate} onChange={(d) => update("birthDate", d)} />
+          <DateField id="birth-date" label={t("fields.date")} value={form.birthDate} onChange={(d) => update("birthDate", d)} clearLabel={t("date.clear")} pickLabel={t("date.pick")} />
           <div className="space-y-2">
-            <Label htmlFor="birth-place">City</Label>
-            <Input id="birth-place" value={form.birthPlace} onChange={(e) => update("birthPlace", e.target.value)} placeholder="City" maxLength={100} />
+            <Label htmlFor="birth-place">{t("fields.city")}</Label>
+            <Input id="birth-place" value={form.birthPlace} onChange={(e) => update("birthPlace", e.target.value)} placeholder={t("placeholders.city")} maxLength={100} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="birth-country">Country</Label>
+            <Label htmlFor="birth-country">{t("fields.country")}</Label>
             <Select value={form.birthCountry} onValueChange={(v) => update("birthCountry", v)}>
-              <SelectTrigger id="birth-country"><SelectValue placeholder="Country" /></SelectTrigger>
+              <SelectTrigger id="birth-country"><SelectValue placeholder={t("placeholders.country")} /></SelectTrigger>
               <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -226,22 +229,24 @@ export function MemorialCreateForm() {
 
       {/* Death */}
       <div className="space-y-3">
-        <Label className="text-base">Death</Label>
+        <Label className="text-base">{t("sections.death")}</Label>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <DateField
-            id="death-date" label="Date"
+            id="death-date" label={t("fields.date")}
             value={form.deathDate}
             onChange={(d) => { update("deathDate", d); if (!d) { update("deathPlace", ""); update("deathCountry", "") } }}
             disabledDays={(d) => (form.birthDate ? d < form.birthDate : false) || d > new Date()}
+            clearLabel={t("date.clear")}
+            pickLabel={t("date.pick")}
           />
           <div className="space-y-2">
-            <Label htmlFor="death-place">City</Label>
-            <Input id="death-place" value={form.deathPlace} onChange={(e) => update("deathPlace", e.target.value)} placeholder="City" disabled={!form.deathDate} maxLength={100} />
+            <Label htmlFor="death-place">{t("fields.city")}</Label>
+            <Input id="death-place" value={form.deathPlace} onChange={(e) => update("deathPlace", e.target.value)} placeholder={t("placeholders.city")} disabled={!form.deathDate} maxLength={100} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="death-country">Country</Label>
+            <Label htmlFor="death-country">{t("fields.country")}</Label>
             <Select value={form.deathCountry} onValueChange={(v) => update("deathCountry", v)} disabled={!form.deathDate}>
-              <SelectTrigger id="death-country"><SelectValue placeholder="Country" /></SelectTrigger>
+              <SelectTrigger id="death-country"><SelectValue placeholder={t("placeholders.country")} /></SelectTrigger>
               <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
             </Select>
           </div>
@@ -251,10 +256,10 @@ export function MemorialCreateForm() {
       {/* Actions */}
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2 border-t border-border/60">
         <Button variant="outline" onClick={handleReset} className="gap-2" disabled={isPending}>
-          <RotateCcw className="h-4 w-4" />Reset
+          <RotateCcw className="h-4 w-4" />{t("actions.reset")}
         </Button>
         <Button onClick={handleSave} className="gap-2" disabled={isPending || uploading}>
-          <Save className="h-4 w-4" />Create profile
+          <Save className="h-4 w-4" />{t("actions.createProfile")}
         </Button>
       </div>
     </div>

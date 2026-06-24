@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
 import Link from "next/link"
 import { Trash2, SquarePen, Cake, Heart, HeartCrack, Flower, ArrowUpRight, Shield, Hourglass } from "lucide-react"
@@ -111,11 +111,13 @@ function eventIcon(type: Event["type"]) {
   return <Flower className="h-3.5 w-3.5" />
 }
 
-function eventLabel(e: Event): string {
-  if (e.type === "BORN")     return e.place ? `Born in ${e.place}` : "Born"
-  if (e.type === "DIED")     return e.place ? `Died in ${e.place}` : "Died"
-  if (e.type === "DIVORCED") return `Divorced from ${e.spouseName}`
-  return `Married ${e.spouseName}`
+type EventTranslator = (key: string, values?: Record<string, string>) => string
+
+function eventLabel(e: Event, t: EventTranslator): string {
+  if (e.type === "BORN")     return e.place ? t("timeline.bornIn", { place: e.place }) : t("timeline.born")
+  if (e.type === "DIED")     return e.place ? t("timeline.diedIn", { place: e.place }) : t("timeline.died")
+  if (e.type === "DIVORCED") return t("timeline.divorcedFrom", { name: e.spouseName })
+  return t("timeline.married", { name: e.spouseName })
 }
 
 export function PersonInfoSheet({
@@ -124,6 +126,8 @@ export function PersonInfoSheet({
   onEdit, onAddRelative, onSuccess,
 }: Props) {
   const locale = useLocale()
+  const t = useTranslations("FamilyTree")
+  const tc = useTranslations("Common")
   const router = useRouter()
   const [removing, setRemoving] = useState(false)
   const [requesting, startRequest] = useTransition()
@@ -149,14 +153,14 @@ export function PersonInfoSheet({
     startRequest(async () => {
       const result = await requestGuardianship({ profileId: person.id })
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Request sent. The current guardian will be notified.")
+      toast.success(t("toasts.coManageRequestSent"))
       router.refresh()
     })
   }
 
   const label = relationFromRoot(persons, relations, rootId, person.id)
   const displayName = person.maidenName
-    ? `${person.firstName} ${person.lastName} (née ${person.maidenName})`
+    ? t("nameWithMaiden", { name: `${person.firstName} ${person.lastName}`, maidenName: person.maidenName })
     : `${person.firstName} ${person.lastName}`
   const initials = `${person.firstName[0] ?? ""}${person.lastName[0] ?? ""}`.toUpperCase()
 
@@ -167,7 +171,7 @@ export function PersonInfoSheet({
     const result = await removeMember(rootId, person.id)
     setRemoving(false)
     if (result?.error) { toast.error(result.error); return }
-    toast.success("Removed from the tree.")
+    toast.success(t("toasts.removedFromTree"))
     onClose()
     onSuccess()
   }
@@ -194,7 +198,7 @@ export function PersonInfoSheet({
                 <p className="text-xs italic text-muted-foreground mt-0.5">&ldquo;{person.nickname}&rdquo;</p>
               )}
               {isSelf
-                ? <p className="text-xs text-primary mt-1">This is you</p>
+                ? <p className="text-xs text-primary mt-1">{t("infoSheet.thisIsYou")}</p>
                 : label && <p className="text-xs text-primary mt-1">{label}</p>}
             </div>
           </div>
@@ -204,8 +208,8 @@ export function PersonInfoSheet({
         <div className="px-5 py-4 flex items-center justify-between gap-3 border-b border-border/60">
           <p className="text-xs text-muted-foreground leading-snug max-w-[220px]">
             {canEditMember
-              ? "Update name, dates and details."
-              : "You can only edit your own profile, your memorials, or people you added to the tree."}
+              ? t("infoSheet.editHint")
+              : t("infoSheet.editDisabledHint")}
           </p>
           <Button
             variant="outline"
@@ -215,7 +219,7 @@ export function PersonInfoSheet({
             disabled={!canEditMember}
           >
             <SquarePen className="h-3.5 w-3.5" />
-            Edit
+            {tc("edit")}
           </Button>
         </div>
 
@@ -224,13 +228,13 @@ export function PersonInfoSheet({
           <div className="px-5 py-4 flex items-center justify-between gap-3 border-b border-border/60">
             <p className="text-xs text-muted-foreground leading-snug max-w-[220px]">
               {alreadyRequested
-                ? "Waiting for the current guardian to approve."
-                : "Ask the current guardian to let you co-manage this profile."}
+                ? t("infoSheet.coManageWaiting")
+                : t("infoSheet.coManageHint")}
             </p>
             {alreadyRequested ? (
               <Button variant="outline" size="sm" className="gap-1.5 shrink-0" disabled>
                 <Hourglass className="h-3.5 w-3.5" />
-                Pending
+                {t("infoSheet.pending")}
               </Button>
             ) : (
               <Button
@@ -241,7 +245,7 @@ export function PersonInfoSheet({
                 disabled={requesting || !canRequestCoManage}
               >
                 <Shield className="h-3.5 w-3.5" />
-                Co-manage
+                {t("infoSheet.coManage")}
               </Button>
             )}
           </div>
@@ -250,7 +254,7 @@ export function PersonInfoSheet({
         {/* Timeline */}
         {events.length > 0 && (
           <div className="px-5 py-4 border-b border-border/60">
-            <h3 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Timeline</h3>
+            <h3 className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">{t("infoSheet.timeline")}</h3>
             <ol className="relative space-y-3 pl-1">
               {events.map((e, i) => (
                 <li key={e.id} className="relative flex items-start gap-3">
@@ -261,7 +265,7 @@ export function PersonInfoSheet({
                     {eventIcon(e.type)}
                   </span>
                   <div className="min-w-0 flex-1 pt-0.5">
-                    <p className="text-sm leading-tight">{eventLabel(e)}</p>
+                    <p className="text-sm leading-tight">{eventLabel(e, t)}</p>
                     {e.date && (
                       <p className="text-xs text-muted-foreground tabular-nums mt-0.5">{formatLongDate(e.date)}</p>
                     )}
@@ -275,12 +279,12 @@ export function PersonInfoSheet({
         {/* Quick add relatives */}
         {canManage && (
           <div className="px-5 py-4 border-b border-border/60">
-            <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">Add relative</p>
+            <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">{t("infoSheet.addRelative")}</p>
             <div className="grid grid-cols-2 gap-1.5">
-              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "parent")}>+ Parent</Button>
-              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "sibling")}>+ Sibling</Button>
-              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "spouse")}>+ Partner</Button>
-              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "child")}>+ Child</Button>
+              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "parent")}>{t("infoSheet.addParent")}</Button>
+              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "sibling")}>{t("infoSheet.addSibling")}</Button>
+              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "spouse")}>{t("infoSheet.addPartner")}</Button>
+              <Button variant="outline" size="sm" className="gap-1.5 justify-start" onClick={() => onAddRelative(person.id, "child")}>{t("infoSheet.addChild")}</Button>
             </div>
           </div>
         )}
@@ -292,7 +296,7 @@ export function PersonInfoSheet({
               href={`/profile/${person.id}`}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
             >
-              See profile
+              {t("infoSheet.seeProfile")}
               <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
           ) : <span />}
@@ -301,22 +305,22 @@ export function PersonInfoSheet({
               <AlertDialogTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-1.5 text-destructive hover:text-destructive" disabled={removing}>
                   <Trash2 className="h-3.5 w-3.5" />
-                  Remove
+                  {tc("remove")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Remove from tree?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("removeDialog.title")}</AlertDialogTitle>
                   <AlertDialogDescription>
                     {isGhost
-                      ? <>{displayName} will be deleted permanently from the tree and from the system along with their relations to others in the tree. This cannot be undone.</>
-                      : <>{displayName} will be removed from your tree. The profile stays untouched and remains in the system. People who are only connected to your tree through this profile will also disappear from this view.</>}
+                      ? t("removeDialog.ghostDescription", { name: displayName })
+                      : t("removeDialog.personDescription", { name: displayName })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
                   <AlertDialogAction onClick={handleRemove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Remove
+                    {tc("remove")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

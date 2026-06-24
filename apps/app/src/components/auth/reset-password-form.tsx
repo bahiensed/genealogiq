@@ -2,6 +2,7 @@
 
 import { useState, useActionState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,11 +15,13 @@ interface Props {
 }
 
 export function ResetPasswordForm({ token, callbackUrl }: Props) {
+  const t = useTranslations('Auth')
+  const tc = useTranslations('Common')
   const [state, dispatch, isPending] = useActionState(resetPassword, undefined)
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <AuthCard title="Reset password" description="Enter your new password below.">
+    <AuthCard title={t('resetTitle')} description={t('resetDescription')}>
       <form action={dispatch} className="space-y-4">
         <input type="hidden" name="token" value={token} />
         {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
@@ -28,7 +31,7 @@ export function ResetPasswordForm({ token, callbackUrl }: Props) {
         )}
 
         <div className="space-y-1.5">
-          <Label htmlFor="password">New password</Label>
+          <Label htmlFor="password">{t('newPassword')}</Label>
           <div className="relative">
             <Input
               id="password"
@@ -42,7 +45,7 @@ export function ResetPasswordForm({ token, callbackUrl }: Props) {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? t('hidePassword') : t('showPassword')}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -53,7 +56,7 @@ export function ResetPasswordForm({ token, callbackUrl }: Props) {
         </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Saving…" : "Save new password"}
+          {isPending ? tc('saving') : t('saveNewPassword')}
         </Button>
       </form>
     </AuthCard>

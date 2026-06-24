@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
+import { useLocale, useTranslations } from "next-intl"
 import { Play, X, ChevronLeft, ChevronRight, Images, ImagePlus, ArrowDownUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
@@ -16,11 +17,11 @@ import type { GalleryItemRow } from "@/queries/gallery"
 const PAGE_SIZE = 12
 type SortDir = "newest" | "oldest"
 
-const formatDate = (iso?: string | null) => {
+const formatDate = (iso: string | null | undefined, locale: string) => {
   if (!iso) return ""
   const d = new Date(iso)
   if (isNaN(d.getTime())) return ""
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+  return d.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })
 }
 
 const formatDuration = (sec: number) => {
@@ -37,6 +38,9 @@ interface Props {
 }
 
 export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }: Props) {
+  const t = useTranslations("Gallery")
+  const tc = useTranslations("Common")
+  const locale = useLocale()
   const isEmpty = rawItems.length === 0
 
   const [sort, setSort] = useState<SortDir>("newest")
@@ -100,7 +104,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
     <>
       <section className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
         <div className="flex flex-col gap-1 min-w-0">
-          <p className="text-muted-foreground italic">Frozen moments: light, laughter and the quiet in between</p>
+          <p className="text-muted-foreground italic">{t("tagline")}</p>
           {upgradeHint}
         </div>
         <div className="flex items-center gap-2 shrink-0 self-end lg:self-auto">
@@ -109,12 +113,12 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2">
                   <ArrowDownUp className="h-4 w-4" />
-                  {sort === "newest" ? "Newest first" : "Oldest first"}
+                  {sort === "newest" ? t("sortNewest") : t("sortOldest")}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setSort("newest")}>Newest first</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSort("oldest")}>Oldest first</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSort("newest")}>{t("sortNewest")}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSort("oldest")}>{t("sortOldest")}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -122,7 +126,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
             <Button asChild className="gap-2">
               <Link href={editHref}>
                 {isEmpty ? <ImagePlus className="h-4 w-4" /> : <Images className="h-4 w-4" />}
-                {isEmpty ? "Add media" : "Edit"}
+                {isEmpty ? t("addMedia") : tc("edit")}
               </Link>
             </Button>
           )}
@@ -134,12 +138,12 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
       {isEmpty ? (
         <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
           <Images className="h-10 w-10 text-muted-foreground" />
-          <p className="text-muted-foreground">No media yet.</p>
+          <p className="text-muted-foreground">{t("empty")}</p>
           {isOwn && editHref && (
             <Button asChild className="gap-2">
               <Link href={editHref}>
                 <ImagePlus className="h-4 w-4" />
-                Add media
+                {t("addMedia")}
               </Link>
             </Button>
           )}
@@ -156,12 +160,12 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
               >
                 {item.kind === "image" ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.url} alt="Gallery item" loading="lazy" className="w-full h-auto block" />
+                  <img src={item.url} alt={t("imageAlt")} loading="lazy" className="w-full h-auto block" />
                 ) : (
                   <div className="relative">
                     {item.poster ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.poster} alt="Video thumbnail" loading="lazy" className="w-full h-auto block" />
+                      <img src={item.poster} alt={t("videoThumbnailAlt")} loading="lazy" className="w-full h-auto block" />
                     ) : (
                       <video src={item.url} preload="metadata" className="w-full h-auto block" muted />
                     )}
@@ -186,7 +190,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
               <div className="h-6 w-6 rounded-full border-2 border-muted-foreground/30 border-t-primary animate-spin" />
             </div>
           ) : (
-            <div className="py-10 text-center text-xs text-muted-foreground">End of gallery</div>
+            <div className="py-10 text-center text-xs text-muted-foreground">{t("endOfGallery")}</div>
           )}
         </>
       )}
@@ -194,7 +198,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
       {/* Lightbox */}
       <Dialog open={isOpen} onOpenChange={(o) => !o && setLightboxIndex(null)}>
         <DialogContent className="max-w-[100vw] w-screen h-screen sm:max-w-[95vw] sm:h-[90vh] p-0 bg-background/95 backdrop-blur-xl border-border/60 [&>button]:hidden">
-          <DialogTitle className="sr-only">Gallery item viewer</DialogTitle>
+          <DialogTitle className="sr-only">{t("viewerTitle")}</DialogTitle>
           {currentItem && (
             <div className="relative w-full h-full flex items-center justify-center">
               <div className="relative inline-block max-h-full max-w-full group/media">
@@ -203,7 +207,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
                   <img
                     key={currentItem.id}
                     src={currentItem.url}
-                    alt="Gallery item"
+                    alt={t("imageAlt")}
                     className="max-h-[90vh] sm:max-h-[85vh] max-w-full object-contain block"
                   />
                 ) : (
@@ -220,7 +224,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4 sm:p-6 text-white transition-opacity duration-300 opacity-100 sm:opacity-0 sm:group-hover/media:opacity-100">
                     {(currentItem.takenAt || currentItem.location) && (
                       <div className="text-xs sm:text-sm opacity-90">
-                        {[formatDate(currentItem.takenAt), currentItem.location].filter(Boolean).join(" · ")}
+                        {[formatDate(currentItem.takenAt, locale), currentItem.location].filter(Boolean).join(" · ")}
                       </div>
                     )}
                     {currentItem.description && (
@@ -234,7 +238,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
                 type="button"
                 onClick={() => setLightboxIndex(null)}
                 className="absolute top-4 right-4 h-10 w-10 inline-flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 hover:bg-accent transition"
-                aria-label="Close"
+                aria-label={tc("close")}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -245,7 +249,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
                     type="button"
                     onClick={goPrev}
                     className="hidden md:inline-flex absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 hover:bg-accent transition"
-                    aria-label="Previous"
+                    aria-label={t("previous")}
                   >
                     <ChevronLeft className="h-6 w-6" />
                   </button>
@@ -253,7 +257,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
                     type="button"
                     onClick={goNext}
                     className="hidden md:inline-flex absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 hover:bg-accent transition"
-                    aria-label="Next"
+                    aria-label={tc("next")}
                   >
                     <ChevronRight className="h-6 w-6" />
                   </button>

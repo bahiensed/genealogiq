@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
 import { Search, X, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
@@ -25,6 +25,7 @@ interface Props {
 
 export function HeaderSearch({ onNavigate }: Props = {}) {
   const locale = useLocale()
+  const t = useTranslations("Home")
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -91,7 +92,7 @@ export function HeaderSearch({ onNavigate }: Props = {}) {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setOpen(true)}
           onKeyDown={(e) => e.key === "Escape" && clear()}
-          placeholder="Search profile…"
+          placeholder={t("searchPlaceholder")}
           className="border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 h-7 text-sm px-0"
           autoComplete="off"
         />
@@ -100,7 +101,7 @@ export function HeaderSearch({ onNavigate }: Props = {}) {
             type="button"
             onClick={clear}
             className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Clear search"
+            aria-label={t("clearSearch")}
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -112,11 +113,11 @@ export function HeaderSearch({ onNavigate }: Props = {}) {
           {loading ? (
             <div className="flex items-center justify-center gap-2 px-4 py-6 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
-              Searching…
+              {t("searching")}
             </div>
           ) : results.length === 0 ? (
             <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-              No profiles found.
+              {t("noProfilesFound")}
             </div>
           ) : (
             <ul>
@@ -125,7 +126,7 @@ export function HeaderSearch({ onNavigate }: Props = {}) {
                 const isMemorialized = r.role === "APP_MEMO"
                 const sub = r.birthPlace
                   ? `${r.birthPlace}${r.birthCountry ? `, ${getCountryName(r.birthCountry, locale)}` : ""}`
-                  : isMemorialized ? "Memorialized profile" : ""
+                  : isMemorialized ? t("memorializedProfile") : ""
                 return (
                   <li key={r.id}>
                     <button
@@ -150,7 +151,7 @@ export function HeaderSearch({ onNavigate }: Props = {}) {
                       </div>
                       {isMemorialized && (
                         <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground">
-                          Memorialized
+                          {t("memorializedBadge")}
                         </span>
                       )}
                     </button>

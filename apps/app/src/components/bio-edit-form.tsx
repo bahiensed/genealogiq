@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { ImagePlus, X, Save, RotateCcw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -44,6 +45,8 @@ interface Props {
 }
 
 export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) {
+  const t = useTranslations("Bio")
+  const tc = useTranslations("Common")
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -64,18 +67,18 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
     const all = Array.from(files)
     const valid = all.filter(isAllowedImage)
     if (valid.length < all.length) {
-      toast.warning(`${all.length - valid.length} file(s) skipped. Use ${IMAGE_FORMATS_LABEL}.`)
+      toast.warning(t("toastFilesSkipped", { count: all.length - valid.length, formats: IMAGE_FORMATS_LABEL }))
     }
     if (valid.length === 0) return
     const remaining = maxImages - images.length
-    const upgradeAction = { label: "Upgrade plan", onClick: () => router.push("/subscriptions") }
+    const upgradeAction = { label: t("upgradePlan"), onClick: () => router.push("/subscriptions") }
     if (remaining <= 0) {
-      toast.warning(`Maximum of ${maxImages} images reached.`, { action: upgradeAction })
+      toast.warning(t("toastMaxImages", { max: maxImages }), { action: upgradeAction })
       return
     }
     const toProcess = valid.slice(0, remaining)
     if (valid.length > remaining) {
-      toast.warning(`Only ${remaining} image(s) added — limit is ${maxImages}.`, { action: upgradeAction })
+      toast.warning(t("toastLimitedAdded", { count: remaining, max: maxImages }), { action: upgradeAction })
     }
 
     const placeholders: ImageEntry[] = toProcess.map((f) => ({
@@ -102,7 +105,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
           return next
         })
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : `Failed to upload ${file.name}`)
+        toast.error(err instanceof Error ? err.message : t("toastUploadFailed", { name: file.name }))
         setImages((prev) => prev.filter((img) => img.url !== placeholders[i].url))
       }
     }
@@ -114,7 +117,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
 
   const handleSave = () => {
     if (images.some((img) => img.uploading)) {
-      toast.warning("Please wait for all images to finish uploading.")
+      toast.warning(t("toastWaitUploads"))
       return
     }
     startTransition(async () => {
@@ -131,7 +134,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
       if (result?.error) {
         toast.error(result.error)
       } else {
-        toast.success("Biography saved.")
+        toast.success(t("toastSaved"))
         router.push(`/profile/${profileId}/bio`)
       }
     })
@@ -147,13 +150,13 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
         aspect: (img.aspect as Aspect) ?? "square",
       })) ?? [],
     )
-    toast("Changes reset.")
+    toast(t("toastReset"))
   }
 
   const handleDelete = () => {
     startTransition(async () => {
       await deleteBio(profileId)
-      toast.success("Biography deleted.")
+      toast.success(t("toastDeleted"))
       router.push(`/profile/${profileId}/bio`)
     })
   }
@@ -163,7 +166,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
       {/* Images */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base">Photos</Label>
+          <Label className="text-base">{t("photos")}</Label>
           <span className="text-xs text-muted-foreground">{images.length}/{maxImages}</span>
         </div>
 
@@ -171,7 +174,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
           {images.map((img, idx) => (
             <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-border/60">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img.url} alt="Preview" className="h-full w-full object-cover" />
+              <img src={img.url} alt={t("previewAlt")} className="h-full w-full object-cover" />
               {img.uploading && (
                 <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
                   <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -182,7 +185,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
                   type="button"
                   onClick={() => removeImage(idx)}
                   className="absolute top-1.5 right-1.5 h-7 w-7 inline-flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition"
-                  aria-label="Remove image"
+                  aria-label={t("removeImage")}
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -197,7 +200,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
               className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
             >
               <ImagePlus className="h-6 w-6" />
-              <span className="text-xs font-medium">Add image</span>
+              <span className="text-xs font-medium">{t("addImage")}</span>
             </button>
           )}
         </div>
@@ -218,7 +221,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
       {/* Quote */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="bio-quote" className="text-base">Memorable quote</Label>
+          <Label htmlFor="bio-quote" className="text-base">{t("quoteLabel")}</Label>
           <span className="text-xs text-muted-foreground">{quote.length}/{MAX_QUOTE}</span>
         </div>
         <Input
@@ -226,14 +229,14 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
           value={quote}
           maxLength={MAX_QUOTE}
           onChange={(e) => setQuote(e.target.value)}
-          placeholder="A defining motto or quote..."
+          placeholder={t("quotePlaceholder")}
         />
       </div>
 
       {/* Bio text */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="bio-text" className="text-base">Biography</Label>
+          <Label htmlFor="bio-text" className="text-base">{t("title")}</Label>
           <span className="text-xs text-muted-foreground">{text.length}/{maxChars}</span>
         </div>
         <Textarea
@@ -241,10 +244,10 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
           value={text}
           maxLength={maxChars}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Write biography..."
+          placeholder={t("textPlaceholder")}
           className="min-h-[260px] text-base leading-relaxed"
         />
-        <p className="text-xs text-muted-foreground">Use blank lines to separate paragraphs.</p>
+        <p className="text-xs text-muted-foreground">{t("paragraphHint")}</p>
       </div>
 
       {/* Actions */}
@@ -252,12 +255,12 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
         <div className="order-1 md:order-2 md:ml-auto flex flex-col md:flex-row gap-2 md:gap-3">
           <Button onClick={handleSave} className="gap-2 w-full md:w-auto order-1 md:order-2" disabled={isPending}>
             <Save className="h-4 w-4" />
-            Save
+            {tc("save")}
           </Button>
           {!isCreating && (
             <Button variant="outline" onClick={handleReset} className="gap-2 w-full md:w-auto order-2 md:order-1" disabled={isPending}>
               <RotateCcw className="h-4 w-4" />
-              Reset
+              {t("reset")}
             </Button>
           )}
         </div>
@@ -267,23 +270,23 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" className="gap-2 w-full md:w-auto">
                   <Trash2 className="h-4 w-4" />
-                  Delete bio
+                  {t("deleteBio")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete biography?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("deleteDialogTitle")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently remove the photos, quote and biography text. This action cannot be undone.
+                    {t("deleteDialogDescription")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDelete}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Delete
+                    {tc("delete")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

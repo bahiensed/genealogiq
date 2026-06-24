@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { forgotPassword } from '@/actions/auth'
 import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
@@ -9,12 +10,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export function ForgotPasswordForm() {
+  const t = useTranslations('Auth')
   const [state, dispatch, isPending] = useActionState(forgotPassword, undefined)
 
   return (
     <AuthCard
-      title="Forgot your password?"
-      description="Enter your email below and we'll send you a reset link."
+      title={t('forgotTitle')}
+      description={t('forgotDescription')}
     >
       <form action={dispatch} className="space-y-4">
         {state?.error && (
@@ -22,24 +24,24 @@ export function ForgotPasswordForm() {
         )}
 
         <div className="space-y-1.5">
-          <Label htmlFor="email">E-mail</Label>
+          <Label htmlFor="email">{t('email')}</Label>
           <Input
             id="email"
             name="email"
             type="email"
-            placeholder="your@email.com"
+            placeholder={t('emailPlaceholder')}
             autoComplete="email"
           />
         </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Sending…" : "Send reset link"}
+          {isPending ? t('sending') : t('sendResetLink')}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          Remember your password?{" "}
+          {t('rememberPassword')}{" "}
           <Link href="/sign-in" className="text-primary hover:underline font-medium">
-            Sign in
+            {t('signIn')}
           </Link>
         </p>
       </form>

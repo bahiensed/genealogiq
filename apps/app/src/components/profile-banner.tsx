@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react"
 import Link from "next/link"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
 import { Cake, Feather, Heart, Images, Flower2, MapPin, SquarePen, BrickWall } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -40,6 +40,7 @@ const formatPlace = (place: string, country: string | null | undefined, locale: 
 
 export function ProfileBanner({ profile }: Props) {
   const locale = useLocale()
+  const t = useTranslations("Profile")
   const isMemorial = profile.type === "memorialized"
   const canEdit = profile.isOwn || profile.isGuardian
   const [favorited, setFavorited] = useState(profile.isFavoritedByMe ?? false)
@@ -70,7 +71,7 @@ export function ProfileBanner({ profile }: Props) {
               {canEdit && (
                 <Link
                   href={`/profile/${profile.id}/edit`}
-                  aria-label="Edit profile"
+                  aria-label={t("editProfileAria")}
                   className="h-10 w-10 rounded-full inline-flex items-center justify-center transition-transform hover:scale-110 active:scale-95 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
                 >
                   <SquarePen className="h-5 w-5" />
@@ -92,7 +93,7 @@ export function ProfileBanner({ profile }: Props) {
                     })
                   }}
                   disabled={isPending}
-                  aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                  aria-label={favorited ? t("removeFromFavorites") : t("addToFavorites")}
                   className="h-10 w-10 rounded-full glass border-0 inline-flex items-center justify-center transition-transform hover:scale-110 active:scale-95 disabled:opacity-60"
                 >
                   <Heart
@@ -120,7 +121,7 @@ export function ProfileBanner({ profile }: Props) {
                   <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 mb-3">
                     {isMemorial && (
                       <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
-                        Memorialized
+                        {t("memorialized")}
                       </Badge>
                     )}
                     <Tooltip>
@@ -130,7 +131,7 @@ export function ProfileBanner({ profile }: Props) {
                           {profile.mediaTotal}
                         </Badge>
                       </TooltipTrigger>
-                      <TooltipContent>Media on Gallery</TooltipContent>
+                      <TooltipContent>{t("tooltipMedia")}</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -139,7 +140,7 @@ export function ProfileBanner({ profile }: Props) {
                           {profile.tributes}
                         </Badge>
                       </TooltipTrigger>
-                      <TooltipContent>Received Tributes</TooltipContent>
+                      <TooltipContent>{t("tooltipTributes")}</TooltipContent>
                     </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -148,7 +149,7 @@ export function ProfileBanner({ profile }: Props) {
                           {favCount}
                         </Badge>
                       </TooltipTrigger>
-                      <TooltipContent>Favorites</TooltipContent>
+                      <TooltipContent>{t("tooltipFavorites")}</TooltipContent>
                     </Tooltip>
                     {!isMemorial && (
                       <Tooltip>
@@ -158,7 +159,7 @@ export function ProfileBanner({ profile }: Props) {
                             {profile.guardedCount}
                           </Badge>
                         </TooltipTrigger>
-                        <TooltipContent>Guarded Profiles</TooltipContent>
+                        <TooltipContent>{t("tooltipGuarded")}</TooltipContent>
                       </Tooltip>
                     )}
                   </div>
@@ -173,10 +174,16 @@ export function ProfileBanner({ profile }: Props) {
                     <div className="flex items-center gap-2 text-muted-foreground justify-center lg:justify-start min-w-0">
                       <Cake className="h-4 w-4 text-primary shrink-0" />
                       <span className="truncate min-w-0">
-                        Born on <span className="text-foreground font-medium">{profile.birth.date}</span>
-                        {profile.birth.place && (
-                          <> in <span className="text-foreground font-medium">{formatPlace(profile.birth.place, profile.birth.country, locale)}</span></>
-                        )}
+                        {profile.birth.place
+                          ? t.rich("bornOnInPlace", {
+                              date: profile.birth.date,
+                              place: formatPlace(profile.birth.place, profile.birth.country, locale),
+                              strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                            })
+                          : t.rich("bornOn", {
+                              date: profile.birth.date,
+                              strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                            })}
                       </span>
                     </div>
                   )}
@@ -184,10 +191,16 @@ export function ProfileBanner({ profile }: Props) {
                     <div className="flex items-center gap-2 text-muted-foreground justify-center lg:justify-start min-w-0">
                       <Feather className="h-4 w-4 text-primary shrink-0" />
                       <span className="truncate min-w-0">
-                        Deceased on <span className="text-foreground font-medium">{profile.death.date}</span>
-                        {profile.death.place && (
-                          <> in <span className="text-foreground font-medium">{formatPlace(profile.death.place, profile.death.country, locale)}</span></>
-                        )}
+                        {profile.death.place
+                          ? t.rich("deceasedOnInPlace", {
+                              date: profile.death.date,
+                              place: formatPlace(profile.death.place, profile.death.country, locale),
+                              strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                            })
+                          : t.rich("deceasedOn", {
+                              date: profile.death.date,
+                              strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                            })}
                       </span>
                     </div>
                   )}

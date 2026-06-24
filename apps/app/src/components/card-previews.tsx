@@ -1,15 +1,17 @@
 import { Heart, Star, Images, Flower2, BrickWall, TreePine } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 import { getAvatarColor, getAvatarGradient } from "@/lib/avatar-color"
 import type { TributeAuthorPreview } from "@/queries/tribute"
 import type { FavoriteRow } from "@/queries/favorite"
 import type { MemorialRow } from "@/queries/memorial"
 
-export function TreePreview({ memberCount = 0 }: { memberCount?: number }) {
+export async function TreePreview({ memberCount = 0 }: { memberCount?: number }) {
   if (memberCount <= 1) {
+    const t = await getTranslations("Profile")
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
         <TreePine className="h-8 w-8 text-muted-foreground/50" />
-        <p className="text-xs text-muted-foreground">No relatives yet.</p>
+        <p className="text-xs text-muted-foreground">{t("emptyRelatives")}</p>
       </div>
     )
   }
@@ -292,13 +294,14 @@ function TvBarsPreview() {
   )
 }
 
-export function GalleryPreview({ images, hasVideos = false }: { images: string[]; hasVideos?: boolean }) {
+export async function GalleryPreview({ images, hasVideos = false }: { images: string[]; hasVideos?: boolean }) {
   if (images.length === 0) {
     if (hasVideos) return <TvBarsPreview />
+    const t = await getTranslations("Profile")
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
         <Images className="h-8 w-8 text-muted-foreground/50" />
-        <p className="text-xs text-muted-foreground">No media yet.</p>
+        <p className="text-xs text-muted-foreground">{t("emptyMedia")}</p>
       </div>
     )
   }
@@ -314,12 +317,13 @@ export function GalleryPreview({ images, hasVideos = false }: { images: string[]
   )
 }
 
-export function TributesPreview({ authors }: { authors: TributeAuthorPreview[] }) {
+export async function TributesPreview({ authors }: { authors: TributeAuthorPreview[] }) {
   if (authors.length === 0) {
+    const t = await getTranslations("Profile")
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
         <Flower2 className="h-8 w-8 text-muted-foreground/50" />
-        <p className="text-xs text-muted-foreground">No tributes yet.</p>
+        <p className="text-xs text-muted-foreground">{t("emptyTributes")}</p>
       </div>
     )
   }
@@ -351,12 +355,13 @@ export function TributesPreview({ authors }: { authors: TributeAuthorPreview[] }
   )
 }
 
-export function FavoritesPreview({ favorites }: { favorites: FavoriteRow[] }) {
+export async function FavoritesPreview({ favorites }: { favorites: FavoriteRow[] }) {
   if (favorites.length === 0) {
+    const t = await getTranslations("Profile")
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
         <Heart className="h-8 w-8 text-muted-foreground/50" />
-        <p className="text-xs text-muted-foreground">No favorites yet.</p>
+        <p className="text-xs text-muted-foreground">{t("emptyFavorites")}</p>
       </div>
     )
   }
@@ -386,12 +391,13 @@ export function FavoritesPreview({ favorites }: { favorites: FavoriteRow[] }) {
   )
 }
 
-export function GuardianPreview({ memorials }: { memorials: MemorialRow[] }) {
+export async function GuardianPreview({ memorials }: { memorials: MemorialRow[] }) {
   if (memorials.length === 0) {
+    const t = await getTranslations("Profile")
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
         <BrickWall className="h-8 w-8 text-muted-foreground/50" />
-        <p className="text-xs text-muted-foreground">No profiles guarded yet.</p>
+        <p className="text-xs text-muted-foreground">{t("emptyGuarded")}</p>
       </div>
     )
   }
@@ -427,14 +433,15 @@ function osmTileUrl(lat: number, lon: number, zoom: number) {
   return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`
 }
 
-export function GeoPreview({ lat, lon }: { lat?: number | null; lon?: number | null }) {
+export async function GeoPreview({ lat, lon }: { lat?: number | null; lon?: number | null }) {
+  const t = await getTranslations("Profile")
   const resolvedLat = lat ?? -22.959167
   const resolvedLng = lon ?? -43.188333
   const mapUrl = osmTileUrl(resolvedLat, resolvedLng, 14)
   return (
     <div className="relative h-full w-full min-h-[120px] rounded-xl overflow-hidden bg-muted">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={mapUrl} alt="Map" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      <img src={mapUrl} alt={t("mapAlt")} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/30 to-transparent" />
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
         <span className="relative flex h-3 w-3">
@@ -448,12 +455,13 @@ export function GeoPreview({ lat, lon }: { lat?: number | null; lon?: number | n
 
 const QR_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAAAAAklEQVR4AewaftIAAAQtSURBVO3BUW5jSRIEQY8E739lX2E/hRqABT1OqnvCLH6haslQtWioWjRULRqqFg1Vi178gyT8CVRuJOGGyk8l4UTlJAknKidJ+BOofDdULRqqFg1Vi4aqRUPVoheXVDYk4QkqN5LwLpUTlZMkfJLKhiS8a6haNFQtGqoWDVWLhqpFLx6ShCeoPCEJN1Q+JQk3VD4pCU9Q+amhatFQtWioWjRULRqqFr2o/0vCDZXvknCiUmdD1aKhatFQtWioWjRULXrxH6PyhCR8ShJOVP42Q9WioWrRULVoqFo0VC168RCVP1kSTlR+Kgm/icpvMVQtGqoWDVWLhqpFQ9WiF5eSUGcqJ0k4UTlJwhOS8NsNVYuGqkVD1aKhatFQtSh+4S+UhE9S+ZQknKj8bYaqRUPVoqFq0VC1aKha9OIfJOFE5SQJG1ROVE6ScKLyU0l4gsqNJGxQ+amhatFQtWioWjRULRqqFsUv/CJJOFE5ScKJykkSbqj825JwonIjCScqT0jCicq7hqpFQ9WioWrRULVoqFoUv3CQhCeonCThROUkCScqJ0k4UbmRhBOVn0rCn0DlJAk3VL4bqhYNVYuGqkVD1aKhatGLh6g8IQknKjdUTpJwonIjCd+pnCThROUkCZ+k8gSVkyS8a6haNFQtGqoWDVWLhqpFLz4sCScqN5JwovKEJJyovCsJT1A5ScINlZMknKicJOFThqpFQ9WioWrRULXoxUOS8EkqJ0k4UTlROUnCjSR8p3KShBtJOFG5kYQTlZMknKicJOFE5V1D1aKhatFQtWioWjRULYpfOEjCicqNJPwmKr9FEk5UTpJwonKShCeonCThhsp3Q9WioWrRULVoqFo0VC168cuo3EjCE5JwonKShO9UnpCEE5VPUrmhcpKEdw1Vi4aqRUPVoqFq0VC16MVDknBD5SQJT1A5ScKJyk8l4YbKSRJOkrAhCScqJyrvGqoWDVWLhqpFQ9WioWpR/MJfKAknKidJOFH5qSQ8QeUJSbih8ilD1aKhatFQtWioWjRULXrxD5LwJ1A5UXlCEt6lcqJyIwk3knCickPlJAlPUPluqFo0VC0aqhYNVYuGqkUvLqlsSMKNJNxQOUnCicpvofKEJJyofMpQtWioWjRULRqqFg1Vi148JAlPUPkkld8iCTeS8EkqJ0l4gsp3Q9WioWrRULVoqFo0VC168R+ThBsqJ0l4l8qJyo0k3FA5ScJJEv5tQ9WioWrRULVoqFo0VC168R+jcpKEGyrfJeEkCTdUTlSeoHKShBsqJ0l411C1aKhaNFQtGqoWDVWLXjxE5TdRuaFyIwnvUjlJwkkSfhOVTxmqFg1Vi4aqRUPVoqFq0YtLSfgTJOEJKu9SOUnCicqNJGxIwqcMVYuGqkVD1aKhatFQtSh+oWrJULVoqFo0VC0aqhb9D5sai0l+LRtyAAAAAElFTkSuQmCC"
 
-export function QrPreview() {
+export async function QrPreview() {
+  const t = await getTranslations("Profile")
   return (
     <div className="flex justify-center">
       <div className="bg-white p-2 rounded-xl shadow-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={QR_PLACEHOLDER} alt="QR code" className="h-24 w-24" />
+        <img src={QR_PLACEHOLDER} alt={t("qrAlt")} className="h-24 w-24" />
       </div>
     </div>
   )

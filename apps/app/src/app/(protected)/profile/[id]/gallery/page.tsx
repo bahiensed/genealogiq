@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { verifySession } from "@/lib/dal"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
@@ -16,6 +17,7 @@ interface Props {
 export default async function ProfileGalleryPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
+  const t = await getTranslations("Gallery")
   const [profile, items, features] = await Promise.all([
     getProfileById(id),
     getGalleryByUserId(id),
@@ -38,9 +40,9 @@ export default async function ProfileGalleryPage({ params }: Props) {
       <main className="container relative pt-24 pb-32 max-w-6xl">
         <div className="flex items-center justify-between gap-3 mb-2 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
-            <BackButton href={`/profile/${id}`} label="Back to profile" />
+            <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
             <div className="min-w-0">
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Gallery</h1>
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
               {!isOwn && <p className="text-muted-foreground text-sm mt-1 truncate bg-transparent">{name}</p>}
             </div>
           </div>
@@ -48,12 +50,12 @@ export default async function ProfileGalleryPage({ params }: Props) {
             <div className="flex items-center gap-2 shrink-0">
               {imageCount > 0 && (
                 <span className="inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
-                  {imageCount} {imageCount === 1 ? "image" : "images"}
+                  {t("imageCount", { count: imageCount })}
                 </span>
               )}
               {videoCount > 0 && (
                 <span className="inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
-                  {videoCount} {videoCount === 1 ? "video" : "videos"}
+                  {t("videoCount", { count: videoCount })}
                 </span>
               )}
             </div>

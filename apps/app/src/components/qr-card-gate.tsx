@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { QrCode } from "lucide-react"
 import {
   AlertDialog,
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function QrCardGate({ className, style, children }: Props) {
+  const t = useTranslations("Subscriptions")
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -35,15 +37,15 @@ export function QrCardGate({ className, style, children }: Props) {
           <AlertDialogMedia>
             <QrCode className="text-primary" />
           </AlertDialogMedia>
-          <AlertDialogTitle>Unlock your QR-Code</AlertDialogTitle>
+          <AlertDialogTitle>{t("qrGate.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            This memorial is on the free plan. Purchase a QR-Code to print it on plaques, headstones and digital spaces — keep their memory anywhere, scannable forever.
+            {t("qrGate.description")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Maybe later</AlertDialogCancel>
+          <AlertDialogCancel>{t("qrGate.maybeLater")}</AlertDialogCancel>
           <AlertDialogAction asChild>
-            <Link href="/billing/qr-code">Purchase QR-Code</Link>
+            <Link href="/billing/qr-code">{t("qrGate.purchase")}</Link>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -4,6 +4,7 @@ import { useState, useActionState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { signUp } from '@/actions/auth'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export function SignUpForm() {
+  const t = useTranslations('Auth')
   const [state, dispatch, isPending] = useActionState(signUp, undefined)
   const [showPassword, setShowPassword] = useState(false)
   const callbackUrl = useSearchParams().get('callbackUrl')
@@ -30,7 +32,7 @@ export function SignUpForm() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="firstName">First name</Label>
+            <Label htmlFor="firstName">{t('firstName')}</Label>
             <Input
               id="firstName"
               name="firstName"
@@ -43,7 +45,7 @@ export function SignUpForm() {
             )}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="lastName">Last name</Label>
+            <Label htmlFor="lastName">{t('lastName')}</Label>
             <Input
               id="lastName"
               name="lastName"
@@ -58,12 +60,12 @@ export function SignUpForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="email">E-mail</Label>
+          <Label htmlFor="email">{t('email')}</Label>
           <Input
             id="email"
             name="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
             autoComplete="email"
             aria-invalid={!!state?.errors?.email}
           />
@@ -73,7 +75,7 @@ export function SignUpForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">{t('password')}</Label>
           <div className="relative">
             <Input
               id="password"
@@ -87,7 +89,7 @@ export function SignUpForm() {
               type="button"
               onClick={() => setShowPassword((v) => !v)}
               className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? t('hidePassword') : t('showPassword')}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -98,22 +100,22 @@ export function SignUpForm() {
         </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Creating account…" : "Create account"}
+          {isPending ? t('creatingAccount') : t('createAccount')}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t('alreadyHaveAccount')}{" "}
           <Link
             href={callbackUrl ? `/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/sign-in"}
             className="text-primary hover:underline font-medium"
           >
-            Sign in
+            {t('signIn')}
           </Link>
         </p>
 
         <p className="text-center text-xs text-muted-foreground">
           <Link href="/activate" className="hover:text-foreground transition-colors">
-            Have a physical QR code? Activate it
+            {t('haveQrCode')}
           </Link>
         </p>
       </form>

@@ -1,41 +1,885 @@
 {
-  "Nav": {
-    "myProfile": "Mi perfil",
-    "subscriptions": "Suscripciones",
-    "signOut": "Cerrar sesión",
-    "messages": "Mensajes",
-    "messagesUnread": "{count} mensajes sin leer",
-    "toggleTheme": "Cambiar tema",
-    "userMenu": "Menú de usuario",
-    "language": "Idioma"
-  },
-  "Home": {
-    "tagline": "Escanea, busca y visita un perfil",
-    "myProfileTitle": "Mi perfil",
-    "myProfileSubtitle": "Ver tu página",
-    "recentlyViewedShort": "vistos recientemente",
-    "favoritesShort": "favoritos",
-    "guardedShort": "bajo tu cuidado",
-    "recentlyViewedTitle": "Vistos recientemente",
-    "recentlyViewedSubtitle": "Los perfiles vistos recientemente aparecen aquí",
-    "favoritesTitle": "Mis favoritos",
-    "favoritesSubtitle": "Los más cercanos al corazón",
-    "favoritesEmpty": "Aún no hay perfiles favoritos.",
-    "guardedTitle": "Perfiles bajo mi cuidado",
-    "guardedSubtitle": "Memoriales cuidados con esmero silencioso",
-    "guardedEmpty": "Aún no hay perfiles bajo tu cuidado.",
-    "seeAll": "Ver todos"
-  },
   "Auth": {
+    "activateDescription": "Ingresa el código de activación impreso en tu código QR físico para vincularlo a un memorial.",
+    "activateTitle": "Activa tu código QR",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "backToSignIn": "Volver al inicio de sesión",
+    "changeEmailDescription": "Se enviará un enlace de confirmación a la nueva dirección",
+    "changeEmailSubmit": "Cambiar correo",
+    "changeEmailTitle": "Cambiar correo",
+    "changeEmailTrigger": "Cambiar correo",
+    "changePasswordDescription": "Ingresa tu contraseña actual y elige una nueva.",
+    "changePasswordSubmit": "Cambiar contraseña",
+    "changePasswordTitle": "Cambiar contraseña",
+    "changePasswordTrigger": "Cambiar contraseña",
+    "changing": "Cambiando…",
+    "createAccount": "Crea una cuenta",
+    "creatingAccount": "Creando cuenta…",
+    "currentPasswordLabel": "Contraseña actual:",
+    "deleteAccountDescription": "Esta acción es irreversible. Todos tus datos se eliminarán permanentemente.",
+    "deleteAccountSubmit": "Eliminar mi cuenta",
+    "deleteAccountTitle": "Eliminar cuenta",
+    "deleteAccountTrigger": "Eliminar cuenta",
     "email": "Correo electrónico",
     "emailPlaceholder": "tu@ejemplo.com",
-    "password": "Contraseña",
+    "firstName": "Nombre",
+    "forgotDescription": "Ingresa tu correo a continuación y te enviaremos un enlace para restablecerla.",
     "forgotPassword": "¿Olvidaste tu contraseña?",
+    "forgotSentBody": "Revisa tu bandeja de entrada. El enlace expira en una hora.",
+    "forgotSentDescription": "Si este correo está registrado, recibirás un enlace en breve.",
+    "forgotSentTitle": "Correo enviado",
+    "forgotTitle": "¿Olvidaste tu contraseña?",
+    "goToSignIn": "Ir al inicio de sesión",
+    "haveQrCode": "¿Tienes un código QR físico? Actívalo",
+    "hidePassword": "Ocultar contraseña",
+    "lastName": "Apellido",
+    "newEmailLabel": "Nuevo correo:",
+    "newEmailPlaceholder": "nuevo@ejemplo.com",
+    "newHere": "¿Nuevo por aquí?",
+    "newPassword": "Nueva contraseña",
+    "newPasswordLabel": "Nueva contraseña:",
+    "password": "Contraseña",
+    "rememberPassword": "¿Recuerdas tu contraseña?",
+    "resetDescription": "Ingresa tu nueva contraseña a continuación.",
+    "resetTitle": "Restablecer contraseña",
+    "saveNewPassword": "Guardar nueva contraseña",
+    "sendResetLink": "Enviar enlace de restablecimiento",
+    "sending": "Enviando…",
+    "showPassword": "Mostrar contraseña",
     "signIn": "Iniciar sesión",
     "signingIn": "Iniciando sesión…",
-    "showPassword": "Mostrar contraseña",
-    "hidePassword": "Ocultar contraseña",
-    "newHere": "¿Nuevo por aquí?",
-    "createAccount": "Crea una cuenta"
+    "verifyChangedBody": "Inicia sesión de nuevo con tu nueva dirección de correo.",
+    "verifyChangedDescription": "Tu correo se ha actualizado correctamente.",
+    "verifyChangedTitle": "¡Correo cambiado!",
+    "verifyCheckBody": "Haz clic en el enlace que te enviamos para confirmar tu correo. El enlace expira en 24 horas.",
+    "verifyCheckDescription": "Correo de confirmación enviado.",
+    "verifyCheckTitle": "Revisa tu correo",
+    "verifyConfirmedBody": "Ahora puedes iniciar sesión con tu correo y contraseña.",
+    "verifyConfirmedDescription": "Tu cuenta se ha verificado correctamente.",
+    "verifyConfirmedTitle": "¡Correo confirmado!",
+    "verifyInvalidBody": "Regístrate de nuevo o solicita un nuevo enlace de verificación.",
+    "verifyInvalidDescription": "Este enlace de verificación es inválido o ya ha expirado.",
+    "verifyInvalidTitle": "Enlace inválido o expirado"
+  },
+  "Bio": {
+    "Bio": {
+      "addImage": "Agregar imagen",
+      "backToBiography": "Volver a la biografía",
+      "backToProfile": "Volver al perfil",
+      "carouselNext": "Siguiente",
+      "carouselPrevious": "Anterior",
+      "deleteBio": "Eliminar biografía",
+      "deleteDialogDescription": "Esto eliminará de forma permanente las fotos, la cita y el texto de la biografía. Esta acción no se puede deshacer.",
+      "deleteDialogTitle": "¿Eliminar biografía?",
+      "editSubtitleCreate": "Agrega fotos, una cita y la historia de vida.",
+      "editSubtitleEdit": "Actualiza las fotos, la cita y la historia de vida.",
+      "editTitleCreate": "Escribir biografía",
+      "editTitleEdit": "Editar biografía",
+      "empty": "Aún no hay biografía.",
+      "paragraphHint": "Usa líneas en blanco para separar los párrafos.",
+      "photoAlt": "Foto de la biografía",
+      "photos": "Fotos",
+      "previewAlt": "Vista previa",
+      "quoteLabel": "Cita memorable",
+      "quotePlaceholder": "Un lema o cita que la defina...",
+      "removeImage": "Quitar imagen",
+      "reset": "Restablecer",
+      "subtitleOther": "La historia de vida de {name}",
+      "subtitleOwn": "Una vida recordada con palabras e imágenes",
+      "textPlaceholder": "Escribe la biografía...",
+      "title": "Biografía",
+      "toastDeleted": "Biografía eliminada.",
+      "toastFilesSkipped": "{count, plural, one {# archivo omitido. Usa {formats}.} other {# archivos omitidos. Usa {formats}.}}",
+      "toastLimitedAdded": "{count, plural, one {Solo se agregó # imagen — el límite es {max}.} other {Solo se agregaron # imágenes — el límite es {max}.}}",
+      "toastMaxImages": "Se alcanzó el máximo de {max} imágenes.",
+      "toastReset": "Cambios restablecidos.",
+      "toastSaved": "Biografía guardada.",
+      "toastUploadFailed": "No se pudo subir {name}",
+      "toastWaitUploads": "Espera a que terminen de subir todas las imágenes.",
+      "upgradePlan": "Mejorar plan",
+      "writeBiography": "Escribir biografía"
+    }
+  },
+  "Common": {
+    "add": "Agregar",
+    "address": {
+      "city": "Ciudad:",
+      "complement": "Complemento:",
+      "country": "País:",
+      "lookupAria": "Buscar dirección",
+      "lookupError": "No se pudo buscar el código postal.",
+      "neighborhood": "Colonia:",
+      "number": "Número:",
+      "selectPlaceholder": "Seleccionar",
+      "state": "Estado / Provincia:",
+      "street": "Calle:",
+      "suggestionsTitle": "Direcciones ya registradas:",
+      "zipCode": "Código postal:",
+      "zipNotFound": "Código postal no encontrado"
+    },
+    "back": "Atrás",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "create": "Crear",
+    "creating": "Creando…",
+    "delete": "Eliminar",
+    "deleting": "Eliminando…",
+    "edit": "Editar",
+    "loading": "Cargando…",
+    "next": "Siguiente",
+    "remove": "Quitar",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "seeAll": "Ver todos",
+    "toasts": {
+      "created": "Creado con éxito.",
+      "deleted": "Eliminado con éxito.",
+      "error": "Algo salió mal. Inténtalo de nuevo.",
+      "saved": "Guardado con éxito."
+    }
+  },
+  "FamilyTree": {
+    "FamilyTree": {
+      "addRelative": {
+        "addNewPerson": "¿No encontraste un perfil? Agrega una nueva persona al árbol.",
+        "addToTree": "Agregar al árbol",
+        "backToSearch": "Volver a la búsqueda",
+        "divorced": "Divorcio",
+        "ghostHint": "Esta persona permanece en el árbol genealógico sin un perfil. Puedes convertirla en un perfil conmemorado más adelante.",
+        "kindLabel": "Tipo de familiar:",
+        "married": "Matrimonio",
+        "marriedTo": "¿Casado(a) con <strong>{name}</strong>?",
+        "newPersonTitle": "Agregar una nueva persona",
+        "noResults": "No se encontraron resultados.",
+        "searchPlaceholder": "Buscar perfil...",
+        "title": "Agregar familiar",
+        "togetherSince": "Juntos desde",
+        "typeLabel": "Tipo:",
+        "widowed": "Viudez"
+      },
+      "canvasSearch": {
+        "buttonTitle": "Buscar en el árbol (/)",
+        "noMatches": "Sin coincidencias.",
+        "placeholder": "Buscar por nombre…",
+        "search": "Buscar"
+      },
+      "controls": {
+        "fitTree": "Ajustar todo el árbol",
+        "fitTreeTitle": "Ajustar todo el árbol (F)",
+        "focusRoot": "Enfocar en la raíz",
+        "focusRootTitle": "Enfocar en el dueño del árbol",
+        "zoomIn": "Acercar",
+        "zoomOut": "Alejar"
+      },
+      "editMember": {
+        "title": "Editar persona"
+      },
+      "editRelation": {
+        "ended": "Fin",
+        "married": "Matrimonio",
+        "removeRelation": "Eliminar relación",
+        "started": "Inicio",
+        "title": "Editar relación",
+        "typeLabel": "Tipo",
+        "widowed": "Viudez"
+      },
+      "fields": {
+        "birthDate": "Fecha de nacimiento",
+        "deathDate": "Fecha de fallecimiento",
+        "firstName": "Nombre",
+        "gender": "Género",
+        "genderOptional": "Opcional",
+        "genderSelect": "Seleccionar",
+        "lastName": "Apellido",
+        "maidenName": "Apellido de soltera",
+        "nickname": "Apodo"
+      },
+      "gender": {
+        "female": "Femenino",
+        "male": "Masculino",
+        "other": "Otro"
+      },
+      "header": {
+        "addRelative": "Agregar familiar",
+        "title": "Árbol genealógico de {name}",
+        "upgradePlan": "Cambiar de plan"
+      },
+      "infoSheet": {
+        "addChild": "+ Hijo(a)",
+        "addParent": "+ Padre/Madre",
+        "addPartner": "+ Pareja",
+        "addRelative": "Agregar familiar",
+        "addSibling": "+ Hermano(a)",
+        "coManage": "Co-administrar",
+        "coManageHint": "Pide al guardián actual que te deje co-administrar este perfil.",
+        "coManageWaiting": "Esperando la aprobación del guardián actual.",
+        "editDisabledHint": "Solo puedes editar tu propio perfil, tus memoriales o las personas que agregaste al árbol.",
+        "editHint": "Actualiza nombre, fechas y detalles.",
+        "pending": "Pendiente",
+        "seeProfile": "Ver perfil",
+        "thisIsYou": "Este eres tú",
+        "timeline": "Cronología"
+      },
+      "kinds": {
+        "child": "Hijo(a)",
+        "parent": "Padre/Madre",
+        "sibling": "Hermano(a)",
+        "spouse": "Pareja"
+      },
+      "memorialized": "Conmemorado",
+      "nameWithMaiden": "{name} (de soltera {maidenName})",
+      "node": {
+        "awaitingConfirmation": "Esperando confirmación",
+        "memorial": "Memorial",
+        "pending": "Pendiente",
+        "you": "Tú"
+      },
+      "removeDialog": {
+        "ghostDescription": "{name} se eliminará permanentemente del árbol y del sistema, junto con sus relaciones con las demás personas del árbol. Esto no se puede deshacer.",
+        "personDescription": "{name} se eliminará de tu árbol. El perfil permanece intacto y sigue en el sistema. Las personas que solo están conectadas a tu árbol a través de este perfil también desaparecerán de esta vista.",
+        "title": "¿Eliminar del árbol?"
+      },
+      "stats": {
+        "generations": "{count, plural, one {# generación} other {# generaciones}}",
+        "peopleOfLimit": "/{limit} personas"
+      },
+      "subtypes": {
+        "adopted": "Adoptado(a)",
+        "divorced": "Divorciado(a)",
+        "half": "Medio hermano",
+        "married": "Casado(a)",
+        "partner": "Pareja",
+        "standard": "Estándar",
+        "step": "Político(a)",
+        "widowed": "Viudo(a)"
+      },
+      "timeline": {
+        "born": "Nació",
+        "bornIn": "Nació en {place}",
+        "died": "Falleció",
+        "diedIn": "Falleció en {place}",
+        "divorcedFrom": "Se divorció de {name}",
+        "married": "Se casó con {name}"
+      },
+      "toasts": {
+        "coManageRequestSent": "Solicitud enviada. El guardián actual será notificado.",
+        "nameRequired": "El nombre y el apellido son obligatorios.",
+        "personAdded": "Persona agregada al árbol.",
+        "personUpdated": "Persona actualizada.",
+        "relationRemoved": "Relación eliminada.",
+        "relationUpdated": "Relación actualizada.",
+        "relativeAdded": "Familiar agregado.",
+        "removedFromTree": "Eliminado(a) del árbol."
+      }
+    }
+  },
+  "Favorites": {
+    "Favorites": {
+      "backToProfile": "Volver al perfil",
+      "bornMetric": "Nacido(a) el {date}",
+      "deathMetric": "✦ {date}",
+      "empty": "Aún no hay favoritos.",
+      "memorializedProfile": "Perfil conmemorativo",
+      "profileCount": "{count, plural, one {# perfil} other {# perfiles}}",
+      "subtitle": "Los más cercanos al corazón, siempre presentes",
+      "title": "Favoritos"
+    }
+  },
+  "Gallery": {
+    "Gallery": {
+      "addImage": "Agregar imagen",
+      "addMedia": "Agregar contenido",
+      "addVideo": "Agregar video",
+      "backToGallery": "Volver a la galería",
+      "backToProfile": "Volver al perfil",
+      "converting": "Convirtiendo… {progress}%",
+      "dateTaken": "Fecha de captura",
+      "deleteGallery": "Eliminar galería",
+      "deleteGalleryDescription": "Esto eliminará permanentemente todas las fotos y videos. Esta acción no se puede deshacer.",
+      "deleteGalleryTitle": "¿Eliminar galería?",
+      "deletedToast": "Galería eliminada.",
+      "description": "Descripción",
+      "descriptionPlaceholder": "Una breve nota sobre este momento…",
+      "editSubtitle": "Administra imágenes y videos",
+      "editTitle": "Editar galería",
+      "empty": "Aún no hay contenido.",
+      "endOfGallery": "Fin de la galería",
+      "filesSkipped": "{count, plural, one {# archivo omitido.} other {# archivos omitidos.}} Usa {formats}.",
+      "imageAlt": "Elemento de la galería",
+      "imageCount": "{count, plural, one {# imagen} other {# imágenes}}",
+      "imagesAddedLimit": "{remaining, plural, one {Solo se agregó # imagen — el límite es {max}.} other {Solo se agregaron # imágenes — el límite es {max}.}}",
+      "location": "Ubicación",
+      "locationPlaceholder": "Ciudad, País",
+      "maxImagesReached": "Se alcanzó el máximo de {max} imágenes.",
+      "maxVideosReached": "Se alcanzó el máximo de {max} videos.",
+      "photos": "Fotos",
+      "previewAlt": "Vista previa",
+      "previous": "Anterior",
+      "reset": "Restablecer",
+      "resetToast": "Cambios descartados.",
+      "savedToast": "Galería guardada.",
+      "sortNewest": "Más recientes primero",
+      "sortOldest": "Más antiguos primero",
+      "tagline": "Momentos eternizados: luz, risas y la calma entre ellos",
+      "title": "Galería",
+      "transcodeFailed": "No se pudo convertir \"{name}\" — usa MP4 con resolución de hasta 1080p.",
+      "upgradePlan": "Mejorar plan",
+      "uploadFailed": "No se pudo subir {name}",
+      "videoCount": "{count, plural, one {# video} other {# videos}}",
+      "videoThumbnailAlt": "Miniatura del video",
+      "videoTooLong": "\"{name}\" supera los 5 minutos.",
+      "videoUnreadable": "No se pudo leer \"{name}\".",
+      "videos": "Videos",
+      "videosHint": " · máx. 5 min cada uno · convertido automáticamente a MP4 en HD",
+      "videosProcessedLimit": "{remaining, plural, one {Solo se procesó # video — el límite es {max}.} other {Solo se procesaron # videos — el límite es {max}.}}",
+      "viewerTitle": "Visor de elementos de la galería",
+      "waitForUploads": "Espera a que terminen todas las subidas."
+    }
+  },
+  "Geolocation": {
+    "addImage": "Agregar imagen",
+    "addLocation": "Agregar ubicación",
+    "addSubtitle": "Agrega el lugar de descanso y cómo encontrarlo.",
+    "addTitle": "Agregar Ubicación",
+    "address": "Dirección",
+    "backToGeolocation": "Volver a la ubicación",
+    "backToProfile": "Volver al perfil",
+    "coordinates": "Coordenadas",
+    "deleteDialogDescription": "Esto eliminará permanentemente el lugar, las fotos y las coordenadas.",
+    "deleteDialogTitle": "¿Eliminar ubicación?",
+    "deleteLocation": "Eliminar ubicación",
+    "editSubtitle": "Actualiza el lugar, la dirección y las coordenadas.",
+    "editTitle": "Editar Ubicación",
+    "emptyState": "Aún no se ha definido una ubicación.",
+    "gate": {
+      "description": "Coloca un marcador en las coordenadas GPS exactas para que los visitantes puedan navegar directo al lugar. Disponible en los planes Década y Século.",
+      "dismiss": "Quizás después",
+      "title": "Desbloquea coordenadas precisas",
+      "upgrade": "Mejorar plan"
+    },
+    "latitude": "Latitud",
+    "longitude": "Longitud",
+    "notes": "Notas",
+    "notesPlaceholder": "Horarios de visita, cómo encontrar el lugar, cualquier cosa que ayude…",
+    "openInGoogleMaps": "Abrir en Google Maps",
+    "optional": "(opcional)",
+    "photoAlt": "Foto {number}",
+    "photos": "Fotos",
+    "placeName": "Nombre del lugar",
+    "placeNamePlaceholder": "ej.: Panteón San Francisco",
+    "removePhoto": "Quitar foto",
+    "reset": "Restablecer",
+    "section": "Sección / lote",
+    "sectionPlaceholder": "ej.: Jardín de la Paz, Lote 42",
+    "tagline": "Un lugar para reencontrarse, desde cualquier parte",
+    "title": "Ubicación",
+    "toasts": {
+      "deleted": "Ubicación eliminada.",
+      "fixFields": "Corrige los campos resaltados.",
+      "geolocationUnsupported": "Este navegador no admite la geolocalización.",
+      "locationDenied": "Acceso a la ubicación denegado. Actívalo en la configuración de tu navegador.",
+      "locationDetected": "Ubicación detectada.",
+      "locationTimeout": "La solicitud de ubicación expiró. Inténtalo de nuevo.",
+      "locationUnavailable": "Ubicación no disponible. Verifica tu señal de GPS.",
+      "reset": "Cambios restablecidos.",
+      "saved": "Ubicación guardada.",
+      "unsupportedFile": "Archivo no compatible. Usa {formats}.",
+      "uploadFailed": "No se pudo subir la foto.",
+      "waitForUploads": "Espera a que terminen de subirse las fotos."
+    },
+    "upgradeToUnlock": "Mejora tu plan para desbloquear",
+    "useMyLocation": "Usar mi ubicación",
+    "viewPhotoAlt": "{place} foto {number}"
+  },
+  "Home": {
+    "bornMetric": "Nacido el {date}",
+    "clearSearch": "Limpiar búsqueda",
+    "deathMetric": "✦ {date}",
+    "favoritesEmpty": "Aún no hay perfiles favoritos.",
+    "favoritesShort": "favoritos",
+    "favoritesSubtitle": "Los más cercanos al corazón",
+    "favoritesTitle": "Mis favoritos",
+    "goodAfternoon": "Buenas tardes",
+    "goodEvening": "Buenas noches",
+    "goodMorning": "Buenos días",
+    "greetingFallbackName": "hola",
+    "guardedEmpty": "Aún no hay perfiles bajo tu cuidado.",
+    "guardedShort": "bajo tu cuidado",
+    "guardedSubtitle": "Memoriales cuidados con esmero silencioso",
+    "guardedTitle": "Perfiles bajo mi cuidado",
+    "memorializedBadge": "Conmemorado",
+    "memorializedProfile": "Perfil conmemorativo",
+    "myProfileSubtitle": "Ver tu página",
+    "myProfileTitle": "Mi perfil",
+    "noProfilesFound": "No se encontraron perfiles.",
+    "recentlyViewedEmpty": "No hay perfiles vistos recientemente.",
+    "recentlyViewedShort": "vistos recientemente",
+    "recentlyViewedSubtitle": "Los perfiles vistos recientemente aparecen aquí",
+    "recentlyViewedTitle": "Vistos recientemente",
+    "searchPlaceholder": "Buscar perfil por nombre...",
+    "searching": "Buscando…",
+    "seeAll": "Ver todos",
+    "tagline": "Escanea, busca y visita un perfil"
+  },
+  "Memorialized": {
+    "Memorialized": {
+      "actions": {
+        "createProfile": "Crear perfil",
+        "reset": "Restablecer"
+      },
+      "avatar": {
+        "change": "Cambiar imagen",
+        "unsupportedFile": "Archivo no compatible. Usa {formats}.",
+        "uploadError": "No se pudo subir la imagen.",
+        "waitUploading": "Espera a que termine de subirse la imagen."
+      },
+      "card": {
+        "born": "Nacimiento {date}",
+        "fallbackSubtitle": "Perfil conmemorativo"
+      },
+      "date": {
+        "clear": "Borrar",
+        "pick": "Elige una fecha"
+      },
+      "delete": {
+        "button": "Eliminar perfil",
+        "description": "Esto eliminará de forma permanente el perfil de {name}, biografía, galería, homenajes y geolocalización. Esta acción no se puede deshacer.",
+        "title": "¿Eliminar este perfil?"
+      },
+      "editPage": {
+        "backToProfile": "Volver al perfil",
+        "subtitleLiving": "Actualiza tu información personal.",
+        "subtitleMemorial": "Actualiza la información de este memorial.",
+        "title": "Editar perfil"
+      },
+      "fields": {
+        "city": "Ciudad",
+        "country": "País",
+        "date": "Fecha",
+        "deathCause": "Causa del fallecimiento",
+        "firstName": "Nombre",
+        "gender": "Género",
+        "lastName": "Apellido",
+        "maidenName": "Apellido de soltera",
+        "nationalId": "Identificación oficial",
+        "nickname": "Apodo",
+        "optional": "(opcional)",
+        "otherSocial": "Otro",
+        "phone": "Teléfono",
+        "state": "Estado / Provincia",
+        "website": "Sitio web"
+      },
+      "gender": {
+        "female": "Femenino",
+        "male": "Masculino",
+        "other": "Otro"
+      },
+      "list": {
+        "emptyGuarded": "Aún no hay perfiles conmemorativos bajo tu resguardo.",
+        "emptyOwn": "Aún no hay perfiles conmemorativos.",
+        "newProfile": "Nuevo perfil conmemorativo",
+        "sortAria": "Ordenar perfiles",
+        "sortAsc": "A → Z",
+        "sortDesc": "Z → A",
+        "tagline": "Memoriales cuidados con amor y cariño"
+      },
+      "listPage": {
+        "backToProfile": "Volver al perfil",
+        "profileCount": "{count, plural, one {# perfil} other {# perfiles}}",
+        "title": "Perfiles bajo tu resguardo"
+      },
+      "newPage": {
+        "backToGuarded": "Volver a los perfiles bajo tu resguardo",
+        "subtitle": "Crea un memorial para alguien que vive en tu memoria.",
+        "title": "Nuevo perfil conmemorativo"
+      },
+      "notes": {
+        "notPublic": "No se muestra públicamente."
+      },
+      "placeholders": {
+        "city": "Ciudad",
+        "country": "País",
+        "deathCause": "p. ej.: Insuficiencia cardíaca",
+        "firstName": "Nombre",
+        "handleOrUrl": "@usuario o URL",
+        "lastName": "Apellido",
+        "maidenName": "Apellido de nacimiento",
+        "nationalId": "CURP, RFC, etc.",
+        "nickname": "Cómo se le conocía",
+        "notSpecified": "Sin especificar",
+        "notes": "Notas internas visibles solo para ti…",
+        "otherLink": "Cualquier otro enlace",
+        "state": "Estado o provincia"
+      },
+      "sections": {
+        "address": "Dirección",
+        "birth": "Nacimiento",
+        "contact": "Contacto",
+        "death": "Fallecimiento",
+        "identity": "Identidad",
+        "notes": "Notas",
+        "social": "Redes sociales"
+      },
+      "toasts": {
+        "changesReset": "Cambios descartados.",
+        "created": "Perfil conmemorativo creado.",
+        "deleted": "Perfil eliminado.",
+        "fixFields": "Corrige los campos resaltados.",
+        "formReset": "Formulario restablecido.",
+        "saved": "Perfil guardado."
+      }
+    }
+  },
+  "Messages": {
+    "aProfile": "un perfil",
+    "actions": {
+      "accept": "Aceptar",
+      "approve": "Aprobar",
+      "decline": "Rechazar",
+      "reject": "Rechazar"
+    },
+    "backToHome": "Volver al inicio",
+    "describe": {
+      "familyAcceptedByActor": "se unió a tu árbol genealógico.",
+      "familyAcceptedByViewer": "se unió al árbol genealógico de {name}.",
+      "familyRejectedByActor": "rechazó tu invitación al árbol.",
+      "familyRejectedByViewer": "rechazó la invitación de {name} al árbol.",
+      "familyRequestPending": "te envió una solicitud para unirte a su árbol como <strong>{role}</strong>.",
+      "guardianAcceptedByActor": "te concedió la cogestión de un perfil.",
+      "guardianAcceptedByViewer": "le concedió la cogestión a {name}.",
+      "guardianRejectedByActor": "rechazó tu solicitud de cogestión.",
+      "guardianRejectedByViewer": "rechazó la solicitud de cogestión de {name}.",
+      "guardianRequestPending": "quiere cogestionar <strong>{target}</strong>.",
+      "tributeApprovedByViewer": "aprobó el homenaje de {name}.",
+      "tributeApprovedForAuthor": "aprobó tu homenaje.",
+      "tributeDeclinedForAuthor": "rechazó tu homenaje.",
+      "tributePending": "escribió un homenaje para <strong>{profile}</strong>.",
+      "tributeRejectedByViewer": "rechazó el homenaje de {name}."
+    },
+    "empty": "Tu bandeja de entrada está vacía.",
+    "loadMore": "Cargar más",
+    "pendingAction": "Acción pendiente",
+    "pendingBadge": "{count, plural, one {# pendiente} other {# pendientes}}",
+    "recentActivity": "Actividad reciente",
+    "relation": {
+      "child": "hijo(a)",
+      "halfSibling": "medio hermano(a)",
+      "parent": "padre/madre",
+      "partner": "pareja",
+      "relative": "familiar",
+      "sibling": "hermano(a)",
+      "spouse": "cónyuge"
+    },
+    "someone": "Alguien",
+    "thisProfile": "este perfil",
+    "title": "Mensajes",
+    "toasts": {
+      "coManagementApproved": "Cogestión aprobada.",
+      "coManagementDeclined": "Cogestión rechazada.",
+      "invitationAccepted": "Invitación aceptada.",
+      "invitationDeclined": "Invitación rechazada.",
+      "tributeApproved": "Homenaje aprobado.",
+      "tributeRejected": "Homenaje rechazado."
+    },
+    "view": "Ver",
+    "you": "Tú"
+  },
+  "Nav": {
+    "language": "Idioma",
+    "messages": "Mensajes",
+    "messagesUnread": "{count} mensajes sin leer",
+    "myProfile": "Mi perfil",
+    "signOut": "Cerrar sesión",
+    "subscriptions": "Suscripciones",
+    "toggleTheme": "Cambiar tema",
+    "userMenu": "Menú de usuario"
+  },
+  "NotFound": {
+    "description": "La página que buscas no existe o ha sido eliminada.",
+    "goHome": "Ir al inicio",
+    "title": "Página no encontrada"
+  },
+  "Profile": {
+    "Profile": {
+      "addToFavorites": "Agregar a favoritos",
+      "bioDescription": "Una vida contada en capítulos: momentos, lugares y giros decisivos",
+      "bioEmptyMetric": "Aún no hay biografía",
+      "bioMetric": "Leer",
+      "bioTitle": "Biografía",
+      "bornOn": "Nació el <strong>{date}</strong>",
+      "bornOnInPlace": "Nació el <strong>{date}</strong> en <strong>{place}</strong>",
+      "deceasedOn": "Falleció el <strong>{date}</strong>",
+      "deceasedOnInPlace": "Falleció el <strong>{date}</strong> en <strong>{place}</strong>",
+      "editProfileAria": "Editar perfil",
+      "emptyFavorites": "Aún no hay favoritos.",
+      "emptyGuarded": "Aún no hay perfiles a tu cuidado.",
+      "emptyMedia": "Aún no hay multimedia.",
+      "emptyRelatives": "Aún no hay familiares.",
+      "emptyTributes": "Aún no hay homenajes.",
+      "favoritesDescription": "Personas que llevan un significado profundo, siempre cerca",
+      "favoritesEmptyMetric": "Aún no hay favoritos",
+      "favoritesMetric": "{count, plural, one {# favorito} other {# favoritos}}",
+      "favoritesTitle": "Favoritos",
+      "galleryDescription": "Imágenes y momentos que vale la pena recordar",
+      "galleryEmptyMetric": "Aún no hay multimedia",
+      "galleryMetric": "{count, plural, one {# recuerdo} other {# recuerdos}}",
+      "galleryTitle": "Galería",
+      "geoDescription": "Un lugar para reencontrarse, desde cualquier parte",
+      "geoEmptyMetric": "Sin definir",
+      "geoTitle": "Geolocalización",
+      "guardianDescription": "Memoriales cuidados con cariño silencioso",
+      "guardianEmptyMetric": "Aún no hay perfiles a tu cuidado",
+      "guardianMetric": "{count, plural, one {# perfil} other {# perfiles}}",
+      "guardianTitle": "Perfiles a tu cuidado",
+      "mapAlt": "Mapa",
+      "memorialized": "Conmemorado",
+      "qrAlt": "Código QR",
+      "qrDescription": "Para placas, lápidas y espacios digitales por igual",
+      "qrMetricNotGenerated": "Aún no generado",
+      "qrMetricPurchase": "Compra para desbloquear",
+      "qrMetricReady": "Listo para imprimir",
+      "qrTitle": "Código QR",
+      "removeFromFavorites": "Quitar de favoritos",
+      "tooltipFavorites": "Favoritos",
+      "tooltipGuarded": "Perfiles a tu cuidado",
+      "tooltipMedia": "Multimedia en la galería",
+      "tooltipTributes": "Homenajes recibidos",
+      "treeDescription": "Raíces, ramas y los lazos silenciosos que unen a las generaciones",
+      "treeEmptyMetric": "Aún no hay familiares",
+      "treeMetric": "{count, plural, one {# familiar} other {# familiares}}",
+      "treeTitle": "Árbol genealógico",
+      "tributesDescription": "Mensajes que celebran experiencias y recuerdos compartidos",
+      "tributesEmptyMetric": "Aún no hay homenajes",
+      "tributesMetric": "{count, plural, one {# homenaje} other {# homenajes}}",
+      "tributesTitle": "Homenajes"
+    }
+  },
+  "Qr": {
+    "Qr": {
+      "activateCode": {
+        "continue": "Continuar",
+        "invalid": "Por favor, ingresa un código de activación válido.",
+        "label": "Código de activación",
+        "placeholder": "ej.: ABCD-1234-EFGH"
+      },
+      "activateMemorial": {
+        "activateAndCreate": "Activar y crear perfil",
+        "activationCode": "Código de activación",
+        "available": "Disponible",
+        "birth": "Nacimiento",
+        "changeImage": "Cambiar imagen",
+        "city": "Ciudad",
+        "cityPlaceholder": "Ciudad",
+        "clear": "Limpiar",
+        "country": "País",
+        "countryPlaceholder": "País",
+        "created": "Perfil conmemorativo creado.",
+        "date": "Fecha",
+        "death": "Fallecimiento",
+        "familyNamePlaceholder": "Apellido",
+        "female": "Femenino",
+        "firstName": "Nombre",
+        "gender": "Género",
+        "lastName": "Apellido",
+        "male": "Masculino",
+        "namePlaceholder": "Nombre",
+        "notSpecified": "Sin especificar",
+        "pickDate": "Elige una fecha",
+        "unsupportedFile": "Archivo no compatible. Usa {formats}.",
+        "uploadFailed": "No se pudo subir la foto.",
+        "waitUpload": "Espera a que termine de subirse la foto."
+      },
+      "activatePage": {
+        "subtitle": "Completa los datos de la persona que estás conmemorando.",
+        "title": "Activar memorial"
+      },
+      "billing": {
+        "backToHome": "Volver al inicio",
+        "compareAllPlans": "Comparar todos los planes",
+        "noPackages": "No hay paquetes de código QR disponibles en este momento.",
+        "subtitle": "Un código QR, escaneable para siempre — para placas, lápidas y espacios digitales",
+        "title": "Obtener un código QR"
+      },
+      "client": {
+        "copyLink": "Copiar enlace",
+        "linkCopied": "Enlace del perfil copiado.",
+        "pngDownloaded": "PNG descargado.",
+        "svgDownloaded": "SVG descargado."
+      },
+      "landing": {
+        "createAccount": "Crear cuenta",
+        "description": "Este código QR está listo para vincularse a un perfil conmemorativo.",
+        "signIn": "Iniciar sesión",
+        "title": "Crear un memorial"
+      },
+      "presets": {
+        "bronze": {
+          "description": "Tonos metálicos cálidos — clásico para placas.",
+          "name": "Bronce"
+        },
+        "classic": {
+          "description": "Negro sobre blanco atemporal — seguro en cualquier superficie.",
+          "name": "Clásico"
+        },
+        "forest": {
+          "description": "Verde profundo — ideal para jardines de cementerio.",
+          "name": "Bosque"
+        },
+        "indigo": {
+          "description": "Índigo de la marca sobre blanco — cálido y reconocible.",
+          "name": "Índigo"
+        },
+        "inverted": {
+          "description": "Blanco sobre casi negro — llamativo sobre piedra clara.",
+          "name": "Invertido"
+        },
+        "soft": {
+          "description": "Gris pizarra suave sobre crema — discreto y elegante.",
+          "name": "Suave"
+        }
+      },
+      "profilePage": {
+        "backToProfile": "Volver al perfil",
+        "noQrYet": "Aún no hay código QR.",
+        "purchase": "Adquirir código QR",
+        "subtitle": "Para placas, lápidas y espacios digitales",
+        "title": "Código QR",
+        "unlockDescription": "Este memorial está en el plan gratuito. Adquiere un código QR para imprimirlo en placas, lápidas y espacios digitales — conserva su memoria en cualquier lugar, escaneable para siempre.",
+        "unlockTitle": "Desbloquea tu código QR"
+      },
+      "scanButton": {
+        "aria": "Escanear código QR",
+        "labelLong": "Escanear un código QR",
+        "labelShort": "Escanear QR"
+      },
+      "scanner": {
+        "cameraStartFailed": "No se pudo iniciar la cámara.",
+        "closeAria": "Cerrar lector",
+        "dialogLabel": "Lector de código QR",
+        "invalidCode": "Código QR inválido.",
+        "notValidProfile": "El código QR no apunta a un perfil válido.",
+        "permissionDeniedHint": "Permite el acceso a la cámara en la configuración de tu navegador e inténtalo de nuevo.",
+        "permissionDeniedTitle": "Acceso a la cámara denegado",
+        "pointCamera": "Apunta la cámara hacia un código QR de Genealogiq",
+        "title": "Escanear un código QR"
+      }
+    }
+  },
+  "Subscriptions": {
+    "Subscriptions": {
+      "activeBadge": "Activo",
+      "backToHome": "Volver al inicio",
+      "cadence": {
+        "annual": "anual",
+        "monthly": "mensual"
+      },
+      "confirm": {
+        "downgradeAction": "Programar cambio",
+        "downgradeDescription": "Tu plan {currentPlan} sigue activo hasta el {periodEnd}. Después de eso, {plan} ({cadence}) entra en vigor sin cargo hoy.",
+        "downgradeTitle": "¿Programar cambio a un plan menor?",
+        "upgradeAction": "Mejorar ahora",
+        "upgradeDescription": "Cambiarás a {plan} ({cadence}) de inmediato. Stripe cobrará la diferencia prorrateada hoy y las nuevas funciones se desbloquearán al instante.",
+        "upgradeTitle": "¿Mejorar ahora?",
+        "working": "Procesando…"
+      },
+      "currentlyOn": "Actualmente en el plan {plan} hasta el {date}",
+      "features": {
+        "bioChars": "{count, number} caracteres de biografía",
+        "bioImages": "{count} imágenes de biografía",
+        "galleryPhotos": "{count} fotos en la galería",
+        "galleryVideos": "{count} videos en la galería",
+        "gpsAddressOnly": "Solo dirección (sin marcador GPS)",
+        "gpsPrecise": "Coordenadas GPS precisas",
+        "memorialSlots": "{count, plural, one {# espacio de memorial por compra} other {# espacios de memorial por compra}}",
+        "qrIncluded": "Código QR para placas y lápidas",
+        "qrPaidOnly": "Código QR en los planes de pago",
+        "treeMembers": "{count} miembros en el árbol genealógico"
+      },
+      "freePrice": "Gratis",
+      "manageSubscription": "Gestionar suscripción",
+      "opening": "Abriendo…",
+      "payAnnually": "Pagar anualmente {price}",
+      "payMonthly": "Pagar mensualmente {price}",
+      "qrGate": {
+        "description": "Este memorial está en el plan gratuito. Compra un código QR para imprimirlo en placas, lápidas y espacios digitales — conserva su memoria en cualquier lugar, escaneable para siempre.",
+        "maybeLater": "Quizás más tarde",
+        "purchase": "Comprar código QR",
+        "title": "Desbloquea tu código QR"
+      },
+      "tagline": "La forma perfecta de mantener el vínculo",
+      "term": {
+        "perLifetime": "/ de por vida",
+        "perMonths": "/ {count} meses",
+        "perYear": "/ año"
+      },
+      "title": "Suscripciones",
+      "toasts": {
+        "checkoutCanceled": "Pago cancelado.",
+        "paymentReceived": "Pago recibido — tu plan se está activando. Actualiza en un momento si aún no aparece.",
+        "scheduled": "{plan} está programado para comenzar el {periodEnd}.",
+        "switched": "Cambiaste a {plan}. Stripe acaba de cobrar el monto prorrateado."
+      },
+      "upgradeHint": {
+        "cta": "Mejora tu plan.",
+        "question": {
+          "bio": "¿Necesitas más caracteres e imágenes?",
+          "gallery": "¿Necesitas más imágenes y videos?",
+          "geolocation": "¿Necesitas coordenadas GPS precisas?",
+          "memorialized": "¿Necesitas más perfiles memorializados?",
+          "tree": "¿Necesitas un árbol más grande?"
+        }
+      }
+    }
+  },
+  "Tributes": {
+    "Tributes": {
+      "backToProfile": "Volver al perfil",
+      "backToTributes": "Volver a los homenajes",
+      "card": {
+        "deleteDescription": "Esto no se puede deshacer. El homenaje y su imagen se eliminarán de este perfil.",
+        "deleteMineTitle": "¿Eliminar tu homenaje?",
+        "deleteOtherTitle": "¿Eliminar este homenaje?",
+        "imageAlt": "Homenaje de {author}",
+        "yoursBadge": "Tuyo"
+      },
+      "count": "{count, plural, one {# homenaje} other {# homenajes}}",
+      "edit": {
+        "subtitle": "Comparte un recuerdo o un mensaje"
+      },
+      "form": {
+        "addImage": "Agregar imagen",
+        "deleteDialogDescription": "Tu homenaje se eliminará de forma permanente.",
+        "deleteDialogTitle": "¿Eliminar homenaje?",
+        "deleteTribute": "Eliminar homenaje",
+        "photoLabel": "Foto (opcional)",
+        "previewAlt": "Vista previa",
+        "removeImage": "Quitar imagen",
+        "sendTribute": "Enviar homenaje",
+        "textLabel": "Tu homenaje",
+        "textPlaceholder": "Escribe un recuerdo, un mensaje o unas palabras desde el corazón...",
+        "youFallback": "Tú"
+      },
+      "list": {
+        "awaitingModeration": "Tu homenaje está en espera de moderación.",
+        "editPendingLink": "Haz clic aquí para editar tu homenaje.",
+        "editYourTribute": "Editar tu homenaje",
+        "empty": "Aún no hay homenajes.",
+        "endOfTributes": "Fin de los homenajes",
+        "newestFirst": "Más recientes primero",
+        "oldestFirst": "Más antiguos primero",
+        "sendATribute": "Enviar un homenaje",
+        "subtitle": "Palabras que quedan: pequeñas llamas que llevan quienes recuerdan"
+      },
+      "title": "Homenajes",
+      "toasts": {
+        "deleted": "Homenaje eliminado.",
+        "submitted": "Homenaje enviado para aprobación.",
+        "unsupportedFile": "Archivo no compatible. Usa {formats}.",
+        "updated": "Homenaje actualizado. Pendiente de nueva aprobación.",
+        "uploadFailed": "No se pudo subir la imagen.",
+        "waitForUpload": "Espera a que termine de subir la imagen."
+      }
+    }
   }
 }

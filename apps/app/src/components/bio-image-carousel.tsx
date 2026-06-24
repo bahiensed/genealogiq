@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react"
+import { useTranslations } from "next-intl"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function BioImageCarousel({ images }: Props) {
+  const t = useTranslations("Bio")
   const [startIdx, setStartIdx] = useState(0)
   const [cols, setCols]         = useState(2)   // 2 on xs/sm, 3 on md+
   const touchX                  = useRef(0)
@@ -46,7 +48,7 @@ export function BioImageCarousel({ images }: Props) {
       }}
     >
       {canNavigate && (
-        <button type="button" onClick={prev} aria-label="Previous" className={arrowClass}>
+        <button type="button" onClick={prev} aria-label={t("carouselPrevious")} className={arrowClass}>
           <ChevronLeft className="h-5 w-5" />
         </button>
       )}
@@ -61,7 +63,7 @@ export function BioImageCarousel({ images }: Props) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.url}
-                alt="Biography photo"
+                alt={t("photoAlt")}
                 className="block w-full h-auto"
                 loading="lazy"
               />
@@ -71,7 +73,7 @@ export function BioImageCarousel({ images }: Props) {
       </div>
 
       {canNavigate && (
-        <button type="button" onClick={next} aria-label="Next" className={arrowClass}>
+        <button type="button" onClick={next} aria-label={t("carouselNext")} className={arrowClass}>
           <ChevronRight className="h-5 w-5" />
         </button>
       )}

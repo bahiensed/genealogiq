@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { MapPin } from "lucide-react"
 import {
   AlertDialog,
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function GeolocationGate({ className, style, children }: Props) {
+  const t = useTranslations("Geolocation")
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -35,15 +37,15 @@ export function GeolocationGate({ className, style, children }: Props) {
           <AlertDialogMedia>
             <MapPin className="text-primary" />
           </AlertDialogMedia>
-          <AlertDialogTitle>Unlock precise coordinates</AlertDialogTitle>
+          <AlertDialogTitle>{t("gate.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            Drop a pin at exact GPS coordinates so visitors can navigate straight to the place. Available on Década and Século plans.
+            {t("gate.description")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Maybe later</AlertDialogCancel>
+          <AlertDialogCancel>{t("gate.dismiss")}</AlertDialogCancel>
           <AlertDialogAction asChild>
-            <Link href="/billing/qr-code">Upgrade plan</Link>
+            <Link href="/billing/qr-code">{t("gate.upgrade")}</Link>
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

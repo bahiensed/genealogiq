@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { TreePerson } from "@/queries/family-tree"
@@ -11,6 +12,8 @@ interface Props {
 }
 
 export function CanvasSearch({ persons, onPick }: Props) {
+  const t = useTranslations("FamilyTree")
+  const tc = useTranslations("Common")
   const [open, setOpen]     = useState(false)
   const [query, setQuery]   = useState("")
   const inputRef            = useRef<HTMLInputElement>(null)
@@ -45,10 +48,10 @@ export function CanvasSearch({ persons, onPick }: Props) {
         type="button"
         onClick={() => { setOpen(true); requestAnimationFrame(() => inputRef.current?.focus()) }}
         className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 rounded-full bg-background/80 backdrop-blur-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-        title="Search the tree (/)"
+        title={t("canvasSearch.buttonTitle")}
       >
         <Search className="h-3.5 w-3.5" />
-        Search
+        {t("canvasSearch.search")}
         <kbd className="text-[10px] font-medium px-1 py-px rounded bg-muted">/</kbd>
       </button>
     )
@@ -63,14 +66,14 @@ export function CanvasSearch({ persons, onPick }: Props) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name…"
+          placeholder={t("canvasSearch.placeholder")}
           className="flex-1 bg-transparent border-0 text-sm focus:outline-none placeholder:text-muted-foreground"
         />
         <button
           type="button"
           onClick={() => { setOpen(false); setQuery("") }}
           className="text-muted-foreground hover:text-foreground"
-          aria-label="Close"
+          aria-label={tc("close")}
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -103,7 +106,7 @@ export function CanvasSearch({ persons, onPick }: Props) {
           })}
         </ul>
       ) : q ? (
-        <p className="px-3 py-4 text-sm text-muted-foreground text-center">No matches.</p>
+        <p className="px-3 py-4 text-sm text-muted-foreground text-center">{t("canvasSearch.noMatches")}</p>
       ) : null}
     </div>
   )

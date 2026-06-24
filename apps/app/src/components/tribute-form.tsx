@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { ImagePlus, X, Save, Send, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { upload } from "@vercel/blob/client"
@@ -36,6 +37,8 @@ interface Props {
 }
 
 export function TributeForm({ profileId, authorName, existing }: Props) {
+  const t = useTranslations("Tributes")
+  const tc = useTranslations("Common")
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -49,7 +52,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
     const file = files?.[0]
     if (!file) return
     if (!isAllowedImage(file)) {
-      toast.error(`Unsupported file. Use ${IMAGE_FORMATS_LABEL}.`)
+      toast.error(t("toasts.unsupportedFile", { formats: IMAGE_FORMATS_LABEL }))
       return
     }
     setUploading(true)
@@ -65,7 +68,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
       })
       setImageUrl(blob.url)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to upload image.")
+      toast.error(err instanceof Error ? err.message : t("toasts.uploadFailed"))
       setImageUrl(existing?.imageUrl ?? undefined)
     } finally {
       setUploading(false)
@@ -73,13 +76,13 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
   }
 
   const handleSubmit = () => {
-    if (uploading) { toast.warning("Please wait for the image to finish uploading."); return }
+    if (uploading) { toast.warning(t("toasts.waitForUpload")); return }
     startTransition(async () => {
       const result = await submitTribute(profileId, { text, imageUrl })
       if (result?.error) {
         toast.error(result.error)
       } else {
-        toast.success(isEditing ? "Tribute updated. Pending re-approval." : "Tribute submitted for approval.")
+        toast.success(isEditing ? t("toasts.updated") : t("toasts.submitted"))
         router.push(`/profile/${profileId}/tributes`)
       }
     })
@@ -90,7 +93,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
     startTransition(async () => {
       const result = await deleteTribute(existing.id)
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Tribute deleted.")
+      toast.success(t("toasts.deleted"))
       router.push(`/profile/${profileId}/tributes`)
     })
   }
@@ -109,12 +112,12 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
 
       {/* Image */}
       <div className="space-y-3">
-        <Label className="text-base">Photo (optional)</Label>
+        <Label className="text-base">{t("form.photoLabel")}</Label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {imageUrl ? (
             <div className="relative group aspect-square rounded-xl overflow-hidden border border-border/60">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="Preview" className="h-full w-full object-cover" />
+              <img src={imageUrl} alt={t("form.previewAlt")} className="h-full w-full object-cover" />
               {uploading && (
                 <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
                   <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -125,7 +128,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
                   type="button"
                   onClick={() => setImageUrl(undefined)}
                   className="absolute top-1.5 right-1.5 h-7 w-7 inline-flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition"
-                  aria-label="Remove image"
+                  aria-label={t("form.removeImage")}
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -138,7 +141,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
               className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
             >
               <ImagePlus className="h-6 w-6" />
-              <span className="text-xs font-medium">Add image</span>
+              <span className="text-xs font-medium">{t("form.addImage")}</span>
             </button>
           )}
         </div>
@@ -148,7 +151,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
       {/* Text */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="tribute-text" className="text-base">Your tribute</Label>
+          <Label htmlFor="tribute-text" className="text-base">{t("form.textLabel")}</Label>
           <span className="text-xs text-muted-foreground">{text.length}/{MAX_TEXT}</span>
         </div>
         <Textarea
@@ -156,7 +159,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
           value={text}
           maxLength={MAX_TEXT}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Write a memory, a message, or a few words from the heart..."
+          placeholder={t("form.textPlaceholder")}
           className="min-h-[200px] text-base leading-relaxed"
         />
       </div>
@@ -166,25 +169,25 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
         {isEditing && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="gap-2"><Trash2 className="h-4 w-4" />Delete tribute</Button>
+              <Button variant="destructive" className="gap-2"><Trash2 className="h-4 w-4" />{t("form.deleteTribute")}</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete tribute?</AlertDialogTitle>
-                <AlertDialogDescription>Your tribute will be permanently removed.</AlertDialogDescription>
+                <AlertDialogTitle>{t("form.deleteDialogTitle")}</AlertDialogTitle>
+                <AlertDialogDescription>{t("form.deleteDialogDescription")}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{tc("delete")}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
         )}
         <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 sm:ml-auto">
-          <Button variant="outline" onClick={() => router.push(`/profile/${profileId}/tributes`)} disabled={isPending}>Cancel</Button>
+          <Button variant="outline" onClick={() => router.push(`/profile/${profileId}/tributes`)} disabled={isPending}>{tc("cancel")}</Button>
           <Button onClick={handleSubmit} className="gap-2" disabled={isPending || uploading}>
             {isEditing ? <Save className="h-4 w-4" /> : <Send className="h-4 w-4" />}
-            {isEditing ? "Save" : "Send tribute"}
+            {isEditing ? tc("save") : t("form.sendTribute")}
           </Button>
         </div>
       </div>

@@ -2,10 +2,12 @@
 
 import { useState } from "react"
 import { QrCode } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { GlassIcon } from "@/components/glass-icon"
 import { QrScannerModal } from "@/components/qr-scanner-modal"
 
 export function ScanQrButton() {
+  const t = useTranslations("Qr")
   const [open, setOpen] = useState(false)
 
   return (
@@ -13,11 +15,11 @@ export function ScanQrButton() {
       <button
         onClick={() => setOpen(true)}
         className="glass-card flex lg:w-auto w-full items-center justify-center gap-3 px-5 py-3 group"
-        aria-label="Scan QR code"
+        aria-label={t("scanButton.aria")}
       >
         <GlassIcon icon={QrCode} size="sm" />
-        <span className="lg:hidden font-medium">Scan a QR code</span>
-        <span className="hidden lg:inline text-sm font-medium pr-2">Scan QR</span>
+        <span className="lg:hidden font-medium">{t("scanButton.labelLong")}</span>
+        <span className="hidden lg:inline text-sm font-medium pr-2">{t("scanButton.labelShort")}</span>
       </button>
 
       {open && <QrScannerModal onClose={() => setOpen(false)} />}

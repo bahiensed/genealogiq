@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
@@ -16,6 +17,8 @@ interface Props {
 export default async function MemorialNewPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
+  const t = await getTranslations("Memorialized")
+  const tc = await getTranslations("Common")
 
   if (id !== session.user.id) redirect(`/profile/${id}/memorialized`)
 
@@ -30,15 +33,15 @@ export default async function MemorialNewPage({ params }: Props) {
         <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
           <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">
-              <BackButton href={`/profile/${id}/memorialized`} label="Back to guarded profiles" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">New memorialized profile</h1>
+              <BackButton href={`/profile/${id}/memorialized`} label={t("newPage.backToGuarded")} />
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("newPage.title")}</h1>
             </div>
             <p className="text-muted-foreground mt-2 bg-transparent">
-              Create a memorial for someone who lives on in your memory.
+              {t("newPage.subtitle")}
             </p>
           </div>
           <Button variant="ghost" asChild className="shrink-0">
-            <Link href={`/profile/${id}/memorialized`}>Cancel</Link>
+            <Link href={`/profile/${id}/memorialized`}>{tc("cancel")}</Link>
           </Button>
         </section>
 

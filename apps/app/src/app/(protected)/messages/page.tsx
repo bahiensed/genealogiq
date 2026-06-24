@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { MessagesList } from "@/components/messages-list"
@@ -7,6 +8,7 @@ import { getMessages } from "@/queries/notifications"
 
 export default async function MessagesPage() {
   const session = await verifySession()
+  const t = await getTranslations("Messages")
   const data = await getMessages(session.user.id)
 
   // Visiting the inbox = "I saw them all" → clears the bell badge.
@@ -24,12 +26,12 @@ export default async function MessagesPage() {
       <main className="container relative pt-24 pb-32 max-w-6xl">
         <div className="flex items-center justify-between gap-3 mb-2 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
-            <BackButton href="/home" label="Back to home" />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Messages</h1>
+            <BackButton href="/home" label={t("backToHome")} />
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
           </div>
           {totalPending > 0 && (
             <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
-              {totalPending} pending
+              {t("pendingBadge", { count: totalPending })}
             </span>
           )}
         </div>

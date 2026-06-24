@@ -39,7 +39,7 @@ import { updateProfile } from "@/actions/profile"
 import { updateMemorial, deleteMemorial } from "@/actions/memorial"
 import { getAvatarColor } from "@/lib/avatar-color"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { getLocalizedCountries } from "@/consts/countries-data"
 import { cn } from "@/lib/utils"
 import type { EditProfileRow } from "@/queries/profile"
@@ -47,7 +47,7 @@ import type { EditProfileRow } from "@/queries/profile"
 // ─── Date picker helper ───────────────────────────────────────────────────────
 
 function DateField({
-  name, label, control, setValue, disabled, minDate,
+  name, label, control, setValue, disabled, minDate, clearLabel, pickLabel,
 }: {
   name: string; label: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,6 +55,7 @@ function DateField({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: (name: any, value: any) => void
   disabled?: boolean; minDate?: Date
+  clearLabel: string; pickLabel: string
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const value: Date | null = useWatch({ control: control as any, name }) ?? null
@@ -64,7 +65,7 @@ function DateField({
         <Label>{label}</Label>
         {value && !disabled && (
           <button type="button" onClick={() => setValue(name, null)} className="text-xs text-muted-foreground hover:text-foreground">
-            Clear
+            {clearLabel}
           </button>
         )}
       </div>
@@ -77,7 +78,7 @@ function DateField({
             className={cn("w-full justify-start text-left font-normal", !value && "text-muted-foreground")}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {value ? format(value, "PPP") : <span>Pick a date</span>}
+            {value ? format(value, "PPP") : <span>{pickLabel}</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
@@ -162,6 +163,8 @@ interface Props {
 
 export function MemorialEditForm({ profileId, initial, isMemorialized = true }: Props) {
   const locale        = useLocale()
+  const t             = useTranslations("Memorialized")
+  const tc            = useTranslations("Common")
   const countryOptions = getLocalizedCountries(locale)
   const router        = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -192,7 +195,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   const handleAvatarChange = async (files: FileList | null) => {
     const file = files?.[0]
     if (!file) return
-    if (!isAllowedImage(file)) { toast.error(`Unsupported file. Use ${IMAGE_FORMATS_LABEL}.`); return }
+    if (!isAllowedImage(file)) { toast.error(t("avatar.unsupportedFile", { formats: IMAGE_FORMATS_LABEL })); return }
     setUploading(true)
     setValue("avatarUrl", URL.createObjectURL(file))
     try {
@@ -205,7 +208,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
       })
       setValue("avatarUrl", blob.url)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to upload avatar.")
+      toast.error(err instanceof Error ? err.message : t("avatar.uploadError"))
       setValue("avatarUrl", initial.avatarUrl ?? null)
     } finally {
       setUploading(false)
@@ -217,23 +220,23 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = (values: any) => {
     const typed = values as ProfileEditValues
-    if (uploading) { toast.warning("Please wait for the avatar to finish uploading."); return }
+    if (uploading) { toast.warning(t("avatar.waitUploading")); return }
     startTransition(async () => {
       const result = isMemorialized
         ? await updateMemorial(profileId, typed)
         : await updateProfile(typed)
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Profile saved.")
+      toast.success(t("toasts.saved"))
     })
   }
 
-  const handleReset  = () => { reset(defaults); toast("Changes reset.") }
+  const handleReset  = () => { reset(defaults); toast(t("toasts.changesReset")) }
 
   const handleDelete = () => {
     startTransition(async () => {
       const result = await deleteMemorial(profileId)
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Profile deleted.")
+      toast.success(t("toasts.deleted"))
       router.push("/profile")
     })
   }
@@ -241,13 +244,13 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, () => toast.error("Please fix the highlighted fields."))} className="space-y-3 animate-fade-in" style={{ animationDelay: "80ms" }}>
+    <form onSubmit={handleSubmit(onSubmit, () => toast.error(t("toasts.fixFields")))} className="space-y-3 animate-fade-in" style={{ animationDelay: "80ms" }}>
       <Accordion type="multiple" defaultValue={["identity"]} className="space-y-3">
 
         {/* ── Identity ─────────────────────────────────────────── */}
         <AccordionItem value="identity" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
           <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-            <SectionTrigger icon={User} label="Identity" />
+            <SectionTrigger icon={User} label={t("sections.identity")} />
           </AccordionTrigger>
           <AccordionContent>
             <div className="px-6 pb-6 pt-4 space-y-6">
@@ -266,11 +269,11 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                 </Avatar>
                 <div className="flex flex-wrap gap-2">
                   <Button type="button" variant="outline" className="gap-2" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
-                    <ImageIcon className="h-4 w-4" />Change image
+                    <ImageIcon className="h-4 w-4" />{t("avatar.change")}
                   </Button>
                   {avatarUrl && (
                     <Button type="button" variant="ghost" className="gap-2 text-muted-foreground" onClick={() => setValue("avatarUrl", null)}>
-                      <Trash2 className="h-4 w-4" />Remove
+                      <Trash2 className="h-4 w-4" />{tc("remove")}
                     </Button>
                   )}
                   <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { handleAvatarChange(e.target.files); e.target.value = "" }} />
@@ -280,13 +283,13 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
               {/* Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="first-name">First name <span className="text-destructive">*</span></Label>
-                  <Input id="first-name" maxLength={100} placeholder="Name" {...register("firstName")} />
+                  <Label htmlFor="first-name">{t("fields.firstName")} <span className="text-destructive">*</span></Label>
+                  <Input id="first-name" maxLength={100} placeholder={t("placeholders.firstName")} {...register("firstName")} />
                   {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last-name">Family name <span className="text-destructive">*</span></Label>
-                  <Input id="last-name" maxLength={100} placeholder="Family name" {...register("lastName")} />
+                  <Label htmlFor="last-name">{t("fields.lastName")} <span className="text-destructive">*</span></Label>
+                  <Input id="last-name" maxLength={100} placeholder={t("placeholders.lastName")} {...register("lastName")} />
                   {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
                 </div>
               </div>
@@ -294,37 +297,37 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
               {/* Maiden name + Nickname */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="maiden-name">Maiden name <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                  <Input id="maiden-name" maxLength={100} placeholder="Birth surname" {...register("maidenName")} />
+                  <Label htmlFor="maiden-name">{t("fields.maidenName")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Input id="maiden-name" maxLength={100} placeholder={t("placeholders.maidenName")} {...register("maidenName")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nickname">Nickname <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                  <Input id="nickname" maxLength={100} placeholder="How they were known" {...register("nickname")} />
+                  <Label htmlFor="nickname">{t("fields.nickname")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Input id="nickname" maxLength={100} placeholder={t("placeholders.nickname")} {...register("nickname")} />
                 </div>
               </div>
 
               {/* Gender + National ID */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="gender">Gender <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                  <Label htmlFor="gender">{t("fields.gender")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
                   <Controller
                     control={control}
                     name="gender"
                     render={({ field }) => (
                       <Select value={field.value ?? ""} onValueChange={(v) => field.onChange(v || null)}>
-                        <SelectTrigger id="gender"><SelectValue placeholder="Not specified" /></SelectTrigger>
+                        <SelectTrigger id="gender"><SelectValue placeholder={t("placeholders.notSpecified")} /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="FEMALE">Female</SelectItem>
-                          <SelectItem value="MALE">Male</SelectItem>
-                          <SelectItem value="OTHER">Other</SelectItem>
+                          <SelectItem value="FEMALE">{t("gender.female")}</SelectItem>
+                          <SelectItem value="MALE">{t("gender.male")}</SelectItem>
+                          <SelectItem value="OTHER">{t("gender.other")}</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="national-id">National ID <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                  <Input id="national-id" maxLength={50} placeholder="CPF, SSN, etc." {...register("nationalId")} />
+                  <Label htmlFor="national-id">{t("fields.nationalId")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Input id="national-id" maxLength={50} placeholder={t("placeholders.nationalId")} {...register("nationalId")} />
                 </div>
               </div>
             </div>
@@ -334,32 +337,32 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         {/* ── Birth ────────────────────────────────────────────── */}
         <AccordionItem value="birth" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
           <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-            <SectionTrigger icon={Calendar} label="Birth" />
+            <SectionTrigger icon={Calendar} label={t("sections.birth")} />
           </AccordionTrigger>
           <AccordionContent>
             <div className="px-6 pb-6 pt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DateField name="birthDate" label="Date" control={control} setValue={setValue} />
+                <DateField name="birthDate" label={t("fields.date")} control={control} setValue={setValue} clearLabel={t("date.clear")} pickLabel={t("date.pick")} />
                 <div className="space-y-2">
-                  <Label htmlFor="birth-country">Country <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                  <Label htmlFor="birth-country">{t("fields.country")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
                   <Controller
                     control={control}
                     name="birthCountry"
                     render={({ field }) => (
                       <Select value={field.value ?? ""} onValueChange={field.onChange}>
-                        <SelectTrigger id="birth-country"><SelectValue placeholder="Country" /></SelectTrigger>
+                        <SelectTrigger id="birth-country"><SelectValue placeholder={t("placeholders.country")} /></SelectTrigger>
                         <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
                       </Select>
                     )}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="birth-city">City <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                  <Input id="birth-city" maxLength={100} placeholder="City" {...register("birthPlace")} />
+                  <Label htmlFor="birth-city">{t("fields.city")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Input id="birth-city" maxLength={100} placeholder={t("placeholders.city")} {...register("birthPlace")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="birth-state">State / Province <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                  <Input id="birth-state" maxLength={100} placeholder="State or province" {...register("birthState")} />
+                  <Label htmlFor="birth-state">{t("fields.state")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Input id="birth-state" maxLength={100} placeholder={t("placeholders.state")} {...register("birthState")} />
                 </div>
               </div>
             </div>
@@ -370,13 +373,14 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         {isMemorialized && (
           <AccordionItem value="death" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
             <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-              <SectionTrigger icon={Flower2} label="Death" />
+              <SectionTrigger icon={Flower2} label={t("sections.death")} />
             </AccordionTrigger>
             <AccordionContent>
               <div className="px-6 pb-6 pt-4 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <DateField
-                    name="deathDate" label="Date" control={control}
+                    name="deathDate" label={t("fields.date")} control={control}
+                    clearLabel={t("date.clear")} pickLabel={t("date.pick")}
                     setValue={(n, v) => {
                       setValue(n as keyof ProfileEditValues, v)
                       if (!v) {
@@ -389,30 +393,30 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                     minDate={birthDate ?? undefined}
                   />
                   <div className="space-y-2">
-                    <Label htmlFor="death-country">Country <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                    <Label htmlFor="death-country">{t("fields.country")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
                     <Controller
                       control={control}
                       name="deathCountry"
                       render={({ field }) => (
                         <Select value={field.value ?? ""} onValueChange={field.onChange} disabled={!deathDate}>
-                          <SelectTrigger id="death-country"><SelectValue placeholder="Country" /></SelectTrigger>
+                          <SelectTrigger id="death-country"><SelectValue placeholder={t("placeholders.country")} /></SelectTrigger>
                           <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
                         </Select>
                       )}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="death-city">City <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                    <Input id="death-city" maxLength={100} placeholder="City" disabled={!deathDate} {...register("deathPlace")} />
+                    <Label htmlFor="death-city">{t("fields.city")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                    <Input id="death-city" maxLength={100} placeholder={t("placeholders.city")} disabled={!deathDate} {...register("deathPlace")} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="death-state">State / Province <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                    <Input id="death-state" maxLength={100} placeholder="State or province" disabled={!deathDate} {...register("deathState")} />
+                    <Label htmlFor="death-state">{t("fields.state")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                    <Input id="death-state" maxLength={100} placeholder={t("placeholders.state")} disabled={!deathDate} {...register("deathState")} />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="death-cause">Cause of death <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                  <Input id="death-cause" maxLength={200} placeholder="e.g. Heart failure" disabled={!deathDate} {...register("deathCause")} />
+                  <Label htmlFor="death-cause">{t("fields.deathCause")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Input id="death-cause" maxLength={200} placeholder={t("placeholders.deathCause")} disabled={!deathDate} {...register("deathCause")} />
                 </div>
               </div>
             </AccordionContent>
@@ -422,12 +426,12 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         {/* ── Contact ──────────────────────────────────────────── */}
         <AccordionItem value="contact" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
           <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-            <SectionTrigger icon={Phone} label="Contact" />
+            <SectionTrigger icon={Phone} label={t("sections.contact")} />
           </AccordionTrigger>
           <AccordionContent>
             <div className="px-6 pb-6 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                <Label htmlFor="phone">{t("fields.phone")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
                 <div className="flex gap-2">
                   <Input id="phone-cc" maxLength={5} placeholder="+55" className="w-20 shrink-0" {...register("phoneCountryCode")} />
                   <Input id="phone" maxLength={30} placeholder="(11) 99999-9999" className="flex-1" {...register("phone")} />
@@ -440,7 +444,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         {/* ── Address ──────────────────────────────────────────── */}
         <AccordionItem value="address" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
           <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-            <SectionTrigger icon={MapPin} label="Address" />
+            <SectionTrigger icon={MapPin} label={t("sections.address")} />
           </AccordionTrigger>
           <AccordionContent>
             <div className="px-6 pb-6 pt-4">
@@ -458,18 +462,18 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         {/* ── Social networks ───────────────────────────────────── */}
         <AccordionItem value="social" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
           <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-            <SectionTrigger icon={Globe} label="Social networks" />
+            <SectionTrigger icon={Globe} label={t("sections.social")} />
           </AccordionTrigger>
           <AccordionContent>
             <div className="px-6 pb-6 pt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="website">Website</Label>
+                  <Label htmlFor="website">{t("fields.website")}</Label>
                   <Input id="website" maxLength={250} placeholder="https://example.com" {...register("website")} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="instagram">Instagram</Label>
-                  <Input id="instagram" maxLength={250} placeholder="@username or URL" {...register("instagram")} />
+                  <Input id="instagram" maxLength={250} placeholder={t("placeholders.handleOrUrl")} {...register("instagram")} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="linkedin">LinkedIn</Label>
@@ -481,19 +485,19 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="x">X (Twitter)</Label>
-                  <Input id="x" maxLength={250} placeholder="@username or URL" {...register("x")} />
+                  <Input id="x" maxLength={250} placeholder={t("placeholders.handleOrUrl")} {...register("x")} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="tiktok">TikTok</Label>
-                  <Input id="tiktok" maxLength={250} placeholder="@username or URL" {...register("tiktok")} />
+                  <Input id="tiktok" maxLength={250} placeholder={t("placeholders.handleOrUrl")} {...register("tiktok")} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="youtube">YouTube</Label>
                   <Input id="youtube" maxLength={250} placeholder="youtube.com/..." {...register("youtube")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="other-social">Other</Label>
-                  <Input id="other-social" maxLength={250} placeholder="Any other link" {...register("otherSocial")} />
+                  <Label htmlFor="other-social">{t("fields.otherSocial")}</Label>
+                  <Input id="other-social" maxLength={250} placeholder={t("placeholders.otherLink")} {...register("otherSocial")} />
                 </div>
               </div>
             </div>
@@ -503,19 +507,19 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         {/* ── Notes ────────────────────────────────────────────── */}
         <AccordionItem value="notes" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
           <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-            <SectionTrigger icon={FileText} label="Notes" />
+            <SectionTrigger icon={FileText} label={t("sections.notes")} />
           </AccordionTrigger>
           <AccordionContent>
             <div className="px-6 pb-6 pt-4 space-y-2">
-              <Label htmlFor="notes" className="sr-only">Notes</Label>
+              <Label htmlFor="notes" className="sr-only">{t("sections.notes")}</Label>
               <Textarea
                 id="notes"
                 maxLength={1000}
-                placeholder="Internal notes visible only to you…"
+                placeholder={t("placeholders.notes")}
                 className="min-h-[120px] text-base leading-relaxed resize-none"
                 {...register("notes")}
               />
-              <p className="text-xs text-muted-foreground">Not shown publicly.</p>
+              <p className="text-xs text-muted-foreground">{t("notes.notPublic")}</p>
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -526,10 +530,10 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
       <div className="flex flex-col md:flex-row md:items-center gap-3 pt-2 border-t border-border/60">
         <div className="order-1 md:order-2 md:ml-auto flex flex-col md:flex-row gap-2 md:gap-3">
           <Button type="submit" className="gap-2 w-full md:w-auto order-1 md:order-2" disabled={isPending || uploading}>
-            <Save className="h-4 w-4" />Save
+            <Save className="h-4 w-4" />{tc("save")}
           </Button>
           <Button type="button" variant="outline" onClick={handleReset} className="gap-2 w-full md:w-auto order-2 md:order-1" disabled={isPending}>
-            <RotateCcw className="h-4 w-4" />Reset
+            <RotateCcw className="h-4 w-4" />{t("actions.reset")}
           </Button>
         </div>
         {isMemorialized && (
@@ -537,20 +541,20 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button type="button" variant="destructive" className="gap-2 w-full md:w-auto" disabled={isPending}>
-                  <Trash2 className="h-4 w-4" />Delete profile
+                  <Trash2 className="h-4 w-4" />{t("delete.button")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete this profile?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("delete.title")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently remove {firstName} {lastName}&apos;s profile, biography, gallery, tributes and geolocation. This action cannot be undone.
+                    {t("delete.description", { name: `${firstName} ${lastName}` })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
                   <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Delete
+                    {tc("delete")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
