@@ -37,5 +37,15 @@
     "hidePassword": "Hide password",
     "newHere": "New here?",
     "createAccount": "Create an account"
+  },
+  "Errors": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "retry": "Try again"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been removed.",
+    "backHome": "Go home"
   }
 }

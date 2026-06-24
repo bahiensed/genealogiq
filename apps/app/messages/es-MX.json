@@ -37,5 +37,15 @@
     "hidePassword": "Ocultar contraseña",
     "newHere": "¿Nuevo por aquí?",
     "createAccount": "Crea una cuenta"
+  },
+  "Errors": {
+    "title": "Algo salió mal",
+    "description": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "retry": "Intentar de nuevo"
+  },
+  "NotFound": {
+    "title": "Página no encontrada",
+    "description": "La página que buscas no existe o fue eliminada.",
+    "backHome": "Volver al inicio"
   }
 }

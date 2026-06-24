@@ -32,5 +32,15 @@
     "revenueThisYear": "Receita neste ano",
     "totalRevenue": "Receita total",
     "allTimeRevenue": "Receita de todo o período"
+  },
+  "Errors": {
+    "title": "Algo deu errado",
+    "description": "Ocorreu um erro inesperado. Tente novamente.",
+    "retry": "Tentar de novo"
+  },
+  "NotFound": {
+    "title": "Página não encontrada",
+    "description": "A página que você procura não existe ou foi removida.",
+    "backHome": "Voltar ao início"
   }
 }

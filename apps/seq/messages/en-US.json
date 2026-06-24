@@ -30,5 +30,15 @@
     "revenueThisMonth": "Revenue this month",
     "averageTicket": "Average Ticket",
     "avgRevenuePerSale": "Avg. revenue per sale this month"
+  },
+  "Errors": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "retry": "Try again"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been removed.",
+    "backHome": "Go home"
   }
 }

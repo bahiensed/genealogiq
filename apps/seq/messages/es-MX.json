@@ -30,5 +30,15 @@
     "revenueThisMonth": "Ingresos este mes",
     "averageTicket": "Ticket promedio",
     "avgRevenuePerSale": "Ingreso promedio por venta este mes"
+  },
+  "Errors": {
+    "title": "Algo salió mal",
+    "description": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "retry": "Intentar de nuevo"
+  },
+  "NotFound": {
+    "title": "Página no encontrada",
+    "description": "La página que buscas no existe o fue eliminada.",
+    "backHome": "Volver al inicio"
   }
 }
