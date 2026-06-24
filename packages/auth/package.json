@@ -6,6 +6,7 @@
     ".": "./src/node.ts",
     "./edge": "./src/edge.ts",
     "./dal": "./src/dal.ts",
+    "./authz": "./src/authz.ts",
     "./login": "./src/login.ts",
     "./lockout": "./src/lockout.ts",
     "./schemas": "./src/schemas.ts",

@@ -11,7 +11,7 @@ const { prismaMock, headersMock } = vi.hoisted(() => ({
 vi.mock("@genealogiq/db", () => ({ prisma: prismaMock }))
 vi.mock("next/headers", () => ({ headers: headersMock }))
 
-import { checkRateLimit, getClientIp } from "./rate-limit"
+import { checkRateLimit, getClientIp, requireWithinRateLimit, TooManyRequestsError } from "./rate-limit"
 
 const headerBag = (entries: Record<string, string | null>) => ({
   get: (k: string) => entries[k] ?? null,
@@ -61,5 +61,23 @@ describe("getClientIp", () => {
   it("returns 'unknown' when no client IP header is present", async () => {
     headersMock.mockResolvedValue(headerBag({}))
     expect(await getClientIp()).toBe("unknown")
+  })
+})
+
+describe("requireWithinRateLimit (throwing guard)", () => {
+  it("resolves when under the limit", async () => {
+    prismaMock.rateLimitAttempt.findMany.mockResolvedValue([])
+    await expect(requireWithinRateLimit("k", { limit: 5, windowSec: 300 })).resolves.toBeUndefined()
+  })
+
+  it("throws TooManyRequestsError with a retryAfter once the window is full", async () => {
+    const oldest = new Date(Date.now() - 100_000) // 100s ago, window 300s
+    prismaMock.rateLimitAttempt.findMany.mockResolvedValue(
+      Array.from({ length: 5 }, () => ({ attemptedAt: oldest })),
+    )
+    await expect(requireWithinRateLimit("k", { limit: 5, windowSec: 300 })).rejects.toBeInstanceOf(
+      TooManyRequestsError,
+    )
+    expect(prismaMock.rateLimitAttempt.create).not.toHaveBeenCalled()
   })
 })

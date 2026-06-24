@@ -55,3 +55,39 @@ export async function checkRateLimit({
 
   return { allowed: true, retryAfter: 0 }
 }
+
+/**
+ * 429 error thrown by requireWithinRateLimit. Carries retry-after (seconds) so
+ * callers can surface it. Defined here (the lower package) and re-exported through
+ * @genealogiq/auth's authz barrel to keep the auth→services dependency acyclic.
+ */
+export class TooManyRequestsError extends Error {
+  readonly status = 429
+  constructor(
+    public readonly retryAfter: number,
+    message = 'Too many requests',
+  ) {
+    super(message)
+    this.name = 'TooManyRequestsError'
+  }
+}
+
+/**
+ * Throwing guard over checkRateLimit (régua contract). Throws
+ * TooManyRequestsError(retryAfter) on breach.
+ *
+ * - In a form-invoked Server Action, wrap in try/catch and convert to `{ error }`
+ *   (forms expect a result, not a thrown navigation).
+ * - In an HTTP route handler, map the thrown error to a 429 response.
+ */
+export async function requireWithinRateLimit(
+  key: string,
+  opts: { limit: number; windowSec: number; message?: string },
+): Promise<void> {
+  const { allowed, retryAfter } = await checkRateLimit({
+    key,
+    maxAttempts:   opts.limit,
+    windowSeconds: opts.windowSec,
+  })
+  if (!allowed) throw new TooManyRequestsError(retryAfter, opts.message)
+}

@@ -6,6 +6,7 @@ import { verifySession } from "@/lib/dal"
 import { tributeSchema } from "@/schemas/tribute"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { assertOwnership } from "@genealogiq/auth/authz"
 import { deleteBlobs } from "@/lib/blob"
 import { notify, markNotificationsRead } from "@/lib/notifications"
 
@@ -60,11 +61,11 @@ export async function approveTribute(tributeId: string, profileId: string) {
   // Ensure the tribute actually belongs to the profile the caller manages.
   // Without this, a manager of profile A could moderate tributes on any other
   // profile by passing their own profileId + an arbitrary tributeId (IDOR).
-  const owned = await prisma.tribute.findUnique({
-    where:  { id: tributeId },
-    select: { profileId: true },
-  })
-  if (!owned || owned.profileId !== profileId) return { error: "Not authorized." }
+  const owned = assertOwnership(
+    await prisma.tribute.findUnique({ where: { id: tributeId }, select: { profileId: true } }),
+    (t) => t.profileId === profileId,
+  )
+  if (!owned.ok) return { error: owned.error }
 
   const tribute = await prisma.tribute.update({
     where: { id: tributeId },
@@ -101,11 +102,11 @@ export async function rejectTribute(tributeId: string, profileId: string) {
 
   // Ensure the tribute actually belongs to the profile the caller manages (see
   // approveTribute) — prevents cross-profile moderation via a forged profileId.
-  const owned = await prisma.tribute.findUnique({
-    where:  { id: tributeId },
-    select: { profileId: true },
-  })
-  if (!owned || owned.profileId !== profileId) return { error: "Not authorized." }
+  const owned = assertOwnership(
+    await prisma.tribute.findUnique({ where: { id: tributeId }, select: { profileId: true } }),
+    (t) => t.profileId === profileId,
+  )
+  if (!owned.ok) return { error: owned.error }
 
   const tribute = await prisma.tribute.update({
     where: { id: tributeId },

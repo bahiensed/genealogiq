@@ -5,7 +5,7 @@ import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { createTenantDal } from "@genealogiq/auth/dal"
 
-export const { verifySession, verifyTenantSession, verifyAdmin, canViewSensitive, REDACTED } =
+export const { verifySession, verifyTenantSession, verifyAdmin, canViewSensitive, REDACTED, requireSession, requireRole } =
   createTenantDal({
     auth: () => auth(),
     adminRoles: ["SUPER_ADMIN", "OWNER", "ADMIN"],
