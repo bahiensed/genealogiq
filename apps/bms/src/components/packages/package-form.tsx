@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
 import { packageResolver, packageDefaultValues, type PackageFormValues } from '@/schemas/package.schema'
 import { createPackage, updatePackage, syncPackageWithStripe } from '@/actions/package.actions'
@@ -36,14 +37,15 @@ interface PackageFormProps {
   backHref?:        string
 }
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-
 export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId, fixedType, backHref = '/packages' }: PackageFormProps) {
+  const t  = useTranslations('Packages')
+  const tc = useTranslations('Common')
+  const locale = useLocale()
+  const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   const isEditing  = !!id
   const isSynced   = isEditing && !!stripePriceId
   const isPhysical = fixedType === 'PHYSICAL'
-  const noun       = isPhysical ? 'product' : 'package'
-  const Noun       = isPhysical ? 'Product' : 'Package'
+  const noun       = isPhysical ? t('noun.product') : t('noun.package')
   const [serverError, setServerError] = useState<string | null>(null)
   const [syncOpen, setSyncOpen]       = useState(false)
   const [isSyncing, startSync]        = useTransition()
@@ -94,12 +96,12 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8 max-w-lg">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          {isEditing ? `Edit ${noun}` : `New ${noun}`}
+          {isEditing ? t('edit', { noun }) : t('new', { noun })}
         </h1>
         <div className="flex items-center gap-3">
           {fixedType && (
             <Badge variant={fixedType === 'PHYSICAL' ? 'outline' : 'secondary'} className="text-xs">
-              {fixedType === 'DIGITAL' ? 'Digital' : 'Physical'}
+              {fixedType === 'DIGITAL' ? t('typeBadge.digital') : t('typeBadge.physical')}
             </Badge>
           )}
           {isEditing && (
@@ -109,7 +111,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
               render={({ field }) => (
                 <div className="flex items-center gap-2">
                   <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-                  <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
+                  <label htmlFor="isActive" className="text-sm cursor-pointer">{t('active')}</label>
                 </div>
               )}
             />
@@ -124,7 +126,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>{Noun} Name:</FieldLabel>
+              <FieldLabel>{t('fields.name', { noun })}</FieldLabel>
               <Input {...field} maxLength={32} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -138,7 +140,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>QR-Code Quantity:</FieldLabel>
+                <FieldLabel>{t('fields.quantity')}</FieldLabel>
                 <Input
                   type="number"
                   step="1"
@@ -159,7 +161,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Price (US$):</FieldLabel>
+                <FieldLabel>{t('fields.price')}</FieldLabel>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">$</span>
                   <CurrencyInput
@@ -179,7 +181,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
         {/* Summary pill */}
         {quantity > 0 && price > 0 && (
           <div className="rounded-lg border bg-muted/40 px-4 py-3 flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Unit price per QR code</span>
+            <span className="text-muted-foreground">{t('unitPrice')}</span>
             <span className="font-semibold tabular-nums">{usd.format(price / quantity)}</span>
           </div>
         )}
@@ -190,7 +192,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Description:</FieldLabel>
+              <FieldLabel>{t('fields.description')}</FieldLabel>
               <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={256} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -200,39 +202,36 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
         {isEditing && (
           <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-3 text-xs">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground uppercase tracking-wider">Stripe sync</span>
+              <span className="text-muted-foreground uppercase tracking-wider">{t('stripe.title')}</span>
               {isSynced
-                ? <span className="font-medium text-emerald-600">Synced</span>
-                : <span className="font-medium text-amber-600">Not synced</span>}
+                ? <span className="font-medium text-emerald-600">{t('stripe.synced')}</span>
+                : <span className="font-medium text-amber-600">{t('stripe.notSynced')}</span>}
             </div>
             {isSynced && (
               <div className="flex flex-col gap-1 font-mono text-muted-foreground">
-                <span>product: {stripeProductId}</span>
-                <span>price:   {stripePriceId}</span>
+                <span>{t('stripe.productId')} {stripeProductId}</span>
+                <span>{t('stripe.priceId')} {stripePriceId}</span>
               </div>
             )}
             <p className="text-muted-foreground">
-              Pushes this {noun}&apos;s name, description and price to Stripe (creating or updating the
-              matching Product and Price). Save your changes first — sync uses the saved data. Changing
-              the price provisions a fresh Stripe Price.
+              {t('stripe.hint', { noun })}
             </p>
             <AlertDialog open={syncOpen} onOpenChange={setSyncOpen}>
               <AlertDialogTrigger asChild>
                 <Button type="button" variant="outline" size="sm" className="self-start" disabled={isSyncing}>
-                  {isSyncing ? 'Syncing…' : 'Sync with Stripe'}
+                  {isSyncing ? t('stripe.syncing') : t('stripe.syncButton')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Sync with Stripe?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('stripe.confirmTitle')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Please confirm that this {noun}&apos;s data is correct. This will create or update the
-                    matching Product and Price in Stripe. Are you sure you want to synchronize?
+                    {t('stripe.confirmDescription', { noun })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isSyncing}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSync} disabled={isSyncing}>Sync now</AlertDialogAction>
+                  <AlertDialogCancel disabled={isSyncing}>{tc('cancel')}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSync} disabled={isSyncing}>{t('stripe.syncNow')}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -243,10 +242,10 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
       {serverError && <FieldError>{serverError}</FieldError>}
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create package'}
+          {isSubmitting ? tc('saving') : isEditing ? t('saveChanges') : t('createButton', { noun })}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>

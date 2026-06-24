@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations, useLocale } from 'next-intl'
 import { DataTable } from '@genealogiq/ui/data-table'
 import { getColumns, type PackageRow } from './columns'
 
@@ -12,26 +13,28 @@ interface PackagesDataTableProps {
   noun?: 'package' | 'product'
 }
 
-function columnLabels(noun: 'package' | 'product'): Record<string, string> {
-  const Noun = noun === 'product' ? 'Product' : 'Package'
-  return {
-    name:        `${Noun} Name`,
-    quantity:    'QR-Codes / Package',
-    price:       `${Noun} Price`,
-    description: `${Noun} Description`,
-    isActive:    'Status',
-    createdAt:   'Created at',
-  }
-}
-
 export function PackagesDataTable({ currentUserRole, data, basePath, emptyMessage, noun = 'package' }: PackagesDataTableProps) {
+  const t = useTranslations('Packages')
+  const locale = useLocale()
+
+  const Noun = noun === 'product' ? t('noun.product') : t('noun.package')
+
+  const columnLabels: Record<string, string> = {
+    name:        t('table.name', { noun: Noun }),
+    quantity:    t('table.quantity'),
+    price:       t('table.price', { noun: Noun }),
+    description: t('table.description', { noun: Noun }),
+    isActive:    t('table.status'),
+    createdAt:   t('table.createdAt'),
+  }
+
   return (
     <DataTable
-      columns={getColumns(currentUserRole, basePath, noun)}
+      columns={getColumns(currentUserRole, t, locale, basePath, noun)}
       data={data}
-      emptyMessage={emptyMessage ?? 'No packages found.'}
+      emptyMessage={emptyMessage ?? (noun === 'product' ? t('table.emptyProduct') : t('table.empty'))}
       initialSorting={[{ id: 'quantity', desc: false }]}
-      columnLabels={columnLabels(noun)}
+      columnLabels={columnLabels}
     />
   )
 }

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { verifySession } from '@/lib/dal'
 import { getDiscountCoupons } from '@/queries/discount-coupons'
 import { DiscountCouponsDataTable } from '@/components/discount-coupons/discount-coupons-data-table'
@@ -7,6 +8,7 @@ import { Button } from '@genealogiq/ui/button'
 
 export default async function DiscountCouponsPage() {
   const session = await verifySession()
+  const t = await getTranslations('DiscountCoupons')
 
   // Defensive: if the query throws (Prisma schema drift, missing Stripe key
   // propagating from an unexpected import, etc.) we surface the real message
@@ -25,16 +27,16 @@ export default async function DiscountCouponsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          Discount Coupons
+          {t('title')}
         </h1>
         <Button asChild>
-          <Link href="/sales/discount-coupons/new">New coupon</Link>
+          <Link href="/sales/discount-coupons/new">{t('new')}</Link>
         </Button>
       </div>
 
       {loadError ? (
         <p className="text-sm text-destructive">
-          Could not load coupons: {loadError}. Check Vercel function logs for details.
+          {t('loadError', { message: loadError })}
         </p>
       ) : (
         <DiscountCouponsDataTable currentUserRole={session.user.role} data={coupons} />

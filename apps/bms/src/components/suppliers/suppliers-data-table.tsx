@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations, useLocale } from 'next-intl'
 import { DataTable } from '@genealogiq/ui/data-table'
 import { getColumns, type SupplierRow } from './columns'
 
@@ -8,22 +9,25 @@ interface SuppliersDataTableProps {
   data: SupplierRow[]
 }
 
-const COLUMN_LABELS: Record<string, string> = {
-  name:       'Name',
-  entityType: 'Type',
-  category:   'Category',
-  email:      'E-mail',
-  isActive:   'Status',
-  createdAt:  'Created at',
-}
-
 export function SuppliersDataTable({ currentUserRole, data }: SuppliersDataTableProps) {
+  const t = useTranslations('Suppliers')
+  const locale = useLocale()
+
+  const columnLabels: Record<string, string> = {
+    name:       t('table.name'),
+    entityType: t('table.type'),
+    category:   t('table.category'),
+    email:      t('table.email'),
+    isActive:   t('table.status'),
+    createdAt:  t('table.createdAt'),
+  }
+
   return (
     <DataTable
-      columns={getColumns(currentUserRole)}
+      columns={getColumns(currentUserRole, t, locale)}
       data={data}
-      emptyMessage="No suppliers found."
-      columnLabels={COLUMN_LABELS}
+      emptyMessage={t('table.empty')}
+      columnLabels={columnLabels}
     />
   )
 }

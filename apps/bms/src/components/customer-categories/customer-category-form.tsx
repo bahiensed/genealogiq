@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { customerCategoryResolver, customerCategoryDefaultValues, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
 import { createCustomerCategory, updateCustomerCategory } from '@/actions/customer-category.actions'
@@ -18,6 +19,8 @@ interface CustomerCategoryFormProps {
 }
 
 export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryFormProps) {
+  const t  = useTranslations('CustomerCategories')
+  const tc = useTranslations('Common')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
@@ -52,7 +55,7 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Name:</FieldLabel>
+              <FieldLabel>{t('fields.name')}</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -64,7 +67,7 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Description:</FieldLabel>
+              <FieldLabel>{t('fields.description')}</FieldLabel>
               <Textarea {...field} rows={3} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -82,7 +85,7 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <FieldLabel htmlFor="isActive" className="cursor-pointer">Active category:</FieldLabel>
+                <FieldLabel htmlFor="isActive" className="cursor-pointer">{t('fields.active')}</FieldLabel>
               </Field>
             )}
           />
@@ -91,10 +94,10 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create category'}
+          {isSubmitting ? tc('saving') : isEditing ? t('saveChanges') : t('create')}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>

@@ -17,6 +17,10 @@ import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
 import { toggleUserActive, deleteUser, resendWelcomeEmail } from '@/actions/user.actions'
 
+// Loose translator type so getColumns can stay a plain function (not a hook).
+// The caller (users-data-table) passes useTranslations('Users').
+type Translator = (key: string, values?: Record<string, string | number | Date>) => string
+
 export type UserRow = {
   id: string
   firstName: string
@@ -27,23 +31,16 @@ export type UserRow = {
   createdAt: Date
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  SUPER_ADMIN: 'Super Admin',
-  OWNER:     'Owner',
-  ADMIN:     'Admin',
-  COMERCIAL: 'Comercial',
-  FINANCE:   'Finance',
-  USER:      'User',
-}
-
 function ActionsCell({
   row,
   currentUserId,
   currentUserRole,
+  t,
 }: {
   row: { original: UserRow }
   currentUserId: string
   currentUserRole: string
+  t: Translator
 }) {
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -56,41 +53,39 @@ function ActionsCell({
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" disabled={isPending}>
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('actions.openMenu')}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/users/${user.id}`}>Edit</Link>
+            <Link href={`/users/${user.id}`}>{t('actions.edit')}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={isSelf}
             onClick={() => startTransition(async () => {
               const result = await toggleUserActive(user.id)
               if (result?.error) toast.error(result.error)
-              else toast.success(user.isActive ? 'User deactivated.' : 'User reactivated.')
+              else toast.success(user.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
-            {user.isActive ? 'Deactivate' : 'Reactivate'}
+            {user.isActive ? t('actions.deactivate') : t('actions.reactivate')}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await resendWelcomeEmail(user.id)
               if (result?.error) toast.error(result.error)
-              else toast.success('Email resent successfully.')
+              else toast.success(t('toasts.emailResent'))
             })}
           >
-            Resend email
+            {t('actions.resendEmail')}
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-            <>
-                  <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onSelect={() => setDeleteOpen(true)}
-              >
-                Delete
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={() => setDeleteOpen(true)}
+            >
+              {t('actions.delete')}
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -100,11 +95,11 @@ function ActionsCell({
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           isPending={isPending}
-          description={`The user "${user.firstName} ${user.lastName}" will be permanently deleted.`}
+          description={t('toasts.deleteConfirm', { name: `${user.firstName} ${user.lastName}` })}
           onConfirm={() => startTransition(async () => {
             const result = await deleteUser(user.id)
             if (result?.error) toast.error(result.error)
-            else { toast.success('User deleted successfully.'); setDeleteOpen(false) }
+            else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
           })}
         />
       )}
@@ -112,12 +107,16 @@ function ActionsCell({
   )
 }
 
-export function getColumns({ currentUserId, currentUserRole }: { currentUserId: string; currentUserRole: string }): ColumnDef<UserRow>[] {
+export function getColumns(
+  { currentUserId, currentUserRole }: { currentUserId: string; currentUserRole: string },
+  t: Translator,
+  locale: string,
+): ColumnDef<UserRow>[] {
   return [
     {
       id: 'name',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
       cell: ({ row }) => (
         <Link href={`/users/${row.original.id}`} className="hover:underline">
           {row.original.firstName} {row.original.lastName}
@@ -126,35 +125,35 @@ export function getColumns({ currentUserId, currentUserRole }: { currentUserId: 
     },
     {
       accessorKey: 'email',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="E-mail" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.email')} />,
     },
     {
       accessorKey: 'role',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.role')} />,
       cell: ({ row }) => (
-        <Badge variant="secondary">{ROLE_LABELS[row.original.role] ?? row.original.role}</Badge>
+        <Badge variant="secondary">{t(`roles.${row.original.role}`)}</Badge>
       ),
     },
     {
       accessorKey: 'isActive',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.status')} />,
       cell: ({ row }) =>
         row.original.isActive ? (
-          <Badge variant="default">Active</Badge>
+          <Badge variant="default">{t('status.active')}</Badge>
         ) : (
-          <Badge variant="destructive">Inactive</Badge>
+          <Badge variant="destructive">{t('status.inactive')}</Badge>
         ),
     },
     {
       accessorKey: 'createdAt',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.createdAt')} />,
       cell: ({ row }) =>
-        new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
+        new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(row.original.createdAt),
     },
     {
       id: 'actions',
       enableHiding: false,
-      cell: ({ row }) => <ActionsCell row={row} currentUserId={currentUserId} currentUserRole={currentUserRole} />,
+      cell: ({ row }) => <ActionsCell row={row} currentUserId={currentUserId} currentUserRole={currentUserRole} t={t} />,
     },
   ]
 }

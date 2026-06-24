@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { updateDiscountCoupon } from '@/actions/discount-coupon.actions'
 import { Button } from '@genealogiq/ui/button'
@@ -16,6 +17,8 @@ interface DiscountCouponEditFormProps {
 }
 
 export function DiscountCouponEditForm({ id, code, description }: DiscountCouponEditFormProps) {
+  const t  = useTranslations('DiscountCoupons')
+  const tc = useTranslations('Common')
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [value, setValue] = useState(description ?? '')
@@ -38,20 +41,20 @@ export function DiscountCouponEditForm({ id, code, description }: DiscountCoupon
 
       <FieldGroup>
         <Field>
-          <FieldLabel>Code:</FieldLabel>
+          <FieldLabel>{t('fields.code')}</FieldLabel>
           <Input value={code} disabled readOnly className="font-mono" />
           <p className="text-xs text-muted-foreground">
-            The promotion code is immutable. To change terms, deactivate this coupon and create a new one.
+            {t('hints.codeImmutable')}
           </p>
         </Field>
 
         <Field>
-          <FieldLabel>Description:</FieldLabel>
+          <FieldLabel>{t('fields.description')}</FieldLabel>
           <Textarea
             value={value}
             onChange={(e) => setValue(e.target.value)}
             rows={3}
-            placeholder="Internal note (not shown to customers)"
+            placeholder={t('placeholders.descriptionEdit')}
             maxLength={255}
           />
         </Field>
@@ -59,10 +62,10 @@ export function DiscountCouponEditForm({ id, code, description }: DiscountCoupon
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isPending}>
-          {isPending ? 'Saving…' : 'Save changes'}
+          {isPending ? tc('saving') : t('saveChanges')}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.push('/sales/discount-coupons')}>
-          Cancel
+          {tc('cancel')}
         </Button>
       </Field>
     </form>

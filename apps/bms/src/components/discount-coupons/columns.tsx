@@ -16,6 +16,10 @@ import {
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { toggleDiscountCouponActive } from '@/actions/discount-coupon.actions'
 
+// Loose translator type so getColumns can stay a plain function (not a hook).
+// The caller (discount-coupons-data-table) passes useTranslations('DiscountCoupons').
+type Translator = (key: string, values?: Record<string, string | number | Date>) => string
+
 export type DiscountCouponRow = {
   id:               string
   code:             string
@@ -30,21 +34,21 @@ export type DiscountCouponRow = {
   createdAt:        Date
 }
 
-const dateFmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'short' })
-
-function formatDiscount(row: DiscountCouponRow) {
+function formatDiscount(row: DiscountCouponRow, t: Translator, locale: string) {
   return row.discountType === 'percent'
-    ? `${row.discountValue}% off`
-    : `$${row.discountValue.toFixed(2)} off`
+    ? t('discount.percent', { value: row.discountValue })
+    : t('discount.amount', {
+        value: new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(row.discountValue),
+      })
 }
 
-function formatDuration(row: DiscountCouponRow) {
-  if (row.duration === 'once')     return 'Once'
-  if (row.duration === 'forever')  return 'Forever'
-  return `${row.durationInMonths ?? '?'} months`
+function formatDuration(row: DiscountCouponRow, t: Translator) {
+  if (row.duration === 'once')    return t('durationLabel.once')
+  if (row.duration === 'forever') return t('durationLabel.forever')
+  return t('durationLabel.repeating', { months: row.durationInMonths ?? '?' })
 }
 
-function ActionsCell({ row }: { row: { original: DiscountCouponRow } }) {
+function ActionsCell({ row, t }: { row: { original: DiscountCouponRow }; t: Translator }) {
   const [isPending, startTransition] = useTransition()
   const coupon = row.original
 
@@ -53,32 +57,32 @@ function ActionsCell({ row }: { row: { original: DiscountCouponRow } }) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" disabled={isPending}>
           <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">Open menu</span>
+          <span className="sr-only">{t('actions.openMenu')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem asChild>
-          <Link href={`/sales/discount-coupons/${coupon.id}`}>Edit description</Link>
+          <Link href={`/sales/discount-coupons/${coupon.id}`}>{t('actions.editDescription')}</Link>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => startTransition(async () => {
             const result = await toggleDiscountCouponActive(coupon.id)
             if ('error' in result) toast.error(result.error)
-            else toast.success(result.success)
+            else toast.success(coupon.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
           })}
         >
-          {coupon.isActive ? 'Deactivate' : 'Reactivate'}
+          {coupon.isActive ? t('actions.deactivate') : t('actions.reactivate')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
 }
 
-export function getColumns(_currentUserRole: string): ColumnDef<DiscountCouponRow>[] {
+export function getColumns(_currentUserRole: string, t: Translator, locale: string): ColumnDef<DiscountCouponRow>[] {
   return [
     {
       accessorKey: 'code',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Code" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.code')} />,
       cell: ({ row }) => (
         <Link href={`/sales/discount-coupons/${row.original.id}`} className="font-mono hover:underline">
           {row.original.code}
@@ -87,46 +91,50 @@ export function getColumns(_currentUserRole: string): ColumnDef<DiscountCouponRo
     },
     {
       accessorKey: 'description',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.description')} />,
       cell: ({ row }) => row.original.description ?? '—',
     },
     {
       id: 'discount',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Discount" />,
-      cell: ({ row }) => formatDiscount(row.original),
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.discount')} />,
+      cell: ({ row }) => formatDiscount(row.original, t, locale),
     },
     {
       id: 'duration',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Duration" />,
-      cell: ({ row }) => formatDuration(row.original),
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.duration')} />,
+      cell: ({ row }) => formatDuration(row.original, t),
     },
     {
       accessorKey: 'maxRedemptions',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Max uses" />,
-      cell: ({ row }) => row.original.maxRedemptions ?? 'Unlimited',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.maxUses')} />,
+      cell: ({ row }) => row.original.maxRedemptions ?? t('table.unlimited'),
     },
     {
       accessorKey: 'redeemBy',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Expires" />,
-      cell: ({ row }) => row.original.redeemBy ? dateFmt.format(row.original.redeemBy) : 'Never',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.expires')} />,
+      cell: ({ row }) =>
+        row.original.redeemBy
+          ? new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(row.original.redeemBy)
+          : t('table.never'),
     },
     {
       accessorKey: 'isActive',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.status')} />,
       cell: ({ row }) =>
         row.original.isActive
-          ? <Badge variant="default">Active</Badge>
-          : <Badge variant="destructive">Inactive</Badge>,
+          ? <Badge variant="default">{t('status.active')}</Badge>
+          : <Badge variant="destructive">{t('status.inactive')}</Badge>,
     },
     {
       accessorKey: 'createdAt',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
-      cell: ({ row }) => dateFmt.format(row.original.createdAt),
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.createdAt')} />,
+      cell: ({ row }) =>
+        new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(row.original.createdAt),
     },
     {
       id: 'actions',
       enableHiding: false,
-      cell: ({ row }) => <ActionsCell row={row} />,
+      cell: ({ row }) => <ActionsCell row={row} t={t} />,
     },
   ]
 }
