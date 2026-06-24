@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { profileResolver, profileDefaultValues, type ProfileFormValues } from '@/schemas/profile.schema'
 import { updateProfile } from '@/actions/profile.actions'
@@ -32,6 +33,8 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ defaultValues }: ProfileFormProps) {
+  const t  = useTranslations('Profile')
+  const tc = useTranslations('Common')
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
@@ -68,7 +71,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>First name</FieldLabel>
+                <FieldLabel>{t('fields.firstName')}</FieldLabel>
                 <Input {...field} autoComplete="given-name" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -80,7 +83,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Last name</FieldLabel>
+                <FieldLabel>{t('fields.lastName')}</FieldLabel>
                 <Input {...field} autoComplete="family-name" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -94,7 +97,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>CPF</FieldLabel>
+                <FieldLabel>{t('fields.cpf')}</FieldLabel>
                 <MaskedInput
                   value={field.value ?? ''}
                   onChange={field.onChange}
@@ -112,7 +115,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Date of birth</FieldLabel>
+                <FieldLabel>{t('fields.birthDate')}</FieldLabel>
                 <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -126,7 +129,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
             control={control}
             render={({ field }) => (
               <Field className="col-span-3">
-                <FieldLabel>Country code</FieldLabel>
+                <FieldLabel>{t('fields.countryCode')}</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
                     <SelectValue />
@@ -146,7 +149,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-9" data-invalid={fieldState.invalid}>
-                <FieldLabel>Phone</FieldLabel>
+                <FieldLabel>{t('fields.phone')}</FieldLabel>
                 <MaskedInput
                   value={field.value ?? ''}
                   onChange={field.onChange}
@@ -163,7 +166,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
 
       <FieldSeparator />
 
-      <p className="text-sm font-medium">Address</p>
+      <p className="text-sm font-medium">{t('sections.address')}</p>
       <AddressSection
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         control={control as any}
@@ -176,10 +179,10 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : 'Save changes'}
+          {isSubmitting ? tc('saving') : t('actions.save')}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>

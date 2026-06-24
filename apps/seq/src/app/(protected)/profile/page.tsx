@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { verifySession } from '@/lib/dal'
 import { prisma } from '@/lib/prisma'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@genealogiq/ui/card'
@@ -17,6 +18,7 @@ function toDateInputValue(date: Date | null | undefined): string {
 
 export default async function ProfilePage() {
   const session = await verifySession()
+  const t = await getTranslations('Profile')
 
   const user = await prisma.user.findUnique({
     where:   { id: session.user.id },
@@ -55,15 +57,15 @@ export default async function ProfilePage() {
       <div className="flex items-center gap-4">
         <AvatarUpload defaultUrl={image} fullName={fullName} />
         <div className="min-w-0">
-          <h1 className="text-3xl font-bold tracking-tight truncate">{fullName || 'Profile'}</h1>
+          <h1 className="text-3xl font-bold tracking-tight truncate">{fullName || t('title')}</h1>
           <p className="text-sm text-muted-foreground truncate">{email}</p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Personal information</CardTitle>
-          <CardDescription>Update your name, document, and contact details.</CardDescription>
+          <CardTitle>{t('sections.personal.title')}</CardTitle>
+          <CardDescription>{t('sections.personal.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <ProfileForm defaultValues={defaultValues} />
@@ -72,14 +74,14 @@ export default async function ProfilePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Account &amp; security</CardTitle>
-          <CardDescription>Manage your sign-in email and password.</CardDescription>
+          <CardTitle>{t('sections.account.title')}</CardTitle>
+          <CardDescription>{t('sections.account.description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Field>
-            <FieldLabel>Email</FieldLabel>
+            <FieldLabel>{t('fields.email')}</FieldLabel>
             <Input value={email} readOnly disabled />
-            <FieldDescription>To change your email, use the button below — a confirmation link is sent to the new address.</FieldDescription>
+            <FieldDescription>{t('sections.account.emailHint')}</FieldDescription>
           </Field>
           <div className="flex flex-wrap gap-2">
             <ChangeEmailDialog />
@@ -90,8 +92,8 @@ export default async function ProfilePage() {
 
       <Card className="border border-destructive/40 ring-destructive/30">
         <CardHeader>
-          <CardTitle className="text-destructive">Danger zone</CardTitle>
-          <CardDescription>Permanently delete your account and all related data.</CardDescription>
+          <CardTitle className="text-destructive">{t('sections.danger.title')}</CardTitle>
+          <CardDescription>{t('sections.danger.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <DeleteAccountDialog />

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { CheckIcon } from 'lucide-react'
 import {
@@ -37,19 +38,14 @@ interface Props { categories?: Category[] }
 const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const
 type SocialKey = typeof SOCIAL_KEYS[number]
 
-function socialLabel(key: SocialKey): string {
+function socialLabel(key: SocialKey, otherLabel: string): string {
   if (key === 'fb') return 'Facebook'
   if (key === 'x') return 'X'
-  if (key === 'otherSocial') return 'Other'
+  if (key === 'otherSocial') return otherLabel
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
-const STEPS = [
-  { title: 'Personal',  desc: 'Name, gender & birth'    },
-  { title: 'Contact',   desc: 'Email, phone & category' },
-  { title: 'Address',   desc: 'Physical location'       },
-  { title: 'Social',    desc: 'Social media & website'  },
-]
+const STEP_KEYS = ['personal', 'contact', 'address', 'social'] as const
 
 type StepIndex = 0 | 1 | 2 | 3
 
@@ -61,10 +57,17 @@ const STEP_FIELDS: Record<StepIndex, (keyof AppUserFormValues)[]> = {
 }
 
 export function CustomerNewForm({ categories = [] }: Props) {
+  const t  = useTranslations('Customers')
+  const tc = useTranslations('Common')
   const [step, setStep]               = useState<StepIndex>(0)
   const [localCats, setLocalCats]     = useState(categories)
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
+
+  const STEPS = STEP_KEYS.map((k) => ({
+    title: t(`steps.${k}.title`),
+    desc:  t(`steps.${k}.desc`),
+  }))
 
   const form = useForm<AppUserFormValues>({
     resolver:       appUserResolver,
@@ -105,11 +108,11 @@ export function CustomerNewForm({ categories = [] }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        New customer
+        {t('new')}
       </h1>
 
       {/* Stepper */}
-      <nav aria-label="Form steps">
+      <nav aria-label={t('stepsLabel')}>
         {/* Mobile: compact numbered steps */}
         <div className="flex items-center gap-2 md:hidden">
           {STEPS.map((s, i) => (
@@ -167,14 +170,14 @@ export function CustomerNewForm({ categories = [] }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="firstName" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>First Name:*</FieldLabel>
+                  <FieldLabel>{t('fields.firstNameRequired')}</FieldLabel>
                   <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
               <Controller name="lastName" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Last Name:*</FieldLabel>
+                  <FieldLabel>{t('fields.lastNameRequired')}</FieldLabel>
                   <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -184,14 +187,14 @@ export function CustomerNewForm({ categories = [] }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="gender" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Gender:</FieldLabel>
+                  <FieldLabel>{t('fields.gender')}</FieldLabel>
                   <GenderSelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
               <Controller name="birthDate" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Date of Birth:*</FieldLabel>
+                  <FieldLabel>{t('fields.birthDateRequired')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -201,7 +204,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="birthCountry" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Birth Country:</FieldLabel>
+                  <FieldLabel>{t('fields.birthCountry')}</FieldLabel>
                   <CountrySelect
                     value={field.value}
                     onChange={(v) => {
@@ -215,13 +218,13 @@ export function CustomerNewForm({ categories = [] }: Props) {
               )} />
               <Controller name="birthState" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>Birth State / Province:</FieldLabel>
+                  <FieldLabel>{t('fields.birthStateProvince')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
               <Controller name="birthCity" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>Birth City:</FieldLabel>
+                  <FieldLabel>{t('fields.birthCity')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
@@ -235,14 +238,14 @@ export function CustomerNewForm({ categories = [] }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="email" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Email:*</FieldLabel>
+                  <FieldLabel>{t('fields.emailRequired')}</FieldLabel>
                   <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
               <Controller name="phoneCountryCode" control={control} render={({ field }) => (
                 <Field className="col-span-2">
-                  <FieldLabel>Country code:</FieldLabel>
+                  <FieldLabel>{t('fields.countryCode')}</FieldLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -255,7 +258,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
               )} />
               <Controller name="phone" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Phone:*</FieldLabel>
+                  <FieldLabel>{t('fields.phoneRequired')}</FieldLabel>
                   <MaskedInput
                     value={field.value ?? ''}
                     onChange={field.onChange}
@@ -271,7 +274,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
             <Controller name="categoryId" control={control} render={({ field }) => (
               <Field>
                 <div className="flex items-center justify-between">
-                  <FieldLabel>Category:</FieldLabel>
+                  <FieldLabel>{t('fields.category')}</FieldLabel>
                   <AddCustomerCategoryDialog
                     onCreated={(cat) => {
                       setLocalCats((prev) => [...prev, cat])
@@ -280,7 +283,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
                   />
                 </div>
                 <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
-                  <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('placeholders.category')} /></SelectTrigger>
                   <SelectContent>
                     {localCats.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
@@ -292,7 +295,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
 
             <Controller name="notes" control={control} render={({ field }) => (
               <Field>
-                <FieldLabel>Notes:</FieldLabel>
+                <FieldLabel>{t('fields.notes')}</FieldLabel>
                 <Textarea {...field} value={field.value ?? ''} rows={3} />
               </Field>
             )} />
@@ -302,7 +305,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
         {/* ── Step 2: Address ── */}
         {step === 2 && (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-muted-foreground">Address is optional and can be filled in later.</p>
+            <p className="text-sm text-muted-foreground">{t('hints.addressOptional')}</p>
             <AddressSection
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               control={control as any}
@@ -320,7 +323,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
               {SOCIAL_KEYS.map((key) => (
                 <Controller key={key} name={key} control={control} render={({ field }) => (
                   <Field className="col-span-6 md:col-span-4">
-                    <FieldLabel>{socialLabel(key)}:</FieldLabel>
+                    <FieldLabel>{socialLabel(key, t('social.other'))}:</FieldLabel>
                     <Input {...field} value={field.value ?? ''} autoComplete="off" />
                   </Field>
                 )} />
@@ -334,20 +337,20 @@ export function CustomerNewForm({ categories = [] }: Props) {
         {/* Navigation */}
         <div className="flex items-center justify-between pt-2 border-t">
           <Button type="button" variant="outline" onClick={goBack} disabled={step === 0}>
-            Back
+            {tc('back')}
           </Button>
 
           <span className="text-xs text-muted-foreground">
-            Step {step + 1} of {STEPS.length}
+            {t('stepOf', { step: step + 1, total: STEPS.length })}
           </span>
 
           {step < STEPS.length - 1 ? (
             <Button type="button" onClick={goNext}>
-              Next
+              {tc('next')}
             </Button>
           ) : (
             <Button type="button" onClick={() => handleSubmit(onSubmit)()} disabled={isSubmitting}>
-              {isSubmitting ? 'Creating…' : 'Create customer'}
+              {isSubmitting ? tc('creating') : t('createCustomer')}
             </Button>
           )}
         </div>

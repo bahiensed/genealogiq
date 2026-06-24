@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Download } from 'lucide-react'
 import { Button } from '@genealogiq/ui/button'
 import { formatGenCode } from '@/lib/gen-code'
@@ -11,6 +12,8 @@ interface LicensesCsvButtonProps {
 }
 
 export function LicensesCsvButton({ licenses, appUrl }: LicensesCsvButtonProps) {
+  const t = useTranslations('Licenses')
+
   function download() {
     const header = 'code,url,status,printed_at,sold_at,sold_via,sold_to,activated_at\n'
     const rows = licenses
@@ -32,7 +35,7 @@ export function LicensesCsvButton({ licenses, appUrl }: LicensesCsvButtonProps) 
   return (
     <Button variant="outline" onClick={download} className="gap-2">
       <Download className="h-4 w-4" />
-      Export CSV
+      {t('actions.exportCsv')}
     </Button>
   )
 }

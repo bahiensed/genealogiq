@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { getCustomer } from '@/queries/customers'
 import { getCustomerCategories } from '@/queries/customer-categories'
 import { CustomerForm } from '@/components/customers/customer-form'
@@ -17,6 +18,8 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
     getCustomerCategories(),
   ])
   if (!customer) notFound()
+
+  const t = await getTranslations('Customers')
 
   const defaultValues: AppUserFormValues = {
     firstName:        customer.firstName,
@@ -73,19 +76,19 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
       <section id="memorialized-profiles" className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-            <h2 className="text-lg font-semibold">Memorialized Profiles</h2>
+            <h2 className="text-lg font-semibold">{t('memorialized.title')}</h2>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">Acquired QR Codes: {acquiredQRCodes}</Badge>
+              <Badge variant="outline">{t('memorialized.acquiredQrCodes', { count: acquiredQRCodes })}</Badge>
               <Badge variant={availableProfiles > 0 ? 'default' : 'secondary'}>
-                Available Memo Profiles: {availableProfiles}
+                {t('memorialized.availableProfiles', { count: availableProfiles })}
               </Badge>
-              <Badge variant="outline">Created Memo Profiles: {createdProfiles}</Badge>
+              <Badge variant="outline">{t('memorialized.createdProfiles', { count: createdProfiles })}</Badge>
             </div>
           </div>
           {availableProfiles > 0 && (
             <Button asChild>
               <Link href={`/customers/${id}/memorialized/new`}>
-                Create memorialized profile
+                {t('memorialized.create')}
               </Link>
             </Button>
           )}

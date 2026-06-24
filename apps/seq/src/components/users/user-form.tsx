@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { userResolver, userDefaultValues, ASSIGNABLE_ROLES, type UserFormValues } from '@/schemas/user.schema'
 import { createUser, updateUser } from '@/actions/user.actions'
@@ -28,20 +29,14 @@ import {
   FieldSeparator,
 } from '@genealogiq/ui/field'
 
-const ROLE_LABELS: Record<string, string> = {
-  OWNER:     'Owner',
-  ADMIN:     'Admin',
-  COMERCIAL: 'Comercial',
-  FINANCE:   'Finance',
-  USER:      'User',
-}
-
 interface UserFormProps {
   id?: string
   defaultValues?: UserFormValues
 }
 
 export function UserForm({ id, defaultValues }: UserFormProps) {
+  const t  = useTranslations('Users')
+  const tc = useTranslations('Common')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
@@ -80,7 +75,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>First Name:</FieldLabel>
+                <FieldLabel>{t('fields.firstName')}</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -92,7 +87,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Last Name:</FieldLabel>
+                <FieldLabel>{t('fields.lastName')}</FieldLabel>
                 <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -105,7 +100,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>E-mail:</FieldLabel>
+              <FieldLabel>{t('fields.email')}</FieldLabel>
               <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -117,14 +112,14 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Role:</FieldLabel>
+              <FieldLabel>{t('fields.role')}</FieldLabel>
               <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Select a role" />
+                  <SelectValue placeholder={t('placeholders.role')} />
                 </SelectTrigger>
                 <SelectContent>
                   {ASSIGNABLE_ROLES.map((role) => (
-                    <SelectItem key={role} value={role}>{ROLE_LABELS[role]}</SelectItem>
+                    <SelectItem key={role} value={role}>{t(`roles.${role}`)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -139,7 +134,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>CPF:</FieldLabel>
+                <FieldLabel>{t('fields.cpf')}</FieldLabel>
                 <MaskedInput
                   value={field.value ?? ''}
                   onChange={field.onChange}
@@ -157,7 +152,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Date of Birth:</FieldLabel>
+                <FieldLabel>{t('fields.birthDate')}</FieldLabel>
                 <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -171,7 +166,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field }) => (
               <Field className="col-span-2">
-                <FieldLabel>Country Code:</FieldLabel>
+                <FieldLabel>{t('fields.countryCode')}</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
                     <SelectValue />
@@ -191,7 +186,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                <FieldLabel>Phone:</FieldLabel>
+                <FieldLabel>{t('fields.phone')}</FieldLabel>
                 <MaskedInput
                   value={field.value ?? ''}
                   onChange={field.onChange}
@@ -216,7 +211,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <FieldLabel htmlFor="isActive" className="cursor-pointer">Active user:</FieldLabel>
+                <FieldLabel htmlFor="isActive" className="cursor-pointer">{t('fields.isActive')}</FieldLabel>
               </Field>
             )}
           />
@@ -225,7 +220,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
 
       <FieldSeparator />
 
-      <p className="text-sm font-medium">Address</p>
+      <p className="text-sm font-medium">{t('sections.address')}</p>
       <AddressSection
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         control={control as any}
@@ -238,10 +233,10 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create user'}
+          {isSubmitting ? (isEditing ? tc('saving') : tc('creating')) : isEditing ? tc('save') : t('create')}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>
