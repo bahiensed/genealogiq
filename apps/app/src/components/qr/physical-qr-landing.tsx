@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { QrCode } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { formatGenCode } from "@/lib/gen-code"
 
@@ -10,6 +11,7 @@ interface PhysicalQrLandingProps {
 }
 
 export function PhysicalQrLanding({ genCode }: PhysicalQrLandingProps) {
+  const t = useTranslations("Qr")
   const callbackUrl = `/qr/${genCode}`
 
   return (
@@ -19,26 +21,26 @@ export function PhysicalQrLanding({ genCode }: PhysicalQrLandingProps) {
       </div>
 
       <div className="space-y-3 max-w-md">
-        <h1 className="text-3xl font-bold tracking-tight">Create a Memorial</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("landing.title")}</h1>
         <p className="text-muted-foreground">
-          This QR code is ready to be linked to a memorial profile.
+          {t("landing.description")}
         </p>
       </div>
 
       <div className="rounded-lg border bg-card px-6 py-3">
-        <p className="text-xs text-muted-foreground mb-1">Activation code</p>
+        <p className="text-xs text-muted-foreground mb-1">{t("activateMemorial.activationCode")}</p>
         <p className="font-mono text-xl font-semibold tracking-widest">{formatGenCode(genCode)}</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
         <Button asChild className="flex-1">
           <Link href={`/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}`}>
-            Sign in
+            {t("landing.signIn")}
           </Link>
         </Button>
         <Button asChild variant="outline" className="flex-1">
           <Link href={`/sign-up?callbackUrl=${encodeURIComponent(callbackUrl)}`}>
-            Create account
+            {t("landing.createAccount")}
           </Link>
         </Button>
       </div>

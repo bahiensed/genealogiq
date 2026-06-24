@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from "react"
+import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -43,6 +44,8 @@ const toInputDate = (d: Date | null) => d ? new Date(d).toISOString().slice(0, 1
 const STANDARD = "__standard"
 
 export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess }: Props) {
+  const t = useTranslations("FamilyTree")
+  const tc = useTranslations("Common")
   const [isPending, startTransition] = useTransition()
   const [subtype, setSubtype] = useState<string>(
     relation.subtype ?? (relation.type === "SPOUSE" ? "married" : STANDARD),
@@ -68,7 +71,7 @@ export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess 
         endDate:   endDate || null,
       })
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Relation updated.")
+      toast.success(t("toasts.relationUpdated"))
       onClose()
       onSuccess?.()
     })
@@ -78,7 +81,7 @@ export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess 
     startTransition(async () => {
       const result = await removeRelation(rootId, relation.id)
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Relation removed.")
+      toast.success(t("toasts.relationRemoved"))
       onClose()
       onSuccess?.()
     })
@@ -88,19 +91,19 @@ export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess 
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit relation</DialogTitle>
+          <DialogTitle>{t("editRelation.title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div className="space-y-1.5">
-            <Label>Type</Label>
+            <Label>{t("editRelation.typeLabel")}</Label>
             <Select value={subtype} onValueChange={setSubtype}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {allowStandard && (
-                  <SelectItem value={STANDARD}>Standard</SelectItem>
+                  <SelectItem value={STANDARD}>{t("subtypes.standard")}</SelectItem>
                 )}
                 {subtypes.map((s) => (
-                  <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+                  <SelectItem key={s} value={s}>{t(`subtypes.${s}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -109,13 +112,13 @@ export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess 
             <div className="grid grid-cols-2 gap-2">
               {showStartDate && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="r-start">{relation.type === "SPOUSE" ? "Married" : "Started"}</Label>
+                  <Label htmlFor="r-start">{relation.type === "SPOUSE" ? t("editRelation.married") : t("editRelation.started")}</Label>
                   <Input id="r-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                 </div>
               )}
               {showEndDate && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="r-end">{subtype === "widowed" ? "Widowed" : "Ended"}</Label>
+                  <Label htmlFor="r-end">{subtype === "widowed" ? t("editRelation.widowed") : t("editRelation.ended")}</Label>
                   <Input id="r-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                 </div>
               )}
@@ -123,10 +126,10 @@ export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess 
           )}
         </div>
         <DialogFooter className="sm:justify-between">
-          <Button variant="destructive" onClick={handleRemove} disabled={isPending}>Remove relation</Button>
+          <Button variant="destructive" onClick={handleRemove} disabled={isPending}>{t("editRelation.removeRelation")}</Button>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} disabled={isPending}>Cancel</Button>
-            <Button onClick={handleSave} disabled={isPending}>{isPending ? "Saving…" : "Save"}</Button>
+            <Button variant="outline" onClick={onClose} disabled={isPending}>{tc("cancel")}</Button>
+            <Button onClick={handleSave} disabled={isPending}>{isPending ? tc("saving") : tc("save")}</Button>
           </div>
         </DialogFooter>
       </DialogContent>

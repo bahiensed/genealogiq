@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useLocale, useTranslations } from "next-intl"
 import { Check, X, User, Flower2, ArrowUpRight, Shield, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -14,12 +15,14 @@ import { loadMoreActivity } from "@/actions/messages"
 import type { ActivityCursor, InboxItem, MessagesData } from "@/queries/notifications"
 import type { NotificationType } from '@genealogiq/db'
 
-const dateFmt = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" })
+// Translation function bound to the "Messages" namespace.
+type T = ReturnType<typeof useTranslations<"Messages">>
 
-function relationLabel(type: string, subtype: string | null, requesterIsParent: boolean): string {
-  if (type === "SPOUSE")  return subtype === "partner" ? "partner" : "spouse"
-  if (type === "SIBLING") return subtype === "half" ? "half-sibling" : "sibling"
-  return requesterIsParent ? "parent" : "child"
+// Maps a family-relation type/subtype to a translation key for the role noun.
+function relationLabelKey(type: string, subtype: string | null, requesterIsParent: boolean): string {
+  if (type === "SPOUSE")  return subtype === "partner" ? "relation.partner" : "relation.spouse"
+  if (type === "SIBLING") return subtype === "half" ? "relation.halfSibling" : "relation.sibling"
+  return requesterIsParent ? "relation.parent" : "relation.child"
 }
 
 interface Actor {
@@ -28,20 +31,22 @@ interface Actor {
   avatarUrl: string | null
 }
 
-function actorOrPlaceholder(actor: InboxItem["actor"]): Actor {
-  return actor ?? { firstName: "Someone", lastName: "", avatarUrl: null }
+function actorOrPlaceholder(actor: InboxItem["actor"], t: T): Actor {
+  return actor ?? { firstName: t("someone"), lastName: "", avatarUrl: null }
 }
 
 interface MessageCardProps {
-  actor:       Actor
-  description: React.ReactNode
-  timestamp:   Date
-  body?:       React.ReactNode
-  imageUrl?:   string | null
-  footer?:     React.ReactNode
+  actor:        Actor
+  description:  React.ReactNode
+  timestamp:    Date
+  placeholder:  string
+  dateFmt:      Intl.DateTimeFormat
+  body?:        React.ReactNode
+  imageUrl?:    string | null
+  footer?:      React.ReactNode
 }
 
-function MessageCard({ actor, description, timestamp, body, imageUrl, footer }: MessageCardProps) {
+function MessageCard({ actor, description, timestamp, placeholder, dateFmt, body, imageUrl, footer }: MessageCardProps) {
   const name     = `${actor.firstName} ${actor.lastName}`.trim()
   const initials = `${actor.firstName[0] ?? ""}${actor.lastName[0] ?? ""}`.toUpperCase()
 
@@ -63,7 +68,7 @@ function MessageCard({ actor, description, timestamp, body, imageUrl, footer }: 
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm">
-              <span className="font-semibold">{name || "Someone"}</span>
+              <span className="font-semibold">{name || placeholder}</span>
               <span className="text-muted-foreground"> {description}</span>
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">{dateFmt.format(timestamp)}</p>
@@ -79,108 +84,107 @@ function MessageCard({ actor, description, timestamp, body, imageUrl, footer }: 
 // ─── Dispatch table ──────────────────────────────────────────────────────────
 // All inbox cards are driven from this map keyed by NotificationType. Each
 // entry knows how to describe itself, optionally where it links, and whether
-// it has a footer with action buttons (pending items only).
+// it has a footer with action buttons (pending items only). The `describe`
+// and `body` builders receive the bound translation function.
 
 type DispatchEntry = {
-  describe: (item: InboxItem) => React.ReactNode
+  describe: (item: InboxItem, t: T) => React.ReactNode
   body?:    (item: InboxItem) => React.ReactNode
   image?:   (item: InboxItem) => string | null
   href?:    (item: InboxItem) => string | null
   Footer?:  React.ComponentType<{ item: InboxItem }>
 }
 
+// Renders the emphasized chunks inside rich messages.
+const strong = (chunks: React.ReactNode) => <span className="font-medium text-foreground">{chunks}</span>
+
 const DISPATCH: Record<NotificationType, DispatchEntry> = {
   TRIBUTE_PENDING: {
-    describe: (i) => (
-      <>
-        wrote a tribute for{" "}
-        <span className="font-medium text-foreground">{i.tribute?.profileName ?? "a profile"}</span>.
-      </>
-    ),
+    describe: (i, t) => t.rich("describe.tributePending", {
+      profile: i.tribute?.profileName ?? t("aProfile"),
+      strong,
+    }),
     body:   (i) => i.tribute?.text ?? null,
     image:  (i) => i.tribute?.imageUrl ?? null,
     Footer: TributeActions,
   },
   TRIBUTE_APPROVED: {
-    describe: (i) => describeTributeResult(i, "approved"),
+    describe: (i, t) => describeTributeResult(i, "approved", t),
     href:     (i) => i.tribute ? `/profile/${i.tribute.profileId}/tributes` : null,
   },
   TRIBUTE_REJECTED: {
-    describe: (i) => describeTributeResult(i, "rejected"),
+    describe: (i, t) => describeTributeResult(i, "rejected", t),
     href:     (i) => i.tribute ? `/profile/${i.tribute.profileId}/tributes` : null,
   },
   FAMILY_REQUEST_PENDING: {
-    describe: (i) => {
+    describe: (i, t) => {
       const fr = i.familyRelation
-      const role = fr ? relationLabel(fr.type, fr.subtype, fr.requesterIsParent) : "relative"
-      return (
-        <>
-          sent you a request to join their tree as their{" "}
-          <span className="font-medium text-foreground">{role}</span>.
-        </>
-      )
+      const role = fr ? t(relationLabelKey(fr.type, fr.subtype, fr.requesterIsParent)) : t("relation.relative")
+      return t.rich("describe.familyRequestPending", { role, strong })
     },
     Footer: FamilyRequestActions,
   },
   FAMILY_REQUEST_ACCEPTED: {
-    describe: (i) => i.viewerActed
-      ? <>joined {actorName(i)}&apos;s family tree.</>
-      : <>joined your family tree.</>,
+    describe: (i, t) => i.viewerActed
+      ? t("describe.familyAcceptedByViewer", { name: actorName(i, t) })
+      : t("describe.familyAcceptedByActor"),
   },
   FAMILY_REQUEST_REJECTED: {
-    describe: (i) => i.viewerActed
-      ? <>declined {actorName(i)}&apos;s tree invitation.</>
-      : <>declined your tree invitation.</>,
+    describe: (i, t) => i.viewerActed
+      ? t("describe.familyRejectedByViewer", { name: actorName(i, t) })
+      : t("describe.familyRejectedByActor"),
   },
   GUARDIAN_REQUEST_PENDING: {
-    describe: (i) => {
+    describe: (i, t) => {
       const target = i.guardianProfile
-      const targetName = target ? `${target.firstName} ${target.lastName}`.trim() : "this profile"
-      return (
-        <>
-          wants to co-manage{" "}
-          <span className="font-medium text-foreground">{targetName || "this profile"}</span>.
-        </>
-      )
+      const targetName = target ? `${target.firstName} ${target.lastName}`.trim() : ""
+      return t.rich("describe.guardianRequestPending", {
+        target: targetName || t("thisProfile"),
+        strong,
+      })
     },
     Footer: GuardianRequestActions,
   },
   GUARDIAN_REQUEST_ACCEPTED: {
-    describe: (i) => i.viewerActed
-      ? <>granted {actorName(i)} co-management.</>
-      : <>granted you co-management of a profile.</>,
+    describe: (i, t) => i.viewerActed
+      ? t("describe.guardianAcceptedByViewer", { name: actorName(i, t) })
+      : t("describe.guardianAcceptedByActor"),
     href: (i) => i.guardianProfile ? `/profile/${i.guardianProfile.id}` : null,
   },
   GUARDIAN_REQUEST_REJECTED: {
-    describe: (i) => i.viewerActed
-      ? <>declined {actorName(i)}&apos;s co-management request.</>
-      : <>declined your co-management request.</>,
+    describe: (i, t) => i.viewerActed
+      ? t("describe.guardianRejectedByViewer", { name: actorName(i, t) })
+      : t("describe.guardianRejectedByActor"),
   },
 }
 
-function actorName(item: InboxItem): string {
-  return item.actor ? `${item.actor.firstName} ${item.actor.lastName}`.trim() || "Someone" : "Someone"
+function actorName(item: InboxItem, t: T): string {
+  return item.actor ? `${item.actor.firstName} ${item.actor.lastName}`.trim() || t("someone") : t("someone")
 }
 
-function describeTributeResult(item: InboxItem, verb: "approved" | "rejected"): React.ReactNode {
+function describeTributeResult(item: InboxItem, verb: "approved" | "rejected", t: T): React.ReactNode {
   if (item.viewerActed) {
-    return <>{verb} {actorName(item)}&apos;s tribute.</>
+    return verb === "approved"
+      ? t("describe.tributeApprovedByViewer", { name: actorName(item, t) })
+      : t("describe.tributeRejectedByViewer", { name: actorName(item, t) })
   }
   // Author-facing: "rejected" reads softer as "declined"
-  return <>{verb === "approved" ? "approved" : "declined"} your tribute.</>
+  return verb === "approved"
+    ? t("describe.tributeApprovedForAuthor")
+    : t("describe.tributeDeclinedForAuthor")
 }
 
 // ─── Renderer ────────────────────────────────────────────────────────────────
 
-function InboxCard({ item, pending }: { item: InboxItem; pending: boolean }) {
+function InboxCard({ item, pending, t, dateFmt }: { item: InboxItem; pending: boolean; t: T; dateFmt: Intl.DateTimeFormat }) {
   const entry = DISPATCH[item.type]
   if (!entry) return null
 
   // For activity cards where the viewer acted, headline reads "You" but we
   // keep the counterparty's avatar so the picture matches the description.
-  const baseActor   = actorOrPlaceholder(item.actor)
+  const baseActor   = actorOrPlaceholder(item.actor, t)
   const displayActor: Actor = !pending && item.viewerActed
-    ? { firstName: "You", lastName: "", avatarUrl: baseActor.avatarUrl }
+    ? { firstName: t("you"), lastName: "", avatarUrl: baseActor.avatarUrl }
     : baseActor
 
   const Footer = pending ? entry.Footer : undefined
@@ -189,15 +193,17 @@ function InboxCard({ item, pending }: { item: InboxItem; pending: boolean }) {
   const card = (
     <MessageCard
       actor={displayActor}
-      description={entry.describe(item)}
+      description={entry.describe(item, t)}
       timestamp={item.createdAt}
+      placeholder={t("someone")}
+      dateFmt={dateFmt}
       body={entry.body?.(item)}
       imageUrl={entry.image?.(item) ?? null}
       footer={
         Footer
           ? <Footer item={item} />
           : href
-            ? <span className="inline-flex items-center text-xs text-muted-foreground gap-1">View <ArrowUpRight className="h-3 w-3" /></span>
+            ? <span className="inline-flex items-center text-xs text-muted-foreground gap-1">{t("view")} <ArrowUpRight className="h-3 w-3" /></span>
             : undefined
       }
     />
@@ -210,6 +216,7 @@ function InboxCard({ item, pending }: { item: InboxItem; pending: boolean }) {
 
 function TributeActions({ item }: { item: InboxItem }) {
   const router = useRouter()
+  const t = useTranslations("Messages")
   const [isPending, startTransition] = useTransition()
 
   const handle = (action: "approve" | "reject") => {
@@ -219,7 +226,7 @@ function TributeActions({ item }: { item: InboxItem }) {
         ? await approveTribute(item.tributeId!, item.tribute!.profileId)
         : await rejectTribute(item.tributeId!,  item.tribute!.profileId)
       if (result?.error) { toast.error(result.error); return }
-      toast.success(action === "approve" ? "Tribute approved." : "Tribute rejected.")
+      toast.success(action === "approve" ? t("toasts.tributeApproved") : t("toasts.tributeRejected"))
       router.refresh()
     })
   }
@@ -227,10 +234,10 @@ function TributeActions({ item }: { item: InboxItem }) {
   return (
     <>
       <Button size="sm" variant="outline" onClick={() => handle("reject")} disabled={isPending} className="gap-1.5 text-destructive border-destructive/40 hover:bg-destructive/10">
-        <X className="h-3.5 w-3.5" /> Reject
+        <X className="h-3.5 w-3.5" /> {t("actions.reject")}
       </Button>
       <Button size="sm" onClick={() => handle("approve")} disabled={isPending} className="gap-1.5">
-        <Check className="h-3.5 w-3.5" /> Approve
+        <Check className="h-3.5 w-3.5" /> {t("actions.approve")}
       </Button>
     </>
   )
@@ -238,6 +245,7 @@ function TributeActions({ item }: { item: InboxItem }) {
 
 function FamilyRequestActions({ item }: { item: InboxItem }) {
   const router = useRouter()
+  const t = useTranslations("Messages")
   const [isPending, startTransition] = useTransition()
 
   const handle = (action: "accept" | "reject") => {
@@ -247,7 +255,7 @@ function FamilyRequestActions({ item }: { item: InboxItem }) {
         ? await acceptFamilyRequest(item.familyRelationId!)
         : await rejectFamilyRequest(item.familyRelationId!)
       if (result?.error) { toast.error(result.error); return }
-      toast.success(action === "accept" ? "Invitation accepted." : "Invitation declined.")
+      toast.success(action === "accept" ? t("toasts.invitationAccepted") : t("toasts.invitationDeclined"))
       router.refresh()
     })
   }
@@ -255,10 +263,10 @@ function FamilyRequestActions({ item }: { item: InboxItem }) {
   return (
     <>
       <Button size="sm" variant="outline" onClick={() => handle("reject")} disabled={isPending} className="gap-1.5">
-        <X className="h-3.5 w-3.5" /> Decline
+        <X className="h-3.5 w-3.5" /> {t("actions.decline")}
       </Button>
       <Button size="sm" onClick={() => handle("accept")} disabled={isPending} className="gap-1.5">
-        <Check className="h-3.5 w-3.5" /> Accept
+        <Check className="h-3.5 w-3.5" /> {t("actions.accept")}
       </Button>
     </>
   )
@@ -266,6 +274,7 @@ function FamilyRequestActions({ item }: { item: InboxItem }) {
 
 function GuardianRequestActions({ item }: { item: InboxItem }) {
   const router = useRouter()
+  const t = useTranslations("Messages")
   const [isPending, startTransition] = useTransition()
 
   const handle = (action: "approve" | "reject") => {
@@ -275,7 +284,7 @@ function GuardianRequestActions({ item }: { item: InboxItem }) {
         ? await approveGuardianship({ guardianshipId: item.appUserGuardianId! })
         : await rejectGuardianship({  guardianshipId: item.appUserGuardianId! })
       if (result?.error) { toast.error(result.error); return }
-      toast.success(action === "approve" ? "Co-management approved." : "Co-management declined.")
+      toast.success(action === "approve" ? t("toasts.coManagementApproved") : t("toasts.coManagementDeclined"))
       router.refresh()
     })
   }
@@ -283,10 +292,10 @@ function GuardianRequestActions({ item }: { item: InboxItem }) {
   return (
     <>
       <Button size="sm" variant="outline" onClick={() => handle("reject")} disabled={isPending} className="gap-1.5">
-        <X className="h-3.5 w-3.5" /> Decline
+        <X className="h-3.5 w-3.5" /> {t("actions.decline")}
       </Button>
       <Button size="sm" onClick={() => handle("approve")} disabled={isPending} className="gap-1.5">
-        <Shield className="h-3.5 w-3.5" /> Approve
+        <Shield className="h-3.5 w-3.5" /> {t("actions.approve")}
       </Button>
     </>
   )
@@ -301,6 +310,8 @@ function LoadMoreButton({
   initialCursor: ActivityCursor | null
   onLoaded:      (items: InboxItem[], next: ActivityCursor | null) => void
 }) {
+  const t = useTranslations("Messages")
+  const tc = useTranslations("Common")
   const [cursor, setCursor] = useState<ActivityCursor | null>(initialCursor)
   const [isPending, startTransition] = useTransition()
 
@@ -317,7 +328,7 @@ function LoadMoreButton({
   return (
     <div className="flex justify-center pt-2">
       <Button size="sm" variant="outline" onClick={loadMore} disabled={isPending} className="gap-1.5">
-        <ChevronDown className="h-3.5 w-3.5" /> {isPending ? "Loading…" : "Load more"}
+        <ChevronDown className="h-3.5 w-3.5" /> {isPending ? tc("loading") : t("loadMore")}
       </Button>
     </div>
   )
@@ -330,6 +341,9 @@ interface Props {
 }
 
 export function MessagesList({ data }: Props) {
+  const t = useTranslations("Messages")
+  const locale = useLocale()
+  const dateFmt = new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" })
   const [activity, setActivity] = useState<InboxItem[]>(data.activity)
   const hasPending  = data.pending.length > 0
   const hasActivity = activity.length > 0
@@ -338,7 +352,7 @@ export function MessagesList({ data }: Props) {
     return (
       <div className="glass-card no-sheen flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in mt-6">
         <Flower2 className="h-10 w-10 text-muted-foreground/50" />
-        <p className="text-muted-foreground">Your inbox is empty.</p>
+        <p className="text-muted-foreground">{t("empty")}</p>
       </div>
     )
   }
@@ -347,15 +361,15 @@ export function MessagesList({ data }: Props) {
     <div className="space-y-8 mt-6">
       {hasPending && (
         <section className="space-y-3">
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Pending action</h2>
-          {data.pending.map((item) => <InboxCard key={item.id} item={item} pending />)}
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("pendingAction")}</h2>
+          {data.pending.map((item) => <InboxCard key={item.id} item={item} pending t={t} dateFmt={dateFmt} />)}
         </section>
       )}
 
       {hasActivity && (
         <section className="space-y-3">
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recent activity</h2>
-          {activity.map((item) => <InboxCard key={item.id} item={item} pending={false} />)}
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t("recentActivity")}</h2>
+          {activity.map((item) => <InboxCard key={item.id} item={item} pending={false} t={t} dateFmt={dateFmt} />)}
           <LoadMoreButton
             initialCursor={data.nextCursor}
             onLoaded={(items) => setActivity((prev) => [...prev, ...items])}

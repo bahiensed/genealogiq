@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Html5Qrcode } from "html5-qrcode"
 import { X, QrCode } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 
 const SCANNER_ELEMENT_ID = "qr-scanner-region"
@@ -14,6 +15,8 @@ interface Props {
 }
 
 export function QrScannerModal({ onClose }: Props) {
+  const t = useTranslations("Qr")
+  const tc = useTranslations("Common")
   const router = useRouter()
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const [hasPermission, setHasPermission] = useState<"pending" | "granted" | "denied">("pending")
@@ -38,11 +41,11 @@ export function QrScannerModal({ onClose }: Props) {
           try {
             const url = new URL(decodedText)
             const profileMatch = url.pathname.match(/^\/profile\/([^/]+)$/)
-            if (!profileMatch) { toast.error("QR code does not point to a valid profile."); onClose(); return }
+            if (!profileMatch) { toast.error(t("scanner.notValidProfile")); onClose(); return }
             router.push(url.pathname)
             onClose()
           } catch {
-            toast.error("Invalid QR code.")
+            toast.error(t("scanner.invalidCode"))
             onClose()
           }
         },
@@ -60,7 +63,7 @@ export function QrScannerModal({ onClose }: Props) {
         if (msg.toLowerCase().includes("permission")) {
           setHasPermission("denied")
         } else {
-          toast.error("Could not start camera.")
+          toast.error(t("scanner.cameraStartFailed"))
           onClose()
         }
       })
@@ -69,20 +72,20 @@ export function QrScannerModal({ onClose }: Props) {
       unmounted = true
       stopSafely()
     }
-  }, [router, onClose])
+  }, [router, onClose, t])
 
   return (
     <div
       className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-sm animate-fade-in"
       role="dialog"
-      aria-label="QR code scanner"
+      aria-label={t("scanner.dialogLabel")}
     >
       <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
         <div className="flex items-center gap-2">
           <QrCode className="h-5 w-5 text-primary" />
-          <span className="font-semibold">Scan a QR code</span>
+          <span className="font-semibold">{t("scanner.title")}</span>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close scanner">
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label={t("scanner.closeAria")}>
           <X className="h-5 w-5" />
         </Button>
       </div>
@@ -91,11 +94,11 @@ export function QrScannerModal({ onClose }: Props) {
         {hasPermission === "denied" ? (
           <div className="text-center space-y-3 max-w-xs">
             <QrCode className="h-12 w-12 text-muted-foreground mx-auto" />
-            <p className="font-medium">Camera access denied</p>
+            <p className="font-medium">{t("scanner.permissionDeniedTitle")}</p>
             <p className="text-sm text-muted-foreground">
-              Allow camera access in your browser settings and try again.
+              {t("scanner.permissionDeniedHint")}
             </p>
-            <Button onClick={onClose}>Close</Button>
+            <Button onClick={onClose}>{tc("close")}</Button>
           </div>
         ) : (
           <>
@@ -114,7 +117,7 @@ export function QrScannerModal({ onClose }: Props) {
               </div>
             </div>
             <p className="text-sm text-muted-foreground text-center">
-              Point the camera at a Genealogiq QR code
+              {t("scanner.pointCamera")}
             </p>
           </>
         )}

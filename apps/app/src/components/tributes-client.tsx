@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useTranslations, useLocale } from "next-intl"
 import { Send, SquarePen, Flower2, ArrowDownUp, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -31,8 +32,8 @@ import type { ApprovedTributeRow } from "@/queries/tribute"
 const PAGE_SIZE = 10
 type SortDir = "newest" | "oldest"
 
-const formatDate = (d: Date) =>
-  d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+const formatDate = (d: Date, locale: string) =>
+  d.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" })
 
 const initials = (name: string) =>
   name.split(" ").filter(Boolean).slice(0, 2).map((n) => n[0]?.toUpperCase() ?? "").join("")
@@ -47,6 +48,9 @@ interface Props {
 }
 
 export function TributesClient({ items, profileId, sessionUserId, canWrite, isManager = false, hasPendingFromMe }: Props) {
+  const t = useTranslations("Tributes")
+  const tc = useTranslations("Common")
+  const locale = useLocale()
   const router = useRouter()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [, startDelete] = useTransition()
@@ -63,7 +67,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
       const result = await deleteTribute(tributeId)
       setDeletingId(null)
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Tribute deleted.")
+      toast.success(t("toasts.deleted"))
       router.refresh()
     })
   }
@@ -102,13 +106,13 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
       <section className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
         <div className="flex flex-col gap-1 min-w-0">
           <p className="text-muted-foreground italic">
-            Words left behind: small flames carried by those who remember
+            {t("list.subtitle")}
           </p>
           {hasPendingFromMe && (
             <p className="text-xs text-muted-foreground">
-              Your tribute is awaiting moderation.{" "}
+              {t("list.awaitingModeration")}{" "}
               <Link href={writeHref} className="text-primary hover:underline">
-                Click here to edit your tribute.
+                {t("list.editPendingLink")}
               </Link>
             </p>
           )}
@@ -119,12 +123,12 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2">
                   <ArrowDownUp className="h-4 w-4" />
-                  {sort === "newest" ? "Newest first" : "Oldest first"}
+                  {sort === "newest" ? t("list.newestFirst") : t("list.oldestFirst")}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setSort("newest")}>Newest first</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSort("oldest")}>Oldest first</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSort("newest")}>{t("list.newestFirst")}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSort("oldest")}>{t("list.oldestFirst")}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -132,7 +136,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
             <Button asChild className="gap-2">
               <Link href={writeHref}>
                 {myTribute ? <SquarePen className="h-4 w-4" /> : <Send className="h-4 w-4" />}
-                {myTribute ? "Edit your tribute" : "Send a tribute"}
+                {myTribute ? t("list.editYourTribute") : t("list.sendATribute")}
               </Link>
             </Button>
           )}
@@ -144,38 +148,38 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
       {items.length === 0 ? (
         <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
           <Flower2 className="h-10 w-10 text-muted-foreground" />
-          <p className="text-muted-foreground">No tributes yet.</p>
+          <p className="text-muted-foreground">{t("list.empty")}</p>
           {canWrite && (
             <Button asChild className="gap-2">
-              <Link href={writeHref}><Send className="h-4 w-4" />Send a tribute</Link>
+              <Link href={writeHref}><Send className="h-4 w-4" />{t("list.sendATribute")}</Link>
             </Button>
           )}
         </div>
       ) : (
         <>
           <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
-            {visible.map((t) => {
-              const isMine = t.authorId === sessionUserId
-              const authorName = `${t.author.firstName} ${t.author.lastName}`
+            {visible.map((tribute) => {
+              const isMine = tribute.authorId === sessionUserId
+              const authorName = `${tribute.author.firstName} ${tribute.author.lastName}`
               return (
-                <article key={t.id} className="mb-4 break-inside-avoid glass-card no-sheen overflow-hidden">
-                  {t.imageUrl && (
+                <article key={tribute.id} className="mb-4 break-inside-avoid glass-card no-sheen overflow-hidden">
+                  {tribute.imageUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={t.imageUrl} alt={`Tribute by ${authorName}`} loading="lazy" className="w-full h-auto block" />
+                    <img src={tribute.imageUrl} alt={t("card.imageAlt", { author: authorName })} loading="lazy" className="w-full h-auto block" />
                   )}
                   <div className="p-5 space-y-4">
-                    <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{t.text}</p>
+                    <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{tribute.text}</p>
                     <div className="flex items-center gap-3 pt-1 border-t border-border/60">
                       <Avatar className="h-8 w-8">
-                        {t.author.avatarUrl && <AvatarImage src={t.author.avatarUrl} alt={authorName} />}
+                        {tribute.author.avatarUrl && <AvatarImage src={tribute.author.avatarUrl} alt={authorName} />}
                         <AvatarFallback className="text-xs bg-secondary">{initials(authorName)}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium truncate">{authorName}</span>
-                          {isMine && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Yours</Badge>}
+                          {isMine && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{t("card.yoursBadge")}</Badge>}
                         </div>
-                        <div className="text-xs text-muted-foreground">{formatDate(t.createdAt)}</div>
+                        <div className="text-xs text-muted-foreground">{formatDate(tribute.createdAt, locale)}</div>
                       </div>
                       {(isMine || isManager) && (
                         <AlertDialog>
@@ -184,8 +188,8 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                              aria-label="Delete tribute"
-                              disabled={deletingId === t.id}
+                              aria-label={t("form.deleteTribute")}
+                              disabled={deletingId === tribute.id}
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -193,20 +197,20 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>
-                                {isMine ? "Delete your tribute?" : "Delete this tribute?"}
+                                {isMine ? t("card.deleteMineTitle") : t("card.deleteOtherTitle")}
                               </AlertDialogTitle>
                               <AlertDialogDescription>
-                                This cannot be undone. The tribute and its image will be removed from this profile.
+                                {t("card.deleteDescription")}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel disabled={deletingId === t.id}>Cancel</AlertDialogCancel>
+                              <AlertDialogCancel disabled={deletingId === tribute.id}>{tc("cancel")}</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => handleDelete(t.id)}
-                                disabled={deletingId === t.id}
+                                onClick={() => handleDelete(tribute.id)}
+                                disabled={deletingId === tribute.id}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
-                                {deletingId === t.id ? "Deleting…" : "Delete"}
+                                {deletingId === tribute.id ? tc("deleting") : tc("delete")}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -224,7 +228,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
               <div className="h-6 w-6 rounded-full border-2 border-muted-foreground/30 border-t-primary animate-spin" />
             </div>
           ) : (
-            <div className="py-10 text-center text-xs text-muted-foreground">End of tributes</div>
+            <div className="py-10 text-center text-xs text-muted-foreground">{t("list.endOfTributes")}</div>
           )}
         </>
       )}

@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { ImagePlus, Film, X, Save, RotateCcw, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -56,21 +57,22 @@ const formatDuration = (sec: number) => {
 }
 
 function MetaFields({ item, onChange }: { item: MediaEntry; idx: number; onChange: (patch: Partial<MediaEntry>) => void }) {
+  const t = useTranslations("Gallery")
   return (
     <div className="p-3 space-y-2 border-t border-border/60 bg-card/30">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Date taken</Label>
+          <Label className="text-xs text-muted-foreground">{t("dateTaken")}</Label>
           <Input type="date" value={item.takenAt ?? ""} onChange={(e) => onChange({ takenAt: e.target.value })} className="h-8 text-sm" />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs text-muted-foreground">Location</Label>
-          <Input type="text" placeholder="City, Country" value={item.location ?? ""} onChange={(e) => onChange({ location: e.target.value })} className="h-8 text-sm" />
+          <Label className="text-xs text-muted-foreground">{t("location")}</Label>
+          <Input type="text" placeholder={t("locationPlaceholder")} value={item.location ?? ""} onChange={(e) => onChange({ location: e.target.value })} className="h-8 text-sm" />
         </div>
       </div>
       <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">Description</Label>
-        <Textarea rows={2} maxLength={280} placeholder="A short note about this moment…" value={item.description ?? ""} onChange={(e) => onChange({ description: e.target.value })} className="min-h-[56px] text-sm resize-none" />
+        <Label className="text-xs text-muted-foreground">{t("description")}</Label>
+        <Textarea rows={2} maxLength={280} placeholder={t("descriptionPlaceholder")} value={item.description ?? ""} onChange={(e) => onChange({ description: e.target.value })} className="min-h-[56px] text-sm resize-none" />
       </div>
     </div>
   )
@@ -84,6 +86,8 @@ interface Props {
 }
 
 export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Props) {
+  const t = useTranslations("Gallery")
+  const tc = useTranslations("Common")
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const imgInputRef = useRef<HTMLInputElement>(null)
@@ -118,18 +122,18 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
     const all = Array.from(files)
     const valid = all.filter(isAllowedImage)
     if (valid.length < all.length) {
-      toast.warning(`${all.length - valid.length} file(s) skipped. Use ${IMAGE_FORMATS_LABEL}.`)
+      toast.warning(t("filesSkipped", { count: all.length - valid.length, formats: IMAGE_FORMATS_LABEL }))
     }
     if (valid.length === 0) return
     const remaining = maxImages - images.length
-    const upgradeAction = { label: "Upgrade plan", onClick: () => router.push("/subscriptions") }
+    const upgradeAction = { label: t("upgradePlan"), onClick: () => router.push("/subscriptions") }
     if (remaining <= 0) {
-      toast.warning(`Maximum of ${maxImages} images reached.`, { action: upgradeAction })
+      toast.warning(t("maxImagesReached", { max: maxImages }), { action: upgradeAction })
       return
     }
     const toProcess = valid.slice(0, remaining)
     if (valid.length > remaining) {
-      toast.warning(`Only ${remaining} image(s) added — limit is ${maxImages}.`, { action: upgradeAction })
+      toast.warning(t("imagesAddedLimit", { remaining, max: maxImages }), { action: upgradeAction })
     }
 
     const placeholders: MediaEntry[] = toProcess.map((f) => ({
@@ -159,7 +163,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
           return next
         })
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : `Failed to upload ${file.name}`)
+        toast.error(err instanceof Error ? err.message : t("uploadFailed", { name: file.name }))
         setItems((prev) => prev.filter((item) => item.url !== localUrl))
       }
     }
@@ -170,27 +174,27 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
     const all = Array.from(files)
     const valid = all.filter(isAllowedVideo)
     if (valid.length < all.length) {
-      toast.warning(`${all.length - valid.length} file(s) skipped. Use ${VIDEO_FORMATS_LABEL}.`)
+      toast.warning(t("filesSkipped", { count: all.length - valid.length, formats: VIDEO_FORMATS_LABEL }))
     }
     if (valid.length === 0) return
     const remaining = maxVideos - videos.length
-    const upgradeAction = { label: "Upgrade plan", onClick: () => router.push("/subscriptions") }
+    const upgradeAction = { label: t("upgradePlan"), onClick: () => router.push("/subscriptions") }
     if (remaining <= 0) {
-      toast.warning(`Maximum of ${maxVideos} videos reached.`, { action: upgradeAction })
+      toast.warning(t("maxVideosReached", { max: maxVideos }), { action: upgradeAction })
       return
     }
     const candidates = valid.slice(0, remaining)
     if (valid.length > remaining) {
-      toast.warning(`Only ${remaining} video(s) processed — limit is ${maxVideos}.`, { action: upgradeAction })
+      toast.warning(t("videosProcessedLimit", { remaining, max: maxVideos }), { action: upgradeAction })
     }
 
     for (const file of candidates) {
       let meta
       try {
         meta = await inspectVideo(file)
-        if (meta.durationSec > MAX_VIDEO_SECONDS) { toast.error(`"${file.name}" exceeds 5 minutes.`); continue }
+        if (meta.durationSec > MAX_VIDEO_SECONDS) { toast.error(t("videoTooLong", { name: file.name })); continue }
       } catch {
-        toast.error(`Could not read "${file.name}".`); continue
+        toast.error(t("videoUnreadable", { name: file.name })); continue
       }
 
       const durationSec = meta.durationSec
@@ -219,7 +223,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
           ))
         } catch (err) {
           console.error(err)
-          toast.error(`Could not convert "${file.name}" — please use MP4 under 1080p.`)
+          toast.error(t("transcodeFailed", { name: file.name }))
           setItems((prev) => prev.filter((item) => item.url !== localUrl))
           continue
         }
@@ -239,14 +243,14 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
           return next
         })
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : `Failed to upload ${file.name}`)
+        toast.error(err instanceof Error ? err.message : t("uploadFailed", { name: file.name }))
         setItems((prev) => prev.filter((item) => item.url !== localUrl))
       }
     }
   }
 
   const handleSave = () => {
-    if (items.some((i) => i.uploading)) { toast.warning("Please wait for all uploads to finish."); return }
+    if (items.some((i) => i.uploading)) { toast.warning(t("waitForUploads")); return }
     startTransition(async () => {
       const result = await saveGallery(profileId, {
         items: items.map((item, i) => ({
@@ -261,16 +265,16 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
           order: i,
         })),
       })
-      if (result?.error) { toast.error(result.error) } else { toast.success("Gallery saved."); router.push(`/profile/${profileId}/gallery`) }
+      if (result?.error) { toast.error(result.error) } else { toast.success(t("savedToast")); router.push(`/profile/${profileId}/gallery`) }
     })
   }
 
-  const handleReset = () => { setItems(initialRef.current.map((i) => ({ ...i }))); toast("Changes reset.") }
+  const handleReset = () => { setItems(initialRef.current.map((i) => ({ ...i }))); toast(t("resetToast")) }
 
   const handleDelete = () => {
     startTransition(async () => {
       await deleteGallery(profileId)
-      toast.success("Gallery deleted.")
+      toast.success(t("deletedToast"))
       router.push(`/profile/${profileId}/gallery`)
     })
   }
@@ -282,7 +286,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
       {/* Photos */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base">Photos</Label>
+          <Label className="text-base">{t("photos")}</Label>
           <span className="text-xs text-muted-foreground">{images.length}/{maxImages}</span>
         </div>
 
@@ -290,7 +294,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
           {images.length < maxImages && (
             <button type="button" onClick={() => imgInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground">
               <ImagePlus className="h-6 w-6" />
-              <span className="text-xs font-medium">Add image</span>
+              <span className="text-xs font-medium">{t("addImage")}</span>
             </button>
           )}
 
@@ -298,14 +302,14 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
             <div key={idx} className="relative group rounded-xl overflow-hidden border border-border/60 bg-card/40 flex flex-col">
               <div className="relative aspect-square">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.url} alt="Preview" className="h-full w-full object-cover" />
+                <img src={item.url} alt={t("previewAlt")} className="h-full w-full object-cover" />
                 {item.uploading && (
                   <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
                     <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                   </div>
                 )}
                 {!item.uploading && (
-                  <button type="button" onClick={() => removeItem(idx)} className="absolute top-1.5 right-1.5 h-7 w-7 inline-flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition" aria-label="Remove">
+                  <button type="button" onClick={() => removeItem(idx)} className="absolute top-1.5 right-1.5 h-7 w-7 inline-flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition" aria-label={tc("remove")}>
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
@@ -320,15 +324,15 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
       {/* Videos */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base">Videos</Label>
-          <span className="text-xs text-muted-foreground">{videos.length}/{maxVideos} · max 5 min each · auto-converted to HD MP4</span>
+          <Label className="text-base">{t("videos")}</Label>
+          <span className="text-xs text-muted-foreground">{videos.length}/{maxVideos}{t("videosHint")}</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {videos.length < maxVideos && (
             <button type="button" onClick={() => vidInputRef.current?.click()} className="aspect-video rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground">
               <Film className="h-6 w-6" />
-              <span className="text-xs font-medium">Add video</span>
+              <span className="text-xs font-medium">{t("addVideo")}</span>
             </button>
           )}
 
@@ -345,7 +349,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
                       <>
                         <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                         <span className="text-xs font-medium">
-                          Converting… {Math.round((item.transcodeProgress ?? 0) * 100)}%
+                          {t("converting", { progress: Math.round((item.transcodeProgress ?? 0) * 100) })}
                         </span>
                       </>
                     ) : (
@@ -354,7 +358,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
                   </div>
                 )}
                 {!item.uploading && (
-                  <button type="button" onClick={() => removeItem(idx)} className="absolute top-1.5 right-1.5 h-7 w-7 inline-flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition" aria-label="Remove">
+                  <button type="button" onClick={() => removeItem(idx)} className="absolute top-1.5 right-1.5 h-7 w-7 inline-flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition" aria-label={tc("remove")}>
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
@@ -369,25 +373,25 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
       {/* Actions */}
       <div className="flex flex-col md:flex-row md:items-center gap-3 pt-2 border-t border-border/60">
         <div className="order-1 md:order-2 md:ml-auto flex flex-col md:flex-row gap-2 md:gap-3">
-          <Button onClick={handleSave} className="gap-2 w-full md:w-auto order-1 md:order-2" disabled={isPending}><Save className="h-4 w-4" />Save</Button>
+          <Button onClick={handleSave} className="gap-2 w-full md:w-auto order-1 md:order-2" disabled={isPending}><Save className="h-4 w-4" />{tc("save")}</Button>
           {!isCreating && (
-            <Button variant="outline" onClick={handleReset} className="gap-2 w-full md:w-auto order-2 md:order-1" disabled={isPending}><RotateCcw className="h-4 w-4" />Reset</Button>
+            <Button variant="outline" onClick={handleReset} className="gap-2 w-full md:w-auto order-2 md:order-1" disabled={isPending}><RotateCcw className="h-4 w-4" />{t("reset")}</Button>
           )}
         </div>
         {!isCreating && (
           <div className="order-2 md:order-1">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="gap-2 w-full md:w-auto"><Trash2 className="h-4 w-4" />Delete gallery</Button>
+                <Button variant="destructive" className="gap-2 w-full md:w-auto"><Trash2 className="h-4 w-4" />{t("deleteGallery")}</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete gallery?</AlertDialogTitle>
-                  <AlertDialogDescription>This will permanently remove all photos and videos. This action cannot be undone.</AlertDialogDescription>
+                  <AlertDialogTitle>{t("deleteGalleryTitle")}</AlertDialogTitle>
+                  <AlertDialogDescription>{t("deleteGalleryDescription")}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                  <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{tc("delete")}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

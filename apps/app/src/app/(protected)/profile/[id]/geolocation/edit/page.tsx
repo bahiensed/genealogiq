@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
@@ -28,6 +29,8 @@ export default async function GeolocationEditPage({ params }: Props) {
   if (!canManageProfile(profile, session.user.id)) redirect(`/profile/${id}/geolocation`)
 
   const isCreating = !existing
+  const t = await getTranslations("Geolocation")
+  const tc = await getTranslations("Common")
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -36,19 +39,19 @@ export default async function GeolocationEditPage({ params }: Props) {
       <main className="container relative pt-24 pb-32 max-w-4xl">
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
-            <BackButton href={`/profile/${id}/geolocation`} label="Back to geolocation" />
+            <BackButton href={`/profile/${id}/geolocation`} label={t("backToGeolocation")} />
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">
-              {isCreating ? "Add Geolocation" : "Edit Geolocation"}
+              {isCreating ? t("addTitle") : t("editTitle")}
             </h1>
           </div>
           <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
             <div className="flex flex-col gap-1 min-w-0 bg-transparent">
               <p className="text-muted-foreground italic bg-transparent">
-                {isCreating ? "Add the resting place and how to find it." : "Update place, address and coordinates."}
+                {isCreating ? t("addSubtitle") : t("editSubtitle")}
               </p>
             </div>
             <Button variant="ghost" asChild className="shrink-0 self-end lg:self-auto">
-              <Link href={`/profile/${id}/geolocation`}>Cancel</Link>
+              <Link href={`/profile/${id}/geolocation`}>{tc("cancel")}</Link>
             </Button>
           </div>
         </div>

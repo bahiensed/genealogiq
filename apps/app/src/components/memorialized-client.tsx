@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react"
 import Link from "next/link"
 import { ArrowDownUp, Plus } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function MemorializedClient({ profiles, isOwn, canCreate, newHref, upgradeHint }: Props) {
+  const t = useTranslations("Memorialized")
   const [sort, setSort] = useState<SortDir>("az")
   const isEmpty = profiles.length === 0
 
@@ -35,21 +37,21 @@ export function MemorializedClient({ profiles, isOwn, canCreate, newHref, upgrad
     <>
       <section className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
         <div className="flex flex-col gap-1 min-w-0">
-          <p className="text-muted-foreground italic">Memorials watched over with love and care</p>
+          <p className="text-muted-foreground italic">{t("list.tagline")}</p>
           {upgradeHint}
         </div>
         <div className="flex items-center gap-2 shrink-0 self-end lg:self-auto">
           {!isEmpty && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" aria-label={t("list.sortAria")}>
                   <ArrowDownUp className="h-4 w-4" />
-                  {sort === "az" ? "A → Z" : "Z → A"}
+                  {sort === "az" ? t("list.sortAsc") : t("list.sortDesc")}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setSort("az")}>A → Z</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSort("za")}>Z → A</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSort("az")}>{t("list.sortAsc")}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSort("za")}>{t("list.sortDesc")}</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -57,7 +59,7 @@ export function MemorializedClient({ profiles, isOwn, canCreate, newHref, upgrad
             <Button asChild className="gap-2">
               <Link href={newHref}>
                 <Plus className="h-4 w-4" />
-                New memorialized profile
+                {t("list.newProfile")}
               </Link>
             </Button>
           )}
@@ -67,7 +69,7 @@ export function MemorializedClient({ profiles, isOwn, canCreate, newHref, upgrad
       {isEmpty ? (
         <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
           <p className="text-muted-foreground">
-            {isOwn ? "No memorialized profiles yet." : "No memorialized profiles guarded yet."}
+            {isOwn ? t("list.emptyOwn") : t("list.emptyGuarded")}
           </p>
         </div>
       ) : (

@@ -1,41 +1,885 @@
 {
-  "Nav": {
-    "myProfile": "My profile",
-    "subscriptions": "Subscriptions",
-    "signOut": "Sign out",
-    "messages": "Messages",
-    "messagesUnread": "{count} unread messages",
-    "toggleTheme": "Toggle theme",
-    "userMenu": "User menu",
-    "language": "Language"
-  },
-  "Home": {
-    "tagline": "Scan, search & visit a profile",
-    "myProfileTitle": "My Profile",
-    "myProfileSubtitle": "View your page",
-    "recentlyViewedShort": "recently viewed",
-    "favoritesShort": "favorites",
-    "guardedShort": "guarded",
-    "recentlyViewedTitle": "Recently viewed",
-    "recentlyViewedSubtitle": "Recently viewed profiles appear here",
-    "favoritesTitle": "My favorites",
-    "favoritesSubtitle": "The ones closest to the heart",
-    "favoritesEmpty": "No favorite profile yet.",
-    "guardedTitle": "Profiles I guard",
-    "guardedSubtitle": "Memorials watched over with quiet care",
-    "guardedEmpty": "No guarded profile yet.",
-    "seeAll": "See all"
-  },
   "Auth": {
+    "activateDescription": "Enter the activation code printed on your physical QR code to link it to a memorial.",
+    "activateTitle": "Activate your QR code",
+    "alreadyHaveAccount": "Already have an account?",
+    "backToSignIn": "Back to sign in",
+    "changeEmailDescription": "A confirmation link will be sent to the new address",
+    "changeEmailSubmit": "Change e-mail",
+    "changeEmailTitle": "Change e-mail",
+    "changeEmailTrigger": "Change E-mail",
+    "changePasswordDescription": "Enter your current password and choose a new one.",
+    "changePasswordSubmit": "Change password",
+    "changePasswordTitle": "Change password",
+    "changePasswordTrigger": "Change Password",
+    "changing": "Changing…",
+    "createAccount": "Create an account",
+    "creatingAccount": "Creating account…",
+    "currentPasswordLabel": "Current password:",
+    "deleteAccountDescription": "This action is irreversible. All your data will be permanently deleted.",
+    "deleteAccountSubmit": "Delete my account",
+    "deleteAccountTitle": "Delete account",
+    "deleteAccountTrigger": "Delete account",
     "email": "E-mail",
     "emailPlaceholder": "you@example.com",
-    "password": "Password",
+    "firstName": "First name",
+    "forgotDescription": "Enter your email below and we'll send you a reset link.",
     "forgotPassword": "Forgot password?",
+    "forgotSentBody": "Check your inbox. The link expires in one hour.",
+    "forgotSentDescription": "If this email is registered, you will receive a link shortly.",
+    "forgotSentTitle": "E-mail sent",
+    "forgotTitle": "Forgot your password?",
+    "goToSignIn": "Go to sign in",
+    "haveQrCode": "Have a physical QR code? Activate it",
+    "hidePassword": "Hide password",
+    "lastName": "Last name",
+    "newEmailLabel": "New e-mail:",
+    "newEmailPlaceholder": "new@example.com",
+    "newHere": "New here?",
+    "newPassword": "New password",
+    "newPasswordLabel": "New password:",
+    "password": "Password",
+    "rememberPassword": "Remember your password?",
+    "resetDescription": "Enter your new password below.",
+    "resetTitle": "Reset password",
+    "saveNewPassword": "Save new password",
+    "sendResetLink": "Send reset link",
+    "sending": "Sending…",
+    "showPassword": "Show password",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
-    "showPassword": "Show password",
-    "hidePassword": "Hide password",
-    "newHere": "New here?",
-    "createAccount": "Create an account"
+    "verifyChangedBody": "Sign in again with your new e-mail address.",
+    "verifyChangedDescription": "Your e-mail has been updated successfully.",
+    "verifyChangedTitle": "E-mail changed!",
+    "verifyCheckBody": "Click the link we sent to confirm your e-mail. The link expires in 24 hours.",
+    "verifyCheckDescription": "Confirmation e-mail sent.",
+    "verifyCheckTitle": "Check your e-mail",
+    "verifyConfirmedBody": "You can now sign in with your e-mail and password.",
+    "verifyConfirmedDescription": "Your account has been verified successfully.",
+    "verifyConfirmedTitle": "E-mail confirmed!",
+    "verifyInvalidBody": "Please sign up again or request a new verification link.",
+    "verifyInvalidDescription": "This verification link is invalid or has already expired.",
+    "verifyInvalidTitle": "Invalid or expired link"
+  },
+  "Bio": {
+    "Bio": {
+      "addImage": "Add image",
+      "backToBiography": "Back to biography",
+      "backToProfile": "Back to profile",
+      "carouselNext": "Next",
+      "carouselPrevious": "Previous",
+      "deleteBio": "Delete bio",
+      "deleteDialogDescription": "This will permanently remove the photos, quote and biography text. This action cannot be undone.",
+      "deleteDialogTitle": "Delete biography?",
+      "editSubtitleCreate": "Add photos, a quote and the life story.",
+      "editSubtitleEdit": "Update photos, quote and life story.",
+      "editTitleCreate": "Write Biography",
+      "editTitleEdit": "Edit Biography",
+      "empty": "No biography yet.",
+      "paragraphHint": "Use blank lines to separate paragraphs.",
+      "photoAlt": "Biography photo",
+      "photos": "Photos",
+      "previewAlt": "Preview",
+      "quoteLabel": "Memorable quote",
+      "quotePlaceholder": "A defining motto or quote...",
+      "removeImage": "Remove image",
+      "reset": "Reset",
+      "subtitleOther": "{name}'s life story",
+      "subtitleOwn": "A life remembered through words and images",
+      "textPlaceholder": "Write biography...",
+      "title": "Biography",
+      "toastDeleted": "Biography deleted.",
+      "toastFilesSkipped": "{count, plural, one {# file skipped. Use {formats}.} other {# files skipped. Use {formats}.}}",
+      "toastLimitedAdded": "{count, plural, one {Only # image added — limit is {max}.} other {Only # images added — limit is {max}.}}",
+      "toastMaxImages": "Maximum of {max} images reached.",
+      "toastReset": "Changes reset.",
+      "toastSaved": "Biography saved.",
+      "toastUploadFailed": "Failed to upload {name}",
+      "toastWaitUploads": "Please wait for all images to finish uploading.",
+      "upgradePlan": "Upgrade plan",
+      "writeBiography": "Write biography"
+    }
+  },
+  "Common": {
+    "add": "Add",
+    "address": {
+      "city": "City:",
+      "complement": "Complement:",
+      "country": "Country:",
+      "lookupAria": "Look up address",
+      "lookupError": "Failed to look up ZIP/postal code.",
+      "neighborhood": "Neighborhood:",
+      "number": "Number:",
+      "selectPlaceholder": "Select",
+      "state": "State / Province:",
+      "street": "Street:",
+      "suggestionsTitle": "Addresses already on file:",
+      "zipCode": "ZIP Code:",
+      "zipNotFound": "ZIP not found"
+    },
+    "back": "Back",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "create": "Create",
+    "creating": "Creating…",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "edit": "Edit",
+    "loading": "Loading…",
+    "next": "Next",
+    "remove": "Remove",
+    "save": "Save",
+    "saving": "Saving…",
+    "seeAll": "See all",
+    "toasts": {
+      "created": "Created successfully.",
+      "deleted": "Deleted successfully.",
+      "error": "Something went wrong. Please try again.",
+      "saved": "Saved successfully."
+    }
+  },
+  "FamilyTree": {
+    "FamilyTree": {
+      "addRelative": {
+        "addNewPerson": "Didn't find a profile? Add a new person to the tree.",
+        "addToTree": "Add to tree",
+        "backToSearch": "Back to search",
+        "divorced": "Divorced",
+        "ghostHint": "This person stays in the family tree without a profile. You can promote them to a memorialized profile later.",
+        "kindLabel": "Kind:",
+        "married": "Married",
+        "marriedTo": "Married to <strong>{name}</strong>?",
+        "newPersonTitle": "Add a new person",
+        "noResults": "No results found.",
+        "searchPlaceholder": "Search profile...",
+        "title": "Add relative",
+        "togetherSince": "Together since",
+        "typeLabel": "Type:",
+        "widowed": "Widowed"
+      },
+      "canvasSearch": {
+        "buttonTitle": "Search the tree (/)",
+        "noMatches": "No matches.",
+        "placeholder": "Search by name…",
+        "search": "Search"
+      },
+      "controls": {
+        "fitTree": "Fit whole tree",
+        "fitTreeTitle": "Fit whole tree (F)",
+        "focusRoot": "Focus on root",
+        "focusRootTitle": "Focus on the tree owner",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out"
+      },
+      "editMember": {
+        "title": "Edit person"
+      },
+      "editRelation": {
+        "ended": "Ended",
+        "married": "Married",
+        "removeRelation": "Remove relation",
+        "started": "Started",
+        "title": "Edit relation",
+        "typeLabel": "Type",
+        "widowed": "Widowed"
+      },
+      "fields": {
+        "birthDate": "Birth date",
+        "deathDate": "Death date",
+        "firstName": "First name",
+        "gender": "Gender",
+        "genderOptional": "Optional",
+        "genderSelect": "Select",
+        "lastName": "Last name",
+        "maidenName": "Maiden name",
+        "nickname": "Nickname"
+      },
+      "gender": {
+        "female": "Female",
+        "male": "Male",
+        "other": "Other"
+      },
+      "header": {
+        "addRelative": "Add relative",
+        "title": "{name}'s Family Tree",
+        "upgradePlan": "Upgrade plan"
+      },
+      "infoSheet": {
+        "addChild": "+ Child",
+        "addParent": "+ Parent",
+        "addPartner": "+ Partner",
+        "addRelative": "Add relative",
+        "addSibling": "+ Sibling",
+        "coManage": "Co-manage",
+        "coManageHint": "Ask the current guardian to let you co-manage this profile.",
+        "coManageWaiting": "Waiting for the current guardian to approve.",
+        "editDisabledHint": "You can only edit your own profile, your memorials, or people you added to the tree.",
+        "editHint": "Update name, dates and details.",
+        "pending": "Pending",
+        "seeProfile": "See profile",
+        "thisIsYou": "This is you",
+        "timeline": "Timeline"
+      },
+      "kinds": {
+        "child": "Child",
+        "parent": "Parent",
+        "sibling": "Sibling",
+        "spouse": "Partner"
+      },
+      "memorialized": "Memorialized",
+      "nameWithMaiden": "{name} (née {maidenName})",
+      "node": {
+        "awaitingConfirmation": "Awaiting confirmation",
+        "memorial": "Memorial",
+        "pending": "Pending",
+        "you": "You"
+      },
+      "removeDialog": {
+        "ghostDescription": "{name} will be deleted permanently from the tree and from the system along with their relations to others in the tree. This cannot be undone.",
+        "personDescription": "{name} will be removed from your tree. The profile stays untouched and remains in the system. People who are only connected to your tree through this profile will also disappear from this view.",
+        "title": "Remove from tree?"
+      },
+      "stats": {
+        "generations": "{count, plural, one {# generation} other {# generations}}",
+        "peopleOfLimit": "/{limit} people"
+      },
+      "subtypes": {
+        "adopted": "Adopted",
+        "divorced": "Divorced",
+        "half": "Half",
+        "married": "Married",
+        "partner": "Partner",
+        "standard": "Standard",
+        "step": "Step",
+        "widowed": "Widowed"
+      },
+      "timeline": {
+        "born": "Born",
+        "bornIn": "Born in {place}",
+        "died": "Died",
+        "diedIn": "Died in {place}",
+        "divorcedFrom": "Divorced from {name}",
+        "married": "Married {name}"
+      },
+      "toasts": {
+        "coManageRequestSent": "Request sent. The current guardian will be notified.",
+        "nameRequired": "First and last name are required.",
+        "personAdded": "Person added to the tree.",
+        "personUpdated": "Person updated.",
+        "relationRemoved": "Relation removed.",
+        "relationUpdated": "Relation updated.",
+        "relativeAdded": "Relative added.",
+        "removedFromTree": "Removed from the tree."
+      }
+    }
+  },
+  "Favorites": {
+    "Favorites": {
+      "backToProfile": "Back to profile",
+      "bornMetric": "Born {date}",
+      "deathMetric": "✦ {date}",
+      "empty": "No favorites yet.",
+      "memorializedProfile": "Memorialized profile",
+      "profileCount": "{count, plural, one {# profile} other {# profiles}}",
+      "subtitle": "The ones closest to the heart, kept near, always",
+      "title": "Favorites"
+    }
+  },
+  "Gallery": {
+    "Gallery": {
+      "addImage": "Add image",
+      "addMedia": "Add media",
+      "addVideo": "Add video",
+      "backToGallery": "Back to gallery",
+      "backToProfile": "Back to profile",
+      "converting": "Converting… {progress}%",
+      "dateTaken": "Date taken",
+      "deleteGallery": "Delete gallery",
+      "deleteGalleryDescription": "This will permanently remove all photos and videos. This action cannot be undone.",
+      "deleteGalleryTitle": "Delete gallery?",
+      "deletedToast": "Gallery deleted.",
+      "description": "Description",
+      "descriptionPlaceholder": "A short note about this moment…",
+      "editSubtitle": "Manage images and videos",
+      "editTitle": "Edit Gallery",
+      "empty": "No media yet.",
+      "endOfGallery": "End of gallery",
+      "filesSkipped": "{count, plural, one {# file skipped.} other {# files skipped.}} Use {formats}.",
+      "imageAlt": "Gallery item",
+      "imageCount": "{count, plural, one {# image} other {# images}}",
+      "imagesAddedLimit": "{remaining, plural, one {Only # image added — limit is {max}.} other {Only # images added — limit is {max}.}}",
+      "location": "Location",
+      "locationPlaceholder": "City, Country",
+      "maxImagesReached": "Maximum of {max} images reached.",
+      "maxVideosReached": "Maximum of {max} videos reached.",
+      "photos": "Photos",
+      "previewAlt": "Preview",
+      "previous": "Previous",
+      "reset": "Reset",
+      "resetToast": "Changes reset.",
+      "savedToast": "Gallery saved.",
+      "sortNewest": "Newest first",
+      "sortOldest": "Oldest first",
+      "tagline": "Frozen moments: light, laughter and the quiet in between",
+      "title": "Gallery",
+      "transcodeFailed": "Could not convert \"{name}\" — please use MP4 under 1080p.",
+      "upgradePlan": "Upgrade plan",
+      "uploadFailed": "Failed to upload {name}",
+      "videoCount": "{count, plural, one {# video} other {# videos}}",
+      "videoThumbnailAlt": "Video thumbnail",
+      "videoTooLong": "\"{name}\" exceeds 5 minutes.",
+      "videoUnreadable": "Could not read \"{name}\".",
+      "videos": "Videos",
+      "videosHint": " · max 5 min each · auto-converted to HD MP4",
+      "videosProcessedLimit": "{remaining, plural, one {Only # video processed — limit is {max}.} other {Only # videos processed — limit is {max}.}}",
+      "viewerTitle": "Gallery item viewer",
+      "waitForUploads": "Please wait for all uploads to finish."
+    }
+  },
+  "Geolocation": {
+    "addImage": "Add Image",
+    "addLocation": "Add location",
+    "addSubtitle": "Add the resting place and how to find it.",
+    "addTitle": "Add Geolocation",
+    "address": "Address",
+    "backToGeolocation": "Back to geolocation",
+    "backToProfile": "Back to profile",
+    "coordinates": "Coordinates",
+    "deleteDialogDescription": "This will permanently remove the place, photos and coordinates.",
+    "deleteDialogTitle": "Delete geolocation?",
+    "deleteLocation": "Delete location",
+    "editSubtitle": "Update place, address and coordinates.",
+    "editTitle": "Edit Geolocation",
+    "emptyState": "No location set yet.",
+    "gate": {
+      "description": "Drop a pin at exact GPS coordinates so visitors can navigate straight to the place. Available on Década and Século plans.",
+      "dismiss": "Maybe later",
+      "title": "Unlock precise coordinates",
+      "upgrade": "Upgrade plan"
+    },
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "notes": "Notes",
+    "notesPlaceholder": "Visiting hours, how to find the spot, anything that helps…",
+    "openInGoogleMaps": "Open in Google Maps",
+    "optional": "(optional)",
+    "photoAlt": "Photo {number}",
+    "photos": "Photos",
+    "placeName": "Place name",
+    "placeNamePlaceholder": "e.g. São Francisco Cemetery",
+    "removePhoto": "Remove photo",
+    "reset": "Reset",
+    "section": "Section / plot",
+    "sectionPlaceholder": "e.g. Garden of Peace, Plot 42",
+    "tagline": "A place to meet again, from anywhere",
+    "title": "Geolocation",
+    "toasts": {
+      "deleted": "Geolocation deleted.",
+      "fixFields": "Please fix the highlighted fields.",
+      "geolocationUnsupported": "Geolocation not supported by this browser.",
+      "locationDenied": "Location access denied. Enable it in your browser settings.",
+      "locationDetected": "Location detected.",
+      "locationTimeout": "Location request timed out. Try again.",
+      "locationUnavailable": "Location unavailable. Check your GPS signal.",
+      "reset": "Changes reset.",
+      "saved": "Geolocation saved.",
+      "unsupportedFile": "Unsupported file. Use {formats}.",
+      "uploadFailed": "Failed to upload photo.",
+      "waitForUploads": "Please wait for photos to finish uploading."
+    },
+    "upgradeToUnlock": "Upgrade plan to unlock",
+    "useMyLocation": "Use my location",
+    "viewPhotoAlt": "{place} photo {number}"
+  },
+  "Home": {
+    "bornMetric": "Born {date}",
+    "clearSearch": "Clear search",
+    "deathMetric": "✦ {date}",
+    "favoritesEmpty": "No favorite profile yet.",
+    "favoritesShort": "favorites",
+    "favoritesSubtitle": "The ones closest to the heart",
+    "favoritesTitle": "My favorites",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "goodMorning": "Good morning",
+    "greetingFallbackName": "there",
+    "guardedEmpty": "No guarded profile yet.",
+    "guardedShort": "guarded",
+    "guardedSubtitle": "Memorials watched over with quiet care",
+    "guardedTitle": "Profiles I guard",
+    "memorializedBadge": "Memorialized",
+    "memorializedProfile": "Memorialized profile",
+    "myProfileSubtitle": "View your page",
+    "myProfileTitle": "My Profile",
+    "noProfilesFound": "No profiles found.",
+    "recentlyViewedEmpty": "No recently viewed profile.",
+    "recentlyViewedShort": "recently viewed",
+    "recentlyViewedSubtitle": "Recently viewed profiles appear here",
+    "recentlyViewedTitle": "Recently viewed",
+    "searchPlaceholder": "Search profile by name...",
+    "searching": "Searching…",
+    "seeAll": "See all",
+    "tagline": "Scan, search & visit a profile"
+  },
+  "Memorialized": {
+    "Memorialized": {
+      "actions": {
+        "createProfile": "Create profile",
+        "reset": "Reset"
+      },
+      "avatar": {
+        "change": "Change image",
+        "unsupportedFile": "Unsupported file. Use {formats}.",
+        "uploadError": "Failed to upload avatar.",
+        "waitUploading": "Please wait for the avatar to finish uploading."
+      },
+      "card": {
+        "born": "Born {date}",
+        "fallbackSubtitle": "Memorialized profile"
+      },
+      "date": {
+        "clear": "Clear",
+        "pick": "Pick a date"
+      },
+      "delete": {
+        "button": "Delete profile",
+        "description": "This will permanently remove {name}'s profile, biography, gallery, tributes and geolocation. This action cannot be undone.",
+        "title": "Delete this profile?"
+      },
+      "editPage": {
+        "backToProfile": "Back to profile",
+        "subtitleLiving": "Update your personal information.",
+        "subtitleMemorial": "Update this memorial's information.",
+        "title": "Edit Profile"
+      },
+      "fields": {
+        "city": "City",
+        "country": "Country",
+        "date": "Date",
+        "deathCause": "Cause of death",
+        "firstName": "First name",
+        "gender": "Gender",
+        "lastName": "Family name",
+        "maidenName": "Maiden name",
+        "nationalId": "National ID",
+        "nickname": "Nickname",
+        "optional": "(optional)",
+        "otherSocial": "Other",
+        "phone": "Phone",
+        "state": "State / Province",
+        "website": "Website"
+      },
+      "gender": {
+        "female": "Female",
+        "male": "Male",
+        "other": "Other"
+      },
+      "list": {
+        "emptyGuarded": "No memorialized profiles guarded yet.",
+        "emptyOwn": "No memorialized profiles yet.",
+        "newProfile": "New memorialized profile",
+        "sortAria": "Sort profiles",
+        "sortAsc": "A → Z",
+        "sortDesc": "Z → A",
+        "tagline": "Memorials watched over with love and care"
+      },
+      "listPage": {
+        "backToProfile": "Back to profile",
+        "profileCount": "{count, plural, one {# profile} other {# profiles}}",
+        "title": "Guarded profiles"
+      },
+      "newPage": {
+        "backToGuarded": "Back to guarded profiles",
+        "subtitle": "Create a memorial for someone who lives on in your memory.",
+        "title": "New memorialized profile"
+      },
+      "notes": {
+        "notPublic": "Not shown publicly."
+      },
+      "placeholders": {
+        "city": "City",
+        "country": "Country",
+        "deathCause": "e.g. Heart failure",
+        "firstName": "Name",
+        "handleOrUrl": "@username or URL",
+        "lastName": "Family name",
+        "maidenName": "Birth surname",
+        "nationalId": "CPF, SSN, etc.",
+        "nickname": "How they were known",
+        "notSpecified": "Not specified",
+        "notes": "Internal notes visible only to you…",
+        "otherLink": "Any other link",
+        "state": "State or province"
+      },
+      "sections": {
+        "address": "Address",
+        "birth": "Birth",
+        "contact": "Contact",
+        "death": "Death",
+        "identity": "Identity",
+        "notes": "Notes",
+        "social": "Social networks"
+      },
+      "toasts": {
+        "changesReset": "Changes reset.",
+        "created": "Memorial profile created.",
+        "deleted": "Profile deleted.",
+        "fixFields": "Please fix the highlighted fields.",
+        "formReset": "Form reset.",
+        "saved": "Profile saved."
+      }
+    }
+  },
+  "Messages": {
+    "aProfile": "a profile",
+    "actions": {
+      "accept": "Accept",
+      "approve": "Approve",
+      "decline": "Decline",
+      "reject": "Reject"
+    },
+    "backToHome": "Back to home",
+    "describe": {
+      "familyAcceptedByActor": "joined your family tree.",
+      "familyAcceptedByViewer": "joined {name}'s family tree.",
+      "familyRejectedByActor": "declined your tree invitation.",
+      "familyRejectedByViewer": "declined {name}'s tree invitation.",
+      "familyRequestPending": "sent you a request to join their tree as their <strong>{role}</strong>.",
+      "guardianAcceptedByActor": "granted you co-management of a profile.",
+      "guardianAcceptedByViewer": "granted {name} co-management.",
+      "guardianRejectedByActor": "declined your co-management request.",
+      "guardianRejectedByViewer": "declined {name}'s co-management request.",
+      "guardianRequestPending": "wants to co-manage <strong>{target}</strong>.",
+      "tributeApprovedByViewer": "approved {name}'s tribute.",
+      "tributeApprovedForAuthor": "approved your tribute.",
+      "tributeDeclinedForAuthor": "declined your tribute.",
+      "tributePending": "wrote a tribute for <strong>{profile}</strong>.",
+      "tributeRejectedByViewer": "rejected {name}'s tribute."
+    },
+    "empty": "Your inbox is empty.",
+    "loadMore": "Load more",
+    "pendingAction": "Pending action",
+    "pendingBadge": "{count, plural, one {# pending} other {# pending}}",
+    "recentActivity": "Recent activity",
+    "relation": {
+      "child": "child",
+      "halfSibling": "half-sibling",
+      "parent": "parent",
+      "partner": "partner",
+      "relative": "relative",
+      "sibling": "sibling",
+      "spouse": "spouse"
+    },
+    "someone": "Someone",
+    "thisProfile": "this profile",
+    "title": "Messages",
+    "toasts": {
+      "coManagementApproved": "Co-management approved.",
+      "coManagementDeclined": "Co-management declined.",
+      "invitationAccepted": "Invitation accepted.",
+      "invitationDeclined": "Invitation declined.",
+      "tributeApproved": "Tribute approved.",
+      "tributeRejected": "Tribute rejected."
+    },
+    "view": "View",
+    "you": "You"
+  },
+  "Nav": {
+    "language": "Language",
+    "messages": "Messages",
+    "messagesUnread": "{count} unread messages",
+    "myProfile": "My profile",
+    "signOut": "Sign out",
+    "subscriptions": "Subscriptions",
+    "toggleTheme": "Toggle theme",
+    "userMenu": "User menu"
+  },
+  "NotFound": {
+    "description": "The page you are looking for does not exist or has been removed.",
+    "goHome": "Go home",
+    "title": "Page not found"
+  },
+  "Profile": {
+    "Profile": {
+      "addToFavorites": "Add to favorites",
+      "bioDescription": "A life told in chapters: moments, places and turning points",
+      "bioEmptyMetric": "No biography yet",
+      "bioMetric": "Read",
+      "bioTitle": "Biography",
+      "bornOn": "Born on <strong>{date}</strong>",
+      "bornOnInPlace": "Born on <strong>{date}</strong> in <strong>{place}</strong>",
+      "deceasedOn": "Deceased on <strong>{date}</strong>",
+      "deceasedOnInPlace": "Deceased on <strong>{date}</strong> in <strong>{place}</strong>",
+      "editProfileAria": "Edit profile",
+      "emptyFavorites": "No favorites yet.",
+      "emptyGuarded": "No profiles guarded yet.",
+      "emptyMedia": "No media yet.",
+      "emptyRelatives": "No relatives yet.",
+      "emptyTributes": "No tributes yet.",
+      "favoritesDescription": "People who carry deep meaning, kept close, always",
+      "favoritesEmptyMetric": "No favorites yet",
+      "favoritesMetric": "{count, plural, one {# favorite} other {# favorites}}",
+      "favoritesTitle": "Favorites",
+      "galleryDescription": "Images and moments worth remembering",
+      "galleryEmptyMetric": "No media yet",
+      "galleryMetric": "{count, plural, one {# memory} other {# memories}}",
+      "galleryTitle": "Gallery",
+      "geoDescription": "A place to meet again, from anywhere",
+      "geoEmptyMetric": "Not set",
+      "geoTitle": "Geolocation",
+      "guardianDescription": "Memorials watched over with quiet care",
+      "guardianEmptyMetric": "No profiles guarded yet",
+      "guardianMetric": "{count, plural, one {# profile} other {# profiles}}",
+      "guardianTitle": "Guarded profiles",
+      "mapAlt": "Map",
+      "memorialized": "Memorialized",
+      "qrAlt": "QR code",
+      "qrDescription": "For plaques, headstones and digital spaces alike",
+      "qrMetricNotGenerated": "Not yet generated",
+      "qrMetricPurchase": "Purchase to unlock",
+      "qrMetricReady": "Ready to print",
+      "qrTitle": "QR Code",
+      "removeFromFavorites": "Remove from favorites",
+      "tooltipFavorites": "Favorites",
+      "tooltipGuarded": "Guarded Profiles",
+      "tooltipMedia": "Media on Gallery",
+      "tooltipTributes": "Received Tributes",
+      "treeDescription": "Roots, branches and the quiet ties that bind generations",
+      "treeEmptyMetric": "No relatives yet",
+      "treeMetric": "{count, plural, one {# member} other {# members}}",
+      "treeTitle": "Family Tree",
+      "tributesDescription": "Messages celebrating shared experiences and memories",
+      "tributesEmptyMetric": "No tributes yet",
+      "tributesMetric": "{count, plural, one {# tribute} other {# tributes}}",
+      "tributesTitle": "Tributes"
+    }
+  },
+  "Qr": {
+    "Qr": {
+      "activateCode": {
+        "continue": "Continue",
+        "invalid": "Please enter a valid activation code.",
+        "label": "Activation code",
+        "placeholder": "e.g. ABCD-1234-EFGH"
+      },
+      "activateMemorial": {
+        "activateAndCreate": "Activate & create profile",
+        "activationCode": "Activation code",
+        "available": "Available",
+        "birth": "Birth",
+        "changeImage": "Change Image",
+        "city": "City",
+        "cityPlaceholder": "City",
+        "clear": "Clear",
+        "country": "Country",
+        "countryPlaceholder": "Country",
+        "created": "Memorial profile created.",
+        "date": "Date",
+        "death": "Death",
+        "familyNamePlaceholder": "Family name",
+        "female": "Female",
+        "firstName": "First name",
+        "gender": "Gender",
+        "lastName": "Family name",
+        "male": "Male",
+        "namePlaceholder": "Name",
+        "notSpecified": "Not specified",
+        "pickDate": "Pick a date",
+        "unsupportedFile": "Unsupported file. Use {formats}.",
+        "uploadFailed": "Failed to upload avatar.",
+        "waitUpload": "Please wait for the avatar to finish uploading."
+      },
+      "activatePage": {
+        "subtitle": "Fill in the details of the person you are memorializing.",
+        "title": "Activate Memorial"
+      },
+      "billing": {
+        "backToHome": "Back to home",
+        "compareAllPlans": "Compare all plans",
+        "noPackages": "No QR Code packages available right now.",
+        "subtitle": "One QR Code, scannable forever — for plaques, headstones and digital spaces alike",
+        "title": "Get a QR Code"
+      },
+      "client": {
+        "copyLink": "Copy link",
+        "linkCopied": "Profile link copied.",
+        "pngDownloaded": "PNG downloaded.",
+        "svgDownloaded": "SVG downloaded."
+      },
+      "landing": {
+        "createAccount": "Create account",
+        "description": "This QR code is ready to be linked to a memorial profile.",
+        "signIn": "Sign in",
+        "title": "Create a Memorial"
+      },
+      "presets": {
+        "bronze": {
+          "description": "Warm metallic tones — classic for plaques.",
+          "name": "Bronze"
+        },
+        "classic": {
+          "description": "Timeless black on white — safe for any surface.",
+          "name": "Classic"
+        },
+        "forest": {
+          "description": "Deep green — at home in cemetery gardens.",
+          "name": "Forest"
+        },
+        "indigo": {
+          "description": "Brand indigo on white — warm and recognizable.",
+          "name": "Indigo"
+        },
+        "inverted": {
+          "description": "White on near-black — striking on light stone.",
+          "name": "Inverted"
+        },
+        "soft": {
+          "description": "Muted slate on cream — quiet and editorial.",
+          "name": "Soft"
+        }
+      },
+      "profilePage": {
+        "backToProfile": "Back to profile",
+        "noQrYet": "No QR-Code yet.",
+        "purchase": "Purchase QR-Code",
+        "subtitle": "For plaques, headstones and digital spaces alike",
+        "title": "QR Code",
+        "unlockDescription": "This memorial is on the free plan. Purchase a QR-Code to print it on plaques, headstones and digital spaces — keep their memory anywhere, scannable forever.",
+        "unlockTitle": "Unlock your QR-Code"
+      },
+      "scanButton": {
+        "aria": "Scan QR code",
+        "labelLong": "Scan a QR code",
+        "labelShort": "Scan QR"
+      },
+      "scanner": {
+        "cameraStartFailed": "Could not start camera.",
+        "closeAria": "Close scanner",
+        "dialogLabel": "QR code scanner",
+        "invalidCode": "Invalid QR code.",
+        "notValidProfile": "QR code does not point to a valid profile.",
+        "permissionDeniedHint": "Allow camera access in your browser settings and try again.",
+        "permissionDeniedTitle": "Camera access denied",
+        "pointCamera": "Point the camera at a Genealogiq QR code",
+        "title": "Scan a QR code"
+      }
+    }
+  },
+  "Subscriptions": {
+    "Subscriptions": {
+      "activeBadge": "Active",
+      "backToHome": "Back to home",
+      "cadence": {
+        "annual": "annual",
+        "monthly": "monthly"
+      },
+      "confirm": {
+        "downgradeAction": "Schedule switch",
+        "downgradeDescription": "Your {currentPlan} plan stays active until {periodEnd}. After that, {plan} ({cadence}) kicks in with no charge today.",
+        "downgradeTitle": "Schedule downgrade?",
+        "upgradeAction": "Upgrade now",
+        "upgradeDescription": "You'll switch to {plan} ({cadence}) immediately. Stripe will charge the prorated difference today and the new features unlock right away.",
+        "upgradeTitle": "Upgrade now?",
+        "working": "Working…"
+      },
+      "currentlyOn": "Currently on {plan} until {date}",
+      "features": {
+        "bioChars": "{count, number} biography characters",
+        "bioImages": "{count} biography images",
+        "galleryPhotos": "{count} gallery photos",
+        "galleryVideos": "{count} gallery videos",
+        "gpsAddressOnly": "Address only (no GPS pin)",
+        "gpsPrecise": "Precise GPS coordinates",
+        "memorialSlots": "{count, plural, one {# memorial slot per purchase} other {# memorial slots per purchase}}",
+        "qrIncluded": "QR Code for plaques & stones",
+        "qrPaidOnly": "QR Code on paid plans",
+        "treeMembers": "{count} family tree members"
+      },
+      "freePrice": "Free",
+      "manageSubscription": "Manage subscription",
+      "opening": "Opening…",
+      "payAnnually": "Pay annually {price}",
+      "payMonthly": "Pay monthly {price}",
+      "qrGate": {
+        "description": "This memorial is on the free plan. Purchase a QR-Code to print it on plaques, headstones and digital spaces — keep their memory anywhere, scannable forever.",
+        "maybeLater": "Maybe later",
+        "purchase": "Purchase QR-Code",
+        "title": "Unlock your QR-Code"
+      },
+      "tagline": "The perfect way to stay in touch",
+      "term": {
+        "perLifetime": "/ lifetime",
+        "perMonths": "/ {count} mo",
+        "perYear": "/ year"
+      },
+      "title": "Subscriptions",
+      "toasts": {
+        "checkoutCanceled": "Checkout canceled.",
+        "paymentReceived": "Payment received — your plan is being activated. Refresh in a moment if it hasn't appeared yet.",
+        "scheduled": "{plan} is scheduled to start on {periodEnd}.",
+        "switched": "Switched to {plan}. Stripe just charged the prorated amount."
+      },
+      "upgradeHint": {
+        "cta": "Upgrade your plan.",
+        "question": {
+          "bio": "Need more characters and images?",
+          "gallery": "Need more images and videos?",
+          "geolocation": "Need precise GPS coordinates?",
+          "memorialized": "Need more memorialized profiles?",
+          "tree": "Need a bigger tree?"
+        }
+      }
+    }
+  },
+  "Tributes": {
+    "Tributes": {
+      "backToProfile": "Back to profile",
+      "backToTributes": "Back to tributes",
+      "card": {
+        "deleteDescription": "This cannot be undone. The tribute and its image will be removed from this profile.",
+        "deleteMineTitle": "Delete your tribute?",
+        "deleteOtherTitle": "Delete this tribute?",
+        "imageAlt": "Tribute by {author}",
+        "yoursBadge": "Yours"
+      },
+      "count": "{count, plural, one {# tribute} other {# tributes}}",
+      "edit": {
+        "subtitle": "Share a memory or message"
+      },
+      "form": {
+        "addImage": "Add image",
+        "deleteDialogDescription": "Your tribute will be permanently removed.",
+        "deleteDialogTitle": "Delete tribute?",
+        "deleteTribute": "Delete tribute",
+        "photoLabel": "Photo (optional)",
+        "previewAlt": "Preview",
+        "removeImage": "Remove image",
+        "sendTribute": "Send tribute",
+        "textLabel": "Your tribute",
+        "textPlaceholder": "Write a memory, a message, or a few words from the heart...",
+        "youFallback": "You"
+      },
+      "list": {
+        "awaitingModeration": "Your tribute is awaiting moderation.",
+        "editPendingLink": "Click here to edit your tribute.",
+        "editYourTribute": "Edit your tribute",
+        "empty": "No tributes yet.",
+        "endOfTributes": "End of tributes",
+        "newestFirst": "Newest first",
+        "oldestFirst": "Oldest first",
+        "sendATribute": "Send a tribute",
+        "subtitle": "Words left behind: small flames carried by those who remember"
+      },
+      "title": "Tributes",
+      "toasts": {
+        "deleted": "Tribute deleted.",
+        "submitted": "Tribute submitted for approval.",
+        "unsupportedFile": "Unsupported file. Use {formats}.",
+        "updated": "Tribute updated. Pending re-approval.",
+        "uploadFailed": "Failed to upload image.",
+        "waitForUpload": "Please wait for the image to finish uploading."
+      }
+    }
   }
 }

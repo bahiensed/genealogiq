@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition, useRef } from "react"
+import { useTranslations } from "next-intl"
 import { Search, User, UserPlus, ArrowLeft } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -54,12 +55,7 @@ interface Props {
   onSuccess?: () => void
 }
 
-const KIND_LABELS: Record<RelationKind, string> = {
-  parent:  "Parent",
-  spouse:  "Partner",
-  sibling: "Sibling",
-  child:   "Child",
-}
+const KIND_ORDER: RelationKind[] = ["parent", "spouse", "sibling", "child"]
 
 const KIND_TO_TYPE: Record<RelationKind, "PARENT_OF" | "SPOUSE" | "SIBLING"> = {
   parent: "PARENT_OF", child: "PARENT_OF", spouse: "SPOUSE", sibling: "SIBLING",
@@ -72,6 +68,8 @@ function genderRingClass(gender: string | null) {
 }
 
 export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind = "parent", anchorParents = [], onSuccess }: Props) {
+  const t = useTranslations("FamilyTree")
+  const tc = useTranslations("Common")
   const [isPending, startTransition] = useTransition()
   const [mode, setMode]   = useState<Mode>("search")
   const [kind, setKind]   = useState<RelationKind>(initialKind)
@@ -130,7 +128,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         linkSpouseId: shouldLinkSpouse ? anchorParents[0]?.id : null,
       })
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Relative added.")
+      toast.success(t("toasts.relativeAdded"))
       handleClose()
       onSuccess?.()
     })
@@ -138,7 +136,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
 
   const handleConfirmGhost = () => {
     if (!firstName.trim() || !lastName.trim()) {
-      toast.error("First and last name are required.")
+      toast.error(t("toasts.nameRequired"))
       return
     }
     startTransition(async () => {
@@ -156,7 +154,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         linkSpouseId: shouldLinkSpouse ? anchorParents[0]?.id : null,
       })
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Person added to the tree.")
+      toast.success(t("toasts.personAdded"))
       handleClose()
       onSuccess?.()
     })
@@ -180,8 +178,8 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
   const showSpouseLink = kind === "parent" && anchorParents.length > 0
   const shouldLinkSpouse = showSpouseLink && linkSpouse
   const needsEndDate = spouseSubtype === "divorced" || spouseSubtype === "widowed"
-  const startLabel = spouseSubtype === "partner" ? "Together since" : "Married"
-  const endLabel   = spouseSubtype === "widowed" ? "Widowed" : "Divorced"
+  const startLabel = spouseSubtype === "partner" ? t("addRelative.togetherSince") : t("addRelative.married")
+  const endLabel   = spouseSubtype === "widowed" ? t("addRelative.widowed") : t("addRelative.divorced")
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose() }}>
@@ -194,37 +192,37 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                   type="button"
                   onClick={() => setMode("search")}
                   className="text-muted-foreground hover:text-foreground"
-                  aria-label="Back to search"
+                  aria-label={t("addRelative.backToSearch")}
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </button>
-                Add a new person
+                {t("addRelative.newPersonTitle")}
               </span>
-            ) : "Add relative"}
+            ) : t("addRelative.title")}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-2 gap-2 items-end">
             <div className="space-y-1.5">
-              <Label>Kind:</Label>
+              <Label>{t("addRelative.kindLabel")}</Label>
               <Select value={kind} onValueChange={(v) => setKind(v as RelationKind)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {(Object.entries(KIND_LABELS) as [RelationKind, string][]).map(([k, label]) => (
-                    <SelectItem key={k} value={k}>{label}</SelectItem>
+                  {KIND_ORDER.map((k) => (
+                    <SelectItem key={k} value={k}>{t(`kinds.${k}`)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             {kind === "spouse" && (
               <div className="space-y-1.5">
-                <Label>Type:</Label>
+                <Label>{t("addRelative.typeLabel")}</Label>
                 <Select value={spouseSubtype} onValueChange={(v) => setSpouseSubtype(v as SpouseSubtype)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {SPOUSE_SUBTYPES.map((s) => (
-                      <SelectItem key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</SelectItem>
+                      <SelectItem key={s} value={s}>{t(`subtypes.${s}`)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -251,7 +249,10 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
             <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
               <Checkbox checked={linkSpouse} onCheckedChange={(v) => setLinkSpouse(v === true)} />
               <span>
-                Married to <span className="font-medium">{anchorParents[0].name}</span>?
+                {t.rich("addRelative.marriedTo", {
+                  name: anchorParents[0].name,
+                  strong: (chunks) => <span className="font-medium">{chunks}</span>,
+                })}
               </span>
             </label>
           )}
@@ -260,7 +261,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
             <div className="space-y-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9" placeholder="Search profile..." value={query} onChange={(e) => handleSearch(e.target.value)} />
+                <Input className="pl-9" placeholder={t("addRelative.searchPlaceholder")} value={query} onChange={(e) => handleSearch(e.target.value)} />
               </div>
 
               {(results.length > 0 || loading) && (
@@ -291,7 +292,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium truncate">{name}</p>
-                            {isMemorialized && <p className="text-[10px] text-muted-foreground italic">Memorialized</p>}
+                            {isMemorialized && <p className="text-[10px] text-muted-foreground italic">{t("memorialized")}</p>}
                           </div>
                         </button>
                       )
@@ -300,7 +301,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                 </div>
               )}
 
-              {showNoResults && <p className="text-sm text-center text-muted-foreground py-2">No results found.</p>}
+              {showNoResults && <p className="text-sm text-center text-muted-foreground py-2">{t("addRelative.noResults")}</p>}
 
               <button
                 type="button"
@@ -308,66 +309,66 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                 className="w-full inline-flex items-center justify-center gap-2 text-sm font-medium text-primary hover:underline pt-1"
               >
                 <UserPlus className="h-4 w-4" />
-                Didn&apos;t find a profile? Add a new person to the tree.
+                {t("addRelative.addNewPerson")}
               </button>
             </div>
           ) : (
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-first">First name:</Label>
+                  <Label htmlFor="g-first">{t("fields.firstName")}</Label>
                   <Input id="g-first" value={firstName} onChange={(e) => setFirstName(e.target.value)} maxLength={64} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-last">Last name:</Label>
+                  <Label htmlFor="g-last">{t("fields.lastName")}</Label>
                   <Input id="g-last" value={lastName} onChange={(e) => setLastName(e.target.value)} maxLength={64} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-maiden">Maiden name:</Label>
+                  <Label htmlFor="g-maiden">{t("fields.maidenName")}</Label>
                   <Input id="g-maiden" value={maidenName} onChange={(e) => setMaidenName(e.target.value)} maxLength={64} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-nick">Nickname:</Label>
+                  <Label htmlFor="g-nick">{t("fields.nickname")}</Label>
                   <Input id="g-nick" value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={40} />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Gender:</Label>
+                <Label>{t("fields.gender")}</Label>
                 <Select value={gender} onValueChange={(v) => setGender(v as "MALE" | "FEMALE" | "OTHER")}>
-                  <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t("fields.genderSelect")} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="FEMALE">Female</SelectItem>
-                    <SelectItem value="MALE">Male</SelectItem>
-                    <SelectItem value="OTHER">Other</SelectItem>
+                    <SelectItem value="FEMALE">{t("gender.female")}</SelectItem>
+                    <SelectItem value="MALE">{t("gender.male")}</SelectItem>
+                    <SelectItem value="OTHER">{t("gender.other")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-birth">Birth date:</Label>
+                  <Label htmlFor="g-birth">{t("fields.birthDate")}</Label>
                   <Input id="g-birth" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-death">Death date:</Label>
+                  <Label htmlFor="g-death">{t("fields.deathDate")}</Label>
                   <Input id="g-death" type="date" value={deathDate} onChange={(e) => setDeathDate(e.target.value)} />
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                This person stays in the family tree without a profile. You can promote them to a memorialized profile later.
+                {t("addRelative.ghostHint")}
               </p>
             </div>
           )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={isPending}>Cancel</Button>
+          <Button variant="outline" onClick={handleClose} disabled={isPending}>{tc("cancel")}</Button>
           {mode === "search" ? (
-            <Button onClick={handleConfirmExisting} disabled={!selected || isPending}>Add</Button>
+            <Button onClick={handleConfirmExisting} disabled={!selected || isPending}>{tc("add")}</Button>
           ) : (
             <Button onClick={handleConfirmGhost} disabled={isPending}>
-              {isPending ? "Saving…" : "Add to tree"}
+              {isPending ? tc("saving") : t("addRelative.addToTree")}
             </Button>
           )}
         </DialogFooter>

@@ -2,6 +2,7 @@
 
 import { useState, useActionState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import {
@@ -21,6 +22,8 @@ import {
 import { deleteAccount } from '@/actions/auth'
 
 export function DeleteAccountDialog() {
+  const t = useTranslations('Auth')
+  const tc = useTranslations('Common')
   const [open, setOpen] = useState(false)
   const [state, dispatch, isPending] = useActionState(deleteAccount, undefined)
   const [showPassword, setShowPassword] = useState(false)
@@ -29,15 +32,15 @@ export function DeleteAccountDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="text-sm text-destructive underline underline-offset-4 hover:no-underline cursor-pointer">
-          Delete account
+          {t('deleteAccountTrigger')}
         </button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-destructive">Delete account</DialogTitle>
+          <DialogTitle className="text-destructive">{t('deleteAccountTitle')}</DialogTitle>
           <DialogDescription>
-            This action is irreversible. All your data will be permanently deleted.
+            {t('deleteAccountDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -47,7 +50,7 @@ export function DeleteAccountDialog() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="da-currentPassword">Current password:</Label>
+            <Label htmlFor="da-currentPassword">{t('currentPasswordLabel')}</Label>
             <InputGroup aria-invalid={!!state?.errors?.currentPassword}>
               <InputGroupInput
                 id="da-currentPassword"
@@ -59,7 +62,7 @@ export function DeleteAccountDialog() {
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                 >
                   {showPassword ? <EyeOff /> : <Eye />}
                 </InputGroupButton>
@@ -71,7 +74,7 @@ export function DeleteAccountDialog() {
           </div>
 
           <Button type="submit" variant="destructive" className="w-full mt-2" disabled={isPending}>
-            {isPending ? "Deleting…" : "Delete my account"}
+            {isPending ? tc('deleting') : t('deleteAccountSubmit')}
           </Button>
         </form>
       </DialogContent>

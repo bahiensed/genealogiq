@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
 import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
 import { getProfileGradient } from "@/lib/avatar-color"
@@ -18,25 +18,27 @@ function shuffle<T>(arr: T[]): T[] {
   return copy
 }
 
-function toMiniProfile(fav: FavoriteRow, locale: string): MiniProfile {
-  const t = fav.target
-  const isMemorialized = t.role === "APP_MEMO"
+type Translate = (key: string, values?: Record<string, string>) => string
+
+function toMiniProfile(fav: FavoriteRow, locale: string, t: Translate): MiniProfile {
+  const p = fav.target
+  const isMemorialized = p.role === "APP_MEMO"
   return {
-    id: t.id,
-    name: `${t.firstName} ${t.lastName}`,
-    subtitle: t.birthPlace
-      ? `${t.birthPlace}${t.birthCountry ? `, ${getCountryName(t.birthCountry, locale)}` : ""}`
-      : isMemorialized ? "Memorialized profile" : "",
+    id: p.id,
+    name: `${p.firstName} ${p.lastName}`,
+    subtitle: p.birthPlace
+      ? `${p.birthPlace}${p.birthCountry ? `, ${getCountryName(p.birthCountry, locale)}` : ""}`
+      : isMemorialized ? t("memorializedProfile") : "",
     status: isMemorialized ? "Memorialized" : "Living",
-    metric: isMemorialized && t.deathDate
-      ? `✦ ${t.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
-      : t.birthDate
-        ? `Born ${t.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
+    metric: isMemorialized && p.deathDate
+      ? t("deathMetric", { date: p.deathDate.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" }) })
+      : p.birthDate
+        ? t("bornMetric", { date: p.birthDate.toLocaleDateString(locale, { year: "numeric", month: "short" }) })
         : "",
-    initials: `${t.firstName[0]}${t.lastName[0]}`.toUpperCase(),
-    gradient: getProfileGradient(t.id),
-    href: `/profile/${t.id}`,
-    avatarUrl: t.avatarUrl,
+    initials: `${p.firstName[0]}${p.lastName[0]}`.toUpperCase(),
+    gradient: getProfileGradient(p.id),
+    href: `/profile/${p.id}`,
+    avatarUrl: p.avatarUrl,
   }
 }
 
@@ -46,6 +48,7 @@ interface Props {
 
 export function HomeFavorites({ items }: Props) {
   const locale = useLocale()
+  const t = useTranslations("Home")
   // Render the original order on SSR to avoid hydration mismatch; shuffle on mount.
   const [order, setOrder] = useState(items)
 
@@ -61,7 +64,7 @@ export function HomeFavorites({ items }: Props) {
       {visible.map((fav, i) => (
         <ProfileMiniCard
           key={fav.targetId}
-          profile={toMiniProfile(fav, locale)}
+          profile={toMiniProfile(fav, locale, t)}
           delay={i * 40}
           hideLivingBadge={fav.target.role !== "APP_MEMO"}
         />

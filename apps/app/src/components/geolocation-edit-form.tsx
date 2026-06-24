@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { ImagePlus, X, Save, RotateCcw, Trash2, LocateFixed, Lock } from "lucide-react"
@@ -77,6 +78,8 @@ interface Props {
 
 export function GeolocationEditForm({ profileId, existing, geolocationFullAccess }: Props) {
   const router = useRouter()
+  const t = useTranslations("Geolocation")
+  const tc = useTranslations("Common")
   const [isPending, startTransition] = useTransition()
   const isEditing = !!existing
   const fileRef = useRef<HTMLInputElement>(null)
@@ -158,7 +161,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
     const file = files?.[0]
     if (!file) return
     if (!isAllowedImage(file)) {
-      toast.error(`Unsupported file. Use ${IMAGE_FORMATS_LABEL}.`)
+      toast.error(t("toasts.unsupportedFile", { formats: IMAGE_FORMATS_LABEL }))
       return
     }
     const slot = photos.findIndex((p) => p == null)
@@ -176,7 +179,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
       })
       setPhotoAt(slot, blob.url)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to upload photo.")
+      toast.error(err instanceof Error ? err.message : t("toasts.uploadFailed"))
       setPhotoAt(slot, null)
     } finally {
       setUploading((prev) => { const u = [...prev]; u[slot] = false; return u })
@@ -193,20 +196,20 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
   }
 
   const handleUseMyLocation = () => {
-    if (!navigator.geolocation) { toast.error("Geolocation not supported by this browser."); return }
+    if (!navigator.geolocation) { toast.error(t("toasts.geolocationUnsupported")); return }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setValue("lat", parseFloat(pos.coords.latitude.toFixed(6)), { shouldDirty: true })
         setValue("lon", parseFloat(pos.coords.longitude.toFixed(6)), { shouldDirty: true })
-        toast.success("Location detected.")
+        toast.success(t("toasts.locationDetected"))
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED) {
-          toast.error("Location access denied. Enable it in your browser settings.")
+          toast.error(t("toasts.locationDenied"))
         } else if (err.code === err.POSITION_UNAVAILABLE) {
-          toast.error("Location unavailable. Check your GPS signal.")
+          toast.error(t("toasts.locationUnavailable"))
         } else {
-          toast.error("Location request timed out. Try again.")
+          toast.error(t("toasts.locationTimeout"))
         }
       },
       { timeout: 10000, maximumAge: 60000 },
@@ -214,38 +217,38 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
   }
 
   const onSubmit = (data: GeolocationFormValues) => {
-    if (uploading.some(Boolean)) { toast.warning("Please wait for photos to finish uploading."); return }
+    if (uploading.some(Boolean)) { toast.warning(t("toasts.waitForUploads")); return }
     startTransition(async () => {
       const result = await saveGeolocation(profileId, data)
       if (result?.error) { toast.error(result.error); return }
-      toast.success("Geolocation saved.")
+      toast.success(t("toasts.saved"))
       router.push(`/profile/${profileId}/geolocation`)
     })
   }
 
   const handleReset = () => {
     reset(buildDefaults(existing))
-    toast("Changes reset.")
+    toast(t("toasts.reset"))
   }
 
   const handleDelete = () => {
     startTransition(async () => {
       await deleteGeolocation(profileId)
-      toast.success("Geolocation deleted.")
+      toast.success(t("toasts.deleted"))
       router.push(`/profile/${profileId}/geolocation`)
     })
   }
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit, () => toast.error("Please fix the highlighted fields."))}
+      onSubmit={handleSubmit(onSubmit, () => toast.error(t("toasts.fixFields")))}
       className="glass-card no-sheen p-6 md:p-8 space-y-8 animate-fade-in"
       style={{ animationDelay: "80ms" }}
     >
       {/* Photos */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-base">Photos</Label>
+          <Label className="text-base">{t("photos")}</Label>
           <span className="text-xs text-muted-foreground">{filledPhotoCount}/{MAX_PHOTOS}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -253,7 +256,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
             photo ? (
               <div key={slot} className="relative group aspect-square rounded-xl overflow-hidden border border-border/60">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo} alt={`Photo ${slot + 1}`} className="h-full w-full object-cover" />
+                <img src={photo} alt={t("photoAlt", { number: slot + 1 })} className="h-full w-full object-cover" />
                 {uploading[slot] && (
                   <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
                     <div className="h-5 w-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -264,7 +267,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
                     type="button"
                     onClick={() => removePhoto(slot)}
                     className="absolute top-1.5 right-1.5 h-7 w-7 inline-flex items-center justify-center rounded-full bg-background/80 backdrop-blur-md border border-border/60 opacity-0 group-hover:opacity-100 hover:bg-destructive hover:text-destructive-foreground transition"
-                    aria-label="Remove photo"
+                    aria-label={t("removePhoto")}
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -279,7 +282,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
               className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
             >
               <ImagePlus className="h-6 w-6" />
-              <span className="text-xs font-medium">Add Image</span>
+              <span className="text-xs font-medium">{t("addImage")}</span>
             </button>
           )}
         </div>
@@ -294,12 +297,12 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
 
       {/* Place name with typeahead */}
       <div className="space-y-2">
-        <Label htmlFor="geo-place" className="text-base">Place name</Label>
+        <Label htmlFor="geo-place" className="text-base">{t("placeName")}</Label>
         <div className="relative" ref={placeDropdownRef}>
           <Input
             id="geo-place"
             maxLength={120}
-            placeholder="e.g. São Francisco Cemetery"
+            placeholder={t("placeNamePlaceholder")}
             {...placeRestRegister}
             onChange={(e) => {
               placeRegOnChange(e)
@@ -336,7 +339,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
 
       {/* Address (BMS-style with CEP search) */}
       <div className="space-y-3">
-        <Label className="text-base">Address</Label>
+        <Label className="text-base">{t("address")}</Label>
         <AddressSection
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           control={control as any}
@@ -348,36 +351,36 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
 
       {/* Section / plot */}
       <div className="space-y-2">
-        <Label htmlFor="geo-section" className="text-base">Section / plot <span className="text-muted-foreground text-xs">(optional)</span></Label>
-        <Input id="geo-section" maxLength={200} placeholder="e.g. Garden of Peace, Plot 42" {...register("section")} />
+        <Label htmlFor="geo-section" className="text-base">{t("section")} <span className="text-muted-foreground text-xs">{t("optional")}</span></Label>
+        <Input id="geo-section" maxLength={200} placeholder={t("sectionPlaceholder")} {...register("section")} />
       </div>
 
       {/* Coordinates */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-base">Coordinates</Label>
+          <Label className="text-base">{t("coordinates")}</Label>
           {!geolocationFullAccess && (
             <GeolocationGate className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
               <Lock className="h-3.5 w-3.5" />
-              Upgrade plan to unlock
+              {t("upgradeToUnlock")}
             </GeolocationGate>
           )}
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 space-y-1">
-            <Label htmlFor="geo-lat" className="text-xs text-muted-foreground">Latitude</Label>
+            <Label htmlFor="geo-lat" className="text-xs text-muted-foreground">{t("latitude")}</Label>
             <Input id="geo-lat" type="number" step="any" min={-90} max={90} placeholder="-25.4284" disabled={!geolocationFullAccess} {...register("lat", { valueAsNumber: true })} />
             {errors.lat && <p className="text-xs text-destructive">{errors.lat.message}</p>}
           </div>
           <div className="flex-1 space-y-1">
-            <Label htmlFor="geo-lon" className="text-xs text-muted-foreground">Longitude</Label>
+            <Label htmlFor="geo-lon" className="text-xs text-muted-foreground">{t("longitude")}</Label>
             <Input id="geo-lon" type="number" step="any" min={-180} max={180} placeholder="-49.2733" disabled={!geolocationFullAccess} {...register("lon", { valueAsNumber: true })} />
             {errors.lon && <p className="text-xs text-destructive">{errors.lon.message}</p>}
           </div>
           <div className="flex items-end">
             <Button type="button" variant="outline" onClick={handleUseMyLocation} disabled={!geolocationFullAccess} className="gap-2 w-full sm:w-auto">
               <LocateFixed className="h-4 w-4" />
-              Use my location
+              {t("useMyLocation")}
             </Button>
           </div>
         </div>
@@ -386,13 +389,13 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
       {/* Notes */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="geo-notes" className="text-base">Notes <span className="text-muted-foreground text-xs">(optional)</span></Label>
+          <Label htmlFor="geo-notes" className="text-base">{t("notes")} <span className="text-muted-foreground text-xs">{t("optional")}</span></Label>
           <span className="text-xs text-muted-foreground">{notesValue.length}/{MAX_NOTES}</span>
         </div>
         <Textarea
           id="geo-notes"
           maxLength={MAX_NOTES}
-          placeholder="Visiting hours, how to find the spot, anything that helps…"
+          placeholder={t("notesPlaceholder")}
           className="min-h-[140px] text-base leading-relaxed"
           {...register("notes")}
         />
@@ -402,10 +405,10 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
       <div className="flex flex-col md:flex-row md:items-center gap-3 pt-2 border-t border-border/60">
         <div className="order-1 md:order-2 md:ml-auto flex flex-col md:flex-row gap-2 md:gap-3">
           <Button type="submit" className="gap-2 w-full md:w-auto order-1 md:order-2" disabled={isPending || uploading.some(Boolean)}>
-            <Save className="h-4 w-4" />Save
+            <Save className="h-4 w-4" />{tc("save")}
           </Button>
           <Button type="button" variant="outline" onClick={handleReset} className="gap-2 w-full md:w-auto order-2 md:order-1" disabled={isPending}>
-            <RotateCcw className="h-4 w-4" />Reset
+            <RotateCcw className="h-4 w-4" />{t("reset")}
           </Button>
         </div>
         {isEditing && (
@@ -413,19 +416,19 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button type="button" variant="destructive" className="gap-2 w-full md:w-auto" disabled={isPending}>
-                  <Trash2 className="h-4 w-4" />Delete location
+                  <Trash2 className="h-4 w-4" />{t("deleteLocation")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete geolocation?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("deleteDialogTitle")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently remove the place, photos and coordinates.
+                    {t("deleteDialogDescription")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                  <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{tc("delete")}</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>

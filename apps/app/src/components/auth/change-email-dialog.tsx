@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useActionState } from 'react'
+import { useTranslations } from 'next-intl'
 import { requestEmailChange } from '@/actions/auth'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '
 import { Label } from '@/components/ui/label'
 
 export function ChangeEmailDialog() {
+  const t = useTranslations('Auth')
   const [open, setOpen] = useState(false)
   const [state, dispatch, isPending] = useActionState(requestEmailChange, undefined)
   const [showPassword, setShowPassword] = useState(false)
@@ -18,15 +20,15 @@ export function ChangeEmailDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="text-sm text-foreground underline underline-offset-4 hover:no-underline cursor-pointer">
-          Change E-mail
+          {t('changeEmailTrigger')}
         </button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change e-mail</DialogTitle>
+          <DialogTitle>{t('changeEmailTitle')}</DialogTitle>
           <DialogDescription>
-            A confirmation link will be sent to the new address
+            {t('changeEmailDescription')}
           </DialogDescription>
         </DialogHeader>
 
@@ -39,12 +41,12 @@ export function ChangeEmailDialog() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ce-newEmail">New e-mail:</Label>
+            <Label htmlFor="ce-newEmail">{t('newEmailLabel')}</Label>
             <Input
               id="ce-newEmail"
               name="newEmail"
               type="email"
-              placeholder="new@example.com"
+              placeholder={t('newEmailPlaceholder')}
               autoComplete="email"
               aria-invalid={!!state?.errors?.newEmail}
             />
@@ -54,7 +56,7 @@ export function ChangeEmailDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ce-currentPassword">Current password:</Label>
+            <Label htmlFor="ce-currentPassword">{t('currentPasswordLabel')}</Label>
             <InputGroup aria-invalid={!!state?.errors?.currentPassword}>
               <InputGroupInput
                 id="ce-currentPassword"
@@ -66,7 +68,7 @@ export function ChangeEmailDialog() {
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                 >
                   {showPassword ? <EyeOff /> : <Eye />}
                 </InputGroupButton>
@@ -78,7 +80,7 @@ export function ChangeEmailDialog() {
           </div>
 
           <Button type="submit" className="w-full mt-2" disabled={isPending}>
-            {isPending ? "Changing…" : "Change e-mail"}
+            {isPending ? t('changing') : t('changeEmailSubmit')}
           </Button>
         </form>
       </DialogContent>

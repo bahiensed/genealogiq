@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation"
-import { getLocale } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getCountryName } from "@genealogiq/core"
 import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
 import { auth } from "@/auth"
@@ -111,53 +111,62 @@ export default async function ProfileByIdPage({ params }: Props) {
   }
 
   const base = `/profile/${id}`
+  const t = await getTranslations("Profile")
+
+  const treeCard: SectionCard = {
+    key: "tree",
+    title: t("treeTitle"),
+    description: t("treeDescription"),
+    metric: treeCount > 1 ? t("treeMetric", { count: treeCount }) : t("treeEmptyMetric"),
+    icon: Network,
+    span: 4,
+    preview: <TreePreview memberCount={treeCount} />,
+    href: `${base}/tree`,
+  }
+
+  const bioCard: SectionCard = {
+    key: "bio",
+    title: t("bioTitle"),
+    description: t("bioDescription"),
+    metric: hasBio ? t("bioMetric") : t("bioEmptyMetric"),
+    icon: BookOpen,
+    span: 2,
+    preview: <BioPreview hasBio={hasBio} initial1={user.firstName[0]} initial2={user.lastName[0]} />,
+    href: `${base}/bio`,
+  }
+
+  const galleryCard: SectionCard = {
+    key: "gallery",
+    title: t("galleryTitle"),
+    description: t("galleryDescription"),
+    metric: galleryCount > 0 ? t("galleryMetric", { count: galleryCount }) : t("galleryEmptyMetric"),
+    icon: Images,
+    span: 3,
+    preview: <GalleryPreview images={galleryImages} hasVideos={galleryHasVideos} />,
+    href: `${base}/gallery`,
+  }
+
+  const tributesCard: SectionCard = {
+    key: "tributes",
+    title: t("tributesTitle"),
+    description: t("tributesDescription"),
+    metric: tributeCount > 0 ? t("tributesMetric", { count: tributeCount }) : t("tributesEmptyMetric"),
+    icon: Flower2,
+    span: 3,
+    preview: <TributesPreview authors={tributeAuthors} />,
+    href: `${base}/tributes`,
+  }
 
   const memorializedCards: SectionCard[] = [
-    {
-      key: "tree",
-      title: "Family Tree",
-      description: "Roots, branches and the quiet ties that bind generations",
-      metric: treeCount > 1 ? `${treeCount} members` : "No relatives yet",
-      icon: Network,
-      span: 4,
-      preview: <TreePreview memberCount={treeCount} />,
-      href: `${base}/tree`,
-    },
-    {
-      key: "bio",
-      title: "Biography",
-      description: "A life told in chapters: moments, places and turning points",
-      metric: hasBio ? "Read" : "No biography yet",
-      icon: BookOpen,
-      span: 2,
-      preview: <BioPreview hasBio={hasBio} initial1={user.firstName[0]} initial2={user.lastName[0]} />,
-      href: `${base}/bio`,
-    },
-    {
-      key: "gallery",
-      title: "Gallery",
-      description: "Images and moments worth remembering",
-      metric: galleryCount > 0 ? `${galleryCount} ${galleryCount === 1 ? "memory" : "memories"}` : "No media yet",
-      icon: Images,
-      span: 3,
-      preview: <GalleryPreview images={galleryImages} hasVideos={galleryHasVideos} />,
-      href: `${base}/gallery`,
-    },
-    {
-      key: "tributes",
-      title: "Tributes",
-      description: "Messages celebrating shared experiences and memories",
-      metric: tributeCount > 0 ? `${tributeCount} ${tributeCount === 1 ? "tribute" : "tributes"}` : "No tributes yet",
-      icon: Flower2,
-      span: 3,
-      preview: <TributesPreview authors={tributeAuthors} />,
-      href: `${base}/tributes`,
-    },
+    treeCard,
+    bioCard,
+    galleryCard,
+    tributesCard,
     {
       key: "geo",
-      title: "Geolocation",
-      description: "A place to meet again, from anywhere",
-      metric: geo ? geo.placeName : "Not set",
+      title: t("geoTitle"),
+      description: t("geoDescription"),
+      metric: geo ? geo.placeName : t("geoEmptyMetric"),
       icon: MapPin,
       span: 3,
       preview: <GeoPreview lat={geo?.lat} lon={geo?.lon} />,
@@ -165,13 +174,13 @@ export default async function ProfileByIdPage({ params }: Props) {
     },
     {
       key: "qr",
-      title: "QR Code",
-      description: "For plaques, headstones and digital spaces alike",
+      title: t("qrTitle"),
+      description: t("qrDescription"),
       metric: showQrPurchaseCTA
-        ? "Purchase to unlock"
+        ? t("qrMetricPurchase")
         : showQrVisitorEmpty
-          ? "Not yet generated"
-          : "Ready to print",
+          ? t("qrMetricNotGenerated")
+          : t("qrMetricReady"),
       icon: QrCode,
       span: 3,
       preview: <QrPreview />,
@@ -180,51 +189,15 @@ export default async function ProfileByIdPage({ params }: Props) {
   ]
 
   const livingCards: SectionCard[] = [
-    {
-      key: "tree",
-      title: "Family Tree",
-      description: "Roots, branches and the quiet ties that bind generations",
-      metric: treeCount > 1 ? `${treeCount} members` : "No relatives yet",
-      icon: Network,
-      span: 4,
-      preview: <TreePreview memberCount={treeCount} />,
-      href: `${base}/tree`,
-    },
-    {
-      key: "bio",
-      title: "Biography",
-      description: "A life told in chapters: moments, places and turning points",
-      metric: hasBio ? "Read" : "No biography yet",
-      icon: BookOpen,
-      span: 2,
-      preview: <BioPreview hasBio={hasBio} initial1={user.firstName[0]} initial2={user.lastName[0]} />,
-      href: `${base}/bio`,
-    },
-    {
-      key: "gallery",
-      title: "Gallery",
-      description: "Images and moments worth remembering",
-      metric: galleryCount > 0 ? `${galleryCount} ${galleryCount === 1 ? "memory" : "memories"}` : "No media yet",
-      icon: Images,
-      span: 3,
-      preview: <GalleryPreview images={galleryImages} hasVideos={galleryHasVideos} />,
-      href: `${base}/gallery`,
-    },
-    {
-      key: "tributes",
-      title: "Tributes",
-      description: "Messages celebrating shared experiences and memories",
-      metric: tributeCount > 0 ? `${tributeCount} ${tributeCount === 1 ? "tribute" : "tributes"}` : "No tributes yet",
-      icon: Flower2,
-      span: 3,
-      preview: <TributesPreview authors={tributeAuthors} />,
-      href: `${base}/tributes`,
-    },
+    treeCard,
+    bioCard,
+    galleryCard,
+    tributesCard,
     {
       key: "favorites",
-      title: "Favorites",
-      description: "People who carry deep meaning, kept close, always",
-      metric: favorites.length > 0 ? `${favorites.length} ${favorites.length === 1 ? "Favorite" : "Favorites"}` : "No favorites yet",
+      title: t("favoritesTitle"),
+      description: t("favoritesDescription"),
+      metric: favorites.length > 0 ? t("favoritesMetric", { count: favorites.length }) : t("favoritesEmptyMetric"),
       icon: Heart,
       span: 3,
       preview: <FavoritesPreview favorites={favorites} />,
@@ -232,11 +205,9 @@ export default async function ProfileByIdPage({ params }: Props) {
     },
     {
       key: "guardian",
-      title: "Guarded profiles",
-      description: "Memorials watched over with quiet care",
-      metric: memorialCount > 0
-        ? `${memorialCount} ${memorialCount === 1 ? "profile" : "profiles"}`
-        : "No profiles guarded yet",
+      title: t("guardianTitle"),
+      description: t("guardianDescription"),
+      metric: memorialCount > 0 ? t("guardianMetric", { count: memorialCount }) : t("guardianEmptyMetric"),
       icon: BrickWall,
       span: 3,
       preview: <GuardianPreview memorials={memorials} />,

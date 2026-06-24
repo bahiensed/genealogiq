@@ -4,7 +4,7 @@ import { useState } from "react"
 import { type Control, type FieldErrors, type UseFormSetValue, useWatch } from "react-hook-form"
 import { SearchIcon } from "lucide-react"
 import { toast } from "sonner"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { lookupZip } from "@/lib/zipLookup"
 import { maskCep, maskUsZip, maskMxZip, unmaskDigits } from "@/lib/masks"
 import { COUNTRY_BY_ISO, getLocalizedCountries } from "@/consts/countries-data"
@@ -51,6 +51,7 @@ function zipPlaceholder(iso: string): string {
 
 export function AddressSection({ control, setValue, errors, prefix }: AddressSectionProps) {
   const locale = useLocale()
+  const t = useTranslations("Common")
   const countryOptions = getLocalizedCountries(locale)
   const [isSearching, setIsSearching] = useState(false)
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
@@ -89,10 +90,10 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
       }
 
       if (!zipResult && (!Array.isArray(suggestionsRes) || suggestionsRes.length === 0)) {
-        toast.error("ZIP not found")
+        toast.error(t("address.zipNotFound"))
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to look up ZIP/postal code")
+      toast.error(err instanceof Error ? err.message : t("address.lookupError"))
     } finally {
       setIsSearching(false)
     }
@@ -123,7 +124,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Country */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>Country:</FieldLabel>
+        <FieldLabel>{t("address.country")}</FieldLabel>
         <Select
           value={country}
           onValueChange={(val) => {
@@ -133,7 +134,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
           }}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select" />
+            <SelectValue placeholder={t("address.selectPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {countryOptions.map((c) => (
@@ -145,7 +146,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* ZIP */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>ZIP Code:</FieldLabel>
+        <FieldLabel>{t("address.zipCode")}</FieldLabel>
         <InputGroup>
           <InputGroupInput
             value={applyZipMask(country, zip)}
@@ -159,7 +160,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
           />
           {zipSupported && (
             <InputGroupAddon align="inline-end">
-              <InputGroupButton onClick={handleZipSearch} disabled={isSearching} aria-label="Look up address">
+              <InputGroupButton onClick={handleZipSearch} disabled={isSearching} aria-label={t("address.lookupAria")}>
                 <SearchIcon />
               </InputGroupButton>
             </InputGroupAddon>
@@ -170,7 +171,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
         {/* DB address suggestions */}
         {suggestions.length > 0 && (
           <div className="mt-2 rounded-md border border-border bg-background shadow-sm">
-            <p className="px-3 pt-2 pb-1 text-xs text-muted-foreground">Addresses already on file:</p>
+            <p className="px-3 pt-2 pb-1 text-xs text-muted-foreground">{t("address.suggestionsTitle")}</p>
             <ul className="divide-y divide-border">
               {suggestions.map((s, i) => (
                 <li key={i}>
@@ -194,7 +195,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Street */}
       <Field className="col-span-12 md:col-span-10">
-        <FieldLabel>Street:</FieldLabel>
+        <FieldLabel>{t("address.street")}</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.street` }) ?? ""}
           onChange={(e) => { setValue(`${prefix}.street`, e.target.value); setSuggestions([]) }}
@@ -204,7 +205,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Number */}
       <Field className="col-span-12 md:col-span-2">
-        <FieldLabel>Number:</FieldLabel>
+        <FieldLabel>{t("address.number")}</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.number` }) ?? ""}
           onChange={(e) => setValue(`${prefix}.number`, e.target.value)}
@@ -213,7 +214,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Complement */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>Complement:</FieldLabel>
+        <FieldLabel>{t("address.complement")}</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.complement` }) ?? ""}
           onChange={(e) => setValue(`${prefix}.complement`, e.target.value)}
@@ -222,7 +223,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* Neighborhood */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>Neighborhood:</FieldLabel>
+        <FieldLabel>{t("address.neighborhood")}</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.neighborhood` }) ?? ""}
           onChange={(e) => setValue(`${prefix}.neighborhood`, e.target.value)}
@@ -231,7 +232,7 @@ export function AddressSection({ control, setValue, errors, prefix }: AddressSec
 
       {/* City */}
       <Field className="col-span-12 md:col-span-6">
-        <FieldLabel>City:</FieldLabel>
+        <FieldLabel>{t("address.city")}</FieldLabel>
         <Input
           value={useWatch({ control, name: `${prefix}.city` }) ?? ""}
           onChange={(e) => setValue(`${prefix}.city`, e.target.value)}
@@ -259,14 +260,15 @@ interface StateFieldProps {
 }
 
 function StateField({ control, setValue, prefix, states }: StateFieldProps) {
+  const t = useTranslations("Common")
   const value = useWatch({ control, name: `${prefix}.state` }) ?? ""
   return (
     <Field className="col-span-12 md:col-span-6">
-      <FieldLabel>State / Province:</FieldLabel>
+      <FieldLabel>{t("address.state")}</FieldLabel>
       {states.length > 0 ? (
         <Select value={value} onValueChange={(val) => setValue(`${prefix}.state`, val)}>
           <SelectTrigger>
-            <SelectValue placeholder="Select" />
+            <SelectValue placeholder={t("address.selectPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             {states.map((s) => (

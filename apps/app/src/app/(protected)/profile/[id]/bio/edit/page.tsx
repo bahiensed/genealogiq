@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
@@ -18,6 +19,8 @@ interface Props {
 export default async function BioEditPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
+  const t = await getTranslations("Bio")
+  const tc = await getTranslations("Common")
 
   const [profile, bio, features] = await Promise.all([
     getProfileById(id),
@@ -40,20 +43,20 @@ export default async function BioEditPage({ params }: Props) {
       <main className="container relative pt-24 pb-32 max-w-4xl">
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
-            <BackButton href={`/profile/${id}/bio`} label="Back to biography" />
+            <BackButton href={`/profile/${id}/bio`} label={t("backToBiography")} />
             <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">
-              {isCreating ? "Write Biography" : "Edit Biography"}
+              {isCreating ? t("editTitleCreate") : t("editTitleEdit")}
             </h1>
           </div>
           <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
             <div className="flex flex-col gap-1 min-w-0 bg-transparent">
               <p className="text-muted-foreground italic bg-transparent">
-                {isCreating ? "Add photos, a quote and the life story." : "Update photos, quote and life story."}
+                {isCreating ? t("editSubtitleCreate") : t("editSubtitleEdit")}
               </p>
               {atLimit && <UpgradeHint context="bio" currentTier={features.code} />}
             </div>
             <Button variant="ghost" asChild className="shrink-0 self-end lg:self-auto">
-              <Link href={`/profile/${id}/bio`}>Cancel</Link>
+              <Link href={`/profile/${id}/bio`}>{tc("cancel")}</Link>
             </Button>
           </div>
         </div>

@@ -26,7 +26,7 @@ export default async function HomePage() {
     prisma.appUser.findUnique({ where: { id: userId }, select: { firstName: true } }),
   ])
 
-  const firstName = currentUser?.firstName ?? "there"
+  const firstName = currentUser?.firstName ?? t("greetingFallbackName")
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">

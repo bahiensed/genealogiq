@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { NotebookText, NotebookPen, Quote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
@@ -19,6 +20,8 @@ interface Props {
 export default async function ProfileBioPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
+  const t = await getTranslations("Bio")
+  const tc = await getTranslations("Common")
   const [profile, bio, features] = await Promise.all([
     getProfileById(id),
     getBioByUserId(id),
@@ -43,20 +46,20 @@ export default async function ProfileBioPage({ params }: Props) {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
-              <BackButton href={`/profile/${id}`} label="Back to profile" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Biography</h1>
+              <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
             </div>
             {isOwn && (
               <Button asChild className="shrink-0 gap-2">
                 <Link href={`/profile/${id}/bio/edit`}>
                   <NotebookPen className="h-4 w-4" />
-                  {isEmpty ? "Write biography" : "Edit"}
+                  {isEmpty ? t("writeBiography") : tc("edit")}
                 </Link>
               </Button>
             )}
           </div>
           <p className="text-muted-foreground mt-2 italic">
-            {isOwn ? "A life remembered through words and images" : `${name}'s life story`}
+            {isOwn ? t("subtitleOwn") : t("subtitleOther", { name })}
           </p>
           {isOwn && atLimit && (
             <div className="mt-2">
@@ -71,10 +74,10 @@ export default async function ProfileBioPage({ params }: Props) {
             style={{ animationDelay: "80ms" }}
           >
             <NotebookText className="h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground text-sm">No biography yet.</p>
+            <p className="text-muted-foreground text-sm">{t("empty")}</p>
             {isOwn && (
               <Button asChild variant="outline" size="sm" className="gap-2">
-                <Link href={`/profile/${id}/bio/edit`}><NotebookPen className="h-4 w-4" />Write biography</Link>
+                <Link href={`/profile/${id}/bio/edit`}><NotebookPen className="h-4 w-4" />{t("writeBiography")}</Link>
               </Button>
             )}
           </div>
