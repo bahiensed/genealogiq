@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -40,12 +41,13 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   filterColumn = 'name',
-  filterPlaceholder = 'Search...',
-  emptyMessage = 'No records found',
+  filterPlaceholder,
+  emptyMessage,
   columnLabels,
   initialColumnVisibility,
   initialSorting,
 }: DataTableProps<TData, TValue>) {
+  const t = useTranslations('Common')
   const [sorting, setSorting] = React.useState<SortingState>(initialSorting ?? [])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility ?? {})
@@ -71,7 +73,7 @@ export function DataTable<TData, TValue>({
     <div className="w-full space-y-4">
       <div className="flex items-center gap-2">
         <Input
-          placeholder={filterPlaceholder}
+          placeholder={filterPlaceholder ?? t('dataTable.searchPlaceholder')}
           value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ''}
           onChange={(e) => table.getColumn(filterColumn)?.setFilterValue(e.target.value)}
           className="max-w-sm"
@@ -108,7 +110,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  {emptyMessage}
+                  {emptyMessage ?? t('dataTable.noResults')}
                 </TableCell>
               </TableRow>
             )}

@@ -32,5 +32,44 @@
     "revenueThisYear": "Receita neste ano",
     "totalRevenue": "Receita total",
     "allTimeRevenue": "Receita de todo o período"
+  },
+  "Common": {
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "cancel": "Cancelar",
+    "create": "Criar",
+    "creating": "Criando…",
+    "edit": "Editar",
+    "search": "Buscar",
+    "reset": "Redefinir",
+    "back": "Voltar",
+    "next": "Avançar",
+    "delete": {
+      "title": "Confirmar exclusão",
+      "description": "Esta ação não pode ser desfeita.",
+      "confirm": "Excluir",
+      "deleting": "Excluindo…"
+    },
+    "toasts": {
+      "saved": "Salvo com sucesso.",
+      "created": "Criado com sucesso.",
+      "deleted": "Excluído com sucesso.",
+      "error": "Algo deu errado. Tente novamente."
+    },
+    "dataTable": {
+      "searchPlaceholder": "Buscar…",
+      "noResults": "Nenhum registro encontrado",
+      "columns": "Colunas",
+      "rowsPerPage": "Itens por página",
+      "pageOf": "Página {page} de {total}",
+      "rowCount": "{count, plural, =0 {Nenhum registro} one {# registro} other {# registros}}",
+      "firstPage": "Primeira página",
+      "previousPage": "Página anterior",
+      "nextPage": "Próxima página",
+      "lastPage": "Última página",
+      "sortAsc": "Cresc.",
+      "sortDesc": "Decresc.",
+      "hide": "Ocultar"
+    }
   }
 }

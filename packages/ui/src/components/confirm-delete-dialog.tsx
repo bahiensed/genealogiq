@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { Button } from './button'
 import {
   Dialog,
@@ -20,21 +21,22 @@ interface ConfirmDeleteDialogProps {
 }
 
 export function ConfirmDeleteDialog({ open, onOpenChange, onConfirm, isPending, description }: ConfirmDeleteDialogProps) {
+  const t = useTranslations('Common')
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirm deletion</DialogTitle>
+          <DialogTitle>{t('delete.title')}</DialogTitle>
           <DialogDescription>
-            {description ?? 'This action cannot be undone.'}
+            {description ?? t('delete.description')}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">{t('cancel')}</Button>
           </DialogClose>
           <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
-            {isPending ? 'Deleting…' : 'Delete'}
+            {isPending ? t('delete.deleting') : t('delete.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>
