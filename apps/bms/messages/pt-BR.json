@@ -71,5 +71,117 @@
       "sortDesc": "Decresc.",
       "hide": "Ocultar"
     }
+  },
+  "Customers": {
+    "title": "Clientes",
+    "new": "Novo cliente",
+    "edit": "Editar cliente",
+    "create": "Criar cliente",
+    "stepOf": "Etapa {step} de {total}",
+    "active": "Ativo?",
+    "sections": {
+      "business": "Empresa",
+      "contact": "Contato",
+      "address": "Endereço",
+      "administrator": "Administrador",
+      "modules": "Módulos Sequoia"
+    },
+    "steps": {
+      "businessDesc": "Dados legais e identificação",
+      "contactDesc": "Detalhes de contato e categoria",
+      "addressDesc": "Localização física",
+      "administratorDesc": "Responsável pela conta Sequoia",
+      "modulesDesc": "Permissões de acesso ao Sequoia"
+    },
+    "hints": {
+      "addressOptional": "O endereço é opcional e pode ser preenchido depois.",
+      "admin": "Credenciais de acesso ao sistema Sequoia para o responsável por esta empresa. Um e-mail será enviado com um link para definir a senha.",
+      "modulesGray": "Itens em cinza são sempre acessíveis e não podem ser desativados."
+    },
+    "fields": {
+      "type": "Tipo:",
+      "firstName": "Nome:",
+      "companyName": "Razão social:",
+      "lastName": "Sobrenome:",
+      "tradeName": "Nome fantasia:",
+      "cpf": "CPF:",
+      "cnpj": "CNPJ:",
+      "birthDate": "Data de nascimento:",
+      "stateRegistration": "Inscrição estadual:",
+      "stateRegistrationShort": "Insc. est.:",
+      "municipalRegistration": "Inscrição municipal:",
+      "municipalRegistrationShort": "Insc. mun.:",
+      "email": "E-mail:",
+      "countryCode": "Código do país:",
+      "phone": "Telefone:",
+      "category": "Categoria:",
+      "notes": "Observações:"
+    },
+    "placeholders": {
+      "category": "Selecione uma categoria"
+    },
+    "entityType": {
+      "company": "Empresa",
+      "individual": "Pessoa física"
+    },
+    "owner": {
+      "firstName": "Nome:",
+      "lastName": "Sobrenome:",
+      "email": "E-mail:"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "table": {
+      "name": "Nome",
+      "type": "Tipo",
+      "category": "Categoria",
+      "email": "E-mail",
+      "status": "Status",
+      "createdAt": "Criado em",
+      "empty": "Nenhum cliente encontrado."
+    },
+    "actions": {
+      "openMenu": "Abrir menu",
+      "edit": "Editar",
+      "deactivate": "Desativar",
+      "reactivate": "Reativar",
+      "resendEmail": "Reenviar e-mail",
+      "delete": "Excluir"
+    },
+    "toasts": {
+      "deactivated": "Cliente desativado.",
+      "reactivated": "Cliente reativado.",
+      "emailResent": "E-mail reenviado com sucesso.",
+      "deleted": "Cliente excluído com sucesso.",
+      "deleteConfirm": "O cliente \"{name}\" será excluído permanentemente."
+    },
+    "modules": {
+      "groups": {
+        "alwaysActive": "Sempre ativo",
+        "records": "Cadastros",
+        "categories": "Categorias",
+        "purchasing": "Compras",
+        "inventory": "Estoque",
+        "finance": "Financeiro"
+      },
+      "labels": {
+        "dashboard": "Painel",
+        "buySubscriptions": "Comprar assinaturas",
+        "viewSubscriptions": "Ver assinaturas",
+        "customers": "Clientes",
+        "sales": "Vendas",
+        "system": "Sistema",
+        "suppliers": "Fornecedores",
+        "products": "Produtos",
+        "services": "Serviços",
+        "supplierCat": "Cat. fornecedor",
+        "productCat": "Cat. produto",
+        "serviceCat": "Cat. serviço",
+        "customerCat": "Cat. cliente",
+        "finance": "Financeiro"
+      }
+    }
   }
 }
