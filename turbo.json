@@ -1,6 +1,18 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalEnv": ["DATABASE_URL", "AUTH_SECRET", "AUTH_URL", "AUTH_TRUST_HOST"],
+  "globalEnv": [
+    "DATABASE_URL",
+    "AUTH_SECRET",
+    "AUTH_URL",
+    "AUTH_TRUST_HOST",
+    "APP_URL",
+    "BMS_URL",
+    "SEQUOIA_URL",
+    "RESEND_API_KEY",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "BLOB_READ_WRITE_TOKEN"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "^db:generate", "db:generate"],
