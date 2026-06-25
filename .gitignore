@@ -23,3 +23,9 @@ dist/
 
 # TypeScript incremental build info (per-machine artifact)
 *.tsbuildinfo
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
