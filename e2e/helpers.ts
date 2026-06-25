@@ -4,9 +4,10 @@ import en from "../apps/bms/messages/en-US.json"
 export const t = en // assert against the real en-US strings (locale defaults to en in dev)
 
 /** Types into the data-table search box so a single row is on screen regardless of
- *  pagination (the dev branch carries copied prod data, so lists span many pages). */
-export async function searchTable(page: Page, query: string) {
-  await page.getByPlaceholder(t.Common.dataTable.searchPlaceholder).fill(query)
+ *  pagination (the dev branch carries copied prod data, so lists span many pages).
+ *  Some tables filter a non-default column and pass their own placeholder. */
+export async function searchTable(page: Page, query: string, placeholder = t.Common.dataTable.searchPlaceholder) {
+  await page.getByPlaceholder(placeholder).fill(query)
 }
 
 /**

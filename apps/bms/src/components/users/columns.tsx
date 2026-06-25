@@ -58,7 +58,7 @@ function ActionsCell({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/users/${user.id}`}>{t('actions.edit')}</Link>
+            <Link href={`/system/users/${user.id}`}>{t('actions.edit')}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={isSelf}
@@ -118,7 +118,7 @@ export function getColumns(
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
       cell: ({ row }) => (
-        <Link href={`/users/${row.original.id}`} className="hover:underline">
+        <Link href={`/system/users/${row.original.id}`} className="hover:underline">
           {row.original.firstName} {row.original.lastName}
         </Link>
       ),

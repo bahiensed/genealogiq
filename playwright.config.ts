@@ -13,7 +13,10 @@ const STORAGE = "e2e/.auth/user.json"
 
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  // Serial: the authenticated CRUD specs share one dev server + the dev DB, so
+  // parallel workers contend and make dropdown→navigate steps flaky.
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
