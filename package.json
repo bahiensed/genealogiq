@@ -14,9 +14,15 @@
     "check:schema-parity": "node scripts/check-schema-parity.mjs",
     "check:i18n-parity": "node scripts/check-i18n-parity.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "seed:e2e": "tsx e2e/seed.ts"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.2",
     "turbo": "^2.9.18",
     "vitest": "^3.0.0"
   }
