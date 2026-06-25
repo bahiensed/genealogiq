@@ -15,6 +15,7 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.e2e.example
 
 # misc
 *.log
@@ -29,3 +30,7 @@ dist/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# E2E secrets / auth state
+.env.e2e
+e2e/.auth/

@@ -1,28 +1,51 @@
 # E2E (Playwright)
 
-Smoke harness for browser-level checks. Run:
+Browser-level tests for BMS. Two layers:
+
+- **public** (`*.smoke.spec.ts`) — unauthenticated, read-only.
+- **authenticated** (`*.crud.spec.ts`) — full create→edit→delete, signed in as a
+  seeded admin, run against the Neon **`development`** branch (never prod).
+
+## One-time setup
 
 ```bash
-pnpm playwright install --with-deps chromium   # one-time: download the browser
-pnpm test:e2e                                   # starts BMS dev (:3000) + runs e2e/*.spec.ts
+# 1. point e2e at the Neon dev branch (gitignored)
+cp .env.e2e.example .env.e2e
+#    edit .env.e2e: DATABASE_URL = the `development` branch connection string,
+#    AUTH_SECRET = the same secret your BMS app uses locally.
+
+# 2. install the browser
+pnpm playwright install --with-deps chromium
+
+# 3. seed the test admin into the dev branch (idempotent)
+pnpm seed:e2e
 ```
 
-`playwright.config.ts` boots a single app (BMS) via `webServer`. The dev server
-needs the app's `.env` (at least `DATABASE_URL`, `AUTH_SECRET`) to start.
+## Run
 
-## Scope today
+```bash
+pnpm test:e2e                       # boots BMS dev (:3000) against the dev branch + runs all specs
+pnpm test:e2e --project=public      # just the public smoke tests
+pnpm test:e2e e2e/packages.crud.spec.ts
+```
 
-Only **public, read-only** pages (sign-in render, locale-cookie i18n, not-found).
-We deliberately do **not** mutate data, because all three apps point at the
-**production Neon DB**.
+How isolation works: `playwright.config.ts` loads `.env.e2e` and forces its
+`DATABASE_URL` onto the BMS dev server via `webServer.env`. Next.js never
+overrides env already in the process, so the app talks to the **dev branch**.
 
-## To add authenticated / CRUD flows (follow-up)
+The `setup` project (`auth.setup.ts`) signs the seeded admin in once and writes
+`e2e/.auth/user.json`; the `authenticated` project replays it.
 
-1. Provision a **dedicated test database** (separate `DATABASE_URL`) and point the
-   `webServer` env at it.
-2. Add a **seed** (a test tenant + a known user with a fixed password) and a
-   Playwright `storageState` / global-setup that signs that user in once.
-3. Then add specs for the high-value journeys: create/edit a Customer, run a Sale,
-   the sign-up → verify-email flow, etc.
+## Adding a CRUD spec
 
-Until a test DB exists, keep new specs read-only.
+Copy `customer-categories.crud.spec.ts`. Reuse `helpers.ts`
+(`openRowMenu`, `confirmDelete`, and `t` = the real en-US message strings). Keep
+each spec **self-cleaning** (delete what it creates) so reruns stay green even
+though the dev branch persists between runs.
+
+## Notes / limits
+
+- The dev branch is a copy of prod data; specs use unique names + clean up, so
+  they never touch real-looking records destructively.
+- Test creds live only in `.env.e2e` + `e2e/test-user.ts` (the password is a
+  fixed local-only value); both the env file and `e2e/.auth/` are gitignored.
