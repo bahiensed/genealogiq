@@ -98,8 +98,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
     reset,
     formState: { errors },
   } = useForm<GeolocationFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: useMemo(() => zodResolver(getGeolocationSchema(tErr)) as any, [tErr]),
+    resolver: useMemo(() => zodResolver(getGeolocationSchema(tErr)), [tErr]),
     defaultValues: buildDefaults(existing),
   })
 

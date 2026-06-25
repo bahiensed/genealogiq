@@ -86,7 +86,7 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
   const router = useRouter()
 
   const form = useForm<SubscriptionFormValues>({
-    resolver: useMemo(() => zodResolver(getSubscriptionSchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getSubscriptionSchema(tErr)), [tErr]),
     defaultValues: defaultValues ?? subscriptionDefaultValues,
   })
 

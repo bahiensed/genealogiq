@@ -10,6 +10,7 @@ import {
   getCustomerSchema,
   customerDefaultValues,
   type CustomerFormValues,
+  type CustomerFormInput,
 } from '@/schemas/customer.schema'
 import { updateCustomer } from '@/actions/customer.actions'
 import { maskCpf, maskCnpj, maskPhone } from '@/lib/masks'
@@ -69,9 +70,8 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
   const [localCategories, setLocalCats] = useState(categories)
   const router = useRouter()
 
-  const form = useForm<CustomerFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:      useMemo(() => zodResolver(getCustomerSchema(tErr)) as any, [tErr]),
+  const form = useForm<CustomerFormInput, unknown, CustomerFormValues>({
+    resolver:      useMemo(() => zodResolver(getCustomerSchema(tErr)), [tErr]),
     defaultValues: defaultValues ?? customerDefaultValues,
   })
 

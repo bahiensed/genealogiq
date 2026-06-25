@@ -71,7 +71,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
     : { ...packageDefaultValues, ...(fixedType ? { type: fixedType } : {}) }
 
   const form = useForm<PackageFormValues>({
-    resolver: useMemo(() => zodResolver(getPackageSchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getPackageSchema(tErr)), [tErr]),
     defaultValues: resolvedDefaults,
   })
 

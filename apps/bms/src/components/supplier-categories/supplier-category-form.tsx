@@ -28,7 +28,7 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
   const router = useRouter()
 
   const form = useForm<SupplierCategoryFormValues>({
-    resolver: useMemo(() => zodResolver(getSupplierCategorySchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getSupplierCategorySchema(tErr)), [tErr]),
     defaultValues: defaultValues ?? supplierCategoryDefaultValues,
   })
 
