@@ -3,10 +3,10 @@ import en from "../apps/bms/messages/en-US.json"
 
 export const t = en // assert against the real en-US strings (locale defaults to en in dev)
 
-/** A short unique suffix so each run's rows don't collide. Avoids Date/Math.random
- *  flakiness by using the worker-scoped test info timestamp passed in. */
-export function uniqueName(prefix: string, stamp: number | string): string {
-  return `${prefix} ${stamp}`
+/** Types into the data-table search box so a single row is on screen regardless of
+ *  pagination (the dev branch carries copied prod data, so lists span many pages). */
+export async function searchTable(page: Page, query: string) {
+  await page.getByPlaceholder(t.Common.dataTable.searchPlaceholder).fill(query)
 }
 
 /**

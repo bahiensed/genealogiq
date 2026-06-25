@@ -16,5 +16,10 @@ setup("authenticate", async ({ page }) => {
   await page.waitForURL("**/dashboard", { timeout: 30_000 })
   await expect(page).toHaveURL(/\/dashboard/)
 
+  // Dismiss the cookie-consent banner so it never overlays clickable elements.
+  await page.context().addCookies([
+    { name: "cookie_consent", value: "accepted", url: "http://localhost:3000" },
+  ])
+
   await page.context().storageState({ path: authFile })
 })
