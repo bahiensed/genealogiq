@@ -45,7 +45,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: SupplierCat
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/supplier-categories/${category.id}`}>{t('actions.edit')}</Link>
+            <Link href={`/categories/suppliers/${category.id}`}>{t('actions.edit')}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
@@ -90,7 +90,7 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       accessorKey: 'name',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
       cell: ({ row }) => (
-        <Link href={`/supplier-categories/${row.original.id}`} className="hover:underline">
+        <Link href={`/categories/suppliers/${row.original.id}`} className="hover:underline">
           {row.original.name}
         </Link>
       ),
