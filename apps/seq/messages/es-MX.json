@@ -176,67 +176,63 @@
     }
   },
   "Company": {
-    "Company": {
-      "fields": {
-        "cnpj": "CNPJ:",
-        "countryCode": "Código de País:",
-        "email": "Correo electrónico:",
-        "isActive": "Empresa activa:",
-        "legalName": "Razón Social:",
-        "municipalRegistration": "Registro Municipal:",
-        "phone": "Teléfono:",
-        "stateRegistration": "Registro Estatal:",
-        "tradeName": "Nombre Comercial:"
-      },
-      "sections": {
-        "address": "Dirección"
-      },
-      "title": "Datos de la Empresa",
-      "toasts": {
-        "updated": "Datos actualizados correctamente."
-      }
+    "fields": {
+      "cnpj": "CNPJ:",
+      "countryCode": "Código de País:",
+      "email": "Correo electrónico:",
+      "isActive": "Empresa activa:",
+      "legalName": "Razón Social:",
+      "municipalRegistration": "Registro Municipal:",
+      "phone": "Teléfono:",
+      "stateRegistration": "Registro Estatal:",
+      "tradeName": "Nombre Comercial:"
+    },
+    "sections": {
+      "address": "Dirección"
+    },
+    "title": "Datos de la Empresa",
+    "toasts": {
+      "updated": "Datos actualizados correctamente."
     }
   },
   "CustomerCategories": {
-    "CustomerCategories": {
-      "actions": {
-        "deactivate": "Desactivar",
-        "delete": "Eliminar",
-        "edit": "Editar",
-        "openMenu": "Abrir menú",
-        "reactivate": "Reactivar"
-      },
-      "create": "Crear categoría",
-      "dialog": {
-        "addNew": "Agregar nueva categoría",
-        "title": "Nueva categoría de cliente"
-      },
-      "edit": "Editar categoría",
-      "fields": {
-        "description": "Descripción:",
-        "isActive": "Categoría activa:",
-        "name": "Nombre:"
-      },
-      "new": "Nueva categoría",
-      "status": {
-        "active": "Activa",
-        "inactive": "Inactiva"
-      },
-      "table": {
-        "createdAt": "Creada el",
-        "description": "Descripción",
-        "empty": "No se encontraron categorías de clientes.",
-        "name": "Nombre",
-        "status": "Estado"
-      },
-      "title": "Categorías de Clientes",
-      "toasts": {
-        "created": "Categoría creada correctamente.",
-        "deactivated": "Categoría desactivada.",
-        "deleteConfirm": "La categoría \"{name}\" se eliminará de forma permanente.",
-        "deleted": "Categoría eliminada correctamente.",
-        "reactivated": "Categoría reactivada."
-      }
+    "actions": {
+      "deactivate": "Desactivar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "openMenu": "Abrir menú",
+      "reactivate": "Reactivar"
+    },
+    "create": "Crear categoría",
+    "dialog": {
+      "addNew": "Agregar nueva categoría",
+      "title": "Nueva categoría de cliente"
+    },
+    "edit": "Editar categoría",
+    "fields": {
+      "description": "Descripción:",
+      "isActive": "Categoría activa:",
+      "name": "Nombre:"
+    },
+    "new": "Nueva categoría",
+    "status": {
+      "active": "Activa",
+      "inactive": "Inactiva"
+    },
+    "table": {
+      "createdAt": "Creada el",
+      "description": "Descripción",
+      "empty": "No se encontraron categorías de clientes.",
+      "name": "Nombre",
+      "status": "Estado"
+    },
+    "title": "Categorías de Clientes",
+    "toasts": {
+      "created": "Categoría creada correctamente.",
+      "deactivated": "Categoría desactivada.",
+      "deleteConfirm": "La categoría \"{name}\" se eliminará de forma permanente.",
+      "deleted": "Categoría eliminada correctamente.",
+      "reactivated": "Categoría reactivada."
     }
   },
   "Customers": {
@@ -601,180 +597,172 @@
     "title": "Página no encontrada"
   },
   "PhysicalQr": {
-    "PhysicalQr": {
-      "actions": {
-        "manualWriteOff": "Baja manual (fuera de la plataforma)",
-        "markNotPrinted": "Marcar como no impreso",
-        "markPrinted": "Marcar como impreso",
-        "sellViaPlatform": "Vender por la plataforma",
-        "undoSale": "Deshacer venta (volver a disponible)"
-      },
-      "detail": {
-        "backToInventory": "Volver al inventario",
-        "title": "Código QR Físico"
-      },
-      "fields": {
-        "buyerName": "Nombre / contacto del comprador",
-        "customer": "Cliente",
-        "saleValue": "Valor de la venta (opcional)"
-      },
-      "manualSale": {
-        "description": "Registra una venta realizada fuera de la plataforma para que este código no pueda venderse de nuevo.",
-        "submit": "Dar de baja",
-        "title": "Baja manual"
-      },
-      "placeholders": {
-        "buyerName": "¿Quién lo compró?",
-        "customerSearch": "Escribe nombre o correo…"
-      },
-      "platformSale": {
-        "description": "Asigna este código a un cliente registrado y envíale el acceso a la aplicación por correo. El código se da de baja.",
-        "removeCustomer": "Quitar cliente",
-        "submit": "Vender y enviar acceso",
-        "submitting": "Vendiendo…",
-        "title": "Vender por la plataforma"
-      },
-      "soldVia": {
-        "MANUAL": "Manual",
-        "PLATFORM": "Plataforma"
-      },
-      "status": {
-        "ACTIVATED": "Activado",
-        "AVAILABLE": "Disponible",
-        "SOLD": "Vendido"
-      },
-      "statusCard": {
-        "title": "Estado del código QR"
-      },
-      "timeline": {
-        "activated": "Activado",
-        "created": "Creado",
-        "memorial": "memorial: {name}",
-        "printed": "Impreso",
-        "sold": "Vendido",
-        "soldBy": "por {name}",
-        "soldFor": "por {value}",
-        "soldTo": "a {name}"
-      },
-      "toasts": {
-        "markedNotPrinted": "Marcado como no impreso.",
-        "markedPrinted": "Marcado como impreso."
-      },
-      "undo": {
-        "confirm": "Esto marcará el código como disponible nuevamente. Solo es posible mientras no haya sido activado por el consumidor."
-      }
+    "actions": {
+      "manualWriteOff": "Baja manual (fuera de la plataforma)",
+      "markNotPrinted": "Marcar como no impreso",
+      "markPrinted": "Marcar como impreso",
+      "sellViaPlatform": "Vender por la plataforma",
+      "undoSale": "Deshacer venta (volver a disponible)"
+    },
+    "detail": {
+      "backToInventory": "Volver al inventario",
+      "title": "Código QR Físico"
+    },
+    "fields": {
+      "buyerName": "Nombre / contacto del comprador",
+      "customer": "Cliente",
+      "saleValue": "Valor de la venta (opcional)"
+    },
+    "manualSale": {
+      "description": "Registra una venta realizada fuera de la plataforma para que este código no pueda venderse de nuevo.",
+      "submit": "Dar de baja",
+      "title": "Baja manual"
+    },
+    "placeholders": {
+      "buyerName": "¿Quién lo compró?",
+      "customerSearch": "Escribe nombre o correo…"
+    },
+    "platformSale": {
+      "description": "Asigna este código a un cliente registrado y envíale el acceso a la aplicación por correo. El código se da de baja.",
+      "removeCustomer": "Quitar cliente",
+      "submit": "Vender y enviar acceso",
+      "submitting": "Vendiendo…",
+      "title": "Vender por la plataforma"
+    },
+    "soldVia": {
+      "MANUAL": "Manual",
+      "PLATFORM": "Plataforma"
+    },
+    "status": {
+      "ACTIVATED": "Activado",
+      "AVAILABLE": "Disponible",
+      "SOLD": "Vendido"
+    },
+    "statusCard": {
+      "title": "Estado del código QR"
+    },
+    "timeline": {
+      "activated": "Activado",
+      "created": "Creado",
+      "memorial": "memorial: {name}",
+      "printed": "Impreso",
+      "sold": "Vendido",
+      "soldBy": "por {name}",
+      "soldFor": "por {value}",
+      "soldTo": "a {name}"
+    },
+    "toasts": {
+      "markedNotPrinted": "Marcado como no impreso.",
+      "markedPrinted": "Marcado como impreso."
+    },
+    "undo": {
+      "confirm": "Esto marcará el código como disponible nuevamente. Solo es posible mientras no haya sido activado por el consumidor."
     }
   },
   "Profile": {
-    "Profile": {
-      "actions": {
-        "save": "Guardar cambios"
+    "actions": {
+      "save": "Guardar cambios"
+    },
+    "avatar": {
+      "change": "Cambiar foto",
+      "invalidType": "Elige un archivo de imagen.",
+      "tooLarge": "La imagen debe pesar 5 MB o menos.",
+      "uploadFailed": "Error al subir"
+    },
+    "fields": {
+      "birthDate": "Fecha de nacimiento",
+      "countryCode": "Código de país",
+      "cpf": "CPF",
+      "email": "Correo electrónico",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "phone": "Teléfono"
+    },
+    "sections": {
+      "account": {
+        "description": "Gestiona el correo y la contraseña de acceso.",
+        "emailHint": "Para cambiar tu correo, usa el botón de abajo — se enviará un enlace de confirmación a la nueva dirección.",
+        "title": "Cuenta y seguridad"
       },
-      "avatar": {
-        "change": "Cambiar foto",
-        "invalidType": "Elige un archivo de imagen.",
-        "tooLarge": "La imagen debe pesar 5 MB o menos.",
-        "uploadFailed": "Error al subir"
+      "address": "Dirección",
+      "danger": {
+        "description": "Elimina permanentemente tu cuenta y todos los datos relacionados.",
+        "title": "Zona de peligro"
       },
-      "fields": {
-        "birthDate": "Fecha de nacimiento",
-        "countryCode": "Código de país",
-        "cpf": "CPF",
-        "email": "Correo electrónico",
-        "firstName": "Nombre",
-        "lastName": "Apellido",
-        "phone": "Teléfono"
-      },
-      "sections": {
-        "account": {
-          "description": "Gestiona el correo y la contraseña de acceso.",
-          "emailHint": "Para cambiar tu correo, usa el botón de abajo — se enviará un enlace de confirmación a la nueva dirección.",
-          "title": "Cuenta y seguridad"
-        },
-        "address": "Dirección",
-        "danger": {
-          "description": "Elimina permanentemente tu cuenta y todos los datos relacionados.",
-          "title": "Zona de peligro"
-        },
-        "personal": {
-          "description": "Actualiza tu nombre, documento y datos de contacto.",
-          "title": "Información personal"
-        }
-      },
-      "title": "Perfil"
-    }
+      "personal": {
+        "description": "Actualiza tu nombre, documento y datos de contacto.",
+        "title": "Información personal"
+      }
+    },
+    "title": "Perfil"
   },
   "Purchasing": {
-    "Purchasing": {
-      "card": {
-        "amount": "Cantidad:",
-        "buyDigital": "Empieza a Ganar Ahora",
-        "buyPhysical": "Comprar y empezar a revender",
-        "digitalDescription": "Paquete con {count} {count, plural, one {Código} other {Códigos}} QR",
-        "digitalHeadline": "Aumenta tus márgenes hasta un 500% con este paquete",
-        "digitalPriceUnit": "{count} {count, plural, one {Código} other {Códigos}} QR por paquete",
-        "digitalSubcopy": "Genera {amount}+ en ingresos",
-        "physicalDescription": "{count} {count, plural, one {código} other {códigos}} QR listos para imprimir",
-        "physicalHeadline": "Imprime bajo demanda y revende a tu propio precio",
-        "physicalPriceUnit": "{count} {count, plural, one {código} other {códigos}} QR listos para imprimir",
-        "physicalSubcopy": "Gana hasta {amount}+ revendiéndolos",
-        "priceForAsLittleAs": "Por tan solo",
-        "priceFrom": "Desde",
-        "processing": "Procesando…"
-      },
-      "digital": {
-        "title": "Comprar Códigos QR Digitales"
-      },
-      "empty": {
-        "digital": "No hay paquetes disponibles por el momento.",
-        "physical": "No hay códigos QR físicos disponibles por el momento."
-      },
-      "physical": {
-        "title": "Comprar Códigos QR Físicos"
-      },
-      "toasts": {
-        "canceled": "Compra cancelada.",
-        "success": "Compra completada — los códigos QR aparecerán en breve."
-      }
+    "card": {
+      "amount": "Cantidad:",
+      "buyDigital": "Empieza a Ganar Ahora",
+      "buyPhysical": "Comprar y empezar a revender",
+      "digitalDescription": "Paquete con {count} {count, plural, one {Código} other {Códigos}} QR",
+      "digitalHeadline": "Aumenta tus márgenes hasta un 500% con este paquete",
+      "digitalPriceUnit": "{count} {count, plural, one {Código} other {Códigos}} QR por paquete",
+      "digitalSubcopy": "Genera {amount}+ en ingresos",
+      "physicalDescription": "{count} {count, plural, one {código} other {códigos}} QR listos para imprimir",
+      "physicalHeadline": "Imprime bajo demanda y revende a tu propio precio",
+      "physicalPriceUnit": "{count} {count, plural, one {código} other {códigos}} QR listos para imprimir",
+      "physicalSubcopy": "Gana hasta {amount}+ revendiéndolos",
+      "priceForAsLittleAs": "Por tan solo",
+      "priceFrom": "Desde",
+      "processing": "Procesando…"
+    },
+    "digital": {
+      "title": "Comprar Códigos QR Digitales"
+    },
+    "empty": {
+      "digital": "No hay paquetes disponibles por el momento.",
+      "physical": "No hay códigos QR físicos disponibles por el momento."
+    },
+    "physical": {
+      "title": "Comprar Códigos QR Físicos"
+    },
+    "toasts": {
+      "canceled": "Compra cancelada.",
+      "success": "Compra completada — los códigos QR aparecerán en breve."
     }
   },
   "Sales": {
-    "Sales": {
-      "actions": {
-        "completeSale": "Completar venta",
-        "registering": "Registrando...",
-        "removeCustomer": "Eliminar cliente"
-      },
-      "buyQrCodes": "Comprar códigos QR",
-      "confirm": {
-        "confirm": "Confirmar",
-        "description": "La venta se registrará y se eliminará un código QR del inventario. ¿Confirmar?",
-        "title": "Confirmar venta"
-      },
-      "emptyInventory": "No hay códigos QR en inventario.",
-      "errors": {
-        "invalidAmount": "Ingresa un monto válido.",
-        "selectCustomer": "Selecciona un cliente.",
-        "selectSubscription": "Selecciona una suscripción."
-      },
-      "fields": {
-        "bonusSubscription": "Suscripción de bonificación:",
-        "customer": "Cliente:",
-        "totalAmount": "Monto total:"
-      },
-      "hints": {
-        "belowSuggested": "Por debajo de lo sugerido {amount} (2× el costo del último paquete) — ¿vendiendo con pérdida?",
-        "bonusSubscription": "La suscripción de la aplicación que el cliente recibirá gratis",
-        "customer": "¿A quién le estás vendiendo?",
-        "suggested": "Sugerido: {amount} (2× el costo del último paquete)",
-        "totalAmount": "El precio total cobrado por los códigos QR."
-      },
-      "placeholders": {
-        "customerSearch": "Escribe el nombre o correo electrónico...",
-        "subscription": "Selecciona una suscripción..."
-      },
-      "title": "Ventas"
-    }
+    "actions": {
+      "completeSale": "Completar venta",
+      "registering": "Registrando...",
+      "removeCustomer": "Eliminar cliente"
+    },
+    "buyQrCodes": "Comprar códigos QR",
+    "confirm": {
+      "confirm": "Confirmar",
+      "description": "La venta se registrará y se eliminará un código QR del inventario. ¿Confirmar?",
+      "title": "Confirmar venta"
+    },
+    "emptyInventory": "No hay códigos QR en inventario.",
+    "errors": {
+      "invalidAmount": "Ingresa un monto válido.",
+      "selectCustomer": "Selecciona un cliente.",
+      "selectSubscription": "Selecciona una suscripción."
+    },
+    "fields": {
+      "bonusSubscription": "Suscripción de bonificación:",
+      "customer": "Cliente:",
+      "totalAmount": "Monto total:"
+    },
+    "hints": {
+      "belowSuggested": "Por debajo de lo sugerido {amount} (2× el costo del último paquete) — ¿vendiendo con pérdida?",
+      "bonusSubscription": "La suscripción de la aplicación que el cliente recibirá gratis",
+      "customer": "¿A quién le estás vendiendo?",
+      "suggested": "Sugerido: {amount} (2× el costo del último paquete)",
+      "totalAmount": "El precio total cobrado por los códigos QR."
+    },
+    "placeholders": {
+      "customerSearch": "Escribe el nombre o correo electrónico...",
+      "subscription": "Selecciona una suscripción..."
+    },
+    "title": "Ventas"
   },
   "SupplierCategories": {
     "actions": {
@@ -873,63 +861,61 @@
     }
   },
   "Users": {
-    "Users": {
-      "actions": {
-        "deactivate": "Desactivar",
-        "delete": "Eliminar",
-        "edit": "Editar",
-        "openMenu": "Abrir menú",
-        "reactivate": "Reactivar",
-        "resendEmail": "Reenviar correo"
-      },
-      "create": "Nuevo usuario",
-      "edit": "Editar usuario",
-      "fields": {
-        "birthDate": "Fecha de Nacimiento:",
-        "countryCode": "Código de País:",
-        "cpf": "CPF:",
-        "email": "Correo electrónico:",
-        "firstName": "Nombre:",
-        "isActive": "Usuario activo:",
-        "lastName": "Apellido:",
-        "phone": "Teléfono:",
-        "role": "Rol:"
-      },
-      "new": "Nuevo empleado",
-      "placeholders": {
-        "role": "Selecciona un rol"
-      },
-      "roles": {
-        "ADMIN": "Administrador",
-        "COMERCIAL": "Comercial",
-        "FINANCE": "Finanzas",
-        "OWNER": "Propietario",
-        "SUPER_ADMIN": "Súper Admin",
-        "USER": "Usuario"
-      },
-      "sections": {
-        "address": "Dirección"
-      },
-      "status": {
-        "active": "Activo",
-        "inactive": "Inactivo"
-      },
-      "table": {
-        "createdAt": "Creado el",
-        "email": "Correo electrónico",
-        "empty": "No se encontraron usuarios.",
-        "name": "Nombre",
-        "role": "Rol",
-        "status": "Estado"
-      },
-      "title": "Empleados",
-      "toasts": {
-        "deactivated": "Usuario desactivado.",
-        "deleteConfirm": "El usuario \"{name}\" será eliminado permanentemente.",
-        "deleted": "Usuario eliminado con éxito.",
-        "emailResent": "Correo reenviado con éxito.",
-        "reactivated": "Usuario reactivado."
-      }
+    "actions": {
+      "deactivate": "Desactivar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "openMenu": "Abrir menú",
+      "reactivate": "Reactivar",
+      "resendEmail": "Reenviar correo"
+    },
+    "create": "Nuevo usuario",
+    "edit": "Editar usuario",
+    "fields": {
+      "birthDate": "Fecha de Nacimiento:",
+      "countryCode": "Código de País:",
+      "cpf": "CPF:",
+      "email": "Correo electrónico:",
+      "firstName": "Nombre:",
+      "isActive": "Usuario activo:",
+      "lastName": "Apellido:",
+      "phone": "Teléfono:",
+      "role": "Rol:"
+    },
+    "new": "Nuevo empleado",
+    "placeholders": {
+      "role": "Selecciona un rol"
+    },
+    "roles": {
+      "ADMIN": "Administrador",
+      "COMERCIAL": "Comercial",
+      "FINANCE": "Finanzas",
+      "OWNER": "Propietario",
+      "SUPER_ADMIN": "Súper Admin",
+      "USER": "Usuario"
+    },
+    "sections": {
+      "address": "Dirección"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "table": {
+      "createdAt": "Creado el",
+      "email": "Correo electrónico",
+      "empty": "No se encontraron usuarios.",
+      "name": "Nombre",
+      "role": "Rol",
+      "status": "Estado"
+    },
+    "title": "Empleados",
+    "toasts": {
+      "deactivated": "Usuario desactivado.",
+      "deleteConfirm": "El usuario \"{name}\" será eliminado permanentemente.",
+      "deleted": "Usuario eliminado con éxito.",
+      "emailResent": "Correo reenviado con éxito.",
+      "reactivated": "Usuario reactivado."
     }
   }
 }

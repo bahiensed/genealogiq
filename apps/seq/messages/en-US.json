@@ -176,67 +176,63 @@
     }
   },
   "Company": {
-    "Company": {
-      "fields": {
-        "cnpj": "CNPJ:",
-        "countryCode": "Country Code:",
-        "email": "E-mail:",
-        "isActive": "Active company:",
-        "legalName": "Company Name:",
-        "municipalRegistration": "Municipal Registration:",
-        "phone": "Phone:",
-        "stateRegistration": "State Registration:",
-        "tradeName": "Trade Name:"
-      },
-      "sections": {
-        "address": "Address"
-      },
-      "title": "Company Data",
-      "toasts": {
-        "updated": "Data updated successfully."
-      }
+    "fields": {
+      "cnpj": "CNPJ:",
+      "countryCode": "Country Code:",
+      "email": "E-mail:",
+      "isActive": "Active company:",
+      "legalName": "Company Name:",
+      "municipalRegistration": "Municipal Registration:",
+      "phone": "Phone:",
+      "stateRegistration": "State Registration:",
+      "tradeName": "Trade Name:"
+    },
+    "sections": {
+      "address": "Address"
+    },
+    "title": "Company Data",
+    "toasts": {
+      "updated": "Data updated successfully."
     }
   },
   "CustomerCategories": {
-    "CustomerCategories": {
-      "actions": {
-        "deactivate": "Deactivate",
-        "delete": "Delete",
-        "edit": "Edit",
-        "openMenu": "Open menu",
-        "reactivate": "Reactivate"
-      },
-      "create": "Create category",
-      "dialog": {
-        "addNew": "Add new category",
-        "title": "New customer category"
-      },
-      "edit": "Edit category",
-      "fields": {
-        "description": "Description:",
-        "isActive": "Active category:",
-        "name": "Name:"
-      },
-      "new": "New category",
-      "status": {
-        "active": "Active",
-        "inactive": "Inactive"
-      },
-      "table": {
-        "createdAt": "Created at",
-        "description": "Description",
-        "empty": "No customer categories found.",
-        "name": "Name",
-        "status": "Status"
-      },
-      "title": "Customer Categories",
-      "toasts": {
-        "created": "Category created successfully.",
-        "deactivated": "Category deactivated.",
-        "deleteConfirm": "The category \"{name}\" will be permanently deleted.",
-        "deleted": "Category deleted successfully.",
-        "reactivated": "Category reactivated."
-      }
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate"
+    },
+    "create": "Create category",
+    "dialog": {
+      "addNew": "Add new category",
+      "title": "New customer category"
+    },
+    "edit": "Edit category",
+    "fields": {
+      "description": "Description:",
+      "isActive": "Active category:",
+      "name": "Name:"
+    },
+    "new": "New category",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "createdAt": "Created at",
+      "description": "Description",
+      "empty": "No customer categories found.",
+      "name": "Name",
+      "status": "Status"
+    },
+    "title": "Customer Categories",
+    "toasts": {
+      "created": "Category created successfully.",
+      "deactivated": "Category deactivated.",
+      "deleteConfirm": "The category \"{name}\" will be permanently deleted.",
+      "deleted": "Category deleted successfully.",
+      "reactivated": "Category reactivated."
     }
   },
   "Customers": {
@@ -601,180 +597,172 @@
     "title": "Page not found"
   },
   "PhysicalQr": {
-    "PhysicalQr": {
-      "actions": {
-        "manualWriteOff": "Manual write-off (off-platform)",
-        "markNotPrinted": "Mark as not printed",
-        "markPrinted": "Mark as printed",
-        "sellViaPlatform": "Sell via platform",
-        "undoSale": "Undo sale (back to available)"
-      },
-      "detail": {
-        "backToInventory": "Back to inventory",
-        "title": "Physical QR Code"
-      },
-      "fields": {
-        "buyerName": "Buyer name / contact",
-        "customer": "Customer",
-        "saleValue": "Sale value (optional)"
-      },
-      "manualSale": {
-        "description": "Record a sale made outside the platform so this code can't be sold again.",
-        "submit": "Write off",
-        "title": "Manual write-off"
-      },
-      "placeholders": {
-        "buyerName": "Who bought it?",
-        "customerSearch": "Type name or email…"
-      },
-      "platformSale": {
-        "description": "Assign this code to a registered customer and email them access to the app. The code is written off.",
-        "removeCustomer": "Remove customer",
-        "submit": "Sell & send access",
-        "submitting": "Selling…",
-        "title": "Sell via platform"
-      },
-      "soldVia": {
-        "MANUAL": "Manual",
-        "PLATFORM": "Platform"
-      },
-      "status": {
-        "ACTIVATED": "Activated",
-        "AVAILABLE": "Available",
-        "SOLD": "Sold"
-      },
-      "statusCard": {
-        "title": "QR Code Status"
-      },
-      "timeline": {
-        "activated": "Activated",
-        "created": "Created",
-        "memorial": "memorial: {name}",
-        "printed": "Printed",
-        "sold": "Sold",
-        "soldBy": "by {name}",
-        "soldFor": "for {value}",
-        "soldTo": "to {name}"
-      },
-      "toasts": {
-        "markedNotPrinted": "Marked as not printed.",
-        "markedPrinted": "Marked as printed."
-      },
-      "undo": {
-        "confirm": "This will mark the code as available again. Only possible while it has not been activated by the consumer."
-      }
+    "actions": {
+      "manualWriteOff": "Manual write-off (off-platform)",
+      "markNotPrinted": "Mark as not printed",
+      "markPrinted": "Mark as printed",
+      "sellViaPlatform": "Sell via platform",
+      "undoSale": "Undo sale (back to available)"
+    },
+    "detail": {
+      "backToInventory": "Back to inventory",
+      "title": "Physical QR Code"
+    },
+    "fields": {
+      "buyerName": "Buyer name / contact",
+      "customer": "Customer",
+      "saleValue": "Sale value (optional)"
+    },
+    "manualSale": {
+      "description": "Record a sale made outside the platform so this code can't be sold again.",
+      "submit": "Write off",
+      "title": "Manual write-off"
+    },
+    "placeholders": {
+      "buyerName": "Who bought it?",
+      "customerSearch": "Type name or email…"
+    },
+    "platformSale": {
+      "description": "Assign this code to a registered customer and email them access to the app. The code is written off.",
+      "removeCustomer": "Remove customer",
+      "submit": "Sell & send access",
+      "submitting": "Selling…",
+      "title": "Sell via platform"
+    },
+    "soldVia": {
+      "MANUAL": "Manual",
+      "PLATFORM": "Platform"
+    },
+    "status": {
+      "ACTIVATED": "Activated",
+      "AVAILABLE": "Available",
+      "SOLD": "Sold"
+    },
+    "statusCard": {
+      "title": "QR Code Status"
+    },
+    "timeline": {
+      "activated": "Activated",
+      "created": "Created",
+      "memorial": "memorial: {name}",
+      "printed": "Printed",
+      "sold": "Sold",
+      "soldBy": "by {name}",
+      "soldFor": "for {value}",
+      "soldTo": "to {name}"
+    },
+    "toasts": {
+      "markedNotPrinted": "Marked as not printed.",
+      "markedPrinted": "Marked as printed."
+    },
+    "undo": {
+      "confirm": "This will mark the code as available again. Only possible while it has not been activated by the consumer."
     }
   },
   "Profile": {
-    "Profile": {
-      "actions": {
-        "save": "Save changes"
+    "actions": {
+      "save": "Save changes"
+    },
+    "avatar": {
+      "change": "Change avatar",
+      "invalidType": "Please choose an image file.",
+      "tooLarge": "Image must be 5 MB or smaller.",
+      "uploadFailed": "Upload failed"
+    },
+    "fields": {
+      "birthDate": "Date of birth",
+      "countryCode": "Country code",
+      "cpf": "CPF",
+      "email": "Email",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Phone"
+    },
+    "sections": {
+      "account": {
+        "description": "Manage your sign-in email and password.",
+        "emailHint": "To change your email, use the button below — a confirmation link is sent to the new address.",
+        "title": "Account & security"
       },
-      "avatar": {
-        "change": "Change avatar",
-        "invalidType": "Please choose an image file.",
-        "tooLarge": "Image must be 5 MB or smaller.",
-        "uploadFailed": "Upload failed"
+      "address": "Address",
+      "danger": {
+        "description": "Permanently delete your account and all related data.",
+        "title": "Danger zone"
       },
-      "fields": {
-        "birthDate": "Date of birth",
-        "countryCode": "Country code",
-        "cpf": "CPF",
-        "email": "Email",
-        "firstName": "First name",
-        "lastName": "Last name",
-        "phone": "Phone"
-      },
-      "sections": {
-        "account": {
-          "description": "Manage your sign-in email and password.",
-          "emailHint": "To change your email, use the button below — a confirmation link is sent to the new address.",
-          "title": "Account & security"
-        },
-        "address": "Address",
-        "danger": {
-          "description": "Permanently delete your account and all related data.",
-          "title": "Danger zone"
-        },
-        "personal": {
-          "description": "Update your name, document, and contact details.",
-          "title": "Personal information"
-        }
-      },
-      "title": "Profile"
-    }
+      "personal": {
+        "description": "Update your name, document, and contact details.",
+        "title": "Personal information"
+      }
+    },
+    "title": "Profile"
   },
   "Purchasing": {
-    "Purchasing": {
-      "card": {
-        "amount": "Amount:",
-        "buyDigital": "Start Earning Now",
-        "buyPhysical": "Buy & start reselling",
-        "digitalDescription": "Package with {count} QR {count, plural, one {Code} other {Codes}}",
-        "digitalHeadline": "Boost your margins by up to 500% with this bundle",
-        "digitalPriceUnit": "{count} QR {count, plural, one {Code} other {Codes}} per package",
-        "digitalSubcopy": "Generate {amount}+ in revenue",
-        "physicalDescription": "{count} QR {count, plural, one {code} other {codes}} ready to print",
-        "physicalHeadline": "Print on demand and resell at your own price",
-        "physicalPriceUnit": "{count} print-ready QR {count, plural, one {code} other {codes}}",
-        "physicalSubcopy": "Earn up to {amount}+ reselling them",
-        "priceForAsLittleAs": "For as little as",
-        "priceFrom": "From",
-        "processing": "Processing…"
-      },
-      "digital": {
-        "title": "Buy Digital QR Codes"
-      },
-      "empty": {
-        "digital": "No packages available at the moment.",
-        "physical": "No physical QR codes available at the moment."
-      },
-      "physical": {
-        "title": "Buy Physical QR Codes"
-      },
-      "toasts": {
-        "canceled": "Purchase canceled.",
-        "success": "Purchase complete — QR codes will appear shortly."
-      }
+    "card": {
+      "amount": "Amount:",
+      "buyDigital": "Start Earning Now",
+      "buyPhysical": "Buy & start reselling",
+      "digitalDescription": "Package with {count} QR {count, plural, one {Code} other {Codes}}",
+      "digitalHeadline": "Boost your margins by up to 500% with this bundle",
+      "digitalPriceUnit": "{count} QR {count, plural, one {Code} other {Codes}} per package",
+      "digitalSubcopy": "Generate {amount}+ in revenue",
+      "physicalDescription": "{count} QR {count, plural, one {code} other {codes}} ready to print",
+      "physicalHeadline": "Print on demand and resell at your own price",
+      "physicalPriceUnit": "{count} print-ready QR {count, plural, one {code} other {codes}}",
+      "physicalSubcopy": "Earn up to {amount}+ reselling them",
+      "priceForAsLittleAs": "For as little as",
+      "priceFrom": "From",
+      "processing": "Processing…"
+    },
+    "digital": {
+      "title": "Buy Digital QR Codes"
+    },
+    "empty": {
+      "digital": "No packages available at the moment.",
+      "physical": "No physical QR codes available at the moment."
+    },
+    "physical": {
+      "title": "Buy Physical QR Codes"
+    },
+    "toasts": {
+      "canceled": "Purchase canceled.",
+      "success": "Purchase complete — QR codes will appear shortly."
     }
   },
   "Sales": {
-    "Sales": {
-      "actions": {
-        "completeSale": "Complete Sale",
-        "registering": "Registering...",
-        "removeCustomer": "Remove customer"
-      },
-      "buyQrCodes": "Buy QR codes",
-      "confirm": {
-        "confirm": "Confirm",
-        "description": "The sale will be registered and a QR code will be removed from inventory. Confirm?",
-        "title": "Confirm sale"
-      },
-      "emptyInventory": "No QR codes in inventory.",
-      "errors": {
-        "invalidAmount": "Enter a valid amount.",
-        "selectCustomer": "Select a customer.",
-        "selectSubscription": "Select a subscription."
-      },
-      "fields": {
-        "bonusSubscription": "Bonus subscription:",
-        "customer": "Customer:",
-        "totalAmount": "Total Amount:"
-      },
-      "hints": {
-        "belowSuggested": "Below suggested {amount} (2× last package cost) — selling at a loss?",
-        "bonusSubscription": "The app subscription the customer will receive for free",
-        "customer": "Who are you selling to?",
-        "suggested": "Suggested: {amount} (2× last package cost)",
-        "totalAmount": "The total price charged for the QR Codes."
-      },
-      "placeholders": {
-        "customerSearch": "Type name or email...",
-        "subscription": "Select a subscription..."
-      },
-      "title": "Sales"
-    }
+    "actions": {
+      "completeSale": "Complete Sale",
+      "registering": "Registering...",
+      "removeCustomer": "Remove customer"
+    },
+    "buyQrCodes": "Buy QR codes",
+    "confirm": {
+      "confirm": "Confirm",
+      "description": "The sale will be registered and a QR code will be removed from inventory. Confirm?",
+      "title": "Confirm sale"
+    },
+    "emptyInventory": "No QR codes in inventory.",
+    "errors": {
+      "invalidAmount": "Enter a valid amount.",
+      "selectCustomer": "Select a customer.",
+      "selectSubscription": "Select a subscription."
+    },
+    "fields": {
+      "bonusSubscription": "Bonus subscription:",
+      "customer": "Customer:",
+      "totalAmount": "Total Amount:"
+    },
+    "hints": {
+      "belowSuggested": "Below suggested {amount} (2× last package cost) — selling at a loss?",
+      "bonusSubscription": "The app subscription the customer will receive for free",
+      "customer": "Who are you selling to?",
+      "suggested": "Suggested: {amount} (2× last package cost)",
+      "totalAmount": "The total price charged for the QR Codes."
+    },
+    "placeholders": {
+      "customerSearch": "Type name or email...",
+      "subscription": "Select a subscription..."
+    },
+    "title": "Sales"
   },
   "SupplierCategories": {
     "actions": {
@@ -873,63 +861,61 @@
     }
   },
   "Users": {
-    "Users": {
-      "actions": {
-        "deactivate": "Deactivate",
-        "delete": "Delete",
-        "edit": "Edit",
-        "openMenu": "Open menu",
-        "reactivate": "Reactivate",
-        "resendEmail": "Resend email"
-      },
-      "create": "New user",
-      "edit": "Edit user",
-      "fields": {
-        "birthDate": "Date of Birth:",
-        "countryCode": "Country Code:",
-        "cpf": "CPF:",
-        "email": "E-mail:",
-        "firstName": "First Name:",
-        "isActive": "Active user:",
-        "lastName": "Last Name:",
-        "phone": "Phone:",
-        "role": "Role:"
-      },
-      "new": "New employee",
-      "placeholders": {
-        "role": "Select a role"
-      },
-      "roles": {
-        "ADMIN": "Admin",
-        "COMERCIAL": "Comercial",
-        "FINANCE": "Finance",
-        "OWNER": "Owner",
-        "SUPER_ADMIN": "Super Admin",
-        "USER": "User"
-      },
-      "sections": {
-        "address": "Address"
-      },
-      "status": {
-        "active": "Active",
-        "inactive": "Inactive"
-      },
-      "table": {
-        "createdAt": "Created at",
-        "email": "E-mail",
-        "empty": "No users found.",
-        "name": "Name",
-        "role": "Role",
-        "status": "Status"
-      },
-      "title": "Employees",
-      "toasts": {
-        "deactivated": "User deactivated.",
-        "deleteConfirm": "The user \"{name}\" will be permanently deleted.",
-        "deleted": "User deleted successfully.",
-        "emailResent": "Email resent successfully.",
-        "reactivated": "User reactivated."
-      }
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate",
+      "resendEmail": "Resend email"
+    },
+    "create": "New user",
+    "edit": "Edit user",
+    "fields": {
+      "birthDate": "Date of Birth:",
+      "countryCode": "Country Code:",
+      "cpf": "CPF:",
+      "email": "E-mail:",
+      "firstName": "First Name:",
+      "isActive": "Active user:",
+      "lastName": "Last Name:",
+      "phone": "Phone:",
+      "role": "Role:"
+    },
+    "new": "New employee",
+    "placeholders": {
+      "role": "Select a role"
+    },
+    "roles": {
+      "ADMIN": "Admin",
+      "COMERCIAL": "Comercial",
+      "FINANCE": "Finance",
+      "OWNER": "Owner",
+      "SUPER_ADMIN": "Super Admin",
+      "USER": "User"
+    },
+    "sections": {
+      "address": "Address"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "createdAt": "Created at",
+      "email": "E-mail",
+      "empty": "No users found.",
+      "name": "Name",
+      "role": "Role",
+      "status": "Status"
+    },
+    "title": "Employees",
+    "toasts": {
+      "deactivated": "User deactivated.",
+      "deleteConfirm": "The user \"{name}\" will be permanently deleted.",
+      "deleted": "User deleted successfully.",
+      "emailResent": "Email resent successfully.",
+      "reactivated": "User reactivated."
     }
   }
 }
