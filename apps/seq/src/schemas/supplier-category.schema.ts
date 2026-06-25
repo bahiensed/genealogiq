@@ -1,15 +1,15 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import type { Translator } from './i18n'
 
-export const supplierCategorySchema = z.object({
-  name:        z.string().min(8, 'Must be at least 8 characters').max(24, 'Must be at most 24 characters'),
-  description: z.string().min(12, 'Must be at least 12 characters').max(48, 'Must be at most 48 characters'),
-  isActive:    z.boolean(),
-})
+export function getSupplierCategorySchema(t: Translator) {
+  return z.object({
+    name:        z.string().min(8, t('minChars', { count: 8 })).max(24, t('maxChars', { count: 24 })),
+    description: z.string().min(12, t('minChars', { count: 12 })).max(48, t('maxChars', { count: 48 })),
+    isActive:    z.boolean(),
+  })
+}
 
-export type SupplierCategoryFormValues = z.infer<typeof supplierCategorySchema>
-
-export const supplierCategoryResolver = zodResolver(supplierCategorySchema)
+export type SupplierCategoryFormValues = z.infer<ReturnType<typeof getSupplierCategorySchema>>
 
 export const supplierCategoryDefaultValues: SupplierCategoryFormValues = {
   name:        '',

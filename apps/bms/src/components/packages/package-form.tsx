@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
-import { packageResolver, packageDefaultValues, type PackageFormValues } from '@/schemas/package.schema'
+import { getPackageSchema, packageDefaultValues, type PackageFormValues } from '@/schemas/package.schema'
 import { createPackage, updatePackage, syncPackageWithStripe } from '@/actions/package.actions'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
@@ -38,8 +39,9 @@ interface PackageFormProps {
 }
 
 export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId, fixedType, backHref = '/packages' }: PackageFormProps) {
-  const t  = useTranslations('Packages')
-  const tc = useTranslations('Common')
+  const t    = useTranslations('Packages')
+  const tc   = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const locale = useLocale()
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   const isEditing  = !!id
@@ -69,7 +71,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
     : { ...packageDefaultValues, ...(fixedType ? { type: fixedType } : {}) }
 
   const form = useForm<PackageFormValues>({
-    resolver: packageResolver,
+    resolver: useMemo(() => zodResolver(getPackageSchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: resolvedDefaults,
   })
 

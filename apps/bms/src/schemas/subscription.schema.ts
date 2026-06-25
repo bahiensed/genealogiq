@@ -1,37 +1,37 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import type { Translator } from './i18n'
 
-export const subscriptionSchema = z.object({
-  code:        z.string()
-    .min(2, 'Must be at least 2 characters')
-    .max(32, 'Must be at most 32 characters')
-    .regex(/^[A-Z0-9_]+$/, 'Use uppercase letters, numbers and underscores only'),
-  name:        z.string()
-    .min(4, 'Must be at least 4 characters')
-    .max(64, 'Must be at most 64 characters'),
-  description: z.string().max(256, 'Must be at most 256 characters').optional(),
-  isActive:    z.boolean(),
+export function getSubscriptionSchema(t: Translator) {
+  return z.object({
+    code:        z.string()
+      .min(2, t('minChars', { count: 2 }))
+      .max(32, t('maxChars', { count: 32 }))
+      .regex(/^[A-Z0-9_]+$/, t('codeFormat')),
+    name:        z.string()
+      .min(4, t('minChars', { count: 4 }))
+      .max(64, t('maxChars', { count: 64 })),
+    description: z.string().max(256, t('maxChars', { count: 256 })).optional(),
+    isActive:    z.boolean(),
 
-  // Commercial
-  maxProfiles: z.number().int('Must be a whole number').positive('Must be greater than zero'),
-  termLength:  z.number().int('Must be a whole number').min(0, 'Must be 0 (lifetime) or a positive number of months'),
-  price:       z.number().min(0, 'Must be 0 (free) or greater'),
+    // Commercial
+    maxProfiles: z.number().int(t('mustBeWholeNumber')).positive(t('mustBePositive')),
+    termLength:  z.number().int(t('mustBeWholeNumber')).min(0, t('termLengthMin')),
+    price:       z.number().min(0, t('priceMin')),
 
-  // Feature limits
-  treeMaxMembers:   z.number().int('Must be a whole number').min(0, 'Must be 0 or greater'),
-  bioMaxChars:      z.number().int('Must be a whole number').min(0, 'Must be 0 or greater'),
-  bioMaxImages:     z.number().int('Must be a whole number').min(0, 'Must be 0 or greater'),
-  galleryMaxImages: z.number().int('Must be a whole number').min(0, 'Must be 0 or greater'),
-  galleryMaxVideos: z.number().int('Must be a whole number').min(0, 'Must be 0 or greater'),
+    // Feature limits
+    treeMaxMembers:   z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
+    bioMaxChars:      z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
+    bioMaxImages:     z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
+    galleryMaxImages: z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
+    galleryMaxVideos: z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
 
-  // Feature flags
-  geolocationFullAccess: z.boolean(),
-  qrCodeAccess:          z.boolean(),
-})
+    // Feature flags
+    geolocationFullAccess: z.boolean(),
+    qrCodeAccess:          z.boolean(),
+  })
+}
 
-export type SubscriptionFormValues = z.infer<typeof subscriptionSchema>
-
-export const subscriptionResolver = zodResolver(subscriptionSchema)
+export type SubscriptionFormValues = z.infer<ReturnType<typeof getSubscriptionSchema>>
 
 export const subscriptionDefaultValues: SubscriptionFormValues = {
   code:        '',

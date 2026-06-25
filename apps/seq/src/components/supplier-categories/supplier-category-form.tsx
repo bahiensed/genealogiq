@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { supplierCategoryResolver, supplierCategoryDefaultValues, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
+import { getSupplierCategorySchema, supplierCategoryDefaultValues, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
 import { createSupplierCategory, updateSupplierCategory } from '@/actions/supplier-category.actions'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
@@ -19,14 +20,15 @@ interface SupplierCategoryFormProps {
 }
 
 export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryFormProps) {
-  const t  = useTranslations('SupplierCategories')
-  const tc = useTranslations('Common')
+  const t    = useTranslations('SupplierCategories')
+  const tc   = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<SupplierCategoryFormValues>({
-    resolver: supplierCategoryResolver,
+    resolver: useMemo(() => zodResolver(getSupplierCategorySchema(tErr)) as any, [tErr]), // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: defaultValues ?? supplierCategoryDefaultValues,
   })
 

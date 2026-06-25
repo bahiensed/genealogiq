@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { CheckIcon } from 'lucide-react'
 import {
-  customerCreateResolver,
+  getCustomerCreateSchema,
   customerCreateDefaultValues,
   type CustomerCreateFormValues,
 } from '@/schemas/customer.schema'
@@ -70,8 +71,9 @@ const PURCHASING_MODULES = [
 ] as const
 
 export function CustomerNewForm({ categories = [] }: Props) {
-  const t  = useTranslations('Customers')
-  const tc = useTranslations('Common')
+  const t   = useTranslations('Customers')
+  const tc  = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [step, setStep]                 = useState<StepIndex>(0)
   const [localCategories, setLocalCats] = useState(categories)
   const [serverError, setServerError]   = useState<string | null>(null)
@@ -81,7 +83,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
 
   const form = useForm<CustomerCreateFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:         customerCreateResolver as any,
+    resolver:         useMemo(() => zodResolver(getCustomerCreateSchema(tErr)) as any, [tErr]),
     defaultValues:    customerCreateDefaultValues,
     mode:             'onBlur',
     reValidateMode:   'onChange',

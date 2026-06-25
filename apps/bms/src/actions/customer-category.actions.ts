@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/dal'
-import { customerCategorySchema, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
+import { getCustomerCategorySchema, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
@@ -13,7 +14,7 @@ type CreateSuccess = { success: string; category: { id: string; name: string } }
 export async function createCustomerCategory(data: CustomerCategoryFormValues): Promise<ActionError | CreateSuccess> {
   await verifyAdmin()
 
-  const validated = customerCategorySchema.safeParse(data)
+  const validated = getCustomerCategorySchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   let created: { id: string; name: string }
@@ -33,7 +34,7 @@ export async function createCustomerCategory(data: CustomerCategoryFormValues): 
 export async function updateCustomerCategory(id: string, data: CustomerCategoryFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = customerCategorySchema.safeParse(data)
+  const validated = getCustomerCategorySchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   try {

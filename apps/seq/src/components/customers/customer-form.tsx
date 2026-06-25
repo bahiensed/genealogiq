@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { appUserResolver, appUserDefaultValues, type AppUserFormValues } from '@/schemas/app-user.schema'
+import { getAppUserSchema, appUserDefaultValues, type AppUserFormValues } from '@/schemas/app-user.schema'
 import { GenderSelect } from '@/components/ui/gender-select'
 import { CountrySelect } from '@/components/ui/country-select'
 import { updateCustomer } from '@/actions/customer.actions'
@@ -57,11 +58,13 @@ function socialLabel(key: SocialKey, otherLabel: string): string {
 export function CustomerForm({ id, name, defaultValues, categories = [] }: CustomerFormProps) {
   const t  = useTranslations('Customers')
   const tc = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [serverError,     setServerError]     = useState<string | null>(null)
   const [localCategories, setLocalCategories] = useState<Category[]>(categories)
 
   const form = useForm<AppUserFormValues>({
-    resolver: appUserResolver,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getAppUserSchema(tErr)) as any, [tErr]),
     defaultValues: defaultValues ?? appUserDefaultValues,
   })
 

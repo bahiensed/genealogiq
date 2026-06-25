@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { userResolver, userDefaultValues, ASSIGNABLE_ROLES, type UserFormValues } from '@/schemas/user.schema'
+import { getUserSchema, userDefaultValues, ASSIGNABLE_ROLES, type UserFormValues } from '@/schemas/user.schema'
 import { createUser, updateUser } from '@/actions/user.actions'
 import { maskCpf, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
@@ -37,12 +38,13 @@ interface UserFormProps {
 export function UserForm({ id, defaultValues }: UserFormProps) {
   const t  = useTranslations('Users')
   const tc = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<UserFormValues>({
-    resolver: userResolver,
+    resolver: useMemo(() => zodResolver(getUserSchema(tErr)) as any, [tErr]), // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: defaultValues ?? userDefaultValues,
   })
 

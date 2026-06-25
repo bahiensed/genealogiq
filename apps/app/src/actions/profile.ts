@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
-import { profileEditSchema } from "@/schemas/profile"
+import { getProfileEditSchema } from "@/schemas/profile"
+import { identityTranslator } from "@/schemas/i18n"
 import { deleteBlobs } from "@/lib/blob"
 
 export async function updateProfile(data: unknown) {
   const session = await verifySession()
 
-  const parsed = profileEditSchema.safeParse(data)
+  const parsed = getProfileEditSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const {

@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import {
-  customerResolver,
+  getCustomerSchema,
   customerDefaultValues,
   type CustomerFormValues,
 } from '@/schemas/customer.schema'
@@ -61,15 +62,16 @@ const PURCHASING_MODULES = [
 ] as const
 
 export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFormProps) {
-  const t  = useTranslations('Customers')
-  const tc = useTranslations('Common')
+  const t   = useTranslations('Customers')
+  const tc  = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [serverError, setServerError]   = useState<string | null>(null)
   const [localCategories, setLocalCats] = useState(categories)
   const router = useRouter()
 
   const form = useForm<CustomerFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:      customerResolver as any,
+    resolver:      useMemo(() => zodResolver(getCustomerSchema(tErr)) as any, [tErr]),
     defaultValues: defaultValues ?? customerDefaultValues,
   })
 

@@ -1,23 +1,23 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { addressSchema, addressDefaultValues } from './address.schema'
+import type { Translator } from './i18n'
 
-export const companySchema = z.object({
-  legalName:              z.string().min(2, 'Must be at least 2 characters'),
-  tradeName:              z.string().min(2, 'Must be at least 2 characters'),
-  taxId:                  z.string().min(1, 'CNPJ is required'),
-  stateRegistration:      z.string().nullish(),
-  municipalRegistration:  z.string().nullish(),
-  email:                  z.string().email('Invalid email'),
-  phoneCountryCode:       z.string().min(1, 'Country code is required'),
-  phone:                  z.string().min(1, 'Phone is required'),
-  isActive:               z.boolean(),
-  address:                addressSchema.optional(),
-})
+export function getCompanySchema(t: Translator) {
+  return z.object({
+    legalName:              z.string().min(2, t('minChars', { count: 2 })),
+    tradeName:              z.string().min(2, t('minChars', { count: 2 })),
+    taxId:                  z.string().min(1, t('required')),
+    stateRegistration:      z.string().nullish(),
+    municipalRegistration:  z.string().nullish(),
+    email:                  z.string().email(t('invalidEmail')),
+    phoneCountryCode:       z.string().min(1, t('countryCodeRequired')),
+    phone:                  z.string().min(1, t('required')),
+    isActive:               z.boolean(),
+    address:                addressSchema.optional(),
+  })
+}
 
-export type CompanyFormValues = z.infer<typeof companySchema>
-
-export const companyResolver = zodResolver(companySchema)
+export type CompanyFormValues = z.infer<ReturnType<typeof getCompanySchema>>
 
 export const companyDefaultValues: CompanyFormValues = {
   legalName:             '',

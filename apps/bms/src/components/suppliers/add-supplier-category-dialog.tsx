@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { createSupplierCategory } from '@/actions/supplier-category.actions'
-import { supplierCategoryResolver, supplierCategoryDefaultValues, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
+import { getSupplierCategorySchema, supplierCategoryDefaultValues, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
@@ -24,11 +25,12 @@ interface AddSupplierCategoryDialogProps {
 export function AddSupplierCategoryDialog({ onCreated }: AddSupplierCategoryDialogProps) {
   const t  = useTranslations('Suppliers')
   const tc = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [open, setOpen] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<SupplierCategoryFormValues>({
-    resolver: supplierCategoryResolver,
+    resolver: useMemo(() => zodResolver(getSupplierCategorySchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: supplierCategoryDefaultValues,
   })
 

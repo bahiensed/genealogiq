@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect, useTransition } from "react"
+import { useRef, useState, useEffect, useTransition, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useForm, useWatch } from "react-hook-form"
@@ -28,7 +28,7 @@ import { AddressSection } from "@/components/address/address-section"
 import { GeolocationGate } from "@/components/geolocation-gate"
 import { saveGeolocation, deleteGeolocation } from "@/actions/geolocation"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
-import { geolocationSchema, type GeolocationFormValues } from "@/schemas/geolocation"
+import { getGeolocationSchema, type GeolocationFormValues } from "@/schemas/geolocation"
 import type { GeolocationRow } from "@/queries/geolocation"
 
 const MAX_NOTES = 500
@@ -80,6 +80,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
   const router = useRouter()
   const t = useTranslations("Geolocation")
   const tc = useTranslations("Common")
+  const tErr = useTranslations("Errors")
   const [isPending, startTransition] = useTransition()
   const isEditing = !!existing
   const fileRef = useRef<HTMLInputElement>(null)
@@ -97,7 +98,8 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
     reset,
     formState: { errors },
   } = useForm<GeolocationFormValues>({
-    resolver: zodResolver(geolocationSchema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getGeolocationSchema(tErr)) as any, [tErr]),
     defaultValues: buildDefaults(existing),
   })
 

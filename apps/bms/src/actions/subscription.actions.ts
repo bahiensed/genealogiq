@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/dal'
-import { subscriptionSchema, type SubscriptionFormValues } from '@/schemas/subscription.schema'
+import { getSubscriptionSchema, type SubscriptionFormValues } from '@/schemas/subscription.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError   = { error: string }
 type ActionSuccess = { success: string }
@@ -12,7 +13,7 @@ type ActionSuccess = { success: string }
 export async function createSubscription(data: SubscriptionFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = subscriptionSchema.safeParse(data)
+  const validated = getSubscriptionSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { price, ...rest } = validated.data
@@ -25,7 +26,7 @@ export async function createSubscription(data: SubscriptionFormValues): Promise<
 export async function updateSubscription(id: string, data: SubscriptionFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = subscriptionSchema.safeParse(data)
+  const validated = getSubscriptionSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { price, ...rest } = validated.data

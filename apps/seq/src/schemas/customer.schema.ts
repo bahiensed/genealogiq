@@ -1,29 +1,29 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import type { Translator } from './i18n'
 import { addressSchema, addressDefaultValues } from './address.schema'
 
 export const ENTITY_TYPES = ['INDIVIDUAL', 'COMPANY'] as const
 
-export const customerSchema = z.object({
-  entityType:            z.enum(ENTITY_TYPES),
-  name:                  z.string().min(2, 'Must be at least 2 characters'),
-  tradeName:             z.string().min(2, 'Must be at least 2 characters'),
-  taxId:                 z.string().min(1, 'Required'),
-  stateRegistration:     z.string().nullish(),
-  municipalRegistration: z.string().nullish(),
-  birthDate:             z.string().nullish(),
-  email:                 z.string().email('Invalid email address'),
-  phoneCountryCode:      z.string().min(1, 'Country code is required'),
-  phone:                 z.string().min(1, 'Required'),
-  notes:                 z.string().nullish(),
-  categoryId:            z.string().min(1, 'Category is required'),
-  isActive:              z.boolean(),
-  address:               addressSchema.optional(),
-})
+export function getCustomerSchema(t: Translator) {
+  return z.object({
+    entityType:            z.enum(ENTITY_TYPES),
+    name:                  z.string().min(2, t('minChars', { count: 2 })),
+    tradeName:             z.string().min(2, t('minChars', { count: 2 })),
+    taxId:                 z.string().min(1, t('required')),
+    stateRegistration:     z.string().nullish(),
+    municipalRegistration: z.string().nullish(),
+    birthDate:             z.string().nullish(),
+    email:                 z.string().email(t('invalidEmail')),
+    phoneCountryCode:      z.string().min(1, t('countryCodeRequired')),
+    phone:                 z.string().min(1, t('required')),
+    notes:                 z.string().nullish(),
+    categoryId:            z.string().min(1, t('categoryRequired')),
+    isActive:              z.boolean(),
+    address:               addressSchema.optional(),
+  })
+}
 
-export type CustomerFormValues = z.infer<typeof customerSchema>
-
-export const customerResolver = zodResolver(customerSchema)
+export type CustomerFormValues = z.infer<ReturnType<typeof getCustomerSchema>>
 
 export const customerDefaultValues: CustomerFormValues = {
   entityType:            'COMPANY',

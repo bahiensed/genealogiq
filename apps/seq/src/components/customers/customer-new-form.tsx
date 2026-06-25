@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { CheckIcon } from 'lucide-react'
 import {
-  appUserResolver,
+  getAppUserSchema,
   appUserDefaultValues,
   type AppUserFormValues,
 } from '@/schemas/app-user.schema'
@@ -59,6 +60,7 @@ const STEP_FIELDS: Record<StepIndex, (keyof AppUserFormValues)[]> = {
 export function CustomerNewForm({ categories = [] }: Props) {
   const t  = useTranslations('Customers')
   const tc = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [step, setStep]               = useState<StepIndex>(0)
   const [localCats, setLocalCats]     = useState(categories)
   const [serverError, setServerError] = useState<string | null>(null)
@@ -70,7 +72,8 @@ export function CustomerNewForm({ categories = [] }: Props) {
   }))
 
   const form = useForm<AppUserFormValues>({
-    resolver:       appUserResolver,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver:       useMemo(() => zodResolver(getAppUserSchema(tErr)) as any, [tErr]),
     defaultValues:  appUserDefaultValues,
     mode:           'onBlur',
     reValidateMode: 'onChange',

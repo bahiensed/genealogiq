@@ -1,22 +1,22 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import type { Translator } from './i18n'
 
-export const packageSchema = z.object({
-  name:        z.string()
-    .min(4, 'Must be at least 4 characters')
-    .max(32, 'Must be at most 32 characters'),
-  quantity:    z.number().int('Must be a whole number').positive('Must be greater than zero'),
-  description: z.string()
-    .min(12, 'Must be at least 12 characters')
-    .max(256, 'Must be at most 256 characters'),
-  price:       z.number().positive('Must be greater than zero'),
-  isActive:    z.boolean(),
-  type:        z.enum(['DIGITAL', 'PHYSICAL']),
-})
+export function getPackageSchema(t: Translator) {
+  return z.object({
+    name:        z.string()
+      .min(4, t('minChars', { count: 4 }))
+      .max(32, t('maxChars', { count: 32 })),
+    quantity:    z.number().int(t('wholeNumber')).positive(t('greaterThanZero')),
+    description: z.string()
+      .min(12, t('minChars', { count: 12 }))
+      .max(256, t('maxChars', { count: 256 })),
+    price:       z.number().positive(t('greaterThanZero')),
+    isActive:    z.boolean(),
+    type:        z.enum(['DIGITAL', 'PHYSICAL']),
+  })
+}
 
-export type PackageFormValues = z.infer<typeof packageSchema>
-
-export const packageResolver = zodResolver(packageSchema)
+export type PackageFormValues = z.infer<ReturnType<typeof getPackageSchema>>
 
 export const packageDefaultValues: PackageFormValues = {
   name:        '',

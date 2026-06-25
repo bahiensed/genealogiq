@@ -8,11 +8,12 @@ import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
 import { countTreeMembers, getTreeMemberIds } from "@/queries/family-tree"
 import {
-  addRelationSchema,
-  addGhostRelativeSchema,
-  updateMemberSchema,
-  updateRelationSchema,
+  getAddRelationSchema,
+  getAddGhostRelativeSchema,
+  getUpdateMemberSchema,
+  getUpdateRelationSchema,
 } from "@/schemas/family-tree"
+import { identityTranslator } from "@/schemas/i18n"
 import { notify } from "@/lib/notifications"
 
 type RelationType = "PARENT_OF" | "SPOUSE" | "SIBLING"
@@ -34,7 +35,7 @@ export async function addRelation(rootId: string, data: unknown) {
   const profile = await getProfileById(rootId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
 
-  const parsed = addRelationSchema.safeParse(data)
+  const parsed = getAddRelationSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const { fromId, toId, type, subtype, startDate, endDate, linkSpouseId } = parsed.data
@@ -132,7 +133,7 @@ export async function addGhostRelative(rootId: string, data: unknown) {
   const profile = await getProfileById(rootId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
 
-  const parsed = addGhostRelativeSchema.safeParse(data)
+  const parsed = getAddGhostRelativeSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const {
@@ -291,7 +292,7 @@ export async function updateMember(rootId: string, memberId: string, data: unkno
     if (!target || !canManageProfile(target, session.user.id)) return { error: "Not authorized." }
   }
 
-  const parsed = updateMemberSchema.safeParse(data)
+  const parsed = getUpdateMemberSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const d = parsed.data
@@ -321,7 +322,7 @@ export async function updateRelation(rootId: string, relationId: string, data: u
   const profile = await getProfileById(rootId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
 
-  const parsed = updateRelationSchema.safeParse(data)
+  const parsed = getUpdateRelationSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   // The relation must belong to rootId's tree (both endpoints reachable from
