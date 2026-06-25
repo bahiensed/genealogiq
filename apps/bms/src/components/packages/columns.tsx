@@ -12,6 +12,10 @@ import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
 import { togglePackageActive, deletePackage } from '@/actions/package.actions'
 
+// Loose translator type so getColumns can stay a plain function (not a hook).
+// The caller (packages-data-table) passes useTranslations('Packages').
+type Translator = (key: string, values?: Record<string, string | number | Date>) => string
+
 export type PackageRow = {
   id: string
   name: string
@@ -23,7 +27,7 @@ export type PackageRow = {
   createdAt: Date
 }
 
-function ActionsCell({ row, currentUserRole, basePath }: { row: { original: PackageRow }; currentUserRole: string; basePath: string }) {
+function ActionsCell({ row, currentUserRole, basePath, t }: { row: { original: PackageRow }; currentUserRole: string; basePath: string; t: Translator }) {
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const pkg = row.original
@@ -34,28 +38,28 @@ function ActionsCell({ row, currentUserRole, basePath }: { row: { original: Pack
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" disabled={isPending}>
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('actions.openMenu')}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`${basePath}/${pkg.id}`}>Edit</Link>
+            <Link href={`${basePath}/${pkg.id}`}>{t('actions.edit')}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await togglePackageActive(pkg.id)
               if (result?.error) toast.error(result.error)
-              else toast.success(pkg.isActive ? 'Package deactivated.' : 'Package reactivated.')
+              else toast.success(pkg.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
-            {pkg.isActive ? 'Deactivate' : 'Reactivate'}
+            {pkg.isActive ? t('actions.deactivate') : t('actions.reactivate')}
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onSelect={() => setDeleteOpen(true)}
             >
-              Delete
+              {t('actions.delete')}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -66,11 +70,11 @@ function ActionsCell({ row, currentUserRole, basePath }: { row: { original: Pack
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           isPending={isPending}
-          description={`The package "${pkg.name}" will be permanently deleted.`}
+          description={t('toasts.deleteConfirm', { name: pkg.name })}
           onConfirm={() => startTransition(async () => {
             const result = await deletePackage(pkg.id)
             if (result?.error) toast.error(result.error)
-            else { toast.success('Package deleted successfully.'); setDeleteOpen(false) }
+            else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
           })}
         />
       )}
@@ -78,14 +82,13 @@ function ActionsCell({ row, currentUserRole, basePath }: { row: { original: Pack
   )
 }
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-
-export function getColumns(currentUserRole: string, basePath = '/packages', noun: 'package' | 'product' = 'package'): ColumnDef<PackageRow>[] {
-  const Noun = noun === 'product' ? 'Product' : 'Package'
+export function getColumns(currentUserRole: string, t: Translator, locale: string, basePath = '/packages', noun: 'package' | 'product' = 'package'): ColumnDef<PackageRow>[] {
+  const Noun = noun === 'product' ? t('noun.product') : t('noun.package')
+  const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   return [
     {
       accessorKey: 'name',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>{Noun}<br/>Name</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name', { noun: Noun })} />,
       cell: ({ row }) => (
         <Link href={`${basePath}/${row.original.id}`} className="hover:underline">
           {row.original.name}
@@ -94,39 +97,39 @@ export function getColumns(currentUserRole: string, basePath = '/packages', noun
     },
     {
       accessorKey: 'quantity',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>QR-Codes /<br/>Package</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.quantity')} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.quantity}</div>,
     },
     {
       accessorKey: 'price',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>{Noun}<br/>Price</>} className="justify-end" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.price', { noun: Noun })} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{usd.format(row.original.price)}</div>,
     },
     {
       accessorKey: 'description',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<>{Noun} Description</>} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.description', { noun: Noun })} />,
       cell: ({ row }) => row.original.description ?? '—',
     },
     {
       accessorKey: 'isActive',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.status')} />,
       cell: ({ row }) =>
         row.original.isActive ? (
-          <Badge variant="default">Active</Badge>
+          <Badge variant="default">{t('status.active')}</Badge>
         ) : (
-          <Badge variant="destructive">Inactive</Badge>
+          <Badge variant="destructive">{t('status.inactive')}</Badge>
         ),
     },
     {
       accessorKey: 'createdAt',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.createdAt')} />,
       cell: ({ row }) =>
-        new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
+        new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(row.original.createdAt),
     },
     {
       id: 'actions',
       enableHiding: false,
-      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} basePath={basePath} />,
+      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} basePath={basePath} t={t} />,
     },
   ]
 }

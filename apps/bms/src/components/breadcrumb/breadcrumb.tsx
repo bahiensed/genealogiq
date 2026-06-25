@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import * as Sentry from '@sentry/nextjs'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -44,7 +45,11 @@ function useResolvedNames(segments: string[]) {
             setNames((prev) => ({ ...prev, [id]: data.name }))
           }
         })
-        .catch(() => {})
+        .catch((error) => {
+          // Non-critical: the breadcrumb falls back to the formatted segment.
+          // Surface it as a warning instead of swallowing it silently.
+          Sentry.captureException(error, { level: 'warning' })
+        })
     })
   }, [segments.join('/')])
 

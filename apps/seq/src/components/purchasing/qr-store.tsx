@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
 import { ShoppingCart } from 'lucide-react'
 import { createPackageCheckoutSession } from '@/actions/checkout.actions'
@@ -25,17 +26,15 @@ export interface QRPackage {
   quantity: number
 }
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-
 export type QRStoreVariant = 'digital' | 'physical'
 
 export function QRStore({ packages, variant = 'digital' }: { packages: QRPackage[]; variant?: QRStoreVariant }) {
+  const t = useTranslations('Purchasing')
+
   if (packages.length === 0) {
     return (
       <p className="text-muted-foreground">
-        {variant === 'physical'
-          ? 'No physical QR codes available at the moment.'
-          : 'No packages available at the moment.'}
+        {variant === 'physical' ? t('empty.physical') : t('empty.digital')}
       </p>
     )
   }
@@ -51,8 +50,12 @@ export function QRStore({ packages, variant = 'digital' }: { packages: QRPackage
 
 function PackageCard({ pkg, variant }: { pkg: QRPackage; variant: QRStoreVariant }) {
   const router = useRouter()
+  const t = useTranslations('Purchasing')
+  const locale = useLocale()
   const [qty, setQty] = useState(1)
   const [isPending, startTransition] = useTransition()
+
+  const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
 
   function handleBuy() {
     startTransition(async () => {
@@ -66,7 +69,6 @@ function PackageCard({ pkg, variant }: { pkg: QRPackage; variant: QRStoreVariant
   }
 
   const isPhysical    = variant === 'physical'
-  const codeWord      = pkg.quantity === 1 ? 'code' : 'codes'
   const revenueUpside = pkg.price * 5
 
   return (
@@ -75,8 +77,8 @@ function PackageCard({ pkg, variant }: { pkg: QRPackage; variant: QRStoreVariant
         <CardTitle>{pkg.name}</CardTitle>
         <CardDescription>
           {isPhysical
-            ? <>{pkg.quantity} QR {codeWord} ready to print</>
-            : <>Package with {pkg.quantity} QR {pkg.quantity === 1 ? 'Code' : 'Codes'}</>}
+            ? t('card.physicalDescription', { count: pkg.quantity })
+            : t('card.digitalDescription', { count: pkg.quantity })}
         </CardDescription>
       </CardHeader>
 
@@ -85,20 +87,16 @@ function PackageCard({ pkg, variant }: { pkg: QRPackage; variant: QRStoreVariant
         <div className="flex flex-col gap-0.5">
           {isPhysical ? (
             <>
-              <p className="text-sm font-medium">
-                Print on demand and resell at your own price
-              </p>
+              <p className="text-sm font-medium">{t('card.physicalHeadline')}</p>
               <p className="text-sm text-muted-foreground">
-                Earn up to {usd.format(revenueUpside)}+ reselling them
+                {t('card.physicalSubcopy', { amount: usd.format(revenueUpside) })}
               </p>
             </>
           ) : (
             <>
-              <p className="text-sm font-medium">
-                Boost your margins by up to 500% with this bundle
-              </p>
+              <p className="text-sm font-medium">{t('card.digitalHeadline')}</p>
               <p className="text-sm text-muted-foreground">
-                Generate {usd.format(revenueUpside)}+ in revenue
+                {t('card.digitalSubcopy', { amount: usd.format(revenueUpside) })}
               </p>
             </>
           )}
@@ -108,18 +106,20 @@ function PackageCard({ pkg, variant }: { pkg: QRPackage; variant: QRStoreVariant
 
         {/* Price */}
         <div>
-          <p className="text-xs text-muted-foreground">{isPhysical ? 'From' : 'For as little as'}</p>
+          <p className="text-xs text-muted-foreground">
+            {isPhysical ? t('card.priceFrom') : t('card.priceForAsLittleAs')}
+          </p>
           <p className="text-3xl font-bold">{usd.format(pkg.price)}</p>
           <p className="text-sm text-muted-foreground">
             {isPhysical
-              ? <>{pkg.quantity} print-ready QR {codeWord}</>
-              : <>{pkg.quantity} QR {pkg.quantity === 1 ? 'Code' : 'Codes'} per package</>}
+              ? t('card.physicalPriceUnit', { count: pkg.quantity })
+              : t('card.digitalPriceUnit', { count: pkg.quantity })}
           </p>
         </div>
 
         {/* Amount */}
         <div className="mt-auto flex items-center gap-2 pt-2">
-          <span className="text-sm font-medium whitespace-nowrap">Amount:</span>
+          <span className="text-sm font-medium whitespace-nowrap">{t('card.amount')}</span>
           <Input
             type="number"
             min={1}
@@ -133,7 +133,11 @@ function PackageCard({ pkg, variant }: { pkg: QRPackage; variant: QRStoreVariant
       <CardFooter className="border-t">
         <Button className="w-full" onClick={handleBuy} disabled={isPending}>
           <ShoppingCart className="mr-2 h-4 w-4" />
-          {isPending ? 'Processing…' : isPhysical ? 'Buy & start reselling' : 'Start Earning Now'}
+          {isPending
+            ? t('card.processing')
+            : isPhysical
+              ? t('card.buyPhysical')
+              : t('card.buyDigital')}
         </Button>
       </CardFooter>
     </Card>

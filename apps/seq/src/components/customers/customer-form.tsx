@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { appUserResolver, appUserDefaultValues, type AppUserFormValues } from '@/schemas/app-user.schema'
+import { getAppUserSchema, appUserDefaultValues, type AppUserFormValues } from '@/schemas/app-user.schema'
 import { GenderSelect } from '@/components/ui/gender-select'
 import { CountrySelect } from '@/components/ui/country-select'
 import { updateCustomer } from '@/actions/customer.actions'
@@ -46,19 +48,23 @@ interface CustomerFormProps {
 const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const
 type SocialKey = typeof SOCIAL_KEYS[number]
 
-function socialLabel(key: SocialKey): string {
+function socialLabel(key: SocialKey, otherLabel: string): string {
   if (key === 'fb') return 'Facebook'
   if (key === 'x') return 'X (Twitter)'
-  if (key === 'otherSocial') return 'Other'
+  if (key === 'otherSocial') return otherLabel
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
 export function CustomerForm({ id, name, defaultValues, categories = [] }: CustomerFormProps) {
+  const t  = useTranslations('Customers')
+  const tc = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [serverError,     setServerError]     = useState<string | null>(null)
   const [localCategories, setLocalCategories] = useState<Category[]>(categories)
 
   const form = useForm<AppUserFormValues>({
-    resolver: appUserResolver,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getAppUserSchema(tErr)) as any, [tErr]),
     defaultValues: defaultValues ?? appUserDefaultValues,
   })
 
@@ -96,7 +102,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
           render={({ field }) => (
             <div className="flex items-center gap-2">
               <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-              <label htmlFor="isActive" className="text-sm cursor-pointer">Active?</label>
+              <label htmlFor="isActive" className="text-sm cursor-pointer">{t('active')}</label>
             </div>
           )}
         />
@@ -106,7 +112,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
 
         {/* ── Personal data ── */}
         <AccordionItem value="personal" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Personal data</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.personal')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -115,7 +121,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>First Name:</FieldLabel>
+                      <FieldLabel>{t('fields.firstName')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -126,7 +132,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Last Name:</FieldLabel>
+                      <FieldLabel>{t('fields.lastName')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -140,7 +146,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Gender:</FieldLabel>
+                      <FieldLabel>{t('fields.gender')}</FieldLabel>
                       <GenderSelect value={field.value} onChange={(v) => field.onChange(v || null)} invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -151,7 +157,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Date of Birth:</FieldLabel>
+                      <FieldLabel>{t('fields.birthDate')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -165,7 +171,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   control={control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Birth city:</FieldLabel>
+                      <FieldLabel>{t('fields.birthCity')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -175,7 +181,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   control={control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Birth state:</FieldLabel>
+                      <FieldLabel>{t('fields.birthState')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -185,7 +191,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Birth country:</FieldLabel>
+                      <FieldLabel>{t('fields.birthCountry')}</FieldLabel>
                       <CountrySelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -198,7 +204,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
 
         {/* ── Contact ── */}
         <AccordionItem value="contact" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Contact</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.contact')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
               <Controller
@@ -206,7 +212,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                 control={control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>E-mail:</FieldLabel>
+                    <FieldLabel>{t('fields.email')}</FieldLabel>
                     <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -219,7 +225,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   control={control}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Country Code:</FieldLabel>
+                      <FieldLabel>{t('fields.countryCode')}</FieldLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -236,7 +242,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-2" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Phone:</FieldLabel>
+                      <FieldLabel>{t('fields.phone')}</FieldLabel>
                       <MaskedInput
                         value={field.value ?? ''}
                         onChange={field.onChange}
@@ -256,12 +262,12 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                 render={({ field }) => (
                   <Field>
                     <div className="flex items-center justify-between">
-                      <FieldLabel>Category:</FieldLabel>
+                      <FieldLabel>{t('fields.category')}</FieldLabel>
                       <AddCustomerCategoryDialog onCreated={handleCategoryCreated} />
                     </div>
                     <Select value={field.value ?? ''} onValueChange={(v) => field.onChange(v || null)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder={t('placeholders.category')} />
                       </SelectTrigger>
                       <SelectContent>
                         {localCategories.map((cat) => (
@@ -278,7 +284,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                 control={control}
                 render={({ field }) => (
                   <Field>
-                    <FieldLabel>Notes:</FieldLabel>
+                    <FieldLabel>{t('fields.notes')}</FieldLabel>
                     <Textarea {...field} value={field.value ?? ''} rows={3} />
                   </Field>
                 )}
@@ -289,7 +295,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
 
         {/* ── Address ── */}
         <AccordionItem value="address" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Address</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.address')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <AddressSection
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -303,7 +309,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
 
         {/* ── Social media ── */}
         <AccordionItem value="social" className="border rounded-lg px-4">
-          <AccordionTrigger className="text-base font-semibold">Social media</AccordionTrigger>
+          <AccordionTrigger className="text-base font-semibold">{t('sections.social')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -314,7 +320,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
                     control={control}
                     render={({ field }) => (
                       <Field>
-                        <FieldLabel>{socialLabel(key)}:</FieldLabel>
+                        <FieldLabel>{socialLabel(key, t('social.other'))}:</FieldLabel>
                         <Input {...field} value={field.value ?? ''} autoComplete="off" />
                       </Field>
                     )}
@@ -331,10 +337,10 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : 'Save changes'}
+          {isSubmitting ? tc('saving') : tc('save')}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>

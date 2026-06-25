@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
 import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
@@ -11,16 +12,17 @@ export default async function ForgotPasswordPage({ searchParams }: Props) {
   const { sent } = await searchParams
 
   if (sent === "true") {
+    const t = await getTranslations('Auth')
     return (
       <AuthCard
-        title="E-mail sent"
-        description="If this email is registered, you will receive a link shortly."
+        title={t('forgotSentTitle')}
+        description={t('forgotSentDescription')}
       >
         <p className="text-sm text-muted-foreground">
-          Check your inbox. The link expires in one hour.
+          {t('forgotSentBody')}
         </p>
         <Button asChild variant="outline" className="w-full">
-          <Link href="/sign-in">Back to sign in</Link>
+          <Link href="/sign-in">{t('backToSignIn')}</Link>
         </Button>
       </AuthCard>
     )

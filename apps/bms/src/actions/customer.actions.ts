@@ -8,11 +8,12 @@ import { hashToken } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 import { sendSequoiaWelcomeEmail } from '@/lib/email'
 import {
-  customerSchema,
-  customerCreateSchema,
+  getCustomerSchema,
+  getCustomerCreateSchema,
   type CustomerFormValues,
   type CustomerCreateFormValues,
 } from '@/schemas/customer.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
@@ -30,7 +31,7 @@ function buildAddressWrite(address: CustomerFormValues['address'], mode: 'create
 export async function createCustomer(data: CustomerCreateFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = customerCreateSchema.safeParse(data)
+  const validated = getCustomerCreateSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, owner, ...rest } = validated.data
@@ -90,7 +91,7 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
 export async function updateCustomer(id: string, data: CustomerFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = customerSchema.safeParse(data)
+  const validated = getCustomerSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data

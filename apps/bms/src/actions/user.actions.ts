@@ -7,7 +7,8 @@ import { prisma } from '@/lib/prisma'
 import { hashToken } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 import { sendWelcomeEmail } from '@/lib/email'
-import { userSchema, type UserFormValues } from '@/schemas/user.schema'
+import { getUserSchema, type UserFormValues } from '@/schemas/user.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
@@ -24,7 +25,7 @@ function buildAddressWrite(address: UserFormValues['address'], mode: 'create' | 
 export async function createUser(data: UserFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = userSchema.safeParse(data)
+  const validated = getUserSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, ...rest } = validated.data
@@ -64,7 +65,7 @@ export async function createUser(data: UserFormValues): Promise<ActionError | Ac
 export async function updateUser(id: string, data: UserFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = userSchema.safeParse(data)
+  const validated = getUserSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, ...rest } = validated.data

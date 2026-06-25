@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
 import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
 import { getProfileGradient } from "@/lib/avatar-color"
@@ -18,18 +18,20 @@ function shuffle<T>(arr: T[]): T[] {
   return copy
 }
 
-function toMiniProfile(m: MemorialRow, locale: string): MiniProfile {
+type Translate = (key: string, values?: Record<string, string>) => string
+
+function toMiniProfile(m: MemorialRow, locale: string, t: Translate): MiniProfile {
   return {
     id: m.id,
     name: `${m.firstName} ${m.lastName}`,
     subtitle: m.birthPlace
       ? `${m.birthPlace}${m.birthCountry ? `, ${getCountryName(m.birthCountry, locale)}` : ""}`
-      : "Memorialized profile",
+      : t("memorializedProfile"),
     status: "Memorialized",
     metric: m.deathDate
-      ? `✦ ${m.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
+      ? t("deathMetric", { date: m.deathDate.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" }) })
       : m.birthDate
-        ? `Born ${m.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
+        ? t("bornMetric", { date: m.birthDate.toLocaleDateString(locale, { year: "numeric", month: "short" }) })
         : "",
     initials: `${m.firstName[0]}${m.lastName[0]}`.toUpperCase(),
     gradient: getProfileGradient(m.id),
@@ -44,6 +46,7 @@ interface Props {
 
 export function HomeMemorials({ items }: Props) {
   const locale = useLocale()
+  const t = useTranslations("Home")
   const [order, setOrder] = useState(items)
 
   useEffect(() => {
@@ -56,7 +59,7 @@ export function HomeMemorials({ items }: Props) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {visible.map((m, i) => (
-        <ProfileMiniCard key={m.id} profile={toMiniProfile(m, locale)} delay={i * 40} />
+        <ProfileMiniCard key={m.id} profile={toMiniProfile(m, locale, t)} delay={i * 40} />
       ))}
     </div>
   )

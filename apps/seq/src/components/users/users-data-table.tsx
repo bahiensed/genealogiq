@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations, useLocale } from 'next-intl'
 import { DataTable } from '@genealogiq/ui/data-table'
 import { getColumns, type UserRow } from './columns'
 
@@ -8,22 +9,24 @@ interface UsersDataTableProps {
   data: UserRow[]
 }
 
-const COLUMN_LABELS: Record<string, string> = {
-  name:      'Name',
-  email:     'E-mail',
-  role:      'Role',
-  isActive:  'Status',
-  createdAt: 'Created at',
-}
-
 export function UsersDataTable({ currentUserId, data }: UsersDataTableProps) {
-  const columns = getColumns(currentUserId)
+  const t = useTranslations('Users')
+  const locale = useLocale()
+
+  const columnLabels: Record<string, string> = {
+    name:      t('table.name'),
+    email:     t('table.email'),
+    role:      t('table.role'),
+    isActive:  t('table.status'),
+    createdAt: t('table.createdAt'),
+  }
+
   return (
     <DataTable
-      columns={columns}
+      columns={getColumns(currentUserId, t, locale)}
       data={data}
-      emptyMessage="No users found."
-      columnLabels={COLUMN_LABELS}
+      emptyMessage={t('table.empty')}
+      columnLabels={columnLabels}
     />
   )
 }

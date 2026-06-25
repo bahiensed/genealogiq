@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 import { createCustomerCategory } from '@/actions/customer-category.actions'
-import { customerCategoryResolver, customerCategoryDefaultValues, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
+import { getCustomerCategorySchema, customerCategoryDefaultValues, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
@@ -21,11 +23,14 @@ interface AddCustomerCategoryDialogProps {
 }
 
 export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDialogProps) {
+  const t   = useTranslations('CustomerCategories')
+  const tc  = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [open, setOpen] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<CustomerCategoryFormValues>({
-    resolver: customerCategoryResolver,
+    resolver: useMemo(() => zodResolver(getCustomerCategorySchema(tErr)) as any, [tErr]), // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: customerCategoryDefaultValues,
   })
 
@@ -47,12 +52,12 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { reset(); setServerError(null) } }}>
       <DialogTrigger asChild>
         <button type="button" className="text-sm text-primary underline-offset-4 hover:underline">
-          Add new category
+          {t('dialog.addNew')}
         </button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New customer category</DialogTitle>
+          <DialogTitle>{t('dialog.title')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -62,7 +67,7 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Name:</FieldLabel>
+                  <FieldLabel>{t('fields.name')}</FieldLabel>
                   <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -73,7 +78,7 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Description:</FieldLabel>
+                  <FieldLabel>{t('fields.description')}</FieldLabel>
                   <Textarea {...field} rows={2} aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -85,10 +90,10 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
 
           <Field orientation="horizontal">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating…' : 'Create category'}
+              {isSubmitting ? tc('creating') : t('create')}
             </Button>
             <Button type="button" variant="outline" onClick={() => { setOpen(false); reset(); setServerError(null) }}>
-              Cancel
+              {tc('cancel')}
             </Button>
           </Field>
         </form>

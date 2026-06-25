@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { ManageSubscriptionButton } from "@/components/manage-subscription-button"
@@ -16,6 +17,7 @@ interface Props {
 
 export default async function SubscriptionsPage({ searchParams }: Props) {
   const session = await verifySession()
+  const t = await getTranslations("Subscriptions")
   const [{ status }, subscriptions, activePlan] = await Promise.all([
     searchParams,
     getActiveSubscriptions(),
@@ -31,17 +33,17 @@ export default async function SubscriptionsPage({ searchParams }: Props) {
       <main className="container relative pt-24 pb-32 max-w-6xl">
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
-            <BackButton href="/home" label="Back to home" />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Subscriptions</h1>
+            <BackButton href="/home" label={t("backToHome")} />
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
           </div>
           <section className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
             <div className="flex flex-col gap-1 min-w-0">
               <p className="text-muted-foreground italic">
-                The perfect way to stay in touch
+                {t("tagline")}
               </p>
               {activePlan && (
                 <p className="text-xs text-muted-foreground">
-                  Currently on {activePlan.subscription.name} until {longDate.format(activePlan.currentPeriodEnd)}
+                  {t("currentlyOn", { plan: activePlan.subscription.name, date: longDate.format(activePlan.currentPeriodEnd) })}
                 </p>
               )}
             </div>

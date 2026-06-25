@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
-import { memorialSchema } from "@/schemas/memorial"
+import { getMemorialSchema } from "@/schemas/memorial"
+import { identityTranslator } from "@/schemas/i18n"
 
 export async function activatePhysicalQr(genCode: string, data: unknown) {
   const session = await verifySession()
@@ -17,7 +18,7 @@ export async function activatePhysicalQr(genCode: string, data: unknown) {
   // sold/written-off (SOLD) — only an already-ACTIVATED code is rejected.
   if (license.status === "ACTIVATED") return { error: "This code has already been activated." }
 
-  const parsed = memorialSchema.safeParse(data)
+  const parsed = getMemorialSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const { firstName, lastName, gender, birthDate, birthPlace, birthCountry, deathDate, deathPlace, deathCountry, avatarUrl } = parsed.data

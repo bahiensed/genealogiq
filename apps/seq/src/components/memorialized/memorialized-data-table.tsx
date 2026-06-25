@@ -1,26 +1,30 @@
 'use client'
 
+import { useTranslations, useLocale } from 'next-intl'
 import { DataTable } from '@genealogiq/ui/data-table'
-import { memorializedColumns, type MemorializedRow } from './columns'
+import { getColumns, type MemorializedRow } from './columns'
 
 interface MemorializedDataTableProps {
   data: MemorializedRow[]
 }
 
-const COLUMN_LABELS: Record<string, string> = {
-  name:      'Name',
-  birthDate: 'Birth date',
-  deathDate: 'Death date',
-}
-
 export function MemorializedDataTable({ data }: MemorializedDataTableProps) {
+  const t = useTranslations('Memorialized')
+  const locale = useLocale()
+
+  const columnLabels: Record<string, string> = {
+    name:      t('table.name'),
+    birthDate: t('table.birthDate'),
+    deathDate: t('table.deathDate'),
+  }
+
   return (
     <DataTable
-      columns={memorializedColumns}
+      columns={getColumns(t, locale)}
       data={data}
-      filterPlaceholder="Filter by name…"
-      emptyMessage="No memorialized profiles found."
-      columnLabels={COLUMN_LABELS}
+      filterPlaceholder={t('table.filterPlaceholder')}
+      emptyMessage={t('table.empty')}
+      columnLabels={columnLabels}
     />
   )
 }

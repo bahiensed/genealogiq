@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from "next-intl"
 import { User, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatYear } from "@/lib/format-date"
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function PersonNode({ person, x, y, isRoot, isSessionUser, isSelected, onActivate }: Props) {
+  const t = useTranslations("FamilyTree")
   const isGhost = person.role === "APP_GHOST"
   const isMemorial = person.role === "APP_MEMO"
   const isPending = person.pending && !isRoot
@@ -34,7 +36,7 @@ export function PersonNode({ person, x, y, isRoot, isSessionUser, isSelected, on
   const yearLabel = deathYear ? `${birthYear || "—"} – ${deathYear}` : birthYear
 
   const displayName = person.maidenName
-    ? `${person.firstName} ${person.lastName} (née ${person.maidenName})`
+    ? t("nameWithMaiden", { name: `${person.firstName} ${person.lastName}`, maidenName: person.maidenName })
     : `${person.firstName} ${person.lastName}`
 
   return (
@@ -93,18 +95,18 @@ export function PersonNode({ person, x, y, isRoot, isSessionUser, isSelected, on
       {(isSessionUser || isMemorial || isPending) && (
         <div className="absolute bottom-1 right-1 flex items-center gap-1">
           {isPending && (
-            <span className="text-[8px] font-semibold uppercase tracking-wider px-1 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300" title="Awaiting confirmation">
-              Pending
+            <span className="text-[8px] font-semibold uppercase tracking-wider px-1 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300" title={t("node.awaitingConfirmation")}>
+              {t("node.pending")}
             </span>
           )}
           {isMemorial && (
-            <span className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-secondary text-foreground/70" title="Memorial">
+            <span className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-secondary text-foreground/70" title={t("node.memorial")}>
               <BookOpen className="h-2 w-2" />
             </span>
           )}
           {isSessionUser && (
             <span className="text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded-full bg-primary text-primary-foreground">
-              You
+              {t("node.you")}
             </span>
           )}
         </div>

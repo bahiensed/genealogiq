@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import { getLocale, getTranslations } from "next-intl/server"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { MemorializedClient } from "@/components/memorialized-client"
@@ -11,18 +12,25 @@ import { prisma } from "@/lib/prisma"
 import { UpgradeHint } from "@/components/upgrade-hint"
 import type { MemorialRow } from "@/queries/memorial"
 
-function toMiniProfile(m: MemorialRow): MiniProfile {
+interface MiniProfileContext {
+  locale: string
+  fallbackSubtitle: string
+  bornLabel: (date: string) => string
+}
+
+function toMiniProfile(m: MemorialRow, ctx: MiniProfileContext): MiniProfile {
   return {
     id: m.id,
     name: `${m.firstName} ${m.lastName}`,
     subtitle: m.birthPlace
       ? `${m.birthPlace}${m.birthCountry ? `, ${m.birthCountry}` : ""}`
-      : "Memorialized profile",
+      : ctx.fallbackSubtitle,
+    // status is a discriminator consumed by the shared ProfileMiniCard (not owned here); kept as the literal value
     status: "Memorialized",
     metric: m.deathDate
-      ? `✦ ${m.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
+      ? `✦ ${m.deathDate.toLocaleDateString(ctx.locale, { year: "numeric", month: "short", day: "numeric" })}`
       : m.birthDate
-        ? `Born ${m.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
+        ? ctx.bornLabel(m.birthDate.toLocaleDateString(ctx.locale, { year: "numeric", month: "short" }))
         : "",
     initials: `${m.firstName[0]}${m.lastName[0]}`.toUpperCase(),
     gradient: getProfileGradient(m.id),
@@ -38,6 +46,8 @@ interface Props {
 export default async function MemorializedPage({ params }: Props) {
   const { id } = await params
   const session = await verifySession()
+  const t = await getTranslations("Memorialized")
+  const locale = await getLocale()
 
   const [profile, memorials, sales] = await Promise.all([
     getProfileById(id),
@@ -67,6 +77,12 @@ export default async function MemorializedPage({ params }: Props) {
 
   const atLimit = isOwn && !canCreate
 
+  const miniProfileCtx: MiniProfileContext = {
+    locale,
+    fallbackSubtitle: t("card.fallbackSubtitle"),
+    bornLabel: (date) => t("card.born", { date }),
+  }
+
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="top" />
@@ -75,19 +91,19 @@ export default async function MemorializedPage({ params }: Props) {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
-              <BackButton href={`/profile/${id}`} label="Back to profile" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Guarded profiles</h1>
+              <BackButton href={`/profile/${id}`} label={t("listPage.backToProfile")} />
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("listPage.title")}</h1>
             </div>
             {memorials.length > 0 && (
               <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
-                {memorials.length} {memorials.length === 1 ? "profile" : "profiles"}
+                {t("listPage.profileCount", { count: memorials.length })}
               </span>
             )}
           </div>
         </div>
 
         <MemorializedClient
-          profiles={memorials.map(toMiniProfile)}
+          profiles={memorials.map((m) => toMiniProfile(m, miniProfileCtx))}
           isOwn={isOwn}
           canCreate={canCreate}
           newHref={`/profile/${id}/memorialized/new`}

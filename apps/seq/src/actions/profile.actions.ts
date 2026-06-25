@@ -3,7 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
-import { profileSchema, type ProfileFormValues } from '@/schemas/profile.schema'
+import { getProfileSchema, type ProfileFormValues } from '@/schemas/profile.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 // Self-profile edit: any logged-in user can update their OWN profile. Scope is
 // clamped to session.user.id, so role/email/isActive/tenantId stay untouched
@@ -23,7 +24,7 @@ function buildAddressWrite(address: ProfileFormValues['address']): any {
 export async function updateProfile(data: ProfileFormValues): Promise<ActionResult> {
   const session = await verifySession()
 
-  const validated = profileSchema.safeParse(data)
+  const validated = getProfileSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, ...rest } = validated.data

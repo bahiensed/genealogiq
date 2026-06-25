@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Search, X } from 'lucide-react'
 import { createAppSale } from '@/actions/sale.actions'
@@ -44,8 +45,6 @@ interface SalesFormProps {
   suggestedValue?: number | null
 }
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-
 function formatValueAsDigits(value: number): string {
   return String(Math.round(value * 100))
 }
@@ -58,6 +57,10 @@ interface FieldErrors {
 
 export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
   const router = useRouter()
+  const t      = useTranslations('Sales')
+  const tc     = useTranslations('Common')
+  const locale = useLocale()
+  const usd    = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
 
   const [query,          setQuery]          = useState('')
   const [results,        setResults]        = useState<AppUserResult[]>([])
@@ -119,12 +122,12 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
     e.preventDefault()
 
     const errors: FieldErrors = {}
-    if (!selected)        errors.appUser        = 'Select a customer.'
-    if (!subscriptionId)  errors.subscriptionId = 'Select a subscription.'
+    if (!selected)        errors.appUser        = t('errors.selectCustomer')
+    if (!subscriptionId)  errors.subscriptionId = t('errors.selectSubscription')
 
     const numValue = parseCurrencyDigits(value)
     if (!value || numValue <= 0) {
-      errors.value = 'Enter a valid amount.'
+      errors.value = t('errors.invalidAmount')
     }
 
     if (Object.keys(errors).length > 0) {
@@ -163,14 +166,14 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
       <FieldGroup>
         {/* Customer search */}
         <Field data-invalid={!!fieldErrors.appUser || undefined}>
-          <FieldLabel>Customer:</FieldLabel>
+          <FieldLabel>{t('fields.customer')}</FieldLabel>
           {selected ? (
             <div className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
               <span className="flex-1">
                 {selected.firstName} {selected.lastName}
                 <span className="ml-2 text-muted-foreground">{selected.email}</span>
               </span>
-              <button type="button" onClick={clearSelected} aria-label="Remove customer">
+              <button type="button" onClick={clearSelected} aria-label={t('actions.removeCustomer')}>
                 <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
             </div>
@@ -179,7 +182,7 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Type name or email..."
+                  placeholder={t('placeholders.customerSearch')}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className="pl-9"
@@ -204,16 +207,16 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
               )}
             </div>
           )}
-          <FieldDescription>Who are you selling to?</FieldDescription>
+          <FieldDescription>{t('hints.customer')}</FieldDescription>
           {fieldErrors.appUser && <FieldError>{fieldErrors.appUser}</FieldError>}
         </Field>
 
         {/* Subscription */}
         <Field data-invalid={!!fieldErrors.subscriptionId || undefined}>
-          <FieldLabel>Bonus subscription:</FieldLabel>
+          <FieldLabel>{t('fields.bonusSubscription')}</FieldLabel>
           <Select value={subscriptionId} onValueChange={(v) => { setSubscriptionId(v); setFieldErrors((prev) => ({ ...prev, subscriptionId: undefined })) }}>
             <SelectTrigger aria-invalid={!!fieldErrors.subscriptionId}>
-              <SelectValue placeholder="Select a subscription..." />
+              <SelectValue placeholder={t('placeholders.subscription')} />
             </SelectTrigger>
             <SelectContent>
               {subscriptions.map((sub) => (
@@ -223,13 +226,13 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
               ))}
             </SelectContent>
           </Select>
-          <FieldDescription>The app subscription the customer will receive for free</FieldDescription>
+          <FieldDescription>{t('hints.bonusSubscription')}</FieldDescription>
           {fieldErrors.subscriptionId && <FieldError>{fieldErrors.subscriptionId}</FieldError>}
         </Field>
 
         {/* Amount */}
         <Field data-invalid={!!fieldErrors.value || undefined}>
-          <FieldLabel>Total Amount:</FieldLabel>
+          <FieldLabel>{t('fields.totalAmount')}</FieldLabel>
           <MaskedInput
             maskFn={maskCurrency}
             value={value}
@@ -237,17 +240,17 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
             placeholder="0.00"
             aria-invalid={!!fieldErrors.value}
           />
-          <FieldDescription>The total price charged for the QR Codes.</FieldDescription>
+          <FieldDescription>{t('hints.totalAmount')}</FieldDescription>
           {suggestedValue != null && (
             isBelowSuggested
               ? (
                 <p className="text-xs font-medium text-amber-600">
-                  Below suggested {usd.format(suggestedValue)} (2× last package cost) — selling at a loss?
+                  {t('hints.belowSuggested', { amount: usd.format(suggestedValue) })}
                 </p>
               )
               : (
                 <p className="text-xs text-muted-foreground">
-                  Suggested: {usd.format(suggestedValue)} (2× last package cost)
+                  {t('hints.suggested', { amount: usd.format(suggestedValue) })}
                 </p>
               )
           )}
@@ -259,7 +262,7 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
 
       <div>
         <Button type="submit" disabled={isPending}>
-          {isPending ? 'Registering...' : 'Complete Sale'}
+          {isPending ? t('actions.registering') : t('actions.completeSale')}
         </Button>
       </div>
     </form>
@@ -267,17 +270,17 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
     <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirm sale</DialogTitle>
+          <DialogTitle>{t('confirm.title')}</DialogTitle>
           <DialogDescription>
-            The sale will be registered and a QR code will be removed from inventory. Confirm?
+            {t('confirm.description')}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" onClick={() => setConfirmOpen(false)}>
-            Cancel
+            {tc('cancel')}
           </Button>
           <Button onClick={handleConfirm} disabled={isPending}>
-            {isPending ? 'Registering...' : 'Confirm'}
+            {isPending ? t('actions.registering') : t('confirm.confirm')}
           </Button>
         </DialogFooter>
       </DialogContent>

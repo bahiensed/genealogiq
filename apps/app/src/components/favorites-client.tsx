@@ -1,11 +1,13 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { useLocale } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
 import { Heart } from "lucide-react"
 import { ProfileMiniCard, type MiniProfile, type AvatarGradient } from "@/components/profile-mini-card"
 import type { FavoriteRow } from "@/queries/favorite"
+
+type Translate = (key: string, values?: Record<string, string>) => string
 
 const PAGE_SIZE = 12
 
@@ -20,29 +22,29 @@ function shuffle<T>(arr: T[]): T[] {
   return copy
 }
 
-function toMiniProfile(fav: FavoriteRow, index: number, locale: string): MiniProfile {
-  const t = fav.target
-  const name = `${t.firstName} ${t.lastName}`
-  const isMemorialized = t.role === "APP_MEMO"
-  const subtitle = t.birthPlace
-    ? `${t.birthPlace}${t.birthCountry ? `, ${getCountryName(t.birthCountry, locale)}` : ""}`
+function toMiniProfile(fav: FavoriteRow, index: number, locale: string, t: Translate): MiniProfile {
+  const target = fav.target
+  const name = `${target.firstName} ${target.lastName}`
+  const isMemorialized = target.role === "APP_MEMO"
+  const subtitle = target.birthPlace
+    ? `${target.birthPlace}${target.birthCountry ? `, ${getCountryName(target.birthCountry, locale)}` : ""}`
     : isMemorialized
-      ? "Memorialized profile"
+      ? t("memorializedProfile")
       : ""
   return {
-    id: t.id,
+    id: target.id,
     name,
     subtitle,
     status: isMemorialized ? "Memorialized" : "Living",
-    metric: isMemorialized && t.deathDate
-      ? `✦ ${t.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
-      : t.birthDate
-        ? `Born ${t.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
+    metric: isMemorialized && target.deathDate
+      ? t("deathMetric", { date: target.deathDate.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" }) })
+      : target.birthDate
+        ? t("bornMetric", { date: target.birthDate.toLocaleDateString(locale, { year: "numeric", month: "short" }) })
         : "",
-    initials: `${t.firstName[0]}${t.lastName[0]}`.toUpperCase(),
+    initials: `${target.firstName[0]}${target.lastName[0]}`.toUpperCase(),
     gradient: GRADIENTS[index % GRADIENTS.length],
-    href: `/profile/${t.id}`,
-    avatarUrl: t.avatarUrl,
+    href: `/profile/${target.id}`,
+    avatarUrl: target.avatarUrl,
   }
 }
 
@@ -52,6 +54,7 @@ interface Props {
 
 export function FavoritesClient({ items }: Props) {
   const locale = useLocale()
+  const t = useTranslations("Favorites")
   // Start with original order (SSR-safe); shuffle client-side on mount to avoid hydration mismatch
   const [shuffled, setShuffled] = useState(items)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -80,7 +83,7 @@ export function FavoritesClient({ items }: Props) {
     return (
       <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
         <Heart className="h-10 w-10 text-muted-foreground" />
-        <p className="text-muted-foreground">No favorites yet.</p>
+        <p className="text-muted-foreground">{t("empty")}</p>
       </div>
     )
   }
@@ -95,7 +98,7 @@ export function FavoritesClient({ items }: Props) {
           return (
             <ProfileMiniCard
               key={fav.targetId}
-              profile={toMiniProfile(fav, i, locale)}
+              profile={toMiniProfile(fav, i, locale, t)}
               delay={i * 40}
               hideLivingBadge={!isMemorialized}
             />

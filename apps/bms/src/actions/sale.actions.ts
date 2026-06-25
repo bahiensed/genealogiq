@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/dal'
-import { saleSchema, type SaleFormValues } from '@/schemas/sale.schema'
+import { getSaleSchema, type SaleFormValues } from '@/schemas/sale.schema'
+import { identityTranslator } from '@/schemas/i18n'
 import { generateGenCode } from '@/lib/gen-code'
 
 type ActionError   = { error: string }
@@ -13,7 +14,7 @@ type ActionSuccess = { success: string }
 export async function createSale(data: SaleFormValues): Promise<ActionError | ActionSuccess> {
   const session = await verifyAdmin()
 
-  const validated = saleSchema.safeParse(data)
+  const validated = getSaleSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { packageId, tenantId, quantity } = validated.data

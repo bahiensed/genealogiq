@@ -17,6 +17,10 @@ import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
 import { toggleSupplierActive, deleteSupplier } from '@/actions/supplier.actions'
 
+// Loose translator type so getColumns can stay a plain function (not a hook).
+// The caller (suppliers-data-table) passes useTranslations('Suppliers').
+type Translator = (key: string, values?: Record<string, string | number | Date>) => string
+
 export type SupplierRow = {
   id: string
   entityType: string
@@ -28,7 +32,7 @@ export type SupplierRow = {
   category: { id: string; name: string } | null
 }
 
-function ActionsCell({ row }: { row: { original: SupplierRow } }) {
+function ActionsCell({ row, t }: { row: { original: SupplierRow }; t: Translator }) {
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const supplier = row.original
@@ -39,27 +43,27 @@ function ActionsCell({ row }: { row: { original: SupplierRow } }) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" disabled={isPending}>
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('actions.openMenu')}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/suppliers/${supplier.id}`}>Edit</Link>
+            <Link href={`/suppliers/${supplier.id}`}>{t('actions.edit')}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleSupplierActive(supplier.id)
               if (result?.error) toast.error(result.error)
-              else toast.success(supplier.isActive ? 'Supplier deactivated.' : 'Supplier reactivated.')
+              else toast.success(supplier.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
-            {supplier.isActive ? 'Deactivate' : 'Reactivate'}
+            {supplier.isActive ? t('actions.deactivate') : t('actions.reactivate')}
           </DropdownMenuItem>
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onSelect={() => setDeleteOpen(true)}
           >
-            Delete
+            {t('actions.delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -68,62 +72,65 @@ function ActionsCell({ row }: { row: { original: SupplierRow } }) {
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         isPending={isPending}
-        description={`The supplier "${supplier.name}" will be permanently deleted.`}
+        description={t('toasts.deleteConfirm', { name: supplier.name })}
         onConfirm={() => startTransition(async () => {
           const result = await deleteSupplier(supplier.id)
           if (result?.error) toast.error(result.error)
-          else { toast.success('Supplier deleted successfully.'); setDeleteOpen(false) }
+          else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
         })}
       />
     </>
   )
 }
 
-export const supplierColumns: ColumnDef<SupplierRow>[] = [
-  {
-    accessorKey: 'name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
-    cell: ({ row }) => (
-      <Link href={`/suppliers/${row.original.id}`} className="hover:underline">
-        {row.original.name}
-      </Link>
-    ),
-  },
-  {
-    accessorKey: 'entityType',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Type" />,
-    cell: ({ row }) => row.original.entityType === 'INDIVIDUAL' ? 'Individual' : 'Company',
-  },
-  {
-    id: 'category',
-    accessorFn: (row) => row.category?.name ?? '',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Category" />,
-    cell: ({ row }) => row.original.category?.name ?? '—',
-  },
-  {
-    accessorKey: 'email',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="E-mail" />,
-    cell: ({ row }) => row.original.email,
-  },
-  {
-    accessorKey: 'isActive',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
-    cell: ({ row }) =>
-      row.original.isActive ? (
-        <Badge variant="default">Active</Badge>
-      ) : (
-        <Badge variant="destructive">Inactive</Badge>
+export function getColumns(t: Translator, locale: string): ColumnDef<SupplierRow>[] {
+  return [
+    {
+      accessorKey: 'name',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
+      cell: ({ row }) => (
+        <Link href={`/suppliers/${row.original.id}`} className="hover:underline">
+          {row.original.name}
+        </Link>
       ),
-  },
-  {
-    accessorKey: 'createdAt',
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
-    cell: ({ row }) =>
-      new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
-  },
-  {
-    id: 'actions',
-    enableHiding: false,
-    cell: ({ row }) => <ActionsCell row={row} />,
-  },
-]
+    },
+    {
+      accessorKey: 'entityType',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.type')} />,
+      cell: ({ row }) =>
+        row.original.entityType === 'INDIVIDUAL' ? t('entityType.individual') : t('entityType.company'),
+    },
+    {
+      id: 'category',
+      accessorFn: (row) => row.category?.name ?? '',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.category')} />,
+      cell: ({ row }) => row.original.category?.name ?? '—',
+    },
+    {
+      accessorKey: 'email',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.email')} />,
+      cell: ({ row }) => row.original.email,
+    },
+    {
+      accessorKey: 'isActive',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.status')} />,
+      cell: ({ row }) =>
+        row.original.isActive ? (
+          <Badge variant="default">{t('status.active')}</Badge>
+        ) : (
+          <Badge variant="destructive">{t('status.inactive')}</Badge>
+        ),
+    },
+    {
+      accessorKey: 'createdAt',
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.createdAt')} />,
+      cell: ({ row }) =>
+        new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(row.original.createdAt),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => <ActionsCell row={row} t={t} />,
+    },
+  ]
+}

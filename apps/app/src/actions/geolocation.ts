@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
-import { geolocationSchema } from "@/schemas/geolocation"
+import { getGeolocationSchema } from "@/schemas/geolocation"
+import { identityTranslator } from "@/schemas/i18n"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
@@ -15,7 +16,7 @@ export async function saveGeolocation(profileId: string, data: unknown) {
   const profile = await getProfileById(profileId)
   if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
 
-  const parsed = geolocationSchema.safeParse(data)
+  const parsed = getGeolocationSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const existing = await prisma.geolocation.findUnique({

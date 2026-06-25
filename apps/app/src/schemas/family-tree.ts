@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { Translator } from "./i18n"
 
 // ─── Subtype canon ───────────────────────────────────────────────────────────
 // "blood" (regular/by-birth) is the implicit default — represented by a null
@@ -15,7 +16,8 @@ export type SiblingSubtype  = typeof SIBLING_SUBTYPES[number]
 export const RELATION_TYPES = ["PARENT_OF", "SPOUSE", "SIBLING"] as const
 export type RelationType = typeof RELATION_TYPES[number]
 
-const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date").optional().nullable()
+const makeDateString = (t: Translator) =>
+  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("invalidDate")).optional().nullable()
 
 const subtypeForType = (type: RelationType): readonly string[] =>
   type === "PARENT_OF" ? PARENT_OF_SUBTYPES
@@ -24,67 +26,81 @@ const subtypeForType = (type: RelationType): readonly string[] =>
 
 // ─── addRelation ─────────────────────────────────────────────────────────────
 
-export const addRelationSchema = z.object({
-  fromId:        z.string().cuid(),
-  toId:          z.string().cuid(),
-  type:          z.enum(RELATION_TYPES),
-  subtype:       z.string().min(1).optional().nullable(),
-  startDate:     dateString,
-  endDate:       dateString,
-  // When set on a PARENT_OF add, the action also creates a SPOUSE relation
-  // between the new parent and `linkSpouseId` (the existing other parent).
-  linkSpouseId:  z.string().cuid().optional().nullable(),
-}).refine((d) => !d.subtype || subtypeForType(d.type).includes(d.subtype), {
-  message: "Subtype is not valid for this relation type.",
-  path:    ["subtype"],
-})
+export function getAddRelationSchema(t: Translator) {
+  const dateString = makeDateString(t)
+  return z.object({
+    fromId:        z.string().cuid(),
+    toId:          z.string().cuid(),
+    type:          z.enum(RELATION_TYPES),
+    subtype:       z.string().min(1).optional().nullable(),
+    startDate:     dateString,
+    endDate:       dateString,
+    // When set on a PARENT_OF add, the action also creates a SPOUSE relation
+    // between the new parent and `linkSpouseId` (the existing other parent).
+    linkSpouseId:  z.string().cuid().optional().nullable(),
+  }).refine((d) => !d.subtype || subtypeForType(d.type).includes(d.subtype), {
+    message: t("invalidSubtypeForType"),
+    path:    ["subtype"],
+  })
+}
 
-export type AddRelationInput = z.infer<typeof addRelationSchema>
+export type AddRelationInput = z.infer<ReturnType<typeof getAddRelationSchema>>
 
 // ─── addGhostRelative ────────────────────────────────────────────────────────
 
-const ghostIdentity = z.object({
-  firstName:  z.string().trim().min(1, "First name is required.").max(64),
-  lastName:   z.string().trim().min(1, "Last name is required.").max(64),
-  maidenName: z.string().trim().max(64).optional().nullable(),
-  nickname:   z.string().trim().max(40).optional().nullable(),
-  gender:     z.enum(["MALE", "FEMALE", "OTHER"]).nullable().optional(),
-  birthDate:  dateString,
-  deathDate:  dateString,
-})
+function makeGhostIdentity(t: Translator) {
+  const dateString = makeDateString(t)
+  return z.object({
+    firstName:  z.string().trim().min(1, t("required")).max(64),
+    lastName:   z.string().trim().min(1, t("required")).max(64),
+    maidenName: z.string().trim().max(64).optional().nullable(),
+    nickname:   z.string().trim().max(40).optional().nullable(),
+    gender:     z.enum(["MALE", "FEMALE", "OTHER"]).nullable().optional(),
+    birthDate:  dateString,
+    deathDate:  dateString,
+  })
+}
 
-export const addGhostRelativeSchema = ghostIdentity.extend({
-  anchorId:     z.string().cuid(),
-  kind:         z.enum(["parent", "child", "spouse", "sibling"]),
-  subtype:      z.string().min(1).optional().nullable(),
-  startDate:    dateString,
-  endDate:      dateString,
-  linkSpouseId: z.string().cuid().optional().nullable(),
-}).refine((d) => {
-  if (!d.subtype) return true
-  const type: RelationType = d.kind === "spouse" ? "SPOUSE" : d.kind === "sibling" ? "SIBLING" : "PARENT_OF"
-  return subtypeForType(type).includes(d.subtype)
-}, {
-  message: "Subtype is not valid for this relation kind.",
-  path:    ["subtype"],
-})
+export function getAddGhostRelativeSchema(t: Translator) {
+  const dateString = makeDateString(t)
+  return makeGhostIdentity(t).extend({
+    anchorId:     z.string().cuid(),
+    kind:         z.enum(["parent", "child", "spouse", "sibling"]),
+    subtype:      z.string().min(1).optional().nullable(),
+    startDate:    dateString,
+    endDate:      dateString,
+    linkSpouseId: z.string().cuid().optional().nullable(),
+  }).refine((d) => {
+    if (!d.subtype) return true
+    const type: RelationType = d.kind === "spouse" ? "SPOUSE" : d.kind === "sibling" ? "SIBLING" : "PARENT_OF"
+    return subtypeForType(type).includes(d.subtype)
+  }, {
+    message: t("invalidSubtypeForKind"),
+    path:    ["subtype"],
+  })
+}
 
-export type AddGhostRelativeInput = z.infer<typeof addGhostRelativeSchema>
+export type AddGhostRelativeInput = z.infer<ReturnType<typeof getAddGhostRelativeSchema>>
 
 // ─── updateMember (identity patch) ───────────────────────────────────────────
 
-export const updateMemberSchema = ghostIdentity.extend({
-  avatarUrl: z.string().url().optional().nullable(),
-})
+export function getUpdateMemberSchema(t: Translator) {
+  return makeGhostIdentity(t).extend({
+    avatarUrl: z.string().url().optional().nullable(),
+  })
+}
 
-export type UpdateMemberInput = z.infer<typeof updateMemberSchema>
+export type UpdateMemberInput = z.infer<ReturnType<typeof getUpdateMemberSchema>>
 
 // ─── updateRelation (subtype + dates) ────────────────────────────────────────
 
-export const updateRelationSchema = z.object({
-  subtype:   z.string().min(1).optional().nullable(),
-  startDate: dateString,
-  endDate:   dateString,
-})
+export function getUpdateRelationSchema(t: Translator) {
+  const dateString = makeDateString(t)
+  return z.object({
+    subtype:   z.string().min(1).optional().nullable(),
+    startDate: dateString,
+    endDate:   dateString,
+  })
+}
 
-export type UpdateRelationInput = z.infer<typeof updateRelationSchema>
+export type UpdateRelationInput = z.infer<ReturnType<typeof getUpdateRelationSchema>>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Check, CalendarDays, Calendar1 } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -43,15 +44,16 @@ function compareMonthly(a: { price: number; termLength: number }, b: { price: nu
 }
 
 export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Props) {
+  const t = useTranslations("Subscriptions")
   const [pendingChange, setPendingChange] = useState<PendingChange | null>(null)
 
   useEffect(() => {
     if (flashStatus === "success") {
-      toast.success("Payment received — your plan is being activated. Refresh in a moment if it hasn't appeared yet.")
+      toast.success(t("toasts.paymentReceived"))
     } else if (flashStatus === "cancel") {
-      toast.info("Checkout canceled.")
+      toast.info(t("toasts.checkoutCanceled"))
     }
-  }, [flashStatus])
+  }, [flashStatus, t])
 
   const activeSubscriptionId = activePlan?.subscription.id ?? null
 
@@ -94,6 +96,7 @@ interface PlanCardProps {
 
 function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCardProps) {
   const router = useRouter()
+  const t = useTranslations("Subscriptions")
   const [isPending, startTransition] = useTransition()
   const isFree = plan.code === "FREE"
 
@@ -122,14 +125,14 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
   }
 
   const features = [
-    `${plan.maxProfiles} memorial ${plan.maxProfiles === 1 ? "slot" : "slots"} per purchase`,
-    `${plan.treeMaxMembers} family tree members`,
-    `${plan.bioMaxChars.toLocaleString()} biography characters`,
-    `${plan.bioMaxImages} biography images`,
-    `${plan.galleryMaxImages} gallery photos`,
-    `${plan.galleryMaxVideos} gallery videos`,
-    plan.geolocationFullAccess ? "Precise GPS coordinates" : "Address only (no GPS pin)",
-    plan.qrCodeAccess ? "QR Code for plaques & stones" : "QR Code on paid plans",
+    t("features.memorialSlots", { count: plan.maxProfiles }),
+    t("features.treeMembers", { count: plan.treeMaxMembers }),
+    t("features.bioChars", { count: plan.bioMaxChars }),
+    t("features.bioImages", { count: plan.bioMaxImages }),
+    t("features.galleryPhotos", { count: plan.galleryMaxImages }),
+    t("features.galleryVideos", { count: plan.galleryMaxVideos }),
+    plan.geolocationFullAccess ? t("features.gpsPrecise") : t("features.gpsAddressOnly"),
+    plan.qrCodeAccess ? t("features.qrIncluded") : t("features.qrPaidOnly"),
   ]
 
   return (
@@ -139,7 +142,7 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
           <h3 className="text-2xl font-semibold tracking-tight">{plan.name}</h3>
           {isActive && (
             <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-primary text-primary-foreground px-2 py-0.5">
-              Active
+              {t("activeBadge")}
             </span>
           )}
         </div>
@@ -152,12 +155,12 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
         <div className="flex items-baseline gap-1">
           <span className="text-4xl font-bold">{usd.format(annualPrice)}</span>
           <span className="text-sm text-muted-foreground">
-            {plan.termLength === 12 ? "/ year" : plan.termLength === 0 ? "/ lifetime" : `/ ${plan.termLength} mo`}
+            {plan.termLength === 12 ? t("term.perYear") : plan.termLength === 0 ? t("term.perLifetime") : t("term.perMonths", { count: plan.termLength })}
           </span>
         </div>
       ) : (
         <div>
-          <span className="text-4xl font-bold">Free</span>
+          <span className="text-4xl font-bold">{t("freePrice")}</span>
         </div>
       )}
 
@@ -174,11 +177,11 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
         <div className="grid grid-cols-1 gap-2">
           <Button onClick={() => requestChange("annual")} disabled={isPending} className="w-full gap-2">
             <CalendarDays className="h-4 w-4" />
-            Pay annually {usd.format(annualPrice)}
+            {t("payAnnually", { price: usd.format(annualPrice) })}
           </Button>
           <Button onClick={() => requestChange("monthly")} disabled={isPending} variant="outline" className="w-full gap-2">
             <Calendar1 className="h-4 w-4" />
-            Pay monthly {usd.format(monthlyPrice)}
+            {t("payMonthly", { price: usd.format(monthlyPrice) })}
           </Button>
         </div>
       )}
@@ -194,19 +197,21 @@ interface ChangeConfirmDialogProps {
 
 function ChangeConfirmDialog({ pending, activePlan, onClose }: ChangeConfirmDialogProps) {
   const router = useRouter()
+  const t = useTranslations("Subscriptions")
+  const tc = useTranslations("Common")
   const [isPending, startTransition] = useTransition()
 
   if (!pending || !activePlan) return null
 
   const isUpgrade = pending.effect === "upgrade"
-  const cadenceLabel = pending.cadence === "annual" ? "annual" : "monthly"
+  const cadenceLabel = pending.cadence === "annual" ? t("cadence.annual") : t("cadence.monthly")
   const periodEnd = longDate.format(activePlan.currentPeriodEnd)
 
-  const title = isUpgrade ? "Upgrade now?" : "Schedule downgrade?"
+  const title = isUpgrade ? t("confirm.upgradeTitle") : t("confirm.downgradeTitle")
   const description = isUpgrade
-    ? `You'll switch to ${pending.plan.name} (${cadenceLabel}) immediately. Stripe will charge the prorated difference today and the new features unlock right away.`
-    : `Your ${activePlan.subscription.name} plan stays active until ${periodEnd}. After that, ${pending.plan.name} (${cadenceLabel}) kicks in with no charge today.`
-  const confirmLabel = isUpgrade ? "Upgrade now" : "Schedule switch"
+    ? t("confirm.upgradeDescription", { plan: pending.plan.name, cadence: cadenceLabel })
+    : t("confirm.downgradeDescription", { currentPlan: activePlan.subscription.name, periodEnd, plan: pending.plan.name, cadence: cadenceLabel })
+  const confirmLabel = isUpgrade ? t("confirm.upgradeAction") : t("confirm.downgradeAction")
 
   const handleConfirm = () => {
     startTransition(async () => {
@@ -214,8 +219,8 @@ function ChangeConfirmDialog({ pending, activePlan, onClose }: ChangeConfirmDial
       if ("error" in result) { toast.error(result.error); return }
       toast.success(
         result.effect === "upgraded"
-          ? `Switched to ${pending.plan.name}. Stripe just charged the prorated amount.`
-          : `${pending.plan.name} is scheduled to start on ${periodEnd}.`,
+          ? t("toasts.switched", { plan: pending.plan.name })
+          : t("toasts.scheduled", { plan: pending.plan.name, periodEnd }),
       )
       onClose()
       router.refresh()
@@ -230,9 +235,9 @@ function ChangeConfirmDialog({ pending, activePlan, onClose }: ChangeConfirmDial
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{tc("cancel")}</AlertDialogCancel>
           <AlertDialogAction onClick={handleConfirm} disabled={isPending}>
-            {isPending ? "Working…" : confirmLabel}
+            {isPending ? t("confirm.working") : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { verifySession } from "@/lib/dal"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
@@ -13,6 +14,7 @@ interface Props {
 
 export default async function TributesPage({ params }: Props) {
   const { id } = await params
+  const t = await getTranslations("Tributes")
   const session = await verifySession()
   const profile = await getProfileById(id)
   if (!profile) notFound()
@@ -36,15 +38,15 @@ export default async function TributesPage({ params }: Props) {
       <main className="container relative pt-24 pb-32 max-w-6xl">
         <div className="flex items-center justify-between gap-3 mb-2 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
-            <BackButton href={`/profile/${id}`} label="Back to profile" />
+            <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
             <div className="min-w-0">
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Tributes</h1>
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
               {!isManager && <p className="text-muted-foreground text-sm mt-1 truncate bg-transparent">{name}</p>}
             </div>
           </div>
           {tributes.length > 0 && (
             <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
-              {tributes.length} {tributes.length === 1 ? "tribute" : "tributes"}
+              {t("count", { count: tributes.length })}
             </span>
           )}
         </div>

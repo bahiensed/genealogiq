@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
-import { tributeSchema } from "@/schemas/tribute"
+import { getTributeSchema } from "@/schemas/tribute"
+import { identityTranslator } from "@/schemas/i18n"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { assertOwnership } from "@genealogiq/auth/authz"
@@ -14,8 +15,8 @@ export async function submitTribute(profileId: string, data: unknown) {
   const session = await verifySession()
   if (session.user.id === profileId) return { error: "You cannot tribute your own profile." }
 
-  const parsed = tributeSchema.safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  const parsed = getTributeSchema(identityTranslator).safeParse(data)
+  if (!parsed.success) return { error: "Invalid data" }
 
   const existing = await prisma.tribute.findUnique({
     where: { authorId_profileId: { authorId: session.user.id, profileId } },

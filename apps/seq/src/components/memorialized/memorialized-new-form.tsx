@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { CheckIcon, MapPin } from 'lucide-react'
-import { deceasedResolver, deceasedDefaultValues, type DeceasedFormValues } from '@/schemas/deceased.schema'
+import { getDeceasedSchema, deceasedDefaultValues, type DeceasedFormValues } from '@/schemas/deceased.schema'
 import { createDeceased } from '@/actions/deceased.actions'
 import { GenderSelect } from '@/components/ui/gender-select'
 import { CountrySelect } from '@/components/ui/country-select'
@@ -22,19 +24,14 @@ interface Props {
 const SOCIAL_KEYS = ['fb', 'instagram', 'linkedin', 'tiktok', 'x', 'youtube', 'otherSocial', 'website'] as const
 type SocialKey = typeof SOCIAL_KEYS[number]
 
-function socialLabel(key: SocialKey): string {
+function socialLabel(key: SocialKey, otherLabel: string): string {
   if (key === 'fb') return 'Facebook'
   if (key === 'x') return 'X'
-  if (key === 'otherSocial') return 'Other'
+  if (key === 'otherSocial') return otherLabel
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
-const STEPS = [
-  { title: 'Personal', desc: 'Name, gender & birth'  },
-  { title: 'Death',    desc: 'Date, place & cause'   },
-  { title: 'Burial',   desc: 'Site & location'       },
-  { title: 'Social',   desc: 'Social media & notes'  },
-]
+const STEP_KEYS = ['personal', 'death', 'burial', 'social'] as const
 
 type StepIndex = 0 | 1 | 2 | 3
 
@@ -46,12 +43,21 @@ const STEP_FIELDS: Record<StepIndex, (keyof DeceasedFormValues)[]> = {
 }
 
 export function MemorializedNewForm({ appUserId }: Props) {
+  const t  = useTranslations('Memorialized')
+  const tc = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [step, setStep]               = useState<StepIndex>(0)
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
+  const STEPS = STEP_KEYS.map((key) => ({
+    title: t(`steps.${key}.title`),
+    desc:  t(`steps.${key}.desc`),
+  }))
+
   const form = useForm<DeceasedFormValues>({
-    resolver:       deceasedResolver,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver:       useMemo(() => zodResolver(getDeceasedSchema(tErr)) as any, [tErr]),
     defaultValues:  deceasedDefaultValues,
     mode:           'onBlur',
     reValidateMode: 'onChange',
@@ -81,7 +87,7 @@ export function MemorializedNewForm({ appUserId }: Props) {
     if ('error' in result) {
       setServerError(result.error)
     } else {
-      toast.success('Profile created successfully.')
+      toast.success(t('toasts.created'))
       router.push(`/customers/${appUserId}`)
     }
   }
@@ -90,7 +96,7 @@ export function MemorializedNewForm({ appUserId }: Props) {
     <div className="flex flex-col gap-6">
 
       {/* Stepper */}
-      <nav aria-label="Form steps">
+      <nav aria-label={t('stepperLabel')}>
         {/* Mobile */}
         <div className="flex items-center gap-2 md:hidden">
           {STEPS.map((s, i) => (
@@ -148,14 +154,14 @@ export function MemorializedNewForm({ appUserId }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="firstName" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>First Name:*</FieldLabel>
+                  <FieldLabel>{t('fields.firstName')}</FieldLabel>
                   <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
               <Controller name="lastName" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Last Name:*</FieldLabel>
+                  <FieldLabel>{t('fields.lastName')}</FieldLabel>
                   <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -165,21 +171,21 @@ export function MemorializedNewForm({ appUserId }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="gender" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Gender:</FieldLabel>
+                  <FieldLabel>{t('fields.gender')}</FieldLabel>
                   <GenderSelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
               <Controller name="birthDate" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Birth date:*</FieldLabel>
+                  <FieldLabel>{t('fields.birthDate')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
               <Controller name="birthCountry" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Birth country:*</FieldLabel>
+                  <FieldLabel>{t('fields.birthCountry')}</FieldLabel>
                   <CountrySelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
@@ -189,14 +195,14 @@ export function MemorializedNewForm({ appUserId }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="birthState" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Birth state:*</FieldLabel>
+                  <FieldLabel>{t('fields.birthState')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
               <Controller name="birthCity" control={control} render={({ field }) => (
                 <Field className="col-span-6">
-                  <FieldLabel>Birth city:</FieldLabel>
+                  <FieldLabel>{t('fields.birthCity')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
@@ -210,20 +216,20 @@ export function MemorializedNewForm({ appUserId }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="deathDate" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Death date:*</FieldLabel>
+                  <FieldLabel>{t('fields.deathDate')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} type="date" aria-invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
               <Controller name="deathCity" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>City:</FieldLabel>
+                  <FieldLabel>{t('fields.city')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
               <Controller name="deathState" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>State:</FieldLabel>
+                  <FieldLabel>{t('fields.state')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
@@ -232,14 +238,14 @@ export function MemorializedNewForm({ appUserId }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="deathCountry" control={control} render={({ field, fieldState }) => (
                 <Field className="col-span-6" data-invalid={fieldState.invalid}>
-                  <FieldLabel>Country:*</FieldLabel>
+                  <FieldLabel>{t('fields.countryRequired')}</FieldLabel>
                   <CountrySelect value={field.value} onChange={field.onChange} invalid={fieldState.invalid} />
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )} />
               <Controller name="deathCause" control={control} render={({ field }) => (
                 <Field className="col-span-6">
-                  <FieldLabel>Cause:</FieldLabel>
+                  <FieldLabel>{t('fields.cause')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
@@ -250,18 +256,18 @@ export function MemorializedNewForm({ appUserId }: Props) {
         {/* ── Step 2: Burial ── */}
         {step === 2 && (
           <FieldGroup>
-            <p className="text-sm text-muted-foreground">Burial information is optional and can be filled in later.</p>
+            <p className="text-sm text-muted-foreground">{t('burialHint')}</p>
 
             <div className="grid grid-cols-12 gap-3">
               <Controller name="burialDate" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>Burial date:</FieldLabel>
+                  <FieldLabel>{t('fields.burialDate')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} type="date" />
                 </Field>
               )} />
               <Controller name="burialSite" control={control} render={({ field }) => (
                 <Field className="col-span-8">
-                  <FieldLabel>Location (cemetery/crematorium):</FieldLabel>
+                  <FieldLabel>{t('fields.burialSite')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
@@ -270,19 +276,19 @@ export function MemorializedNewForm({ appUserId }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="burialZip" control={control} render={({ field }) => (
                 <Field className="col-span-3">
-                  <FieldLabel>ZIP:</FieldLabel>
+                  <FieldLabel>{t('fields.zip')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
               <Controller name="burialStreet" control={control} render={({ field }) => (
                 <Field className="col-span-6">
-                  <FieldLabel>Street:</FieldLabel>
+                  <FieldLabel>{t('fields.street')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
               <Controller name="burialNumber" control={control} render={({ field }) => (
                 <Field className="col-span-3">
-                  <FieldLabel>Number:</FieldLabel>
+                  <FieldLabel>{t('fields.number')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
@@ -291,19 +297,19 @@ export function MemorializedNewForm({ appUserId }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="burialComplement" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>Complement:</FieldLabel>
+                  <FieldLabel>{t('fields.complement')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
               <Controller name="burialNeighborhood" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>Neighborhood:</FieldLabel>
+                  <FieldLabel>{t('fields.neighborhood')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
               <Controller name="burialCity" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>City:</FieldLabel>
+                  <FieldLabel>{t('fields.city')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
@@ -312,13 +318,13 @@ export function MemorializedNewForm({ appUserId }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="burialState" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>State:</FieldLabel>
+                  <FieldLabel>{t('fields.state')}</FieldLabel>
                   <Input {...field} value={field.value ?? ''} autoComplete="off" />
                 </Field>
               )} />
               <Controller name="burialCountry" control={control} render={({ field }) => (
                 <Field className="col-span-4">
-                  <FieldLabel>Country:</FieldLabel>
+                  <FieldLabel>{t('fields.country')}</FieldLabel>
                   <CountrySelect value={field.value} onChange={field.onChange} />
                 </Field>
               )} />
@@ -327,7 +333,7 @@ export function MemorializedNewForm({ appUserId }: Props) {
             <div className="grid grid-cols-12 gap-3">
               <Controller name="burialLatitude" control={control} render={({ field }) => (
                 <Field className="col-span-5">
-                  <FieldLabel>Latitude:</FieldLabel>
+                  <FieldLabel>{t('fields.latitude')}</FieldLabel>
                   <Input
                     type="number"
                     step="any"
@@ -339,7 +345,7 @@ export function MemorializedNewForm({ appUserId }: Props) {
               )} />
               <Controller name="burialLongitude" control={control} render={({ field }) => (
                 <Field className="col-span-5">
-                  <FieldLabel>Longitude:</FieldLabel>
+                  <FieldLabel>{t('fields.longitude')}</FieldLabel>
                   <Input
                     type="number"
                     step="any"
@@ -350,9 +356,9 @@ export function MemorializedNewForm({ appUserId }: Props) {
                 </Field>
               )} />
               <div className="col-span-2 flex items-end">
-                <Button type="button" variant="outline" size="sm" className="w-full" title="Get coordinates automatically">
+                <Button type="button" variant="outline" size="sm" className="w-full" title={t('fields.gpsTitle')}>
                   <MapPin className="h-4 w-4" />
-                  GPS
+                  {t('fields.gps')}
                 </Button>
               </div>
             </div>
@@ -366,7 +372,7 @@ export function MemorializedNewForm({ appUserId }: Props) {
               {SOCIAL_KEYS.map((key) => (
                 <Controller key={key} name={key} control={control} render={({ field }) => (
                   <Field className="col-span-6 md:col-span-4">
-                    <FieldLabel>{socialLabel(key)}:</FieldLabel>
+                    <FieldLabel>{socialLabel(key, t('fields.otherSocial'))}:</FieldLabel>
                     <Input {...field} value={field.value ?? ''} autoComplete="off" />
                   </Field>
                 )} />
@@ -375,7 +381,7 @@ export function MemorializedNewForm({ appUserId }: Props) {
 
             <Controller name="notes" control={control} render={({ field }) => (
               <Field>
-                <FieldLabel>Notes:</FieldLabel>
+                <FieldLabel>{t('fields.notes')}</FieldLabel>
                 <Textarea {...field} value={field.value ?? ''} rows={3} />
               </Field>
             )} />
@@ -387,20 +393,20 @@ export function MemorializedNewForm({ appUserId }: Props) {
         {/* Navigation */}
         <div className="flex items-center justify-between pt-2 border-t">
           <Button type="button" variant="outline" onClick={goBack} disabled={step === 0}>
-            Back
+            {tc('back')}
           </Button>
 
           <span className="text-xs text-muted-foreground">
-            Step {step + 1} of {STEPS.length}
+            {t('stepIndicator', { current: step + 1, total: STEPS.length })}
           </span>
 
           {step < STEPS.length - 1 ? (
             <Button type="button" onClick={goNext}>
-              Next
+              {tc('next')}
             </Button>
           ) : (
             <Button type="button" onClick={() => handleSubmit(onSubmit)()} disabled={isSubmitting}>
-              {isSubmitting ? 'Creating…' : 'Create profile'}
+              {isSubmitting ? tc('creating') : t('createProfile')}
             </Button>
           )}
         </div>

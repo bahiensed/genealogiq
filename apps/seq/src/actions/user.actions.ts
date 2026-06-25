@@ -11,7 +11,8 @@ import { verifyAdmin } from '@/lib/dal'
 // restricted to OWNER / ADMIN / SUPER_ADMIN of the tenant — see verifyAdmin().
 // Self-profile edits go through a different action (not exposed here).
 import { sendWelcomeEmail } from '@/lib/email'
-import { userSchema, type UserFormValues } from '@/schemas/user.schema'
+import { getUserSchema, type UserFormValues } from '@/schemas/user.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError = { error: string }
 
@@ -34,7 +35,7 @@ function buildAddressWrite(address: UserFormValues['address']): any {
 export async function createUser(data: UserFormValues): Promise<Result<string>> {
   const { customerId } = await verifyAdmin()
 
-  const validated = userSchema.safeParse(data)
+  const validated = getUserSchema(identityTranslator).safeParse(data)
   if (!validated.success) return err('Invalid data')
 
   const { address, birthDate, ...rest } = validated.data
@@ -75,7 +76,7 @@ export async function createUser(data: UserFormValues): Promise<Result<string>> 
 export async function updateUser(id: string, data: UserFormValues): Promise<Result<string>> {
   const { customerId } = await verifyAdmin()
 
-  const validated = userSchema.safeParse(data)
+  const validated = getUserSchema(identityTranslator).safeParse(data)
   if (!validated.success) return err('Invalid data')
 
   const { address, birthDate, ...rest } = validated.data

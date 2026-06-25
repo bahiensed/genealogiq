@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { getLocale } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 import { getCountryName } from "@genealogiq/core"
 import { MapPin, Plus, SquarePen } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,8 @@ export default async function GeolocationPage({ params }: Props) {
   const isEmpty = !geo
   const editHref = `/profile/${id}/geolocation/edit`
   const locale = await getLocale()
+  const t = await getTranslations("Geolocation")
+  const tc = await getTranslations("Common")
 
   const photos = geo
     ? [geo.photo1, geo.photo2, geo.photo3].filter((p): p is string => !!p)
@@ -42,30 +44,30 @@ export default async function GeolocationPage({ params }: Props) {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
-              <BackButton href={`/profile/${id}`} label="Back to profile" />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">Geolocation</h1>
+              <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
+              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
             </div>
             {isOwn && (
               <Button asChild className="shrink-0 gap-2">
                 <Link href={editHref}>
                   {isEmpty ? <Plus className="h-4 w-4" /> : <SquarePen className="h-4 w-4" />}
-                  {isEmpty ? "Add location" : "Edit"}
+                  {isEmpty ? t("addLocation") : tc("edit")}
                 </Link>
               </Button>
             )}
           </div>
           <p className="text-muted-foreground mt-2 italic">
-            A place to meet again, from anywhere
+            {t("tagline")}
           </p>
         </div>
 
         {isEmpty ? (
           <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
             <MapPin className="h-10 w-10 text-muted-foreground" />
-            <p className="text-muted-foreground">No location set yet.</p>
+            <p className="text-muted-foreground">{t("emptyState")}</p>
             {isOwn && (
               <Button asChild className="gap-2">
-                <Link href={editHref}><Plus className="h-4 w-4" />Add location</Link>
+                <Link href={editHref}><Plus className="h-4 w-4" />{t("addLocation")}</Link>
               </Button>
             )}
           </div>
@@ -80,7 +82,7 @@ export default async function GeolocationPage({ params }: Props) {
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={src}
-                          alt={`${geo.placeName} photo ${i + 1}`}
+                          alt={t("viewPhotoAlt", { place: geo.placeName, number: i + 1 })}
                           className="h-full w-full object-cover"
                           loading="lazy"
                         />
@@ -110,7 +112,7 @@ export default async function GeolocationPage({ params }: Props) {
                   </div>
                   {(geo.lat !== 0 || geo.lon !== 0) && (
                     <div className="pt-3 border-t border-border/60">
-                      <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Coordinates</div>
+                      <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">{t("coordinates")}</div>
                       <div className="flex items-center gap-3 flex-wrap">
                         <code className="text-sm font-mono">
                           {geo.lat.toFixed(6)}, {geo.lon.toFixed(6)}
@@ -122,7 +124,7 @@ export default async function GeolocationPage({ params }: Props) {
                           className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                         >
                           <MapPin className="h-3 w-3" />
-                          Open in Google Maps
+                          {t("openInGoogleMaps")}
                         </a>
                       </div>
                     </div>

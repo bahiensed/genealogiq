@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,6 +14,7 @@ function normalizeCode(raw: string): string {
 }
 
 export function ActivateCodeForm() {
+  const t = useTranslations("Qr")
   const router = useRouter()
   const [code, setCode] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +23,7 @@ export function ActivateCodeForm() {
     e.preventDefault()
     const normalized = normalizeCode(code)
     if (normalized.length < 6) {
-      setError("Please enter a valid activation code.")
+      setError(t("activateCode.invalid"))
       return
     }
     // The /qr/[genCode] route resolves the code and shows notFound() if it does
@@ -32,7 +34,7 @@ export function ActivateCodeForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="code">Activation code</Label>
+        <Label htmlFor="code">{t("activateCode.label")}</Label>
         <Input
           id="code"
           name="code"
@@ -41,7 +43,7 @@ export function ActivateCodeForm() {
             setCode(e.target.value)
             if (error) setError(null)
           }}
-          placeholder="e.g. ABCD-1234-EFGH"
+          placeholder={t("activateCode.placeholder")}
           autoComplete="off"
           autoCapitalize="characters"
           className="font-mono tracking-widest"
@@ -51,7 +53,7 @@ export function ActivateCodeForm() {
       </div>
 
       <Button type="submit" className="w-full">
-        Continue
+        {t("activateCode.continue")}
       </Button>
     </form>
   )

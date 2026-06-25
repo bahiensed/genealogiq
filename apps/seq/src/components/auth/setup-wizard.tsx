@@ -1,15 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { z } from 'zod'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 
 import { SetupSchema } from '@/lib/auth'
 import { maskCnpj, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
 
-import { companyResolver, companyDefaultValues, type CompanyFormValues } from '@/schemas/company.schema'
+import { getCompanySchema, companyDefaultValues, type CompanyFormValues } from '@/schemas/company.schema'
 import { setupSystem } from '@/actions/auth'
 
 import { Eye, EyeOff } from 'lucide-react'
@@ -35,13 +36,15 @@ const STEP_LABELS = [
 ]
 
 export function SetupWizard() {
+  const tErr = useTranslations('Errors')
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [companyData, setCompanyData] = useState<CompanyFormValues | null>(null)
   const [serverError, setServerError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
 
   const companyForm = useForm<CompanyFormValues>({
-    resolver:       companyResolver,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver:       useMemo(() => zodResolver(getCompanySchema(tErr)) as any, [tErr]),
     defaultValues:  companyDefaultValues,
     mode:           'onBlur',
     reValidateMode: 'onChange',

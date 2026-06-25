@@ -1,73 +1,823 @@
 {
-  "Nav": {
-    "profile": "Profile",
-    "signOut": "Sign out",
-    "signingOut": "Signing out…",
-    "language": "Language",
-    "toggleTheme": "Toggle theme"
-  },
   "Auth": {
-    "title": "Sign in",
     "description": "Enter your email and password to access your account.",
     "email": "E-mail:",
     "emailPlaceholder": "you@email.com",
-    "password": "Password:",
     "forgotPassword": "Forgot password?",
-    "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "password": "Password:",
+    "showPassword": "Show password",
     "signIn": "Sign in",
-    "signingIn": "Signing in…"
-  },
-  "Dashboard": {
-    "title": "Dashboard",
-    "availableQr": "Available QR Codes for Sale",
-    "currentlyInStock": "Currently in stock",
-    "totalCustomers": "Total Customers",
-    "registeredCustomers": "Registered customers",
-    "qrSoldThisMonth": "QR Codes Sold this Month",
-    "salesThisMonth": "Sales this month",
-    "monthlyRevenue": "Monthly Revenue",
-    "revenueThisMonth": "Revenue this month",
-    "averageTicket": "Average Ticket",
-    "avgRevenuePerSale": "Avg. revenue per sale this month"
+    "signingIn": "Signing in…",
+    "title": "Sign in"
   },
   "Common": {
-    "save": "Save",
-    "saving": "Saving…",
+    "address": {
+      "city": "City:",
+      "complement": "Complement:",
+      "country": "Country:",
+      "lookupAria": "Look up address",
+      "lookupError": "Failed to look up ZIP/postal code.",
+      "neighborhood": "Neighborhood:",
+      "number": "Number:",
+      "selectPlaceholder": "Select",
+      "state": "State / Province:",
+      "street": "Street:",
+      "zipCode": "ZIP Code:"
+    },
+    "back": "Back",
     "cancel": "Cancel",
     "create": "Create",
     "creating": "Creating…",
-    "edit": "Edit",
-    "search": "Search",
-    "reset": "Reset",
-    "back": "Back",
-    "next": "Next",
-    "delete": {
-      "title": "Confirm deletion",
-      "description": "This action cannot be undone.",
-      "confirm": "Delete",
-      "deleting": "Deleting…"
+    "dataTable": {
+      "columns": "Columns",
+      "firstPage": "First page",
+      "hide": "Hide",
+      "lastPage": "Last page",
+      "nextPage": "Next page",
+      "noResults": "No records found",
+      "pageOf": "Page {page} of {total}",
+      "previousPage": "Previous page",
+      "rowCount": "{count, plural, =0 {No records} one {# record} other {# records}}",
+      "rowsPerPage": "Rows per page",
+      "searchPlaceholder": "Search…",
+      "sortAsc": "Asc",
+      "sortDesc": "Desc"
     },
+    "delete": {
+      "confirm": "Delete",
+      "deleting": "Deleting…",
+      "description": "This action cannot be undone.",
+      "title": "Confirm deletion"
+    },
+    "edit": "Edit",
+    "next": "Next",
+    "reset": "Reset",
+    "save": "Save",
+    "saving": "Saving…",
+    "search": "Search",
     "toasts": {
-      "saved": "Saved successfully.",
       "created": "Created successfully.",
       "deleted": "Deleted successfully.",
-      "error": "Something went wrong. Please try again."
+      "error": "Something went wrong. Please try again.",
+      "saved": "Saved successfully."
+    }
+  },
+  "Company": {
+    "Company": {
+      "fields": {
+        "cnpj": "CNPJ:",
+        "countryCode": "Country Code:",
+        "email": "E-mail:",
+        "isActive": "Active company:",
+        "legalName": "Company Name:",
+        "municipalRegistration": "Municipal Registration:",
+        "phone": "Phone:",
+        "stateRegistration": "State Registration:",
+        "tradeName": "Trade Name:"
+      },
+      "sections": {
+        "address": "Address"
+      },
+      "title": "Company Data",
+      "toasts": {
+        "updated": "Data updated successfully."
+      }
+    }
+  },
+  "CustomerCategories": {
+    "CustomerCategories": {
+      "actions": {
+        "deactivate": "Deactivate",
+        "delete": "Delete",
+        "edit": "Edit",
+        "openMenu": "Open menu",
+        "reactivate": "Reactivate"
+      },
+      "create": "Create category",
+      "dialog": {
+        "addNew": "Add new category",
+        "title": "New customer category"
+      },
+      "edit": "Edit category",
+      "fields": {
+        "description": "Description:",
+        "isActive": "Active category:",
+        "name": "Name:"
+      },
+      "new": "New category",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "createdAt": "Created at",
+        "description": "Description",
+        "empty": "No customer categories found.",
+        "name": "Name",
+        "status": "Status"
+      },
+      "title": "Customer Categories",
+      "toasts": {
+        "created": "Category created successfully.",
+        "deactivated": "Category deactivated.",
+        "deleteConfirm": "The category \"{name}\" will be permanently deleted.",
+        "deleted": "Category deleted successfully.",
+        "reactivated": "Category reactivated."
+      }
+    }
+  },
+  "Customers": {
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate",
+      "resendEmail": "Resend email"
     },
-    "dataTable": {
-      "searchPlaceholder": "Search…",
-      "noResults": "No records found",
-      "columns": "Columns",
-      "rowsPerPage": "Rows per page",
-      "pageOf": "Page {page} of {total}",
-      "rowCount": "{count, plural, =0 {No records} one {# record} other {# records}}",
-      "firstPage": "First page",
-      "previousPage": "Previous page",
-      "nextPage": "Next page",
-      "lastPage": "Last page",
-      "sortAsc": "Asc",
-      "sortDesc": "Desc",
-      "hide": "Hide"
+    "active": "Active?",
+    "createCustomer": "Create customer",
+    "fields": {
+      "birthCity": "Birth city:",
+      "birthCountry": "Birth country:",
+      "birthCountryRequired": "Birth country:*",
+      "birthDate": "Date of Birth:",
+      "birthDateRequired": "Date of Birth:*",
+      "birthState": "Birth state:",
+      "birthStateProvince": "Birth State / Province:",
+      "birthStateRequired": "Birth state:*",
+      "burialDate": "Burial date:",
+      "burialSite": "Location (cemetery/crematorium):",
+      "category": "Category:",
+      "city": "City:",
+      "complement": "Complement:",
+      "country": "Country:",
+      "countryCode": "Country code:",
+      "countryRequired": "Country:*",
+      "deathCause": "Cause:",
+      "deathDateRequired": "Death date:*",
+      "email": "E-mail:",
+      "emailRequired": "Email:*",
+      "firstName": "First Name:",
+      "firstNameRequired": "First Name:*",
+      "gender": "Gender:",
+      "genderRequired": "Gender:*",
+      "gps": "GPS",
+      "gpsTitle": "Get coordinates automatically",
+      "lastName": "Last Name:",
+      "lastNameRequired": "Last Name:*",
+      "latitude": "Latitude:",
+      "longitude": "Longitude:",
+      "neighborhood": "Neighborhood:",
+      "notes": "Notes:",
+      "number": "Number:",
+      "phone": "Phone:",
+      "phoneRequired": "Phone:*",
+      "state": "State:",
+      "street": "Street:",
+      "zip": "ZIP:"
+    },
+    "gender": {
+      "female": "Female",
+      "male": "Male",
+      "other": "Other"
+    },
+    "geolocation": {
+      "denied": "Location access denied. Enable it in your browser settings.",
+      "detected": "Location detected.",
+      "timeout": "Location request timed out. Try again.",
+      "unavailable": "Location unavailable. Check your GPS signal.",
+      "unsupported": "Geolocation not supported by this browser."
+    },
+    "hints": {
+      "addressOptional": "Address is optional and can be filled in later."
+    },
+    "memorialized": {
+      "acquiredQrCodes": "Acquired QR Codes: {count}",
+      "availableProfiles": "Available Memo Profiles: {count}",
+      "create": "Create memorialized profile",
+      "createdProfiles": "Created Memo Profiles: {count}",
+      "title": "Memorialized Profiles"
+    },
+    "new": "New customer",
+    "placeholders": {
+      "category": "Select a category",
+      "select": "Select"
+    },
+    "sections": {
+      "address": "Address",
+      "contact": "Contact",
+      "personal": "Personal data",
+      "social": "Social media"
+    },
+    "social": {
+      "other": "Other"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "stepOf": "Step {step} of {total}",
+    "steps": {
+      "address": {
+        "desc": "Physical location",
+        "title": "Address"
+      },
+      "contact": {
+        "desc": "Email, phone & category",
+        "title": "Contact"
+      },
+      "personal": {
+        "desc": "Name, gender & birth",
+        "title": "Personal"
+      },
+      "social": {
+        "desc": "Social media & website",
+        "title": "Social"
+      }
+    },
+    "stepsLabel": "Form steps",
+    "table": {
+      "category": "Category",
+      "createdAt": "Created at",
+      "email": "E-mail",
+      "empty": "No customers found",
+      "name": "Name",
+      "status": "Status"
+    },
+    "title": "Customers",
+    "toasts": {
+      "deactivated": "Customer deactivated.",
+      "deleteConfirm": "The customer \"{name}\" will be permanently deleted.",
+      "deleted": "Customer deleted successfully.",
+      "emailResent": "Email resent successfully.",
+      "reactivated": "Customer reactivated."
+    },
+    "wizardSections": {
+      "customer": "Customer",
+      "deceased": "Deceased"
+    },
+    "wizardSteps": {
+      "customer": {
+        "address": "Address",
+        "contact": "Contact",
+        "personal": "Personal data",
+        "social": "Social media"
+      },
+      "deceased": {
+        "burial": "Burial",
+        "death": "Death",
+        "personal": "Personal data",
+        "social": "Social media"
+      }
+    }
+  },
+  "Dashboard": {
+    "availableQr": "Available QR Codes for Sale",
+    "averageTicket": "Average Ticket",
+    "avgRevenuePerSale": "Avg. revenue per sale this month",
+    "currentlyInStock": "Currently in stock",
+    "monthlyRevenue": "Monthly Revenue",
+    "qrSoldThisMonth": "QR Codes Sold this Month",
+    "registeredCustomers": "Registered customers",
+    "revenueThisMonth": "Revenue this month",
+    "salesThisMonth": "Sales this month",
+    "title": "Dashboard",
+    "totalCustomers": "Total Customers"
+  },
+  "Errors": {
+    "categoryRequired": "Category is required",
+    "countryCodeRequired": "Country code is required",
+    "description": "An unexpected error occurred. Please try again.",
+    "invalidCnpj": "Invalid CNPJ",
+    "invalidCpf": "Invalid CPF",
+    "invalidEmail": "Invalid email address",
+    "invalidRole": "Invalid role",
+    "maxChars": "Must be at most {count} characters",
+    "minChars": "Must be at least {count} characters",
+    "required": "Required",
+    "retry": "Try again",
+    "title": "Something went wrong"
+  },
+  "Inventory": {
+    "digital": {
+      "availableForSale": "Available for sale",
+      "buy": "Buy digital QR codes",
+      "empty": "No QR code activity yet.",
+      "reconcileNote": "Note: the statement below was reconstructed from purchases and sales and may differ slightly from this live total (e.g. reversed sales or manual adjustments).",
+      "reversed": "Reversed",
+      "table": {
+        "balance": "Available",
+        "date": "Date",
+        "description": "Transaction Description",
+        "totalPrice": "Total Price",
+        "unitPrice": "Unit Price",
+        "units": "Units"
+      },
+      "title": "My Digital QR Codes"
+    },
+    "products": {
+      "title": "Product Inventory"
+    }
+  },
+  "Licenses": {
+    "actions": {
+      "copyUrl": "Copy URL",
+      "exportCsv": "Export CSV"
+    },
+    "buy": "Buy physical QR codes",
+    "soldVia": {
+      "MANUAL": "Manual",
+      "PLATFORM": "Platform"
+    },
+    "status": {
+      "ACTIVATED": "Activated",
+      "AVAILABLE": "Available",
+      "SOLD": "Sold"
+    },
+    "summary": {
+      "activated": "Activated",
+      "available": "Available for sale",
+      "printed": "Printed",
+      "sold": "Sold"
+    },
+    "table": {
+      "code": "Code",
+      "empty": "No QR codes found",
+      "memorial": "Memorial",
+      "printed": "Printed",
+      "soldTo": "Sold to",
+      "status": "Status",
+      "url": "URL"
+    },
+    "title": "My Physical QR Codes"
+  },
+  "Memorialized": {
+    "actions": {
+      "download": "Download",
+      "edit": "Edit",
+      "openMenu": "Open menu"
+    },
+    "burialHint": "Burial information is optional and can be filled in later.",
+    "createProfile": "Create profile",
+    "fields": {
+      "birthCity": "Birth city:",
+      "birthCountry": "Birth country:*",
+      "birthDate": "Birth date:*",
+      "birthState": "Birth state:*",
+      "burialDate": "Burial date:",
+      "burialSite": "Location (cemetery/crematorium):",
+      "cause": "Cause:",
+      "city": "City:",
+      "complement": "Complement:",
+      "country": "Country:",
+      "countryRequired": "Country:*",
+      "deathDate": "Death date:*",
+      "firstName": "First Name:*",
+      "gender": "Gender:",
+      "gps": "GPS",
+      "gpsTitle": "Get coordinates automatically",
+      "lastName": "Last Name:*",
+      "latitude": "Latitude:",
+      "longitude": "Longitude:",
+      "neighborhood": "Neighborhood:",
+      "notes": "Notes:",
+      "number": "Number:",
+      "otherSocial": "Other",
+      "state": "State:",
+      "street": "Street:",
+      "zip": "ZIP:"
+    },
+    "new": "New memorialized profile",
+    "newAvailable": "{count, plural, =0 {No QR codes available} one {# QR code available} other {# QR codes available}}",
+    "newCustomerLabel": "Customer:",
+    "qr": {
+      "copyLink": "Copy link",
+      "installedOn": "Installed: {date}",
+      "linkCopied": "Profile link copied.",
+      "markInstalled": "Mark as installed",
+      "markPrinted": "Mark as printed",
+      "noScans": "No scans yet",
+      "pngDownloaded": "PNG downloaded.",
+      "presets": {
+        "bronze": {
+          "description": "Warm metallic tones — classic for plaques.",
+          "name": "Bronze"
+        },
+        "classic": {
+          "description": "Timeless black on white — safe for any surface.",
+          "name": "Classic"
+        },
+        "forest": {
+          "description": "Deep green — at home in cemetery gardens.",
+          "name": "Forest"
+        },
+        "indigo": {
+          "description": "Brand indigo on white — warm and recognizable.",
+          "name": "Indigo"
+        },
+        "inverted": {
+          "description": "White on near-black — striking on light stone.",
+          "name": "Inverted"
+        },
+        "soft": {
+          "description": "Muted slate on cream — quiet and editorial.",
+          "name": "Soft"
+        }
+      },
+      "printedOn": "Printed: {date}",
+      "scans": "{count, plural, one {# scan} other {# scans}} — last: {date}",
+      "statusTitle": "QR Code Status",
+      "svgDownloaded": "SVG downloaded."
+    },
+    "saveChanges": "Save changes",
+    "sections": {
+      "burial": "Burial",
+      "death": "Death",
+      "personal": "Personal data",
+      "social": "Social media"
+    },
+    "status": {
+      "installed": "Installed",
+      "pending": "Pending",
+      "printed": "Printed"
+    },
+    "stepIndicator": "Step {current} of {total}",
+    "stepperLabel": "Form steps",
+    "steps": {
+      "burial": {
+        "desc": "Site & location",
+        "title": "Burial"
+      },
+      "death": {
+        "desc": "Date, place & cause",
+        "title": "Death"
+      },
+      "personal": {
+        "desc": "Name, gender & birth",
+        "title": "Personal"
+      },
+      "social": {
+        "desc": "Social media & notes",
+        "title": "Social"
+      }
+    },
+    "table": {
+      "birthDate": "Birth date",
+      "deathDate": "Death date",
+      "empty": "No memorialized profiles found.",
+      "filterPlaceholder": "Filter by name…",
+      "name": "Name",
+      "qrCode": "QR Code"
+    },
+    "toasts": {
+      "created": "Profile created successfully.",
+      "updated": "Profile updated successfully."
+    }
+  },
+  "Nav": {
+    "language": "Language",
+    "profile": "Profile",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "toggleTheme": "Toggle theme"
+  },
+  "NotFound": {
+    "description": "The page you are looking for does not exist or has been removed.",
+    "goHome": "Go home",
+    "title": "Page not found"
+  },
+  "PhysicalQr": {
+    "PhysicalQr": {
+      "actions": {
+        "manualWriteOff": "Manual write-off (off-platform)",
+        "markNotPrinted": "Mark as not printed",
+        "markPrinted": "Mark as printed",
+        "sellViaPlatform": "Sell via platform",
+        "undoSale": "Undo sale (back to available)"
+      },
+      "detail": {
+        "backToInventory": "Back to inventory",
+        "title": "Physical QR Code"
+      },
+      "fields": {
+        "buyerName": "Buyer name / contact",
+        "customer": "Customer",
+        "saleValue": "Sale value (optional)"
+      },
+      "manualSale": {
+        "description": "Record a sale made outside the platform so this code can't be sold again.",
+        "submit": "Write off",
+        "title": "Manual write-off"
+      },
+      "placeholders": {
+        "buyerName": "Who bought it?",
+        "customerSearch": "Type name or email…"
+      },
+      "platformSale": {
+        "description": "Assign this code to a registered customer and email them access to the app. The code is written off.",
+        "removeCustomer": "Remove customer",
+        "submit": "Sell & send access",
+        "submitting": "Selling…",
+        "title": "Sell via platform"
+      },
+      "soldVia": {
+        "MANUAL": "Manual",
+        "PLATFORM": "Platform"
+      },
+      "status": {
+        "ACTIVATED": "Activated",
+        "AVAILABLE": "Available",
+        "SOLD": "Sold"
+      },
+      "statusCard": {
+        "title": "QR Code Status"
+      },
+      "timeline": {
+        "activated": "Activated",
+        "created": "Created",
+        "memorial": "memorial: {name}",
+        "printed": "Printed",
+        "sold": "Sold",
+        "soldBy": "by {name}",
+        "soldFor": "for {value}",
+        "soldTo": "to {name}"
+      },
+      "toasts": {
+        "markedNotPrinted": "Marked as not printed.",
+        "markedPrinted": "Marked as printed."
+      },
+      "undo": {
+        "confirm": "This will mark the code as available again. Only possible while it has not been activated by the consumer."
+      }
+    }
+  },
+  "Profile": {
+    "Profile": {
+      "actions": {
+        "save": "Save changes"
+      },
+      "avatar": {
+        "change": "Change avatar",
+        "invalidType": "Please choose an image file.",
+        "tooLarge": "Image must be 5 MB or smaller.",
+        "uploadFailed": "Upload failed"
+      },
+      "fields": {
+        "birthDate": "Date of birth",
+        "countryCode": "Country code",
+        "cpf": "CPF",
+        "email": "Email",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "phone": "Phone"
+      },
+      "sections": {
+        "account": {
+          "description": "Manage your sign-in email and password.",
+          "emailHint": "To change your email, use the button below — a confirmation link is sent to the new address.",
+          "title": "Account & security"
+        },
+        "address": "Address",
+        "danger": {
+          "description": "Permanently delete your account and all related data.",
+          "title": "Danger zone"
+        },
+        "personal": {
+          "description": "Update your name, document, and contact details.",
+          "title": "Personal information"
+        }
+      },
+      "title": "Profile"
+    }
+  },
+  "Purchasing": {
+    "Purchasing": {
+      "card": {
+        "amount": "Amount:",
+        "buyDigital": "Start Earning Now",
+        "buyPhysical": "Buy & start reselling",
+        "digitalDescription": "Package with {count} QR {count, plural, one {Code} other {Codes}}",
+        "digitalHeadline": "Boost your margins by up to 500% with this bundle",
+        "digitalPriceUnit": "{count} QR {count, plural, one {Code} other {Codes}} per package",
+        "digitalSubcopy": "Generate {amount}+ in revenue",
+        "physicalDescription": "{count} QR {count, plural, one {code} other {codes}} ready to print",
+        "physicalHeadline": "Print on demand and resell at your own price",
+        "physicalPriceUnit": "{count} print-ready QR {count, plural, one {code} other {codes}}",
+        "physicalSubcopy": "Earn up to {amount}+ reselling them",
+        "priceForAsLittleAs": "For as little as",
+        "priceFrom": "From",
+        "processing": "Processing…"
+      },
+      "digital": {
+        "title": "Buy Digital QR Codes"
+      },
+      "empty": {
+        "digital": "No packages available at the moment.",
+        "physical": "No physical QR codes available at the moment."
+      },
+      "physical": {
+        "title": "Buy Physical QR Codes"
+      },
+      "toasts": {
+        "canceled": "Purchase canceled.",
+        "success": "Purchase complete — QR codes will appear shortly."
+      }
+    }
+  },
+  "Sales": {
+    "Sales": {
+      "actions": {
+        "completeSale": "Complete Sale",
+        "registering": "Registering...",
+        "removeCustomer": "Remove customer"
+      },
+      "buyQrCodes": "Buy QR codes",
+      "confirm": {
+        "confirm": "Confirm",
+        "description": "The sale will be registered and a QR code will be removed from inventory. Confirm?",
+        "title": "Confirm sale"
+      },
+      "emptyInventory": "No QR codes in inventory.",
+      "errors": {
+        "invalidAmount": "Enter a valid amount.",
+        "selectCustomer": "Select a customer.",
+        "selectSubscription": "Select a subscription."
+      },
+      "fields": {
+        "bonusSubscription": "Bonus subscription:",
+        "customer": "Customer:",
+        "totalAmount": "Total Amount:"
+      },
+      "hints": {
+        "belowSuggested": "Below suggested {amount} (2× last package cost) — selling at a loss?",
+        "bonusSubscription": "The app subscription the customer will receive for free",
+        "customer": "Who are you selling to?",
+        "suggested": "Suggested: {amount} (2× last package cost)",
+        "totalAmount": "The total price charged for the QR Codes."
+      },
+      "placeholders": {
+        "customerSearch": "Type name or email...",
+        "subscription": "Select a subscription..."
+      },
+      "title": "Sales"
+    }
+  },
+  "SupplierCategories": {
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate"
+    },
+    "create": "New Supplier Category",
+    "edit": "Edit supplier category",
+    "fields": {
+      "description": "Description:",
+      "isActive": "Active category:",
+      "name": "Name:"
+    },
+    "new": "New category",
+    "save": "Save changes",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "createdAt": "Created at",
+      "description": "Description",
+      "empty": "No supplier categories found.",
+      "name": "Name",
+      "status": "Status"
+    },
+    "title": "Supplier Categories",
+    "toasts": {
+      "deactivated": "Category deactivated.",
+      "deleteConfirm": "The category \"{name}\" will be permanently deleted.",
+      "deleted": "Category deleted successfully.",
+      "reactivated": "Category reactivated."
+    }
+  },
+  "Suppliers": {
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate"
+    },
+    "create": "Create supplier",
+    "edit": "Edit supplier",
+    "entityType": {
+      "company": "Company",
+      "individual": "Individual"
+    },
+    "fields": {
+      "activeSupplier": "Active supplier:",
+      "birthDate": "Date of Birth:",
+      "category": "Category:",
+      "cnpj": "CNPJ:",
+      "companyName": "Company Name:",
+      "countryCode": "Country Code:",
+      "cpf": "CPF:",
+      "email": "E-mail:",
+      "firstName": "Name:",
+      "lastName": "Last Name:",
+      "municipalRegistration": "Municipal Registration:",
+      "notes": "Notes:",
+      "phone": "Phone:",
+      "stateRegistration": "State Registration:",
+      "tradeName": "Trade Name:",
+      "type": "Type:"
+    },
+    "new": "New supplier",
+    "placeholders": {
+      "category": "Select a category"
+    },
+    "sections": {
+      "address": "Address"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "category": "Category",
+      "createdAt": "Created at",
+      "email": "E-mail",
+      "empty": "No suppliers found.",
+      "name": "Name",
+      "status": "Status",
+      "type": "Type"
+    },
+    "title": "Suppliers",
+    "toasts": {
+      "deactivated": "Supplier deactivated.",
+      "deleteConfirm": "The supplier \"{name}\" will be permanently deleted.",
+      "deleted": "Supplier deleted successfully.",
+      "reactivated": "Supplier reactivated."
+    }
+  },
+  "Users": {
+    "Users": {
+      "actions": {
+        "deactivate": "Deactivate",
+        "delete": "Delete",
+        "edit": "Edit",
+        "openMenu": "Open menu",
+        "reactivate": "Reactivate",
+        "resendEmail": "Resend email"
+      },
+      "create": "New user",
+      "edit": "Edit user",
+      "fields": {
+        "birthDate": "Date of Birth:",
+        "countryCode": "Country Code:",
+        "cpf": "CPF:",
+        "email": "E-mail:",
+        "firstName": "First Name:",
+        "isActive": "Active user:",
+        "lastName": "Last Name:",
+        "phone": "Phone:",
+        "role": "Role:"
+      },
+      "new": "New employee",
+      "placeholders": {
+        "role": "Select a role"
+      },
+      "roles": {
+        "ADMIN": "Admin",
+        "COMERCIAL": "Comercial",
+        "FINANCE": "Finance",
+        "OWNER": "Owner",
+        "SUPER_ADMIN": "Super Admin",
+        "USER": "User"
+      },
+      "sections": {
+        "address": "Address"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "table": {
+        "createdAt": "Created at",
+        "email": "E-mail",
+        "empty": "No users found.",
+        "name": "Name",
+        "role": "Role",
+        "status": "Status"
+      },
+      "title": "Employees",
+      "toasts": {
+        "deactivated": "User deactivated.",
+        "deleteConfirm": "The user \"{name}\" will be permanently deleted.",
+        "deleted": "User deleted successfully.",
+        "emailResent": "Email resent successfully.",
+        "reactivated": "User reactivated."
+      }
     }
   }
 }

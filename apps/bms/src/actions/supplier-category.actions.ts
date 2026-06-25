@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/dal'
-import { supplierCategorySchema, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
+import { getSupplierCategorySchema, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
@@ -13,7 +14,7 @@ type CreateSuccess = { success: string; category: { id: string; name: string } }
 export async function createSupplierCategory(data: SupplierCategoryFormValues): Promise<ActionError | CreateSuccess> {
   await verifyAdmin()
 
-  const validated = supplierCategorySchema.safeParse(data)
+  const validated = getSupplierCategorySchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   let created: { id: string; name: string }
@@ -33,7 +34,7 @@ export async function createSupplierCategory(data: SupplierCategoryFormValues): 
 export async function updateSupplierCategory(id: string, data: SupplierCategoryFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = supplierCategorySchema.safeParse(data)
+  const validated = getSupplierCategorySchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   try {

@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { auth } from "@/auth"
 import { getLicenseByGenCode } from "@/queries/physical-qr"
 import { PhysicalQrLanding } from "@/components/qr/physical-qr-landing"
@@ -13,9 +14,10 @@ export default async function PhysicalQrPage({ params }: Props) {
   const { genCode: rawGenCode } = await params
   const normalized = rawGenCode.toUpperCase().replace(/-/g, "")
 
-  const [session, license] = await Promise.all([
+  const [session, license, t] = await Promise.all([
     auth(),
     getLicenseByGenCode(normalized),
+    getTranslations("Qr"),
   ])
 
   if (!license) notFound()
@@ -32,9 +34,9 @@ export default async function PhysicalQrPage({ params }: Props) {
         {session?.user ? (
           <div className="space-y-6">
             <div>
-              <h1 className="text-4xl font-extrabold tracking-tight">Activate Memorial</h1>
+              <h1 className="text-4xl font-extrabold tracking-tight">{t("activatePage.title")}</h1>
               <p className="text-muted-foreground mt-2">
-                Fill in the details of the person you are memorializing.
+                {t("activatePage.subtitle")}
               </p>
             </div>
             <ActivateMemorialForm genCode={normalized} />

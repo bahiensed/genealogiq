@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
-const { prismaMock, txMock } = vi.hoisted(() => ({
+const { prismaMock, txMock, safeParseMock } = vi.hoisted(() => ({
   prismaMock: {
     physicalQrLicense: { findUnique: vi.fn() },
     $transaction: vi.fn(),
@@ -10,24 +10,25 @@ const { prismaMock, txMock } = vi.hoisted(() => ({
     appUserGuardian: { create: vi.fn() },
     physicalQrLicense: { update: vi.fn() },
   },
+  safeParseMock: vi.fn(),
 }))
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
-vi.mock("@/schemas/memorial", () => ({ memorialSchema: { safeParse: vi.fn() } }))
+// The action calls getMemorialSchema(identityTranslator).safeParse(data); stub the
+// factory so it always hands back an object whose safeParse we control per-test.
+vi.mock("@/schemas/memorial", () => ({ getMemorialSchema: () => ({ safeParse: safeParseMock }) }))
 
 import { activatePhysicalQr } from "./physical-qr"
 import { verifySession } from "@/lib/dal"
-import { memorialSchema } from "@/schemas/memorial"
 
 const MEMORIAL = { firstName: "Ana", lastName: "Silva" }
 
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(verifySession).mockResolvedValue({ user: { id: "guardian-1" } } as never)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ;(memorialSchema.safeParse as any).mockReturnValue({ success: true, data: MEMORIAL })
+  safeParseMock.mockReturnValue({ success: true, data: MEMORIAL })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prismaMock.$transaction.mockImplementation(async (cb: any) => cb(txMock))
   txMock.appUser.create.mockResolvedValue({ id: "memo-1" })
@@ -52,8 +53,7 @@ describe("activatePhysicalQr", () => {
 
   it("rejects invalid memorial data before mutating", async () => {
     prismaMock.physicalQrLicense.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(memorialSchema.safeParse as any).mockReturnValue({ success: false, error: { issues: [{ message: "First name required" }] } })
+    safeParseMock.mockReturnValue({ success: false, error: { issues: [{ message: "First name required" }] } })
     expect(await activatePhysicalQr("GENCODE", MEMORIAL)).toEqual({ error: "First name required" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })

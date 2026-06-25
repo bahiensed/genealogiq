@@ -1,23 +1,23 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import type { Translator } from './i18n'
 import { addressSchema, addressDefaultValues } from './address.schema'
 
 // Self-profile schema: subset of user.schema covering only fields a user can
 // safely edit for themselves. role/email/isActive/tenantId are handled by
 // admin flows or dedicated dialogs (ChangeEmailDialog).
-export const profileSchema = z.object({
-  firstName:        z.string().min(2, 'Must be at least 2 characters'),
-  lastName:         z.string().min(2, 'Must be at least 2 characters'),
-  nationalId:       z.string().nullish(),
-  birthDate:        z.string().nullish(),
-  phoneCountryCode: z.string().min(1, 'Country code is required'),
-  phone:            z.string().nullish(),
-  address:          addressSchema.optional(),
-})
+export function getProfileSchema(t: Translator) {
+  return z.object({
+    firstName:        z.string().min(2, t('minChars', { count: 2 })),
+    lastName:         z.string().min(2, t('minChars', { count: 2 })),
+    nationalId:       z.string().nullish(),
+    birthDate:        z.string().nullish(),
+    phoneCountryCode: z.string().min(1, t('countryCodeRequired')),
+    phone:            z.string().nullish(),
+    address:          addressSchema.optional(),
+  })
+}
 
-export type ProfileFormValues = z.infer<typeof profileSchema>
-
-export const profileResolver = zodResolver(profileSchema)
+export type ProfileFormValues = z.infer<ReturnType<typeof getProfileSchema>>
 
 export const profileDefaultValues: ProfileFormValues = {
   firstName:        '',

@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { supplierCategoryResolver, supplierCategoryDefaultValues, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
+import { getSupplierCategorySchema, supplierCategoryDefaultValues, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
 import { createSupplierCategory, updateSupplierCategory } from '@/actions/supplier-category.actions'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
@@ -18,12 +20,15 @@ interface SupplierCategoryFormProps {
 }
 
 export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryFormProps) {
+  const t    = useTranslations('SupplierCategories')
+  const tc   = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<SupplierCategoryFormValues>({
-    resolver: supplierCategoryResolver,
+    resolver: useMemo(() => zodResolver(getSupplierCategorySchema(tErr)) as any, [tErr]), // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: defaultValues ?? supplierCategoryDefaultValues,
   })
 
@@ -57,7 +62,7 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Name:</FieldLabel>
+              <FieldLabel>{t('fields.name')}</FieldLabel>
               <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -69,7 +74,7 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Description:</FieldLabel>
+              <FieldLabel>{t('fields.description')}</FieldLabel>
               <Textarea {...field} rows={3} aria-invalid={fieldState.invalid} />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -87,7 +92,7 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
-                <FieldLabel htmlFor="isActive" className="cursor-pointer">Active category:</FieldLabel>
+                <FieldLabel htmlFor="isActive" className="cursor-pointer">{t('fields.isActive')}</FieldLabel>
               </Field>
             )}
           />
@@ -98,10 +103,12 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : isEditing ? 'Save changes' : 'Create category'}
+          {isSubmitting
+            ? (isEditing ? tc('saving') : tc('creating'))
+            : isEditing ? t('save') : t('create')}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>

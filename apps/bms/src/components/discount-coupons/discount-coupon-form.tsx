@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
 import {
-  discountCouponResolver,
+  getDiscountCouponSchema,
   discountCouponDefaultValues,
   type DiscountCouponFormValues,
 } from '@/schemas/discount-coupon.schema'
@@ -28,14 +30,17 @@ interface DiscountCouponFormProps {
   packages: PackageOption[]
 }
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-
 export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
+  const t    = useTranslations('DiscountCoupons')
+  const tc   = useTranslations('Common')
+  const tErr = useTranslations('Errors')
+  const locale = useLocale()
+  const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<DiscountCouponFormValues>({
-    resolver:      discountCouponResolver,
+    resolver:      useMemo(() => zodResolver(getDiscountCouponSchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: discountCouponDefaultValues,
   })
 
@@ -64,12 +69,12 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Code:</FieldLabel>
+              <FieldLabel>{t('fields.code')}</FieldLabel>
               <Input
                 {...field}
                 autoComplete="off"
                 onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                placeholder="WELCOME10"
+                placeholder={t('placeholders.code')}
                 aria-invalid={fieldState.invalid}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -82,12 +87,12 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
           control={control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Description:</FieldLabel>
+              <FieldLabel>{t('fields.description')}</FieldLabel>
               <Textarea
                 {...field}
                 value={field.value ?? ''}
                 rows={2}
-                placeholder="Optional internal note"
+                placeholder={t('placeholders.descriptionCreate')}
                 aria-invalid={fieldState.invalid}
               />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -101,12 +106,12 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
             control={control}
             render={({ field }) => (
               <Field>
-                <FieldLabel>Discount type:</FieldLabel>
+                <FieldLabel>{t('fields.discountType')}</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="percent">Percent off</SelectItem>
-                    <SelectItem value="amount">Fixed amount off (USD)</SelectItem>
+                    <SelectItem value="percent">{t('discountType.percent')}</SelectItem>
+                    <SelectItem value="amount">{t('discountType.amount')}</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -118,7 +123,7 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>{discountType === 'percent' ? 'Percent (0-100):' : 'Amount ($):'}</FieldLabel>
+                <FieldLabel>{discountType === 'percent' ? t('fields.percent') : t('fields.amount')}</FieldLabel>
                 <Input
                   type="number"
                   step={discountType === 'percent' ? '1' : '0.01'}
@@ -139,13 +144,13 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
             control={control}
             render={({ field }) => (
               <Field>
-                <FieldLabel>Duration:</FieldLabel>
+                <FieldLabel>{t('fields.duration')}</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="once">Once (first invoice only)</SelectItem>
-                    <SelectItem value="forever">Forever (every invoice)</SelectItem>
-                    <SelectItem value="repeating">Repeating (N months)</SelectItem>
+                    <SelectItem value="once">{t('durationOption.once')}</SelectItem>
+                    <SelectItem value="forever">{t('durationOption.forever')}</SelectItem>
+                    <SelectItem value="repeating">{t('durationOption.repeating')}</SelectItem>
                   </SelectContent>
                 </Select>
               </Field>
@@ -158,7 +163,7 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
               control={control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Duration in months:</FieldLabel>
+                  <FieldLabel>{t('fields.durationInMonths')}</FieldLabel>
                   <Input
                     type="number"
                     min="1"
@@ -180,12 +185,12 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Max redemptions:</FieldLabel>
+                <FieldLabel>{t('fields.maxRedemptions')}</FieldLabel>
                 <Input
                   type="number"
                   min="1"
                   step="1"
-                  placeholder="Blank = unlimited"
+                  placeholder={t('placeholders.maxRedemptions')}
                   value={field.value ?? ''}
                   onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
                   aria-invalid={fieldState.invalid}
@@ -200,7 +205,7 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
             control={control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Expires on:</FieldLabel>
+                <FieldLabel>{t('fields.expiresOn')}</FieldLabel>
                 <Input
                   type="date"
                   value={field.value ? new Date(field.value).toISOString().slice(0, 10) : ''}
@@ -219,8 +224,8 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
             control={control}
             render={({ field }) => (
               <Field>
-                <FieldLabel>Applies to specific packages (optional):</FieldLabel>
-                <p className="text-xs text-muted-foreground">Leave all unchecked to apply to every package.</p>
+                <FieldLabel>{t('fields.appliesTo')}</FieldLabel>
+                <p className="text-xs text-muted-foreground">{t('hints.appliesTo')}</p>
                 <div className="flex flex-col gap-2 mt-1">
                   {packages.map((p) => {
                     const checked = field.value.includes(p.id)
@@ -237,7 +242,7 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
                         />
                         <span>
                           {p.name}
-                          <span className="text-muted-foreground"> — {p.quantity} QR codes · {usd.format(p.price)}</span>
+                          <span className="text-muted-foreground"> — {t('packageMeta', { quantity: p.quantity, price: usd.format(p.price) })}</span>
                         </span>
                       </label>
                     )
@@ -251,10 +256,10 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : 'Create coupon'}
+          {isSubmitting ? tc('saving') : t('create')}
         </Button>
         <Button type="button" variant="outline" onClick={() => form.reset()}>
-          Reset
+          {tc('reset')}
         </Button>
       </Field>
     </form>

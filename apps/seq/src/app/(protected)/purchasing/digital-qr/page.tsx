@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { QRStore } from '@/components/purchasing/qr-store'
@@ -6,6 +7,8 @@ import { PurchaseStatusToast } from '@/components/purchasing/purchase-status-toa
 
 export default async function PurchasingPackagesPage() {
   await verifyTenantSession()
+
+  const t = await getTranslations('Purchasing')
 
   const packages = await prisma.package.findMany({
     where: { isActive: true, type: 'DIGITAL' },
@@ -27,7 +30,7 @@ export default async function PurchasingPackagesPage() {
         <PurchaseStatusToast />
       </Suspense>
       <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-        Buy Digital QR Codes
+        {t('digital.title')}
       </h1>
       <QRStore packages={data} />
     </div>

@@ -17,6 +17,10 @@ import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
 import { toggleCustomerCategoryActive, deleteCustomerCategory } from '@/actions/customer-category.actions'
 
+// Loose translator type so getColumns can stay a plain function (not a hook).
+// The caller (customer-categories-data-table) passes useTranslations('CustomerCategories').
+type Translator = (key: string, values?: Record<string, string | number | Date>) => string
+
 export type CustomerCategoryRow = {
   id: string
   name: string
@@ -25,7 +29,7 @@ export type CustomerCategoryRow = {
   createdAt: Date
 }
 
-function ActionsCell({ row, currentUserRole }: { row: { original: CustomerCategoryRow }; currentUserRole: string }) {
+function ActionsCell({ row, currentUserRole, t }: { row: { original: CustomerCategoryRow }; currentUserRole: string; t: Translator }) {
   const [isPending, startTransition] = useTransition()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const category = row.original
@@ -36,31 +40,29 @@ function ActionsCell({ row, currentUserRole }: { row: { original: CustomerCatego
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" disabled={isPending}>
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('actions.openMenu')}</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/customer-categories/${category.id}`}>Edit</Link>
+            <Link href={`/customer-categories/${category.id}`}>{t('actions.edit')}</Link>
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleCustomerCategoryActive(category.id)
               if (result?.error) toast.error(result.error)
-              else toast.success(category.isActive ? 'Category deactivated.' : 'Category reactivated.')
+              else toast.success(category.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
-            {category.isActive ? 'Deactivate' : 'Reactivate'}
+            {category.isActive ? t('actions.deactivate') : t('actions.reactivate')}
           </DropdownMenuItem>
           {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-            <>
-                  <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onSelect={() => setDeleteOpen(true)}
-              >
-                Delete
-              </DropdownMenuItem>
-            </>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onSelect={() => setDeleteOpen(true)}
+            >
+              {t('actions.delete')}
+            </DropdownMenuItem>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -70,11 +72,11 @@ function ActionsCell({ row, currentUserRole }: { row: { original: CustomerCatego
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           isPending={isPending}
-          description={`The category "${category.name}" will be permanently deleted.`}
+          description={t('toasts.deleteConfirm', { name: category.name })}
           onConfirm={() => startTransition(async () => {
             const result = await deleteCustomerCategory(category.id)
             if (result?.error) toast.error(result.error)
-            else { toast.success('Category deleted successfully.'); setDeleteOpen(false) }
+            else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
           })}
         />
       )}
@@ -82,11 +84,11 @@ function ActionsCell({ row, currentUserRole }: { row: { original: CustomerCatego
   )
 }
 
-export function getColumns(currentUserRole: string): ColumnDef<CustomerCategoryRow>[] {
+export function getColumns(currentUserRole: string, t: Translator, locale: string): ColumnDef<CustomerCategoryRow>[] {
   return [
     {
       accessorKey: 'name',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
       cell: ({ row }) => (
         <Link href={`/customer-categories/${row.original.id}`} className="hover:underline">
           {row.original.name}
@@ -95,29 +97,29 @@ export function getColumns(currentUserRole: string): ColumnDef<CustomerCategoryR
     },
     {
       accessorKey: 'description',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Description" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.description')} />,
       cell: ({ row }) => row.original.description ?? '—',
     },
     {
       accessorKey: 'isActive',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.status')} />,
       cell: ({ row }) =>
         row.original.isActive ? (
-          <Badge variant="default">Active</Badge>
+          <Badge variant="default">{t('status.active')}</Badge>
         ) : (
-          <Badge variant="destructive">Inactive</Badge>
+          <Badge variant="destructive">{t('status.inactive')}</Badge>
         ),
     },
     {
       accessorKey: 'createdAt',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Created at" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.createdAt')} />,
       cell: ({ row }) =>
-        new Intl.DateTimeFormat('en-US', { dateStyle: 'short' }).format(row.original.createdAt),
+        new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(row.original.createdAt),
     },
     {
       id: 'actions',
       enableHiding: false,
-      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} />,
+      cell: ({ row }) => <ActionsCell row={row} currentUserRole={currentUserRole} t={t} />,
     },
   ]
 }

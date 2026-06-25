@@ -5,7 +5,8 @@ import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { assertOwnership } from '@genealogiq/auth/authz'
-import { deceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'
+import { getDeceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
@@ -67,7 +68,7 @@ export async function createDeceased(
   )
   if (!availableSale) return { error: 'No QR codes available for this customer.' }
 
-  const validated = deceasedSchema.safeParse(data)
+  const validated = getDeceasedSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const {
@@ -129,7 +130,7 @@ export async function createDeceased(
 export async function updateDeceased(id: string, data: DeceasedFormValues): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
-  const validated = deceasedSchema.safeParse(data)
+  const validated = getDeceasedSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const {
