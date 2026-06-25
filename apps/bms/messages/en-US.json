@@ -32,5 +32,44 @@
     "revenueThisYear": "Revenue this year",
     "totalRevenue": "Total Revenue",
     "allTimeRevenue": "All-time revenue"
+  },
+  "Common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating…",
+    "edit": "Edit",
+    "search": "Search",
+    "reset": "Reset",
+    "back": "Back",
+    "next": "Next",
+    "delete": {
+      "title": "Confirm deletion",
+      "description": "This action cannot be undone.",
+      "confirm": "Delete",
+      "deleting": "Deleting…"
+    },
+    "toasts": {
+      "saved": "Saved successfully.",
+      "created": "Created successfully.",
+      "deleted": "Deleted successfully.",
+      "error": "Something went wrong. Please try again."
+    },
+    "dataTable": {
+      "searchPlaceholder": "Search…",
+      "noResults": "No records found",
+      "columns": "Columns",
+      "rowsPerPage": "Rows per page",
+      "pageOf": "Page {page} of {total}",
+      "rowCount": "{count, plural, =0 {No records} one {# record} other {# records}}",
+      "firstPage": "First page",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "lastPage": "Last page",
+      "sortAsc": "Asc",
+      "sortDesc": "Desc",
+      "hide": "Hide"
+    }
   }
 }

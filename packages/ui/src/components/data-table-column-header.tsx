@@ -1,4 +1,7 @@
+'use client'
+
 import { type Column } from '@tanstack/react-table'
+import { useTranslations } from 'next-intl'
 import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from 'lucide-react'
 
 import { cn } from '../lib/utils'
@@ -22,6 +25,7 @@ export function DataTableColumnHeader<TData, TValue>({
   title,
   className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
+  const t = useTranslations('Common')
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>
   }
@@ -48,16 +52,16 @@ export function DataTableColumnHeader<TData, TValue>({
         <DropdownMenuContent align="start">
           <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
             <ArrowUp />
-            Asc
+            {t('dataTable.sortAsc')}
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
             <ArrowDown />
-            Desc
+            {t('dataTable.sortDesc')}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
             <EyeOff />
-            Hide
+            {t('dataTable.hide')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
