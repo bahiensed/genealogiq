@@ -1,12 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
+import { done, fail, type ActionResult } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { getCompanySchema, type CompanyFormValues } from '@/schemas/company.schema'
 import { identityTranslator } from '@/schemas/i18n'
-
-type ActionError = { error: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildAddressWrite(address: CompanyFormValues['address']): any {
@@ -16,11 +16,12 @@ function buildAddressWrite(address: CompanyFormValues['address']): any {
   return { upsert: { create: address, update: address } }
 }
 
-export async function updateCompany(_id: string, data: CompanyFormValues): Promise<ActionError | void> {
+export async function updateCompany(_id: string, data: CompanyFormValues): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const validated = getCompanySchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { address, legalName, ...rest } = validated.data
 
@@ -34,4 +35,6 @@ export async function updateCompany(_id: string, data: CompanyFormValues): Promi
   })
 
   revalidatePath('/system/company')
+
+  return done(t('company.updated'))
 }

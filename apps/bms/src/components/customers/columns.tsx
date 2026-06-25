@@ -53,7 +53,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: CustomerRow
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleCustomerActive(customer.id)
-              if (result?.error) toast.error(result.error)
+              if (!result.ok) toast.error(result.message)
               else toast.success(customer.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
@@ -62,7 +62,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: CustomerRow
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await resendCustomerEmail(customer.id)
-              if (result?.error) toast.error(result.error)
+              if (!result.ok) toast.error(result.message)
               else toast.success(t('toasts.emailResent'))
             })}
           >
@@ -87,7 +87,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: CustomerRow
           description={t('toasts.deleteConfirm', { name: customer.name })}
           onConfirm={() => startTransition(async () => {
             const result = await deleteCustomer(customer.id)
-            if (result?.error) toast.error(result.error)
+            if (!result.ok) toast.error(result.message)
             else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
           })}
         />

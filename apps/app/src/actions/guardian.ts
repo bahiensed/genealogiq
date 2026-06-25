@@ -1,6 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
+import { done, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { notify } from "@/lib/notifications"
@@ -16,14 +18,15 @@ import {
 // themselves). The row lands as PENDING and every existing accepted guardian
 // gets notified.
 
-export async function requestGuardianship(data: unknown) {
+export async function requestGuardianship(data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
   const parsed  = requestGuardianshipSchema.safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(parsed.error.issues[0].message)
   const { profileId } = parsed.data
 
   if (profileId === session.user.id) {
-    return { error: "You already manage your own profile." }
+    return fail(t("guardian.cannotManageOwn"))
   }
 
   const profile = await prisma.appUser.findUnique({
@@ -33,17 +36,17 @@ export async function requestGuardianship(data: unknown) {
       guardedBy: { select: { guardianId: true, status: true } },
     },
   })
-  if (!profile) return { error: "Profile not found." }
+  if (!profile) return fail(t("guardian.profileNotFound"))
 
   // Real APP_USERs manage themselves; co-guardianship requests are for ghosts
   // and memorials only (people who can't speak for themselves).
   if (profile.role !== "APP_GHOST" && profile.role !== "APP_MEMO") {
-    return { error: "Only ghost and memorial profiles support co-management." }
+    return fail(t("guardian.coManageUnsupported"))
   }
 
   const existing = profile.guardedBy.find((g) => g.guardianId === session.user.id)
-  if (existing?.status === "ACCEPTED") return { error: "You already co-manage this profile." }
-  if (existing?.status === "PENDING")  return { error: "You already have a pending request for this profile." }
+  if (existing?.status === "ACCEPTED") return fail(t("guardian.alreadyCoManage"))
+  if (existing?.status === "PENDING")  return fail(t("guardian.requestPending"))
 
   const guardianship = await prisma.appUserGuardian.create({
     data: {
@@ -70,15 +73,16 @@ export async function requestGuardianship(data: unknown) {
 
   revalidatePath(`/profile/${profileId}`)
   revalidatePath(`/messages`)
-  return { success: true, id: guardianship.id }
+  return done()
 }
 
 // ─── approveGuardianship ─────────────────────────────────────────────────────
 
-export async function approveGuardianship(data: unknown) {
+export async function approveGuardianship(data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
   const parsed  = guardianshipActionSchema.safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(parsed.error.issues[0].message)
   const { guardianshipId } = parsed.data
 
   const guardianship = await prisma.appUserGuardian.findUnique({
@@ -88,13 +92,13 @@ export async function approveGuardianship(data: unknown) {
       appUser: { select: { guardedBy: { select: { guardianId: true, status: true } } } },
     },
   })
-  if (!guardianship) return { error: "Request not found." }
-  if (guardianship.status !== "PENDING") return { error: "Request already resolved." }
+  if (!guardianship) return fail(t("guardian.requestNotFound"))
+  if (guardianship.status !== "PENDING") return fail(t("guardian.requestResolved"))
 
   const canApprove = guardianship.appUser.guardedBy.some(
     (g) => g.guardianId === session.user.id && g.status === "ACCEPTED",
   )
-  if (!canApprove) return { error: "Not authorized." }
+  if (!canApprove) return fail(t("guardian.notAuthorized"))
 
   await prisma.appUserGuardian.update({
     where: { id: guardianshipId },
@@ -110,15 +114,16 @@ export async function approveGuardianship(data: unknown) {
 
   revalidatePath(`/profile/${guardianship.appUserId}`)
   revalidatePath(`/messages`)
-  return { success: true }
+  return done()
 }
 
 // ─── rejectGuardianship ──────────────────────────────────────────────────────
 
-export async function rejectGuardianship(data: unknown) {
+export async function rejectGuardianship(data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
   const parsed  = guardianshipActionSchema.safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(parsed.error.issues[0].message)
   const { guardianshipId } = parsed.data
 
   const guardianship = await prisma.appUserGuardian.findUnique({
@@ -128,13 +133,13 @@ export async function rejectGuardianship(data: unknown) {
       appUser: { select: { guardedBy: { select: { guardianId: true, status: true } } } },
     },
   })
-  if (!guardianship) return { error: "Request not found." }
-  if (guardianship.status !== "PENDING") return { error: "Request already resolved." }
+  if (!guardianship) return fail(t("guardian.requestNotFound"))
+  if (guardianship.status !== "PENDING") return fail(t("guardian.requestResolved"))
 
   const canReject = guardianship.appUser.guardedBy.some(
     (g) => g.guardianId === session.user.id && g.status === "ACCEPTED",
   )
-  if (!canReject) return { error: "Not authorized." }
+  if (!canReject) return fail(t("guardian.notAuthorized"))
 
   await notify({
     type:    "GUARDIAN_REQUEST_REJECTED",
@@ -147,5 +152,5 @@ export async function rejectGuardianship(data: unknown) {
 
   revalidatePath(`/profile/${guardianship.appUserId}`)
   revalidatePath(`/messages`)
-  return { success: true }
+  return done()
 }

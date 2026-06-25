@@ -40,19 +40,19 @@ export function DeleteAccountDialog() {
         </DialogHeader>
 
         <form action={dispatch} className="flex flex-col gap-4">
-          {state?.error && (
-            <p className="text-sm text-destructive">{state.error}</p>
+          {state && !state.ok && (
+            <p className="text-sm text-destructive">{state.message}</p>
           )}
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="da-currentPassword">Current password:</Label>
-            <InputGroup aria-invalid={!!state?.errors?.currentPassword}>
+            <InputGroup aria-invalid={!!state?.fieldErrors?.currentPassword}>
               <InputGroupInput
                 id="da-currentPassword"
                 name="currentPassword"
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
-                aria-invalid={!!state?.errors?.currentPassword}
+                aria-invalid={!!state?.fieldErrors?.currentPassword}
               />
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
@@ -63,8 +63,8 @@ export function DeleteAccountDialog() {
                 </InputGroupButton>
               </InputGroupAddon>
             </InputGroup>
-            {state?.errors?.currentPassword?.[0] && (
-              <p className="text-xs text-destructive">{state.errors.currentPassword[0]}</p>
+            {state?.fieldErrors?.currentPassword?.[0] && (
+              <p className="text-xs text-destructive">{state.fieldErrors.currentPassword[0]}</p>
             )}
           </div>
 

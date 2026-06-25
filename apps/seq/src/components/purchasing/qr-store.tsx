@@ -60,11 +60,11 @@ function PackageCard({ pkg, variant }: { pkg: QRPackage; variant: QRStoreVariant
   function handleBuy() {
     startTransition(async () => {
       const result = await createPackageCheckoutSession(pkg.id, qty)
-      if ('error' in result) {
-        toast.error(result.error)
+      if (!result.ok) {
+        toast.error(result.message)
         return
       }
-      router.push(result.url)
+      router.push(result.data!.url)
     })
   }
 

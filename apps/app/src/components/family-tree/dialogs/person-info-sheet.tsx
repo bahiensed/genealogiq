@@ -152,7 +152,7 @@ export function PersonInfoSheet({
   const handleRequestCoManage = () => {
     startRequest(async () => {
       const result = await requestGuardianship({ profileId: person.id })
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.coManageRequestSent"))
       router.refresh()
     })
@@ -170,7 +170,7 @@ export function PersonInfoSheet({
     setRemoving(true)
     const result = await removeMember(rootId, person.id)
     setRemoving(false)
-    if (result?.error) { toast.error(result.error); return }
+    if (!result.ok) { toast.error(result.message); return }
     toast.success(t("toasts.removedFromTree"))
     onClose()
     onSuccess()

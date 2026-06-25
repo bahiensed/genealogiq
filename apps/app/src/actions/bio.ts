@@ -1,6 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
+import { done, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { bioSchema } from "@/schemas/bio"
@@ -9,24 +11,25 @@ import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
 
-export async function saveBio(profileId: string, data: unknown) {
+export async function saveBio(profileId: string, data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile) return { error: "Profile not found." }
-  if (!canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile) return fail(t("bio.profileNotFound"))
+  if (!canManageProfile(profile, session.user.id)) return fail(t("bio.notAuthorized"))
 
   const parsed = bioSchema.safeParse(data)
-  if (!parsed.success) return { error: "Invalid data" }
+  if (!parsed.success) return fail(t("common.invalidData"))
 
   const { quote, text, images } = parsed.data
 
   const features = await getMemorialFeatures(profileId)
   if ((text?.length ?? 0) > features.bioMaxChars) {
-    return { error: `Biography limit is ${features.bioMaxChars} characters for this plan.` }
+    return fail(t("bio.charLimit", { max: features.bioMaxChars }))
   }
   if (images.length > features.bioMaxImages) {
-    return { error: `Image limit is ${features.bioMaxImages} for this plan.` }
+    return fail(t("bio.imageLimit", { max: features.bioMaxImages }))
   }
 
   const bio = await prisma.bio.upsert({
@@ -54,15 +57,16 @@ export async function saveBio(profileId: string, data: unknown) {
   }
 
   revalidatePath(`/profile/${profileId}/bio`)
-  return { success: true }
+  return done()
 }
 
-export async function deleteBio(profileId: string) {
+export async function deleteBio(profileId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile) return { error: "Profile not found." }
-  if (!canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile) return fail(t("bio.profileNotFound"))
+  if (!canManageProfile(profile, session.user.id)) return fail(t("bio.notAuthorized"))
 
   const bio = await prisma.bio.findUnique({
     where: { userId: profileId },
@@ -72,5 +76,5 @@ export async function deleteBio(profileId: string) {
 
   await prisma.bio.deleteMany({ where: { userId: profileId } })
   revalidatePath(`/profile/${profileId}/bio`)
-  return { success: true }
+  return done()
 }

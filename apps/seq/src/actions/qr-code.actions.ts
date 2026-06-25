@@ -1,19 +1,20 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
+import { done, fail, type ActionResult } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 
-type ActionError = { error: string }
-
-export async function markQrPrinted(appUserId: string): Promise<ActionError | void> {
+export async function markQrPrinted(appUserId: string): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const { customerId } = await verifyTenantSession()
 
   const memorial = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
     select: { id: true },
   })
-  if (!memorial) return { error: 'Profile not found.' }
+  if (!memorial) return fail(t('qrCode.notFound'))
 
   await prisma.qrCode.update({
     where: { appUserId },
@@ -21,16 +22,18 @@ export async function markQrPrinted(appUserId: string): Promise<ActionError | vo
   })
 
   revalidatePath(`/memorialized/${appUserId}`)
+  return done()
 }
 
-export async function markQrInstalled(appUserId: string): Promise<ActionError | void> {
+export async function markQrInstalled(appUserId: string): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const { customerId } = await verifyTenantSession()
 
   const memorial = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
     select: { id: true },
   })
-  if (!memorial) return { error: 'Profile not found.' }
+  if (!memorial) return fail(t('qrCode.notFound'))
 
   await prisma.qrCode.update({
     where: { appUserId },
@@ -38,4 +41,5 @@ export async function markQrInstalled(appUserId: string): Promise<ActionError | 
   })
 
   revalidatePath(`/memorialized/${appUserId}`)
+  return done()
 }

@@ -39,10 +39,10 @@ export function AddSupplierCategoryDialog({ onCreated }: AddSupplierCategoryDial
   async function onSubmit(data: SupplierCategoryFormValues) {
     setServerError(null)
     const result = await createSupplierCategory(data)
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
-      onCreated(result.category)
+      onCreated(result.data!.category)
       setOpen(false)
       reset()
     }

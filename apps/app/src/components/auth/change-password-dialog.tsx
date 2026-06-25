@@ -44,22 +44,22 @@ export function ChangePasswordDialog() {
         </DialogHeader>
 
         <form action={dispatch} className="flex flex-col gap-4">
-          {state?.error && (
-            <p className="text-sm text-destructive">{state.error}</p>
+          {state && !state.ok && (
+            <p className="text-sm text-destructive">{state.message}</p>
           )}
-          {state?.success && (
-            <p className="text-sm text-green-600">{state.success}</p>
+          {state?.ok && state.message && (
+            <p className="text-sm text-green-600">{state.message}</p>
           )}
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cp-currentPassword">{t('currentPasswordLabel')}</Label>
-            <InputGroup aria-invalid={!!state?.errors?.currentPassword}>
+            <InputGroup aria-invalid={!!state?.fieldErrors?.currentPassword}>
               <InputGroupInput
                 id="cp-currentPassword"
                 name="currentPassword"
                 type={showCurrent ? "text" : "password"}
                 autoComplete="current-password"
-                aria-invalid={!!state?.errors?.currentPassword}
+                aria-invalid={!!state?.fieldErrors?.currentPassword}
               />
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
@@ -70,20 +70,20 @@ export function ChangePasswordDialog() {
                 </InputGroupButton>
               </InputGroupAddon>
             </InputGroup>
-            {state?.errors?.currentPassword?.[0] && (
-              <p className="text-xs text-destructive">{state.errors.currentPassword[0]}</p>
+            {state?.fieldErrors?.currentPassword?.[0] && (
+              <p className="text-xs text-destructive">{state.fieldErrors.currentPassword[0]}</p>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="cp-newPassword">{t('newPasswordLabel')}</Label>
-            <InputGroup aria-invalid={!!state?.errors?.newPassword}>
+            <InputGroup aria-invalid={!!state?.fieldErrors?.newPassword}>
               <InputGroupInput
                 id="cp-newPassword"
                 name="newPassword"
                 type={showNew ? "text" : "password"}
                 autoComplete="new-password"
-                aria-invalid={!!state?.errors?.newPassword}
+                aria-invalid={!!state?.fieldErrors?.newPassword}
               />
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
@@ -94,8 +94,8 @@ export function ChangePasswordDialog() {
                 </InputGroupButton>
               </InputGroupAddon>
             </InputGroup>
-            {state?.errors?.newPassword?.[0] && (
-              <p className="text-xs text-destructive">{state.errors.newPassword[0]}</p>
+            {state?.fieldErrors?.newPassword?.[0] && (
+              <p className="text-xs text-destructive">{state.fieldErrors.newPassword[0]}</p>
             )}
           </div>
 

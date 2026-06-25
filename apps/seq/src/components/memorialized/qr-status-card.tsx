@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Badge } from '@genealogiq/ui/badge'
 import { Button } from '@genealogiq/ui/button'
@@ -40,11 +41,17 @@ export function QrStatusCard({ appUserId, qrCode }: { appUserId: string; qrCode:
   const formatDate = (d: Date) => new Date(d).toLocaleDateString(locale)
 
   function handlePrinted() {
-    startTransition(async () => { await markQrPrinted(appUserId) })
+    startTransition(async () => {
+      const result = await markQrPrinted(appUserId)
+      if (!result.ok) toast.error(result.message)
+    })
   }
 
   function handleInstalled() {
-    startTransition(async () => { await markQrInstalled(appUserId) })
+    startTransition(async () => {
+      const result = await markQrInstalled(appUserId)
+      if (!result.ok) toast.error(result.message)
+    })
   }
 
   return (

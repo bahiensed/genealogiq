@@ -3,7 +3,18 @@ import { getClientIp, checkRateLimit } from "@genealogiq/services/rate-limit"
 import { SignInSchema } from "./schemas"
 import { lockoutRemainingMinutes, nextFailedLoginState } from "./lockout"
 
-export type LoginActionResult = { error?: string } | undefined
+/** Stable error keys; the per-app wrapper localizes them via getTranslations('Actions').
+ *  `invalidData` maps to the shared common.invalidData; the rest live under Actions.auth.*. */
+export type LoginErrorKey =
+  | "invalidData"
+  | "tooManySignIn"
+  | "accountLocked"
+  | "verifyEmailFirst"
+  | "incorrectCredentials"
+
+export type LoginActionResult =
+  | { errorKey: LoginErrorKey; values?: Record<string, string | number> }
+  | undefined
 
 interface LockoutFields {
   id: string
@@ -40,7 +51,7 @@ export function createLoginAction(opts: CreateLoginActionOptions) {
       email: formData.get("email"),
       password: formData.get("password"),
     })
-    if (!validated.success) return { error: "Invalid data" }
+    if (!validated.success) return { errorKey: "invalidData" }
 
     // Optional post-login destination supplied by the form. Accept only an
     // internal path (starts with "/" but not "//", which would be a
@@ -54,17 +65,17 @@ export function createLoginAction(opts: CreateLoginActionOptions) {
 
     const ip = await getClientIp()
     const limit = await checkRateLimit({ key: `signin:ip:${ip}`, maxAttempts: 10, windowSeconds: 300 })
-    if (!limit.allowed) return { error: `Too many sign-in attempts. Try again in ${limit.retryAfter}s.` }
+    if (!limit.allowed) return { errorKey: "tooManySignIn", values: { seconds: limit.retryAfter } }
 
     const user = await opts.loadLockoutFields(validated.data.email)
 
     const lockedMinutes = lockoutRemainingMinutes(user?.lockedUntil ?? null)
     if (lockedMinutes !== null) {
-      return { error: `Account temporarily locked. Try again in ${lockedMinutes} minute(s).` }
+      return { errorKey: "accountLocked", values: { minutes: lockedMinutes } }
     }
 
     if (user && user.emailVerified === null) {
-      return { error: "Please verify your email before signing in. Check your inbox." }
+      return { errorKey: "verifyEmailFirst" }
     }
 
     try {
@@ -72,7 +83,7 @@ export function createLoginAction(opts: CreateLoginActionOptions) {
     } catch (error) {
       if (error instanceof AuthError) {
         if (user) await opts.persistFailedLogin(user.id, nextFailedLoginState(user))
-        return { error: "Incorrect email or password" }
+        return { errorKey: "incorrectCredentials" }
       }
       throw error // re-throw so the post-signIn redirect propagates
     }

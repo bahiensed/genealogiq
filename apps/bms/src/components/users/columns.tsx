@@ -64,7 +64,7 @@ function ActionsCell({
             disabled={isSelf}
             onClick={() => startTransition(async () => {
               const result = await toggleUserActive(user.id)
-              if (result?.error) toast.error(result.error)
+              if (!result.ok) toast.error(result.message)
               else toast.success(user.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
@@ -73,7 +73,7 @@ function ActionsCell({
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await resendWelcomeEmail(user.id)
-              if (result?.error) toast.error(result.error)
+              if (!result.ok) toast.error(result.message)
               else toast.success(t('toasts.emailResent'))
             })}
           >
@@ -98,7 +98,7 @@ function ActionsCell({
           description={t('toasts.deleteConfirm', { name: `${user.firstName} ${user.lastName}` })}
           onConfirm={() => startTransition(async () => {
             const result = await deleteUser(user.id)
-            if (result?.error) toast.error(result.error)
+            if (!result.ok) toast.error(result.message)
             else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
           })}
         />

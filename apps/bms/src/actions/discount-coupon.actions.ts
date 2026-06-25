@@ -1,22 +1,23 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
+import { ok, done, fail, type ActionResult } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 import { getDiscountCouponSchema, type DiscountCouponFormValues } from '@/schemas/discount-coupon.schema'
 import { identityTranslator } from '@/schemas/i18n'
 // NOTE: stripe is imported lazily inside each action below — see comment in createDiscountCoupon.
 
-type ActionError   = { error: string }
-type ActionSuccess = { success: string }
-type CreateSuccess = { success: string; coupon: { id: string; code: string } }
-
-export async function createDiscountCoupon(data: DiscountCouponFormValues): Promise<ActionError | CreateSuccess> {
+export async function createDiscountCoupon(
+  data: DiscountCouponFormValues,
+): Promise<ActionResult<{ id: string; code: string }>> {
   const session = await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const validated = getDiscountCouponSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
   const input = validated.data
 
   // Pre-flight 1: the code must be free in our DB
@@ -24,7 +25,7 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
     where:  { code: input.code },
     select: { id: true },
   })
-  if (dbDup) return { error: 'A coupon with this code already exists.' }
+  if (dbDup) return fail(t('discountCoupon.codeExists'))
 
   // Resolve Package ids → Stripe Product ids for Stripe's applies_to (if any specified)
   let stripeProductIds: string[] = []
@@ -45,7 +46,7 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
   // code that doesn't exist in our DB).
   const stripeDup = await stripe.promotionCodes.list({ code: input.code, active: true, limit: 1 })
   if (stripeDup.data.length > 0) {
-    return { error: `Code "${input.code}" is already active in Stripe (orphan from a failed previous run). Ask an admin to clean it up.` }
+    return fail(t('discountCoupon.stripeOrphan', { code: input.code }))
   }
 
   let stripeCoupon: Awaited<ReturnType<typeof stripe.coupons.create>> | null = null
@@ -92,7 +93,7 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
     })
 
     revalidatePath('/sales/discount-coupons')
-    return { success: 'Coupon created successfully.', coupon: created }
+    return ok(created, t('discountCoupon.created'))
   } catch (e) {
     // Roll back anything we created on Stripe so we don't leak orphans.
     if (promo) {
@@ -102,10 +103,10 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
       try { await stripe.coupons.del(stripeCoupon.id) } catch {}
     }
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'A coupon with this code already exists.' }
+      return fail(t('discountCoupon.codeExists'))
     }
     console.error('[discount-coupon] create failed', e)
-    return { error: (e as Error).message ?? 'Could not create coupon.' }
+    return fail(t('discountCoupon.createFailed'))
   }
 }
 
@@ -120,11 +121,12 @@ export async function createDiscountCoupon(data: DiscountCouponFormValues): Prom
 export async function updateDiscountCoupon(
   id: string,
   data: { description: string | null },
-): Promise<ActionError | ActionSuccess> {
+): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const coupon = await prisma.discountCoupon.findUnique({ where: { id }, select: { id: true } })
-  if (!coupon) return { error: 'Coupon not found.' }
+  if (!coupon) return fail(t('discountCoupon.notFound'))
 
   try {
     await prisma.discountCoupon.update({
@@ -133,22 +135,23 @@ export async function updateDiscountCoupon(
     })
   } catch (e) {
     console.error('[discount-coupon] update failed', e)
-    return { error: (e as Error).message ?? 'Could not update coupon.' }
+    return fail(t('discountCoupon.updateFailed'))
   }
 
   revalidatePath('/sales/discount-coupons')
   revalidatePath(`/sales/discount-coupons/${id}`)
-  return { success: 'Description updated.' }
+  return done(t('discountCoupon.descriptionUpdated'))
 }
 
-export async function toggleDiscountCouponActive(id: string): Promise<ActionError | ActionSuccess> {
+export async function toggleDiscountCouponActive(id: string): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const coupon = await prisma.discountCoupon.findUnique({
     where:  { id },
     select: { isActive: true, stripePromotionCodeId: true },
   })
-  if (!coupon) return { error: 'Coupon not found.' }
+  if (!coupon) return fail(t('discountCoupon.notFound'))
 
   const nextActive = !coupon.isActive
 
@@ -161,9 +164,9 @@ export async function toggleDiscountCouponActive(id: string): Promise<ActionErro
     await prisma.discountCoupon.update({ where: { id }, data: { isActive: nextActive } })
   } catch (e) {
     console.error('[discount-coupon] toggle failed', e)
-    return { error: (e as Error).message ?? 'Could not update coupon.' }
+    return fail(t('discountCoupon.updateFailed'))
   }
 
   revalidatePath('/sales/discount-coupons')
-  return { success: nextActive ? 'Coupon reactivated.' : 'Coupon deactivated.' }
+  return done(nextActive ? t('discountCoupon.reactivated') : t('discountCoupon.deactivated'))
 }

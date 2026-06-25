@@ -26,8 +26,8 @@ export function SignUpForm() {
 
       <form action={dispatch} className="glass-card rounded-2xl p-8 space-y-4">
         {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
-        {state?.error && (
-          <p className="text-sm text-destructive">{state.error}</p>
+        {state && !state.ok && (
+          <p className="text-sm text-destructive">{state.message}</p>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -38,10 +38,10 @@ export function SignUpForm() {
               name="firstName"
               type="text"
               autoComplete="given-name"
-              aria-invalid={!!state?.errors?.firstName}
+              aria-invalid={!!state?.fieldErrors?.firstName}
             />
-            {state?.errors?.firstName?.[0] && (
-              <p className="text-xs text-destructive">{state.errors.firstName[0]}</p>
+            {state?.fieldErrors?.firstName?.[0] && (
+              <p className="text-xs text-destructive">{state.fieldErrors.firstName[0]}</p>
             )}
           </div>
           <div className="space-y-1.5">
@@ -51,10 +51,10 @@ export function SignUpForm() {
               name="lastName"
               type="text"
               autoComplete="family-name"
-              aria-invalid={!!state?.errors?.lastName}
+              aria-invalid={!!state?.fieldErrors?.lastName}
             />
-            {state?.errors?.lastName?.[0] && (
-              <p className="text-xs text-destructive">{state.errors.lastName[0]}</p>
+            {state?.fieldErrors?.lastName?.[0] && (
+              <p className="text-xs text-destructive">{state.fieldErrors.lastName[0]}</p>
             )}
           </div>
         </div>
@@ -67,10 +67,10 @@ export function SignUpForm() {
             type="email"
             placeholder={t('emailPlaceholder')}
             autoComplete="email"
-            aria-invalid={!!state?.errors?.email}
+            aria-invalid={!!state?.fieldErrors?.email}
           />
-          {state?.errors?.email?.[0] && (
-            <p className="text-xs text-destructive">{state.errors.email[0]}</p>
+          {state?.fieldErrors?.email?.[0] && (
+            <p className="text-xs text-destructive">{state.fieldErrors.email[0]}</p>
           )}
         </div>
 
@@ -82,7 +82,7 @@ export function SignUpForm() {
               name="password"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
-              aria-invalid={!!state?.errors?.password}
+              aria-invalid={!!state?.fieldErrors?.password}
               className="pr-10"
             />
             <button
@@ -94,8 +94,8 @@ export function SignUpForm() {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          {state?.errors?.password?.[0] && (
-            <p className="text-xs text-destructive">{state.errors.password[0]}</p>
+          {state?.fieldErrors?.password?.[0] && (
+            <p className="text-xs text-destructive">{state.fieldErrors.password[0]}</p>
           )}
         </div>
 

@@ -67,8 +67,8 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
       ? await updateDeceased(id!, data)
       : await createDeceased(appUserId!, data)
 
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
       toast.success(isEditing ? t('toasts.updated') : t('toasts.created'))
       if (!isEditing) router.push(`/customers/${appUserId}`)

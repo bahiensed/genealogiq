@@ -151,10 +151,10 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
     const numValue   = parseCurrencyDigits(value)
     startTransition(async () => {
       const result = await createAppSale(customerId, subscriptionId, numValue)
-      if ('error' in result) {
-        setServerError(result.error)
+      if (!result.ok) {
+        setServerError(result.message)
       } else {
-        toast.success(result.success)
+        if (result.message) toast.success(result.message)
         router.push(`/customers/${customerId}#memorialized-profiles`)
       }
     })

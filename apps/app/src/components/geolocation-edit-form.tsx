@@ -222,7 +222,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
     if (uploading.some(Boolean)) { toast.warning(t("toasts.waitForUploads")); return }
     startTransition(async () => {
       const result = await saveGeolocation(profileId, data)
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.saved"))
       router.push(`/profile/${profileId}/geolocation`)
     })

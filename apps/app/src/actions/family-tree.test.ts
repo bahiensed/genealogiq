@@ -8,6 +8,7 @@ const { prismaMock } = vi.hoisted(() => ({
 }))
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
+vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
 vi.mock("@/queries/profile", () => ({ getProfileById: vi.fn() }))
@@ -41,7 +42,7 @@ describe("updateRelation — C2 IDOR guard", () => {
 
     const res = await updateRelation("A", "rel-1", {})
 
-    expect(res).toEqual({ error: "Not authorized." })
+    expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
     expect(prismaMock.familyRelation.update).not.toHaveBeenCalled()
   })
 
@@ -52,7 +53,7 @@ describe("updateRelation — C2 IDOR guard", () => {
 
     const res = await updateRelation("A", "rel-1", { subtype: "married" })
 
-    expect(res).toEqual({ success: true })
+    expect(res).toEqual({ ok: true, message: undefined })
     expect(prismaMock.familyRelation.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "rel-1" } }),
     )
@@ -66,7 +67,7 @@ describe("updateMember — C3 IDOR guard (ghost branch)", () => {
 
     const res = await updateMember("A", "ghost-1", { firstName: "John", lastName: "Doe" })
 
-    expect(res).toEqual({ error: "Not authorized." })
+    expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
     expect(prismaMock.appUser.update).not.toHaveBeenCalled()
   })
 
@@ -77,7 +78,7 @@ describe("updateMember — C3 IDOR guard (ghost branch)", () => {
 
     const res = await updateMember("A", "ghost-1", { firstName: "John", lastName: "Doe" })
 
-    expect(res).toEqual({ success: true })
+    expect(res).toEqual({ ok: true, message: undefined })
     expect(prismaMock.appUser.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "ghost-1" } }),
     )

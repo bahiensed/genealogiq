@@ -2,15 +2,13 @@
 
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail } from '@/lib/email'
-import { hashToken } from '@genealogiq/core'
-
-type ActionError   = { error: string }
-type ActionSuccess = { success: string }
+import { hashToken, done, fail, type ActionResult } from '@genealogiq/core'
 
 const buyerSchema = z.string().trim().min(1, 'Buyer name is required.').max(200)
 const valueSchema = z.number().finite().min(0).max(1_000_000)
@@ -21,36 +19,39 @@ function paths(genCode: string) {
 }
 
 /** Toggle the operator-set "printed" flag. */
-export async function markPhysicalQrPrinted(genCode: string, printed: boolean): Promise<ActionError | void> {
+export async function markPhysicalQrPrinted(genCode: string, printed: boolean): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const { customerId } = await verifyTenantSession()
 
   const lic = await prisma.physicalQrLicense.findFirst({
     where:  { genCode, tenantId: customerId },
     select: { id: true },
   })
-  if (!lic) return { error: 'QR code not found.' }
+  if (!lic) return fail(t('physicalQr.notFound'))
 
   await prisma.physicalQrLicense.update({
     where: { id: lic.id },
     data:  { printedAt: printed ? new Date() : null },
   })
   paths(genCode)
+  return done()
 }
 
 /** Manual write-off ("baixa") for a sale made outside the platform. */
 export async function sellPhysicalQrManually(
   genCode: string,
   input:   { buyerName: string; value?: number },
-): Promise<ActionError | ActionSuccess> {
+): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const { customerId, user } = await verifyTenantSession()
 
   const buyer = buyerSchema.safeParse(input.buyerName)
-  if (!buyer.success) return { error: buyer.error.issues[0].message }
+  if (!buyer.success) return fail(t('common.invalidData'))
 
   let soldValue: number | null = null
   if (input.value != null) {
     const v = valueSchema.safeParse(input.value)
-    if (!v.success) return { error: 'Invalid sale value.' }
+    if (!v.success) return fail(t('physicalQr.invalidValue'))
     soldValue = v.data
   }
 
@@ -66,10 +67,10 @@ export async function sellPhysicalQrManually(
       soldValue,
     },
   })
-  if (res.count === 0) return { error: 'This code is not available for sale (already sold or activated).' }
+  if (res.count === 0) return fail(t('physicalQr.notAvailable'))
 
   paths(genCode)
-  return { success: 'Sale recorded (written off).' }
+  return done(t('physicalQr.saleRecorded'))
 }
 
 /** Platform sale: assign the code to a tenant consumer, write it off, and email APP access. */
@@ -77,13 +78,14 @@ export async function sellPhysicalQrViaPlatform(
   genCode:   string,
   appUserId: string,
   value?:    number,
-): Promise<ActionError | ActionSuccess> {
+): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const { customerId, user } = await verifyTenantSession()
 
   let soldValue: number | null = null
   if (value != null) {
     const v = valueSchema.safeParse(value)
-    if (!v.success) return { error: 'Invalid sale value.' }
+    if (!v.success) return fail(t('physicalQr.invalidValue'))
     soldValue = v.data
   }
 
@@ -91,8 +93,8 @@ export async function sellPhysicalQrViaPlatform(
     where:  { id: appUserId, tenantId: customerId },
     select: { id: true, email: true, firstName: true },
   })
-  if (!consumer) return { error: 'Customer not found.' }
-  if (!consumer.email) return { error: 'Customer has no email address.' }
+  if (!consumer) return fail(t('physicalQr.customerNotFound'))
+  if (!consumer.email) return fail(t('physicalQr.customerNoEmail'))
 
   const token = randomBytes(32).toString('hex')
 
@@ -121,12 +123,12 @@ export async function sellPhysicalQrViaPlatform(
     })
   } catch (e) {
     if (e instanceof Error && e.message === 'NOT_AVAILABLE') {
-      return { error: 'This code is not available for sale (already sold or activated).' }
+      return fail(t('physicalQr.notAvailable'))
     }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      return { error: `Failed to register sale (${e.code}).` }
+      return fail(t('physicalQr.saleFailed', { code: e.code }))
     }
-    return { error: 'An unexpected error occurred.' }
+    return fail(t('physicalQr.unexpectedError'))
   }
 
   try {
@@ -138,11 +140,12 @@ export async function sellPhysicalQrViaPlatform(
   }
 
   paths(genCode)
-  return { success: 'Sold and access sent to the customer.' }
+  return done(t('physicalQr.soldViaPlatform'))
 }
 
 /** Reverse a write-off — only while still SOLD (not yet activated by the consumer). */
-export async function undoPhysicalQrSale(genCode: string): Promise<ActionError | ActionSuccess> {
+export async function undoPhysicalQrSale(genCode: string): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const { customerId } = await verifyTenantSession()
 
   const res = await prisma.physicalQrLicense.updateMany({
@@ -157,8 +160,8 @@ export async function undoPhysicalQrSale(genCode: string): Promise<ActionError |
       soldValue:       null,
     },
   })
-  if (res.count === 0) return { error: 'This code is not in a sold state — cannot undo.' }
+  if (res.count === 0) return fail(t('physicalQr.notSold'))
 
   paths(genCode)
-  return { success: 'Sale undone — the code is available again.' }
+  return done(t('physicalQr.saleUndone'))
 }

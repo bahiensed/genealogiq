@@ -39,10 +39,10 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
   async function onSubmit(data: CustomerCategoryFormValues) {
     setServerError(null)
     const result = await createCustomerCategory(data)
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
-      onCreated(result.category)
+      onCreated(result.data!.category)
       setOpen(false)
       reset()
     }

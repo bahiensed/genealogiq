@@ -1,4 +1,116 @@
 {
+  "Actions": {
+    "auth": {
+      "accountLocked": "Cuenta bloqueada temporalmente. Vuelve a intentarlo en {minutes} minuto(s).",
+      "emailChangeLinkSent": "Enlace de confirmación enviado al nuevo correo electrónico.",
+      "emailInUse": "Este correo electrónico ya está en uso.",
+      "emailMustDiffer": "El nuevo correo electrónico debe ser diferente del actual.",
+      "incorrectCredentials": "Correo o contraseña incorrectos.",
+      "incorrectCurrentPassword": "Contraseña actual incorrecta.",
+      "incorrectPassword": "Contraseña incorrecta.",
+      "invalidAdminData": "Datos del administrador no válidos.",
+      "invalidCompanyData": "Datos de la empresa no válidos.",
+      "invalidEmail": "Correo electrónico no válido.",
+      "invalidOrExpiredLink": "Enlace no válido o expirado. Solicita uno nuevo.",
+      "newPasswordMustDiffer": "La nueva contraseña debe ser diferente de la actual.",
+      "passwordChanged": "Contraseña cambiada correctamente.",
+      "systemAlreadyConfigured": "El sistema ya está configurado.",
+      "tooManyAttempts": "Demasiados intentos. Inténtalo de nuevo en {minutes} minuto(s).",
+      "tooManyRequests": "Demasiadas solicitudes. Inténtalo de nuevo en {minutes} minuto(s).",
+      "tooManySignIn": "Demasiados intentos de inicio de sesión. Vuelve a intentarlo en {seconds}s.",
+      "userNotFound": "Usuario no encontrado.",
+      "verifyEmailFirst": "Verifica tu correo antes de iniciar sesión. Revisa tu bandeja de entrada."
+    },
+    "checkout": {
+      "invalidQuantity": "Cantidad no válida.",
+      "noCheckoutUrl": "Stripe no devolvió una URL de pago.",
+      "notSynced": "Este paquete no está sincronizado con Stripe. Ejecuta prisma/seed-stripe-packages.ts.",
+      "packageNotFound": "Paquete no encontrado o no disponible."
+    },
+    "common": {
+      "duplicate": "Datos duplicados detectados",
+      "invalidData": "Datos inválidos"
+    },
+    "company": {
+      "updated": "Empresa actualizada correctamente"
+    },
+    "customer": {
+      "created": "Cliente creado correctamente.",
+      "deleteFailed": "No se pudo eliminar el cliente ({code}).",
+      "emailExists": "Ya existe una cuenta con este correo electrónico.",
+      "hasSales": "No se puede eliminar el cliente con ventas existentes.",
+      "noEmail": "El cliente no tiene dirección de correo electrónico.",
+      "notFound": "Cliente no encontrado.",
+      "passwordAlreadySet": "Este cliente ya estableció su contraseña.",
+      "soleGuardian": "No se puede eliminar el cliente: es el único responsable de uno o más perfiles conmemorativos.",
+      "unexpectedError": "Ocurrió un error inesperado.",
+      "updated": "Cliente actualizado correctamente."
+    },
+    "customerCategory": {
+      "nameExists": "Ya existe una categoría con este nombre",
+      "notFound": "Categoría no encontrada.",
+      "updated": "Categoría actualizada correctamente."
+    },
+    "deceased": {
+      "customerNotFound": "Cliente no encontrado.",
+      "guardianAdded": "Tutor agregado.",
+      "noQrAvailable": "No hay códigos QR disponibles para este cliente.",
+      "notFound": "Perfil no encontrado.",
+      "relationExists": "Este tutor ya está vinculado al perfil.",
+      "relationNotFound": "Vínculo de tutor no encontrado."
+    },
+    "physicalQr": {
+      "customerNoEmail": "El cliente no tiene una dirección de correo electrónico.",
+      "customerNotFound": "Cliente no encontrado.",
+      "invalidValue": "Valor de venta inválido.",
+      "notAvailable": "Este código no está disponible para la venta (ya vendido o activado).",
+      "notFound": "Código QR no encontrado.",
+      "notSold": "Este código no está en estado de venta — no se puede deshacer.",
+      "saleFailed": "No se pudo registrar la venta ({code}).",
+      "saleRecorded": "Venta registrada (dada de baja).",
+      "saleUndone": "Venta deshecha — el código está disponible nuevamente.",
+      "soldViaPlatform": "Vendido y acceso enviado al cliente.",
+      "unexpectedError": "Ocurrió un error inesperado."
+    },
+    "profile": {
+      "avatarUpdated": "Avatar actualizado.",
+      "invalidAvatarUrl": "URL del avatar no válida.",
+      "updated": "Perfil actualizado correctamente."
+    },
+    "qrCode": {
+      "notFound": "Perfil no encontrado."
+    },
+    "sale": {
+      "created": "Venta registrada y acceso enviado correctamente.",
+      "customerNoEmail": "El cliente no tiene dirección de correo electrónico.",
+      "customerNotFound": "Cliente no encontrado.",
+      "invalidValue": "Valor de venta inválido.",
+      "noQrAvailable": "No hay códigos QR disponibles.",
+      "registerFailed": "No se pudo registrar la venta ({code}).",
+      "subscriptionNotFound": "Suscripción no encontrada.",
+      "unexpectedError": "Ocurrió un error inesperado."
+    },
+    "supplier": {
+      "created": "Proveedor creado correctamente.",
+      "notFound": "Proveedor no encontrado.",
+      "taxIdExists": "Ya existe un proveedor con este RFC.",
+      "updated": "Proveedor actualizado correctamente."
+    },
+    "supplierCategory": {
+      "created": "Categoría creada correctamente.",
+      "notFound": "Categoría no encontrada.",
+      "updated": "Categoría actualizada correctamente."
+    },
+    "user": {
+      "cannotDeactivateSelf": "No puedes desactivar tu propia cuenta.",
+      "cannotDeleteSelf": "No puedes eliminar tu propia cuenta.",
+      "created": "Usuario creado correctamente.",
+      "emailExists": "Este correo electrónico ya está en uso.",
+      "notFound": "Usuario no encontrado.",
+      "passwordAlreadySet": "Este usuario ya estableció su contraseña.",
+      "updated": "Usuario actualizado correctamente."
+    }
+  },
   "Auth": {
     "description": "Ingresa tu correo y contraseña para acceder a tu cuenta.",
     "email": "Correo:",

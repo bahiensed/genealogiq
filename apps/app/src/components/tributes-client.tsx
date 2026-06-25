@@ -66,7 +66,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
     startDelete(async () => {
       const result = await deleteTribute(tributeId)
       setDeletingId(null)
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.deleted"))
       router.refresh()
     })

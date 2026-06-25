@@ -39,10 +39,10 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
     const result = isEditing
       ? await updateSupplierCategory(id, data)
       : await createSupplierCategory(data)
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
-      toast.success(result.success)
+      if (result.message) toast.success(result.message)
       if (!isEditing) router.push('/categories/suppliers')
     }
   }

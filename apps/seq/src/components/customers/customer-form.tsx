@@ -73,10 +73,10 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
   async function onSubmit(data: AppUserFormValues) {
     setServerError(null)
     const result = await updateCustomer(id, data)
-    if ('error' in result) {
-      setServerError(result.error)
-    } else {
-      toast.success(result.success)
+    if (!result.ok) {
+      setServerError(result.message)
+    } else if (result.message) {
+      toast.success(result.message)
     }
   }
 

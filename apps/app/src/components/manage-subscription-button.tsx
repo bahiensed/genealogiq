@@ -16,8 +16,8 @@ export function ManageSubscriptionButton() {
   const handle = () => {
     startTransition(async () => {
       const result = await createPortalSession()
-      if ("error" in result) { toast.error(result.error); return }
-      router.push(result.url)
+      if (!result.ok) { toast.error(result.message); return }
+      router.push(result.data!.url)
     })
   }
 

@@ -49,10 +49,10 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
   async function onSubmit(data: ProfileFormValues) {
     setServerError(null)
     const result = await updateProfile(data)
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
-      toast.success(result.success)
+      if (result.message) toast.success(result.message)
       router.refresh()
     }
   }

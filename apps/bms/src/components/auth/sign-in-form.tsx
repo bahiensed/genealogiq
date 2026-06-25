@@ -50,8 +50,8 @@ export function SignInForm() {
 
         <form action={dispatch}>
           <CardContent className="flex flex-col gap-4">
-            {state?.error && (
-              <p className="text-sm text-destructive">{state.error}</p>
+            {state && !state.ok && (
+              <p className="text-sm text-destructive">{state.message}</p>
             )}
 
             <div className="flex flex-col gap-1.5">

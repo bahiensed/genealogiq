@@ -2,9 +2,10 @@
 
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
-import { hashToken, ok, err, type Result } from '@genealogiq/core'
+import { hashToken, done, fail, type ActionResult } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 
 // User management (invite, edit, deactivate, delete tenant employees) is
@@ -13,8 +14,6 @@ import { verifyAdmin } from '@/lib/dal'
 import { sendWelcomeEmail } from '@/lib/email'
 import { getUserSchema, type UserFormValues } from '@/schemas/user.schema'
 import { identityTranslator } from '@/schemas/i18n'
-
-type ActionError = { error: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildAddressCreate(address: UserFormValues['address']): any {
@@ -32,11 +31,12 @@ function buildAddressWrite(address: UserFormValues['address']): any {
   return { upsert: { create: address, update: address } }
 }
 
-export async function createUser(data: UserFormValues): Promise<Result<string>> {
+export async function createUser(data: UserFormValues): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const { customerId } = await verifyAdmin()
 
   const validated = getUserSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return err('Invalid data')
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { address, birthDate, ...rest } = validated.data
 
@@ -62,7 +62,7 @@ export async function createUser(data: UserFormValues): Promise<Result<string>> 
     }))
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return err('This email is already in use')
+      return fail(t('user.emailExists'))
     }
     throw e
   }
@@ -70,20 +70,21 @@ export async function createUser(data: UserFormValues): Promise<Result<string>> 
   await sendWelcomeEmail(rest.email, token, rest.firstName)
 
   revalidatePath('/system/users')
-  return ok('User created successfully.')
+  return done(t('user.created'))
 }
 
-export async function updateUser(id: string, data: UserFormValues): Promise<Result<string>> {
+export async function updateUser(id: string, data: UserFormValues): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const { customerId } = await verifyAdmin()
 
   const validated = getUserSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return err('Invalid data')
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { address, birthDate, ...rest } = validated.data
 
   try {
     const existing = await prisma.user.findUnique({ where: { email: rest.email }, select: { id: true } })
-    if (existing && existing.id !== id) return err('This email is already in use')
+    if (existing && existing.id !== id) return fail(t('user.emailExists'))
 
     await prisma.user.update({
       where: { id, tenantId: customerId },
@@ -95,50 +96,55 @@ export async function updateUser(id: string, data: UserFormValues): Promise<Resu
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return err('User not found.')
+      return fail(t('user.notFound'))
     }
     throw e
   }
 
   revalidatePath('/system/users')
-  return ok('User updated successfully.')
+  return done(t('user.updated'))
 }
 
-export async function deleteUser(userId: string): Promise<ActionError | void> {
+export async function deleteUser(userId: string): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const session = await verifyAdmin()
 
-  if (session.user!.id === userId) return { error: 'You cannot delete your own account.' }
+  if (session.user!.id === userId) return fail(t('user.cannotDeleteSelf'))
 
   try {
     await prisma.user.delete({ where: { id: userId, tenantId: session.customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'User not found.' }
+      return fail(t('user.notFound'))
     }
     throw e
   }
 
   revalidatePath('/system/users')
+  return done()
 }
 
-export async function toggleUserActive(userId: string): Promise<ActionError | void> {
+export async function toggleUserActive(userId: string): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const session = await verifyAdmin()
 
-  if (session.user!.id === userId) return { error: 'You cannot deactivate your own account.' }
+  if (session.user!.id === userId) return fail(t('user.cannotDeactivateSelf'))
 
   const user = await prisma.user.findUnique({ where: { id: userId, tenantId: session.customerId }, select: { isActive: true } })
-  if (!user) return { error: 'User not found.' }
+  if (!user) return fail(t('user.notFound'))
 
   await prisma.user.update({ where: { id: userId }, data: { isActive: !user.isActive } })
   revalidatePath('/system/users')
+  return done()
 }
 
-export async function resendWelcomeEmail(userId: string): Promise<ActionError | void> {
+export async function resendWelcomeEmail(userId: string): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const { customerId } = await verifyAdmin()
 
   const user = await prisma.user.findUnique({ where: { id: userId, tenantId: customerId }, select: { email: true, password: true, firstName: true } })
-  if (!user) return { error: 'User not found.' }
-  if (user.password) return { error: 'This user has already set their password.' }
+  if (!user) return fail(t('user.notFound'))
+  if (user.password) return fail(t('user.passwordAlreadySet'))
 
   await prisma.passwordResetToken.deleteMany({ where: { userId } })
 
@@ -148,4 +154,5 @@ export async function resendWelcomeEmail(userId: string): Promise<ActionError | 
   })
 
   await sendWelcomeEmail(user.email, token, user.firstName)
+  return done()
 }

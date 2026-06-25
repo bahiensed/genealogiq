@@ -1,4 +1,93 @@
 {
+  "Actions": {
+    "auth": {
+      "accountLocked": "Account temporarily locked. Try again in {minutes} minute(s).",
+      "emailChangeLinkSent": "Confirmation link sent to the new email.",
+      "emailInUse": "This email is already in use",
+      "emailMustDiffer": "New email must be different from current",
+      "incorrectCredentials": "Incorrect email or password.",
+      "incorrectCurrentPassword": "Incorrect current password",
+      "incorrectPassword": "Incorrect password",
+      "invalidEmail": "Invalid email",
+      "invalidOrExpiredLink": "Invalid or expired link. Please request a new one.",
+      "newPasswordMustDiffer": "New password must differ from current",
+      "passwordChanged": "Password changed successfully.",
+      "tooManyAttempts": "Too many attempts. Try again in {minutes} minute(s).",
+      "tooManyRequests": "Too many requests. Try again in {minutes} minute(s).",
+      "tooManySignIn": "Too many sign-in attempts. Try again in {seconds}s.",
+      "tooManySignUpAttempts": "Too many sign-up attempts. Try again in {minutes} minute(s).",
+      "userNotFound": "User not found",
+      "verifyEmailFirst": "Please verify your email before signing in. Check your inbox."
+    },
+    "billing": {
+      "noActiveSubscription": "No active subscription to switch from.",
+      "noCheckoutUrl": "Stripe did not return a checkout URL.",
+      "noSchedulePhase": "Could not read current schedule phase.",
+      "noSubscriptionItems": "Active subscription has no items in Stripe.",
+      "planNotFound": "Plan not found or unavailable.",
+      "planNotWired": "This plan is not yet wired in Stripe.",
+      "planNotWiredSeed": "This plan is not yet wired in Stripe. Run prisma/seed-stripe.ts.",
+      "switchFailed": "Could not switch plan."
+    },
+    "bio": {
+      "charLimit": "Biography limit is {max} characters for this plan.",
+      "imageLimit": "Image limit is {max} for this plan.",
+      "notAuthorized": "You are not authorized to manage this profile.",
+      "profileNotFound": "Profile not found."
+    },
+    "common": {
+      "duplicate": "Duplicate data detected",
+      "invalidData": "Invalid data"
+    },
+    "familyTree": {
+      "cannotRelateSelf": "A profile cannot be related to itself.",
+      "cannotRemoveRoot": "You cannot remove the tree root.",
+      "memberNotFound": "Member not found.",
+      "notAuthorized": "Not authorized.",
+      "profileNotFound": "Profile not found.",
+      "relationExists": "This relation already exists.",
+      "relationNotFound": "Relation not found.",
+      "requestAlreadyDecided": "This request has already been decided.",
+      "requestNotFound": "Request not found.",
+      "treeLimitReached": "Family tree limit is {limit} people on this plan."
+    },
+    "favorite": {
+      "cannotFavoriteSelf": "You cannot favorite your own profile."
+    },
+    "gallery": {
+      "imageLimit": "Image limit is {max} for this plan.",
+      "notAuthorized": "You are not authorized to manage this gallery.",
+      "videoLimit": "Video limit is {max} for this plan."
+    },
+    "geolocation": {
+      "notAuthorized": "You are not authorized to manage this profile."
+    },
+    "guardian": {
+      "alreadyCoManage": "You already co-manage this profile.",
+      "cannotManageOwn": "You already manage your own profile.",
+      "coManageUnsupported": "Only ghost and memorial profiles support co-management.",
+      "notAuthorized": "Not authorized.",
+      "profileNotFound": "Profile not found.",
+      "requestNotFound": "Request not found.",
+      "requestPending": "You already have a pending request for this profile.",
+      "requestResolved": "Request already resolved."
+    },
+    "memorial": {
+      "noQrCodes": "No available QR Codes. Purchase a QR Code to create more profiles.",
+      "notAuthorized": "You are not authorized to manage this profile.",
+      "notFound": "Profile not found."
+    },
+    "physicalQr": {
+      "alreadyActivated": "This code has already been activated.",
+      "notFound": "QR code not found.",
+      "raceRetry": "This code was just activated. Please try again."
+    },
+    "tribute": {
+      "cannotTributeSelf": "You cannot tribute your own profile.",
+      "notAuthorized": "Not authorized.",
+      "notFound": "Tribute not found."
+    }
+  },
   "Auth": {
     "activateDescription": "Enter the activation code printed on your physical QR code to link it to a memorial.",
     "activateTitle": "Activate your QR code",

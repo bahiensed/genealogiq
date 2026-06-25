@@ -48,7 +48,7 @@ function ActionsCell({ row, currentUserRole, basePath, t }: { row: { original: P
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await togglePackageActive(pkg.id)
-              if (result?.error) toast.error(result.error)
+              if (!result.ok) toast.error(result.message)
               else toast.success(pkg.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
@@ -73,7 +73,7 @@ function ActionsCell({ row, currentUserRole, basePath, t }: { row: { original: P
           description={t('toasts.deleteConfirm', { name: pkg.name })}
           onConfirm={() => startTransition(async () => {
             const result = await deletePackage(pkg.id)
-            if (result?.error) toast.error(result.error)
+            if (!result.ok) toast.error(result.message)
             else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
           })}
         />

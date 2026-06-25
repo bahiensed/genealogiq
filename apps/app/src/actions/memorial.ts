@@ -1,6 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
+import { ok, done, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { getMemorialSchema } from "@/schemas/memorial"
@@ -10,7 +12,8 @@ import { getProfileById, getProfileForEdit } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 
-export async function createMemorial(data: unknown) {
+export async function createMemorial(data: unknown): Promise<ActionResult<{ id: string }>> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const [createdCount, sales] = await Promise.all([
@@ -34,11 +37,11 @@ export async function createMemorial(data: unknown) {
 
   // Free tier: allow 1 memorial without AppSale. Beyond that, require a sale slot.
   if (!nextSale && createdCount >= 1) {
-    return { error: "No available QR Codes. Purchase a QR Code to create more profiles." }
+    return fail(t("memorial.noQrCodes"))
   }
 
   const parsed = getMemorialSchema(identityTranslator).safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(t("common.invalidData"))
 
   const { firstName, lastName, gender, birthDate, birthPlace, birthCountry, deathDate, deathPlace, deathCountry, avatarUrl } = parsed.data
 
@@ -64,15 +67,16 @@ export async function createMemorial(data: unknown) {
   })
 
   revalidatePath(`/profile/${session.user.id}/memorialized`)
-  return { success: true, id: memorial.id }
+  return ok({ id: memorial.id })
 }
 
-export async function deleteMemorial(profileId: string) {
+export async function deleteMemorial(profileId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile || profile.role !== "APP_MEMO") return { error: "Profile not found." }
-  if (!canManageProfile(profile, session.user.id)) return { error: "Unauthorized." }
+  if (!profile || profile.role !== "APP_MEMO") return fail(t("memorial.notFound"))
+  if (!canManageProfile(profile, session.user.id)) return fail(t("memorial.notAuthorized"))
 
   const [bio, galleryItems, tributes, geo] = await Promise.all([
     prisma.bio.findUnique({
@@ -99,19 +103,20 @@ export async function deleteMemorial(profileId: string) {
 
   await prisma.appUser.delete({ where: { id: profileId } })
   revalidatePath(`/profile/${session.user.id}`)
-  return { success: true }
+  return done()
 }
 
-export async function updateMemorial(profileId: string, data: unknown) {
+export async function updateMemorial(profileId: string, data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   // Manager-only edit path — uses the full projection (needs address id).
   const profile = await getProfileForEdit(profileId)
-  if (!profile || profile.role !== "APP_MEMO") return { error: "Profile not found." }
-  if (!canManageProfile(profile, session.user.id)) return { error: "Unauthorized." }
+  if (!profile || profile.role !== "APP_MEMO") return fail(t("memorial.notFound"))
+  if (!canManageProfile(profile, session.user.id)) return fail(t("memorial.notAuthorized"))
 
   const parsed = getProfileEditSchema(identityTranslator).safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(t("common.invalidData"))
 
   const {
     firstName, lastName, maidenName, nickname, gender, nationalId, avatarUrl,
@@ -163,7 +168,7 @@ export async function updateMemorial(profileId: string, data: unknown) {
   })
 
   revalidatePath(`/profile/${profileId}`)
-  return { success: true, id: profileId }
+  return done()
 }
 
 async function upsertAddress(

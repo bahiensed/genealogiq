@@ -2,15 +2,13 @@
 
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail } from '@/lib/email'
-import { hashToken } from '@genealogiq/core'
-
-type ActionError   = { error: string }
-type ActionSuccess = { success: string }
+import { hashToken, done, fail, type ActionResult } from '@genealogiq/core'
 
 // The sale price is supplied by the client form, so it must be validated
 // server-side: a finite, non-negative amount within a sane upper bound. Without
@@ -21,31 +19,32 @@ export async function createAppSale(
   appUserId: string,
   subscriptionId: string,
   value: number,
-): Promise<ActionError | ActionSuccess> {
+): Promise<ActionResult> {
   const { customerId, user } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const parsedValue = saleValueSchema.safeParse(value)
-  if (!parsedValue.success) return { error: 'Invalid sale value.' }
+  if (!parsedValue.success) return fail(t('sale.invalidValue'))
   const saleValue = parsedValue.data
 
   const appUser = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
     select: { id: true, email: true, firstName: true },
   })
-  if (!appUser) return { error: 'Customer not found.' }
-  if (!appUser.email) return { error: 'Customer has no email address.' }
+  if (!appUser) return fail(t('sale.customerNotFound'))
+  if (!appUser.email) return fail(t('sale.customerNoEmail'))
 
   const inventory = await prisma.qrInventory.findUnique({
     where:  { tenantId: customerId },
     select: { quantity: true },
   })
-  if (!inventory || inventory.quantity < 1) return { error: 'No QR codes available.' }
+  if (!inventory || inventory.quantity < 1) return fail(t('sale.noQrAvailable'))
 
   const subscription = await prisma.subscription.findUnique({
     where:  { id: subscriptionId },
     select: { termLength: true },
   })
-  if (!subscription) return { error: 'Subscription not found.' }
+  if (!subscription) return fail(t('sale.subscriptionNotFound'))
 
   const currentPeriodEnd = new Date()
   currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + subscription.termLength)
@@ -81,9 +80,9 @@ export async function createAppSale(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      return { error: `Failed to register sale (${e.code}).` }
+      return fail(t('sale.registerFailed', { code: e.code }))
     }
-    return { error: 'An unexpected error occurred.' }
+    return fail(t('sale.unexpectedError'))
   }
 
   try {
@@ -94,5 +93,5 @@ export async function createAppSale(
 
   revalidatePath('/sales')
   revalidatePath('/inventory/digital-qr')
-  return { success: 'Sale registered and access sent successfully.' }
+  return done(t('sale.created'))
 }

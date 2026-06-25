@@ -265,7 +265,7 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
           order: i,
         })),
       })
-      if (result?.error) { toast.error(result.error) } else { toast.success(t("savedToast")); router.push(`/profile/${profileId}/gallery`) }
+      if (!result.ok) { toast.error(result.message) } else { toast.success(t("savedToast")); router.push(`/profile/${profileId}/gallery`) }
     })
   }
 

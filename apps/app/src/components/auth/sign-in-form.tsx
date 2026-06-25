@@ -26,8 +26,8 @@ export function SignInForm() {
 
       <form action={dispatch} className="glass-card rounded-2xl p-6 space-y-4">
         {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
-        {state?.error && (
-          <p className="text-sm text-destructive">{state.error}</p>
+        {state && !state.ok && (
+          <p className="text-sm text-destructive">{state.message}</p>
         )}
 
         <div className="space-y-1.5">

@@ -26,8 +26,8 @@ export function ResetPasswordForm({ token, callbackUrl }: Props) {
         <input type="hidden" name="token" value={token} />
         {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
 
-        {state?.error && (
-          <p className="text-sm text-destructive">{state.error}</p>
+        {state && !state.ok && (
+          <p className="text-sm text-destructive">{state.message}</p>
         )}
 
         <div className="space-y-1.5">
@@ -38,7 +38,7 @@ export function ResetPasswordForm({ token, callbackUrl }: Props) {
               name="password"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
-              aria-invalid={!!state?.errors?.password}
+              aria-invalid={!!state?.fieldErrors?.password}
               className="pr-10"
             />
             <button
@@ -50,8 +50,8 @@ export function ResetPasswordForm({ token, callbackUrl }: Props) {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          {state?.errors?.password?.[0] && (
-            <p className="text-xs text-destructive">{state.errors.password[0]}</p>
+          {state?.fieldErrors?.password?.[0] && (
+            <p className="text-xs text-destructive">{state.fieldErrors.password[0]}</p>
           )}
         </div>
 

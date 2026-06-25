@@ -1,4 +1,109 @@
 {
+  "Actions": {
+    "auth": {
+      "accountLocked": "Account temporarily locked. Try again in {minutes} minute(s).",
+      "emailChangeLinkSent": "Confirmation link sent to the new email.",
+      "emailInUse": "This email is already in use.",
+      "emailMustDiffer": "New email must be different from the current one.",
+      "incorrectCredentials": "Incorrect email or password.",
+      "incorrectCurrentPassword": "Incorrect current password.",
+      "incorrectPassword": "Incorrect password.",
+      "invalidAdminData": "Invalid administrator data.",
+      "invalidCompanyData": "Invalid company data.",
+      "invalidEmail": "Invalid email.",
+      "invalidOrExpiredLink": "Invalid or expired link. Please request a new one.",
+      "newPasswordMustDiffer": "New password must differ from the current one.",
+      "passwordChanged": "Password changed successfully.",
+      "systemAlreadyConfigured": "The system is already configured.",
+      "tooManyAttempts": "Too many attempts. Try again in {minutes} minute(s).",
+      "tooManyRequests": "Too many requests. Try again in {minutes} minute(s).",
+      "tooManySignIn": "Too many sign-in attempts. Try again in {seconds}s.",
+      "userNotFound": "User not found.",
+      "verifyEmailFirst": "Please verify your email before signing in. Check your inbox."
+    },
+    "common": {
+      "duplicate": "Duplicate data detected",
+      "invalidData": "Invalid data"
+    },
+    "customer": {
+      "adminEmailInUse": "This administrator email is already in use",
+      "created": "Customer created successfully.",
+      "hasDependents": "Cannot delete: customer has dependent records.",
+      "hasSales": "Cannot delete a customer with existing sales records.",
+      "noOwner": "No owner user found for this customer.",
+      "notFound": "Customer not found.",
+      "passwordAlreadySet": "This user has already set their password.",
+      "taxIdExists": "A customer with this tax ID already exists",
+      "updated": "Customer updated successfully."
+    },
+    "customerCategory": {
+      "created": "Category created successfully.",
+      "inUse": "Cannot delete: category is assigned to one or more customers.",
+      "notFound": "Category not found.",
+      "updated": "Category updated successfully."
+    },
+    "discountCoupon": {
+      "codeExists": "A coupon with this code already exists.",
+      "createFailed": "Could not create coupon.",
+      "created": "Coupon created successfully.",
+      "deactivated": "Coupon deactivated.",
+      "descriptionUpdated": "Description updated.",
+      "notFound": "Coupon not found.",
+      "reactivated": "Coupon reactivated.",
+      "stripeOrphan": "Code \"{code}\" is already active in Stripe (orphan from a failed previous run). Ask an admin to clean it up.",
+      "updateFailed": "Could not update coupon."
+    },
+    "package": {
+      "created": "Package created successfully.",
+      "hasSales": "This package has associated sales and cannot be deleted.",
+      "notFound": "Package not found.",
+      "priceRequired": "Set a price greater than zero before syncing.",
+      "stripeSyncFailed": "Stripe sync failed: {message}",
+      "synced": "Synced with Stripe successfully.",
+      "unknownError": "Unknown error",
+      "updated": "Package updated successfully.",
+      "updatedStripeCleared": "Package updated — Stripe references cleared. Re-run prisma/seed-stripe-packages.ts in SEQ."
+    },
+    "profile": {
+      "avatarUpdated": "Avatar updated.",
+      "invalidAvatarUrl": "Invalid avatar URL.",
+      "updated": "Profile updated successfully."
+    },
+    "sale": {
+      "alreadyReversed": "This sale has already been reversed.",
+      "created": "Sale recorded successfully.",
+      "notFound": "Sale not found.",
+      "packageNotFound": "Package not found."
+    },
+    "subscription": {
+      "created": "Subscription created successfully.",
+      "hasSales": "Cannot delete this subscription — it is linked to existing sales records.",
+      "notFound": "Subscription not found.",
+      "updated": "Subscription updated successfully."
+    },
+    "supplier": {
+      "created": "Supplier created successfully.",
+      "notFound": "Supplier not found.",
+      "taxIdExists": "A supplier with this tax ID already exists",
+      "updated": "Supplier updated successfully."
+    },
+    "supplierCategory": {
+      "created": "Category created successfully.",
+      "hasSuppliers": "Cannot delete: category is assigned to one or more suppliers.",
+      "nameExists": "A category with this name already exists.",
+      "notFound": "Category not found.",
+      "updated": "Category updated successfully."
+    },
+    "user": {
+      "cannotDeactivateSelf": "You cannot deactivate your own account.",
+      "cannotDeleteSelf": "You cannot delete your own account.",
+      "created": "User created successfully.",
+      "emailExists": "This email is already in use.",
+      "notFound": "User not found.",
+      "passwordAlreadySet": "This user has already set their password.",
+      "updated": "User updated successfully."
+    }
+  },
   "Auth": {
     "description": "Enter your email and password to access your account.",
     "email": "E-mail:",

@@ -19,8 +19,8 @@ export function ForgotPasswordForm() {
       description={t('forgotDescription')}
     >
       <form action={dispatch} className="space-y-4">
-        {state?.error && (
-          <p className="text-sm text-destructive">{state.error}</p>
+        {state && !state.ok && (
+          <p className="text-sm text-destructive">{state.message}</p>
         )}
 
         <div className="space-y-1.5">

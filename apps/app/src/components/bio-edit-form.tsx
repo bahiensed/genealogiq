@@ -131,8 +131,8 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
           order: i,
         })),
       })
-      if (result?.error) {
-        toast.error(result.error)
+      if (!result.ok) {
+        toast.error(result.message)
       } else {
         toast.success(t("toastSaved"))
         router.push(`/profile/${profileId}/bio`)

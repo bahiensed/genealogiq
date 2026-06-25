@@ -16,6 +16,11 @@ const { prismaMock, txMock, safeParseMock } = vi.hoisted(() => ({
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
+// The action localizes its business messages via getTranslations('Actions').
+// Stub it to echo the key so assertions can pin the exact message source.
+vi.mock("next-intl/server", () => ({
+  getTranslations: async () => (key: string) => key,
+}))
 // The action calls getMemorialSchema(identityTranslator).safeParse(data); stub the
 // factory so it always hands back an object whose safeParse we control per-test.
 vi.mock("@/schemas/memorial", () => ({ getMemorialSchema: () => ({ safeParse: safeParseMock }) }))
@@ -39,14 +44,15 @@ beforeEach(() => {
 describe("activatePhysicalQr", () => {
   it("rejects an unknown gen code", async () => {
     prismaMock.physicalQrLicense.findUnique.mockResolvedValue(null)
-    expect(await activatePhysicalQr("NOPE", MEMORIAL)).toEqual({ error: "QR code not found." })
+    expect(await activatePhysicalQr("NOPE", MEMORIAL)).toEqual({ ok: false, message: "physicalQr.notFound" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
   it("rejects a code that is no longer AVAILABLE (double-activation guard)", async () => {
     prismaMock.physicalQrLicense.findUnique.mockResolvedValue({ id: "lic-1", status: "ACTIVATED" })
     expect(await activatePhysicalQr("GENCODE", MEMORIAL)).toEqual({
-      error: "This code has already been activated.",
+      ok: false,
+      message: "physicalQr.alreadyActivated",
     })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
@@ -54,7 +60,7 @@ describe("activatePhysicalQr", () => {
   it("rejects invalid memorial data before mutating", async () => {
     prismaMock.physicalQrLicense.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
     safeParseMock.mockReturnValue({ success: false, error: { issues: [{ message: "First name required" }] } })
-    expect(await activatePhysicalQr("GENCODE", MEMORIAL)).toEqual({ error: "First name required" })
+    expect(await activatePhysicalQr("GENCODE", MEMORIAL)).toEqual({ ok: false, message: "First name required" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
@@ -63,7 +69,7 @@ describe("activatePhysicalQr", () => {
 
     const res = await activatePhysicalQr("GENCODE", MEMORIAL)
 
-    expect(res).toEqual({ success: true, id: "memo-1" })
+    expect(res).toEqual({ ok: true, data: { id: "memo-1" }, message: undefined })
     expect(txMock.appUserGuardian.create).toHaveBeenCalledWith({
       data: { appUserId: "memo-1", guardianId: "guardian-1" },
     })
@@ -80,7 +86,8 @@ describe("activatePhysicalQr", () => {
     prismaMock.$transaction.mockRejectedValue({ code: "P2002" })
 
     expect(await activatePhysicalQr("GENCODE", MEMORIAL)).toEqual({
-      error: "This code was just activated. Please try again.",
+      ok: false,
+      message: "physicalQr.raceRetry",
     })
   })
 })

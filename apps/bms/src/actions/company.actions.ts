@@ -1,12 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
+import { done, fail, type ActionResult } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 import { getCompanySchema, type CompanyFormValues } from '@/schemas/company.schema'
 import { identityTranslator } from '@/schemas/i18n'
-
-type ActionError = { error: string }
 
 function buildAddressWrite(address: CompanyFormValues['address']) {
   if (!address) return undefined
@@ -15,11 +15,12 @@ function buildAddressWrite(address: CompanyFormValues['address']) {
   return { upsert: { create: address, update: address } }
 }
 
-export async function updateCompany(id: string, data: CompanyFormValues): Promise<ActionError | void> {
+export async function updateCompany(id: string, data: CompanyFormValues): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const validated = getCompanySchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { address, ...rest } = validated.data
 
@@ -32,4 +33,5 @@ export async function updateCompany(id: string, data: CompanyFormValues): Promis
   })
 
   revalidatePath('/system/company')
+  return done()
 }

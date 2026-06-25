@@ -39,10 +39,10 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
     const result = isEditing
       ? await updateCustomerCategory(id, data)
       : await createCustomerCategory(data)
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
-      toast.success(result.success)
+      if (result.message) toast.success(result.message)
       if (!isEditing) router.push('/categories/customers')
     }
   }

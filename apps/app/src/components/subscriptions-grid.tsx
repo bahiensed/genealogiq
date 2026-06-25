@@ -106,8 +106,8 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
   const startFirstSubscription = (cadence: "annual" | "monthly") => {
     startTransition(async () => {
       const result = await createCheckoutSession(plan.id, cadence)
-      if ("error" in result) { toast.error(result.error); return }
-      router.push(result.url)
+      if (!result.ok) { toast.error(result.message); return }
+      router.push(result.data!.url)
     })
   }
 
@@ -216,9 +216,9 @@ function ChangeConfirmDialog({ pending, activePlan, onClose }: ChangeConfirmDial
   const handleConfirm = () => {
     startTransition(async () => {
       const result = await changeSubscription(pending.plan.id, pending.cadence)
-      if ("error" in result) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(
-        result.effect === "upgraded"
+        result.data!.effect === "upgraded"
           ? t("toasts.switched", { plan: pending.plan.name })
           : t("toasts.scheduled", { plan: pending.plan.name, periodEnd }),
       )

@@ -50,7 +50,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: CustomerCat
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleCustomerCategoryActive(category.id)
-              if (result?.error) toast.error(result.error)
+              if (!result.ok) toast.error(result.message)
               else toast.success(category.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
@@ -75,7 +75,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: CustomerCat
           description={t('toasts.deleteConfirm', { name: category.name })}
           onConfirm={() => startTransition(async () => {
             const result = await deleteCustomerCategory(category.id)
-            if (result?.error) toast.error(result.error)
+            if (!result.ok) toast.error(result.message)
             else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
           })}
         />

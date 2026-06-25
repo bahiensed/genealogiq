@@ -57,10 +57,10 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
     if (!id) return
     startSync(async () => {
       const result = await syncPackageWithStripe(id)
-      if ('error' in result) {
-        toast.error(result.error)
+      if (!result.ok) {
+        toast.error(result.message)
       } else {
-        toast.success(result.success)
+        if (result.message) toast.success(result.message)
         router.refresh()
       }
     })
@@ -86,10 +86,10 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
     const result = isEditing
       ? await updatePackage(id, payload)
       : await createPackage(payload)
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
-      toast.success(result.success)
+      if (result.message) toast.success(result.message)
       if (!isEditing) router.push(backHref)
     }
   }

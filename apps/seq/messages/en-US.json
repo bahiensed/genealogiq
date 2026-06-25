@@ -1,4 +1,116 @@
 {
+  "Actions": {
+    "auth": {
+      "accountLocked": "Account temporarily locked. Try again in {minutes} minute(s).",
+      "emailChangeLinkSent": "Confirmation link sent to the new email.",
+      "emailInUse": "This email is already in use.",
+      "emailMustDiffer": "New email must be different from the current one.",
+      "incorrectCredentials": "Incorrect email or password.",
+      "incorrectCurrentPassword": "Incorrect current password.",
+      "incorrectPassword": "Incorrect password.",
+      "invalidAdminData": "Invalid administrator data.",
+      "invalidCompanyData": "Invalid company data.",
+      "invalidEmail": "Invalid email.",
+      "invalidOrExpiredLink": "Invalid or expired link. Please request a new one.",
+      "newPasswordMustDiffer": "New password must differ from the current one.",
+      "passwordChanged": "Password changed successfully.",
+      "systemAlreadyConfigured": "The system is already configured.",
+      "tooManyAttempts": "Too many attempts. Try again in {minutes} minute(s).",
+      "tooManyRequests": "Too many requests. Try again in {minutes} minute(s).",
+      "tooManySignIn": "Too many sign-in attempts. Try again in {seconds}s.",
+      "userNotFound": "User not found.",
+      "verifyEmailFirst": "Please verify your email before signing in. Check your inbox."
+    },
+    "checkout": {
+      "invalidQuantity": "Invalid quantity.",
+      "noCheckoutUrl": "Stripe did not return a checkout URL.",
+      "notSynced": "This package is not synced with Stripe. Run prisma/seed-stripe-packages.ts.",
+      "packageNotFound": "Package not found or unavailable."
+    },
+    "common": {
+      "duplicate": "Duplicate data detected",
+      "invalidData": "Invalid data"
+    },
+    "company": {
+      "updated": "Company updated successfully"
+    },
+    "customer": {
+      "created": "Customer created successfully.",
+      "deleteFailed": "Failed to delete customer ({code}).",
+      "emailExists": "An account with this email already exists.",
+      "hasSales": "Cannot delete customer with existing sales.",
+      "noEmail": "Customer has no email address.",
+      "notFound": "Customer not found.",
+      "passwordAlreadySet": "This customer has already set their password.",
+      "soleGuardian": "Cannot delete customer: they are the sole guardian of one or more memorialized profiles.",
+      "unexpectedError": "An unexpected error occurred.",
+      "updated": "Customer updated successfully."
+    },
+    "customerCategory": {
+      "nameExists": "A category with this name already exists",
+      "notFound": "Category not found.",
+      "updated": "Category updated successfully."
+    },
+    "deceased": {
+      "customerNotFound": "Customer not found.",
+      "guardianAdded": "Guardian added.",
+      "noQrAvailable": "No QR codes available for this customer.",
+      "notFound": "Profile not found.",
+      "relationExists": "This guardian is already linked to the profile.",
+      "relationNotFound": "Guardian link not found."
+    },
+    "physicalQr": {
+      "customerNoEmail": "Customer has no email address.",
+      "customerNotFound": "Customer not found.",
+      "invalidValue": "Invalid sale value.",
+      "notAvailable": "This code is not available for sale (already sold or activated).",
+      "notFound": "QR code not found.",
+      "notSold": "This code is not in a sold state — cannot undo.",
+      "saleFailed": "Failed to register sale ({code}).",
+      "saleRecorded": "Sale recorded (written off).",
+      "saleUndone": "Sale undone — the code is available again.",
+      "soldViaPlatform": "Sold and access sent to the customer.",
+      "unexpectedError": "An unexpected error occurred."
+    },
+    "profile": {
+      "avatarUpdated": "Avatar updated.",
+      "invalidAvatarUrl": "Invalid avatar URL.",
+      "updated": "Profile updated successfully."
+    },
+    "qrCode": {
+      "notFound": "Profile not found."
+    },
+    "sale": {
+      "created": "Sale registered and access sent successfully.",
+      "customerNoEmail": "Customer has no email address.",
+      "customerNotFound": "Customer not found.",
+      "invalidValue": "Invalid sale value.",
+      "noQrAvailable": "No QR codes available.",
+      "registerFailed": "Failed to register sale ({code}).",
+      "subscriptionNotFound": "Subscription not found.",
+      "unexpectedError": "An unexpected error occurred."
+    },
+    "supplier": {
+      "created": "Supplier created successfully.",
+      "notFound": "Supplier not found.",
+      "taxIdExists": "A supplier with this tax ID already exists.",
+      "updated": "Supplier updated successfully."
+    },
+    "supplierCategory": {
+      "created": "Category created successfully.",
+      "notFound": "Category not found.",
+      "updated": "Category updated successfully."
+    },
+    "user": {
+      "cannotDeactivateSelf": "You cannot deactivate your own account.",
+      "cannotDeleteSelf": "You cannot delete your own account.",
+      "created": "User created successfully.",
+      "emailExists": "This email is already in use.",
+      "notFound": "User not found.",
+      "passwordAlreadySet": "This user has already set their password.",
+      "updated": "User updated successfully."
+    }
+  },
   "Auth": {
     "description": "Enter your email and password to access your account.",
     "email": "E-mail:",

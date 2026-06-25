@@ -9,6 +9,7 @@ const { prismaMock } = vi.hoisted(() => ({
 }))
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
+vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
 vi.mock("@/queries/profile", () => ({ getProfileById: vi.fn() }))
@@ -36,7 +37,7 @@ describe("approveTribute — C1 IDOR guard", () => {
 
     const res = await approveTribute("tribute-1", "A")
 
-    expect(res).toEqual({ error: "Not authorized." })
+    expect(res).toEqual({ ok: false, message: "tribute.notAuthorized" })
     expect(prismaMock.tribute.update).not.toHaveBeenCalled()
   })
 
@@ -47,7 +48,7 @@ describe("approveTribute — C1 IDOR guard", () => {
 
     const res = await approveTribute("tribute-1", "A")
 
-    expect(res).toEqual({ success: true })
+    expect(res).toEqual({ ok: true, message: undefined })
     expect(prismaMock.tribute.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "tribute-1" }, data: { status: "APPROVED" } }),
     )
@@ -58,7 +59,7 @@ describe("approveTribute — C1 IDOR guard", () => {
 
     const res = await approveTribute("tribute-1", "A")
 
-    expect(res).toEqual({ error: "Not authorized." })
+    expect(res).toEqual({ ok: false, message: "tribute.notAuthorized" })
     expect(prismaMock.tribute.findUnique).not.toHaveBeenCalled()
   })
 })
