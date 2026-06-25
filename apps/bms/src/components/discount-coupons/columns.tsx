@@ -1,19 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal } from 'lucide-react'
-import { useTransition } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@genealogiq/ui/button'
 import { Badge } from '@genealogiq/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@genealogiq/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
+import { RowActions } from '@genealogiq/ui/row-actions'
 import { toggleDiscountCouponActive } from '@/actions/discount-coupon.actions'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
@@ -49,32 +39,21 @@ function formatDuration(row: DiscountCouponRow, t: Translator) {
 }
 
 function ActionsCell({ row, t }: { row: { original: DiscountCouponRow }; t: Translator }) {
-  const [isPending, startTransition] = useTransition()
   const coupon = row.original
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={isPending}>
-          <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">{t('actions.openMenu')}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem asChild>
-          <Link href={`/sales/discount-coupons/${coupon.id}`}>{t('actions.editDescription')}</Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => startTransition(async () => {
-            const result = await toggleDiscountCouponActive(coupon.id)
-            if (!result.ok) toast.error(result.message)
-            else toast.success(coupon.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
-          })}
-        >
-          {coupon.isActive ? t('actions.deactivate') : t('actions.reactivate')}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <RowActions
+      menuLabel={t('actions.openMenu')}
+      items={[
+        { kind: 'link', label: t('actions.editDescription'), href: `/sales/discount-coupons/${coupon.id}` },
+        {
+          kind: 'action',
+          label: coupon.isActive ? t('actions.deactivate') : t('actions.reactivate'),
+          run: () => toggleDiscountCouponActive(coupon.id),
+          successMessage: coupon.isActive ? t('toasts.deactivated') : t('toasts.reactivated'),
+        },
+      ]}
+    />
   )
 }
 
@@ -83,11 +62,7 @@ export function getColumns(_currentUserRole: string, t: Translator, locale: stri
     {
       accessorKey: 'code',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.code')} />,
-      cell: ({ row }) => (
-        <Link href={`/sales/discount-coupons/${row.original.id}`} className="font-mono hover:underline">
-          {row.original.code}
-        </Link>
-      ),
+      cell: ({ row }) => <span className="font-mono">{row.original.code}</span>,
     },
     {
       accessorKey: 'description',

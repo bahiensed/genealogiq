@@ -2,14 +2,7 @@
 
 import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal } from 'lucide-react'
-import { Button } from '@genealogiq/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@genealogiq/ui/dropdown-menu'
+import { RowActions } from '@genealogiq/ui/row-actions'
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
@@ -33,19 +26,12 @@ function ActionsCell({ row, t }: { row: { original: MemorializedRow }; t: Transl
   const profile = row.original
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <MoreHorizontal className="h-4 w-4" />
-          <span className="sr-only">{t('actions.openMenu')}</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem asChild>
-          <Link href={`/memorialized/${profile.id}`}>{t('actions.edit')}</Link>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <RowActions
+      menuLabel={t('actions.openMenu')}
+      items={[
+        { kind: 'link', label: t('actions.edit'), href: `/memorialized/${profile.id}` },
+      ]}
+    />
   )
 }
 
@@ -55,11 +41,7 @@ export function getColumns(t: Translator, locale: string): ColumnDef<Memorialize
       id: 'name',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
-      cell: ({ row }) => (
-        <Link href={`/memorialized/${row.original.id}`} className="hover:underline">
-          {row.original.firstName} {row.original.lastName}
-        </Link>
-      ),
+      cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
     },
     {
       accessorKey: 'birthDate',

@@ -1,20 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@genealogiq/ui/button'
 import { Badge } from '@genealogiq/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@genealogiq/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
-import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
+import { RowActions } from '@genealogiq/ui/row-actions'
 import { toggleUserActive, deleteUser, resendWelcomeEmail } from '@/actions/user.actions'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
@@ -38,64 +27,34 @@ function roleLabel(role: string, t: Translator): string {
 }
 
 function ActionsCell({ row, currentUserId, t }: { row: { original: UserRow }; currentUserId: string; t: Translator }) {
-  const [isPending, startTransition] = useTransition()
-  const [deleteOpen, setDeleteOpen] = useState(false)
   const user = row.original
   const isSelf = user.id === currentUserId
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" disabled={isPending}>
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">{t('actions.openMenu')}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href={`/users/${user.id}`}>{t('actions.edit')}</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={isSelf}
-            onClick={() => startTransition(async () => {
-              const result = await toggleUserActive(user.id)
-              if (!result.ok) toast.error(result.message)
-              else toast.success(user.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
-            })}
-          >
-            {user.isActive ? t('actions.deactivate') : t('actions.reactivate')}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => startTransition(async () => {
-              const result = await resendWelcomeEmail(user.id)
-              if (!result.ok) toast.error(result.message)
-              else toast.success(t('toasts.emailResent'))
-            })}
-          >
-            {t('actions.resendEmail')}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onSelect={() => setDeleteOpen(true)}
-          >
-            {t('actions.delete')}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ConfirmDeleteDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        isPending={isPending}
-        description={t('toasts.deleteConfirm', { name: `${user.firstName} ${user.lastName}` })}
-        onConfirm={() => startTransition(async () => {
-          const result = await deleteUser(user.id)
-          if (!result.ok) toast.error(result.message)
-          else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
-        })}
-      />
-    </>
+    <RowActions
+      menuLabel={t('actions.openMenu')}
+      items={[
+        { kind: 'link', label: t('actions.edit'), href: `/users/${user.id}` },
+        {
+          kind: 'action',
+          label: user.isActive ? t('actions.deactivate') : t('actions.reactivate'),
+          run: () => toggleUserActive(user.id),
+          successMessage: user.isActive ? t('toasts.deactivated') : t('toasts.reactivated'),
+        },
+        {
+          kind: 'action',
+          label: t('actions.resendEmail'),
+          run: () => resendWelcomeEmail(user.id),
+          successMessage: t('toasts.emailResent'),
+        },
+      ]}
+      remove={!isSelf ? {
+        label: t('actions.delete'),
+        run: () => deleteUser(user.id),
+        confirmDescription: t('toasts.deleteConfirm', { name: `${user.firstName} ${user.lastName}` }),
+        successMessage: t('toasts.deleted'),
+      } : undefined}
+    />
   )
 }
 
@@ -105,11 +64,7 @@ export function getColumns(currentUserId: string, t: Translator, locale: string)
       id: 'name',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
-      cell: ({ row }) => (
-        <Link href={`/users/${row.original.id}`} className="hover:underline">
-          {row.original.firstName} {row.original.lastName}
-        </Link>
-      ),
+      cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
     },
     {
       accessorKey: 'email',

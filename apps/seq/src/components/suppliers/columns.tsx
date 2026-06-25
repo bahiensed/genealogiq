@@ -1,20 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@genealogiq/ui/button'
 import { Badge } from '@genealogiq/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@genealogiq/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
-import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
+import { RowActions } from '@genealogiq/ui/row-actions'
 import { toggleSupplierActive, deleteSupplier } from '@/actions/supplier.actions'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
@@ -33,53 +22,27 @@ export type SupplierRow = {
 }
 
 function ActionsCell({ row, t }: { row: { original: SupplierRow }; t: Translator }) {
-  const [isPending, startTransition] = useTransition()
-  const [deleteOpen, setDeleteOpen] = useState(false)
   const supplier = row.original
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" disabled={isPending}>
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">{t('actions.openMenu')}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href={`/suppliers/${supplier.id}`}>{t('actions.edit')}</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => startTransition(async () => {
-              const result = await toggleSupplierActive(supplier.id)
-              if (!result.ok) toast.error(result.message)
-              else toast.success(supplier.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
-            })}
-          >
-            {supplier.isActive ? t('actions.deactivate') : t('actions.reactivate')}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onSelect={() => setDeleteOpen(true)}
-          >
-            {t('actions.delete')}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ConfirmDeleteDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        isPending={isPending}
-        description={t('toasts.deleteConfirm', { name: supplier.name })}
-        onConfirm={() => startTransition(async () => {
-          const result = await deleteSupplier(supplier.id)
-          if (!result.ok) toast.error(result.message)
-          else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
-        })}
-      />
-    </>
+    <RowActions
+      menuLabel={t('actions.openMenu')}
+      items={[
+        { kind: 'link', label: t('actions.edit'), href: `/suppliers/${supplier.id}` },
+        {
+          kind: 'action',
+          label: supplier.isActive ? t('actions.deactivate') : t('actions.reactivate'),
+          run: () => toggleSupplierActive(supplier.id),
+          successMessage: supplier.isActive ? t('toasts.deactivated') : t('toasts.reactivated'),
+        },
+      ]}
+      remove={{
+        label: t('actions.delete'),
+        run: () => deleteSupplier(supplier.id),
+        confirmDescription: t('toasts.deleteConfirm', { name: supplier.name }),
+        successMessage: t('toasts.deleted'),
+      }}
+    />
   )
 }
 
@@ -88,11 +51,7 @@ export function getColumns(t: Translator, locale: string): ColumnDef<SupplierRow
     {
       accessorKey: 'name',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
-      cell: ({ row }) => (
-        <Link href={`/suppliers/${row.original.id}`} className="hover:underline">
-          {row.original.name}
-        </Link>
-      ),
+      cell: ({ row }) => row.original.name,
     },
     {
       accessorKey: 'entityType',
