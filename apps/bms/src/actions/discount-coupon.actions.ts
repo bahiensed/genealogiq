@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/dal'
-import { discountCouponSchema, type DiscountCouponFormValues } from '@/schemas/discount-coupon.schema'
+import { getDiscountCouponSchema, type DiscountCouponFormValues } from '@/schemas/discount-coupon.schema'
+import { identityTranslator } from '@/schemas/i18n'
 // NOTE: stripe is imported lazily inside each action below — see comment in createDiscountCoupon.
 
 type ActionError   = { error: string }
@@ -14,7 +15,7 @@ type CreateSuccess = { success: string; coupon: { id: string; code: string } }
 export async function createDiscountCoupon(data: DiscountCouponFormValues): Promise<ActionError | CreateSuccess> {
   const session = await verifyAdmin()
 
-  const validated = discountCouponSchema.safeParse(data)
+  const validated = getDiscountCouponSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
   const input = validated.data
 

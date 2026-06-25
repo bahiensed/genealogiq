@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { companyResolver, type CompanyFormValues } from '@/schemas/company.schema'
+import { getCompanySchema, type CompanyFormValues } from '@/schemas/company.schema'
 import { updateCompany } from '@/actions/company.actions'
 import { maskCnpj, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
@@ -28,12 +29,14 @@ interface CompanyFormProps {
 }
 
 export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
-  const t  = useTranslations('Company')
-  const tc = useTranslations('Common')
+  const t   = useTranslations('Company')
+  const tc  = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<CompanyFormValues>({
-    resolver: companyResolver,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getCompanySchema(tErr)) as any, [tErr]),
     defaultValues,
   })
 

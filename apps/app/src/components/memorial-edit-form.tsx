@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useTransition } from "react"
+import { useMemo, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, useWatch, Controller, type Control } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -33,7 +33,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { AddressSection } from "@/components/address/address-section"
-import { profileEditSchema, type ProfileEditValues } from "@/schemas/profile"
+import { getProfileEditSchema, type ProfileEditValues } from "@/schemas/profile"
 import { addressDefaultValues } from "@/schemas/address.schema"
 import { updateProfile } from "@/actions/profile"
 import { updateMemorial, deleteMemorial } from "@/actions/memorial"
@@ -165,6 +165,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   const locale        = useLocale()
   const t             = useTranslations("Memorialized")
   const tc            = useTranslations("Common")
+  const tErr          = useTranslations("Errors")
   const countryOptions = getLocalizedCountries(locale)
   const router        = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -177,7 +178,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   const { control, register, setValue, handleSubmit, reset, watch, formState: { errors } } =
     useForm<ProfileEditValues>({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      resolver: zodResolver(profileEditSchema) as any,
+      resolver: useMemo(() => zodResolver(getProfileEditSchema(tErr)) as any, [tErr]),
       defaultValues: defaults,
     })
 

@@ -1,39 +1,43 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import type { Translator } from './i18n'
 
-export const discountCouponSchema = z.object({
-  code: z.string()
-    .min(3, 'Must be at least 3 characters')
-    .max(32, 'Must be at most 32 characters')
-    .regex(/^[A-Z0-9_-]+$/, 'Only uppercase letters, numbers, hyphens and underscores'),
-  description:      z.string().max(255).optional().nullable(),
-  discountType:     z.enum(['percent', 'amount']),
-  discountValue:    z.number().positive('Must be greater than 0'),
-  duration:         z.enum(['once', 'forever', 'repeating']),
-  durationInMonths: z.number().int().positive().optional().nullable(),
-  maxRedemptions:   z.number().int().positive().optional().nullable(),
-  redeemBy:         z.date().optional().nullable(),
-  appliesTo:        z.array(z.string()),
-}).superRefine((data, ctx) => {
-  if (data.duration === 'repeating' && !data.durationInMonths) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['durationInMonths'],
-      message: 'Required when duration is "repeating"',
-    })
+function makeDiscountCouponRefine(t: Translator) {
+  return (data: { duration: string; durationInMonths?: number | null; discountType: string; discountValue: number }, ctx: z.RefinementCtx) => {
+    if (data.duration === 'repeating' && !data.durationInMonths) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['durationInMonths'],
+        message: t('durationInMonthsRequired'),
+      })
+    }
+    if (data.discountType === 'percent' && data.discountValue > 100) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['discountValue'],
+        message: t('percentMax'),
+      })
+    }
   }
-  if (data.discountType === 'percent' && data.discountValue > 100) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['discountValue'],
-      message: 'Percent must be 100 or less',
-    })
-  }
-})
+}
 
-export type DiscountCouponFormValues = z.infer<typeof discountCouponSchema>
+export function getDiscountCouponSchema(t: Translator) {
+  return z.object({
+    code: z.string()
+      .min(3, t('minChars', { count: 3 }))
+      .max(32, t('maxChars', { count: 32 }))
+      .regex(/^[A-Z0-9_-]+$/, t('couponCodeFormat')),
+    description:      z.string().max(255).optional().nullable(),
+    discountType:     z.enum(['percent', 'amount']),
+    discountValue:    z.number().positive(t('greaterThanZero')),
+    duration:         z.enum(['once', 'forever', 'repeating']),
+    durationInMonths: z.number().int().positive().optional().nullable(),
+    maxRedemptions:   z.number().int().positive().optional().nullable(),
+    redeemBy:         z.date().optional().nullable(),
+    appliesTo:        z.array(z.string()),
+  }).superRefine(makeDiscountCouponRefine(t))
+}
 
-export const discountCouponResolver = zodResolver(discountCouponSchema)
+export type DiscountCouponFormValues = z.infer<ReturnType<typeof getDiscountCouponSchema>>
 
 export const discountCouponDefaultValues: DiscountCouponFormValues = {
   code:             '',

@@ -1,118 +1,258 @@
 {
-  "Nav": {
-    "profile": "Perfil",
-    "signOut": "Sair",
-    "signingOut": "Saindo…",
-    "language": "Idioma",
-    "toggleTheme": "Alternar tema"
-  },
   "Auth": {
-    "title": "Entrar",
     "description": "Digite seu e-mail e senha para acessar sua conta.",
     "email": "E-mail:",
     "emailPlaceholder": "seu@email.com",
-    "password": "Senha:",
     "forgotPassword": "Esqueceu a senha?",
-    "showPassword": "Mostrar senha",
     "hidePassword": "Ocultar senha",
+    "password": "Senha:",
+    "showPassword": "Mostrar senha",
     "signIn": "Entrar",
-    "signingIn": "Entrando…"
-  },
-  "Dashboard": {
-    "title": "Painel",
-    "availableQr": "QR Codes disponíveis para venda",
-    "currentlyInStock": "Em estoque no momento",
-    "totalCustomers": "Total de clientes",
-    "registeredCustomers": "Clientes cadastrados",
-    "qrSoldThisMonth": "QR Codes vendidos no mês",
-    "salesThisMonth": "Vendas neste mês",
-    "monthlyRevenue": "Receita do mês",
-    "revenueThisMonth": "Receita neste mês",
-    "averageTicket": "Ticket médio",
-    "avgRevenuePerSale": "Receita média por venda neste mês"
+    "signingIn": "Entrando…",
+    "title": "Entrar"
   },
   "Common": {
-    "save": "Salvar",
-    "saving": "Salvando…",
+    "address": {
+      "city": "Cidade:",
+      "complement": "Complemento:",
+      "country": "País:",
+      "lookupAria": "Buscar endereço",
+      "lookupError": "Falha ao buscar o CEP/código postal.",
+      "neighborhood": "Bairro:",
+      "number": "Número:",
+      "selectPlaceholder": "Selecione",
+      "state": "Estado / Província:",
+      "street": "Logradouro:",
+      "zipCode": "CEP:"
+    },
+    "back": "Voltar",
     "cancel": "Cancelar",
     "create": "Criar",
     "creating": "Criando…",
-    "edit": "Editar",
-    "search": "Buscar",
-    "reset": "Redefinir",
-    "back": "Voltar",
-    "next": "Avançar",
-    "delete": {
-      "title": "Confirmar exclusão",
-      "description": "Esta ação não pode ser desfeita.",
-      "confirm": "Excluir",
-      "deleting": "Excluindo…"
+    "dataTable": {
+      "columns": "Colunas",
+      "firstPage": "Primeira página",
+      "hide": "Ocultar",
+      "lastPage": "Última página",
+      "nextPage": "Próxima página",
+      "noResults": "Nenhum registro encontrado",
+      "pageOf": "Página {page} de {total}",
+      "previousPage": "Página anterior",
+      "rowCount": "{count, plural, =0 {Nenhum registro} one {# registro} other {# registros}}",
+      "rowsPerPage": "Itens por página",
+      "searchPlaceholder": "Buscar…",
+      "sortAsc": "Cresc.",
+      "sortDesc": "Decresc."
     },
+    "delete": {
+      "confirm": "Excluir",
+      "deleting": "Excluindo…",
+      "description": "Esta ação não pode ser desfeita.",
+      "title": "Confirmar exclusão"
+    },
+    "edit": "Editar",
+    "next": "Avançar",
+    "reset": "Redefinir",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "search": "Buscar",
     "toasts": {
-      "saved": "Salvo com sucesso.",
       "created": "Criado com sucesso.",
       "deleted": "Excluído com sucesso.",
-      "error": "Algo deu errado. Tente novamente."
-    },
-    "dataTable": {
-      "searchPlaceholder": "Buscar…",
-      "noResults": "Nenhum registro encontrado",
-      "columns": "Colunas",
-      "rowsPerPage": "Itens por página",
-      "pageOf": "Página {page} de {total}",
-      "rowCount": "{count, plural, =0 {Nenhum registro} one {# registro} other {# registros}}",
-      "firstPage": "Primeira página",
-      "previousPage": "Página anterior",
-      "nextPage": "Próxima página",
-      "lastPage": "Última página",
-      "sortAsc": "Cresc.",
-      "sortDesc": "Decresc.",
-      "hide": "Ocultar"
-    },
-    "address": {
-      "country": "País:",
-      "selectPlaceholder": "Selecione",
-      "zipCode": "CEP:",
-      "lookupAria": "Buscar endereço",
-      "lookupError": "Falha ao buscar o CEP/código postal.",
-      "street": "Logradouro:",
-      "number": "Número:",
-      "complement": "Complemento:",
-      "neighborhood": "Bairro:",
-      "city": "Cidade:",
-      "state": "Estado / Província:"
+      "error": "Algo deu errado. Tente novamente.",
+      "saved": "Salvo com sucesso."
+    }
+  },
+  "Company": {
+    "Company": {
+      "fields": {
+        "cnpj": "CNPJ:",
+        "countryCode": "Código do País:",
+        "email": "E-mail:",
+        "isActive": "Empresa ativa:",
+        "legalName": "Razão Social:",
+        "municipalRegistration": "Inscrição Municipal:",
+        "phone": "Telefone:",
+        "stateRegistration": "Inscrição Estadual:",
+        "tradeName": "Nome Fantasia:"
+      },
+      "sections": {
+        "address": "Endereço"
+      },
+      "title": "Dados da Empresa",
+      "toasts": {
+        "updated": "Dados atualizados com sucesso."
+      }
+    }
+  },
+  "CustomerCategories": {
+    "CustomerCategories": {
+      "actions": {
+        "deactivate": "Desativar",
+        "delete": "Excluir",
+        "edit": "Editar",
+        "openMenu": "Abrir menu",
+        "reactivate": "Reativar"
+      },
+      "create": "Criar categoria",
+      "dialog": {
+        "addNew": "Adicionar nova categoria",
+        "title": "Nova categoria de cliente"
+      },
+      "edit": "Editar categoria",
+      "fields": {
+        "description": "Descrição:",
+        "isActive": "Categoria ativa:",
+        "name": "Nome:"
+      },
+      "new": "Nova categoria",
+      "status": {
+        "active": "Ativa",
+        "inactive": "Inativa"
+      },
+      "table": {
+        "createdAt": "Criada em",
+        "description": "Descrição",
+        "empty": "Nenhuma categoria de cliente encontrada.",
+        "name": "Nome",
+        "status": "Situação"
+      },
+      "title": "Categorias de Clientes",
+      "toasts": {
+        "created": "Categoria criada com sucesso.",
+        "deactivated": "Categoria desativada.",
+        "deleteConfirm": "A categoria \"{name}\" será excluída permanentemente.",
+        "deleted": "Categoria excluída com sucesso.",
+        "reactivated": "Categoria reativada."
+      }
     }
   },
   "Customers": {
-    "title": "Clientes",
-    "new": "Novo cliente",
-    "createCustomer": "Criar cliente",
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar",
+      "resendEmail": "Reenviar e-mail"
+    },
     "active": "Ativo?",
-    "stepsLabel": "Etapas do formulário",
-    "stepOf": "Etapa {step} de {total}",
+    "createCustomer": "Criar cliente",
+    "fields": {
+      "birthCity": "Cidade de nascimento:",
+      "birthCountry": "País de nascimento:",
+      "birthCountryRequired": "País de nascimento:*",
+      "birthDate": "Data de nascimento:",
+      "birthDateRequired": "Data de nascimento:*",
+      "birthState": "Estado de nascimento:",
+      "birthStateProvince": "Estado / Província de nascimento:",
+      "birthStateRequired": "Estado de nascimento:*",
+      "burialDate": "Data do sepultamento:",
+      "burialSite": "Local (cemitério/crematório):",
+      "category": "Categoria:",
+      "city": "Cidade:",
+      "complement": "Complemento:",
+      "country": "País:",
+      "countryCode": "Código do país:",
+      "countryRequired": "País:*",
+      "deathCause": "Causa:",
+      "deathDateRequired": "Data do falecimento:*",
+      "email": "E-mail:",
+      "emailRequired": "E-mail:*",
+      "firstName": "Nome:",
+      "firstNameRequired": "Nome:*",
+      "gender": "Gênero:",
+      "genderRequired": "Gênero:*",
+      "gps": "GPS",
+      "gpsTitle": "Obter coordenadas automaticamente",
+      "lastName": "Sobrenome:",
+      "lastNameRequired": "Sobrenome:*",
+      "latitude": "Latitude:",
+      "longitude": "Longitude:",
+      "neighborhood": "Bairro:",
+      "notes": "Observações:",
+      "number": "Número:",
+      "phone": "Telefone:",
+      "phoneRequired": "Telefone:*",
+      "state": "Estado:",
+      "street": "Logradouro:",
+      "zip": "CEP:"
+    },
+    "gender": {
+      "female": "Feminino",
+      "male": "Masculino",
+      "other": "Outro"
+    },
+    "geolocation": {
+      "denied": "Acesso à localização negado. Habilite nas configurações do navegador.",
+      "detected": "Localização detectada.",
+      "timeout": "Tempo de solicitação da localização esgotado. Tente novamente.",
+      "unavailable": "Localização indisponível. Verifique o sinal de GPS.",
+      "unsupported": "Geolocalização não suportada por este navegador."
+    },
+    "hints": {
+      "addressOptional": "O endereço é opcional e pode ser preenchido depois."
+    },
+    "memorialized": {
+      "acquiredQrCodes": "QR Codes adquiridos: {count}",
+      "availableProfiles": "Perfis memo disponíveis: {count}",
+      "create": "Criar perfil memorializado",
+      "createdProfiles": "Perfis memo criados: {count}",
+      "title": "Perfis memorializados"
+    },
+    "new": "Novo cliente",
+    "placeholders": {
+      "category": "Selecione uma categoria",
+      "select": "Selecione"
+    },
     "sections": {
-      "personal": "Dados pessoais",
-      "contact": "Contato",
       "address": "Endereço",
+      "contact": "Contato",
+      "personal": "Dados pessoais",
       "social": "Redes sociais"
     },
+    "social": {
+      "other": "Outro"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "stepOf": "Etapa {step} de {total}",
     "steps": {
-      "personal": {
-        "title": "Pessoal",
-        "desc": "Nome, gênero e nascimento"
+      "address": {
+        "desc": "Localização física",
+        "title": "Endereço"
       },
       "contact": {
-        "title": "Contato",
-        "desc": "E-mail, telefone e categoria"
+        "desc": "E-mail, telefone e categoria",
+        "title": "Contato"
       },
-      "address": {
-        "title": "Endereço",
-        "desc": "Localização física"
+      "personal": {
+        "desc": "Nome, gênero e nascimento",
+        "title": "Pessoal"
       },
       "social": {
-        "title": "Sociais",
-        "desc": "Redes sociais e site"
+        "desc": "Redes sociais e site",
+        "title": "Sociais"
       }
+    },
+    "stepsLabel": "Etapas do formulário",
+    "table": {
+      "category": "Categoria",
+      "createdAt": "Criado em",
+      "email": "E-mail",
+      "empty": "Nenhum cliente encontrado",
+      "name": "Nome",
+      "status": "Status"
+    },
+    "title": "Clientes",
+    "toasts": {
+      "deactivated": "Cliente desativado.",
+      "deleteConfirm": "O cliente \"{name}\" será excluído permanentemente.",
+      "deleted": "Cliente excluído com sucesso.",
+      "emailResent": "E-mail reenviado com sucesso.",
+      "reactivated": "Cliente reativado."
     },
     "wizardSections": {
       "customer": "Cliente",
@@ -120,676 +260,293 @@
     },
     "wizardSteps": {
       "customer": {
-        "personal": "Dados pessoais",
-        "contact": "Contato",
         "address": "Endereço",
+        "contact": "Contato",
+        "personal": "Dados pessoais",
         "social": "Redes sociais"
       },
       "deceased": {
-        "personal": "Dados pessoais",
-        "death": "Falecimento",
         "burial": "Sepultamento",
+        "death": "Falecimento",
+        "personal": "Dados pessoais",
         "social": "Redes sociais"
       }
-    },
-    "hints": {
-      "addressOptional": "O endereço é opcional e pode ser preenchido depois."
-    },
-    "fields": {
-      "firstName": "Nome:",
-      "firstNameRequired": "Nome:*",
-      "lastName": "Sobrenome:",
-      "lastNameRequired": "Sobrenome:*",
-      "gender": "Gênero:",
-      "genderRequired": "Gênero:*",
-      "birthDate": "Data de nascimento:",
-      "birthDateRequired": "Data de nascimento:*",
-      "birthCity": "Cidade de nascimento:",
-      "birthState": "Estado de nascimento:",
-      "birthStateRequired": "Estado de nascimento:*",
-      "birthStateProvince": "Estado / Província de nascimento:",
-      "birthCountry": "País de nascimento:",
-      "birthCountryRequired": "País de nascimento:*",
-      "email": "E-mail:",
-      "emailRequired": "E-mail:*",
-      "countryCode": "Código do país:",
-      "phone": "Telefone:",
-      "phoneRequired": "Telefone:*",
-      "category": "Categoria:",
-      "notes": "Observações:",
-      "deathDateRequired": "Data do falecimento:*",
-      "deathCause": "Causa:",
-      "country": "País:",
-      "countryRequired": "País:*",
-      "city": "Cidade:",
-      "state": "Estado:",
-      "burialDate": "Data do sepultamento:",
-      "burialSite": "Local (cemitério/crematório):",
-      "zip": "CEP:",
-      "street": "Logradouro:",
-      "number": "Número:",
-      "complement": "Complemento:",
-      "neighborhood": "Bairro:",
-      "latitude": "Latitude:",
-      "longitude": "Longitude:",
-      "gps": "GPS",
-      "gpsTitle": "Obter coordenadas automaticamente"
-    },
-    "placeholders": {
-      "category": "Selecione uma categoria",
-      "select": "Selecione"
-    },
-    "gender": {
-      "female": "Feminino",
-      "male": "Masculino",
-      "other": "Outro"
-    },
-    "social": {
-      "other": "Outro"
-    },
-    "geolocation": {
-      "unsupported": "Geolocalização não suportada por este navegador.",
-      "detected": "Localização detectada.",
-      "denied": "Acesso à localização negado. Habilite nas configurações do navegador.",
-      "unavailable": "Localização indisponível. Verifique o sinal de GPS.",
-      "timeout": "Tempo de solicitação da localização esgotado. Tente novamente."
-    },
-    "status": {
-      "active": "Ativo",
-      "inactive": "Inativo"
-    },
-    "table": {
-      "name": "Nome",
-      "category": "Categoria",
-      "email": "E-mail",
-      "status": "Status",
-      "createdAt": "Criado em",
-      "empty": "Nenhum cliente encontrado"
-    },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar",
-      "resendEmail": "Reenviar e-mail",
-      "delete": "Excluir"
-    },
-    "toasts": {
-      "deactivated": "Cliente desativado.",
-      "reactivated": "Cliente reativado.",
-      "emailResent": "E-mail reenviado com sucesso.",
-      "deleted": "Cliente excluído com sucesso.",
-      "deleteConfirm": "O cliente \"{name}\" será excluído permanentemente."
-    },
-    "memorialized": {
-      "title": "Perfis memorializados",
-      "acquiredQrCodes": "QR Codes adquiridos: {count}",
-      "availableProfiles": "Perfis memo disponíveis: {count}",
-      "createdProfiles": "Perfis memo criados: {count}",
-      "create": "Criar perfil memorializado"
     }
   },
-  "Suppliers": {
-    "title": "Fornecedores",
-    "new": "Novo fornecedor",
-    "edit": "Editar fornecedor",
-    "create": "Criar fornecedor",
-    "sections": {
-      "address": "Endereço"
-    },
-    "fields": {
-      "type": "Tipo:",
-      "firstName": "Nome:",
-      "companyName": "Razão Social:",
-      "lastName": "Sobrenome:",
-      "tradeName": "Nome Fantasia:",
-      "cpf": "CPF:",
-      "cnpj": "CNPJ:",
-      "birthDate": "Data de Nascimento:",
-      "stateRegistration": "Inscrição Estadual:",
-      "municipalRegistration": "Inscrição Municipal:",
-      "email": "E-mail:",
-      "countryCode": "Código do País:",
-      "phone": "Telefone:",
-      "category": "Categoria:",
-      "notes": "Observações:",
-      "activeSupplier": "Fornecedor ativo:"
-    },
-    "placeholders": {
-      "category": "Selecione uma categoria"
-    },
-    "entityType": {
-      "company": "Pessoa Jurídica",
-      "individual": "Pessoa Física"
-    },
-    "status": {
-      "active": "Ativo",
-      "inactive": "Inativo"
-    },
-    "table": {
-      "name": "Nome",
-      "type": "Tipo",
-      "category": "Categoria",
-      "email": "E-mail",
-      "status": "Status",
-      "createdAt": "Criado em",
-      "empty": "Nenhum fornecedor encontrado."
-    },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar",
-      "delete": "Excluir"
-    },
-    "toasts": {
-      "deactivated": "Fornecedor desativado.",
-      "reactivated": "Fornecedor reativado.",
-      "deleted": "Fornecedor excluído com sucesso.",
-      "deleteConfirm": "O fornecedor \"{name}\" será excluído permanentemente."
-    }
+  "Dashboard": {
+    "availableQr": "QR Codes disponíveis para venda",
+    "averageTicket": "Ticket médio",
+    "avgRevenuePerSale": "Receita média por venda neste mês",
+    "currentlyInStock": "Em estoque no momento",
+    "monthlyRevenue": "Receita do mês",
+    "qrSoldThisMonth": "QR Codes vendidos no mês",
+    "registeredCustomers": "Clientes cadastrados",
+    "revenueThisMonth": "Receita neste mês",
+    "salesThisMonth": "Vendas neste mês",
+    "title": "Painel",
+    "totalCustomers": "Total de clientes"
   },
-  "Users": {
-    "Users": {
-      "title": "Funcionários",
-      "new": "Novo funcionário",
-      "create": "Novo usuário",
-      "edit": "Editar usuário",
-      "fields": {
-        "firstName": "Nome:",
-        "lastName": "Sobrenome:",
-        "email": "E-mail:",
-        "role": "Função:",
-        "cpf": "CPF:",
-        "birthDate": "Data de Nascimento:",
-        "countryCode": "Código do País:",
-        "phone": "Telefone:",
-        "isActive": "Usuário ativo:"
-      },
-      "placeholders": {
-        "role": "Selecione uma função"
-      },
-      "sections": {
-        "address": "Endereço"
-      },
-      "roles": {
-        "SUPER_ADMIN": "Super Admin",
-        "OWNER": "Proprietário",
-        "ADMIN": "Administrador",
-        "COMERCIAL": "Comercial",
-        "FINANCE": "Financeiro",
-        "USER": "Usuário"
-      },
-      "status": {
-        "active": "Ativo",
-        "inactive": "Inativo"
-      },
-      "table": {
-        "name": "Nome",
-        "email": "E-mail",
-        "role": "Função",
-        "status": "Status",
-        "createdAt": "Criado em",
-        "empty": "Nenhum usuário encontrado."
-      },
-      "actions": {
-        "openMenu": "Abrir menu",
-        "edit": "Editar",
-        "deactivate": "Desativar",
-        "reactivate": "Reativar",
-        "resendEmail": "Reenviar e-mail",
-        "delete": "Excluir"
-      },
-      "toasts": {
-        "deactivated": "Usuário desativado.",
-        "reactivated": "Usuário reativado.",
-        "emailResent": "E-mail reenviado com sucesso.",
-        "deleted": "Usuário excluído com sucesso.",
-        "deleteConfirm": "O usuário \"{name}\" será excluído permanentemente."
-      }
-    }
-  },
-  "CustomerCategories": {
-    "CustomerCategories": {
-      "title": "Categorias de Clientes",
-      "new": "Nova categoria",
-      "edit": "Editar categoria",
-      "create": "Criar categoria",
-      "fields": {
-        "name": "Nome:",
-        "description": "Descrição:",
-        "isActive": "Categoria ativa:"
-      },
-      "status": {
-        "active": "Ativa",
-        "inactive": "Inativa"
-      },
-      "table": {
-        "name": "Nome",
-        "description": "Descrição",
-        "status": "Situação",
-        "createdAt": "Criada em",
-        "empty": "Nenhuma categoria de cliente encontrada."
-      },
-      "actions": {
-        "openMenu": "Abrir menu",
-        "edit": "Editar",
-        "deactivate": "Desativar",
-        "reactivate": "Reativar",
-        "delete": "Excluir"
-      },
-      "toasts": {
-        "created": "Categoria criada com sucesso.",
-        "deactivated": "Categoria desativada.",
-        "reactivated": "Categoria reativada.",
-        "deleted": "Categoria excluída com sucesso.",
-        "deleteConfirm": "A categoria \"{name}\" será excluída permanentemente."
-      },
-      "dialog": {
-        "addNew": "Adicionar nova categoria",
-        "title": "Nova categoria de cliente"
-      }
-    }
-  },
-  "SupplierCategories": {
-    "title": "Categorias de Fornecedores",
-    "new": "Nova categoria",
-    "create": "Nova Categoria de Fornecedor",
-    "edit": "Editar categoria de fornecedor",
-    "save": "Salvar alterações",
-    "fields": {
-      "name": "Nome:",
-      "description": "Descrição:",
-      "isActive": "Categoria ativa:"
-    },
-    "status": {
-      "active": "Ativa",
-      "inactive": "Inativa"
-    },
-    "table": {
-      "name": "Nome",
-      "description": "Descrição",
-      "status": "Status",
-      "createdAt": "Criada em",
-      "empty": "Nenhuma categoria de fornecedor encontrada."
-    },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar",
-      "delete": "Excluir"
-    },
-    "toasts": {
-      "deactivated": "Categoria desativada.",
-      "reactivated": "Categoria reativada.",
-      "deleted": "Categoria excluída com sucesso.",
-      "deleteConfirm": "A categoria \"{name}\" será excluída permanentemente."
-    }
-  },
-  "Memorialized": {
-    "new": "Novo perfil memorializado",
-    "newCustomerLabel": "Cliente:",
-    "newAvailable": "{count, plural, =0 {Nenhum QR code disponível} one {# QR code disponível} other {# QR codes disponíveis}}",
-    "saveChanges": "Salvar alterações",
-    "createProfile": "Criar perfil",
-    "stepperLabel": "Etapas do formulário",
-    "stepIndicator": "Etapa {current} de {total}",
-    "burialHint": "As informações de sepultamento são opcionais e podem ser preenchidas depois.",
-    "sections": {
-      "personal": "Dados pessoais",
-      "death": "Falecimento",
-      "burial": "Sepultamento",
-      "social": "Redes sociais"
-    },
-    "steps": {
-      "personal": {
-        "title": "Pessoal",
-        "desc": "Nome, gênero e nascimento"
-      },
-      "death": {
-        "title": "Falecimento",
-        "desc": "Data, local e causa"
-      },
-      "burial": {
-        "title": "Sepultamento",
-        "desc": "Local e localização"
-      },
-      "social": {
-        "title": "Social",
-        "desc": "Redes sociais e observações"
-      }
-    },
-    "fields": {
-      "firstName": "Nome:*",
-      "lastName": "Sobrenome:*",
-      "gender": "Gênero:",
-      "birthDate": "Data de nascimento:*",
-      "birthCountry": "País de nascimento:*",
-      "birthCity": "Cidade de nascimento:",
-      "birthState": "Estado de nascimento:*",
-      "deathDate": "Data do falecimento:*",
-      "city": "Cidade:",
-      "state": "Estado:",
-      "countryRequired": "País:*",
-      "country": "País:",
-      "cause": "Causa:",
-      "burialDate": "Data do sepultamento:",
-      "burialSite": "Local (cemitério/crematório):",
-      "zip": "CEP:",
-      "street": "Rua:",
-      "number": "Número:",
-      "complement": "Complemento:",
-      "neighborhood": "Bairro:",
-      "latitude": "Latitude:",
-      "longitude": "Longitude:",
-      "gps": "GPS",
-      "gpsTitle": "Obter coordenadas automaticamente",
-      "otherSocial": "Outro",
-      "notes": "Observações:"
-    },
-    "status": {
-      "pending": "Pendente",
-      "printed": "Impresso",
-      "installed": "Instalado"
-    },
-    "table": {
-      "name": "Nome",
-      "birthDate": "Data de nascimento",
-      "deathDate": "Data do falecimento",
-      "qrCode": "QR Code",
-      "filterPlaceholder": "Filtrar por nome…",
-      "empty": "Nenhum perfil memorializado encontrado."
-    },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "download": "Baixar"
-    },
-    "toasts": {
-      "created": "Perfil criado com sucesso.",
-      "updated": "Perfil atualizado com sucesso."
-    },
-    "qr": {
-      "statusTitle": "Status do QR Code",
-      "printedOn": "Impresso: {date}",
-      "installedOn": "Instalado: {date}",
-      "scans": "{count, plural, one {# leitura} other {# leituras}} — última: {date}",
-      "noScans": "Nenhuma leitura ainda",
-      "markPrinted": "Marcar como impresso",
-      "markInstalled": "Marcar como instalado",
-      "copyLink": "Copiar link",
-      "linkCopied": "Link do perfil copiado.",
-      "svgDownloaded": "SVG baixado.",
-      "pngDownloaded": "PNG baixado.",
-      "presets": {
-        "classic": {
-          "name": "Clássico",
-          "description": "Preto sobre branco atemporal — seguro para qualquer superfície."
-        },
-        "indigo": {
-          "name": "Índigo",
-          "description": "Índigo da marca sobre branco — acolhedor e reconhecível."
-        },
-        "inverted": {
-          "name": "Invertido",
-          "description": "Branco sobre quase preto — marcante sobre pedra clara."
-        },
-        "soft": {
-          "name": "Suave",
-          "description": "Ardósia suave sobre creme — discreto e editorial."
-        },
-        "bronze": {
-          "name": "Bronze",
-          "description": "Tons metálicos quentes — clássico para placas."
-        },
-        "forest": {
-          "name": "Floresta",
-          "description": "Verde profundo — perfeito para jardins de cemitério."
-        }
-      }
-    }
-  },
-  "Licenses": {
-    "title": "Meus QR Codes físicos",
-    "buy": "Comprar QR Codes físicos",
-    "summary": {
-      "available": "Disponíveis para venda",
-      "sold": "Vendidos",
-      "activated": "Ativados",
-      "printed": "Impressos"
-    },
-    "table": {
-      "code": "Código",
-      "url": "URL",
-      "status": "Status",
-      "printed": "Impresso",
-      "soldTo": "Vendido para",
-      "memorial": "Memorial",
-      "empty": "Nenhum QR Code encontrado"
-    },
-    "status": {
-      "AVAILABLE": "Disponível",
-      "SOLD": "Vendido",
-      "ACTIVATED": "Ativado"
-    },
-    "soldVia": {
-      "MANUAL": "Manual",
-      "PLATFORM": "Plataforma"
-    },
-    "actions": {
-      "exportCsv": "Exportar CSV",
-      "copyUrl": "Copiar URL"
-    }
+  "Errors": {
+    "categoryRequired": "A categoria é obrigatória",
+    "countryCodeRequired": "O código do país é obrigatório",
+    "invalidCnpj": "CNPJ inválido",
+    "invalidCpf": "CPF inválido",
+    "invalidEmail": "Endereço de e-mail inválido",
+    "invalidRole": "Função inválida",
+    "maxChars": "Deve ter no máximo {count} caracteres",
+    "minChars": "Deve ter pelo menos {count} caracteres",
+    "required": "Obrigatório"
   },
   "Inventory": {
     "digital": {
-      "title": "Meus QR Codes Digitais",
-      "buy": "Comprar QR codes digitais",
       "availableForSale": "Disponível para venda",
-      "reconcileNote": "Observação: o extrato abaixo foi reconstruído a partir de compras e vendas e pode diferir ligeiramente deste total atual (por exemplo, vendas estornadas ou ajustes manuais).",
+      "buy": "Comprar QR codes digitais",
       "empty": "Ainda não há atividade de QR codes.",
+      "reconcileNote": "Observação: o extrato abaixo foi reconstruído a partir de compras e vendas e pode diferir ligeiramente deste total atual (por exemplo, vendas estornadas ou ajustes manuais).",
+      "reversed": "Estornado",
       "table": {
+        "balance": "Disponível",
         "date": "Data",
         "description": "Descrição da Transação",
-        "units": "Unidades",
-        "unitPrice": "Preço Unitário",
         "totalPrice": "Preço Total",
-        "balance": "Disponível"
+        "unitPrice": "Preço Unitário",
+        "units": "Unidades"
       },
-      "reversed": "Estornado"
+      "title": "Meus QR Codes Digitais"
     },
     "products": {
       "title": "Inventário de Produtos"
     }
   },
+  "Licenses": {
+    "actions": {
+      "copyUrl": "Copiar URL",
+      "exportCsv": "Exportar CSV"
+    },
+    "buy": "Comprar QR Codes físicos",
+    "soldVia": {
+      "MANUAL": "Manual",
+      "PLATFORM": "Plataforma"
+    },
+    "status": {
+      "ACTIVATED": "Ativado",
+      "AVAILABLE": "Disponível",
+      "SOLD": "Vendido"
+    },
+    "summary": {
+      "activated": "Ativados",
+      "available": "Disponíveis para venda",
+      "printed": "Impressos",
+      "sold": "Vendidos"
+    },
+    "table": {
+      "code": "Código",
+      "empty": "Nenhum QR Code encontrado",
+      "memorial": "Memorial",
+      "printed": "Impresso",
+      "soldTo": "Vendido para",
+      "status": "Status",
+      "url": "URL"
+    },
+    "title": "Meus QR Codes físicos"
+  },
+  "Memorialized": {
+    "actions": {
+      "download": "Baixar",
+      "edit": "Editar",
+      "openMenu": "Abrir menu"
+    },
+    "burialHint": "As informações de sepultamento são opcionais e podem ser preenchidas depois.",
+    "createProfile": "Criar perfil",
+    "fields": {
+      "birthCity": "Cidade de nascimento:",
+      "birthCountry": "País de nascimento:*",
+      "birthDate": "Data de nascimento:*",
+      "birthState": "Estado de nascimento:*",
+      "burialDate": "Data do sepultamento:",
+      "burialSite": "Local (cemitério/crematório):",
+      "cause": "Causa:",
+      "city": "Cidade:",
+      "complement": "Complemento:",
+      "country": "País:",
+      "countryRequired": "País:*",
+      "deathDate": "Data do falecimento:*",
+      "firstName": "Nome:*",
+      "gender": "Gênero:",
+      "gps": "GPS",
+      "gpsTitle": "Obter coordenadas automaticamente",
+      "lastName": "Sobrenome:*",
+      "latitude": "Latitude:",
+      "longitude": "Longitude:",
+      "neighborhood": "Bairro:",
+      "notes": "Observações:",
+      "number": "Número:",
+      "otherSocial": "Outro",
+      "state": "Estado:",
+      "street": "Rua:",
+      "zip": "CEP:"
+    },
+    "new": "Novo perfil memorializado",
+    "newAvailable": "{count, plural, =0 {Nenhum QR code disponível} one {# QR code disponível} other {# QR codes disponíveis}}",
+    "newCustomerLabel": "Cliente:",
+    "qr": {
+      "copyLink": "Copiar link",
+      "installedOn": "Instalado: {date}",
+      "linkCopied": "Link do perfil copiado.",
+      "markInstalled": "Marcar como instalado",
+      "markPrinted": "Marcar como impresso",
+      "noScans": "Nenhuma leitura ainda",
+      "pngDownloaded": "PNG baixado.",
+      "presets": {
+        "bronze": {
+          "description": "Tons metálicos quentes — clássico para placas.",
+          "name": "Bronze"
+        },
+        "classic": {
+          "description": "Preto sobre branco atemporal — seguro para qualquer superfície.",
+          "name": "Clássico"
+        },
+        "forest": {
+          "description": "Verde profundo — perfeito para jardins de cemitério.",
+          "name": "Floresta"
+        },
+        "indigo": {
+          "description": "Índigo da marca sobre branco — acolhedor e reconhecível.",
+          "name": "Índigo"
+        },
+        "inverted": {
+          "description": "Branco sobre quase preto — marcante sobre pedra clara.",
+          "name": "Invertido"
+        },
+        "soft": {
+          "description": "Ardósia suave sobre creme — discreto e editorial.",
+          "name": "Suave"
+        }
+      },
+      "printedOn": "Impresso: {date}",
+      "scans": "{count, plural, one {# leitura} other {# leituras}} — última: {date}",
+      "statusTitle": "Status do QR Code",
+      "svgDownloaded": "SVG baixado."
+    },
+    "saveChanges": "Salvar alterações",
+    "sections": {
+      "burial": "Sepultamento",
+      "death": "Falecimento",
+      "personal": "Dados pessoais",
+      "social": "Redes sociais"
+    },
+    "status": {
+      "installed": "Instalado",
+      "pending": "Pendente",
+      "printed": "Impresso"
+    },
+    "stepIndicator": "Etapa {current} de {total}",
+    "stepperLabel": "Etapas do formulário",
+    "steps": {
+      "burial": {
+        "desc": "Local e localização",
+        "title": "Sepultamento"
+      },
+      "death": {
+        "desc": "Data, local e causa",
+        "title": "Falecimento"
+      },
+      "personal": {
+        "desc": "Nome, gênero e nascimento",
+        "title": "Pessoal"
+      },
+      "social": {
+        "desc": "Redes sociais e observações",
+        "title": "Social"
+      }
+    },
+    "table": {
+      "birthDate": "Data de nascimento",
+      "deathDate": "Data do falecimento",
+      "empty": "Nenhum perfil memorializado encontrado.",
+      "filterPlaceholder": "Filtrar por nome…",
+      "name": "Nome",
+      "qrCode": "QR Code"
+    },
+    "toasts": {
+      "created": "Perfil criado com sucesso.",
+      "updated": "Perfil atualizado com sucesso."
+    }
+  },
+  "Nav": {
+    "language": "Idioma",
+    "profile": "Perfil",
+    "signOut": "Sair",
+    "signingOut": "Saindo…",
+    "toggleTheme": "Alternar tema"
+  },
   "PhysicalQr": {
     "PhysicalQr": {
-      "detail": {
-        "title": "QR Code Físico",
-        "backToInventory": "Voltar ao estoque"
-      },
-      "status": {
-        "AVAILABLE": "Disponível",
-        "SOLD": "Vendido",
-        "ACTIVATED": "Ativado"
-      },
-      "soldVia": {
-        "PLATFORM": "Plataforma",
-        "MANUAL": "Manual"
-      },
-      "statusCard": {
-        "title": "Status do QR Code"
-      },
-      "timeline": {
-        "created": "Criado",
-        "printed": "Impresso",
-        "sold": "Vendido",
-        "activated": "Ativado",
-        "soldTo": "para {name}",
-        "soldFor": "por {value}",
-        "soldBy": "por {name}",
-        "memorial": "memorial: {name}"
-      },
       "actions": {
-        "markPrinted": "Marcar como impresso",
-        "markNotPrinted": "Marcar como não impresso",
-        "sellViaPlatform": "Vender pela plataforma",
         "manualWriteOff": "Baixa manual (fora da plataforma)",
+        "markNotPrinted": "Marcar como não impresso",
+        "markPrinted": "Marcar como impresso",
+        "sellViaPlatform": "Vender pela plataforma",
         "undoSale": "Desfazer venda (voltar a disponível)"
+      },
+      "detail": {
+        "backToInventory": "Voltar ao estoque",
+        "title": "QR Code Físico"
       },
       "fields": {
         "buyerName": "Nome / contato do comprador",
-        "saleValue": "Valor da venda (opcional)",
-        "customer": "Cliente"
+        "customer": "Cliente",
+        "saleValue": "Valor da venda (opcional)"
+      },
+      "manualSale": {
+        "description": "Registre uma venda feita fora da plataforma para que este código não possa ser vendido novamente.",
+        "submit": "Dar baixa",
+        "title": "Baixa manual"
       },
       "placeholders": {
         "buyerName": "Quem comprou?",
         "customerSearch": "Digite nome ou e-mail…"
       },
-      "manualSale": {
-        "title": "Baixa manual",
-        "description": "Registre uma venda feita fora da plataforma para que este código não possa ser vendido novamente.",
-        "submit": "Dar baixa"
-      },
       "platformSale": {
-        "title": "Vender pela plataforma",
         "description": "Atribua este código a um cliente cadastrado e envie o acesso ao aplicativo por e-mail. O código recebe baixa.",
         "removeCustomer": "Remover cliente",
         "submit": "Vender e enviar acesso",
-        "submitting": "Vendendo…"
+        "submitting": "Vendendo…",
+        "title": "Vender pela plataforma"
+      },
+      "soldVia": {
+        "MANUAL": "Manual",
+        "PLATFORM": "Plataforma"
+      },
+      "status": {
+        "ACTIVATED": "Ativado",
+        "AVAILABLE": "Disponível",
+        "SOLD": "Vendido"
+      },
+      "statusCard": {
+        "title": "Status do QR Code"
+      },
+      "timeline": {
+        "activated": "Ativado",
+        "created": "Criado",
+        "memorial": "memorial: {name}",
+        "printed": "Impresso",
+        "sold": "Vendido",
+        "soldBy": "por {name}",
+        "soldFor": "por {value}",
+        "soldTo": "para {name}"
+      },
+      "toasts": {
+        "markedNotPrinted": "Marcado como não impresso.",
+        "markedPrinted": "Marcado como impresso."
       },
       "undo": {
         "confirm": "Isso marcará o código como disponível novamente. Só é possível enquanto ele não tiver sido ativado pelo consumidor."
-      },
-      "toasts": {
-        "markedPrinted": "Marcado como impresso.",
-        "markedNotPrinted": "Marcado como não impresso."
-      }
-    }
-  },
-  "Purchasing": {
-    "Purchasing": {
-      "digital": {
-        "title": "Comprar QR Codes Digitais"
-      },
-      "physical": {
-        "title": "Comprar QR Codes Físicos"
-      },
-      "empty": {
-        "digital": "Nenhum pacote disponível no momento.",
-        "physical": "Nenhum QR code físico disponível no momento."
-      },
-      "card": {
-        "digitalDescription": "Pacote com {count} QR {count, plural, one {Code} other {Codes}}",
-        "physicalDescription": "{count} QR {count, plural, one {code} other {codes}} prontos para impressão",
-        "digitalHeadline": "Aumente suas margens em até 500% com este pacote",
-        "digitalSubcopy": "Gere {amount}+ em receita",
-        "physicalHeadline": "Imprima sob demanda e revenda pelo seu próprio preço",
-        "physicalSubcopy": "Ganhe até {amount}+ revendendo-os",
-        "priceFrom": "A partir de",
-        "priceForAsLittleAs": "Por apenas",
-        "digitalPriceUnit": "{count} QR {count, plural, one {Code} other {Codes}} por pacote",
-        "physicalPriceUnit": "{count} QR {count, plural, one {code} other {codes}} prontos para impressão",
-        "amount": "Quantidade:",
-        "processing": "Processando…",
-        "buyDigital": "Comece a Faturar Agora",
-        "buyPhysical": "Comprar e começar a revender"
-      },
-      "toasts": {
-        "success": "Compra concluída — os QR codes aparecerão em instantes.",
-        "canceled": "Compra cancelada."
-      }
-    }
-  },
-  "Sales": {
-    "Sales": {
-      "title": "Vendas",
-      "emptyInventory": "Nenhum QR code em estoque.",
-      "buyQrCodes": "Comprar QR codes",
-      "fields": {
-        "customer": "Cliente:",
-        "bonusSubscription": "Assinatura bônus:",
-        "totalAmount": "Valor total:"
-      },
-      "placeholders": {
-        "customerSearch": "Digite o nome ou e-mail...",
-        "subscription": "Selecione uma assinatura..."
-      },
-      "hints": {
-        "customer": "Para quem você está vendendo?",
-        "bonusSubscription": "A assinatura do aplicativo que o cliente receberá gratuitamente",
-        "totalAmount": "O preço total cobrado pelos QR Codes.",
-        "suggested": "Sugerido: {amount} (2× o custo do último pacote)",
-        "belowSuggested": "Abaixo do sugerido {amount} (2× o custo do último pacote) — vendendo com prejuízo?"
-      },
-      "errors": {
-        "selectCustomer": "Selecione um cliente.",
-        "selectSubscription": "Selecione uma assinatura.",
-        "invalidAmount": "Informe um valor válido."
-      },
-      "actions": {
-        "completeSale": "Concluir venda",
-        "registering": "Registrando...",
-        "removeCustomer": "Remover cliente"
-      },
-      "confirm": {
-        "title": "Confirmar venda",
-        "description": "A venda será registrada e um QR code será removido do estoque. Confirmar?",
-        "confirm": "Confirmar"
-      }
-    }
-  },
-  "Company": {
-    "Company": {
-      "title": "Dados da Empresa",
-      "sections": {
-        "address": "Endereço"
-      },
-      "fields": {
-        "legalName": "Razão Social:",
-        "tradeName": "Nome Fantasia:",
-        "cnpj": "CNPJ:",
-        "stateRegistration": "Inscrição Estadual:",
-        "municipalRegistration": "Inscrição Municipal:",
-        "email": "E-mail:",
-        "countryCode": "Código do País:",
-        "phone": "Telefone:",
-        "isActive": "Empresa ativa:"
-      },
-      "toasts": {
-        "updated": "Dados atualizados com sucesso."
       }
     }
   },
   "Profile": {
     "Profile": {
-      "title": "Perfil",
-      "fields": {
-        "firstName": "Nome",
-        "lastName": "Sobrenome",
-        "cpf": "CPF",
-        "birthDate": "Data de nascimento",
-        "countryCode": "Código do país",
-        "phone": "Telefone",
-        "email": "E-mail"
-      },
-      "sections": {
-        "address": "Endereço",
-        "personal": {
-          "title": "Informações pessoais",
-          "description": "Atualize seu nome, documento e dados de contato."
-        },
-        "account": {
-          "title": "Conta e segurança",
-          "description": "Gerencie o e-mail e a senha de acesso.",
-          "emailHint": "Para alterar seu e-mail, use o botão abaixo — um link de confirmação será enviado para o novo endereço."
-        },
-        "danger": {
-          "title": "Zona de perigo",
-          "description": "Exclua permanentemente sua conta e todos os dados relacionados."
-        }
-      },
       "actions": {
         "save": "Salvar alterações"
       },
@@ -798,6 +555,260 @@
         "invalidType": "Escolha um arquivo de imagem.",
         "tooLarge": "A imagem deve ter no máximo 5 MB.",
         "uploadFailed": "Falha no envio"
+      },
+      "fields": {
+        "birthDate": "Data de nascimento",
+        "countryCode": "Código do país",
+        "cpf": "CPF",
+        "email": "E-mail",
+        "firstName": "Nome",
+        "lastName": "Sobrenome",
+        "phone": "Telefone"
+      },
+      "sections": {
+        "account": {
+          "description": "Gerencie o e-mail e a senha de acesso.",
+          "emailHint": "Para alterar seu e-mail, use o botão abaixo — um link de confirmação será enviado para o novo endereço.",
+          "title": "Conta e segurança"
+        },
+        "address": "Endereço",
+        "danger": {
+          "description": "Exclua permanentemente sua conta e todos os dados relacionados.",
+          "title": "Zona de perigo"
+        },
+        "personal": {
+          "description": "Atualize seu nome, documento e dados de contato.",
+          "title": "Informações pessoais"
+        }
+      },
+      "title": "Perfil"
+    }
+  },
+  "Purchasing": {
+    "Purchasing": {
+      "card": {
+        "amount": "Quantidade:",
+        "buyDigital": "Comece a Faturar Agora",
+        "buyPhysical": "Comprar e começar a revender",
+        "digitalDescription": "Pacote com {count} QR {count, plural, one {Code} other {Codes}}",
+        "digitalHeadline": "Aumente suas margens em até 500% com este pacote",
+        "digitalPriceUnit": "{count} QR {count, plural, one {Code} other {Codes}} por pacote",
+        "digitalSubcopy": "Gere {amount}+ em receita",
+        "physicalDescription": "{count} QR {count, plural, one {code} other {codes}} prontos para impressão",
+        "physicalHeadline": "Imprima sob demanda e revenda pelo seu próprio preço",
+        "physicalPriceUnit": "{count} QR {count, plural, one {code} other {codes}} prontos para impressão",
+        "physicalSubcopy": "Ganhe até {amount}+ revendendo-os",
+        "priceForAsLittleAs": "Por apenas",
+        "priceFrom": "A partir de",
+        "processing": "Processando…"
+      },
+      "digital": {
+        "title": "Comprar QR Codes Digitais"
+      },
+      "empty": {
+        "digital": "Nenhum pacote disponível no momento.",
+        "physical": "Nenhum QR code físico disponível no momento."
+      },
+      "physical": {
+        "title": "Comprar QR Codes Físicos"
+      },
+      "toasts": {
+        "canceled": "Compra cancelada.",
+        "success": "Compra concluída — os QR codes aparecerão em instantes."
+      }
+    }
+  },
+  "Sales": {
+    "Sales": {
+      "actions": {
+        "completeSale": "Concluir venda",
+        "registering": "Registrando...",
+        "removeCustomer": "Remover cliente"
+      },
+      "buyQrCodes": "Comprar QR codes",
+      "confirm": {
+        "confirm": "Confirmar",
+        "description": "A venda será registrada e um QR code será removido do estoque. Confirmar?",
+        "title": "Confirmar venda"
+      },
+      "emptyInventory": "Nenhum QR code em estoque.",
+      "errors": {
+        "invalidAmount": "Informe um valor válido.",
+        "selectCustomer": "Selecione um cliente.",
+        "selectSubscription": "Selecione uma assinatura."
+      },
+      "fields": {
+        "bonusSubscription": "Assinatura bônus:",
+        "customer": "Cliente:",
+        "totalAmount": "Valor total:"
+      },
+      "hints": {
+        "belowSuggested": "Abaixo do sugerido {amount} (2× o custo do último pacote) — vendendo com prejuízo?",
+        "bonusSubscription": "A assinatura do aplicativo que o cliente receberá gratuitamente",
+        "customer": "Para quem você está vendendo?",
+        "suggested": "Sugerido: {amount} (2× o custo do último pacote)",
+        "totalAmount": "O preço total cobrado pelos QR Codes."
+      },
+      "placeholders": {
+        "customerSearch": "Digite o nome ou e-mail...",
+        "subscription": "Selecione uma assinatura..."
+      },
+      "title": "Vendas"
+    }
+  },
+  "SupplierCategories": {
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar"
+    },
+    "create": "Nova Categoria de Fornecedor",
+    "edit": "Editar categoria de fornecedor",
+    "fields": {
+      "description": "Descrição:",
+      "isActive": "Categoria ativa:",
+      "name": "Nome:"
+    },
+    "new": "Nova categoria",
+    "save": "Salvar alterações",
+    "status": {
+      "active": "Ativa",
+      "inactive": "Inativa"
+    },
+    "table": {
+      "createdAt": "Criada em",
+      "description": "Descrição",
+      "empty": "Nenhuma categoria de fornecedor encontrada.",
+      "name": "Nome",
+      "status": "Status"
+    },
+    "title": "Categorias de Fornecedores",
+    "toasts": {
+      "deactivated": "Categoria desativada.",
+      "deleteConfirm": "A categoria \"{name}\" será excluída permanentemente.",
+      "deleted": "Categoria excluída com sucesso.",
+      "reactivated": "Categoria reativada."
+    }
+  },
+  "Suppliers": {
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar"
+    },
+    "create": "Criar fornecedor",
+    "edit": "Editar fornecedor",
+    "entityType": {
+      "company": "Pessoa Jurídica",
+      "individual": "Pessoa Física"
+    },
+    "fields": {
+      "activeSupplier": "Fornecedor ativo:",
+      "birthDate": "Data de Nascimento:",
+      "category": "Categoria:",
+      "cnpj": "CNPJ:",
+      "companyName": "Razão Social:",
+      "countryCode": "Código do País:",
+      "cpf": "CPF:",
+      "email": "E-mail:",
+      "firstName": "Nome:",
+      "lastName": "Sobrenome:",
+      "municipalRegistration": "Inscrição Municipal:",
+      "notes": "Observações:",
+      "phone": "Telefone:",
+      "stateRegistration": "Inscrição Estadual:",
+      "tradeName": "Nome Fantasia:",
+      "type": "Tipo:"
+    },
+    "new": "Novo fornecedor",
+    "placeholders": {
+      "category": "Selecione uma categoria"
+    },
+    "sections": {
+      "address": "Endereço"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "table": {
+      "category": "Categoria",
+      "createdAt": "Criado em",
+      "email": "E-mail",
+      "empty": "Nenhum fornecedor encontrado.",
+      "name": "Nome",
+      "status": "Status",
+      "type": "Tipo"
+    },
+    "title": "Fornecedores",
+    "toasts": {
+      "deactivated": "Fornecedor desativado.",
+      "deleteConfirm": "O fornecedor \"{name}\" será excluído permanentemente.",
+      "deleted": "Fornecedor excluído com sucesso.",
+      "reactivated": "Fornecedor reativado."
+    }
+  },
+  "Users": {
+    "Users": {
+      "actions": {
+        "deactivate": "Desativar",
+        "delete": "Excluir",
+        "edit": "Editar",
+        "openMenu": "Abrir menu",
+        "reactivate": "Reativar",
+        "resendEmail": "Reenviar e-mail"
+      },
+      "create": "Novo usuário",
+      "edit": "Editar usuário",
+      "fields": {
+        "birthDate": "Data de Nascimento:",
+        "countryCode": "Código do País:",
+        "cpf": "CPF:",
+        "email": "E-mail:",
+        "firstName": "Nome:",
+        "isActive": "Usuário ativo:",
+        "lastName": "Sobrenome:",
+        "phone": "Telefone:",
+        "role": "Função:"
+      },
+      "new": "Novo funcionário",
+      "placeholders": {
+        "role": "Selecione uma função"
+      },
+      "roles": {
+        "ADMIN": "Administrador",
+        "COMERCIAL": "Comercial",
+        "FINANCE": "Financeiro",
+        "OWNER": "Proprietário",
+        "SUPER_ADMIN": "Super Admin",
+        "USER": "Usuário"
+      },
+      "sections": {
+        "address": "Endereço"
+      },
+      "status": {
+        "active": "Ativo",
+        "inactive": "Inativo"
+      },
+      "table": {
+        "createdAt": "Criado em",
+        "email": "E-mail",
+        "empty": "Nenhum usuário encontrado.",
+        "name": "Nome",
+        "role": "Função",
+        "status": "Status"
+      },
+      "title": "Funcionários",
+      "toasts": {
+        "deactivated": "Usuário desativado.",
+        "deleteConfirm": "O usuário \"{name}\" será excluído permanentemente.",
+        "deleted": "Usuário excluído com sucesso.",
+        "emailResent": "E-mail reenviado com sucesso.",
+        "reactivated": "Usuário reativado."
       }
     }
   }

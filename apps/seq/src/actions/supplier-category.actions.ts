@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
-import { supplierCategorySchema, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
+import { getSupplierCategorySchema, type SupplierCategoryFormValues } from '@/schemas/supplier-category.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
@@ -12,7 +13,7 @@ type ActionSuccess = { success: string }
 export async function createSupplierCategory(data: SupplierCategoryFormValues): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
-  const validated = supplierCategorySchema.safeParse(data)
+  const validated = getSupplierCategorySchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   try {
@@ -31,7 +32,7 @@ export async function createSupplierCategory(data: SupplierCategoryFormValues): 
 export async function updateSupplierCategory(id: string, data: SupplierCategoryFormValues): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
-  const validated = supplierCategorySchema.safeParse(data)
+  const validated = getSupplierCategorySchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   try {

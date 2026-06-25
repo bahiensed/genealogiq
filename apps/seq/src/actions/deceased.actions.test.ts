@@ -13,7 +13,10 @@ vi.mock('@genealogiq/db', () => ({
 }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyTenantSession: vi.fn() }))
-vi.mock("@/schemas/deceased.schema", () => ({ deceasedSchema: {} }))
+vi.mock("@/schemas/deceased.schema", () => ({
+  getDeceasedSchema: () => ({ safeParse: vi.fn() }),
+}))
+vi.mock("@/schemas/i18n", () => ({ identityTranslator: (key: string) => key }))
 
 import { addGuardian, removeGuardian } from "./deceased.actions"
 import { verifyTenantSession } from "@/lib/dal"

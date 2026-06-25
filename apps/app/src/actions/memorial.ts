@@ -3,8 +3,9 @@
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
-import { memorialSchema } from "@/schemas/memorial"
-import { profileEditSchema } from "@/schemas/profile"
+import { getMemorialSchema } from "@/schemas/memorial"
+import { getProfileEditSchema } from "@/schemas/profile"
+import { identityTranslator } from "@/schemas/i18n"
 import { getProfileById, getProfileForEdit } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
@@ -36,7 +37,7 @@ export async function createMemorial(data: unknown) {
     return { error: "No available QR Codes. Purchase a QR Code to create more profiles." }
   }
 
-  const parsed = memorialSchema.safeParse(data)
+  const parsed = getMemorialSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const { firstName, lastName, gender, birthDate, birthPlace, birthCountry, deathDate, deathPlace, deathCountry, avatarUrl } = parsed.data
@@ -109,7 +110,7 @@ export async function updateMemorial(profileId: string, data: unknown) {
   if (!profile || profile.role !== "APP_MEMO") return { error: "Profile not found." }
   if (!canManageProfile(profile, session.user.id)) return { error: "Unauthorized." }
 
-  const parsed = profileEditSchema.safeParse(data)
+  const parsed = getProfileEditSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const {

@@ -1,46 +1,46 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import type { Translator } from './i18n'
 import { GENDERS } from './app-user.schema'
 
-export const deceasedSchema = z.object({
-  firstName:         z.string().min(1, 'Required').max(100, 'Must be at most 100 characters'),
-  lastName:          z.string().min(1, 'Required').max(100, 'Must be at most 100 characters'),
-  gender:            z.enum(GENDERS).nullish(),
-  birthDate:         z.string().min(1, 'Required'),
-  birthCity:         z.string().max(200).nullish(),
-  birthState:        z.string().min(1, 'Required').max(200),
-  birthCountry:      z.string().min(1, 'Required').max(200),
-  deathDate:         z.string().min(1, 'Required'),
-  deathCause:        z.string().max(500).nullish(),
-  deathCity:         z.string().max(200).nullish(),
-  deathState:        z.string().max(200).nullish(),
-  deathCountry:      z.string().min(1, 'Required').max(200),
-  burialDate:        z.string().nullish(),
-  burialLatitude:    z.number().nullish(),
-  burialLongitude:   z.number().nullish(),
-  burialSite:        z.string().max(300).nullish(),
-  burialZip:         z.string().max(20).nullish(),
-  burialStreet:      z.string().max(200).nullish(),
-  burialNumber:      z.string().max(20).nullish(),
-  burialComplement:  z.string().max(200).nullish(),
-  burialNeighborhood: z.string().max(200).nullish(),
-  burialCity:        z.string().max(200).nullish(),
-  burialState:       z.string().max(200).nullish(),
-  burialCountry:     z.string().max(200).nullish(),
-  fb:                z.string().max(500).nullish(),
-  instagram:         z.string().max(500).nullish(),
-  linkedin:          z.string().max(500).nullish(),
-  tiktok:            z.string().max(500).nullish(),
-  x:                 z.string().max(500).nullish(),
-  youtube:           z.string().max(500).nullish(),
-  otherSocial:             z.string().max(500).nullish(),
-  website:           z.string().max(500).nullish(),
-  notes:             z.string().nullish(),
-})
+export function getDeceasedSchema(t: Translator) {
+  return z.object({
+    firstName:         z.string().min(1, t('required')).max(100, t('maxChars', { count: 100 })),
+    lastName:          z.string().min(1, t('required')).max(100, t('maxChars', { count: 100 })),
+    gender:            z.enum(GENDERS).nullish(),
+    birthDate:         z.string().min(1, t('required')),
+    birthCity:         z.string().max(200).nullish(),
+    birthState:        z.string().min(1, t('required')).max(200),
+    birthCountry:      z.string().min(1, t('required')).max(200),
+    deathDate:         z.string().min(1, t('required')),
+    deathCause:        z.string().max(500).nullish(),
+    deathCity:         z.string().max(200).nullish(),
+    deathState:        z.string().max(200).nullish(),
+    deathCountry:      z.string().min(1, t('required')).max(200),
+    burialDate:        z.string().nullish(),
+    burialLatitude:    z.number().nullish(),
+    burialLongitude:   z.number().nullish(),
+    burialSite:        z.string().max(300).nullish(),
+    burialZip:         z.string().max(20).nullish(),
+    burialStreet:      z.string().max(200).nullish(),
+    burialNumber:      z.string().max(20).nullish(),
+    burialComplement:  z.string().max(200).nullish(),
+    burialNeighborhood: z.string().max(200).nullish(),
+    burialCity:        z.string().max(200).nullish(),
+    burialState:       z.string().max(200).nullish(),
+    burialCountry:     z.string().max(200).nullish(),
+    fb:                z.string().max(500).nullish(),
+    instagram:         z.string().max(500).nullish(),
+    linkedin:          z.string().max(500).nullish(),
+    tiktok:            z.string().max(500).nullish(),
+    x:                 z.string().max(500).nullish(),
+    youtube:           z.string().max(500).nullish(),
+    otherSocial:             z.string().max(500).nullish(),
+    website:           z.string().max(500).nullish(),
+    notes:             z.string().nullish(),
+  })
+}
 
-export type DeceasedFormValues = z.infer<typeof deceasedSchema>
-
-export const deceasedResolver = zodResolver(deceasedSchema)
+export type DeceasedFormValues = z.infer<ReturnType<typeof getDeceasedSchema>>
 
 export const deceasedDefaultValues: DeceasedFormValues = {
   firstName:          '',

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { profileResolver, profileDefaultValues, type ProfileFormValues } from '@/schemas/profile.schema'
+import { getProfileSchema, profileDefaultValues, type ProfileFormValues } from '@/schemas/profile.schema'
 import { updateProfile } from '@/actions/profile.actions'
 import { maskCpf, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
@@ -33,13 +34,15 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ defaultValues }: ProfileFormProps) {
-  const t  = useTranslations('Profile')
-  const tc = useTranslations('Common')
+  const t    = useTranslations('Profile')
+  const tc   = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<ProfileFormValues>({
-    resolver: profileResolver,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getProfileSchema(tErr)) as any, [tErr]),
     defaultValues: defaultValues ?? profileDefaultValues,
   })
 

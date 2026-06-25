@@ -1,715 +1,737 @@
 {
-  "Nav": {
-    "profile": "Perfil",
-    "signOut": "Sair",
-    "signingOut": "Saindo…",
-    "language": "Idioma",
-    "toggleTheme": "Alternar tema"
-  },
   "Auth": {
-    "title": "Entrar",
     "description": "Digite seu e-mail e senha para acessar sua conta.",
     "email": "E-mail:",
     "emailPlaceholder": "seu@email.com",
-    "password": "Senha:",
     "forgotPassword": "Esqueceu a senha?",
-    "showPassword": "Mostrar senha",
     "hidePassword": "Ocultar senha",
+    "password": "Senha:",
+    "showPassword": "Mostrar senha",
     "signIn": "Entrar",
-    "signingIn": "Entrando…"
-  },
-  "Dashboard": {
-    "title": "Painel",
-    "monthlySales": "Vendas no mês",
-    "salesThisMonth": "Vendas neste mês",
-    "annualSales": "Vendas no ano",
-    "salesThisYear": "Vendas neste ano",
-    "totalSales": "Vendas totais",
-    "allTimeSales": "Vendas de todo o período",
-    "monthlyRevenue": "Receita do mês",
-    "revenueThisMonth": "Receita neste mês",
-    "annualRevenue": "Receita do ano",
-    "revenueThisYear": "Receita neste ano",
-    "totalRevenue": "Receita total",
-    "allTimeRevenue": "Receita de todo o período"
+    "signingIn": "Entrando…",
+    "title": "Entrar"
   },
   "Common": {
-    "save": "Salvar",
-    "saving": "Salvando…",
+    "address": {
+      "city": "Cidade:",
+      "complement": "Complemento:",
+      "country": "País:",
+      "lookupAria": "Buscar endereço",
+      "lookupError": "Falha ao buscar o CEP/código postal.",
+      "neighborhood": "Bairro:",
+      "number": "Número:",
+      "selectPlaceholder": "Selecione",
+      "state": "Estado / Província:",
+      "street": "Logradouro:",
+      "zipCode": "CEP:"
+    },
+    "back": "Voltar",
     "cancel": "Cancelar",
     "create": "Criar",
     "creating": "Criando…",
-    "edit": "Editar",
-    "search": "Buscar",
-    "reset": "Redefinir",
-    "back": "Voltar",
-    "next": "Avançar",
-    "delete": {
-      "title": "Confirmar exclusão",
-      "description": "Esta ação não pode ser desfeita.",
-      "confirm": "Excluir",
-      "deleting": "Excluindo…"
+    "dataTable": {
+      "columns": "Colunas",
+      "firstPage": "Primeira página",
+      "hide": "Ocultar",
+      "lastPage": "Última página",
+      "nextPage": "Próxima página",
+      "noResults": "Nenhum registro encontrado",
+      "pageOf": "Página {page} de {total}",
+      "previousPage": "Página anterior",
+      "rowCount": "{count, plural, =0 {Nenhum registro} one {# registro} other {# registros}}",
+      "rowsPerPage": "Itens por página",
+      "searchPlaceholder": "Buscar…",
+      "sortAsc": "Cresc.",
+      "sortDesc": "Decresc."
     },
+    "delete": {
+      "confirm": "Excluir",
+      "deleting": "Excluindo…",
+      "description": "Esta ação não pode ser desfeita.",
+      "title": "Confirmar exclusão"
+    },
+    "edit": "Editar",
+    "next": "Avançar",
+    "reset": "Redefinir",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "search": "Buscar",
     "toasts": {
-      "saved": "Salvo com sucesso.",
       "created": "Criado com sucesso.",
       "deleted": "Excluído com sucesso.",
-      "error": "Algo deu errado. Tente novamente."
+      "error": "Algo deu errado. Tente novamente.",
+      "saved": "Salvo com sucesso."
+    }
+  },
+  "Company": {
+    "fields": {
+      "cnpj": "CNPJ:",
+      "countryCode": "Código do país:",
+      "email": "E-mail:",
+      "isActive": "Empresa ativa:",
+      "legalName": "Razão Social:",
+      "municipalRegistration": "Inscrição Municipal:",
+      "phone": "Telefone:",
+      "stateRegistration": "Inscrição Estadual:",
+      "tradeName": "Nome Fantasia:"
     },
-    "dataTable": {
-      "searchPlaceholder": "Buscar…",
-      "noResults": "Nenhum registro encontrado",
-      "columns": "Colunas",
-      "rowsPerPage": "Itens por página",
-      "pageOf": "Página {page} de {total}",
-      "rowCount": "{count, plural, =0 {Nenhum registro} one {# registro} other {# registros}}",
-      "firstPage": "Primeira página",
-      "previousPage": "Página anterior",
-      "nextPage": "Próxima página",
-      "lastPage": "Última página",
-      "sortAsc": "Cresc.",
-      "sortDesc": "Decresc.",
-      "hide": "Ocultar"
+    "save": "Salvar alterações",
+    "sections": {
+      "address": "Endereço"
     },
-    "address": {
-      "country": "País:",
-      "selectPlaceholder": "Selecione",
-      "zipCode": "CEP:",
-      "lookupAria": "Buscar endereço",
-      "lookupError": "Falha ao buscar o CEP/código postal.",
-      "street": "Logradouro:",
-      "number": "Número:",
-      "complement": "Complemento:",
-      "neighborhood": "Bairro:",
-      "city": "Cidade:",
-      "state": "Estado / Província:"
+    "title": "Dados da Empresa",
+    "toasts": {
+      "updated": "Dados atualizados com sucesso."
+    }
+  },
+  "CustomerCategories": {
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar"
+    },
+    "create": "Criar categoria",
+    "editPage": "Editar categoria de cliente",
+    "fields": {
+      "active": "Categoria ativa:",
+      "description": "Descrição:",
+      "name": "Nome:"
+    },
+    "new": "Nova categoria",
+    "newPage": "Nova categoria de cliente",
+    "saveChanges": "Salvar alterações",
+    "status": {
+      "active": "Ativa",
+      "inactive": "Inativa"
+    },
+    "table": {
+      "createdAt": "Criada em",
+      "description": "Descrição",
+      "empty": "Nenhuma categoria de cliente encontrada.",
+      "name": "Nome",
+      "status": "Status"
+    },
+    "title": "Categorias de Clientes",
+    "toasts": {
+      "deactivated": "Categoria desativada.",
+      "deleteConfirm": "A categoria \"{name}\" será excluída permanentemente.",
+      "deleted": "Categoria excluída com sucesso.",
+      "reactivated": "Categoria reativada."
     }
   },
   "Customers": {
-    "title": "Clientes",
-    "new": "Novo cliente",
-    "edit": "Editar cliente",
-    "create": "Criar cliente",
-    "stepOf": "Etapa {step} de {total}",
-    "active": "Ativo?",
-    "sections": {
-      "business": "Empresa",
-      "contact": "Contato",
-      "address": "Endereço",
-      "administrator": "Administrador",
-      "modules": "Módulos Sequoia"
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar",
+      "resendEmail": "Reenviar e-mail"
     },
-    "steps": {
-      "businessDesc": "Dados legais e identificação",
-      "contactDesc": "Detalhes de contato e categoria",
-      "addressDesc": "Localização física",
-      "administratorDesc": "Responsável pela conta Sequoia",
-      "modulesDesc": "Permissões de acesso ao Sequoia"
+    "active": "Ativo?",
+    "create": "Criar cliente",
+    "edit": "Editar cliente",
+    "entityType": {
+      "company": "Empresa",
+      "individual": "Pessoa física"
+    },
+    "fields": {
+      "birthDate": "Data de nascimento:",
+      "category": "Categoria:",
+      "cnpj": "CNPJ:",
+      "companyName": "Razão social:",
+      "countryCode": "Código do país:",
+      "cpf": "CPF:",
+      "email": "E-mail:",
+      "firstName": "Nome:",
+      "lastName": "Sobrenome:",
+      "municipalRegistration": "Inscrição municipal:",
+      "municipalRegistrationShort": "Insc. mun.:",
+      "notes": "Observações:",
+      "phone": "Telefone:",
+      "stateRegistration": "Inscrição estadual:",
+      "stateRegistrationShort": "Insc. est.:",
+      "tradeName": "Nome fantasia:",
+      "type": "Tipo:"
     },
     "hints": {
       "addressOptional": "O endereço é opcional e pode ser preenchido depois.",
       "admin": "Credenciais de acesso ao sistema Sequoia para o responsável por esta empresa. Um e-mail será enviado com um link para definir a senha.",
       "modulesGray": "Itens em cinza são sempre acessíveis e não podem ser desativados."
     },
-    "fields": {
-      "type": "Tipo:",
-      "firstName": "Nome:",
-      "companyName": "Razão social:",
-      "lastName": "Sobrenome:",
-      "tradeName": "Nome fantasia:",
-      "cpf": "CPF:",
-      "cnpj": "CNPJ:",
-      "birthDate": "Data de nascimento:",
-      "stateRegistration": "Inscrição estadual:",
-      "stateRegistrationShort": "Insc. est.:",
-      "municipalRegistration": "Inscrição municipal:",
-      "municipalRegistrationShort": "Insc. mun.:",
-      "email": "E-mail:",
-      "countryCode": "Código do país:",
-      "phone": "Telefone:",
-      "category": "Categoria:",
-      "notes": "Observações:"
-    },
-    "placeholders": {
-      "category": "Selecione uma categoria"
-    },
-    "entityType": {
-      "company": "Empresa",
-      "individual": "Pessoa física"
-    },
-    "owner": {
-      "firstName": "Nome:",
-      "lastName": "Sobrenome:",
-      "email": "E-mail:"
-    },
-    "status": {
-      "active": "Ativo",
-      "inactive": "Inativo"
-    },
-    "table": {
-      "name": "Nome",
-      "type": "Tipo",
-      "category": "Categoria",
-      "email": "E-mail",
-      "status": "Status",
-      "createdAt": "Criado em",
-      "empty": "Nenhum cliente encontrado."
-    },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar",
-      "resendEmail": "Reenviar e-mail",
-      "delete": "Excluir"
-    },
-    "toasts": {
-      "deactivated": "Cliente desativado.",
-      "reactivated": "Cliente reativado.",
-      "emailResent": "E-mail reenviado com sucesso.",
-      "deleted": "Cliente excluído com sucesso.",
-      "deleteConfirm": "O cliente \"{name}\" será excluído permanentemente."
-    },
     "modules": {
       "groups": {
         "alwaysActive": "Sempre ativo",
-        "records": "Cadastros",
         "categories": "Categorias",
-        "purchasing": "Compras",
+        "finance": "Financeiro",
         "inventory": "Estoque",
-        "finance": "Financeiro"
+        "purchasing": "Compras",
+        "records": "Cadastros"
       },
       "labels": {
-        "dashboard": "Painel",
         "buySubscriptions": "Comprar assinaturas",
-        "viewSubscriptions": "Ver assinaturas",
+        "customerCat": "Cat. cliente",
         "customers": "Clientes",
-        "sales": "Vendas",
-        "system": "Sistema",
-        "suppliers": "Fornecedores",
+        "dashboard": "Painel",
+        "finance": "Financeiro",
+        "productCat": "Cat. produto",
         "products": "Produtos",
+        "sales": "Vendas",
+        "serviceCat": "Cat. serviço",
         "services": "Serviços",
         "supplierCat": "Cat. fornecedor",
-        "productCat": "Cat. produto",
-        "serviceCat": "Cat. serviço",
-        "customerCat": "Cat. cliente",
-        "finance": "Financeiro"
+        "suppliers": "Fornecedores",
+        "system": "Sistema",
+        "viewSubscriptions": "Ver assinaturas"
       }
-    }
-  },
-  "Suppliers": {
-    "title": "Fornecedores",
-    "new": "Novo fornecedor",
-    "edit": "Editar fornecedor",
-    "create": "Criar fornecedor",
-    "active": "Ativo?",
-    "sections": {
-      "address": "Endereço"
     },
-    "fields": {
-      "type": "Tipo:",
-      "firstName": "Nome:",
-      "companyName": "Razão Social:",
-      "lastName": "Sobrenome:",
-      "tradeName": "Nome Fantasia:",
-      "cpf": "CPF:",
-      "cnpj": "CNPJ:",
-      "birthDate": "Data de Nascimento:",
-      "stateRegistration": "Inscrição Estadual:",
-      "municipalRegistration": "Inscrição Municipal:",
+    "new": "Novo cliente",
+    "owner": {
       "email": "E-mail:",
-      "countryCode": "DDI:",
-      "phone": "Telefone:",
-      "category": "Categoria:",
-      "notes": "Observações:"
+      "firstName": "Nome:",
+      "lastName": "Sobrenome:"
     },
     "placeholders": {
       "category": "Selecione uma categoria"
     },
-    "entityType": {
-      "company": "Pessoa Jurídica",
-      "individual": "Pessoa Física"
+    "sections": {
+      "address": "Endereço",
+      "administrator": "Administrador",
+      "business": "Empresa",
+      "contact": "Contato",
+      "modules": "Módulos Sequoia"
     },
     "status": {
       "active": "Ativo",
       "inactive": "Inativo"
     },
+    "stepOf": "Etapa {step} de {total}",
+    "steps": {
+      "addressDesc": "Localização física",
+      "administratorDesc": "Responsável pela conta Sequoia",
+      "businessDesc": "Dados legais e identificação",
+      "contactDesc": "Detalhes de contato e categoria",
+      "modulesDesc": "Permissões de acesso ao Sequoia"
+    },
     "table": {
-      "name": "Nome",
-      "type": "Tipo",
       "category": "Categoria",
+      "createdAt": "Criado em",
       "email": "E-mail",
-      "status": "Status",
-      "createdAt": "Criado em",
-      "empty": "Nenhum fornecedor encontrado."
-    },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar",
-      "delete": "Excluir"
-    },
-    "toasts": {
-      "deactivated": "Fornecedor desativado.",
-      "reactivated": "Fornecedor reativado.",
-      "deleted": "Fornecedor excluído com sucesso.",
-      "deleteConfirm": "O fornecedor \"{name}\" será excluído permanentemente."
-    },
-    "category": {
-      "add": "Adicionar nova categoria",
-      "title": "Nova categoria de fornecedor",
-      "name": "Nome:",
-      "description": "Descrição:",
-      "create": "Criar categoria"
-    }
-  },
-  "Packages": {
-    "title": "QR Codes Digitais (B2B)",
-    "physicalTitle": "QR Codes Físicos",
-    "newPackage": "Novo pacote",
-    "newProduct": "Novo produto",
-    "noun": {
-      "package": "Pacote",
-      "product": "Produto"
-    },
-    "edit": "Editar {noun}",
-    "new": "Novo {noun}",
-    "createButton": "Criar {noun}",
-    "saveChanges": "Salvar alterações",
-    "active": "Ativo?",
-    "unitPrice": "Preço unitário por QR code",
-    "typeBadge": {
-      "digital": "Digital",
-      "physical": "Físico"
-    },
-    "fields": {
-      "name": "Nome do {noun}:",
-      "quantity": "Quantidade de QR Codes:",
-      "price": "Preço (US$):",
-      "description": "Descrição:"
-    },
-    "status": {
-      "active": "Ativo",
-      "inactive": "Inativo"
-    },
-    "table": {
-      "name": "Nome do {noun}",
-      "quantity": "QR Codes / Pacote",
-      "price": "Preço do {noun}",
-      "description": "Descrição do {noun}",
-      "status": "Status",
-      "createdAt": "Criado em",
-      "empty": "Nenhum pacote encontrado.",
-      "emptyProduct": "Nenhum produto de QR físico ainda."
-    },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar",
-      "delete": "Excluir"
-    },
-    "toasts": {
-      "deactivated": "Pacote desativado.",
-      "reactivated": "Pacote reativado.",
-      "deleted": "Pacote excluído com sucesso.",
-      "deleteConfirm": "O pacote \"{name}\" será excluído permanentemente."
-    },
-    "stripe": {
-      "title": "Sincronização com Stripe",
-      "synced": "Sincronizado",
-      "notSynced": "Não sincronizado",
-      "productId": "produto:",
-      "priceId": "preço:",
-      "hint": "Envia o nome, a descrição e o preço deste {noun} para o Stripe (criando ou atualizando o Product e o Price correspondentes). Salve suas alterações primeiro — a sincronização usa os dados salvos. Alterar o preço provisiona um novo Price no Stripe.",
-      "syncButton": "Sincronizar com Stripe",
-      "syncing": "Sincronizando…",
-      "confirmTitle": "Sincronizar com o Stripe?",
-      "confirmDescription": "Confirme que os dados deste {noun} estão corretos. Isso criará ou atualizará o Product e o Price correspondentes no Stripe. Tem certeza de que deseja sincronizar?",
-      "syncNow": "Sincronizar agora"
-    }
-  },
-  "Users": {
-    "title": "Usuários do sistema",
-    "new": "Novo usuário",
-    "edit": "Editar usuário",
-    "create": "Criar usuário",
-    "saveChanges": "Salvar alterações",
-    "active": "Ativo?",
-    "sections": {
-      "address": "Endereço"
-    },
-    "fields": {
-      "firstName": "Nome:",
-      "lastName": "Sobrenome:",
-      "gender": "Gênero:",
-      "birthDate": "Data de nascimento:",
-      "cpf": "CPF:",
-      "role": "Função:",
-      "email": "E-mail:",
-      "countryCode": "Código:",
-      "phone": "Telefone:"
-    },
-    "placeholders": {
-      "role": "Selecione uma função"
-    },
-    "gender": {
-      "female": "Feminino",
-      "male": "Masculino"
-    },
-    "roles": {
-      "SUPER_ADMIN": "Super Admin",
-      "OWNER": "Proprietário",
-      "ADMIN": "Administrador",
-      "COMERCIAL": "Comercial",
-      "FINANCE": "Financeiro",
-      "USER": "Usuário"
-    },
-    "status": {
-      "active": "Ativo",
-      "inactive": "Inativo"
-    },
-    "table": {
+      "empty": "Nenhum cliente encontrado.",
       "name": "Nome",
-      "email": "E-mail",
-      "role": "Função",
       "status": "Status",
-      "createdAt": "Criado em",
-      "empty": "Nenhum usuário encontrado."
+      "type": "Tipo"
     },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar",
-      "resendEmail": "Reenviar e-mail",
-      "delete": "Excluir"
-    },
+    "title": "Clientes",
     "toasts": {
-      "deactivated": "Usuário desativado.",
-      "reactivated": "Usuário reativado.",
+      "deactivated": "Cliente desativado.",
+      "deleteConfirm": "O cliente \"{name}\" será excluído permanentemente.",
+      "deleted": "Cliente excluído com sucesso.",
       "emailResent": "E-mail reenviado com sucesso.",
-      "deleted": "Usuário excluído com sucesso.",
-      "deleteConfirm": "O usuário \"{name}\" será excluído permanentemente."
+      "reactivated": "Cliente reativado."
     }
   },
-  "Company": {
-    "title": "Dados da Empresa",
-    "save": "Salvar alterações",
-    "sections": {
-      "address": "Endereço"
-    },
-    "fields": {
-      "legalName": "Razão Social:",
-      "tradeName": "Nome Fantasia:",
-      "cnpj": "CNPJ:",
-      "stateRegistration": "Inscrição Estadual:",
-      "municipalRegistration": "Inscrição Municipal:",
-      "email": "E-mail:",
-      "countryCode": "Código do país:",
-      "phone": "Telefone:",
-      "isActive": "Empresa ativa:"
-    },
-    "toasts": {
-      "updated": "Dados atualizados com sucesso."
-    }
+  "Dashboard": {
+    "allTimeRevenue": "Receita de todo o período",
+    "allTimeSales": "Vendas de todo o período",
+    "annualRevenue": "Receita do ano",
+    "annualSales": "Vendas no ano",
+    "monthlyRevenue": "Receita do mês",
+    "monthlySales": "Vendas no mês",
+    "revenueThisMonth": "Receita neste mês",
+    "revenueThisYear": "Receita neste ano",
+    "salesThisMonth": "Vendas neste mês",
+    "salesThisYear": "Vendas neste ano",
+    "title": "Painel",
+    "totalRevenue": "Receita total",
+    "totalSales": "Vendas totais"
   },
   "DiscountCoupons": {
-    "title": "Cupons de Desconto",
-    "new": "Novo cupom",
-    "edit": "Editar cupom de desconto",
+    "actions": {
+      "deactivate": "Desativar",
+      "editDescription": "Editar descrição",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar"
+    },
     "create": "Criar cupom",
-    "saveChanges": "Salvar alterações",
-    "loadError": "Não foi possível carregar os cupons: {message}. Verifique os logs das funções na Vercel para mais detalhes.",
-    "packageMeta": "{quantity} QR codes · {price}",
+    "discount": {
+      "amount": "{value} de desconto",
+      "percent": "{value}% de desconto"
+    },
+    "discountType": {
+      "amount": "Desconto de valor fixo (USD)",
+      "percent": "Desconto percentual"
+    },
+    "durationLabel": {
+      "forever": "Para sempre",
+      "once": "Uma vez",
+      "repeating": "{months} meses"
+    },
+    "durationOption": {
+      "forever": "Para sempre (em todas as faturas)",
+      "once": "Uma vez (apenas na primeira fatura)",
+      "repeating": "Repetido (N meses)"
+    },
+    "edit": "Editar cupom de desconto",
     "fields": {
+      "amount": "Valor ($):",
+      "appliesTo": "Aplica-se a pacotes específicos (opcional):",
       "code": "Código:",
       "description": "Descrição:",
       "discountType": "Tipo de desconto:",
-      "percent": "Percentual (0-100):",
-      "amount": "Valor ($):",
       "duration": "Duração:",
       "durationInMonths": "Duração em meses:",
-      "maxRedemptions": "Máximo de resgates:",
       "expiresOn": "Expira em:",
-      "appliesTo": "Aplica-se a pacotes específicos (opcional):"
+      "maxRedemptions": "Máximo de resgates:",
+      "percent": "Percentual (0-100):"
     },
+    "hints": {
+      "appliesTo": "Deixe tudo desmarcado para aplicar a todos os pacotes.",
+      "codeImmutable": "O código promocional é imutável. Para alterar os termos, desative este cupom e crie um novo."
+    },
+    "loadError": "Não foi possível carregar os cupons: {message}. Verifique os logs das funções na Vercel para mais detalhes.",
+    "new": "Novo cupom",
+    "packageMeta": "{quantity} QR codes · {price}",
     "placeholders": {
       "code": "WELCOME10",
       "descriptionCreate": "Observação interna opcional",
       "descriptionEdit": "Observação interna (não exibida aos clientes)",
       "maxRedemptions": "Em branco = ilimitado"
     },
-    "discountType": {
-      "percent": "Desconto percentual",
-      "amount": "Desconto de valor fixo (USD)"
-    },
-    "durationOption": {
-      "once": "Uma vez (apenas na primeira fatura)",
-      "forever": "Para sempre (em todas as faturas)",
-      "repeating": "Repetido (N meses)"
-    },
-    "discount": {
-      "percent": "{value}% de desconto",
-      "amount": "{value} de desconto"
-    },
-    "durationLabel": {
-      "once": "Uma vez",
-      "forever": "Para sempre",
-      "repeating": "{months} meses"
-    },
-    "hints": {
-      "appliesTo": "Deixe tudo desmarcado para aplicar a todos os pacotes.",
-      "codeImmutable": "O código promocional é imutável. Para alterar os termos, desative este cupom e crie um novo."
-    },
+    "saveChanges": "Salvar alterações",
     "status": {
       "active": "Ativo",
       "inactive": "Inativo"
     },
     "table": {
       "code": "Código",
+      "createdAt": "Criado em",
       "description": "Descrição",
       "discount": "Desconto",
       "duration": "Duração",
-      "maxUses": "Usos máx.",
-      "expires": "Expira",
-      "status": "Status",
-      "createdAt": "Criado em",
       "empty": "Nenhum cupom de desconto ainda.",
+      "expires": "Expira",
+      "maxUses": "Usos máx.",
+      "never": "Nunca",
       "searchByCode": "Buscar por código...",
-      "unlimited": "Ilimitado",
-      "never": "Nunca"
+      "status": "Status",
+      "unlimited": "Ilimitado"
     },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "editDescription": "Editar descrição",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar"
-    },
+    "title": "Cupons de Desconto",
     "toasts": {
       "deactivated": "Cupom desativado.",
       "reactivated": "Cupom reativado."
     }
   },
+  "Errors": {
+    "categoryRequired": "A categoria é obrigatória",
+    "codeFormat": "Use apenas letras maiúsculas, números e sublinhados",
+    "countryCodeRequired": "O código do país é obrigatório",
+    "couponCodeFormat": "Apenas letras maiúsculas, números, hifens e sublinhados",
+    "durationInMonthsRequired": "Obrigatório quando a duração é \"repeating\"",
+    "greaterThanZero": "Deve ser maior que 0",
+    "invalidCnpj": "CNPJ inválido",
+    "invalidCpf": "CPF inválido",
+    "invalidEmail": "Endereço de e-mail inválido",
+    "invalidRole": "Função inválida",
+    "maxChars": "Deve ter no máximo {count} caracteres",
+    "minChars": "Deve ter pelo menos {count} caracteres",
+    "mustBePositive": "Deve ser maior que zero",
+    "mustBeWholeNumber": "Deve ser um número inteiro",
+    "mustBeZeroOrGreater": "Deve ser 0 ou maior",
+    "percentMax": "A porcentagem deve ser no máximo 100",
+    "priceMin": "Deve ser 0 (gratuito) ou maior",
+    "required": "Obrigatório",
+    "termLengthMin": "Deve ser 0 (vitalício) ou um número positivo de meses",
+    "wholeNumber": "Deve ser um número inteiro"
+  },
+  "Nav": {
+    "language": "Idioma",
+    "profile": "Perfil",
+    "signOut": "Sair",
+    "signingOut": "Saindo…",
+    "toggleTheme": "Alternar tema"
+  },
+  "Packages": {
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar"
+    },
+    "active": "Ativo?",
+    "createButton": "Criar {noun}",
+    "edit": "Editar {noun}",
+    "fields": {
+      "description": "Descrição:",
+      "name": "Nome do {noun}:",
+      "price": "Preço (US$):",
+      "quantity": "Quantidade de QR Codes:"
+    },
+    "new": "Novo {noun}",
+    "newPackage": "Novo pacote",
+    "newProduct": "Novo produto",
+    "noun": {
+      "package": "Pacote",
+      "product": "Produto"
+    },
+    "physicalTitle": "QR Codes Físicos",
+    "saveChanges": "Salvar alterações",
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "stripe": {
+      "confirmDescription": "Confirme que os dados deste {noun} estão corretos. Isso criará ou atualizará o Product e o Price correspondentes no Stripe. Tem certeza de que deseja sincronizar?",
+      "confirmTitle": "Sincronizar com o Stripe?",
+      "hint": "Envia o nome, a descrição e o preço deste {noun} para o Stripe (criando ou atualizando o Product e o Price correspondentes). Salve suas alterações primeiro — a sincronização usa os dados salvos. Alterar o preço provisiona um novo Price no Stripe.",
+      "notSynced": "Não sincronizado",
+      "priceId": "preço:",
+      "productId": "produto:",
+      "syncButton": "Sincronizar com Stripe",
+      "syncNow": "Sincronizar agora",
+      "synced": "Sincronizado",
+      "syncing": "Sincronizando…",
+      "title": "Sincronização com Stripe"
+    },
+    "table": {
+      "createdAt": "Criado em",
+      "description": "Descrição do {noun}",
+      "empty": "Nenhum pacote encontrado.",
+      "emptyProduct": "Nenhum produto de QR físico ainda.",
+      "name": "Nome do {noun}",
+      "price": "Preço do {noun}",
+      "quantity": "QR Codes / Pacote",
+      "status": "Status"
+    },
+    "title": "QR Codes Digitais (B2B)",
+    "toasts": {
+      "deactivated": "Pacote desativado.",
+      "deleteConfirm": "O pacote \"{name}\" será excluído permanentemente.",
+      "deleted": "Pacote excluído com sucesso.",
+      "reactivated": "Pacote reativado."
+    },
+    "typeBadge": {
+      "digital": "Digital",
+      "physical": "Físico"
+    },
+    "unitPrice": "Preço unitário por QR code"
+  },
+  "PhysicalQr": {
+    "PhysicalQr": {
+      "table": {
+        "activated": "Ativados",
+        "available": "Disponíveis",
+        "empty": "Nenhum QR Code físico encontrado.",
+        "package": "Pacote",
+        "saleDate": "Data da venda",
+        "tenant": "Inquilino",
+        "total": "Total"
+      }
+    }
+  },
+  "Sales": {
+    "actions": {
+      "cancel": "Cancelar",
+      "openMenu": "Abrir menu",
+      "reverse": "Estornar"
+    },
+    "confirm": {
+      "confirm": "Confirmar",
+      "description": "Antes de concluir esta venda, verifique se o pagamento já foi recebido.",
+      "title": "Confirmar venda"
+    },
+    "fields": {
+      "customer": "Cliente:",
+      "package": "Pacote:",
+      "quantity": "Quantidade de Pacotes:"
+    },
+    "new": "Nova Venda de Pacote de QR Codes",
+    "newButton": "Nova venda",
+    "packageOption": {
+      "codes": "{count, plural, one {# código} other {# códigos}}"
+    },
+    "packageType": {
+      "digital": "Digital",
+      "physical": "Físico"
+    },
+    "placeholders": {
+      "customer": "Selecione um cliente",
+      "package": "Selecione um pacote"
+    },
+    "reverse": {
+      "confirm": "Estornar venda",
+      "descriptionDigital": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada e os QR codes serão devolvidos ao estoque. O registro é mantido para fins de auditoria.",
+      "descriptionPhysical": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada. Os códigos de licença disponíveis serão invalidados. Os códigos já ativados permanecem vinculados aos seus memoriais. O registro é mantido para fins de auditoria.",
+      "reversing": "Estornando…",
+      "title": "Confirmar estorno"
+    },
+    "status": {
+      "active": "Ativa",
+      "reversed": "Estornada"
+    },
+    "submit": "Registrar Venda",
+    "submitting": "Enviando…",
+    "summary": {
+      "digitalCodes": "QR Codes a serem adicionados ao estoque",
+      "physicalCodes": "Códigos de licença físicos a serem gerados",
+      "totalPrice": "Preço total",
+      "unitPrice": "Preço unitário / código"
+    },
+    "table": {
+      "customer": "Cliente",
+      "date": "Data",
+      "empty": "Nenhuma venda encontrada.",
+      "package": "Pacote",
+      "packagePrice": "Preço do Pacote",
+      "quantity": "Qtd. de Pacotes",
+      "seller": "Vendedor",
+      "status": "Status",
+      "subscriptionUnitPrice": "Preço Un. QR-Code",
+      "totalPrice": "Preço Total do Pedido",
+      "totalSubscriptions": "QR-Codes / Pacote"
+    },
+    "title": "Vendas Manuais",
+    "toasts": {
+      "reversed": "Venda estornada com sucesso."
+    }
+  },
   "Subscriptions": {
     "Subscriptions": {
-      "title": "Assinaturas (B2C)",
-      "availableTitle": "Assinaturas Disponíveis",
-      "new": "Nova assinatura",
-      "edit": "Editar Assinatura",
-      "create": "Criar assinatura",
+      "actions": {
+        "deactivate": "Desativar",
+        "delete": "Excluir",
+        "edit": "Editar",
+        "openMenu": "Abrir menu",
+        "reactivate": "Reativar"
+      },
       "active": "Ativa?",
-      "lifetime": "Vitalícia",
-      "free": "Grátis",
+      "availableTitle": "Assinaturas Disponíveis",
+      "create": "Criar assinatura",
+      "edit": "Editar Assinatura",
       "fields": {
-        "code": "Código:",
-        "name": "Nome:",
-        "maxProfiles": "Máximo de Perfis Memo:",
-        "treeMaxMembers": "Máximo de Membros na Árvore Genealógica:",
         "bioMaxChars": "Máximo de Caracteres da Bio:",
         "bioMaxImages": "Máximo de Imagens da Bio:",
+        "code": "Código:",
+        "description": "Descrição:",
         "galleryMaxImages": "Máximo de Imagens da Galeria:",
         "galleryMaxVideos": "Máximo de Vídeos da Galeria:",
         "geolocationFullAccess": "Acesso Total à Geolocalização",
+        "maxProfiles": "Máximo de Perfis Memo:",
+        "name": "Nome:",
+        "price": "Preço (US$):",
         "qrCodeAccess": "Acesso ao QR Code",
         "termLength": "Duração (em meses):",
-        "price": "Preço (US$):",
-        "description": "Descrição:"
+        "treeMaxMembers": "Máximo de Membros na Árvore Genealógica:"
       },
-      "placeholders": {
-        "code": "DECADE"
-      },
+      "free": "Grátis",
       "hints": {
         "code": "Identificação do plano",
         "freeCodeReserved": "O código do plano FREE é reservado.",
-        "termLength": "0 = Vitalícia",
-        "price": "0 = Grátis"
+        "price": "0 = Grátis",
+        "termLength": "0 = Vitalícia"
+      },
+      "lifetime": "Vitalícia",
+      "new": "Nova assinatura",
+      "placeholders": {
+        "code": "DECADE"
       },
       "status": {
         "active": "Ativa",
         "inactive": "Inativa"
       },
       "table": {
-        "code": "Código",
-        "name": "Nome",
-        "maxProfiles": "Memo",
         "bioMaxChars": "Caracteres Bio",
         "bioMaxImages": "Imagens Bio",
+        "code": "Código",
+        "createdAt": "Criada em",
+        "empty": "Nenhuma assinatura encontrada",
         "galleryMaxImages": "Imagens Galeria",
         "galleryMaxVideos": "Vídeos Galeria",
         "geo": "Geo",
-        "qrCode": "QR Code",
-        "term": "Duração",
+        "maxProfiles": "Memo",
+        "name": "Nome",
         "price": "Preço",
+        "qrCode": "QR Code",
         "status": "Status",
-        "createdAt": "Criada em",
-        "empty": "Nenhuma assinatura encontrada"
+        "term": "Duração"
       },
-      "actions": {
-        "openMenu": "Abrir menu",
-        "edit": "Editar",
-        "deactivate": "Desativar",
-        "reactivate": "Reativar",
-        "delete": "Excluir"
-      },
+      "title": "Assinaturas (B2C)",
       "toasts": {
         "deactivated": "Assinatura desativada.",
-        "reactivated": "Assinatura reativada.",
+        "deleteConfirm": "A assinatura \"{name}\" será excluída permanentemente.",
         "deleted": "Assinatura excluída com sucesso.",
-        "deleteConfirm": "A assinatura \"{name}\" será excluída permanentemente."
+        "reactivated": "Assinatura reativada."
       }
     }
   },
-  "CustomerCategories": {
-    "title": "Categorias de Clientes",
-    "new": "Nova categoria",
-    "newPage": "Nova categoria de cliente",
-    "editPage": "Editar categoria de cliente",
-    "create": "Criar categoria",
-    "saveChanges": "Salvar alterações",
-    "fields": {
-      "name": "Nome:",
-      "description": "Descrição:",
-      "active": "Categoria ativa:"
+  "SupplierCategories": {
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar"
     },
+    "create": "Criar categoria",
+    "edit": "Editar categoria de fornecedor",
+    "fields": {
+      "activeCategory": "Categoria ativa:",
+      "description": "Descrição:",
+      "name": "Nome:"
+    },
+    "new": "Nova categoria de fornecedor",
     "status": {
-      "active": "Ativa",
-      "inactive": "Inativa"
+      "active": "Ativo",
+      "inactive": "Inativo"
     },
     "table": {
-      "name": "Nome",
+      "createdAt": "Criado em",
       "description": "Descrição",
-      "status": "Status",
-      "createdAt": "Criada em",
-      "empty": "Nenhuma categoria de cliente encontrada."
+      "empty": "Nenhuma categoria de fornecedor encontrada.",
+      "name": "Nome",
+      "status": "Status"
     },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar",
-      "delete": "Excluir"
-    },
+    "title": "Categorias de fornecedores",
     "toasts": {
       "deactivated": "Categoria desativada.",
-      "reactivated": "Categoria reativada.",
+      "deleteConfirm": "A categoria \"{name}\" será excluída permanentemente.",
       "deleted": "Categoria excluída com sucesso.",
-      "deleteConfirm": "A categoria \"{name}\" será excluída permanentemente."
+      "reactivated": "Categoria reativada."
     }
   },
-  "SupplierCategories": {
-    "title": "Categorias de fornecedores",
-    "new": "Nova categoria de fornecedor",
-    "edit": "Editar categoria de fornecedor",
-    "create": "Criar categoria",
-    "fields": {
-      "name": "Nome:",
+  "Suppliers": {
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar"
+    },
+    "active": "Ativo?",
+    "category": {
+      "add": "Adicionar nova categoria",
+      "create": "Criar categoria",
       "description": "Descrição:",
-      "activeCategory": "Categoria ativa:"
+      "name": "Nome:",
+      "title": "Nova categoria de fornecedor"
+    },
+    "create": "Criar fornecedor",
+    "edit": "Editar fornecedor",
+    "entityType": {
+      "company": "Pessoa Jurídica",
+      "individual": "Pessoa Física"
+    },
+    "fields": {
+      "birthDate": "Data de Nascimento:",
+      "category": "Categoria:",
+      "cnpj": "CNPJ:",
+      "companyName": "Razão Social:",
+      "countryCode": "DDI:",
+      "cpf": "CPF:",
+      "email": "E-mail:",
+      "firstName": "Nome:",
+      "lastName": "Sobrenome:",
+      "municipalRegistration": "Inscrição Municipal:",
+      "notes": "Observações:",
+      "phone": "Telefone:",
+      "stateRegistration": "Inscrição Estadual:",
+      "tradeName": "Nome Fantasia:",
+      "type": "Tipo:"
+    },
+    "new": "Novo fornecedor",
+    "placeholders": {
+      "category": "Selecione uma categoria"
+    },
+    "sections": {
+      "address": "Endereço"
     },
     "status": {
       "active": "Ativo",
       "inactive": "Inativo"
     },
     "table": {
-      "name": "Nome",
-      "description": "Descrição",
-      "status": "Status",
+      "category": "Categoria",
       "createdAt": "Criado em",
-      "empty": "Nenhuma categoria de fornecedor encontrada."
+      "email": "E-mail",
+      "empty": "Nenhum fornecedor encontrado.",
+      "name": "Nome",
+      "status": "Status",
+      "type": "Tipo"
     },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "edit": "Editar",
-      "deactivate": "Desativar",
-      "reactivate": "Reativar",
-      "delete": "Excluir"
-    },
+    "title": "Fornecedores",
     "toasts": {
-      "deactivated": "Categoria desativada.",
-      "reactivated": "Categoria reativada.",
-      "deleted": "Categoria excluída com sucesso.",
-      "deleteConfirm": "A categoria \"{name}\" será excluída permanentemente."
+      "deactivated": "Fornecedor desativado.",
+      "deleteConfirm": "O fornecedor \"{name}\" será excluído permanentemente.",
+      "deleted": "Fornecedor excluído com sucesso.",
+      "reactivated": "Fornecedor reativado."
     }
   },
-  "PhysicalQr": {
-    "PhysicalQr": {
-      "table": {
-        "tenant": "Inquilino",
-        "package": "Pacote",
-        "saleDate": "Data da venda",
-        "total": "Total",
-        "activated": "Ativados",
-        "available": "Disponíveis",
-        "empty": "Nenhum QR Code físico encontrado."
-      }
-    }
-  },
-  "Sales": {
-    "title": "Vendas Manuais",
-    "newButton": "Nova venda",
-    "new": "Nova Venda de Pacote de QR Codes",
-    "submit": "Registrar Venda",
-    "submitting": "Enviando…",
+  "Users": {
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar",
+      "resendEmail": "Reenviar e-mail"
+    },
+    "active": "Ativo?",
+    "create": "Criar usuário",
+    "edit": "Editar usuário",
     "fields": {
-      "package": "Pacote:",
-      "customer": "Cliente:",
-      "quantity": "Quantidade de Pacotes:"
+      "birthDate": "Data de nascimento:",
+      "countryCode": "Código:",
+      "cpf": "CPF:",
+      "email": "E-mail:",
+      "firstName": "Nome:",
+      "gender": "Gênero:",
+      "lastName": "Sobrenome:",
+      "phone": "Telefone:",
+      "role": "Função:"
     },
+    "gender": {
+      "female": "Feminino",
+      "male": "Masculino"
+    },
+    "new": "Novo usuário",
     "placeholders": {
-      "package": "Selecione um pacote",
-      "customer": "Selecione um cliente"
+      "role": "Selecione uma função"
     },
-    "packageType": {
-      "digital": "Digital",
-      "physical": "Físico"
+    "roles": {
+      "ADMIN": "Administrador",
+      "COMERCIAL": "Comercial",
+      "FINANCE": "Financeiro",
+      "OWNER": "Proprietário",
+      "SUPER_ADMIN": "Super Admin",
+      "USER": "Usuário"
     },
-    "packageOption": {
-      "codes": "{count, plural, one {# código} other {# códigos}}"
-    },
-    "summary": {
-      "physicalCodes": "Códigos de licença físicos a serem gerados",
-      "digitalCodes": "QR Codes a serem adicionados ao estoque",
-      "totalPrice": "Preço total",
-      "unitPrice": "Preço unitário / código"
+    "saveChanges": "Salvar alterações",
+    "sections": {
+      "address": "Endereço"
     },
     "status": {
-      "active": "Ativa",
-      "reversed": "Estornada"
+      "active": "Ativo",
+      "inactive": "Inativo"
     },
     "table": {
-      "date": "Data",
-      "status": "Status",
-      "customer": "Cliente",
-      "package": "Pacote",
-      "quantity": "Qtd. de Pacotes",
-      "totalSubscriptions": "QR-Codes / Pacote",
-      "packagePrice": "Preço do Pacote",
-      "subscriptionUnitPrice": "Preço Un. QR-Code",
-      "totalPrice": "Preço Total do Pedido",
-      "seller": "Vendedor",
-      "empty": "Nenhuma venda encontrada."
+      "createdAt": "Criado em",
+      "email": "E-mail",
+      "empty": "Nenhum usuário encontrado.",
+      "name": "Nome",
+      "role": "Função",
+      "status": "Status"
     },
-    "actions": {
-      "openMenu": "Abrir menu",
-      "reverse": "Estornar",
-      "cancel": "Cancelar"
-    },
-    "reverse": {
-      "title": "Confirmar estorno",
-      "descriptionPhysical": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada. Os códigos de licença disponíveis serão invalidados. Os códigos já ativados permanecem vinculados aos seus memoriais. O registro é mantido para fins de auditoria.",
-      "descriptionDigital": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada e os QR codes serão devolvidos ao estoque. O registro é mantido para fins de auditoria.",
-      "confirm": "Estornar venda",
-      "reversing": "Estornando…"
-    },
-    "confirm": {
-      "title": "Confirmar venda",
-      "description": "Antes de concluir esta venda, verifique se o pagamento já foi recebido.",
-      "confirm": "Confirmar"
-    },
+    "title": "Usuários do sistema",
     "toasts": {
-      "reversed": "Venda estornada com sucesso."
+      "deactivated": "Usuário desativado.",
+      "deleteConfirm": "O usuário \"{name}\" será excluído permanentemente.",
+      "deleted": "Usuário excluído com sucesso.",
+      "emailResent": "E-mail reenviado com sucesso.",
+      "reactivated": "Usuário reativado."
     }
   }
 }

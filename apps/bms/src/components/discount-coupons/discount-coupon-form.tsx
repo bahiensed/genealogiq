@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
 import {
-  discountCouponResolver,
+  getDiscountCouponSchema,
   discountCouponDefaultValues,
   type DiscountCouponFormValues,
 } from '@/schemas/discount-coupon.schema'
@@ -30,15 +31,16 @@ interface DiscountCouponFormProps {
 }
 
 export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
-  const t  = useTranslations('DiscountCoupons')
-  const tc = useTranslations('Common')
+  const t    = useTranslations('DiscountCoupons')
+  const tc   = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const locale = useLocale()
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<DiscountCouponFormValues>({
-    resolver:      discountCouponResolver,
+    resolver:      useMemo(() => zodResolver(getDiscountCouponSchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: discountCouponDefaultValues,
   })
 

@@ -4,7 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/dal'
-import { supplierSchema, type SupplierFormValues } from '@/schemas/supplier.schema'
+import { getSupplierSchema, type SupplierFormValues } from '@/schemas/supplier.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
@@ -22,7 +23,7 @@ function buildAddressWrite(address: SupplierFormValues['address'], mode: 'create
 export async function createSupplier(data: SupplierFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = supplierSchema.safeParse(data)
+  const validated = getSupplierSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data
@@ -53,7 +54,7 @@ export async function createSupplier(data: SupplierFormValues): Promise<ActionEr
 export async function updateSupplier(id: string, data: SupplierFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = supplierSchema.safeParse(data)
+  const validated = getSupplierSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data

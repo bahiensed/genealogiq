@@ -6,7 +6,8 @@ import { z, flattenError } from "zod"
 import { signIn, signOut } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { SetupSchema, ResetPasswordSchema, ChangePasswordSchema, ChangeEmailSchema, DeleteAccountSchema } from "@/lib/auth"
-import { companySchema, type CompanyFormValues } from "@/schemas/company.schema"
+import { getCompanySchema, type CompanyFormValues } from "@/schemas/company.schema"
+import { identityTranslator } from "@/schemas/i18n"
 import { sendPasswordResetEmail, sendEmailChangeEmail, sendAccountDeletionEmail } from "@/lib/email"
 import { verifySession } from "@/lib/dal"
 import { getClientIp, checkRateLimit } from "@/lib/rate-limit"
@@ -42,7 +43,7 @@ export async function setupSystem(
   const count = await prisma.user.count()
   if (count > 0) return { error: "The system is already configured." }
 
-  const companyValidated = companySchema.safeParse(companyData)
+  const companyValidated = getCompanySchema(identityTranslator).safeParse(companyData)
   if (!companyValidated.success) return { error: "Invalid company data." }
 
   const adminValidated = SetupSchema.safeParse(adminData)

@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
 import { Fingerprint, QrCode } from 'lucide-react'
-import { saleResolver, saleDefaultValues, type SaleFormValues } from '@/schemas/sale.schema'
+import { getSaleSchema, saleDefaultValues, type SaleFormValues } from '@/schemas/sale.schema'
 import { createSale } from '@/actions/sale.actions'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
@@ -48,8 +49,9 @@ interface SaleFormProps {
 }
 
 export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
-  const t  = useTranslations('Sales')
-  const tc = useTranslations('Common')
+  const t    = useTranslations('Sales')
+  const tc   = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const locale = useLocale()
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   const [serverError, setServerError] = useState<string | null>(null)
@@ -58,7 +60,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   const router = useRouter()
 
   const form = useForm<SaleFormValues>({
-    resolver: saleResolver,
+    resolver: useMemo(() => zodResolver(getSaleSchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: saleDefaultValues,
   })
 

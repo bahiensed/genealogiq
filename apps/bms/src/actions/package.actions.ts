@@ -5,7 +5,8 @@ import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { verifyAdmin } from '@/lib/dal'
-import { packageSchema, type PackageFormValues } from '@/schemas/package.schema'
+import { getPackageSchema, type PackageFormValues } from '@/schemas/package.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError   = { error: string }
 type ActionSuccess = { success: string }
@@ -13,7 +14,7 @@ type ActionSuccess = { success: string }
 export async function createPackage(data: PackageFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = packageSchema.safeParse(data)
+  const validated = getPackageSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { price, ...rest } = validated.data
@@ -30,7 +31,7 @@ export async function createPackage(data: PackageFormValues): Promise<ActionErro
 export async function updatePackage(id: string, data: PackageFormValues): Promise<ActionError | ActionSuccess> {
   await verifyAdmin()
 
-  const validated = packageSchema.safeParse(data)
+  const validated = getPackageSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { price, ...rest } = validated.data

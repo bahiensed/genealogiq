@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { supplierResolver, supplierDefaultValues, type SupplierFormValues } from '@/schemas/supplier.schema'
+import { getSupplierSchema, supplierDefaultValues, type SupplierFormValues } from '@/schemas/supplier.schema'
 import { createSupplier, updateSupplier } from '@/actions/supplier.actions'
 import { maskCpf, maskCnpj, maskPhone } from '@/lib/masks'
 import { PHONE_COUNTRY_CODES } from '@/constants/phone-country-codes'
@@ -43,15 +44,16 @@ interface SupplierFormProps {
 }
 
 export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFormProps) {
-  const t  = useTranslations('Suppliers')
-  const tc = useTranslations('Common')
+  const t   = useTranslations('Suppliers')
+  const tc  = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const [localCategories, setLocalCategories] = useState(categories)
   const router = useRouter()
 
   const form = useForm<SupplierFormValues>({
-    resolver: supplierResolver,
+    resolver: useMemo(() => zodResolver(getSupplierSchema(tErr)) as any, [tErr]), // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: defaultValues ?? supplierDefaultValues,
   })
 

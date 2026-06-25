@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { MapPin } from 'lucide-react'
-import { deceasedResolver, deceasedDefaultValues, type DeceasedFormValues } from '@/schemas/deceased.schema'
+import { getDeceasedSchema, deceasedDefaultValues, type DeceasedFormValues } from '@/schemas/deceased.schema'
 import { createDeceased, updateDeceased } from '@/actions/deceased.actions'
 import { GenderSelect } from '@/components/ui/gender-select'
 import { CountrySelect } from '@/components/ui/country-select'
@@ -47,12 +48,14 @@ function socialLabel(key: SocialKey, otherLabel: string): string {
 export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedFormProps) {
   const t  = useTranslations('Memorialized')
   const tc = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<DeceasedFormValues>({
-    resolver: deceasedResolver,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getDeceasedSchema(tErr)) as any, [tErr]),
     defaultValues: defaultValues ?? deceasedDefaultValues,
   })
 

@@ -1,15 +1,15 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
+import type { Translator } from './i18n'
 
-export const saleSchema = z.object({
-  packageId:  z.string().min(1, 'Package is required'),
-  tenantId:   z.string().min(1, 'Customer is required'),
-  quantity:   z.number().int('Must be a whole number').positive('Must be greater than zero'),
-})
+export function getSaleSchema(t: Translator) {
+  return z.object({
+    packageId:  z.string().min(1, t('required')),
+    tenantId:   z.string().min(1, t('required')),
+    quantity:   z.number().int(t('mustBeWholeNumber')).positive(t('mustBePositive')),
+  })
+}
 
-export type SaleFormValues = z.infer<typeof saleSchema>
-
-export const saleResolver = zodResolver(saleSchema)
+export type SaleFormValues = z.infer<ReturnType<typeof getSaleSchema>>
 
 export const saleDefaultValues: SaleFormValues = {
   packageId:  '',

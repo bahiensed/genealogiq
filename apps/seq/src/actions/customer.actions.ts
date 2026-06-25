@@ -7,8 +7,9 @@ import { hashToken } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail } from '@/lib/email'
-import { appUserSchema, type AppUserFormValues } from '@/schemas/app-user.schema'
-import { deceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'
+import { getAppUserSchema, type AppUserFormValues } from '@/schemas/app-user.schema'
+import { getDeceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'
+import { identityTranslator } from '@/schemas/i18n'
 
 type ActionError = { error: string }
 type ActionSuccess = { success: string }
@@ -38,7 +39,7 @@ export async function createCustomer(
 ): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
-  const validated = appUserSchema.safeParse(appUserData)
+  const validated = getAppUserSchema(identityTranslator).safeParse(appUserData)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data
@@ -70,10 +71,10 @@ export async function createCustomerWithDeceased(
 ): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
-  const validatedUser = appUserSchema.safeParse(appUserData)
+  const validatedUser = getAppUserSchema(identityTranslator).safeParse(appUserData)
   if (!validatedUser.success) return { error: 'Invalid data' }
 
-  const validatedDeceased = deceasedSchema.safeParse(deceasedData)
+  const validatedDeceased = getDeceasedSchema(identityTranslator).safeParse(deceasedData)
   if (!validatedDeceased.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...userRest } = validatedUser.data
@@ -146,7 +147,7 @@ export async function createCustomerWithDeceased(
 export async function updateCustomer(id: string, data: AppUserFormValues): Promise<ActionError | ActionSuccess> {
   const { customerId } = await verifyTenantSession()
 
-  const validated = appUserSchema.safeParse(data)
+  const validated = getAppUserSchema(identityTranslator).safeParse(data)
   if (!validated.success) return { error: 'Invalid data' }
 
   const { address, birthDate, categoryId, ...rest } = validated.data

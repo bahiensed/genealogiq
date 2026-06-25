@@ -1,715 +1,737 @@
 {
-  "Nav": {
-    "profile": "Profile",
-    "signOut": "Sign out",
-    "signingOut": "Signing out…",
-    "language": "Language",
-    "toggleTheme": "Toggle theme"
-  },
   "Auth": {
-    "title": "Sign in",
     "description": "Enter your email and password to access your account.",
     "email": "E-mail:",
     "emailPlaceholder": "you@email.com",
-    "password": "Password:",
     "forgotPassword": "Forgot password?",
-    "showPassword": "Show password",
     "hidePassword": "Hide password",
+    "password": "Password:",
+    "showPassword": "Show password",
     "signIn": "Sign in",
-    "signingIn": "Signing in…"
-  },
-  "Dashboard": {
-    "title": "Dashboard",
-    "monthlySales": "Monthly Sales",
-    "salesThisMonth": "Sales this month",
-    "annualSales": "Annual Sales",
-    "salesThisYear": "Sales this year",
-    "totalSales": "Total Sales",
-    "allTimeSales": "All-time sales",
-    "monthlyRevenue": "Monthly Revenue",
-    "revenueThisMonth": "Revenue this month",
-    "annualRevenue": "Annual Revenue",
-    "revenueThisYear": "Revenue this year",
-    "totalRevenue": "Total Revenue",
-    "allTimeRevenue": "All-time revenue"
+    "signingIn": "Signing in…",
+    "title": "Sign in"
   },
   "Common": {
-    "save": "Save",
-    "saving": "Saving…",
+    "address": {
+      "city": "City:",
+      "complement": "Complement:",
+      "country": "Country:",
+      "lookupAria": "Look up address",
+      "lookupError": "Failed to look up ZIP/postal code.",
+      "neighborhood": "Neighborhood:",
+      "number": "Number:",
+      "selectPlaceholder": "Select",
+      "state": "State / Province:",
+      "street": "Street:",
+      "zipCode": "ZIP Code:"
+    },
+    "back": "Back",
     "cancel": "Cancel",
     "create": "Create",
     "creating": "Creating…",
-    "edit": "Edit",
-    "search": "Search",
-    "reset": "Reset",
-    "back": "Back",
-    "next": "Next",
-    "delete": {
-      "title": "Confirm deletion",
-      "description": "This action cannot be undone.",
-      "confirm": "Delete",
-      "deleting": "Deleting…"
+    "dataTable": {
+      "columns": "Columns",
+      "firstPage": "First page",
+      "hide": "Hide",
+      "lastPage": "Last page",
+      "nextPage": "Next page",
+      "noResults": "No records found",
+      "pageOf": "Page {page} of {total}",
+      "previousPage": "Previous page",
+      "rowCount": "{count, plural, =0 {No records} one {# record} other {# records}}",
+      "rowsPerPage": "Rows per page",
+      "searchPlaceholder": "Search…",
+      "sortAsc": "Asc",
+      "sortDesc": "Desc"
     },
+    "delete": {
+      "confirm": "Delete",
+      "deleting": "Deleting…",
+      "description": "This action cannot be undone.",
+      "title": "Confirm deletion"
+    },
+    "edit": "Edit",
+    "next": "Next",
+    "reset": "Reset",
+    "save": "Save",
+    "saving": "Saving…",
+    "search": "Search",
     "toasts": {
-      "saved": "Saved successfully.",
       "created": "Created successfully.",
       "deleted": "Deleted successfully.",
-      "error": "Something went wrong. Please try again."
+      "error": "Something went wrong. Please try again.",
+      "saved": "Saved successfully."
+    }
+  },
+  "Company": {
+    "fields": {
+      "cnpj": "CNPJ:",
+      "countryCode": "Country code:",
+      "email": "Email:",
+      "isActive": "Company active:",
+      "legalName": "Legal Name:",
+      "municipalRegistration": "Municipal Registration:",
+      "phone": "Phone:",
+      "stateRegistration": "State Registration:",
+      "tradeName": "Trade Name:"
     },
-    "dataTable": {
-      "searchPlaceholder": "Search…",
-      "noResults": "No records found",
-      "columns": "Columns",
-      "rowsPerPage": "Rows per page",
-      "pageOf": "Page {page} of {total}",
-      "rowCount": "{count, plural, =0 {No records} one {# record} other {# records}}",
-      "firstPage": "First page",
-      "previousPage": "Previous page",
-      "nextPage": "Next page",
-      "lastPage": "Last page",
-      "sortAsc": "Asc",
-      "sortDesc": "Desc",
-      "hide": "Hide"
+    "save": "Save changes",
+    "sections": {
+      "address": "Address"
     },
-    "address": {
-      "country": "Country:",
-      "selectPlaceholder": "Select",
-      "zipCode": "ZIP Code:",
-      "lookupAria": "Look up address",
-      "lookupError": "Failed to look up ZIP/postal code.",
-      "street": "Street:",
-      "number": "Number:",
-      "complement": "Complement:",
-      "neighborhood": "Neighborhood:",
-      "city": "City:",
-      "state": "State / Province:"
+    "title": "Company Data",
+    "toasts": {
+      "updated": "Data updated successfully."
+    }
+  },
+  "CustomerCategories": {
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate"
+    },
+    "create": "Create category",
+    "editPage": "Edit customer category",
+    "fields": {
+      "active": "Active category:",
+      "description": "Description:",
+      "name": "Name:"
+    },
+    "new": "New category",
+    "newPage": "New customer category",
+    "saveChanges": "Save changes",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "createdAt": "Created at",
+      "description": "Description",
+      "empty": "No customer categories found.",
+      "name": "Name",
+      "status": "Status"
+    },
+    "title": "Customer Categories",
+    "toasts": {
+      "deactivated": "Category deactivated.",
+      "deleteConfirm": "The category \"{name}\" will be permanently deleted.",
+      "deleted": "Category deleted successfully.",
+      "reactivated": "Category reactivated."
     }
   },
   "Customers": {
-    "title": "Customers",
-    "new": "New customer",
-    "edit": "Edit customer",
-    "create": "Create customer",
-    "stepOf": "Step {step} of {total}",
-    "active": "Active?",
-    "sections": {
-      "business": "Business",
-      "contact": "Contact",
-      "address": "Address",
-      "administrator": "Administrator",
-      "modules": "Sequoia Modules"
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate",
+      "resendEmail": "Resend email"
     },
-    "steps": {
-      "businessDesc": "Legal info & identification",
-      "contactDesc": "Contact details & category",
-      "addressDesc": "Physical location",
-      "administratorDesc": "Sequoia account owner",
-      "modulesDesc": "Sequoia access permissions"
+    "active": "Active?",
+    "create": "Create customer",
+    "edit": "Edit customer",
+    "entityType": {
+      "company": "Company",
+      "individual": "Individual"
+    },
+    "fields": {
+      "birthDate": "Date of Birth:",
+      "category": "Category:",
+      "cnpj": "CNPJ:",
+      "companyName": "Company Name:",
+      "countryCode": "Country Code:",
+      "cpf": "CPF:",
+      "email": "Email:",
+      "firstName": "First Name:",
+      "lastName": "Last Name:",
+      "municipalRegistration": "Municipal Registration:",
+      "municipalRegistrationShort": "Municipal Reg.:",
+      "notes": "Notes:",
+      "phone": "Phone:",
+      "stateRegistration": "State Registration:",
+      "stateRegistrationShort": "State Reg.:",
+      "tradeName": "Trade Name:",
+      "type": "Type:"
     },
     "hints": {
       "addressOptional": "Address is optional and can be filled in later.",
       "admin": "Access credentials for the Sequoia system for the person responsible for this company. An email will be sent with a link to set the password.",
       "modulesGray": "Items shown in gray are always accessible and cannot be disabled."
     },
-    "fields": {
-      "type": "Type:",
-      "firstName": "First Name:",
-      "companyName": "Company Name:",
-      "lastName": "Last Name:",
-      "tradeName": "Trade Name:",
-      "cpf": "CPF:",
-      "cnpj": "CNPJ:",
-      "birthDate": "Date of Birth:",
-      "stateRegistration": "State Registration:",
-      "stateRegistrationShort": "State Reg.:",
-      "municipalRegistration": "Municipal Registration:",
-      "municipalRegistrationShort": "Municipal Reg.:",
-      "email": "Email:",
-      "countryCode": "Country Code:",
-      "phone": "Phone:",
-      "category": "Category:",
-      "notes": "Notes:"
-    },
-    "placeholders": {
-      "category": "Select a category"
-    },
-    "entityType": {
-      "company": "Company",
-      "individual": "Individual"
-    },
-    "owner": {
-      "firstName": "First Name:",
-      "lastName": "Last Name:",
-      "email": "Email:"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "table": {
-      "name": "Name",
-      "type": "Type",
-      "category": "Category",
-      "email": "E-mail",
-      "status": "Status",
-      "createdAt": "Created at",
-      "empty": "No customers found."
-    },
-    "actions": {
-      "openMenu": "Open menu",
-      "edit": "Edit",
-      "deactivate": "Deactivate",
-      "reactivate": "Reactivate",
-      "resendEmail": "Resend email",
-      "delete": "Delete"
-    },
-    "toasts": {
-      "deactivated": "Customer deactivated.",
-      "reactivated": "Customer reactivated.",
-      "emailResent": "Email resent successfully.",
-      "deleted": "Customer deleted successfully.",
-      "deleteConfirm": "The customer \"{name}\" will be permanently deleted."
-    },
     "modules": {
       "groups": {
         "alwaysActive": "Always active",
-        "records": "Records",
         "categories": "Categories",
-        "purchasing": "Purchasing",
+        "finance": "Finance",
         "inventory": "Inventory",
-        "finance": "Finance"
+        "purchasing": "Purchasing",
+        "records": "Records"
       },
       "labels": {
-        "dashboard": "Dashboard",
         "buySubscriptions": "Buy Subscriptions",
-        "viewSubscriptions": "View Subscriptions",
+        "customerCat": "Customer Cat.",
         "customers": "Customers",
-        "sales": "Sales",
-        "system": "System",
-        "suppliers": "Suppliers",
+        "dashboard": "Dashboard",
+        "finance": "Finance",
+        "productCat": "Product Cat.",
         "products": "Products",
+        "sales": "Sales",
+        "serviceCat": "Service Cat.",
         "services": "Services",
         "supplierCat": "Supplier Cat.",
-        "productCat": "Product Cat.",
-        "serviceCat": "Service Cat.",
-        "customerCat": "Customer Cat.",
-        "finance": "Finance"
+        "suppliers": "Suppliers",
+        "system": "System",
+        "viewSubscriptions": "View Subscriptions"
       }
-    }
-  },
-  "Suppliers": {
-    "title": "Suppliers",
-    "new": "New supplier",
-    "edit": "Edit supplier",
-    "create": "Create supplier",
-    "active": "Active?",
-    "sections": {
-      "address": "Address"
     },
-    "fields": {
-      "type": "Type:",
-      "firstName": "Name:",
-      "companyName": "Company Name:",
-      "lastName": "Last Name:",
-      "tradeName": "Trade Name:",
-      "cpf": "CPF:",
-      "cnpj": "CNPJ:",
-      "birthDate": "Date of Birth:",
-      "stateRegistration": "State Registration:",
-      "municipalRegistration": "Municipal Registration:",
+    "new": "New customer",
+    "owner": {
       "email": "Email:",
-      "countryCode": "Country Code:",
-      "phone": "Phone:",
-      "category": "Category:",
-      "notes": "Notes:"
+      "firstName": "First Name:",
+      "lastName": "Last Name:"
     },
     "placeholders": {
       "category": "Select a category"
     },
-    "entityType": {
-      "company": "Company",
-      "individual": "Individual"
+    "sections": {
+      "address": "Address",
+      "administrator": "Administrator",
+      "business": "Business",
+      "contact": "Contact",
+      "modules": "Sequoia Modules"
     },
     "status": {
       "active": "Active",
       "inactive": "Inactive"
     },
+    "stepOf": "Step {step} of {total}",
+    "steps": {
+      "addressDesc": "Physical location",
+      "administratorDesc": "Sequoia account owner",
+      "businessDesc": "Legal info & identification",
+      "contactDesc": "Contact details & category",
+      "modulesDesc": "Sequoia access permissions"
+    },
     "table": {
-      "name": "Name",
-      "type": "Type",
       "category": "Category",
+      "createdAt": "Created at",
       "email": "E-mail",
-      "status": "Status",
-      "createdAt": "Created at",
-      "empty": "No suppliers found."
-    },
-    "actions": {
-      "openMenu": "Open menu",
-      "edit": "Edit",
-      "deactivate": "Deactivate",
-      "reactivate": "Reactivate",
-      "delete": "Delete"
-    },
-    "toasts": {
-      "deactivated": "Supplier deactivated.",
-      "reactivated": "Supplier reactivated.",
-      "deleted": "Supplier deleted successfully.",
-      "deleteConfirm": "The supplier \"{name}\" will be permanently deleted."
-    },
-    "category": {
-      "add": "Add new category",
-      "title": "New supplier category",
-      "name": "Name:",
-      "description": "Description:",
-      "create": "Create category"
-    }
-  },
-  "Packages": {
-    "title": "Digital QR Codes (B2B)",
-    "physicalTitle": "Physical QR Codes",
-    "newPackage": "New package",
-    "newProduct": "New product",
-    "noun": {
-      "package": "Package",
-      "product": "Product"
-    },
-    "edit": "Edit {noun}",
-    "new": "New {noun}",
-    "createButton": "Create {noun}",
-    "saveChanges": "Save changes",
-    "active": "Active?",
-    "unitPrice": "Unit price per QR code",
-    "typeBadge": {
-      "digital": "Digital",
-      "physical": "Physical"
-    },
-    "fields": {
-      "name": "{noun} Name:",
-      "quantity": "QR-Code Quantity:",
-      "price": "Price (US$):",
-      "description": "Description:"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "table": {
-      "name": "{noun} Name",
-      "quantity": "QR-Codes / Package",
-      "price": "{noun} Price",
-      "description": "{noun} Description",
-      "status": "Status",
-      "createdAt": "Created at",
-      "empty": "No packages found.",
-      "emptyProduct": "No physical QR products yet."
-    },
-    "actions": {
-      "openMenu": "Open menu",
-      "edit": "Edit",
-      "deactivate": "Deactivate",
-      "reactivate": "Reactivate",
-      "delete": "Delete"
-    },
-    "toasts": {
-      "deactivated": "Package deactivated.",
-      "reactivated": "Package reactivated.",
-      "deleted": "Package deleted successfully.",
-      "deleteConfirm": "The package \"{name}\" will be permanently deleted."
-    },
-    "stripe": {
-      "title": "Stripe sync",
-      "synced": "Synced",
-      "notSynced": "Not synced",
-      "productId": "product:",
-      "priceId": "price:",
-      "hint": "Pushes this {noun}'s name, description and price to Stripe (creating or updating the matching Product and Price). Save your changes first — sync uses the saved data. Changing the price provisions a fresh Stripe Price.",
-      "syncButton": "Sync with Stripe",
-      "syncing": "Syncing…",
-      "confirmTitle": "Sync with Stripe?",
-      "confirmDescription": "Please confirm that this {noun}'s data is correct. This will create or update the matching Product and Price in Stripe. Are you sure you want to synchronize?",
-      "syncNow": "Sync now"
-    }
-  },
-  "Users": {
-    "title": "System Users",
-    "new": "New user",
-    "edit": "Edit user",
-    "create": "Create user",
-    "saveChanges": "Save changes",
-    "active": "Active?",
-    "sections": {
-      "address": "Address"
-    },
-    "fields": {
-      "firstName": "First Name:",
-      "lastName": "Last Name:",
-      "gender": "Gender:",
-      "birthDate": "Date of Birth:",
-      "cpf": "CPF:",
-      "role": "Role:",
-      "email": "Email:",
-      "countryCode": "Code:",
-      "phone": "Phone:"
-    },
-    "placeholders": {
-      "role": "Select a role"
-    },
-    "gender": {
-      "female": "Female",
-      "male": "Male"
-    },
-    "roles": {
-      "SUPER_ADMIN": "Super Admin",
-      "OWNER": "Owner",
-      "ADMIN": "Admin",
-      "COMERCIAL": "Comercial",
-      "FINANCE": "Finance",
-      "USER": "User"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "table": {
+      "empty": "No customers found.",
       "name": "Name",
-      "email": "E-mail",
-      "role": "Role",
       "status": "Status",
-      "createdAt": "Created at",
-      "empty": "No users found."
+      "type": "Type"
     },
-    "actions": {
-      "openMenu": "Open menu",
-      "edit": "Edit",
-      "deactivate": "Deactivate",
-      "reactivate": "Reactivate",
-      "resendEmail": "Resend email",
-      "delete": "Delete"
-    },
+    "title": "Customers",
     "toasts": {
-      "deactivated": "User deactivated.",
-      "reactivated": "User reactivated.",
+      "deactivated": "Customer deactivated.",
+      "deleteConfirm": "The customer \"{name}\" will be permanently deleted.",
+      "deleted": "Customer deleted successfully.",
       "emailResent": "Email resent successfully.",
-      "deleted": "User deleted successfully.",
-      "deleteConfirm": "The user \"{name}\" will be permanently deleted."
+      "reactivated": "Customer reactivated."
     }
   },
-  "Company": {
-    "title": "Company Data",
-    "save": "Save changes",
-    "sections": {
-      "address": "Address"
-    },
-    "fields": {
-      "legalName": "Legal Name:",
-      "tradeName": "Trade Name:",
-      "cnpj": "CNPJ:",
-      "stateRegistration": "State Registration:",
-      "municipalRegistration": "Municipal Registration:",
-      "email": "Email:",
-      "countryCode": "Country code:",
-      "phone": "Phone:",
-      "isActive": "Company active:"
-    },
-    "toasts": {
-      "updated": "Data updated successfully."
-    }
+  "Dashboard": {
+    "allTimeRevenue": "All-time revenue",
+    "allTimeSales": "All-time sales",
+    "annualRevenue": "Annual Revenue",
+    "annualSales": "Annual Sales",
+    "monthlyRevenue": "Monthly Revenue",
+    "monthlySales": "Monthly Sales",
+    "revenueThisMonth": "Revenue this month",
+    "revenueThisYear": "Revenue this year",
+    "salesThisMonth": "Sales this month",
+    "salesThisYear": "Sales this year",
+    "title": "Dashboard",
+    "totalRevenue": "Total Revenue",
+    "totalSales": "Total Sales"
   },
   "DiscountCoupons": {
-    "title": "Discount Coupons",
-    "new": "New coupon",
-    "edit": "Edit discount coupon",
+    "actions": {
+      "deactivate": "Deactivate",
+      "editDescription": "Edit description",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate"
+    },
     "create": "Create coupon",
-    "saveChanges": "Save changes",
-    "loadError": "Could not load coupons: {message}. Check Vercel function logs for details.",
-    "packageMeta": "{quantity} QR codes · {price}",
+    "discount": {
+      "amount": "{value} off",
+      "percent": "{value}% off"
+    },
+    "discountType": {
+      "amount": "Fixed amount off (USD)",
+      "percent": "Percent off"
+    },
+    "durationLabel": {
+      "forever": "Forever",
+      "once": "Once",
+      "repeating": "{months} months"
+    },
+    "durationOption": {
+      "forever": "Forever (every invoice)",
+      "once": "Once (first invoice only)",
+      "repeating": "Repeating (N months)"
+    },
+    "edit": "Edit discount coupon",
     "fields": {
+      "amount": "Amount ($):",
+      "appliesTo": "Applies to specific packages (optional):",
       "code": "Code:",
       "description": "Description:",
       "discountType": "Discount type:",
-      "percent": "Percent (0-100):",
-      "amount": "Amount ($):",
       "duration": "Duration:",
       "durationInMonths": "Duration in months:",
-      "maxRedemptions": "Max redemptions:",
       "expiresOn": "Expires on:",
-      "appliesTo": "Applies to specific packages (optional):"
+      "maxRedemptions": "Max redemptions:",
+      "percent": "Percent (0-100):"
     },
+    "hints": {
+      "appliesTo": "Leave all unchecked to apply to every package.",
+      "codeImmutable": "The promotion code is immutable. To change terms, deactivate this coupon and create a new one."
+    },
+    "loadError": "Could not load coupons: {message}. Check Vercel function logs for details.",
+    "new": "New coupon",
+    "packageMeta": "{quantity} QR codes · {price}",
     "placeholders": {
       "code": "WELCOME10",
       "descriptionCreate": "Optional internal note",
       "descriptionEdit": "Internal note (not shown to customers)",
       "maxRedemptions": "Blank = unlimited"
     },
-    "discountType": {
-      "percent": "Percent off",
-      "amount": "Fixed amount off (USD)"
-    },
-    "durationOption": {
-      "once": "Once (first invoice only)",
-      "forever": "Forever (every invoice)",
-      "repeating": "Repeating (N months)"
-    },
-    "discount": {
-      "percent": "{value}% off",
-      "amount": "{value} off"
-    },
-    "durationLabel": {
-      "once": "Once",
-      "forever": "Forever",
-      "repeating": "{months} months"
-    },
-    "hints": {
-      "appliesTo": "Leave all unchecked to apply to every package.",
-      "codeImmutable": "The promotion code is immutable. To change terms, deactivate this coupon and create a new one."
-    },
+    "saveChanges": "Save changes",
     "status": {
       "active": "Active",
       "inactive": "Inactive"
     },
     "table": {
       "code": "Code",
+      "createdAt": "Created at",
       "description": "Description",
       "discount": "Discount",
       "duration": "Duration",
-      "maxUses": "Max uses",
-      "expires": "Expires",
-      "status": "Status",
-      "createdAt": "Created at",
       "empty": "No discount coupons yet.",
+      "expires": "Expires",
+      "maxUses": "Max uses",
+      "never": "Never",
       "searchByCode": "Search by code...",
-      "unlimited": "Unlimited",
-      "never": "Never"
+      "status": "Status",
+      "unlimited": "Unlimited"
     },
-    "actions": {
-      "openMenu": "Open menu",
-      "editDescription": "Edit description",
-      "deactivate": "Deactivate",
-      "reactivate": "Reactivate"
-    },
+    "title": "Discount Coupons",
     "toasts": {
       "deactivated": "Coupon deactivated.",
       "reactivated": "Coupon reactivated."
     }
   },
+  "Errors": {
+    "categoryRequired": "Category is required",
+    "codeFormat": "Use uppercase letters, numbers and underscores only",
+    "countryCodeRequired": "Country code is required",
+    "couponCodeFormat": "Only uppercase letters, numbers, hyphens and underscores",
+    "durationInMonthsRequired": "Required when duration is \"repeating\"",
+    "greaterThanZero": "Must be greater than 0",
+    "invalidCnpj": "Invalid CNPJ",
+    "invalidCpf": "Invalid CPF",
+    "invalidEmail": "Invalid email address",
+    "invalidRole": "Invalid role",
+    "maxChars": "Must be at most {count} characters",
+    "minChars": "Must be at least {count} characters",
+    "mustBePositive": "Must be greater than zero",
+    "mustBeWholeNumber": "Must be a whole number",
+    "mustBeZeroOrGreater": "Must be 0 or greater",
+    "percentMax": "Percent must be 100 or less",
+    "priceMin": "Must be 0 (free) or greater",
+    "required": "Required",
+    "termLengthMin": "Must be 0 (lifetime) or a positive number of months",
+    "wholeNumber": "Must be a whole number"
+  },
+  "Nav": {
+    "language": "Language",
+    "profile": "Profile",
+    "signOut": "Sign out",
+    "signingOut": "Signing out…",
+    "toggleTheme": "Toggle theme"
+  },
+  "Packages": {
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate"
+    },
+    "active": "Active?",
+    "createButton": "Create {noun}",
+    "edit": "Edit {noun}",
+    "fields": {
+      "description": "Description:",
+      "name": "{noun} Name:",
+      "price": "Price (US$):",
+      "quantity": "QR-Code Quantity:"
+    },
+    "new": "New {noun}",
+    "newPackage": "New package",
+    "newProduct": "New product",
+    "noun": {
+      "package": "Package",
+      "product": "Product"
+    },
+    "physicalTitle": "Physical QR Codes",
+    "saveChanges": "Save changes",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "stripe": {
+      "confirmDescription": "Please confirm that this {noun}'s data is correct. This will create or update the matching Product and Price in Stripe. Are you sure you want to synchronize?",
+      "confirmTitle": "Sync with Stripe?",
+      "hint": "Pushes this {noun}'s name, description and price to Stripe (creating or updating the matching Product and Price). Save your changes first — sync uses the saved data. Changing the price provisions a fresh Stripe Price.",
+      "notSynced": "Not synced",
+      "priceId": "price:",
+      "productId": "product:",
+      "syncButton": "Sync with Stripe",
+      "syncNow": "Sync now",
+      "synced": "Synced",
+      "syncing": "Syncing…",
+      "title": "Stripe sync"
+    },
+    "table": {
+      "createdAt": "Created at",
+      "description": "{noun} Description",
+      "empty": "No packages found.",
+      "emptyProduct": "No physical QR products yet.",
+      "name": "{noun} Name",
+      "price": "{noun} Price",
+      "quantity": "QR-Codes / Package",
+      "status": "Status"
+    },
+    "title": "Digital QR Codes (B2B)",
+    "toasts": {
+      "deactivated": "Package deactivated.",
+      "deleteConfirm": "The package \"{name}\" will be permanently deleted.",
+      "deleted": "Package deleted successfully.",
+      "reactivated": "Package reactivated."
+    },
+    "typeBadge": {
+      "digital": "Digital",
+      "physical": "Physical"
+    },
+    "unitPrice": "Unit price per QR code"
+  },
+  "PhysicalQr": {
+    "PhysicalQr": {
+      "table": {
+        "activated": "Activated",
+        "available": "Available",
+        "empty": "No physical QR codes found.",
+        "package": "Package",
+        "saleDate": "Sale Date",
+        "tenant": "Tenant",
+        "total": "Total"
+      }
+    }
+  },
+  "Sales": {
+    "actions": {
+      "cancel": "Cancel",
+      "openMenu": "Open menu",
+      "reverse": "Reverse"
+    },
+    "confirm": {
+      "confirm": "Confirm",
+      "description": "Before completing this sale, please verify that payment has already been received.",
+      "title": "Confirm sale"
+    },
+    "fields": {
+      "customer": "Customer:",
+      "package": "Package:",
+      "quantity": "Package Quantity:"
+    },
+    "new": "New QR Code Package Sale",
+    "newButton": "New sale",
+    "packageOption": {
+      "codes": "{count, plural, one {# code} other {# codes}}"
+    },
+    "packageType": {
+      "digital": "Digital",
+      "physical": "Physical"
+    },
+    "placeholders": {
+      "customer": "Select a customer",
+      "package": "Select a package"
+    },
+    "reverse": {
+      "confirm": "Reverse sale",
+      "descriptionDigital": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed and the QR codes will be returned to inventory. The record is kept for audit purposes.",
+      "descriptionPhysical": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed. Available license codes will be invalidated. Activated codes remain linked to their memorials. The record is kept for audit purposes.",
+      "reversing": "Reversing…",
+      "title": "Confirm reversal"
+    },
+    "status": {
+      "active": "Active",
+      "reversed": "Reversed"
+    },
+    "submit": "Submit Sale",
+    "submitting": "Submitting…",
+    "summary": {
+      "digitalCodes": "QR Codes to be added to inventory",
+      "physicalCodes": "Physical license codes to be generated",
+      "totalPrice": "Total price",
+      "unitPrice": "Unit price / code"
+    },
+    "table": {
+      "customer": "Customer",
+      "date": "Date",
+      "empty": "No sales found.",
+      "package": "Package",
+      "packagePrice": "Package Price",
+      "quantity": "Package Qtd.",
+      "seller": "Seller",
+      "status": "Status",
+      "subscriptionUnitPrice": "QR-Code Un. Price",
+      "totalPrice": "Total Order Price",
+      "totalSubscriptions": "QR-Codes / Package"
+    },
+    "title": "Manual Sales",
+    "toasts": {
+      "reversed": "Sale reversed successfully."
+    }
+  },
   "Subscriptions": {
     "Subscriptions": {
-      "title": "Subscriptions (B2C)",
-      "availableTitle": "Available Subscriptions",
-      "new": "New subscription",
-      "edit": "Edit Subscription",
-      "create": "Create subscription",
+      "actions": {
+        "deactivate": "Deactivate",
+        "delete": "Delete",
+        "edit": "Edit",
+        "openMenu": "Open menu",
+        "reactivate": "Reactivate"
+      },
       "active": "Active?",
-      "lifetime": "Lifetime",
-      "free": "Free",
+      "availableTitle": "Available Subscriptions",
+      "create": "Create subscription",
+      "edit": "Edit Subscription",
       "fields": {
-        "code": "Code:",
-        "name": "Name:",
-        "maxProfiles": "Max Memo Profiles:",
-        "treeMaxMembers": "Family Tree Max Members:",
         "bioMaxChars": "Bio Max Characters:",
         "bioMaxImages": "Bio Max Images:",
+        "code": "Code:",
+        "description": "Description:",
         "galleryMaxImages": "Gallery Max Images:",
         "galleryMaxVideos": "Gallery Max Videos:",
         "geolocationFullAccess": "Geolocation Full Access",
+        "maxProfiles": "Max Memo Profiles:",
+        "name": "Name:",
+        "price": "Price (US$):",
         "qrCodeAccess": "QR Code Access",
         "termLength": "Term Length (in months):",
-        "price": "Price (US$):",
-        "description": "Description:"
+        "treeMaxMembers": "Family Tree Max Members:"
       },
-      "placeholders": {
-        "code": "DECADE"
-      },
+      "free": "Free",
       "hints": {
         "code": "Tier identification",
         "freeCodeReserved": "FREE plan code is reserved.",
-        "termLength": "0 = Lifetime",
-        "price": "0 = Free"
+        "price": "0 = Free",
+        "termLength": "0 = Lifetime"
+      },
+      "lifetime": "Lifetime",
+      "new": "New subscription",
+      "placeholders": {
+        "code": "DECADE"
       },
       "status": {
         "active": "Active",
         "inactive": "Inactive"
       },
       "table": {
-        "code": "Code",
-        "name": "Name",
-        "maxProfiles": "Memo",
         "bioMaxChars": "Bio Chars",
         "bioMaxImages": "Bio Images",
+        "code": "Code",
+        "createdAt": "Created at",
+        "empty": "No subscriptions found",
         "galleryMaxImages": "Gallery Images",
         "galleryMaxVideos": "Gallery Videos",
         "geo": "Geo",
-        "qrCode": "QR Code",
-        "term": "Term",
+        "maxProfiles": "Memo",
+        "name": "Name",
         "price": "Price",
+        "qrCode": "QR Code",
         "status": "Status",
-        "createdAt": "Created at",
-        "empty": "No subscriptions found"
+        "term": "Term"
       },
-      "actions": {
-        "openMenu": "Open menu",
-        "edit": "Edit",
-        "deactivate": "Deactivate",
-        "reactivate": "Reactivate",
-        "delete": "Delete"
-      },
+      "title": "Subscriptions (B2C)",
       "toasts": {
         "deactivated": "Subscription deactivated.",
-        "reactivated": "Subscription reactivated.",
+        "deleteConfirm": "The subscription \"{name}\" will be permanently deleted.",
         "deleted": "Subscription deleted successfully.",
-        "deleteConfirm": "The subscription \"{name}\" will be permanently deleted."
+        "reactivated": "Subscription reactivated."
       }
-    }
-  },
-  "CustomerCategories": {
-    "title": "Customer Categories",
-    "new": "New category",
-    "newPage": "New customer category",
-    "editPage": "Edit customer category",
-    "create": "Create category",
-    "saveChanges": "Save changes",
-    "fields": {
-      "name": "Name:",
-      "description": "Description:",
-      "active": "Active category:"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "table": {
-      "name": "Name",
-      "description": "Description",
-      "status": "Status",
-      "createdAt": "Created at",
-      "empty": "No customer categories found."
-    },
-    "actions": {
-      "openMenu": "Open menu",
-      "edit": "Edit",
-      "deactivate": "Deactivate",
-      "reactivate": "Reactivate",
-      "delete": "Delete"
-    },
-    "toasts": {
-      "deactivated": "Category deactivated.",
-      "reactivated": "Category reactivated.",
-      "deleted": "Category deleted successfully.",
-      "deleteConfirm": "The category \"{name}\" will be permanently deleted."
     }
   },
   "SupplierCategories": {
-    "title": "Supplier Categories",
-    "new": "New supplier category",
-    "edit": "Edit supplier category",
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate"
+    },
     "create": "Create category",
+    "edit": "Edit supplier category",
     "fields": {
-      "name": "Name:",
+      "activeCategory": "Active category:",
       "description": "Description:",
-      "activeCategory": "Active category:"
+      "name": "Name:"
+    },
+    "new": "New supplier category",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "createdAt": "Created at",
+      "description": "Description",
+      "empty": "No supplier categories found.",
+      "name": "Name",
+      "status": "Status"
+    },
+    "title": "Supplier Categories",
+    "toasts": {
+      "deactivated": "Category deactivated.",
+      "deleteConfirm": "The category \"{name}\" will be permanently deleted.",
+      "deleted": "Category deleted successfully.",
+      "reactivated": "Category reactivated."
+    }
+  },
+  "Suppliers": {
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate"
+    },
+    "active": "Active?",
+    "category": {
+      "add": "Add new category",
+      "create": "Create category",
+      "description": "Description:",
+      "name": "Name:",
+      "title": "New supplier category"
+    },
+    "create": "Create supplier",
+    "edit": "Edit supplier",
+    "entityType": {
+      "company": "Company",
+      "individual": "Individual"
+    },
+    "fields": {
+      "birthDate": "Date of Birth:",
+      "category": "Category:",
+      "cnpj": "CNPJ:",
+      "companyName": "Company Name:",
+      "countryCode": "Country Code:",
+      "cpf": "CPF:",
+      "email": "Email:",
+      "firstName": "Name:",
+      "lastName": "Last Name:",
+      "municipalRegistration": "Municipal Registration:",
+      "notes": "Notes:",
+      "phone": "Phone:",
+      "stateRegistration": "State Registration:",
+      "tradeName": "Trade Name:",
+      "type": "Type:"
+    },
+    "new": "New supplier",
+    "placeholders": {
+      "category": "Select a category"
+    },
+    "sections": {
+      "address": "Address"
     },
     "status": {
       "active": "Active",
       "inactive": "Inactive"
     },
     "table": {
-      "name": "Name",
-      "description": "Description",
-      "status": "Status",
+      "category": "Category",
       "createdAt": "Created at",
-      "empty": "No supplier categories found."
+      "email": "E-mail",
+      "empty": "No suppliers found.",
+      "name": "Name",
+      "status": "Status",
+      "type": "Type"
     },
-    "actions": {
-      "openMenu": "Open menu",
-      "edit": "Edit",
-      "deactivate": "Deactivate",
-      "reactivate": "Reactivate",
-      "delete": "Delete"
-    },
+    "title": "Suppliers",
     "toasts": {
-      "deactivated": "Category deactivated.",
-      "reactivated": "Category reactivated.",
-      "deleted": "Category deleted successfully.",
-      "deleteConfirm": "The category \"{name}\" will be permanently deleted."
+      "deactivated": "Supplier deactivated.",
+      "deleteConfirm": "The supplier \"{name}\" will be permanently deleted.",
+      "deleted": "Supplier deleted successfully.",
+      "reactivated": "Supplier reactivated."
     }
   },
-  "PhysicalQr": {
-    "PhysicalQr": {
-      "table": {
-        "tenant": "Tenant",
-        "package": "Package",
-        "saleDate": "Sale Date",
-        "total": "Total",
-        "activated": "Activated",
-        "available": "Available",
-        "empty": "No physical QR codes found."
-      }
-    }
-  },
-  "Sales": {
-    "title": "Manual Sales",
-    "newButton": "New sale",
-    "new": "New QR Code Package Sale",
-    "submit": "Submit Sale",
-    "submitting": "Submitting…",
+  "Users": {
+    "actions": {
+      "deactivate": "Deactivate",
+      "delete": "Delete",
+      "edit": "Edit",
+      "openMenu": "Open menu",
+      "reactivate": "Reactivate",
+      "resendEmail": "Resend email"
+    },
+    "active": "Active?",
+    "create": "Create user",
+    "edit": "Edit user",
     "fields": {
-      "package": "Package:",
-      "customer": "Customer:",
-      "quantity": "Package Quantity:"
+      "birthDate": "Date of Birth:",
+      "countryCode": "Code:",
+      "cpf": "CPF:",
+      "email": "Email:",
+      "firstName": "First Name:",
+      "gender": "Gender:",
+      "lastName": "Last Name:",
+      "phone": "Phone:",
+      "role": "Role:"
     },
+    "gender": {
+      "female": "Female",
+      "male": "Male"
+    },
+    "new": "New user",
     "placeholders": {
-      "package": "Select a package",
-      "customer": "Select a customer"
+      "role": "Select a role"
     },
-    "packageType": {
-      "digital": "Digital",
-      "physical": "Physical"
+    "roles": {
+      "ADMIN": "Admin",
+      "COMERCIAL": "Comercial",
+      "FINANCE": "Finance",
+      "OWNER": "Owner",
+      "SUPER_ADMIN": "Super Admin",
+      "USER": "User"
     },
-    "packageOption": {
-      "codes": "{count, plural, one {# code} other {# codes}}"
-    },
-    "summary": {
-      "physicalCodes": "Physical license codes to be generated",
-      "digitalCodes": "QR Codes to be added to inventory",
-      "totalPrice": "Total price",
-      "unitPrice": "Unit price / code"
+    "saveChanges": "Save changes",
+    "sections": {
+      "address": "Address"
     },
     "status": {
       "active": "Active",
-      "reversed": "Reversed"
+      "inactive": "Inactive"
     },
     "table": {
-      "date": "Date",
-      "status": "Status",
-      "customer": "Customer",
-      "package": "Package",
-      "quantity": "Package Qtd.",
-      "totalSubscriptions": "QR-Codes / Package",
-      "packagePrice": "Package Price",
-      "subscriptionUnitPrice": "QR-Code Un. Price",
-      "totalPrice": "Total Order Price",
-      "seller": "Seller",
-      "empty": "No sales found."
+      "createdAt": "Created at",
+      "email": "E-mail",
+      "empty": "No users found.",
+      "name": "Name",
+      "role": "Role",
+      "status": "Status"
     },
-    "actions": {
-      "openMenu": "Open menu",
-      "reverse": "Reverse",
-      "cancel": "Cancel"
-    },
-    "reverse": {
-      "title": "Confirm reversal",
-      "descriptionPhysical": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed. Available license codes will be invalidated. Activated codes remain linked to their memorials. The record is kept for audit purposes.",
-      "descriptionDigital": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed and the QR codes will be returned to inventory. The record is kept for audit purposes.",
-      "confirm": "Reverse sale",
-      "reversing": "Reversing…"
-    },
-    "confirm": {
-      "title": "Confirm sale",
-      "description": "Before completing this sale, please verify that payment has already been received.",
-      "confirm": "Confirm"
-    },
+    "title": "System Users",
     "toasts": {
-      "reversed": "Sale reversed successfully."
+      "deactivated": "User deactivated.",
+      "deleteConfirm": "The user \"{name}\" will be permanently deleted.",
+      "deleted": "User deleted successfully.",
+      "emailResent": "Email resent successfully.",
+      "reactivated": "User reactivated."
     }
   }
 }

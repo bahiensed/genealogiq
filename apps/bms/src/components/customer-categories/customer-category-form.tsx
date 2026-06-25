@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { customerCategoryResolver, customerCategoryDefaultValues, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
+import { getCustomerCategorySchema, customerCategoryDefaultValues, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
 import { createCustomerCategory, updateCustomerCategory } from '@/actions/customer-category.actions'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
@@ -19,14 +20,15 @@ interface CustomerCategoryFormProps {
 }
 
 export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryFormProps) {
-  const t  = useTranslations('CustomerCategories')
-  const tc = useTranslations('Common')
+  const t    = useTranslations('CustomerCategories')
+  const tc   = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<CustomerCategoryFormValues>({
-    resolver: customerCategoryResolver,
+    resolver: useMemo(() => zodResolver(getCustomerCategorySchema(tErr)) as any, [tErr]), // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: defaultValues ?? customerCategoryDefaultValues,
   })
 

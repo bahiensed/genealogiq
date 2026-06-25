@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslations } from 'next-intl'
 import { createCustomerCategory } from '@/actions/customer-category.actions'
-import { customerCategoryResolver, customerCategoryDefaultValues, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
+import { getCustomerCategorySchema, customerCategoryDefaultValues, type CustomerCategoryFormValues } from '@/schemas/customer-category.schema'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
@@ -21,11 +23,12 @@ interface AddCustomerCategoryDialogProps {
 }
 
 export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDialogProps) {
+  const tErr = useTranslations('Errors')
   const [open, setOpen] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<CustomerCategoryFormValues>({
-    resolver: customerCategoryResolver,
+    resolver: useMemo(() => zodResolver(getCustomerCategorySchema(tErr)) as any, [tErr]), // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: customerCategoryDefaultValues,
   })
 

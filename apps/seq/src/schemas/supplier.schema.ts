@@ -1,40 +1,48 @@
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { addressSchema, addressDefaultValues } from './address.schema'
 import { validateCpf, validateCnpj } from '@/lib/masks'
+import type { Translator } from './i18n'
 
 export const ENTITY_TYPES = ['INDIVIDUAL', 'COMPANY'] as const
 
-export const supplierSchema = z.object({
-  entityType:            z.enum(ENTITY_TYPES),
-  name:                  z.string().min(2, 'Must be at least 2 characters'),
-  tradeName:             z.string().min(2, 'Must be at least 2 characters'),
-  taxId:                 z.string().min(1, 'Required'),
-  stateRegistration:     z.string().nullish(),
-  municipalRegistration: z.string().nullish(),
-  birthDate:             z.string().nullish(),
-  email:                 z.string().email('Invalid email address'),
-  phoneCountryCode:      z.string().min(1, 'Country code is required'),
-  phone:                 z.string().min(1, 'Required'),
-  notes:                 z.string().nullish(),
-  categoryId:            z.string().min(1, 'Category is required'),
-  isActive:              z.boolean(),
-  address:               addressSchema.optional(),
-}).superRefine((data, ctx) => {
-  if (data.entityType === 'INDIVIDUAL') {
-    if (!validateCpf(data.taxId)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid CPF', path: ['taxId'] })
-    }
-  } else {
-    if (!validateCnpj(data.taxId)) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid CNPJ', path: ['taxId'] })
+function makeTaxIdRefine(t: Translator) {
+  return (data: { entityType: string; taxId: string }, ctx: z.RefinementCtx) => {
+    if (data.entityType === 'INDIVIDUAL') {
+      if (!validateCpf(data.taxId)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('invalidCpf'), path: ['taxId'] })
+      }
+    } else {
+      if (!validateCnpj(data.taxId)) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: t('invalidCnpj'), path: ['taxId'] })
+      }
     }
   }
-})
+}
 
-export type SupplierFormValues = z.infer<typeof supplierSchema>
+function makeSupplierBaseSchema(t: Translator) {
+  return z.object({
+    entityType:            z.enum(ENTITY_TYPES),
+    name:                  z.string().min(2, t('minChars', { count: 2 })),
+    tradeName:             z.string().min(2, t('minChars', { count: 2 })),
+    taxId:                 z.string().min(1, t('required')),
+    stateRegistration:     z.string().nullish(),
+    municipalRegistration: z.string().nullish(),
+    birthDate:             z.string().nullish(),
+    email:                 z.string().email(t('invalidEmail')),
+    phoneCountryCode:      z.string().min(1, t('countryCodeRequired')),
+    phone:                 z.string().min(1, t('required')),
+    notes:                 z.string().nullish(),
+    categoryId:            z.string().min(1, t('categoryRequired')),
+    isActive:              z.boolean(),
+    address:               addressSchema.optional(),
+  })
+}
 
-export const supplierResolver = zodResolver(supplierSchema)
+export function getSupplierSchema(t: Translator) {
+  return makeSupplierBaseSchema(t).superRefine(makeTaxIdRefine(t))
+}
+
+export type SupplierFormValues = z.infer<ReturnType<typeof getSupplierSchema>>
 
 export const supplierDefaultValues: SupplierFormValues = {
   entityType:            'COMPANY',

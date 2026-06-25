@@ -139,6 +139,16 @@
       "saved": "Guardado con éxito."
     }
   },
+  "Errors": {
+    "invalidDate": "Fecha inválida",
+    "invalidEmail": "Correo electrónico inválido",
+    "invalidSubtypeForKind": "El subtipo no es válido para este tipo de parentesco.",
+    "invalidSubtypeForType": "El subtipo no es válido para este tipo de relación.",
+    "maxChars": "Debe tener como máximo {count} caracteres",
+    "minChars": "Debe tener al menos {count} caracteres",
+    "required": "Requerido",
+    "tributeTextRequired": "Escribe algo antes de publicar."
+  },
   "FamilyTree": {
     "FamilyTree": {
       "addRelative": {

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller, type Control } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
-import { subscriptionResolver, subscriptionDefaultValues, type SubscriptionFormValues } from '@/schemas/subscription.schema'
+import { getSubscriptionSchema, subscriptionDefaultValues, type SubscriptionFormValues } from '@/schemas/subscription.schema'
 import { createSubscription, updateSubscription } from '@/actions/subscription.actions'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
@@ -79,12 +80,13 @@ function SwitchField({ control, name, label }: SwitchFieldProps) {
 export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
   const t  = useTranslations('Subscriptions')
   const tc = useTranslations('Common')
+  const tErr = useTranslations('Errors')
   const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<SubscriptionFormValues>({
-    resolver: subscriptionResolver,
+    resolver: useMemo(() => zodResolver(getSubscriptionSchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
     defaultValues: defaultValues ?? subscriptionDefaultValues,
   })
 
