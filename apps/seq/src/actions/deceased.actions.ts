@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
+import { assertOwnership } from '@genealogiq/auth/authz'
 import { deceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'
 
 type ActionError = { error: string }
@@ -203,10 +204,12 @@ export async function addGuardian(
 
   // Both the memorial and the guardian must belong to the caller's tenant,
   // otherwise a tenant user could link profiles across tenants (IDOR).
-  const scoped = await prisma.appUser.count({
-    where: { id: { in: [memorialId, guardianId] }, tenantId: customerId },
-  })
-  if (scoped !== 2) return { error: 'Profile not found.' }
+  const scoped = assertOwnership(
+    await prisma.appUser.count({ where: { id: { in: [memorialId, guardianId] }, tenantId: customerId } }),
+    (c) => c === 2,
+    'Profile not found.',
+  )
+  if (!scoped.ok) return { error: scoped.error }
 
   try {
     await prisma.appUserGuardian.create({
@@ -231,10 +234,12 @@ export async function removeGuardian(
 
   // Both ids must belong to the caller's tenant (see addGuardian) — prevents
   // unlinking guardians of memorials owned by another tenant (IDOR).
-  const scoped = await prisma.appUser.count({
-    where: { id: { in: [memorialId, guardianId] }, tenantId: customerId },
-  })
-  if (scoped !== 2) return { error: 'Relation not found.' }
+  const scoped = assertOwnership(
+    await prisma.appUser.count({ where: { id: { in: [memorialId, guardianId] }, tenantId: customerId } }),
+    (c) => c === 2,
+    'Relation not found.',
+  )
+  if (!scoped.ok) return { error: scoped.error }
 
   try {
     await prisma.appUserGuardian.delete({

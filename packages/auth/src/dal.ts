@@ -51,7 +51,16 @@ export function createDal<S extends BaseSession>(opts: CreateDalOptions<S>) {
     return opts.adminRoles.includes(session.user.role ?? "")
   }
 
-  return { verifySession, verifyAdmin, canViewSensitive, REDACTED }
+  // Régua vocabulary, additive: requireSession aliases verifySession; requireRole
+  // generalizes verifyAdmin to an arbitrary role set (403 via forbidden()).
+  const requireSession = verifySession
+  const requireRole = async (...roles: string[]): Promise<S> => {
+    const session = await verifySession()
+    if (!roles.includes(session.user.role ?? "")) forbidden()
+    return session
+  }
+
+  return { verifySession, verifyAdmin, canViewSensitive, REDACTED, requireSession, requireRole }
 }
 
 /**
@@ -84,5 +93,13 @@ export function createTenantDal<S extends BaseSession>(opts: CreateDalOptions<S>
     return opts.adminRoles.includes(session.user.role ?? "")
   }
 
-  return { verifySession, verifyTenantSession, verifyAdmin, canViewSensitive, REDACTED }
+  // Régua vocabulary, additive (tenant-scoped: requireRole resolves the tenant too).
+  const requireSession = verifySession
+  const requireRole = async (...roles: string[]) => {
+    const session = await verifyTenantSession()
+    if (!roles.includes(session.user.role ?? "")) forbidden()
+    return session
+  }
+
+  return { verifySession, verifyTenantSession, verifyAdmin, canViewSensitive, REDACTED, requireSession, requireRole }
 }
