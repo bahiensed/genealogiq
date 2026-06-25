@@ -13,6 +13,7 @@
     "db:generate": "turbo run db:generate",
     "check:schema-parity": "node scripts/check-schema-parity.mjs",
     "check:i18n-parity": "node scripts/check-i18n-parity.mjs",
+    "check:i18n-keys": "node scripts/check-i18n-keys.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
