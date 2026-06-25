@@ -56,8 +56,7 @@ export function MemorializedNewForm({ appUserId }: Props) {
   }))
 
   const form = useForm<DeceasedFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:       useMemo(() => zodResolver(getDeceasedSchema(tErr)) as any, [tErr]),
+    resolver:       useMemo(() => zodResolver(getDeceasedSchema(tErr)), [tErr]),
     defaultValues:  deceasedDefaultValues,
     mode:           'onBlur',
     reValidateMode: 'onChange',

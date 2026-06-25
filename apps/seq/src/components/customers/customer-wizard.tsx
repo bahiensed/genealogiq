@@ -90,16 +90,14 @@ export function CustomerWizard({ categories = [] }: CustomerWizardProps) {
   }))
 
   const appUserForm = useForm<AppUserFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:       useMemo(() => zodResolver(getAppUserSchema(tErr)) as any, [tErr]),
+    resolver:       useMemo(() => zodResolver(getAppUserSchema(tErr)), [tErr]),
     defaultValues:  appUserDefaultValues,
     mode:           'onBlur',
     reValidateMode: 'onChange',
   })
 
   const deceasedForm = useForm<DeceasedFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:       useMemo(() => zodResolver(getDeceasedSchema(tErr)) as any, [tErr]),
+    resolver:       useMemo(() => zodResolver(getDeceasedSchema(tErr)), [tErr]),
     defaultValues:  deceasedDefaultValues,
     mode:           'onBlur',
     reValidateMode: 'onChange',

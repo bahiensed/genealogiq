@@ -11,6 +11,7 @@ import {
   getCustomerCreateSchema,
   customerCreateDefaultValues,
   type CustomerCreateFormValues,
+  type CustomerCreateFormInput,
 } from '@/schemas/customer.schema'
 import { createCustomer } from '@/actions/customer.actions'
 import { maskCpf, maskCnpj, maskPhone } from '@/lib/masks'
@@ -81,9 +82,8 @@ export function CustomerNewForm({ categories = [] }: Props) {
 
   const STEPS = STEP_KEYS.map((s) => ({ title: t(`sections.${s.title}`), desc: t(`steps.${s.desc}`) }))
 
-  const form = useForm<CustomerCreateFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:         useMemo(() => zodResolver(getCustomerCreateSchema(tErr)) as any, [tErr]),
+  const form = useForm<CustomerCreateFormInput, unknown, CustomerCreateFormValues>({
+    resolver:         useMemo(() => zodResolver(getCustomerCreateSchema(tErr)), [tErr]),
     defaultValues:    customerCreateDefaultValues,
     mode:             'onBlur',
     reValidateMode:   'onChange',
@@ -114,9 +114,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
     setStep((s) => (s - 1) as StepIndex)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async function onSubmit(data: any) {
-    data = data as CustomerCreateFormValues
+  async function onSubmit(data: CustomerCreateFormValues) {
     setServerError(null)
     const result = await createCustomer(data)
     if (!result.ok) {

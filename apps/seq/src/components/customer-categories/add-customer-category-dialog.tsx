@@ -30,7 +30,7 @@ export function AddCustomerCategoryDialog({ onCreated }: AddCustomerCategoryDial
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<CustomerCategoryFormValues>({
-    resolver: useMemo(() => zodResolver(getCustomerCategorySchema(tErr)) as any, [tErr]), // eslint-disable-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getCustomerCategorySchema(tErr)), [tErr]),
     defaultValues: customerCategoryDefaultValues,
   })
 

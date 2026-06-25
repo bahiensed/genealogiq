@@ -53,7 +53,7 @@ export function SupplierForm({ id, defaultValues, categories = [] }: SupplierFor
   const router = useRouter()
 
   const form = useForm<SupplierFormValues>({
-    resolver: useMemo(() => zodResolver(getSupplierSchema(tErr)) as any, [tErr]), // eslint-disable-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getSupplierSchema(tErr)), [tErr]),
     defaultValues: defaultValues ?? supplierDefaultValues,
   })
 

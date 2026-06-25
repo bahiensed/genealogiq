@@ -39,8 +39,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
   const tErr = useTranslations('Errors')
 
   const form = useForm<ProfileFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: useMemo(() => zodResolver(getProfileSchema(tErr)) as any, [tErr]),
+    resolver: useMemo(() => zodResolver(getProfileSchema(tErr)), [tErr]),
     defaultValues: defaultValues ?? profileDefaultValues,
   })
 

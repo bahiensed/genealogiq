@@ -60,7 +60,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   const router = useRouter()
 
   const form = useForm<SaleFormValues>({
-    resolver: useMemo(() => zodResolver(getSaleSchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
+    resolver: useMemo(() => zodResolver(getSaleSchema(tErr)), [tErr]),
     defaultValues: saleDefaultValues,
   })
 

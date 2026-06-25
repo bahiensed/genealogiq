@@ -72,8 +72,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
   }))
 
   const form = useForm<AppUserFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:       useMemo(() => zodResolver(getAppUserSchema(tErr)) as any, [tErr]),
+    resolver:       useMemo(() => zodResolver(getAppUserSchema(tErr)), [tErr]),
     defaultValues:  appUserDefaultValues,
     mode:           'onBlur',
     reValidateMode: 'onChange',

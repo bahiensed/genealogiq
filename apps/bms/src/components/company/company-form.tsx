@@ -35,8 +35,7 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
   const [serverError, setServerError] = useState<string | null>(null)
 
   const form = useForm<CompanyFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: useMemo(() => zodResolver(getCompanySchema(tErr)) as any, [tErr]),
+    resolver: useMemo(() => zodResolver(getCompanySchema(tErr)), [tErr]),
     defaultValues,
   })
 

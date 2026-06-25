@@ -70,6 +70,13 @@ export type CustomerFormValues       = z.infer<ReturnType<typeof getCustomerSche
 export type OwnerFormValues          = z.infer<ReturnType<typeof getOwnerSchema>>
 export type CustomerCreateFormValues = z.infer<ReturnType<typeof getCustomerCreateSchema>>
 
+// Pre-default input shapes — what react-hook-form fields actually hold (the
+// module booleans are optional before .default() runs). useForm is typed with
+// these so zodResolver lines up without an `as any`; handleSubmit still yields
+// the output (…FormValues) type via useForm's 3rd generic.
+export type CustomerFormInput        = z.input<ReturnType<typeof getCustomerSchema>>
+export type CustomerCreateFormInput  = z.input<ReturnType<typeof getCustomerCreateSchema>>
+
 export const ownerDefaultValues: OwnerFormValues = {
   firstName: '',
   lastName:  '',

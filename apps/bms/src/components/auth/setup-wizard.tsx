@@ -46,8 +46,7 @@ export function SetupWizard() {
   const [showPassword, setShowPassword] = useState(false)
 
   const companyForm = useForm<CompanyFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver:       useMemo(() => zodResolver(getCompanySchema(tErr)) as any, [tErr]),
+    resolver:       useMemo(() => zodResolver(getCompanySchema(tErr)), [tErr]),
     defaultValues:  companyDefaultValues,
     mode:           'onBlur',
     reValidateMode: 'onChange',

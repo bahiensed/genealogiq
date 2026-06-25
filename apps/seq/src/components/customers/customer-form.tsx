@@ -63,8 +63,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
   const [localCategories, setLocalCategories] = useState<Category[]>(categories)
 
   const form = useForm<AppUserFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: useMemo(() => zodResolver(getAppUserSchema(tErr)) as any, [tErr]),
+    resolver: useMemo(() => zodResolver(getAppUserSchema(tErr)), [tErr]),
     defaultValues: defaultValues ?? appUserDefaultValues,
   })
 

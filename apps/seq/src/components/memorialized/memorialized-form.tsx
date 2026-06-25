@@ -54,8 +54,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
   const router = useRouter()
 
   const form = useForm<DeceasedFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: useMemo(() => zodResolver(getDeceasedSchema(tErr)) as any, [tErr]),
+    resolver: useMemo(() => zodResolver(getDeceasedSchema(tErr)), [tErr]),
     defaultValues: defaultValues ?? deceasedDefaultValues,
   })
 

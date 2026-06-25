@@ -40,7 +40,7 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
   const router = useRouter()
 
   const form = useForm<DiscountCouponFormValues>({
-    resolver:      useMemo(() => zodResolver(getDiscountCouponSchema(tErr)) as any, [tErr]),  // eslint-disable-line @typescript-eslint/no-explicit-any
+    resolver:      useMemo(() => zodResolver(getDiscountCouponSchema(tErr)), [tErr]),
     defaultValues: discountCouponDefaultValues,
   })
 

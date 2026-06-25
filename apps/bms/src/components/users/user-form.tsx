@@ -49,8 +49,7 @@ export function UserForm({ id, defaultValues }: UserFormProps) {
   const router = useRouter()
 
   const form = useForm<UserFormValues>({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    resolver: useMemo(() => zodResolver(getUserSchema(tErr)) as any, [tErr]),
+    resolver: useMemo(() => zodResolver(getUserSchema(tErr)), [tErr]),
     defaultValues: defaultValues ?? userDefaultValues,
   })
 
