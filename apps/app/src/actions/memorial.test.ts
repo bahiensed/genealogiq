@@ -1,0 +1,180 @@
+import { describe, it, expect, vi, beforeEach } from "vitest"
+
+// Prisma mock must be hoisted so it exists when the vi.mock factory runs.
+const { prismaMock } = vi.hoisted(() => ({
+  prismaMock: {
+    appUser: { count: vi.fn(), create: vi.fn(), delete: vi.fn() },
+    appSale: { findMany: vi.fn() },
+    appUserGuardian: { create: vi.fn() },
+    bio: { findUnique: vi.fn() },
+    galleryItem: { findMany: vi.fn() },
+    tribute: { findMany: vi.fn() },
+    geolocation: { findUnique: vi.fn() },
+  },
+}))
+
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
+// Identity translator: the returned message IS the key.
+vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
+vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
+vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
+vi.mock("@/queries/profile", () => ({ getProfileById: vi.fn(), getProfileForEdit: vi.fn() }))
+vi.mock("@/lib/profile", () => ({ canManageProfile: vi.fn() }))
+vi.mock("@/lib/blob", () => ({ deleteBlobs: vi.fn() }))
+
+import { createMemorial, deleteMemorial } from "./memorial"
+import { verifySession } from "@/lib/dal"
+import { getProfileById } from "@/queries/profile"
+import { canManageProfile } from "@/lib/profile"
+import { deleteBlobs } from "@/lib/blob"
+
+// A valid create payload (passes getMemorialSchema).
+const validInput = {
+  firstName: "Ada",
+  lastName: "Lovelace",
+  gender: "FEMALE",
+  birthDate: "1815-12-10",
+  deathDate: "1852-11-27",
+  avatarUrl: "https://example.public.blob.vercel-storage.com/a.png",
+}
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  vi.mocked(verifySession).mockResolvedValue({ user: { id: "mgr" } } as never)
+  vi.mocked(canManageProfile).mockReturnValue(true)
+  // Default create-path success wiring.
+  prismaMock.appUser.create.mockResolvedValue({ id: "memo-1" })
+  prismaMock.appUserGuardian.create.mockResolvedValue({})
+})
+
+describe("createMemorial — quota guard", () => {
+  it("fails when the free slot is used and no sale slot is open (never writes)", async () => {
+    // Already created 1 free memorial, and no AppSale has an open slot.
+    prismaMock.appUser.count.mockResolvedValue(1)
+    prismaMock.appSale.findMany.mockResolvedValue([])
+
+    const res = await createMemorial(validInput)
+
+    expect(res).toEqual({ ok: false, message: "memorial.noQrCodes" })
+    expect(prismaMock.appUser.create).not.toHaveBeenCalled()
+    expect(prismaMock.appUserGuardian.create).not.toHaveBeenCalled()
+  })
+
+  it("fails the quota even when a sale exists but every slot is full", async () => {
+    prismaMock.appUser.count.mockResolvedValue(3)
+    prismaMock.appSale.findMany.mockResolvedValue([
+      { id: "sale-1", subscription: { maxProfiles: 2 }, _count: { assignedTo: 2 } },
+    ])
+
+    const res = await createMemorial(validInput)
+
+    expect(res).toEqual({ ok: false, message: "memorial.noQrCodes" })
+    expect(prismaMock.appUser.create).not.toHaveBeenCalled()
+  })
+
+  it("allows the very first free memorial with no sale (assigns no appSaleId)", async () => {
+    prismaMock.appUser.count.mockResolvedValue(0)
+    prismaMock.appSale.findMany.mockResolvedValue([])
+
+    const res = await createMemorial(validInput)
+
+    expect(res.ok).toBe(true)
+    expect(res.ok && res.data).toEqual({ id: "memo-1" })
+    expect(prismaMock.appUser.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ role: "APP_MEMO", appSaleId: null }) }),
+    )
+    // Guardian link is created so the caller can manage the new memorial.
+    expect(prismaMock.appUserGuardian.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { appUserId: "memo-1", guardianId: "mgr" } }),
+    )
+  })
+
+  it("uses an open sale slot when one is available (binds appSaleId)", async () => {
+    prismaMock.appUser.count.mockResolvedValue(2)
+    prismaMock.appSale.findMany.mockResolvedValue([
+      { id: "sale-full", subscription: { maxProfiles: 1 }, _count: { assignedTo: 1 } },
+      { id: "sale-open", subscription: { maxProfiles: 5 }, _count: { assignedTo: 2 } },
+    ])
+
+    const res = await createMemorial(validInput)
+
+    expect(res.ok).toBe(true)
+    expect(prismaMock.appUser.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ appSaleId: "sale-open" }) }),
+    )
+  })
+})
+
+describe("createMemorial — input validation", () => {
+  it("rejects invalid input and never touches the DB write", async () => {
+    // An open sale slot exists, so the quota gate passes and we reach zod.
+    prismaMock.appUser.count.mockResolvedValue(0)
+    prismaMock.appSale.findMany.mockResolvedValue([])
+
+    const res = await createMemorial({ firstName: "" }) // missing required fields
+
+    expect(res).toEqual({ ok: false, message: "common.invalidData" })
+    expect(prismaMock.appUser.create).not.toHaveBeenCalled()
+  })
+})
+
+describe("deleteMemorial — guards + cascade", () => {
+  it("fails when the profile is not found", async () => {
+    vi.mocked(getProfileById).mockResolvedValue(null as never)
+
+    const res = await deleteMemorial("nope")
+
+    expect(res).toEqual({ ok: false, message: "memorial.notFound" })
+    expect(prismaMock.appUser.delete).not.toHaveBeenCalled()
+  })
+
+  it("fails when the profile is not a memorial (wrong role)", async () => {
+    vi.mocked(getProfileById).mockResolvedValue({ id: "p", role: "APP_USER", guardedBy: [] } as never)
+
+    const res = await deleteMemorial("p")
+
+    expect(res).toEqual({ ok: false, message: "memorial.notFound" })
+    expect(prismaMock.appUser.delete).not.toHaveBeenCalled()
+  })
+
+  it("fails when the caller cannot manage the profile (guardian guard)", async () => {
+    vi.mocked(getProfileById).mockResolvedValue({ id: "p", role: "APP_MEMO", guardedBy: [] } as never)
+    vi.mocked(canManageProfile).mockReturnValue(false)
+
+    const res = await deleteMemorial("p")
+
+    expect(res).toEqual({ ok: false, message: "memorial.notAuthorized" })
+    expect(prismaMock.appUser.delete).not.toHaveBeenCalled()
+    expect(vi.mocked(deleteBlobs)).not.toHaveBeenCalled()
+  })
+
+  it("deletes the memorial and its blobs on the happy path", async () => {
+    vi.mocked(getProfileById).mockResolvedValue({
+      id: "p",
+      role: "APP_MEMO",
+      guardedBy: [{ guardianId: "mgr" }],
+      avatarUrl: "https://example.public.blob.vercel-storage.com/avatar.png",
+    } as never)
+    prismaMock.bio.findUnique.mockResolvedValue({ images: [{ url: "bio-1.png" }] })
+    prismaMock.galleryItem.findMany.mockResolvedValue([{ url: "gallery-1.png" }])
+    prismaMock.tribute.findMany.mockResolvedValue([{ imageUrl: "tribute-1.png" }])
+    prismaMock.geolocation.findUnique.mockResolvedValue({ photo1: "geo-1.png", photo2: null, photo3: null })
+    prismaMock.appUser.delete.mockResolvedValue({})
+
+    const res = await deleteMemorial("p")
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(prismaMock.appUser.delete).toHaveBeenCalledWith({ where: { id: "p" } })
+    // Every collected blob URL is handed to deleteBlobs before the row is removed.
+    const passedUrls = vi.mocked(deleteBlobs).mock.calls[0]?.[0]
+    expect(passedUrls).toEqual(
+      expect.arrayContaining([
+        "https://example.public.blob.vercel-storage.com/avatar.png",
+        "bio-1.png",
+        "gallery-1.png",
+        "tribute-1.png",
+        "geo-1.png",
+      ]),
+    )
+  })
+})

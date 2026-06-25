@@ -41,8 +41,8 @@ const validInput = {
   isActive:    true,
 }
 
-const p2002 = () => new Prisma.PrismaClientKnownRequestError("P2002")
-const p2025 = () => new Prisma.PrismaClientKnownRequestError("P2025")
+const p2002 = () => new (Prisma.PrismaClientKnownRequestError as unknown as new (message: string) => Error)("P2002")
+const p2025 = () => new (Prisma.PrismaClientKnownRequestError as unknown as new (message: string) => Error)("P2025")
 
 beforeEach(() => {
   vi.clearAllMocks()

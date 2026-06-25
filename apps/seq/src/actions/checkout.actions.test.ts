@@ -94,7 +94,7 @@ describe("createPackageCheckoutSession", () => {
 
     expect(res.ok).toBe(true)
     if (!res.ok) throw new Error("expected ok result")
-    expect(res.data.url).toBe("https://checkout.stripe.com/c/pay/abc")
+    expect(res.data?.url).toBe("https://checkout.stripe.com/c/pay/abc")
 
     expect(ensureTenantStripeCustomer).toHaveBeenCalledWith("tenant-1")
     expect(createSession).toHaveBeenCalledWith(
@@ -112,7 +112,7 @@ describe("createPackageCheckoutSession", () => {
       }),
     )
     // PHYSICAL package routes the buyer back to the physical-qr return path.
-    const arg = createSession.mock.calls[0][0]
-    expect(arg.success_url).toContain("/purchasing/physical-qr")
+    const arg = createSession.mock.calls[0]?.[0]
+    expect(arg?.success_url).toContain("/purchasing/physical-qr")
   })
 })

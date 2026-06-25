@@ -72,7 +72,7 @@ describe("createCustomer", () => {
 
   it("maps a duplicate-email P2002 to customer.emailExists", async () => {
     prismaMock.appUser.create.mockRejectedValue(
-      new Prisma.PrismaClientKnownRequestError("P2002"),
+      new (Prisma.PrismaClientKnownRequestError as unknown as new (message: string) => Error)("P2002"),
     )
 
     const res = await createCustomer(validUser)
@@ -112,7 +112,7 @@ describe("updateCustomer", () => {
 
   it("maps a missing record P2025 to customer.notFound", async () => {
     prismaMock.appUser.update.mockRejectedValue(
-      new Prisma.PrismaClientKnownRequestError("P2025"),
+      new (Prisma.PrismaClientKnownRequestError as unknown as new (message: string) => Error)("P2025"),
     )
 
     const res = await updateCustomer("missing", validUser)
@@ -159,7 +159,7 @@ describe("deleteCustomer", () => {
     prismaMock.appSale.count.mockResolvedValue(0)
     prismaMock.appUserGuardian.count.mockResolvedValue(0)
     prismaMock.$transaction.mockRejectedValue(
-      new Prisma.PrismaClientKnownRequestError("P2003"),
+      new (Prisma.PrismaClientKnownRequestError as unknown as new (message: string) => Error)("P2003"),
     )
 
     const res = await deleteCustomer("u1")

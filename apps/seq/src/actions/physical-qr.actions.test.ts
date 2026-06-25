@@ -159,7 +159,7 @@ describe("sellPhysicalQrViaPlatform — consumer scoping + transaction branches"
       firstName: "Bo",
     })
     prismaMock.$transaction.mockRejectedValue(
-      new Prisma.PrismaClientKnownRequestError("P2002"),
+      new (Prisma.PrismaClientKnownRequestError as unknown as new (message: string) => Error)("P2002"),
     )
 
     const res = await sellPhysicalQrViaPlatform("GEN-1", "app-user-1")
