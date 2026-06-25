@@ -1,27 +1,9 @@
 'use client'
 
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, Undo2 } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@genealogiq/ui/button'
 import { Badge } from '@genealogiq/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@genealogiq/ui/dropdown-menu'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@genealogiq/ui/dialog'
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
+import { RowActions } from '@genealogiq/ui/row-actions'
 import { reverseSale } from '@/actions/sale.actions'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
@@ -39,63 +21,27 @@ export type SaleRow = {
 }
 
 function ActionsCell({ row, currentUserRole, t }: { row: { original: SaleRow }; currentUserRole: string; t: Translator }) {
-  const [isPending, startTransition] = useTransition()
-  const [open, setOpen] = useState(false)
   const sale = row.original
+  const canManage = currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER'
 
-  if (currentUserRole !== 'SUPER_ADMIN' && currentUserRole !== 'OWNER') return null
-  if (sale.reversedAt) return null
+  // Sales are immutable: the only action is a confirm-guarded reverse, and it's
+  // unavailable once already reversed. With no other items, render nothing.
+  if (!canManage || sale.reversedAt) return null
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" disabled={isPending}>
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">{t('actions.openMenu')}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            className="text-amber-600 focus:text-amber-600"
-            onSelect={() => setOpen(true)}
-          >
-            <Undo2 className="mr-2 h-4 w-4" />
-            {t('actions.reverse')}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('reverse.title')}</DialogTitle>
-            <DialogDescription>
-              {sale.package.type === 'PHYSICAL'
-                ? t('reverse.descriptionPhysical', { package: sale.package.name, customer: sale.tenant.name })
-                : t('reverse.descriptionDigital', { package: sale.package.name, customer: sale.tenant.name })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">{t('actions.cancel')}</Button>
-            </DialogClose>
-            <Button
-              variant="outline"
-              className="border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
-              disabled={isPending}
-              onClick={() => startTransition(async () => {
-                const result = await reverseSale(sale.id)
-                if (!result.ok) toast.error(result.message)
-                else { toast.success(t('toasts.reversed')); setOpen(false) }
-              })}
-            >
-              {isPending ? t('reverse.reversing') : t('reverse.confirm')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+    <RowActions
+      menuLabel={t('actions.openMenu')}
+      items={[]}
+      remove={{
+        label: t('actions.reverse'),
+        run: () => reverseSale(sale.id),
+        confirmDescription:
+          sale.package.type === 'PHYSICAL'
+            ? t('reverse.descriptionPhysical', { package: sale.package.name, customer: sale.tenant.name })
+            : t('reverse.descriptionDigital', { package: sale.package.name, customer: sale.tenant.name }),
+        successMessage: t('toasts.reversed'),
+      }}
+    />
   )
 }
 

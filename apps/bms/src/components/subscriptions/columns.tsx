@@ -1,15 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@genealogiq/ui/button'
 import { Badge } from '@genealogiq/ui/badge'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@genealogiq/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
-import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
+import { RowActions } from '@genealogiq/ui/row-actions'
 import { toggleSubscriptionActive, deleteSubscription } from '@/actions/subscription.actions'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
@@ -36,57 +30,28 @@ export type SubscriptionRow = {
 }
 
 function ActionsCell({ row, currentUserRole, t }: { row: { original: SubscriptionRow }; currentUserRole: string; t: Translator }) {
-  const [isPending, startTransition] = useTransition()
-  const [deleteOpen, setDeleteOpen] = useState(false)
   const subscription = row.original
+  const canManage = currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER'
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" disabled={isPending}>
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">{t('actions.openMenu')}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href={`/subscriptions/${subscription.id}`}>{t('actions.edit')}</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => startTransition(async () => {
-              const result = await toggleSubscriptionActive(subscription.id)
-              if (!result.ok) toast.error(result.message)
-              else toast.success(subscription.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
-            })}
-          >
-            {subscription.isActive ? t('actions.deactivate') : t('actions.reactivate')}
-          </DropdownMenuItem>
-          {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onSelect={() => setDeleteOpen(true)}
-            >
-              {t('actions.delete')}
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {(currentUserRole === 'SUPER_ADMIN' || currentUserRole === 'OWNER') && (
-        <ConfirmDeleteDialog
-          open={deleteOpen}
-          onOpenChange={setDeleteOpen}
-          isPending={isPending}
-          description={t('toasts.deleteConfirm', { name: subscription.name })}
-          onConfirm={() => startTransition(async () => {
-            const result = await deleteSubscription(subscription.id)
-            if (!result.ok) toast.error(result.message)
-            else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
-          })}
-        />
-      )}
-    </>
+    <RowActions
+      menuLabel={t('actions.openMenu')}
+      items={[
+        { kind: 'link', label: t('actions.edit'), href: `/subscriptions/${subscription.id}` },
+        {
+          kind: 'action',
+          label: subscription.isActive ? t('actions.deactivate') : t('actions.reactivate'),
+          run: () => toggleSubscriptionActive(subscription.id),
+          successMessage: subscription.isActive ? t('toasts.deactivated') : t('toasts.reactivated'),
+        },
+      ]}
+      remove={canManage ? {
+        label: t('actions.delete'),
+        run: () => deleteSubscription(subscription.id),
+        confirmDescription: t('toasts.deleteConfirm', { name: subscription.name }),
+        successMessage: t('toasts.deleted'),
+      } : undefined}
+    />
   )
 }
 
@@ -104,11 +69,7 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
     {
       accessorKey: 'name',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
-      cell: ({ row }) => (
-        <Link href={`/subscriptions/${row.original.id}`} className="hover:underline">
-          {row.original.name}
-        </Link>
-      ),
+      cell: ({ row }) => row.original.name,
     },
     {
       accessorKey: 'maxProfiles',

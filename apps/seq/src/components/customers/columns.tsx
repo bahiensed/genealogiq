@@ -1,20 +1,9 @@
 'use client'
 
-import Link from 'next/link'
 import type { ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@genealogiq/ui/button'
 import { Badge } from '@genealogiq/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@genealogiq/ui/dropdown-menu'
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
-import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
+import { RowActions } from '@genealogiq/ui/row-actions'
 import { toggleCustomerActive, deleteCustomer, resendCustomerEmail } from '@/actions/customer.actions'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
@@ -32,65 +21,38 @@ export type CustomerRow = {
 }
 
 function ActionsCell({ row, t }: { row: { original: CustomerRow }; t: Translator }) {
-  const [isPending, startTransition] = useTransition()
-  const [deleteOpen, setDeleteOpen] = useState(false)
   const customer = row.original
   const fullName = `${customer.firstName} ${customer.lastName}`
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" disabled={isPending}>
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">{t('actions.openMenu')}</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href={`/customers/${customer.id}`}>{t('actions.edit')}</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => startTransition(async () => {
-              const result = await toggleCustomerActive(customer.id)
-              if (!result.ok) toast.error(result.message)
-              else toast.success(customer.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
-            })}
-          >
-            {customer.isActive ? t('actions.deactivate') : t('actions.reactivate')}
-          </DropdownMenuItem>
-          {customer.email && (
-            <DropdownMenuItem
-              onClick={() => startTransition(async () => {
-                const result = await resendCustomerEmail(customer.id)
-                if (!result.ok) toast.error(result.message)
-                else toast.success(t('toasts.emailResent'))
-              })}
-            >
-              {t('actions.resendEmail')}
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuItem
-            className="text-destructive focus:text-destructive"
-            onSelect={() => setDeleteOpen(true)}
-          >
-            {t('actions.delete')}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      <ConfirmDeleteDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
-        isPending={isPending}
-        description={t('toasts.deleteConfirm', { name: fullName })}
-        onConfirm={() => startTransition(async () => {
-          const result = await deleteCustomer(customer.id)
-          if (!result.ok) toast.error(result.message)
-          else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
-        })}
-      />
-    </>
+    <RowActions
+      menuLabel={t('actions.openMenu')}
+      items={[
+        { kind: 'link', label: t('actions.edit'), href: `/customers/${customer.id}` },
+        {
+          kind: 'action',
+          label: customer.isActive ? t('actions.deactivate') : t('actions.reactivate'),
+          run: () => toggleCustomerActive(customer.id),
+          successMessage: customer.isActive ? t('toasts.deactivated') : t('toasts.reactivated'),
+        },
+        ...(customer.email
+          ? [
+              {
+                kind: 'action' as const,
+                label: t('actions.resendEmail'),
+                run: () => resendCustomerEmail(customer.id),
+                successMessage: t('toasts.emailResent'),
+              },
+            ]
+          : []),
+      ]}
+      remove={{
+        label: t('actions.delete'),
+        run: () => deleteCustomer(customer.id),
+        confirmDescription: t('toasts.deleteConfirm', { name: fullName }),
+        successMessage: t('toasts.deleted'),
+      }}
+    />
   )
 }
 
@@ -100,11 +62,7 @@ export function getColumns(t: Translator, locale: string): ColumnDef<CustomerRow
       id: 'name',
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
-      cell: ({ row }) => (
-        <Link href={`/customers/${row.original.id}`} className="hover:underline">
-          {row.original.firstName} {row.original.lastName}
-        </Link>
-      ),
+      cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
     },
     {
       id: 'category',
