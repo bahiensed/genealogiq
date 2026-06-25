@@ -534,16 +534,14 @@
     "unitPrice": "Preço unitário por QR code"
   },
   "PhysicalQr": {
-    "PhysicalQr": {
-      "table": {
-        "activated": "Ativados",
-        "available": "Disponíveis",
-        "empty": "Nenhum QR Code físico encontrado.",
-        "package": "Pacote",
-        "saleDate": "Data da venda",
-        "tenant": "Inquilino",
-        "total": "Total"
-      }
+    "table": {
+      "activated": "Ativados",
+      "available": "Disponíveis",
+      "empty": "Nenhum QR Code físico encontrado.",
+      "package": "Pacote",
+      "saleDate": "Data da venda",
+      "tenant": "Inquilino",
+      "total": "Total"
     }
   },
   "Sales": {
@@ -613,72 +611,70 @@
     }
   },
   "Subscriptions": {
-    "Subscriptions": {
-      "actions": {
-        "deactivate": "Desativar",
-        "delete": "Excluir",
-        "edit": "Editar",
-        "openMenu": "Abrir menu",
-        "reactivate": "Reativar"
-      },
-      "active": "Ativa?",
-      "availableTitle": "Assinaturas Disponíveis",
-      "create": "Criar assinatura",
-      "edit": "Editar Assinatura",
-      "fields": {
-        "bioMaxChars": "Máximo de Caracteres da Bio:",
-        "bioMaxImages": "Máximo de Imagens da Bio:",
-        "code": "Código:",
-        "description": "Descrição:",
-        "galleryMaxImages": "Máximo de Imagens da Galeria:",
-        "galleryMaxVideos": "Máximo de Vídeos da Galeria:",
-        "geolocationFullAccess": "Acesso Total à Geolocalização",
-        "maxProfiles": "Máximo de Perfis Memo:",
-        "name": "Nome:",
-        "price": "Preço (US$):",
-        "qrCodeAccess": "Acesso ao QR Code",
-        "termLength": "Duração (em meses):",
-        "treeMaxMembers": "Máximo de Membros na Árvore Genealógica:"
-      },
-      "free": "Grátis",
-      "hints": {
-        "code": "Identificação do plano",
-        "freeCodeReserved": "O código do plano FREE é reservado.",
-        "price": "0 = Grátis",
-        "termLength": "0 = Vitalícia"
-      },
-      "lifetime": "Vitalícia",
-      "new": "Nova assinatura",
-      "placeholders": {
-        "code": "DECADE"
-      },
-      "status": {
-        "active": "Ativa",
-        "inactive": "Inativa"
-      },
-      "table": {
-        "bioMaxChars": "Caracteres Bio",
-        "bioMaxImages": "Imagens Bio",
-        "code": "Código",
-        "createdAt": "Criada em",
-        "empty": "Nenhuma assinatura encontrada",
-        "galleryMaxImages": "Imagens Galeria",
-        "galleryMaxVideos": "Vídeos Galeria",
-        "geo": "Geo",
-        "maxProfiles": "Memo",
-        "name": "Nome",
-        "price": "Preço",
-        "qrCode": "QR Code",
-        "status": "Status",
-        "term": "Duração"
-      },
-      "title": "Assinaturas (B2C)",
-      "toasts": {
-        "deactivated": "Assinatura desativada.",
-        "deleteConfirm": "A assinatura \"{name}\" será excluída permanentemente.",
-        "deleted": "Assinatura excluída com sucesso.",
-        "reactivated": "Assinatura reativada."
-      }
+    "actions": {
+      "deactivate": "Desativar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "openMenu": "Abrir menu",
+      "reactivate": "Reativar"
+    },
+    "active": "Ativa?",
+    "availableTitle": "Assinaturas Disponíveis",
+    "create": "Criar assinatura",
+    "edit": "Editar Assinatura",
+    "fields": {
+      "bioMaxChars": "Máximo de Caracteres da Bio:",
+      "bioMaxImages": "Máximo de Imagens da Bio:",
+      "code": "Código:",
+      "description": "Descrição:",
+      "galleryMaxImages": "Máximo de Imagens da Galeria:",
+      "galleryMaxVideos": "Máximo de Vídeos da Galeria:",
+      "geolocationFullAccess": "Acesso Total à Geolocalização",
+      "maxProfiles": "Máximo de Perfis Memo:",
+      "name": "Nome:",
+      "price": "Preço (US$):",
+      "qrCodeAccess": "Acesso ao QR Code",
+      "termLength": "Duração (em meses):",
+      "treeMaxMembers": "Máximo de Membros na Árvore Genealógica:"
+    },
+    "free": "Grátis",
+    "hints": {
+      "code": "Identificação do plano",
+      "freeCodeReserved": "O código do plano FREE é reservado.",
+      "price": "0 = Grátis",
+      "termLength": "0 = Vitalícia"
+    },
+    "lifetime": "Vitalícia",
+    "new": "Nova assinatura",
+    "placeholders": {
+      "code": "DECADE"
+    },
+    "status": {
+      "active": "Ativa",
+      "inactive": "Inativa"
+    },
+    "table": {
+      "bioMaxChars": "Caracteres Bio",
+      "bioMaxImages": "Imagens Bio",
+      "code": "Código",
+      "createdAt": "Criada em",
+      "empty": "Nenhuma assinatura encontrada",
+      "galleryMaxImages": "Imagens Galeria",
+      "galleryMaxVideos": "Vídeos Galeria",
+      "geo": "Geo",
+      "maxProfiles": "Memo",
+      "name": "Nome",
+      "price": "Preço",
+      "qrCode": "QR Code",
+      "status": "Status",
+      "term": "Duração"
+    },
+    "title": "Assinaturas (B2C)",
+    "toasts": {
+      "deactivated": "Assinatura desativada.",
+      "deleteConfirm": "A assinatura \"{name}\" será excluída permanentemente.",
+      "deleted": "Assinatura excluída com sucesso.",
+      "reactivated": "Assinatura reativada."
     }
   },
   "SupplierCategories": {

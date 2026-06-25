@@ -534,16 +534,14 @@
     "unitPrice": "Precio unitario por código QR"
   },
   "PhysicalQr": {
-    "PhysicalQr": {
-      "table": {
-        "activated": "Activados",
-        "available": "Disponibles",
-        "empty": "No se encontraron códigos QR físicos.",
-        "package": "Paquete",
-        "saleDate": "Fecha de venta",
-        "tenant": "Inquilino",
-        "total": "Total"
-      }
+    "table": {
+      "activated": "Activados",
+      "available": "Disponibles",
+      "empty": "No se encontraron códigos QR físicos.",
+      "package": "Paquete",
+      "saleDate": "Fecha de venta",
+      "tenant": "Inquilino",
+      "total": "Total"
     }
   },
   "Sales": {
@@ -613,72 +611,70 @@
     }
   },
   "Subscriptions": {
-    "Subscriptions": {
-      "actions": {
-        "deactivate": "Desactivar",
-        "delete": "Eliminar",
-        "edit": "Editar",
-        "openMenu": "Abrir menú",
-        "reactivate": "Reactivar"
-      },
-      "active": "¿Activa?",
-      "availableTitle": "Suscripciones Disponibles",
-      "create": "Crear suscripción",
-      "edit": "Editar Suscripción",
-      "fields": {
-        "bioMaxChars": "Máximo de Caracteres de la Bio:",
-        "bioMaxImages": "Máximo de Imágenes de la Bio:",
-        "code": "Código:",
-        "description": "Descripción:",
-        "galleryMaxImages": "Máximo de Imágenes de la Galería:",
-        "galleryMaxVideos": "Máximo de Videos de la Galería:",
-        "geolocationFullAccess": "Acceso Total a la Geolocalización",
-        "maxProfiles": "Máximo de Perfiles Memo:",
-        "name": "Nombre:",
-        "price": "Precio (US$):",
-        "qrCodeAccess": "Acceso al Código QR",
-        "termLength": "Duración (en meses):",
-        "treeMaxMembers": "Máximo de Miembros del Árbol Genealógico:"
-      },
-      "free": "Gratis",
-      "hints": {
-        "code": "Identificación del plan",
-        "freeCodeReserved": "El código del plan FREE está reservado.",
-        "price": "0 = Gratis",
-        "termLength": "0 = De por vida"
-      },
-      "lifetime": "De por vida",
-      "new": "Nueva suscripción",
-      "placeholders": {
-        "code": "DECADE"
-      },
-      "status": {
-        "active": "Activa",
-        "inactive": "Inactiva"
-      },
-      "table": {
-        "bioMaxChars": "Caracteres Bio",
-        "bioMaxImages": "Imágenes Bio",
-        "code": "Código",
-        "createdAt": "Creada el",
-        "empty": "No se encontraron suscripciones",
-        "galleryMaxImages": "Imágenes Galería",
-        "galleryMaxVideos": "Videos Galería",
-        "geo": "Geo",
-        "maxProfiles": "Memo",
-        "name": "Nombre",
-        "price": "Precio",
-        "qrCode": "Código QR",
-        "status": "Estado",
-        "term": "Duración"
-      },
-      "title": "Suscripciones (B2C)",
-      "toasts": {
-        "deactivated": "Suscripción desactivada.",
-        "deleteConfirm": "La suscripción \"{name}\" se eliminará permanentemente.",
-        "deleted": "Suscripción eliminada correctamente.",
-        "reactivated": "Suscripción reactivada."
-      }
+    "actions": {
+      "deactivate": "Desactivar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "openMenu": "Abrir menú",
+      "reactivate": "Reactivar"
+    },
+    "active": "¿Activa?",
+    "availableTitle": "Suscripciones Disponibles",
+    "create": "Crear suscripción",
+    "edit": "Editar Suscripción",
+    "fields": {
+      "bioMaxChars": "Máximo de Caracteres de la Bio:",
+      "bioMaxImages": "Máximo de Imágenes de la Bio:",
+      "code": "Código:",
+      "description": "Descripción:",
+      "galleryMaxImages": "Máximo de Imágenes de la Galería:",
+      "galleryMaxVideos": "Máximo de Videos de la Galería:",
+      "geolocationFullAccess": "Acceso Total a la Geolocalización",
+      "maxProfiles": "Máximo de Perfiles Memo:",
+      "name": "Nombre:",
+      "price": "Precio (US$):",
+      "qrCodeAccess": "Acceso al Código QR",
+      "termLength": "Duración (en meses):",
+      "treeMaxMembers": "Máximo de Miembros del Árbol Genealógico:"
+    },
+    "free": "Gratis",
+    "hints": {
+      "code": "Identificación del plan",
+      "freeCodeReserved": "El código del plan FREE está reservado.",
+      "price": "0 = Gratis",
+      "termLength": "0 = De por vida"
+    },
+    "lifetime": "De por vida",
+    "new": "Nueva suscripción",
+    "placeholders": {
+      "code": "DECADE"
+    },
+    "status": {
+      "active": "Activa",
+      "inactive": "Inactiva"
+    },
+    "table": {
+      "bioMaxChars": "Caracteres Bio",
+      "bioMaxImages": "Imágenes Bio",
+      "code": "Código",
+      "createdAt": "Creada el",
+      "empty": "No se encontraron suscripciones",
+      "galleryMaxImages": "Imágenes Galería",
+      "galleryMaxVideos": "Videos Galería",
+      "geo": "Geo",
+      "maxProfiles": "Memo",
+      "name": "Nombre",
+      "price": "Precio",
+      "qrCode": "Código QR",
+      "status": "Estado",
+      "term": "Duración"
+    },
+    "title": "Suscripciones (B2C)",
+    "toasts": {
+      "deactivated": "Suscripción desactivada.",
+      "deleteConfirm": "La suscripción \"{name}\" se eliminará permanentemente.",
+      "deleted": "Suscripción eliminada correctamente.",
+      "reactivated": "Suscripción reactivada."
     }
   },
   "SupplierCategories": {
