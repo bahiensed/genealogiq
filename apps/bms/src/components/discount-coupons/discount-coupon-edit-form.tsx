@@ -29,8 +29,8 @@ export function DiscountCouponEditForm({ id, code, description }: DiscountCoupon
     setServerError(null)
     startTransition(async () => {
       const result = await updateDiscountCoupon(id, { description: value.trim() || null })
-      if ('error' in result) { setServerError(result.error); return }
-      toast.success(result.success)
+      if (!result.ok) { setServerError(result.message); return }
+      if (result.message) toast.success(result.message)
       router.push('/sales/discount-coupons')
     })
   }

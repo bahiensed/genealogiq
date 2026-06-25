@@ -33,11 +33,11 @@ export function ChangeEmailDialog() {
         </DialogHeader>
 
         <form action={dispatch} className="flex flex-col gap-4">
-          {state?.error && (
-            <p className="text-sm text-destructive">{state.error}</p>
+          {state && !state.ok && (
+            <p className="text-sm text-destructive">{state.message}</p>
           )}
-          {state?.success && (
-            <p className="text-sm text-green-600">{state.success}</p>
+          {state?.ok && state.message && (
+            <p className="text-sm text-green-600">{state.message}</p>
           )}
 
           <div className="flex flex-col gap-1.5">
@@ -48,22 +48,22 @@ export function ChangeEmailDialog() {
               type="email"
               placeholder={t('newEmailPlaceholder')}
               autoComplete="email"
-              aria-invalid={!!state?.errors?.newEmail}
+              aria-invalid={!!state?.fieldErrors?.newEmail}
             />
-            {state?.errors?.newEmail?.[0] && (
-              <p className="text-xs text-destructive">{state.errors.newEmail[0]}</p>
+            {state?.fieldErrors?.newEmail?.[0] && (
+              <p className="text-xs text-destructive">{state.fieldErrors.newEmail[0]}</p>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="ce-currentPassword">{t('currentPasswordLabel')}</Label>
-            <InputGroup aria-invalid={!!state?.errors?.currentPassword}>
+            <InputGroup aria-invalid={!!state?.fieldErrors?.currentPassword}>
               <InputGroupInput
                 id="ce-currentPassword"
                 name="currentPassword"
                 type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
-                aria-invalid={!!state?.errors?.currentPassword}
+                aria-invalid={!!state?.fieldErrors?.currentPassword}
               />
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
@@ -74,8 +74,8 @@ export function ChangeEmailDialog() {
                 </InputGroupButton>
               </InputGroupAddon>
             </InputGroup>
-            {state?.errors?.currentPassword?.[0] && (
-              <p className="text-xs text-destructive">{state.errors.currentPassword[0]}</p>
+            {state?.fieldErrors?.currentPassword?.[0] && (
+              <p className="text-xs text-destructive">{state.fieldErrors.currentPassword[0]}</p>
             )}
           </div>
 

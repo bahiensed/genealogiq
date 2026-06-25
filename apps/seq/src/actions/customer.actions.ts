@@ -2,17 +2,15 @@
 
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { Prisma } from '@genealogiq/db'
-import { hashToken } from '@genealogiq/core'
+import { hashToken, done, fail, type ActionResult } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail } from '@/lib/email'
 import { getAppUserSchema, type AppUserFormValues } from '@/schemas/app-user.schema'
 import { getDeceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'
 import { identityTranslator } from '@/schemas/i18n'
-
-type ActionError = { error: string }
-type ActionSuccess = { success: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildAddressCreate(address: AppUserFormValues['address']): any {
@@ -36,11 +34,12 @@ function toDate(value: string | null | undefined): Date | null {
 
 export async function createCustomer(
   appUserData: AppUserFormValues,
-): Promise<ActionError | ActionSuccess> {
+): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const validated = getAppUserSchema(identityTranslator).safeParse(appUserData)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { address, birthDate, categoryId, ...rest } = validated.data
 
@@ -56,26 +55,27 @@ export async function createCustomer(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'An account with this email already exists.' }
+      return fail(t('customer.emailExists'))
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Customer created successfully.' }
+  return done(t('customer.created'))
 }
 
 export async function createCustomerWithDeceased(
   appUserData: AppUserFormValues,
   deceasedData: DeceasedFormValues,
-): Promise<ActionError | ActionSuccess> {
+): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const validatedUser = getAppUserSchema(identityTranslator).safeParse(appUserData)
-  if (!validatedUser.success) return { error: 'Invalid data' }
+  if (!validatedUser.success) return fail(t('common.invalidData'))
 
   const validatedDeceased = getDeceasedSchema(identityTranslator).safeParse(deceasedData)
-  if (!validatedDeceased.success) return { error: 'Invalid data' }
+  if (!validatedDeceased.success) return fail(t('common.invalidData'))
 
   const { address, birthDate, categoryId, ...userRest } = validatedUser.data
   const { birthDate: dBirthDate, deathDate, burialDate, burialLatitude, burialLongitude, ...deceasedRest } = validatedDeceased.data
@@ -135,20 +135,21 @@ export async function createCustomerWithDeceased(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Duplicate data detected' }
+      return fail(t('common.duplicate'))
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Customer created successfully.' }
+  return done(t('customer.created'))
 }
 
-export async function updateCustomer(id: string, data: AppUserFormValues): Promise<ActionError | ActionSuccess> {
+export async function updateCustomer(id: string, data: AppUserFormValues): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const validated = getAppUserSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { address, birthDate, categoryId, ...rest } = validated.data
 
@@ -164,20 +165,21 @@ export async function updateCustomer(id: string, data: AppUserFormValues): Promi
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Customer not found.' }
+      return fail(t('customer.notFound'))
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Customer updated successfully.' }
+  return done(t('customer.updated'))
 }
 
-export async function deleteCustomer(id: string): Promise<ActionError | void> {
+export async function deleteCustomer(id: string): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const saleCount = await prisma.appSale.count({ where: { appUserId: id } })
-  if (saleCount > 0) return { error: 'Cannot delete customer with existing sales.' }
+  if (saleCount > 0) return fail(t('customer.hasSales'))
 
   const soloGuardianships = await prisma.appUserGuardian.count({
     where: {
@@ -189,7 +191,7 @@ export async function deleteCustomer(id: string): Promise<ActionError | void> {
     },
   })
   if (soloGuardianships > 0)
-    return { error: 'Cannot delete customer: they are the sole guardian of one or more memorialized profiles.' }
+    return fail(t('customer.soleGuardian'))
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -200,25 +202,27 @@ export async function deleteCustomer(id: string): Promise<ActionError | void> {
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      if (e.code === 'P2025') return { error: 'Customer not found.' }
-      return { error: `Failed to delete customer (${e.code}).` }
+      if (e.code === 'P2025') return fail(t('customer.notFound'))
+      return fail(t('customer.deleteFailed', { code: e.code }))
     }
-    return { error: 'An unexpected error occurred.' }
+    return fail(t('customer.unexpectedError'))
   }
 
   revalidatePath('/customers')
+  return done()
 }
 
-export async function resendCustomerEmail(id: string): Promise<ActionError | void> {
+export async function resendCustomerEmail(id: string): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const appUser = await prisma.appUser.findUnique({
     where:  { id, tenantId: customerId },
     select: { id: true, email: true, password: true, firstName: true },
   })
-  if (!appUser) return { error: 'Customer not found.' }
-  if (!appUser.email) return { error: 'Customer has no email address.' }
-  if (appUser.password) return { error: 'This customer has already set their password.' }
+  if (!appUser) return fail(t('customer.notFound'))
+  if (!appUser.email) return fail(t('customer.noEmail'))
+  if (appUser.password) return fail(t('customer.passwordAlreadySet'))
 
   await prisma.passwordResetToken.deleteMany({ where: { appUserId: id } })
 
@@ -228,17 +232,20 @@ export async function resendCustomerEmail(id: string): Promise<ActionError | voi
   })
 
   await sendAppWelcomeEmail(appUser.email, token, appUser.firstName)
+  return done()
 }
 
-export async function toggleCustomerActive(id: string): Promise<ActionError | void> {
+export async function toggleCustomerActive(id: string): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const appUser = await prisma.appUser.findUnique({
     where:  { id, tenantId: customerId },
     select: { isActive: true },
   })
-  if (!appUser) return { error: 'Customer not found.' }
+  if (!appUser) return fail(t('customer.notFound'))
 
   await prisma.appUser.update({ where: { id }, data: { isActive: !appUser.isActive } })
   revalidatePath('/customers')
+  return done()
 }

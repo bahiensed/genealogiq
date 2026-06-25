@@ -67,7 +67,7 @@ function ActionsCell({ row, t }: { row: { original: DiscountCouponRow }; t: Tran
         <DropdownMenuItem
           onClick={() => startTransition(async () => {
             const result = await toggleDiscountCouponActive(coupon.id)
-            if ('error' in result) toast.error(result.error)
+            if (!result.ok) toast.error(result.message)
             else toast.success(coupon.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
           })}
         >

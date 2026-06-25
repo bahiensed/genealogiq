@@ -1,4 +1,109 @@
 {
+  "Actions": {
+    "auth": {
+      "accountLocked": "Cuenta bloqueada temporalmente. Vuelve a intentarlo en {minutes} minuto(s).",
+      "emailChangeLinkSent": "Enlace de confirmación enviado al nuevo correo electrónico.",
+      "emailInUse": "Este correo electrónico ya está en uso.",
+      "emailMustDiffer": "El nuevo correo electrónico debe ser diferente del actual.",
+      "incorrectCredentials": "Correo o contraseña incorrectos.",
+      "incorrectCurrentPassword": "Contraseña actual incorrecta.",
+      "incorrectPassword": "Contraseña incorrecta.",
+      "invalidAdminData": "Datos del administrador inválidos.",
+      "invalidCompanyData": "Datos de la empresa inválidos.",
+      "invalidEmail": "Correo electrónico inválido.",
+      "invalidOrExpiredLink": "Enlace inválido o expirado. Solicita uno nuevo.",
+      "newPasswordMustDiffer": "La nueva contraseña debe ser diferente de la actual.",
+      "passwordChanged": "Contraseña cambiada correctamente.",
+      "systemAlreadyConfigured": "El sistema ya está configurado.",
+      "tooManyAttempts": "Demasiados intentos. Vuelve a intentarlo en {minutes} minuto(s).",
+      "tooManyRequests": "Demasiadas solicitudes. Vuelve a intentarlo en {minutes} minuto(s).",
+      "tooManySignIn": "Demasiados intentos de inicio de sesión. Vuelve a intentarlo en {seconds}s.",
+      "userNotFound": "Usuario no encontrado.",
+      "verifyEmailFirst": "Verifica tu correo antes de iniciar sesión. Revisa tu bandeja de entrada."
+    },
+    "common": {
+      "duplicate": "Datos duplicados detectados",
+      "invalidData": "Datos inválidos"
+    },
+    "customer": {
+      "adminEmailInUse": "Este correo de administrador ya está en uso",
+      "created": "Cliente creado con éxito.",
+      "hasDependents": "No se puede eliminar: el cliente tiene registros dependientes.",
+      "hasSales": "No se puede eliminar un cliente con registros de ventas.",
+      "noOwner": "No se encontró usuario propietario para este cliente.",
+      "notFound": "Cliente no encontrado.",
+      "passwordAlreadySet": "Este usuario ya estableció su contraseña.",
+      "taxIdExists": "Ya existe un cliente con este identificador fiscal",
+      "updated": "Cliente actualizado con éxito."
+    },
+    "customerCategory": {
+      "created": "Categoría creada con éxito.",
+      "inUse": "No se puede eliminar: la categoría está asignada a uno o más clientes.",
+      "notFound": "Categoría no encontrada.",
+      "updated": "Categoría actualizada con éxito."
+    },
+    "discountCoupon": {
+      "codeExists": "Ya existe un cupón con este código.",
+      "createFailed": "No se pudo crear el cupón.",
+      "created": "Cupón creado correctamente.",
+      "deactivated": "Cupón desactivado.",
+      "descriptionUpdated": "Descripción actualizada.",
+      "notFound": "Cupón no encontrado.",
+      "reactivated": "Cupón reactivado.",
+      "stripeOrphan": "El código \"{code}\" ya está activo en Stripe (residuo de una ejecución anterior fallida). Pide a un administrador que lo elimine.",
+      "updateFailed": "No se pudo actualizar el cupón."
+    },
+    "package": {
+      "created": "Paquete creado correctamente.",
+      "hasSales": "Este paquete tiene ventas asociadas y no se puede eliminar.",
+      "notFound": "Paquete no encontrado.",
+      "priceRequired": "Establece un precio mayor que cero antes de sincronizar.",
+      "stripeSyncFailed": "Error al sincronizar con Stripe: {message}",
+      "synced": "Sincronizado con Stripe correctamente.",
+      "unknownError": "Error desconocido",
+      "updated": "Paquete actualizado correctamente.",
+      "updatedStripeCleared": "Paquete actualizado — referencias de Stripe eliminadas. Vuelve a ejecutar prisma/seed-stripe-packages.ts en SEQ."
+    },
+    "profile": {
+      "avatarUpdated": "Avatar actualizado.",
+      "invalidAvatarUrl": "URL de avatar no válida.",
+      "updated": "Perfil actualizado correctamente."
+    },
+    "sale": {
+      "alreadyReversed": "Esta venta ya fue revertida.",
+      "created": "Venta registrada correctamente.",
+      "notFound": "Venta no encontrada.",
+      "packageNotFound": "Paquete no encontrado."
+    },
+    "subscription": {
+      "created": "Plan creado correctamente.",
+      "hasSales": "No se puede eliminar este plan: está vinculado a ventas existentes.",
+      "notFound": "Plan no encontrado.",
+      "updated": "Plan actualizado correctamente."
+    },
+    "supplier": {
+      "created": "Proveedor creado correctamente.",
+      "notFound": "Proveedor no encontrado.",
+      "taxIdExists": "Ya existe un proveedor con este RFC",
+      "updated": "Proveedor actualizado correctamente."
+    },
+    "supplierCategory": {
+      "created": "Categoría creada con éxito.",
+      "hasSuppliers": "No se puede eliminar: la categoría está asignada a uno o más proveedores.",
+      "nameExists": "Ya existe una categoría con este nombre.",
+      "notFound": "Categoría no encontrada.",
+      "updated": "Categoría actualizada con éxito."
+    },
+    "user": {
+      "cannotDeactivateSelf": "No puedes desactivar tu propia cuenta.",
+      "cannotDeleteSelf": "No puedes eliminar tu propia cuenta.",
+      "created": "Usuario creado correctamente.",
+      "emailExists": "Este correo electrónico ya está en uso.",
+      "notFound": "Usuario no encontrado.",
+      "passwordAlreadySet": "Este usuario ya estableció su contraseña.",
+      "updated": "Usuario actualizado correctamente."
+    }
+  },
   "Auth": {
     "description": "Ingresa tu correo y contraseña para acceder a tu cuenta.",
     "email": "Correo:",

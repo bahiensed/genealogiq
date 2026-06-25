@@ -127,7 +127,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         endDate:   kind === "spouse" && needsEndDate && endedAt ? endedAt : null,
         linkSpouseId: shouldLinkSpouse ? anchorParents[0]?.id : null,
       })
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.relativeAdded"))
       handleClose()
       onSuccess?.()
@@ -153,7 +153,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         endDate:   kind === "spouse" && needsEndDate && endedAt ? endedAt : null,
         linkSpouseId: shouldLinkSpouse ? anchorParents[0]?.id : null,
       })
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.personAdded"))
       handleClose()
       onSuccess?.()

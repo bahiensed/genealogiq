@@ -89,7 +89,7 @@ export function SetupWizard() {
     setServerError(null)
     const company = companyForm.getValues()
     const result = await setupSystem(company, adminData)
-    if (result?.error) setServerError(result.error)
+    if (result && !result.ok) setServerError(result.message)
   }
 
   const { control: cc, formState: { errors: ce } } = companyForm

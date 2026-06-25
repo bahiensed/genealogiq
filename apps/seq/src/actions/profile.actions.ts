@@ -1,6 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
+import { done, fail, type ActionResult } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 import { getProfileSchema, type ProfileFormValues } from '@/schemas/profile.schema'
@@ -11,8 +13,6 @@ import { identityTranslator } from '@/schemas/i18n'
 // here — those go through dedicated flows (admin actions or the dialogs in
 // components/auth/).
 
-type ActionResult = { error: string } | { success: string }
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildAddressWrite(address: ProfileFormValues['address']): any {
   if (!address) return undefined
@@ -22,10 +22,11 @@ function buildAddressWrite(address: ProfileFormValues['address']): any {
 }
 
 export async function updateProfile(data: ProfileFormValues): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const session = await verifySession()
 
   const validated = getProfileSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { address, birthDate, ...rest } = validated.data
 
@@ -39,14 +40,15 @@ export async function updateProfile(data: ProfileFormValues): Promise<ActionResu
   })
 
   revalidatePath('/profile')
-  return { success: 'Profile updated successfully.' }
+  return done(t('profile.updated'))
 }
 
 export async function updateAvatar(url: string): Promise<ActionResult> {
+  const t = await getTranslations('Actions')
   const session = await verifySession()
 
   if (!/^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//.test(url)) {
-    return { error: 'Invalid avatar URL' }
+    return fail(t('profile.invalidAvatarUrl'))
   }
 
   await prisma.user.update({
@@ -55,5 +57,5 @@ export async function updateAvatar(url: string): Promise<ActionResult> {
   })
 
   revalidatePath('/profile')
-  return { success: 'Avatar updated.' }
+  return done(t('profile.avatarUpdated'))
 }

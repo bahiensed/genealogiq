@@ -53,7 +53,7 @@ function ActionsCell({ row, t }: { row: { original: SupplierRow }; t: Translator
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleSupplierActive(supplier.id)
-              if (result?.error) toast.error(result.error)
+              if (!result.ok) toast.error(result.message)
               else toast.success(supplier.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
@@ -75,7 +75,7 @@ function ActionsCell({ row, t }: { row: { original: SupplierRow }; t: Translator
         description={t('toasts.deleteConfirm', { name: supplier.name })}
         onConfirm={() => startTransition(async () => {
           const result = await deleteSupplier(supplier.id)
-          if (result?.error) toast.error(result.error)
+          if (!result.ok) toast.error(result.message)
           else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
         })}
       />

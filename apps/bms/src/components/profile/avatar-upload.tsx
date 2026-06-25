@@ -42,13 +42,13 @@ export function AvatarUpload({ defaultUrl, fullName }: AvatarUploadProps) {
 
       startSaving(async () => {
         const result = await updateAvatar(blob.url)
-        if ('error' in result) {
-          toast.error(result.error)
+        if (!result.ok) {
+          toast.error(result.message)
           return
         }
         setUrl(blob.url)
         await update({ image: blob.url })
-        toast.success(result.success)
+        if (result.message) toast.success(result.message)
         router.refresh()
       })
     } catch (err) {

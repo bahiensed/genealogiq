@@ -1,6 +1,6 @@
 export { hashToken } from "./token"
 export { generateGenCode, formatGenCode } from "./gen-code"
-export { ok, err, type Result } from "./result"
+export { ok, done, fail, type ActionResult } from "./result"
 export {
   COUNTRIES,
   COUNTRY_NAMES,

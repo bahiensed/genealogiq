@@ -149,9 +149,9 @@ export function ActivateMemorialForm({ genCode }: ActivateMemorialFormProps) {
         deathCountry: form.deathCountry || undefined,
         avatarUrl:   form.avatarUrl   || null,
       })
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("activateMemorial.created"))
-      router.push(`/profile/${result.id}`)
+      router.push(`/profile/${result.data!.id}`)
     })
   }
 

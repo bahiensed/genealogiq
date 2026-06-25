@@ -45,10 +45,10 @@ export function CompanyForm({ id, defaultValues }: CompanyFormProps) {
   async function onSubmit(data: CompanyFormValues) {
     setServerError(null)
     const result = await updateCompany(id, data)
-    if (result?.error) {
-      setServerError(result.error)
-    } else {
-      toast.success(t('toasts.updated'))
+    if (!result.ok) {
+      setServerError(result.message)
+    } else if (result.message) {
+      toast.success(result.message)
     }
   }
 

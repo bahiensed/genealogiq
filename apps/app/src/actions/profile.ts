@@ -1,17 +1,20 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
+import { done, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { getProfileEditSchema } from "@/schemas/profile"
 import { identityTranslator } from "@/schemas/i18n"
 import { deleteBlobs } from "@/lib/blob"
 
-export async function updateProfile(data: unknown) {
+export async function updateProfile(data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const parsed = getProfileEditSchema(identityTranslator).safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(t("common.invalidData"))
 
   const {
     firstName, lastName, maidenName, nickname, gender, nationalId, avatarUrl,
@@ -63,7 +66,7 @@ export async function updateProfile(data: unknown) {
 
   revalidatePath(`/profile/${session.user.id}`)
   revalidatePath("/", "layout")
-  return { success: true }
+  return done()
 }
 
 async function upsertAddress(

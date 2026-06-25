@@ -56,7 +56,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: Subscriptio
           <DropdownMenuItem
             onClick={() => startTransition(async () => {
               const result = await toggleSubscriptionActive(subscription.id)
-              if (result?.error) toast.error(result.error)
+              if (!result.ok) toast.error(result.message)
               else toast.success(subscription.isActive ? t('toasts.deactivated') : t('toasts.reactivated'))
             })}
           >
@@ -81,7 +81,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: Subscriptio
           description={t('toasts.deleteConfirm', { name: subscription.name })}
           onConfirm={() => startTransition(async () => {
             const result = await deleteSubscription(subscription.id)
-            if (result?.error) toast.error(result.error)
+            if (!result.ok) toast.error(result.message)
             else { toast.success(t('toasts.deleted')); setDeleteOpen(false) }
           })}
         />

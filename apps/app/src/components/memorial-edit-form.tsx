@@ -226,7 +226,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
       const result = isMemorialized
         ? await updateMemorial(profileId, typed)
         : await updateProfile(typed)
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.saved"))
     })
   }
@@ -236,7 +236,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   const handleDelete = () => {
     startTransition(async () => {
       const result = await deleteMemorial(profileId)
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.deleted"))
       router.push("/profile")
     })

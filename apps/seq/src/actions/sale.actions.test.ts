@@ -5,6 +5,7 @@ const { prismaMock } = vi.hoisted(() => ({
 }))
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
+vi.mock("next-intl/server", () => ({ getTranslations: async () => (key: string) => key }))
 vi.mock('@genealogiq/db', () => ({ Prisma: {} }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyTenantSession: vi.fn() }))
@@ -27,7 +28,7 @@ describe("createAppSale — A3 server-side value validation", () => {
   ])("rejects a %s value before touching the DB", async (_label, value) => {
     const res = await createAppSale("app-user-1", "sub-1", value as number)
 
-    expect(res).toEqual({ error: "Invalid sale value." })
+    expect(res).toEqual({ ok: false, message: "sale.invalidValue" })
     expect(prismaMock.appUser.findUnique).not.toHaveBeenCalled()
   })
 
@@ -37,7 +38,7 @@ describe("createAppSale — A3 server-side value validation", () => {
 
     const res = await createAppSale("app-user-1", "sub-1", 100)
 
-    expect(res).toEqual({ error: "Customer not found." })
+    expect(res).toEqual({ ok: false, message: "sale.customerNotFound" })
     expect(prismaMock.appUser.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "app-user-1", tenantId: "c1" } }),
     )

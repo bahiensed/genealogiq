@@ -85,10 +85,10 @@ export function ProfileBanner({ profile }: Props) {
                       setFavorited(next)
                       setFavCount((c) => c + (next ? 1 : -1))
                       const result = await toggleFavorite(profile.id)
-                      if (result?.error) {
+                      if (!result.ok) {
                         setFavorited(!next)
                         setFavCount((c) => c + (next ? -1 : 1))
-                        toast.error(result.error)
+                        toast.error(result.message)
                       }
                     })
                   }}

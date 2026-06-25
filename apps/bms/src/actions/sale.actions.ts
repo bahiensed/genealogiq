@@ -1,21 +1,21 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { Prisma } from '@genealogiq/db'
+import { done, fail, type ActionResult } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/dal'
 import { getSaleSchema, type SaleFormValues } from '@/schemas/sale.schema'
 import { identityTranslator } from '@/schemas/i18n'
 import { generateGenCode } from '@/lib/gen-code'
 
-type ActionError   = { error: string }
-type ActionSuccess = { success: string }
-
-export async function createSale(data: SaleFormValues): Promise<ActionError | ActionSuccess> {
+export async function createSale(data: SaleFormValues): Promise<ActionResult> {
   const session = await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const validated = getSaleSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { packageId, tenantId, quantity } = validated.data
 
@@ -23,7 +23,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
     where:  { id: packageId },
     select: { quantity: true, type: true },
   })
-  if (!pkg) return { error: 'Package not found.' }
+  if (!pkg) return fail(t('sale.packageNotFound'))
 
   const totalCodes = pkg.quantity * quantity
 
@@ -57,11 +57,12 @@ export async function createSale(data: SaleFormValues): Promise<ActionError | Ac
 
   revalidatePath('/sales/manual-sales')
   revalidatePath('/physical-qr')
-  return { success: 'Sale recorded successfully.' }
+  return done(t('sale.created'))
 }
 
-export async function reverseSale(id: number): Promise<ActionError | void> {
+export async function reverseSale(id: number): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const sale = await prisma.sale.findUnique({
     where:  { id },
@@ -72,8 +73,8 @@ export async function reverseSale(id: number): Promise<ActionError | void> {
       package:    { select: { quantity: true, type: true } },
     },
   })
-  if (!sale) return { error: 'Sale not found.' }
-  if (sale.reversedAt) return { error: 'This sale has already been reversed.' }
+  if (!sale) return fail(t('sale.notFound'))
+  if (sale.reversedAt) return fail(t('sale.alreadyReversed'))
 
   try {
     await prisma.$transaction(async (tx) => {
@@ -106,11 +107,12 @@ export async function reverseSale(id: number): Promise<ActionError | void> {
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Sale not found.' }
+      return fail(t('sale.notFound'))
     }
     throw e
   }
 
   revalidatePath('/sales/manual-sales')
   revalidatePath('/physical-qr')
+  return done()
 }

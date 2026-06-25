@@ -79,8 +79,8 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
     if (uploading) { toast.warning(t("toasts.waitForUpload")); return }
     startTransition(async () => {
       const result = await submitTribute(profileId, { text, imageUrl })
-      if (result?.error) {
-        toast.error(result.error)
+      if (!result.ok) {
+        toast.error(result.message)
       } else {
         toast.success(isEditing ? t("toasts.updated") : t("toasts.submitted"))
         router.push(`/profile/${profileId}/tributes`)
@@ -92,7 +92,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
     if (!existing) return
     startTransition(async () => {
       const result = await deleteTribute(existing.id)
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.deleted"))
       router.push(`/profile/${profileId}/tributes`)
     })

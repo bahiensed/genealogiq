@@ -66,7 +66,7 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
   function togglePrinted() {
     startTransition(async () => {
       const res = await markPhysicalQrPrinted(license.genCode, !printed)
-      if (res?.error) toast.error(res.error)
+      if (!res.ok) toast.error(res.message)
       else { toast.success(printed ? t('toasts.markedNotPrinted') : t('toasts.markedPrinted')); router.refresh() }
     })
   }
@@ -74,8 +74,8 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
   function undo() {
     startTransition(async () => {
       const res = await undoPhysicalQrSale(license.genCode)
-      if ('error' in res) toast.error(res.error)
-      else { toast.success(res.success); setUndoOpen(false); router.refresh() }
+      if (!res.ok) toast.error(res.message)
+      else { if (res.message) toast.success(res.message); setUndoOpen(false); router.refresh() }
     })
   }
 
@@ -181,8 +181,8 @@ function ManualSaleDialog({ genCode, open, onOpenChange, onDone }: {
     const v = value.trim() ? Number(value) : undefined
     startTransition(async () => {
       const res = await sellPhysicalQrManually(genCode, { buyerName, value: v })
-      if ('error' in res) toast.error(res.error)
-      else { toast.success(res.success); onOpenChange(false); setBuyerName(''); setValue(''); onDone() }
+      if (!res.ok) toast.error(res.message)
+      else { if (res.message) toast.success(res.message); onOpenChange(false); setBuyerName(''); setValue(''); onDone() }
     })
   }
 
@@ -249,8 +249,8 @@ function PlatformSaleDialog({ genCode, open, onOpenChange, onDone }: {
     const v = value.trim() ? Number(value) : undefined
     startTransition(async () => {
       const res = await sellPhysicalQrViaPlatform(genCode, selected.id, v)
-      if ('error' in res) toast.error(res.error)
-      else { toast.success(res.success); onOpenChange(false); setSelected(null); setQuery(''); setValue(''); onDone() }
+      if (!res.ok) toast.error(res.message)
+      else { if (res.message) toast.success(res.message); onOpenChange(false); setSelected(null); setQuery(''); setValue(''); onDone() }
     })
   }
 

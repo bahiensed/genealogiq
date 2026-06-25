@@ -225,7 +225,7 @@ function TributeActions({ item }: { item: InboxItem }) {
       const result = action === "approve"
         ? await approveTribute(item.tributeId!, item.tribute!.profileId)
         : await rejectTribute(item.tributeId!,  item.tribute!.profileId)
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(action === "approve" ? t("toasts.tributeApproved") : t("toasts.tributeRejected"))
       router.refresh()
     })
@@ -254,7 +254,7 @@ function FamilyRequestActions({ item }: { item: InboxItem }) {
       const result = action === "accept"
         ? await acceptFamilyRequest(item.familyRelationId!)
         : await rejectFamilyRequest(item.familyRelationId!)
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(action === "accept" ? t("toasts.invitationAccepted") : t("toasts.invitationDeclined"))
       router.refresh()
     })
@@ -283,7 +283,7 @@ function GuardianRequestActions({ item }: { item: InboxItem }) {
       const result = action === "approve"
         ? await approveGuardianship({ guardianshipId: item.appUserGuardianId! })
         : await rejectGuardianship({  guardianshipId: item.appUserGuardianId! })
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(action === "approve" ? t("toasts.coManagementApproved") : t("toasts.coManagementDeclined"))
       router.refresh()
     })

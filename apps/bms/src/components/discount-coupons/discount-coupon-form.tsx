@@ -51,10 +51,10 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
   async function onSubmit(data: DiscountCouponFormValues) {
     setServerError(null)
     const result = await createDiscountCoupon(data)
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
-      toast.success(result.success)
+      if (result.message) toast.success(result.message)
       router.push('/sales/discount-coupons')
     }
   }

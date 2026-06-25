@@ -98,10 +98,10 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
     const result = isEditing
       ? await updateSubscription(id, data)
       : await createSubscription(data)
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
-      toast.success(result.success)
+      if (result.message) toast.success(result.message)
       if (!isEditing) router.push('/subscriptions')
     }
   }

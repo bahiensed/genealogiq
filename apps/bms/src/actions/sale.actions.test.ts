@@ -23,6 +23,7 @@ vi.mock("@genealogiq/db", () => ({ Prisma: { PrismaClientKnownRequestError: Pris
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyAdmin: vi.fn() }))
 vi.mock("@/lib/gen-code", () => ({ generateGenCode: vi.fn(() => "GEN-CODE") }))
+vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
 
 import { createSale, reverseSale } from "./sale.actions"
 import { verifyAdmin } from "@/lib/dal"
@@ -35,14 +36,14 @@ beforeEach(() => {
 describe("createSale", () => {
   it("rejects invalid input before touching the DB", async () => {
     const res = await createSale({ packageId: "", tenantId: "", quantity: 0 } as never)
-    expect(res).toEqual({ error: "Invalid data" })
+    expect(res).toEqual({ ok: false, message: "common.invalidData" })
     expect(prismaMock.package.findUnique).not.toHaveBeenCalled()
   })
 
   it("rejects when the package does not exist", async () => {
     prismaMock.package.findUnique.mockResolvedValue(null)
     const res = await createSale({ packageId: "p1", tenantId: "c1", quantity: 2 })
-    expect(res).toEqual({ error: "Package not found." })
+    expect(res).toEqual({ ok: false, message: "sale.packageNotFound" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
@@ -64,7 +65,7 @@ describe("createSale", () => {
       expect.objectContaining({ saleId: 99, packageId: "p1", tenantId: "c1", genCode: "GEN-CODE" }),
     )
     expect(prismaMock.qrInventory.upsert).not.toHaveBeenCalled()
-    expect(res).toEqual({ success: "Sale recorded successfully." })
+    expect(res).toEqual({ ok: true, message: "sale.created" })
   })
 
   it("DIGITAL: increments QR inventory by quantity × pkg.quantity", async () => {
@@ -81,14 +82,14 @@ describe("createSale", () => {
       }),
     )
     expect(prismaMock.physicalQrLicense.createMany).not.toHaveBeenCalled()
-    expect(res).toEqual({ success: "Sale recorded successfully." })
+    expect(res).toEqual({ ok: true, message: "sale.created" })
   })
 })
 
 describe("reverseSale", () => {
   it("rejects when the sale does not exist", async () => {
     prismaMock.sale.findUnique.mockResolvedValue(null)
-    expect(await reverseSale(1)).toEqual({ error: "Sale not found." })
+    expect(await reverseSale(1)).toEqual({ ok: false, message: "sale.notFound" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
@@ -96,7 +97,7 @@ describe("reverseSale", () => {
     prismaMock.sale.findUnique.mockResolvedValue({
       quantity: 1, tenantId: "c1", reversedAt: new Date(), package: { quantity: 1, type: "PHYSICAL" },
     })
-    expect(await reverseSale(1)).toEqual({ error: "This sale has already been reversed." })
+    expect(await reverseSale(1)).toEqual({ ok: false, message: "sale.alreadyReversed" })
   })
 
   it("PHYSICAL: marks reversed and deletes only AVAILABLE licenses", async () => {
@@ -113,7 +114,7 @@ describe("reverseSale", () => {
     expect(prismaMock.physicalQrLicense.deleteMany).toHaveBeenCalledWith({
       where: { saleId: 7, status: "AVAILABLE" },
     })
-    expect(res).toBeUndefined()
+    expect(res).toEqual({ ok: true, message: undefined })
   })
 
   it("maps a P2025 race to 'Sale not found.'", async () => {
@@ -121,6 +122,6 @@ describe("reverseSale", () => {
       quantity: 1, tenantId: "c1", reversedAt: null, package: { quantity: 1, type: "PHYSICAL" },
     })
     prismaMock.sale.update.mockRejectedValue(new PrismaKnownError("gone", "P2025"))
-    expect(await reverseSale(7)).toEqual({ error: "Sale not found." })
+    expect(await reverseSale(7)).toEqual({ ok: false, message: "sale.notFound" })
   })
 })

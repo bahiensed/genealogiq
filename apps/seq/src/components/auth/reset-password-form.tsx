@@ -51,19 +51,19 @@ export function ResetPasswordForm({ token }: Props) {
           <input type="hidden" name="token" value={token} />
 
           <CardContent className="flex flex-col gap-4">
-            {state?.error && (
-              <p className="text-sm text-destructive">{state.error}</p>
+            {state && !state.ok && (
+              <p className="text-sm text-destructive">{state.message}</p>
             )}
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="password">New password:</Label>
-              <InputGroup aria-invalid={!!state?.errors?.password}>
+              <InputGroup aria-invalid={!!state?.fieldErrors?.password}>
                 <InputGroupInput
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  aria-invalid={!!state?.errors?.password}
+                  aria-invalid={!!state?.fieldErrors?.password}
                 />
                 <InputGroupAddon align="inline-end">
                   <InputGroupButton
@@ -74,8 +74,8 @@ export function ResetPasswordForm({ token }: Props) {
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
-              {state?.errors?.password?.[0] && (
-                <p className="text-xs text-destructive">{state.errors.password[0]}</p>
+              {state?.fieldErrors?.password?.[0] && (
+                <p className="text-xs text-destructive">{state.fieldErrors.password[0]}</p>
               )}
             </div>
           </CardContent>

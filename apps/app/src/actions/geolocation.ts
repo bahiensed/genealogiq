@@ -1,6 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
+import { done, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { getGeolocationSchema } from "@/schemas/geolocation"
@@ -10,14 +12,15 @@ import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
 
-export async function saveGeolocation(profileId: string, data: unknown) {
+export async function saveGeolocation(profileId: string, data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("geolocation.notAuthorized"))
 
   const parsed = getGeolocationSchema(identityTranslator).safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(t("common.invalidData"))
 
   const existing = await prisma.geolocation.findUnique({
     where: { userId: profileId },
@@ -49,14 +52,15 @@ export async function saveGeolocation(profileId: string, data: unknown) {
   })
 
   revalidatePath(`/profile/${profileId}/geolocation`)
-  return { success: true }
+  return done()
 }
 
-export async function deleteGeolocation(profileId: string) {
+export async function deleteGeolocation(profileId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("geolocation.notAuthorized"))
 
   const existing = await prisma.geolocation.findUnique({
     where: { userId: profileId },
@@ -66,5 +70,5 @@ export async function deleteGeolocation(profileId: string) {
 
   await prisma.geolocation.deleteMany({ where: { userId: profileId } })
   revalidatePath(`/profile/${profileId}/geolocation`)
-  return { success: true }
+  return done()
 }

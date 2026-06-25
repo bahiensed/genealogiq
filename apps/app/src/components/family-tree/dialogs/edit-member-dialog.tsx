@@ -60,7 +60,7 @@ export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: P
         deathDate:  deathDate || null,
         avatarUrl:  person.avatarUrl,
       })
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.personUpdated"))
       onClose()
       onSuccess?.()

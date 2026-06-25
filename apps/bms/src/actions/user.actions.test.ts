@@ -21,7 +21,12 @@ vi.mock("@genealogiq/db", () => ({ Prisma: { PrismaClientKnownRequestError: Pris
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyAdmin: vi.fn() }))
 vi.mock("@/lib/email", () => ({ sendWelcomeEmail: vi.fn() }))
-vi.mock("@genealogiq/core", () => ({ hashToken: vi.fn((t: string) => `hashed:${t}`) }))
+vi.mock("@genealogiq/core", () => ({
+  hashToken: vi.fn((t: string) => `hashed:${t}`),
+  done: (message?: string) => ({ ok: true, message }),
+  fail: (message: string) => ({ ok: false, message }),
+}))
+vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
 
 import { createUser, deleteUser, toggleUserActive } from "./user.actions"
 import { verifyAdmin } from "@/lib/dal"
@@ -44,7 +49,7 @@ beforeEach(() => {
 describe("createUser", () => {
   it("rejects invalid input", async () => {
     const res = await createUser({ ...validUser, email: "not-an-email" } as never)
-    expect(res).toEqual({ error: "Invalid data" })
+    expect(res).toEqual({ ok: false, message: "common.invalidData" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
@@ -64,43 +69,43 @@ describe("createUser", () => {
     const [emailTo, rawToken] = vi.mocked(sendWelcomeEmail).mock.calls[0]
     expect(emailTo).toBe("ana@example.com")
     expect(`hashed:${rawToken}`).toBe(tokenArg.data.token) // email carries the raw token; DB keeps its hash
-    expect(res).toEqual({ success: "User created successfully." })
+    expect(res).toEqual({ ok: true, message: "user.created" })
   })
 
   it("maps a P2002 duplicate to 'This email is already in use'", async () => {
     prismaMock.user.create.mockRejectedValue(new PrismaKnownError("dup", "P2002"))
-    expect(await createUser(validUser)).toEqual({ error: "This email is already in use" })
+    expect(await createUser(validUser)).toEqual({ ok: false, message: "user.emailExists" })
     expect(sendWelcomeEmail).not.toHaveBeenCalled()
   })
 })
 
 describe("deleteUser", () => {
   it("refuses to delete your own account", async () => {
-    expect(await deleteUser("admin-1")).toEqual({ error: "You cannot delete your own account." })
+    expect(await deleteUser("admin-1")).toEqual({ ok: false, message: "user.cannotDeleteSelf" })
     expect(prismaMock.user.delete).not.toHaveBeenCalled()
   })
 
-  it("maps a P2025 to 'User not found.'", async () => {
+  it("maps a P2025 to a not-found failure", async () => {
     prismaMock.user.delete.mockRejectedValue(new PrismaKnownError("gone", "P2025"))
-    expect(await deleteUser("other")).toEqual({ error: "User not found." })
+    expect(await deleteUser("other")).toEqual({ ok: false, message: "user.notFound" })
   })
 
-  it("succeeds (returns void) on a clean delete", async () => {
+  it("succeeds (no message) on a clean delete", async () => {
     prismaMock.user.delete.mockResolvedValue({})
-    expect(await deleteUser("other")).toBeUndefined()
+    expect(await deleteUser("other")).toEqual({ ok: true, message: undefined })
   })
 })
 
 describe("toggleUserActive", () => {
   it("refuses to deactivate your own account", async () => {
-    expect(await toggleUserActive("admin-1")).toEqual({ error: "You cannot deactivate your own account." })
+    expect(await toggleUserActive("admin-1")).toEqual({ ok: false, message: "user.cannotDeactivateSelf" })
     expect(prismaMock.user.findUnique).not.toHaveBeenCalled()
   })
 
   it("flips isActive for another user", async () => {
     prismaMock.user.findUnique.mockResolvedValue({ isActive: true })
     prismaMock.user.update.mockResolvedValue({})
-    expect(await toggleUserActive("other")).toBeUndefined()
+    expect(await toggleUserActive("other")).toEqual({ ok: true, message: undefined })
     expect(prismaMock.user.update).toHaveBeenCalledWith({ where: { id: "other" }, data: { isActive: false } })
   })
 })

@@ -86,7 +86,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: SaleRow }; 
               disabled={isPending}
               onClick={() => startTransition(async () => {
                 const result = await reverseSale(sale.id)
-                if (result?.error) toast.error(result.error)
+                if (!result.ok) toast.error(result.message)
                 else { toast.success(t('toasts.reversed')); setOpen(false) }
               })}
             >

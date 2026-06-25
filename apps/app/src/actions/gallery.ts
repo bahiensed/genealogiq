@@ -1,6 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
+import { done, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { saveGallerySchema } from "@/schemas/gallery"
@@ -9,14 +11,15 @@ import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
 
-export async function saveGallery(profileId: string, data: unknown) {
+export async function saveGallery(profileId: string, data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("gallery.notAuthorized"))
 
   const parsed = saveGallerySchema.safeParse(data)
-  if (!parsed.success) return { error: "Invalid data" }
+  if (!parsed.success) return fail(t("common.invalidData"))
 
   const { items } = parsed.data
 
@@ -24,10 +27,10 @@ export async function saveGallery(profileId: string, data: unknown) {
   const imgCount = items.filter((i) => i.kind === "image").length
   const vidCount = items.filter((i) => i.kind === "video").length
   if (imgCount > features.galleryMaxImages) {
-    return { error: `Image limit is ${features.galleryMaxImages} for this plan.` }
+    return fail(t("gallery.imageLimit", { max: features.galleryMaxImages }))
   }
   if (vidCount > features.galleryMaxVideos) {
-    return { error: `Video limit is ${features.galleryMaxVideos} for this plan.` }
+    return fail(t("gallery.videoLimit", { max: features.galleryMaxVideos }))
   }
 
   const oldItems = await prisma.galleryItem.findMany({
@@ -57,14 +60,15 @@ export async function saveGallery(profileId: string, data: unknown) {
   }
 
   revalidatePath(`/profile/${profileId}/gallery`)
-  return { success: true }
+  return done()
 }
 
-export async function deleteGallery(profileId: string) {
+export async function deleteGallery(profileId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("gallery.notAuthorized"))
 
   const items = await prisma.galleryItem.findMany({
     where: { userId: profileId },
@@ -74,5 +78,5 @@ export async function deleteGallery(profileId: string) {
 
   await prisma.galleryItem.deleteMany({ where: { userId: profileId } })
   revalidatePath(`/profile/${profileId}/gallery`)
-  return { success: true }
+  return done()
 }

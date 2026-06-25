@@ -1,17 +1,18 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
+import { ok, fail, type ActionResult } from "@genealogiq/core"
 import { verifySession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import { stripe } from "@/lib/stripe"
 import { ensureStripeCustomer, compareTier, upsertSaleFromSubscription } from "@/lib/billing"
 
-type ActionResult<T> = { error: string } | T
-
 export async function createCheckoutSession(
   subscriptionId: string,
   cadence:        "annual" | "monthly",
 ): Promise<ActionResult<{ url: string }>> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const plan = await prisma.subscription.findUnique({
@@ -22,10 +23,10 @@ export async function createCheckoutSession(
       stripeMonthlyPriceId: true,
     },
   })
-  if (!plan) return { error: "Plan not found or unavailable." }
+  if (!plan) return fail(t("billing.planNotFound"))
 
   const priceId = cadence === "annual" ? plan.stripeAnnualPriceId : plan.stripeMonthlyPriceId
-  if (!priceId) return { error: "This plan is not yet wired in Stripe. Run prisma/seed-stripe.ts." }
+  if (!priceId) return fail(t("billing.planNotWiredSeed"))
 
   const customerId = await ensureStripeCustomer(session.user.id)
   const appUrl     = process.env.APP_URL ?? "http://localhost:3000"
@@ -43,8 +44,8 @@ export async function createCheckoutSession(
     allow_promotion_codes: true,
   })
 
-  if (!checkout.url) return { error: "Stripe did not return a checkout URL." }
-  return { url: checkout.url }
+  if (!checkout.url) return fail(t("billing.noCheckoutUrl"))
+  return ok({ url: checkout.url })
 }
 
 /**
@@ -56,6 +57,7 @@ export async function changeSubscription(
   subscriptionId: string,
   cadence:        "annual" | "monthly",
 ): Promise<ActionResult<{ effect: "upgraded" | "scheduled" }>> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   // Active subscription (none = caller should use createCheckoutSession instead).
@@ -75,16 +77,16 @@ export async function changeSubscription(
       subscription: { select: { price: true, termLength: true } },
     },
   })
-  if (!active || !active.stripeSubscriptionId) return { error: "No active subscription to switch from." }
+  if (!active || !active.stripeSubscriptionId) return fail(t("billing.noActiveSubscription"))
   const stripeSubId = active.stripeSubscriptionId
 
   const target = await prisma.subscription.findUnique({
     where:  { id: subscriptionId, isActive: true },
     select: { id: true, price: true, termLength: true, stripeAnnualPriceId: true, stripeMonthlyPriceId: true },
   })
-  if (!target) return { error: "Plan not found or unavailable." }
+  if (!target) return fail(t("billing.planNotFound"))
   const targetPriceId = cadence === "annual" ? target.stripeAnnualPriceId : target.stripeMonthlyPriceId
-  if (!targetPriceId) return { error: "This plan is not yet wired in Stripe." }
+  if (!targetPriceId) return fail(t("billing.planNotWired"))
 
   const cmp = compareTier(
     { price: Number(target.price), termLength: target.termLength },
@@ -98,7 +100,7 @@ export async function changeSubscription(
       // Upgrade or cadence-only swap: replace the price on the existing subscription, prorate, charge now.
       const sub = await stripe.subscriptions.retrieve(stripeSubId)
       const itemId = sub.items.data[0]?.id
-      if (!itemId) return { error: "Active subscription has no items in Stripe." }
+      if (!itemId) return fail(t("billing.noSubscriptionItems"))
 
       const updated = await stripe.subscriptions.update(stripeSubId, {
         items:              [{ id: itemId, price: targetPriceId }],
@@ -113,7 +115,7 @@ export async function changeSubscription(
 
       revalidatePath("/subscriptions")
       revalidatePath(`/profile/${session.user.id}/memorialized`)
-      return { effect: "upgraded" }
+      return ok({ effect: "upgraded" })
     }
 
     // Downgrade: schedule the switch for end of current period.
@@ -121,7 +123,7 @@ export async function changeSubscription(
       from_subscription: stripeSubId,
     })
     const currentPhase = schedule.phases[0]
-    if (!currentPhase) return { error: "Could not read current schedule phase." }
+    if (!currentPhase) return fail(t("billing.noSchedulePhase"))
 
     await stripe.subscriptionSchedules.update(schedule.id, {
       end_behavior: "release",
@@ -143,10 +145,10 @@ export async function changeSubscription(
     })
 
     revalidatePath("/subscriptions")
-    return { effect: "scheduled" }
+    return ok({ effect: "scheduled" })
   } catch (err) {
     console.error("[billing] changeSubscription failed", err)
-    return { error: (err as Error).message ?? "Could not switch plan." }
+    return fail((err as Error).message ?? t("billing.switchFailed"))
   }
 }
 
@@ -159,5 +161,5 @@ export async function createPortalSession(): Promise<ActionResult<{ url: string 
     customer:   customerId,
     return_url: `${appUrl}/subscriptions`,
   })
-  return { url: portal.url }
+  return ok({ url: portal.url })
 }

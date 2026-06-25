@@ -1,4 +1,93 @@
 {
+  "Actions": {
+    "auth": {
+      "accountLocked": "Conta temporariamente bloqueada. Tente novamente em {minutes} minuto(s).",
+      "emailChangeLinkSent": "Link de confirmação enviado para o novo e-mail.",
+      "emailInUse": "Este e-mail já está em uso",
+      "emailMustDiffer": "O novo e-mail deve ser diferente do atual",
+      "incorrectCredentials": "E-mail ou senha incorretos.",
+      "incorrectCurrentPassword": "Senha atual incorreta",
+      "incorrectPassword": "Senha incorreta",
+      "invalidEmail": "E-mail inválido",
+      "invalidOrExpiredLink": "Link inválido ou expirado. Solicite um novo.",
+      "newPasswordMustDiffer": "A nova senha deve ser diferente da atual",
+      "passwordChanged": "Senha alterada com sucesso.",
+      "tooManyAttempts": "Muitas tentativas. Tente novamente em {minutes} minuto(s).",
+      "tooManyRequests": "Muitas solicitações. Tente novamente em {minutes} minuto(s).",
+      "tooManySignIn": "Muitas tentativas de login. Tente novamente em {seconds}s.",
+      "tooManySignUpAttempts": "Muitas tentativas de cadastro. Tente novamente em {minutes} minuto(s).",
+      "userNotFound": "Usuário não encontrado",
+      "verifyEmailFirst": "Verifique seu e-mail antes de entrar. Confira sua caixa de entrada."
+    },
+    "billing": {
+      "noActiveSubscription": "Nenhuma assinatura ativa para trocar.",
+      "noCheckoutUrl": "O Stripe não retornou uma URL de checkout.",
+      "noSchedulePhase": "Não foi possível ler a fase atual do agendamento.",
+      "noSubscriptionItems": "A assinatura ativa não tem itens no Stripe.",
+      "planNotFound": "Plano não encontrado ou indisponível.",
+      "planNotWired": "Este plano ainda não está vinculado ao Stripe.",
+      "planNotWiredSeed": "Este plano ainda não está vinculado ao Stripe. Execute prisma/seed-stripe.ts.",
+      "switchFailed": "Não foi possível trocar de plano."
+    },
+    "bio": {
+      "charLimit": "O limite da biografia é de {max} caracteres neste plano.",
+      "imageLimit": "O limite de imagens é de {max} neste plano.",
+      "notAuthorized": "Você não tem permissão para gerenciar este perfil.",
+      "profileNotFound": "Perfil não encontrado."
+    },
+    "common": {
+      "duplicate": "Dados duplicados detectados",
+      "invalidData": "Dados inválidos"
+    },
+    "familyTree": {
+      "cannotRelateSelf": "Um perfil não pode ser relacionado a si mesmo.",
+      "cannotRemoveRoot": "Você não pode remover a pessoa principal da árvore.",
+      "memberNotFound": "Membro não encontrado.",
+      "notAuthorized": "Sem autorização.",
+      "profileNotFound": "Perfil não encontrado.",
+      "relationExists": "Esta relação já existe.",
+      "relationNotFound": "Relação não encontrada.",
+      "requestAlreadyDecided": "Esta solicitação já foi respondida.",
+      "requestNotFound": "Solicitação não encontrada.",
+      "treeLimitReached": "O limite da árvore genealógica é de {limit} pessoas neste plano."
+    },
+    "favorite": {
+      "cannotFavoriteSelf": "Você não pode favoritar o seu próprio perfil."
+    },
+    "gallery": {
+      "imageLimit": "O limite de imagens é {max} para este plano.",
+      "notAuthorized": "Você não tem permissão para gerenciar esta galeria.",
+      "videoLimit": "O limite de vídeos é {max} para este plano."
+    },
+    "geolocation": {
+      "notAuthorized": "Você não tem autorização para gerenciar este perfil."
+    },
+    "guardian": {
+      "alreadyCoManage": "Você já faz a cogestão deste perfil.",
+      "cannotManageOwn": "Você já gerencia o seu próprio perfil.",
+      "coManageUnsupported": "Apenas perfis fantasma e memoriais permitem cogestão.",
+      "notAuthorized": "Sem autorização.",
+      "profileNotFound": "Perfil não encontrado.",
+      "requestNotFound": "Solicitação não encontrada.",
+      "requestPending": "Você já tem uma solicitação pendente para este perfil.",
+      "requestResolved": "Solicitação já resolvida."
+    },
+    "memorial": {
+      "noQrCodes": "Nenhum QR Code disponível. Compre um QR Code para criar mais perfis.",
+      "notAuthorized": "Você não tem permissão para gerenciar este perfil.",
+      "notFound": "Perfil não encontrado."
+    },
+    "physicalQr": {
+      "alreadyActivated": "Este código já foi ativado.",
+      "notFound": "Código QR não encontrado.",
+      "raceRetry": "Este código acabou de ser ativado. Tente novamente."
+    },
+    "tribute": {
+      "cannotTributeSelf": "Você não pode deixar uma homenagem no seu próprio perfil.",
+      "notAuthorized": "Sem autorização.",
+      "notFound": "Homenagem não encontrada."
+    }
+  },
   "Auth": {
     "activateDescription": "Digite o código de ativação impresso no seu QR code físico para vinculá-lo a um memorial.",
     "activateTitle": "Ative seu QR code",

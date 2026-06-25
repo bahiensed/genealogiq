@@ -70,7 +70,7 @@ export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess 
         startDate: startDate || null,
         endDate:   endDate || null,
       })
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.relationUpdated"))
       onClose()
       onSuccess?.()
@@ -80,7 +80,7 @@ export function EditRelationDialog({ open, onClose, rootId, relation, onSuccess 
   const handleRemove = () => {
     startTransition(async () => {
       const result = await removeRelation(rootId, relation.id)
-      if (result?.error) { toast.error(result.error); return }
+      if (!result.ok) { toast.error(result.message); return }
       toast.success(t("toasts.relationRemoved"))
       onClose()
       onSuccess?.()

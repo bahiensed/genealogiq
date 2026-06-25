@@ -1,6 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
+import { done, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
@@ -29,24 +31,25 @@ function toDate(s: string | null | undefined): Date | null {
 
 // ─── addRelation ─────────────────────────────────────────────────────────────
 
-export async function addRelation(rootId: string, data: unknown) {
+export async function addRelation(rootId: string, data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(rootId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("familyTree.notAuthorized"))
 
   const parsed = getAddRelationSchema(identityTranslator).safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(parsed.error.issues[0].message)
 
   const { fromId, toId, type, subtype, startDate, endDate, linkSpouseId } = parsed.data
 
-  if (fromId === toId) return { error: "A profile cannot be related to itself." }
+  if (fromId === toId) return fail(t("familyTree.cannotRelateSelf"))
 
   const [from, to] = await Promise.all([
     prisma.appUser.findUnique({ where: { id: fromId }, select: { id: true, role: true } }),
     prisma.appUser.findUnique({ where: { id: toId },   select: { id: true, role: true } }),
   ])
-  if (!from || !to) return { error: "Profile not found." }
+  if (!from || !to) return fail(t("familyTree.profileNotFound"))
 
   // Tier limit (only enforced when the tree would grow).
   const features = await getMemorialFeatures(rootId)
@@ -60,7 +63,7 @@ export async function addRelation(rootId: string, data: unknown) {
   })
   const involvesNew = !relExists && (fromId !== rootId && toId !== rootId)
   if (involvesNew && memberCount + 1 > features.treeMaxMembers) {
-    return { error: `Family tree limit is ${features.treeMaxMembers} people on this plan.` }
+    return fail(t("familyTree.treeLimitReached", { limit: features.treeMaxMembers }))
   }
 
   // The "other" endpoint (the one being invited). Adding a real APP_USER
@@ -92,7 +95,7 @@ export async function addRelation(rootId: string, data: unknown) {
     })
     createdRelationId = created.id
   } catch {
-    return { error: "This relation already exists." }
+    return fail(t("familyTree.relationExists"))
   }
 
   if (needsConsent && otherId) {
@@ -122,19 +125,20 @@ export async function addRelation(rootId: string, data: unknown) {
   }
 
   revalidatePath(`/profile/${rootId}/tree`)
-  return { success: true, pending: needsConsent }
+  return done()
 }
 
 // ─── addGhostRelative ────────────────────────────────────────────────────────
 
-export async function addGhostRelative(rootId: string, data: unknown) {
+export async function addGhostRelative(rootId: string, data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(rootId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("familyTree.notAuthorized"))
 
   const parsed = getAddGhostRelativeSchema(identityTranslator).safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(parsed.error.issues[0].message)
 
   const {
     firstName, lastName, maidenName, nickname,
@@ -146,7 +150,7 @@ export async function addGhostRelative(rootId: string, data: unknown) {
   const features = await getMemorialFeatures(rootId)
   const memberCount = await countTreeMembers(rootId)
   if (memberCount + 1 > features.treeMaxMembers) {
-    return { error: `Family tree limit is ${features.treeMaxMembers} people on this plan.` }
+    return fail(t("familyTree.treeLimitReached", { limit: features.treeMaxMembers }))
   }
 
   let kindType: RelationType
@@ -156,7 +160,7 @@ export async function addGhostRelative(rootId: string, data: unknown) {
 
   const finalSubtype = subtype ?? (kindType === "SPOUSE" ? "married" : null)
 
-  const ghostId = await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     const ghost = await tx.appUser.create({
       data: {
         firstName,
@@ -263,37 +267,38 @@ export async function addGhostRelative(rootId: string, data: unknown) {
   })
 
   revalidatePath(`/profile/${rootId}/tree`)
-  return { success: true, id: ghostId }
+  return done()
 }
 
 // ─── updateMember ────────────────────────────────────────────────────────────
 
-export async function updateMember(rootId: string, memberId: string, data: unknown) {
+export async function updateMember(rootId: string, memberId: string, data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const rootProfile = await getProfileById(rootId)
-  if (!rootProfile || !canManageProfile(rootProfile, session.user.id)) return { error: "Not authorized." }
+  if (!rootProfile || !canManageProfile(rootProfile, session.user.id)) return fail(t("familyTree.notAuthorized"))
 
   const member = await prisma.appUser.findUnique({
     where:  { id: memberId },
     select: { id: true, role: true },
   })
-  if (!member) return { error: "Member not found." }
+  if (!member) return fail(t("familyTree.memberNotFound"))
 
   if (member.role === "APP_GHOST") {
     // Ghosts have no owner, so authorize by tree membership: the ghost must be
     // reachable from rootId (which the caller manages). Without this, a manager
     // of one tree could overwrite a ghost belonging to another user's tree (IDOR).
     const memberIds = await getTreeMemberIds(rootId)
-    if (!memberIds.has(memberId)) return { error: "Not authorized." }
+    if (!memberIds.has(memberId)) return fail(t("familyTree.notAuthorized"))
   } else {
     // Real members (own/guardian) are authorized via canManageProfile.
     const target = await getProfileById(memberId)
-    if (!target || !canManageProfile(target, session.user.id)) return { error: "Not authorized." }
+    if (!target || !canManageProfile(target, session.user.id)) return fail(t("familyTree.notAuthorized"))
   }
 
   const parsed = getUpdateMemberSchema(identityTranslator).safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(parsed.error.issues[0].message)
 
   const d = parsed.data
   await prisma.appUser.update({
@@ -311,19 +316,20 @@ export async function updateMember(rootId: string, memberId: string, data: unkno
   })
 
   revalidatePath(`/profile/${rootId}/tree`)
-  return { success: true }
+  return done()
 }
 
 // ─── updateRelation ──────────────────────────────────────────────────────────
 
-export async function updateRelation(rootId: string, relationId: string, data: unknown) {
+export async function updateRelation(rootId: string, relationId: string, data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(rootId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("familyTree.notAuthorized"))
 
   const parsed = getUpdateRelationSchema(identityTranslator).safeParse(data)
-  if (!parsed.success) return { error: parsed.error.issues[0].message }
+  if (!parsed.success) return fail(parsed.error.issues[0].message)
 
   // The relation must belong to rootId's tree (both endpoints reachable from
   // root). Without this, any manager could edit arbitrary relations by id (IDOR).
@@ -331,10 +337,10 @@ export async function updateRelation(rootId: string, relationId: string, data: u
     where:  { id: relationId },
     select: { fromId: true, toId: true },
   })
-  if (!relation) return { error: "Relation not found." }
+  if (!relation) return fail(t("familyTree.relationNotFound"))
   const memberIds = await getTreeMemberIds(rootId)
   if (!memberIds.has(relation.fromId) || !memberIds.has(relation.toId)) {
-    return { error: "Not authorized." }
+    return fail(t("familyTree.notAuthorized"))
   }
 
   const { subtype, startDate, endDate } = parsed.data
@@ -345,16 +351,17 @@ export async function updateRelation(rootId: string, relationId: string, data: u
   })
 
   revalidatePath(`/profile/${rootId}/tree`)
-  return { success: true }
+  return done()
 }
 
 // ─── removeRelation ──────────────────────────────────────────────────────────
 
-export async function removeRelation(rootId: string, relationId: string) {
+export async function removeRelation(rootId: string, relationId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(rootId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("familyTree.notAuthorized"))
 
   // The relation must belong to rootId's tree (see updateRelation) — prevents
   // deleting arbitrary relations from other users' trees by id (IDOR).
@@ -362,39 +369,40 @@ export async function removeRelation(rootId: string, relationId: string) {
     where:  { id: relationId },
     select: { fromId: true, toId: true },
   })
-  if (!relation) return { error: "Relation not found." }
+  if (!relation) return fail(t("familyTree.relationNotFound"))
   const memberIds = await getTreeMemberIds(rootId)
   if (!memberIds.has(relation.fromId) || !memberIds.has(relation.toId)) {
-    return { error: "Not authorized." }
+    return fail(t("familyTree.notAuthorized"))
   }
 
   await prisma.familyRelation.delete({ where: { id: relationId } })
   revalidatePath(`/profile/${rootId}/tree`)
-  return { success: true }
+  return done()
 }
 
 // ─── removeMember — ghost: delete; real: detach from this tree ───────────────
 
-export async function removeMember(rootId: string, memberId: string) {
+export async function removeMember(rootId: string, memberId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(rootId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("familyTree.notAuthorized"))
 
-  if (memberId === rootId) return { error: "You cannot remove the tree root." }
+  if (memberId === rootId) return fail(t("familyTree.cannotRemoveRoot"))
 
   const member = await prisma.appUser.findUnique({
     where:  { id: memberId },
     select: { id: true, role: true },
   })
-  if (!member) return { error: "Member not found." }
+  if (!member) return fail(t("familyTree.memberNotFound"))
 
   if (member.role === "APP_GHOST") {
     // Ghosts only live inside one tree — full delete. Authorize by tree
     // membership first: the ghost must be reachable from rootId, otherwise a
     // manager of one tree could delete a ghost from another tree (IDOR).
     const memberIds = await getTreeMemberIds(rootId)
-    if (!memberIds.has(memberId)) return { error: "Not authorized." }
+    if (!memberIds.has(memberId)) return fail(t("familyTree.notAuthorized"))
     await prisma.appUser.delete({ where: { id: memberId } })
   } else {
     // Real users / memorials keep their profile. Disconnect them from THIS
@@ -413,23 +421,24 @@ export async function removeMember(rootId: string, memberId: string) {
   }
 
   revalidatePath(`/profile/${rootId}/tree`)
-  return { success: true }
+  return done()
 }
 
 // ─── acceptFamilyRequest / rejectFamilyRequest ───────────────────────────────
 
-export async function acceptFamilyRequest(relationId: string) {
+export async function acceptFamilyRequest(relationId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const relation = await prisma.familyRelation.findUnique({
     where:  { id: relationId },
     select: { id: true, type: true, fromId: true, toId: true, status: true, requestedById: true },
   })
-  if (!relation) return { error: "Request not found." }
-  if (relation.status !== "PENDING") return { error: "This request has already been decided." }
+  if (!relation) return fail(t("familyTree.requestNotFound"))
+  if (relation.status !== "PENDING") return fail(t("familyTree.requestAlreadyDecided"))
 
   const isTarget = relation.fromId === session.user.id || relation.toId === session.user.id
-  if (!isTarget || relation.requestedById === session.user.id) return { error: "Not authorized." }
+  if (!isTarget || relation.requestedById === session.user.id) return fail(t("familyTree.notAuthorized"))
 
   await prisma.familyRelation.update({
     where: { id: relationId },
@@ -507,21 +516,22 @@ export async function acceptFamilyRequest(relationId: string) {
 
   revalidatePath("/family-requests")
   revalidatePath("/messages")
-  return { success: true }
+  return done()
 }
 
-export async function rejectFamilyRequest(relationId: string) {
+export async function rejectFamilyRequest(relationId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const relation = await prisma.familyRelation.findUnique({
     where:  { id: relationId },
     select: { id: true, fromId: true, toId: true, status: true, requestedById: true },
   })
-  if (!relation) return { error: "Request not found." }
-  if (relation.status !== "PENDING") return { error: "This request has already been decided." }
+  if (!relation) return fail(t("familyTree.requestNotFound"))
+  if (relation.status !== "PENDING") return fail(t("familyTree.requestAlreadyDecided"))
 
   const isTarget = relation.fromId === session.user.id || relation.toId === session.user.id
-  if (!isTarget || relation.requestedById === session.user.id) return { error: "Not authorized." }
+  if (!isTarget || relation.requestedById === session.user.id) return fail(t("familyTree.notAuthorized"))
 
   // Keep the row but mark it REJECTED so we preserve the audit trail and the
   // notifications linked to it (tree queries filter REJECTED out).
@@ -547,5 +557,5 @@ export async function rejectFamilyRequest(relationId: string) {
   }
 
   revalidatePath("/family-requests")
-  return { success: true }
+  return done()
 }

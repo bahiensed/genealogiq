@@ -2,9 +2,10 @@
 
 import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
-import { hashToken } from '@genealogiq/core'
+import { hashToken, done, fail, type ActionResult } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 import { sendSequoiaWelcomeEmail } from '@/lib/email'
 import {
@@ -14,9 +15,6 @@ import {
   type CustomerCreateFormValues,
 } from '@/schemas/customer.schema'
 import { identityTranslator } from '@/schemas/i18n'
-
-type ActionError = { error: string }
-type ActionSuccess = { success: string }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildAddressWrite(address: CustomerFormValues['address'], mode: 'create' | 'update'): any {
@@ -28,19 +26,20 @@ function buildAddressWrite(address: CustomerFormValues['address'], mode: 'create
     : { upsert: { create: address, update: address } }
 }
 
-export async function createCustomer(data: CustomerCreateFormValues): Promise<ActionError | ActionSuccess> {
+export async function createCustomer(data: CustomerCreateFormValues): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const validated = getCustomerCreateSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { address, birthDate, categoryId, owner, ...rest } = validated.data
 
   const dupTax = await prisma.tenant.findFirst({ where: { taxId: rest.taxId }, select: { id: true } })
-  if (dupTax) return { error: 'A customer with this tax ID already exists' }
+  if (dupTax) return fail(t('customer.taxIdExists'))
 
   const existingOwner = await prisma.user.findUnique({ where: { email: owner.email }, select: { id: true } })
-  if (existingOwner) return { error: 'This administrator email is already in use' }
+  if (existingOwner) return fail(t('customer.adminEmailInUse'))
 
   let token: string
   try {
@@ -77,7 +76,7 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
     }))
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Duplicate data detected' }
+      return fail(t('common.duplicate'))
     }
     throw e
   }
@@ -85,19 +84,20 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
   await sendSequoiaWelcomeEmail(owner.email, token)
 
   revalidatePath('/customers')
-  return { success: 'Customer created successfully.' }
+  return done(t('customer.created'))
 }
 
-export async function updateCustomer(id: string, data: CustomerFormValues): Promise<ActionError | ActionSuccess> {
+export async function updateCustomer(id: string, data: CustomerFormValues): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const validated = getCustomerSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { address, birthDate, categoryId, ...rest } = validated.data
 
   const dupTax = await prisma.tenant.findFirst({ where: { taxId: rest.taxId, NOT: { id } }, select: { id: true } })
-  if (dupTax) return { error: 'A customer with this tax ID already exists' }
+  if (dupTax) return fail(t('customer.taxIdExists'))
 
   try {
     await prisma.tenant.update({
@@ -111,47 +111,50 @@ export async function updateCustomer(id: string, data: CustomerFormValues): Prom
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Customer not found.' }
+      return fail(t('customer.notFound'))
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Customer updated successfully.' }
+  return done(t('customer.updated'))
 }
 
-export async function deleteCustomer(id: string): Promise<ActionError | void> {
+export async function deleteCustomer(id: string): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const salesCount = await prisma.sale.count({ where: { tenantId: id } })
   if (salesCount > 0) {
-    return { error: 'Cannot delete a customer with existing sales records.' }
+    return fail(t('customer.hasSales'))
   }
 
   try {
     await prisma.tenant.delete({ where: { id } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Customer not found.' }
+      return fail(t('customer.notFound'))
     }
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2003') {
-      return { error: 'Cannot delete: customer has dependent records.' }
+      return fail(t('customer.hasDependents'))
     }
     throw e
   }
 
   revalidatePath('/customers')
+  return done()
 }
 
-export async function resendCustomerEmail(tenantId: string): Promise<ActionError | void> {
+export async function resendCustomerEmail(tenantId: string): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const owner = await prisma.user.findFirst({
     where:  { tenantId, role: 'OWNER' },
     select: { id: true, email: true, password: true },
   })
-  if (!owner) return { error: 'No owner user found for this customer.' }
-  if (owner.password) return { error: 'This user has already set their password.' }
+  if (!owner) return fail(t('customer.noOwner'))
+  if (owner.password) return fail(t('customer.passwordAlreadySet'))
 
   await prisma.passwordResetToken.deleteMany({ where: { userId: owner.id } })
 
@@ -161,14 +164,17 @@ export async function resendCustomerEmail(tenantId: string): Promise<ActionError
   })
 
   await sendSequoiaWelcomeEmail(owner.email, token)
+  return done()
 }
 
-export async function toggleCustomerActive(id: string): Promise<ActionError | void> {
+export async function toggleCustomerActive(id: string): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const customer = await prisma.tenant.findUnique({ where: { id }, select: { isActive: true } })
-  if (!customer) return { error: 'Customer not found.' }
+  if (!customer) return fail(t('customer.notFound'))
 
   await prisma.tenant.update({ where: { id }, data: { isActive: !customer.isActive } })
   revalidatePath('/customers')
+  return done()
 }

@@ -1,21 +1,21 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { done, fail, type ActionResult } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 import { getPackageSchema, type PackageFormValues } from '@/schemas/package.schema'
 import { identityTranslator } from '@/schemas/i18n'
 
-type ActionError   = { error: string }
-type ActionSuccess = { success: string }
-
-export async function createPackage(data: PackageFormValues): Promise<ActionError | ActionSuccess> {
+export async function createPackage(data: PackageFormValues): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const validated = getPackageSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { price, ...rest } = validated.data
 
@@ -25,14 +25,15 @@ export async function createPackage(data: PackageFormValues): Promise<ActionErro
 
   revalidatePath('/packages')
   revalidatePath('/physical-qr')
-  return { success: 'Package created successfully.' }
+  return done(t('package.created'))
 }
 
-export async function updatePackage(id: string, data: PackageFormValues): Promise<ActionError | ActionSuccess> {
+export async function updatePackage(id: string, data: PackageFormValues): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const validated = getPackageSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const { price, ...rest } = validated.data
   const newPrice = new Prisma.Decimal(price)
@@ -41,7 +42,7 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
     where:  { id },
     select: { price: true, stripePriceId: true },
   })
-  if (!current) return { error: 'Package not found.' }
+  if (!current) return fail(t('package.notFound'))
 
   // Stripe Prices are immutable. If admin changes price on a synced package,
   // clear the Stripe refs — checkout action will refuse purchases until the
@@ -60,56 +61,57 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Package not found.' }
+      return fail(t('package.notFound'))
     }
     throw e
   }
 
   revalidatePath('/packages')
   revalidatePath('/physical-qr')
-  return {
-    success: clearStripeRefs
-      ? 'Package updated — Stripe references cleared. Re-run prisma/seed-stripe-packages.ts in SEQ.'
-      : 'Package updated successfully.',
-  }
+  return done(clearStripeRefs ? t('package.updatedStripeCleared') : t('package.updated'))
 }
 
-export async function deletePackage(id: string): Promise<ActionError | void> {
+export async function deletePackage(id: string): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   try {
     await prisma.package.delete({ where: { id } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Package not found.' }
+      return fail(t('package.notFound'))
     }
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2003') {
-      return { error: 'This package has associated sales and cannot be deleted.' }
+      return fail(t('package.hasSales'))
     }
     throw e
   }
 
   revalidatePath('/packages')
   revalidatePath('/physical-qr')
+  return done()
 }
 
-export async function togglePackageActive(id: string): Promise<ActionError | void> {
+export async function togglePackageActive(id: string): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const pkg = await prisma.package.findUnique({ where: { id }, select: { isActive: true } })
-  if (!pkg) return { error: 'Package not found.' }
+  if (!pkg) return fail(t('package.notFound'))
 
   await prisma.package.update({ where: { id }, data: { isActive: !pkg.isActive } })
   revalidatePath('/packages')
   revalidatePath('/physical-qr')
+  return done()
 }
 
 // Push the saved package's data to Stripe: create/update the Product and, if missing,
 // create the Price. Mirrors apps/seq/prisma/seed-stripe.ts but runs on demand from BMS.
 // Stripe Prices are immutable — updatePackage() clears stripePriceId on a price change,
 // so a fresh Price is minted here on the next sync.
-export async function syncPackageWithStripe(id: string): Promise<ActionError | ActionSuccess> {
+export async function syncPackageWithStripe(id: string): Promise<ActionResult> {
   await verifyAdmin()
+  const t = await getTranslations('Actions')
 
   const pkg = await prisma.package.findUnique({
     where:  { id },
@@ -118,10 +120,10 @@ export async function syncPackageWithStripe(id: string): Promise<ActionError | A
       stripeProductId: true, stripePriceId: true,
     },
   })
-  if (!pkg) return { error: 'Package not found.' }
+  if (!pkg) return fail(t('package.notFound'))
 
   const priceCents = Math.round(Number(pkg.price) * 100)
-  if (priceCents <= 0) return { error: 'Set a price greater than zero before syncing.' }
+  if (priceCents <= 0) return fail(t('package.priceRequired'))
 
   try {
     let productId = pkg.stripeProductId
@@ -155,11 +157,11 @@ export async function syncPackageWithStripe(id: string): Promise<ActionError | A
       data:  { stripeProductId: productId, stripePriceId: priceId },
     })
   } catch (e) {
-    const message = e instanceof Error ? e.message : 'Unknown error'
-    return { error: `Stripe sync failed: ${message}` }
+    const message = e instanceof Error ? e.message : t('package.unknownError')
+    return fail(t('package.stripeSyncFailed', { message }))
   }
 
   revalidatePath('/packages')
   revalidatePath('/physical-qr')
-  return { success: 'Synced with Stripe successfully.' }
+  return done(t('package.synced'))
 }

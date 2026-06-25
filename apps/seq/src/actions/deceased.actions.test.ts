@@ -13,6 +13,7 @@ vi.mock('@genealogiq/db', () => ({
 }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyTenantSession: vi.fn() }))
+vi.mock("next-intl/server", () => ({ getTranslations: async () => (key: string) => key }))
 vi.mock("@/schemas/deceased.schema", () => ({
   getDeceasedSchema: () => ({ safeParse: vi.fn() }),
 }))
@@ -32,7 +33,7 @@ describe("addGuardian — C4 cross-tenant IDOR guard", () => {
 
     const res = await addGuardian("memorial-x", "guardian-y")
 
-    expect(res).toEqual({ error: "Profile not found." })
+    expect(res).toEqual({ ok: false, message: "deceased.notFound" })
     expect(prismaMock.appUserGuardian.create).not.toHaveBeenCalled()
   })
 
@@ -42,7 +43,7 @@ describe("addGuardian — C4 cross-tenant IDOR guard", () => {
 
     const res = await addGuardian("memorial-x", "guardian-y")
 
-    expect(res).toEqual({ success: "Guardian added." })
+    expect(res).toEqual({ ok: true, message: "deceased.guardianAdded" })
     expect(prismaMock.appUser.count).toHaveBeenCalledWith({
       where: { id: { in: ["memorial-x", "guardian-y"] }, tenantId: "c1" },
     })
@@ -56,7 +57,7 @@ describe("removeGuardian — C4 cross-tenant IDOR guard", () => {
 
     const res = await removeGuardian("memorial-x", "guardian-y")
 
-    expect(res).toEqual({ error: "Relation not found." })
+    expect(res).toEqual({ ok: false, message: "deceased.relationNotFound" })
     expect(prismaMock.appUserGuardian.delete).not.toHaveBeenCalled()
   })
 

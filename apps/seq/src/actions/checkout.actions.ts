@@ -1,29 +1,31 @@
 'use server'
 
+import { getTranslations } from 'next-intl/server'
+import { ok, fail, type ActionResult } from '@genealogiq/core'
 import { verifyTenantSession } from '@/lib/dal'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { ensureTenantStripeCustomer } from '@/lib/billing'
 
-type ActionResult = { error: string } | { url: string }
-
 export async function createPackageCheckoutSession(
   packageId: string,
   quantity:  number,
-): Promise<ActionResult> {
+): Promise<ActionResult<{ url: string }>> {
+  const t = await getTranslations('Actions')
+
   const session    = await verifyTenantSession()
   const { customerId: tenantId } = session
   const soldById   = session.user.id
 
-  if (!Number.isInteger(quantity) || quantity < 1) return { error: 'Invalid quantity.' }
+  if (!Number.isInteger(quantity) || quantity < 1) return fail(t('checkout.invalidQuantity'))
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId, isActive: true },
     select: { id: true, type: true, stripePriceId: true },
   })
-  if (!pkg) return { error: 'Package not found or unavailable.' }
+  if (!pkg) return fail(t('checkout.packageNotFound'))
   if (!pkg.stripePriceId) {
-    return { error: 'This package is not synced with Stripe. Run prisma/seed-stripe-packages.ts.' }
+    return fail(t('checkout.notSynced'))
   }
 
   const customer = await ensureTenantStripeCustomer(tenantId)
@@ -44,6 +46,6 @@ export async function createPackageCheckoutSession(
     allow_promotion_codes: true,
   })
 
-  if (!checkout.url) return { error: 'Stripe did not return a checkout URL.' }
-  return { url: checkout.url }
+  if (!checkout.url) return fail(t('checkout.noCheckoutUrl'))
+  return ok({ url: checkout.url })
 }

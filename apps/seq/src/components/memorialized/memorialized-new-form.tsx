@@ -84,8 +84,8 @@ export function MemorializedNewForm({ appUserId }: Props) {
   async function onSubmit(data: DeceasedFormValues) {
     setServerError(null)
     const result = await createDeceased(appUserId, data)
-    if ('error' in result) {
-      setServerError(result.error)
+    if (!result.ok) {
+      setServerError(result.message)
     } else {
       toast.success(t('toasts.created'))
       router.push(`/customers/${appUserId}`)

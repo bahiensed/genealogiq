@@ -1,15 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getTranslations } from 'next-intl/server'
 import { Prisma } from '@genealogiq/db'
+import { done, fail, type ActionResult } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { assertOwnership } from '@genealogiq/auth/authz'
 import { getDeceasedSchema, type DeceasedFormValues } from '@/schemas/deceased.schema'
 import { identityTranslator } from '@/schemas/i18n'
-
-type ActionError = { error: string }
-type ActionSuccess = { success: string }
 
 function toDate(value: string | null | undefined): Date | null {
   return value ? new Date(value) : null
@@ -44,8 +43,9 @@ function buildGeolocationData(data: DeceasedFormValues) {
 export async function createDeceased(
   appUserId: string,
   data: DeceasedFormValues,
-): Promise<ActionError | ActionSuccess> {
+): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const guardian = await prisma.appUser.findUnique({
     where:  { id: appUserId, tenantId: customerId },
@@ -61,15 +61,15 @@ export async function createDeceased(
       },
     },
   })
-  if (!guardian) return { error: 'Customer not found.' }
+  if (!guardian) return fail(t('deceased.customerNotFound'))
 
   const availableSale = guardian.appSales.find(
     (s) => s._count.assignedTo < s.subscription.maxProfiles
   )
-  if (!availableSale) return { error: 'No QR codes available for this customer.' }
+  if (!availableSale) return fail(t('deceased.noQrAvailable'))
 
   const validated = getDeceasedSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const {
     birthDate, deathDate, deathCity,
@@ -118,20 +118,21 @@ export async function createDeceased(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Duplicate data detected' }
+      return fail(t('common.duplicate'))
     }
     throw e
   }
 
   revalidatePath(`/customers/${appUserId}`)
-  return { success: 'Memorialized profile created successfully.' }
+  return done()
 }
 
-export async function updateDeceased(id: string, data: DeceasedFormValues): Promise<ActionError | ActionSuccess> {
+export async function updateDeceased(id: string, data: DeceasedFormValues): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const validated = getDeceasedSchema(identityTranslator).safeParse(data)
-  if (!validated.success) return { error: 'Invalid data' }
+  if (!validated.success) return fail(t('common.invalidData'))
 
   const {
     birthDate, deathDate, deathCity,
@@ -167,17 +168,18 @@ export async function updateDeceased(id: string, data: DeceasedFormValues): Prom
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Profile not found.' }
+      return fail(t('deceased.notFound'))
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Profile updated successfully.' }
+  return done()
 }
 
-export async function deleteDeceased(id: string): Promise<ActionError | void> {
+export async function deleteDeceased(id: string): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   const guardian = await prisma.appUserGuardian.findFirst({
     where:  { appUserId: id },
@@ -188,29 +190,31 @@ export async function deleteDeceased(id: string): Promise<ActionError | void> {
     await prisma.appUser.delete({ where: { id, tenantId: customerId } })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Profile not found.' }
+      return fail(t('deceased.notFound'))
     }
     throw e
   }
 
   revalidatePath('/customers')
   if (guardian) revalidatePath(`/customers/${guardian.guardianId}`)
+  return done()
 }
 
 export async function addGuardian(
   memorialId: string,
   guardianId: string,
-): Promise<ActionError | ActionSuccess> {
+): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   // Both the memorial and the guardian must belong to the caller's tenant,
   // otherwise a tenant user could link profiles across tenants (IDOR).
   const scoped = assertOwnership(
     await prisma.appUser.count({ where: { id: { in: [memorialId, guardianId] }, tenantId: customerId } }),
     (c) => c === 2,
-    'Profile not found.',
+    t('deceased.notFound'),
   )
-  if (!scoped.ok) return { error: scoped.error }
+  if (!scoped.ok) return fail(scoped.error)
 
   try {
     await prisma.appUserGuardian.create({
@@ -218,29 +222,30 @@ export async function addGuardian(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-      return { error: 'Relation already exists.' }
+      return fail(t('deceased.relationExists'))
     }
     throw e
   }
 
   revalidatePath('/customers')
-  return { success: 'Guardian added.' }
+  return done(t('deceased.guardianAdded'))
 }
 
 export async function removeGuardian(
   memorialId: string,
   guardianId: string,
-): Promise<ActionError | void> {
+): Promise<ActionResult> {
   const { customerId } = await verifyTenantSession()
+  const t = await getTranslations('Actions')
 
   // Both ids must belong to the caller's tenant (see addGuardian) — prevents
   // unlinking guardians of memorials owned by another tenant (IDOR).
   const scoped = assertOwnership(
     await prisma.appUser.count({ where: { id: { in: [memorialId, guardianId] }, tenantId: customerId } }),
     (c) => c === 2,
-    'Relation not found.',
+    t('deceased.relationNotFound'),
   )
-  if (!scoped.ok) return { error: scoped.error }
+  if (!scoped.ok) return fail(scoped.error)
 
   try {
     await prisma.appUserGuardian.delete({
@@ -248,10 +253,11 @@ export async function removeGuardian(
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return { error: 'Relation not found.' }
+      return fail(t('deceased.relationNotFound'))
     }
     throw e
   }
 
   revalidatePath('/customers')
+  return done()
 }

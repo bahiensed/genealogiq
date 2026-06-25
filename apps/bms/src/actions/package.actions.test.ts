@@ -25,6 +25,12 @@ const { prismaMock, FakeDecimal, PrismaKnownError } = vi.hoisted(() => {
 })
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
+// Identity translator: t('package.created') -> 'package.created', with interpolation appended.
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async () => (key: string, values?: Record<string, unknown>) =>
+    values ? `${key}:${JSON.stringify(values)}` : key
+  ),
+}))
 vi.mock("@genealogiq/db", () => ({
   Prisma: { Decimal: FakeDecimal, PrismaClientKnownRequestError: PrismaKnownError },
 }))
@@ -52,7 +58,7 @@ beforeEach(() => {
 describe("createPackage", () => {
   it("rejects invalid input", async () => {
     const res = await createPackage({ ...validInput, name: "no" } as never)
-    expect(res).toEqual({ error: "Invalid data" })
+    expect(res).toEqual({ ok: false, message: "common.invalidData" })
     expect(prismaMock.package.create).not.toHaveBeenCalled()
   })
 
@@ -62,7 +68,7 @@ describe("createPackage", () => {
 
     const arg = prismaMock.package.create.mock.calls[0][0] as { data: { price: unknown } }
     expect(arg.data.price).toBeInstanceOf(FakeDecimal)
-    expect(res).toEqual({ success: "Package created successfully." })
+    expect(res).toEqual({ ok: true, message: "package.created" })
   })
 })
 
@@ -76,9 +82,7 @@ describe("updatePackage", () => {
     const arg = prismaMock.package.update.mock.calls[0][0] as { data: Record<string, unknown> }
     expect(arg.data.stripeProductId).toBeNull()
     expect(arg.data.stripePriceId).toBeNull()
-    expect(res).toEqual({
-      success: "Package updated — Stripe references cleared. Re-run prisma/seed-stripe-packages.ts in SEQ.",
-    })
+    expect(res).toEqual({ ok: true, message: "package.updatedStripeCleared" })
   })
 
   it("keeps the Stripe refs when the price is unchanged", async () => {
@@ -90,36 +94,34 @@ describe("updatePackage", () => {
     const arg = prismaMock.package.update.mock.calls[0][0] as { data: Record<string, unknown> }
     expect(arg.data).not.toHaveProperty("stripeProductId")
     expect(arg.data).not.toHaveProperty("stripePriceId")
-    expect(res).toEqual({ success: "Package updated successfully." })
+    expect(res).toEqual({ ok: true, message: "package.updated" })
   })
 
   it("rejects when the package is not found", async () => {
     prismaMock.package.findUnique.mockResolvedValue(null)
-    expect(await updatePackage("p1", validInput)).toEqual({ error: "Package not found." })
+    expect(await updatePackage("p1", validInput)).toEqual({ ok: false, message: "package.notFound" })
   })
 
   it("maps a P2025 race to 'Package not found.'", async () => {
     prismaMock.package.findUnique.mockResolvedValue({ price: new FakeDecimal(40), stripePriceId: null })
     prismaMock.package.update.mockRejectedValue(new PrismaKnownError("gone", "P2025"))
-    expect(await updatePackage("p1", validInput)).toEqual({ error: "Package not found." })
+    expect(await updatePackage("p1", validInput)).toEqual({ ok: false, message: "package.notFound" })
   })
 })
 
 describe("deletePackage", () => {
-  it("succeeds (returns void) on a clean delete", async () => {
+  it("succeeds (no message) on a clean delete", async () => {
     prismaMock.package.delete.mockResolvedValue({})
-    expect(await deletePackage("p1")).toBeUndefined()
+    expect(await deletePackage("p1")).toEqual({ ok: true, message: undefined })
   })
 
   it("maps a P2003 FK violation to the associated-sales message", async () => {
     prismaMock.package.delete.mockRejectedValue(new PrismaKnownError("fk", "P2003"))
-    expect(await deletePackage("p1")).toEqual({
-      error: "This package has associated sales and cannot be deleted.",
-    })
+    expect(await deletePackage("p1")).toEqual({ ok: false, message: "package.hasSales" })
   })
 
   it("maps a P2025 to 'Package not found.'", async () => {
     prismaMock.package.delete.mockRejectedValue(new PrismaKnownError("gone", "P2025"))
-    expect(await deletePackage("p1")).toEqual({ error: "Package not found." })
+    expect(await deletePackage("p1")).toEqual({ ok: false, message: "package.notFound" })
   })
 })

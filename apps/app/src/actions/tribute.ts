@@ -1,6 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { getTranslations } from "next-intl/server"
+import { done, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { getTributeSchema } from "@/schemas/tribute"
@@ -11,12 +13,13 @@ import { assertOwnership } from "@genealogiq/auth/authz"
 import { deleteBlobs } from "@/lib/blob"
 import { notify, markNotificationsRead } from "@/lib/notifications"
 
-export async function submitTribute(profileId: string, data: unknown) {
+export async function submitTribute(profileId: string, data: unknown): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
-  if (session.user.id === profileId) return { error: "You cannot tribute your own profile." }
+  if (session.user.id === profileId) return fail(t("tribute.cannotTributeSelf"))
 
   const parsed = getTributeSchema(identityTranslator).safeParse(data)
-  if (!parsed.success) return { error: "Invalid data" }
+  if (!parsed.success) return fail(t("common.invalidData"))
 
   const existing = await prisma.tribute.findUnique({
     where: { authorId_profileId: { authorId: session.user.id, profileId } },
@@ -50,23 +53,24 @@ export async function submitTribute(profileId: string, data: unknown) {
   }
 
   revalidatePath(`/profile/${profileId}/tributes`)
-  return { success: true }
+  return done()
 }
 
-export async function approveTribute(tributeId: string, profileId: string) {
+export async function approveTribute(tributeId: string, profileId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("tribute.notAuthorized"))
 
   // Ensure the tribute actually belongs to the profile the caller manages.
   // Without this, a manager of profile A could moderate tributes on any other
   // profile by passing their own profileId + an arbitrary tributeId (IDOR).
   const owned = assertOwnership(
     await prisma.tribute.findUnique({ where: { id: tributeId }, select: { profileId: true } }),
-    (t) => t.profileId === profileId,
+    (rec) => rec.profileId === profileId,
   )
-  if (!owned.ok) return { error: owned.error }
+  if (!owned.ok) return fail(t("tribute.notAuthorized"))
 
   const tribute = await prisma.tribute.update({
     where: { id: tributeId },
@@ -92,22 +96,23 @@ export async function approveTribute(tributeId: string, profileId: string) {
 
   revalidatePath(`/profile/${profileId}/tributes`)
   revalidatePath(`/profile/${profileId}/tributes/moderate`)
-  return { success: true }
+  return done()
 }
 
-export async function rejectTribute(tributeId: string, profileId: string) {
+export async function rejectTribute(tributeId: string, profileId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const profile = await getProfileById(profileId)
-  if (!profile || !canManageProfile(profile, session.user.id)) return { error: "Not authorized." }
+  if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("tribute.notAuthorized"))
 
   // Ensure the tribute actually belongs to the profile the caller manages (see
   // approveTribute) — prevents cross-profile moderation via a forged profileId.
   const owned = assertOwnership(
     await prisma.tribute.findUnique({ where: { id: tributeId }, select: { profileId: true } }),
-    (t) => t.profileId === profileId,
+    (rec) => rec.profileId === profileId,
   )
-  if (!owned.ok) return { error: owned.error }
+  if (!owned.ok) return fail(t("tribute.notAuthorized"))
 
   const tribute = await prisma.tribute.update({
     where: { id: tributeId },
@@ -130,10 +135,11 @@ export async function rejectTribute(tributeId: string, profileId: string) {
   })
 
   revalidatePath(`/profile/${profileId}/tributes/moderate`)
-  return { success: true }
+  return done()
 }
 
-export async function deleteTribute(tributeId: string) {
+export async function deleteTribute(tributeId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
   const session = await verifySession()
 
   const tribute = await prisma.tribute.findUnique({
@@ -154,7 +160,7 @@ export async function deleteTribute(tributeId: string) {
       },
     },
   })
-  if (!tribute) return { error: "Tribute not found." }
+  if (!tribute) return fail(t("tribute.notFound"))
 
   // Permission: the author OR anyone who can manage the target profile
   // (the profile owner themselves, or any guardian).
@@ -163,12 +169,12 @@ export async function deleteTribute(tributeId: string) {
     tribute.profile.id === session.user.id ||
     tribute.profile.guardedBy.some((g) => g.guardianId === session.user.id)
   )
-  if (!isAuthor && !isManager) return { error: "Not authorized." }
+  if (!isAuthor && !isManager) return fail(t("tribute.notAuthorized"))
 
   await markNotificationsRead(session.user.id, { tributeId: tribute.id })
   await deleteBlobs([tribute.imageUrl])
   await prisma.tribute.delete({ where: { id: tribute.id } })
 
   revalidatePath(`/profile/${tribute.profileId}/tributes`)
-  return { success: true }
+  return done()
 }
