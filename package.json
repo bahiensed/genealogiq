@@ -12,6 +12,7 @@
     "typecheck": "turbo run typecheck",
     "db:generate": "turbo run db:generate",
     "check:schema-parity": "node scripts/check-schema-parity.mjs",
+    "check:i18n-parity": "node scripts/check-i18n-parity.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
