@@ -52,7 +52,11 @@ export async function createDeceased(
     select: {
       id: true,
       appSales: {
-        where:  { status: 'active' },
+        // Only genuinely-active subscriptions can take a new memorial: status is
+        // never flipped off 'active', so without the currentPeriodEnd check SEQ
+        // would assign memorials to EXPIRED sales — and the APP (which gates
+        // features on currentPeriodEnd > now) would show them as FREE on day one.
+        where:  { status: 'active', currentPeriodEnd: { gt: new Date() } },
         select: {
           id:           true,
           subscription: { select: { maxProfiles: true } },
