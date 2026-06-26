@@ -26,6 +26,7 @@ import { addRelation, addGhostRelative, updateRelation, updateMember } from "./f
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { notify } from "@/lib/notifications"
 import { getTreeMemberIds, countTreeMembers } from "@/queries/family-tree"
 import { getMemorialFeatures } from "@/lib/subscription"
 
@@ -158,6 +159,42 @@ describe("addRelation — IDOR guard", () => {
 
     expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
     expect(prismaMock.familyRelation.create).not.toHaveBeenCalled()
+  })
+
+  it("forces consent (PENDING) for an out-of-tree APP_USER even when anchored to a non-root member", async () => {
+    mockUsers({
+      [MEMBER]: { id: MEMBER, role: "APP_GHOST" },     // in-tree anchor (not root)
+      [STRANGER1]: { id: STRANGER1, role: "APP_USER" }, // out-of-tree real user
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT, MEMBER]))
+    prismaMock.familyRelation.findFirst.mockResolvedValue(null)
+    prismaMock.familyRelation.create.mockResolvedValue({ id: "rel-new" })
+
+    const res = await addRelation(ROOT, { fromId: MEMBER, toId: STRANGER1, type: "SIBLING" })
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(prismaMock.familyRelation.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ status: "PENDING" }) }),
+    )
+    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ userId: STRANGER1 }))
+  })
+
+  it("does not auto-create a SPOUSE link to an out-of-tree new parent (no unconsented marriage)", async () => {
+    mockUsers({
+      [STRANGER1]: { id: STRANGER1, role: "APP_USER" }, // new parent, out of tree
+      [MEMBER]: { id: MEMBER, role: "APP_GHOST" },       // child, in tree
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT, MEMBER])) // linkSpouse ROOT in tree
+    prismaMock.familyRelation.findFirst.mockResolvedValue(null)
+    prismaMock.familyRelation.create.mockResolvedValue({ id: "rel-new" })
+
+    const res = await addRelation(ROOT, {
+      fromId: STRANGER1, toId: MEMBER, type: "PARENT_OF", linkSpouseId: ROOT,
+    })
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    // only the main (PENDING) PARENT_OF relation — the spouse auto-link is skipped
+    expect(prismaMock.familyRelation.create).toHaveBeenCalledTimes(1)
   })
 })
 
