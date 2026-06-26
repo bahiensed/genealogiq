@@ -222,7 +222,7 @@ model AppSale {
   appUser              AppUser      @relation("AppSaleBuyer", fields: [appUserId], references: [id], onDelete: Cascade)
   soldBy               User?        @relation(fields: [soldById], references: [id], onDelete: Restrict)
   subscription         Subscription @relation(fields: [subscriptionId], references: [id])
-  tenant               Tenant?      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant               Tenant?      @relation(fields: [tenantId], references: [id], onDelete: SetNull)
   assignedTo           AppUser[]    @relation("AppSaleMemorial")
 
   @@index([appUserId])
