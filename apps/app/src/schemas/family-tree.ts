@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { BLOB_URL_PATTERN } from "@genealogiq/core"
 import type { Translator } from "./i18n"
 
 // ─── Subtype canon ───────────────────────────────────────────────────────────
@@ -86,7 +87,7 @@ export type AddGhostRelativeInput = z.infer<ReturnType<typeof getAddGhostRelativ
 
 export function getUpdateMemberSchema(t: Translator) {
   return makeGhostIdentity(t).extend({
-    avatarUrl: z.string().url().optional().nullable(),
+    avatarUrl: z.string().regex(BLOB_URL_PATTERN, t("invalidUrl")).optional().nullable(),
   })
 }
 

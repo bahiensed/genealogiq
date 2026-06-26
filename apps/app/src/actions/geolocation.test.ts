@@ -105,19 +105,19 @@ describe("saveGeolocation — success path", () => {
 
   it("deletes orphaned photo blobs that are no longer referenced", async () => {
     prismaMock.geolocation.findUnique.mockResolvedValue({
-      photo1: "https://blob/old-1.jpg",
-      photo2: "https://blob/keep-2.jpg",
+      photo1: "https://qa.public.blob.vercel-storage.com/old-1.jpg",
+      photo2: "https://qa.public.blob.vercel-storage.com/keep-2.jpg",
       photo3: null,
     })
 
     await saveGeolocation("A", {
       ...validInput,
       photo1: null,
-      photo2: "https://blob/keep-2.jpg",
+      photo2: "https://qa.public.blob.vercel-storage.com/keep-2.jpg",
     })
 
     // old-1 is dropped; keep-2 is still referenced so it stays.
-    expect(deleteBlobs).toHaveBeenCalledWith(["https://blob/old-1.jpg"])
+    expect(deleteBlobs).toHaveBeenCalledWith(["https://qa.public.blob.vercel-storage.com/old-1.jpg"])
   })
 })
 
@@ -133,7 +133,7 @@ describe("deleteGeolocation — authorization guard", () => {
 
   it("deletes the geolocation and returns ok on the happy path", async () => {
     prismaMock.geolocation.findUnique.mockResolvedValue({
-      photo1: "https://blob/p1.jpg",
+      photo1: "https://qa.public.blob.vercel-storage.com/p1.jpg",
       photo2: null,
       photo3: null,
     })
@@ -141,7 +141,7 @@ describe("deleteGeolocation — authorization guard", () => {
     const res = await deleteGeolocation("A")
 
     expect(res).toEqual({ ok: true, message: undefined })
-    expect(deleteBlobs).toHaveBeenCalledWith(["https://blob/p1.jpg", null, null])
+    expect(deleteBlobs).toHaveBeenCalledWith(["https://qa.public.blob.vercel-storage.com/p1.jpg", null, null])
     expect(prismaMock.geolocation.deleteMany).toHaveBeenCalledWith({ where: { userId: "A" } })
   })
 })

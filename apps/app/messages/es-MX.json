@@ -232,6 +232,7 @@
     "invalidEmail": "Correo electrónico inválido",
     "invalidSubtypeForKind": "El subtipo no es válido para este tipo de parentesco.",
     "invalidSubtypeForType": "El subtipo no es válido para este tipo de relación.",
+    "invalidUrl": "URL de medios inválida",
     "maxChars": "Debe tener como máximo {count} caracteres",
     "minChars": "Debe tener al menos {count} caracteres",
     "required": "Requerido",

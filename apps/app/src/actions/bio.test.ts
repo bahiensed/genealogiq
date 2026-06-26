@@ -81,8 +81,8 @@ describe("saveBio — ownership + validation guards", () => {
     const res = await saveBio("A", {
       text: "ok",
       images: [
-        validImage("https://blob.example/a.jpg", 0),
-        validImage("https://blob.example/b.jpg", 1),
+        validImage("https://qa.public.blob.vercel-storage.com/a.jpg", 0),
+        validImage("https://qa.public.blob.vercel-storage.com/b.jpg", 1),
       ],
     })
 
@@ -94,8 +94,8 @@ describe("saveBio — ownership + validation guards", () => {
     prismaMock.bio.upsert.mockResolvedValue({ id: "bio-1" })
     // The old image "stale.jpg" is no longer in the new set -> must be deleted.
     prismaMock.bioImage.findMany.mockResolvedValue([
-      { url: "https://blob.example/keep.jpg" },
-      { url: "https://blob.example/stale.jpg" },
+      { url: "https://qa.public.blob.vercel-storage.com/keep.jpg" },
+      { url: "https://qa.public.blob.vercel-storage.com/stale.jpg" },
     ])
     prismaMock.bioImage.deleteMany.mockResolvedValue({})
     prismaMock.bioImage.createMany.mockResolvedValue({})
@@ -103,14 +103,14 @@ describe("saveBio — ownership + validation guards", () => {
     const res = await saveBio("A", {
       quote: "be kind",
       text: "a life well lived",
-      images: [validImage("https://blob.example/keep.jpg", 0)],
+      images: [validImage("https://qa.public.blob.vercel-storage.com/keep.jpg", 0)],
     })
 
     expect(res).toEqual({ ok: true, message: undefined })
     expect(prismaMock.bio.upsert).toHaveBeenCalledWith(
       expect.objectContaining({ where: { userId: "A" } }),
     )
-    expect(deleteBlobs).toHaveBeenCalledWith(["https://blob.example/stale.jpg"])
+    expect(deleteBlobs).toHaveBeenCalledWith(["https://qa.public.blob.vercel-storage.com/stale.jpg"])
     expect(prismaMock.bioImage.createMany).toHaveBeenCalled()
   })
 })
@@ -128,14 +128,14 @@ describe("deleteBio — ownership guard", () => {
   it("deletes the bio and its blobs on the happy path", async () => {
     prismaMock.bio.findUnique.mockResolvedValue({
       id: "bio-1",
-      images: [{ url: "https://blob.example/x.jpg" }],
+      images: [{ url: "https://qa.public.blob.vercel-storage.com/x.jpg" }],
     })
     prismaMock.bio.deleteMany.mockResolvedValue({})
 
     const res = await deleteBio("A")
 
     expect(res).toEqual({ ok: true, message: undefined })
-    expect(deleteBlobs).toHaveBeenCalledWith(["https://blob.example/x.jpg"])
+    expect(deleteBlobs).toHaveBeenCalledWith(["https://qa.public.blob.vercel-storage.com/x.jpg"])
     expect(prismaMock.bio.deleteMany).toHaveBeenCalledWith({ where: { userId: "A" } })
   })
 })

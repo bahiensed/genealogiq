@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { BLOB_URL_PATTERN } from "@genealogiq/core"
 import type { Translator } from "./i18n"
 import { addressSchema } from "./address.schema"
 
@@ -13,7 +14,7 @@ export function getProfileEditSchema(t: Translator) {
     nickname:     z.string().trim().max(100).optional(),
     gender:       z.enum(["MALE", "FEMALE", "OTHER"]).optional().nullable(),
     nationalId:   z.string().trim().max(50).optional(),
-    avatarUrl:    z.string().url().optional().nullable(),
+    avatarUrl:    z.string().regex(BLOB_URL_PATTERN, t("invalidUrl")).optional().nullable(),
 
     // Birth
     birthDate:    z.coerce.date().optional().nullable(),
