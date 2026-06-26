@@ -21,7 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { upload } from "@vercel/blob/client"
-import { saveBio, deleteBio } from "@/actions/bio"
+import { saveBio, deleteBio } from "@/actions/bio.actions"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { compressImage } from "@/lib/image-compress"
 import type { BioRow } from "@/queries/bio"

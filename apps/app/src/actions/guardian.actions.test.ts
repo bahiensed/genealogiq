@@ -24,7 +24,7 @@ import {
   requestGuardianship,
   approveGuardianship,
   rejectGuardianship,
-} from "./guardian"
+} from "./guardian.actions"
 import { verifySession } from "@/lib/dal"
 import { notify } from "@/lib/notifications"
 

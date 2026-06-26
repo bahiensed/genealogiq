@@ -26,7 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { deleteTribute } from "@/actions/tribute"
+import { deleteTribute } from "@/actions/tribute.actions"
 import type { ApprovedTributeRow } from "@/queries/tribute"
 
 const PAGE_SIZE = 10

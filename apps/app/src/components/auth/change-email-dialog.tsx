@@ -2,7 +2,7 @@
 
 import { useState, useActionState } from 'react'
 import { useTranslations } from 'next-intl'
-import { requestEmailChange } from '@/actions/auth'
+import { requestEmailChange } from '@/actions/auth.actions'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'

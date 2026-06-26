@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { Settings } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { createPortalSession } from "@/actions/billing"
+import { createPortalSession } from "@/actions/billing.actions"
 
 export function ManageSubscriptionButton() {
   const router = useRouter()

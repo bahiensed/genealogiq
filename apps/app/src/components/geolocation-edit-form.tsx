@@ -26,9 +26,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import { AddressSection } from "@/components/address/address-section"
 import { GeolocationGate } from "@/components/geolocation-gate"
-import { saveGeolocation, deleteGeolocation } from "@/actions/geolocation"
+import { saveGeolocation, deleteGeolocation } from "@/actions/geolocation.actions"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
-import { getGeolocationSchema, type GeolocationFormValues } from "@/schemas/geolocation"
+import { getGeolocationSchema, type GeolocationFormValues } from "@/schemas/geolocation.schema"
 import type { GeolocationRow } from "@/queries/geolocation"
 
 const MAX_NOTES = 500

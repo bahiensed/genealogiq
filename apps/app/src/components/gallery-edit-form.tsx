@@ -21,7 +21,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { upload } from "@vercel/blob/client"
-import { saveGallery, deleteGallery } from "@/actions/gallery"
+import { saveGallery, deleteGallery } from "@/actions/gallery.actions"
 import {
   isAllowedImage,
   isAllowedVideo,

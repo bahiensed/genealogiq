@@ -28,7 +28,7 @@ vi.mock("@/lib/billing", () => ({
     a.price / Math.max(a.termLength, 1) - b.price / Math.max(b.termLength, 1),
 }))
 
-import { createCheckoutSession, changeSubscription } from "./billing"
+import { createCheckoutSession, changeSubscription } from "./billing.actions"
 import { verifySession } from "@/lib/dal"
 import { ensureStripeCustomer, upsertSaleFromSubscription } from "@/lib/billing"
 

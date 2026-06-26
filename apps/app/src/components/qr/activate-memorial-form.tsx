@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { activatePhysicalQr } from "@/actions/physical-qr"
+import { activatePhysicalQr } from "@/actions/physical-qr.actions"
 import { formatGenCode } from "@/lib/gen-code"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { useLocale, useTranslations } from "next-intl"

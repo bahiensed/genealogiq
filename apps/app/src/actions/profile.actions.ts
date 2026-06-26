@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server"
 import { done, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
-import { getProfileEditSchema } from "@/schemas/profile"
+import { getProfileEditSchema } from "@/schemas/profile.schema"
 import { identityTranslator } from "@/schemas/i18n"
 import { deleteBlobs } from "@/lib/blob"
 

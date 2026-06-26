@@ -22,7 +22,7 @@ vi.mock("@/queries/family-tree", () => ({
   countTreeMembers: vi.fn(),
 }))
 
-import { addRelation, addGhostRelative, updateRelation, removeRelation, updateMember } from "./family-tree"
+import { addRelation, addGhostRelative, updateRelation, removeRelation, updateMember } from "./family-tree.actions"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"

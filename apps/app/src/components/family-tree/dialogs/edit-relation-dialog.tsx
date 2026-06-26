@@ -20,12 +20,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { updateRelation, removeRelation } from "@/actions/family-tree"
+import { updateRelation, removeRelation } from "@/actions/family-tree.actions"
 import {
   PARENT_OF_SUBTYPES,
   SPOUSE_SUBTYPES,
   SIBLING_SUBTYPES,
-} from "@/schemas/family-tree"
+} from "@/schemas/family-tree.schema"
 import type { TreeRelation } from "@/queries/family-tree"
 
 interface Props {

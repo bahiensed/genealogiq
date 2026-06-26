@@ -12,7 +12,7 @@ vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: st
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
 
-import { toggleFavorite } from "./favorite"
+import { toggleFavorite } from "./favorite.actions"
 import { verifySession } from "@/lib/dal"
 import { revalidatePath } from "next/cache"
 

@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { toggleFavorite } from "@/actions/favorite"
+import { toggleFavorite } from "@/actions/favorite.actions"
 import { toast } from "sonner"
 
 export interface ProfileData {

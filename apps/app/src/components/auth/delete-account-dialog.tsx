@@ -19,7 +19,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from '@/components/ui/input-group'
-import { deleteAccount } from '@/actions/auth'
+import { deleteAccount } from '@/actions/auth.actions'
 
 export function DeleteAccountDialog() {
   const t = useTranslations('Auth')

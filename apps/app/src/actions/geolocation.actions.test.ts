@@ -18,7 +18,7 @@ vi.mock("@/lib/subscription", () => ({ getMemorialFeatures: vi.fn() }))
 // NOTE: the Zod schema (@/schemas/geolocation) and identityTranslator are NOT mocked —
 // the real validation runs so we can exercise the notes-max / invalidData branch.
 
-import { saveGeolocation, deleteGeolocation } from "./geolocation"
+import { saveGeolocation, deleteGeolocation } from "./geolocation.actions"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"

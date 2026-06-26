@@ -22,7 +22,7 @@ vi.mock("@/queries/profile", () => ({ getProfileById: vi.fn(), getProfileForEdit
 vi.mock("@/lib/profile", () => ({ canManageProfile: vi.fn() }))
 vi.mock("@/lib/blob", () => ({ deleteBlobs: vi.fn() }))
 
-import { createMemorial, deleteMemorial } from "./memorial"
+import { createMemorial, deleteMemorial } from "./memorial.actions"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"

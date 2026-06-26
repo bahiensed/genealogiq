@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server"
 import { ok, fail, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
-import { getMemorialSchema } from "@/schemas/memorial"
+import { getMemorialSchema } from "@/schemas/memorial.schema"
 import { identityTranslator } from "@/schemas/i18n"
 
 export async function activatePhysicalQr(

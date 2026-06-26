@@ -23,8 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { addRelation, addGhostRelative } from "@/actions/family-tree"
-import { SPOUSE_SUBTYPES, type SpouseSubtype } from "@/schemas/family-tree"
+import { addRelation, addGhostRelative } from "@/actions/family-tree.actions"
+import { SPOUSE_SUBTYPES, type SpouseSubtype } from "@/schemas/family-tree.schema"
 
 type RelationKind = "parent" | "spouse" | "sibling" | "child"
 type Mode = "search" | "create"
