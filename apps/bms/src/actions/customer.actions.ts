@@ -124,9 +124,22 @@ export async function deleteCustomer(id: string): Promise<ActionResult> {
   await verifyAdmin()
   const t = await getTranslations('Actions')
 
-  const salesCount = await prisma.sale.count({ where: { tenantId: id } })
+  // A Tenant cascade-deletes its APP-side memorials (AppUser) and subscription
+  // rows (AppSale), so a back-office delete could silently destroy paid,
+  // end-user-facing memorials provisioned by SEQ. Guard every dependent the way
+  // SEQ Sale already is — a Cascade FK doesn't raise P2003, so the catch below
+  // would never stop it.
+  const [salesCount, appUserCount, appSaleCount] = await Promise.all([
+    prisma.sale.count({ where: { tenantId: id } }),
+    prisma.appUser.count({ where: { tenantId: id } }),
+    prisma.appSale.count({ where: { tenantId: id } }),
+  ])
   if (salesCount > 0) {
     return fail(t('customer.hasSales'))
+  }
+  const appDataCount = appUserCount + appSaleCount
+  if (appDataCount > 0) {
+    return fail(t('customer.hasAppData', { count: appDataCount }))
   }
 
   try {
