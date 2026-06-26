@@ -27,6 +27,11 @@ export interface CreateAuthOptions<Row extends AuthUserRow> {
 export function createAuth<Row extends AuthUserRow>(opts: CreateAuthOptions<Row>) {
   return NextAuth({
     ...opts.edgeConfig,
+    // Explicit: the Credentials provider has no DB session table — sessions are
+    // stateless JWTs (the edge authorized()/jwt callbacks read role/customerId
+    // from the token). This is NextAuth's default for Credentials, declared here
+    // so the strategy and its implications aren't implicit.
+    session: { strategy: "jwt" },
     providers: [
       Credentials({
         credentials: { email: {}, password: {} },

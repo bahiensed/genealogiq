@@ -45,7 +45,7 @@ export async function saveGallery(profileId: string, data: unknown): Promise<Act
   if (items.length > 0) {
     await prisma.galleryItem.createMany({
       data: items.map((item, i) => ({
-        id: item.id,
+        // id is DB-generated (cuid) — never persist a client-supplied primary key.
         kind: item.kind,
         url: item.url,
         poster: item.poster,

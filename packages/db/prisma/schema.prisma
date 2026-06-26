@@ -108,10 +108,9 @@ model Subscription {
   isActive              Boolean   @default(true) @map("is_active")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
-  // DB permits NULL on these three, but every app's schema has always declared
-  // them required and the seed always populates them — kept non-null to match
-  // the application contract (see docs "intentional deviations"). A future
-  // migration should add the NOT NULL constraint to remove the DB-level drift.
+  // These three are required in both the schema and the DB: migration
+  // 20260607010000_reconcile_schema_drift added the NOT NULL constraints after
+  // verifying zero NULL rows, so the earlier app-vs-DB drift is fully resolved.
   maxProfiles           Int       @map("max_profiles")
   termLength            Int       @map("term_length")
   price                 Decimal   @db.Decimal(10, 2)
