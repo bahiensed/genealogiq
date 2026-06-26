@@ -23,7 +23,8 @@ vi.mock("@genealogiq/db", () => ({ Prisma: { PrismaClientKnownRequestError: Pris
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyAdmin: vi.fn() }))
 vi.mock("@/lib/email", () => ({ sendSequoiaWelcomeEmail: vi.fn() }))
-vi.mock("@genealogiq/core", () => ({
+vi.mock("@genealogiq/core", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@genealogiq/core")>()),
   hashToken: vi.fn((t: string) => `hashed:${t}`),
   done: (message?: string) => ({ ok: true, message }),
   fail: (message: string) => ({ ok: false, message }),
