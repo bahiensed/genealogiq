@@ -22,7 +22,7 @@ vi.mock("@/queries/family-tree", () => ({
   countTreeMembers: vi.fn(),
 }))
 
-import { addRelation, addGhostRelative, updateRelation, updateMember } from "./family-tree"
+import { addRelation, addGhostRelative, updateRelation, removeRelation, updateMember } from "./family-tree"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
@@ -226,5 +226,32 @@ describe("addGhostRelative — IDOR guard", () => {
     expect(res).toEqual({ ok: true, message: undefined })
     expect(tx.appUser.create).toHaveBeenCalled()
     expect(tx.familyRelation.create).toHaveBeenCalled()
+  })
+})
+
+describe("removeRelation — pending-invite management (ACCEPTED-only membership)", () => {
+  it("lets the sender withdraw their own PENDING invite though the invitee isn't an accepted member", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      fromId: "A", toId: STRANGER1, status: "PENDING", requestedById: "mgr",
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set(["A"])) // STRANGER1 not an accepted member
+    prismaMock.familyRelation.delete.mockResolvedValue({})
+
+    const res = await removeRelation("A", "rel-1")
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(prismaMock.familyRelation.delete).toHaveBeenCalledWith({ where: { id: "rel-1" } })
+  })
+
+  it("rejects deleting a PENDING invite the caller did not send", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      fromId: "A", toId: STRANGER1, status: "PENDING", requestedById: "someone-else",
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set(["A"]))
+
+    const res = await removeRelation("A", "rel-1")
+
+    expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
+    expect(prismaMock.familyRelation.delete).not.toHaveBeenCalled()
   })
 })

@@ -29,6 +29,25 @@ function toDate(s: string | null | undefined): Date | null {
   return s ? new Date(s) : null
 }
 
+/**
+ * Whether the caller may edit/delete a given relation by id. Membership is
+ * ACCEPTED-only (getTreeMemberIds), so a pending invite's endpoint isn't a
+ * member yet — but the sender must still be able to edit/withdraw the invite
+ * they created, hence the second clause.
+ */
+function canManageRelation(
+  relation: { fromId: string; toId: string; status: string; requestedById: string | null },
+  memberIds: Set<string>,
+  actorId: string,
+): boolean {
+  if (memberIds.has(relation.fromId) && memberIds.has(relation.toId)) return true
+  return (
+    relation.status === "PENDING" &&
+    relation.requestedById === actorId &&
+    (memberIds.has(relation.fromId) || memberIds.has(relation.toId))
+  )
+}
+
 // ─── addRelation ─────────────────────────────────────────────────────────────
 
 export async function addRelation(rootId: string, data: unknown): Promise<ActionResult> {
@@ -360,15 +379,16 @@ export async function updateRelation(rootId: string, relationId: string, data: u
   const parsed = getUpdateRelationSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return fail(parsed.error.issues[0].message)
 
-  // The relation must belong to rootId's tree (both endpoints reachable from
-  // root). Without this, any manager could edit arbitrary relations by id (IDOR).
+  // The relation must belong to rootId's ACCEPTED tree (or be a pending invite
+  // the caller sent). Without this, any manager could edit arbitrary relations
+  // by id (IDOR).
   const relation = await prisma.familyRelation.findUnique({
     where:  { id: relationId },
-    select: { fromId: true, toId: true },
+    select: { fromId: true, toId: true, status: true, requestedById: true },
   })
   if (!relation) return fail(t("familyTree.relationNotFound"))
   const memberIds = await getTreeMemberIds(rootId)
-  if (!memberIds.has(relation.fromId) || !memberIds.has(relation.toId)) {
+  if (!canManageRelation(relation, memberIds, session.user.id)) {
     return fail(t("familyTree.notAuthorized"))
   }
 
@@ -392,15 +412,16 @@ export async function removeRelation(rootId: string, relationId: string): Promis
   const profile = await getProfileById(rootId)
   if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("familyTree.notAuthorized"))
 
-  // The relation must belong to rootId's tree (see updateRelation) — prevents
-  // deleting arbitrary relations from other users' trees by id (IDOR).
+  // The relation must belong to rootId's ACCEPTED tree (or be a pending invite
+  // the caller sent) — see updateRelation. Prevents deleting arbitrary relations
+  // from other users' trees by id (IDOR).
   const relation = await prisma.familyRelation.findUnique({
     where:  { id: relationId },
-    select: { fromId: true, toId: true },
+    select: { fromId: true, toId: true, status: true, requestedById: true },
   })
   if (!relation) return fail(t("familyTree.relationNotFound"))
   const memberIds = await getTreeMemberIds(rootId)
-  if (!memberIds.has(relation.fromId) || !memberIds.has(relation.toId)) {
+  if (!canManageRelation(relation, memberIds, session.user.id)) {
     return fail(t("familyTree.notAuthorized"))
   }
 
