@@ -63,6 +63,9 @@ export async function addRelation(rootId: string, data: unknown): Promise<Action
   if (outsiderRole !== null && outsiderRole !== "APP_USER") {
     return fail(t("familyTree.notAuthorized"))
   }
+  // linkSpouseId forges a second (ACCEPTED) SPOUSE relation below — it must be
+  // an existing member of the tree, never an arbitrary stranger by id.
+  if (linkSpouseId && !treeIds.has(linkSpouseId)) return fail(t("familyTree.notAuthorized"))
 
   // Tier limit (only enforced when the tree would grow).
   const features = await getMemorialFeatures(rootId)
@@ -161,8 +164,11 @@ export async function addGhostRelative(rootId: string, data: unknown): Promise<A
 
   // IDOR guard: the anchor must belong to the caller's tree, otherwise a ghost
   // could be attached to — and auto-linked into — a stranger's profile by id.
+  // linkSpouseId (an optional second SPOUSE relation below) must likewise be an
+  // existing tree member, never an arbitrary stranger.
   const treeIds = await getTreeMemberIds(rootId)
   if (!treeIds.has(anchorId)) return fail(t("familyTree.notAuthorized"))
+  if (linkSpouseId && !treeIds.has(linkSpouseId)) return fail(t("familyTree.notAuthorized"))
 
   // Tier limit (always +1 here).
   const features = await getMemorialFeatures(rootId)

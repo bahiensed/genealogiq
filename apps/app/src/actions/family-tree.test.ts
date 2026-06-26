@@ -144,6 +144,21 @@ describe("addRelation — IDOR guard", () => {
     expect(res).toEqual({ ok: true, message: undefined })
     expect(prismaMock.familyRelation.create).toHaveBeenCalled()
   })
+
+  it("rejects a foreign linkSpouseId (forged spouse via the link side-channel)", async () => {
+    mockUsers({
+      [ROOT]: { id: ROOT, role: "APP_USER" },
+      [MEMBER]: { id: MEMBER, role: "APP_GHOST" },
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT, MEMBER])) // STRANGER1 not in tree
+
+    const res = await addRelation(ROOT, {
+      fromId: ROOT, toId: MEMBER, type: "PARENT_OF", linkSpouseId: STRANGER1,
+    })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
+    expect(prismaMock.familyRelation.create).not.toHaveBeenCalled()
+  })
 })
 
 describe("addGhostRelative — IDOR guard", () => {
