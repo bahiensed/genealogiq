@@ -13,3 +13,15 @@ export {
   type Country,
   type ZipProvider,
 } from "./countries"
+export {
+  unmaskDigits,
+  maskCpf,
+  maskCnpj,
+  maskTaxId,
+  maskPhone,
+  maskUsZip,
+  maskMxZip,
+  maskCep,
+  validateCpf,
+  validateCnpj,
+} from "./masks"
