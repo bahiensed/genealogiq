@@ -1,4 +1,5 @@
 export { hashToken } from "./token"
+export { BLOB_URL_PATTERN } from "./blob"
 export { generateGenCode, formatGenCode } from "./gen-code"
 export { ok, done, fail, type ActionResult } from "./result"
 export {

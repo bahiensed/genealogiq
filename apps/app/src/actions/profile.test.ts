@@ -58,6 +58,13 @@ describe("updateProfile — input validation", () => {
     expect(res).toEqual({ ok: false, message: "common.invalidData" })
     expect(prismaMock.appUser.update).not.toHaveBeenCalled()
   })
+
+  it("rejects a well-formed but off-site avatar url (host pin, not just URL shape)", async () => {
+    const res = await updateProfile(validInput({ avatarUrl: "https://evil.example.com/pixel.png" }))
+
+    expect(res).toEqual({ ok: false, message: "common.invalidData" })
+    expect(prismaMock.appUser.update).not.toHaveBeenCalled()
+  })
 })
 
 describe("updateProfile — self-scoping (living users)", () => {
@@ -101,23 +108,23 @@ describe("updateProfile — self-scoping (living users)", () => {
 describe("updateProfile — avatar blob pruning", () => {
   it("deletes the stale avatar blob when the avatar changes", async () => {
     prismaMock.appUser.findUnique.mockResolvedValue({
-      avatarUrl: "https://blob.example/old.jpg",
+      avatarUrl: "https://qa.public.blob.vercel-storage.com/old.jpg",
       addressId: null,
     })
 
-    const res = await updateProfile(validInput({ avatarUrl: "https://blob.example/new.jpg" }))
+    const res = await updateProfile(validInput({ avatarUrl: "https://qa.public.blob.vercel-storage.com/new.jpg" }))
 
     expect(res.ok).toBe(true)
-    expect(deleteBlobs).toHaveBeenCalledWith(["https://blob.example/old.jpg"])
+    expect(deleteBlobs).toHaveBeenCalledWith(["https://qa.public.blob.vercel-storage.com/old.jpg"])
   })
 
   it("does not delete the blob when the avatar is unchanged", async () => {
     prismaMock.appUser.findUnique.mockResolvedValue({
-      avatarUrl: "https://blob.example/same.jpg",
+      avatarUrl: "https://qa.public.blob.vercel-storage.com/same.jpg",
       addressId: null,
     })
 
-    const res = await updateProfile(validInput({ avatarUrl: "https://blob.example/same.jpg" }))
+    const res = await updateProfile(validInput({ avatarUrl: "https://qa.public.blob.vercel-storage.com/same.jpg" }))
 
     expect(res.ok).toBe(true)
     expect(deleteBlobs).not.toHaveBeenCalled()

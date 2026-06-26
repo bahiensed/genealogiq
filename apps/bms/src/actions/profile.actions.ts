@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
-import { done, fail, type ActionResult } from '@genealogiq/core'
+import { done, fail, BLOB_URL_PATTERN, type ActionResult } from '@genealogiq/core'
 import { verifySession } from '@/lib/dal'
 import { getProfileSchema, type ProfileFormValues } from '@/schemas/profile.schema'
 import { identityTranslator } from '@/schemas/i18n'
@@ -47,7 +47,7 @@ export async function updateAvatar(url: string): Promise<ActionResult> {
   const session = await verifySession()
   const t = await getTranslations('Actions')
 
-  if (!/^https:\/\/[^/]+\.public\.blob\.vercel-storage\.com\//.test(url)) {
+  if (!BLOB_URL_PATTERN.test(url)) {
     return fail(t('profile.invalidAvatarUrl'))
   }
 

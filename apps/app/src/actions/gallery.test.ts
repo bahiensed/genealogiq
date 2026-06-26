@@ -27,13 +27,13 @@ import { getMemorialFeatures } from "@/lib/subscription"
 const img = (n: number) => ({
   id: `i${n}`,
   kind: "image" as const,
-  url: `https://blob.example.com/img-${n}.jpg`,
+  url: `https://qa.public.blob.vercel-storage.com/img-${n}.jpg`,
   order: n,
 })
 const vid = (n: number) => ({
   id: `v${n}`,
   kind: "video" as const,
-  url: `https://blob.example.com/vid-${n}.mp4`,
+  url: `https://qa.public.blob.vercel-storage.com/vid-${n}.mp4`,
   order: n,
 })
 
@@ -116,8 +116,8 @@ describe("saveGallery — reorder/replace happy path", () => {
   it("deletes orphaned blobs, replaces rows in order, and returns done()", async () => {
     // Existing rows: one stays (img-0), one is removed (old).
     prismaMock.galleryItem.findMany.mockResolvedValue([
-      { url: "https://blob.example.com/img-0.jpg" },
-      { url: "https://blob.example.com/old.jpg" },
+      { url: "https://qa.public.blob.vercel-storage.com/img-0.jpg" },
+      { url: "https://qa.public.blob.vercel-storage.com/old.jpg" },
     ])
 
     // Reordered set: img(1) first, img(0) second.
@@ -125,7 +125,7 @@ describe("saveGallery — reorder/replace happy path", () => {
 
     expect(res).toEqual({ ok: true, message: undefined })
     // Only the blob no longer referenced is deleted.
-    expect(deleteBlobs).toHaveBeenCalledWith(["https://blob.example.com/old.jpg"])
+    expect(deleteBlobs).toHaveBeenCalledWith(["https://qa.public.blob.vercel-storage.com/old.jpg"])
     expect(prismaMock.galleryItem.deleteMany).toHaveBeenCalledWith({ where: { userId: "A" } })
     // `order` is re-derived from array index, proving the reorder is persisted.
     expect(prismaMock.galleryItem.createMany).toHaveBeenCalledWith(
@@ -140,13 +140,13 @@ describe("saveGallery — reorder/replace happy path", () => {
 
   it("clears the gallery (empty items) without calling createMany", async () => {
     prismaMock.galleryItem.findMany.mockResolvedValue([
-      { url: "https://blob.example.com/img-0.jpg" },
+      { url: "https://qa.public.blob.vercel-storage.com/img-0.jpg" },
     ])
 
     const res = await saveGallery("A", { items: [] })
 
     expect(res).toEqual({ ok: true, message: undefined })
-    expect(deleteBlobs).toHaveBeenCalledWith(["https://blob.example.com/img-0.jpg"])
+    expect(deleteBlobs).toHaveBeenCalledWith(["https://qa.public.blob.vercel-storage.com/img-0.jpg"])
     expect(prismaMock.galleryItem.deleteMany).toHaveBeenCalledWith({ where: { userId: "A" } })
     expect(prismaMock.galleryItem.createMany).not.toHaveBeenCalled()
   })
@@ -165,16 +165,16 @@ describe("deleteGallery — ownership guard", () => {
 
   it("removes all blobs and rows then returns done()", async () => {
     prismaMock.galleryItem.findMany.mockResolvedValue([
-      { url: "https://blob.example.com/img-0.jpg" },
-      { url: "https://blob.example.com/img-1.jpg" },
+      { url: "https://qa.public.blob.vercel-storage.com/img-0.jpg" },
+      { url: "https://qa.public.blob.vercel-storage.com/img-1.jpg" },
     ])
 
     const res = await deleteGallery("A")
 
     expect(res).toEqual({ ok: true, message: undefined })
     expect(deleteBlobs).toHaveBeenCalledWith([
-      "https://blob.example.com/img-0.jpg",
-      "https://blob.example.com/img-1.jpg",
+      "https://qa.public.blob.vercel-storage.com/img-0.jpg",
+      "https://qa.public.blob.vercel-storage.com/img-1.jpg",
     ])
     expect(prismaMock.galleryItem.deleteMany).toHaveBeenCalledWith({ where: { userId: "A" } })
   })
