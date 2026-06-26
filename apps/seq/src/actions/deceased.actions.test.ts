@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
-    appUser: { count: vi.fn() },
+    appUser: { count: vi.fn(), findUnique: vi.fn() },
     appUserGuardian: { create: vi.fn(), delete: vi.fn() },
   },
 }))
@@ -19,7 +19,7 @@ vi.mock("@/schemas/deceased.schema", () => ({
 }))
 vi.mock("@/schemas/i18n", () => ({ identityTranslator: (key: string) => key }))
 
-import { addGuardian, removeGuardian } from "./deceased.actions"
+import { addGuardian, removeGuardian, createDeceased } from "./deceased.actions"
 import { verifyTenantSession } from "@/lib/dal"
 
 beforeEach(() => {
@@ -68,5 +68,26 @@ describe("removeGuardian — C4 cross-tenant IDOR guard", () => {
     await removeGuardian("memorial-x", "guardian-y")
 
     expect(prismaMock.appUserGuardian.delete).toHaveBeenCalled()
+  })
+})
+
+describe("createDeceased — vendor-sale expiry consistency", () => {
+  it("only assigns memorials to active, NON-EXPIRED subscriptions", async () => {
+    // Guardian exists but has no assignable (active + non-expired + spare) sale.
+    prismaMock.appUser.findUnique.mockResolvedValue({ id: "g1", appSales: [] } as never)
+
+    const res = await createDeceased("g1", {} as never)
+
+    expect(res).toEqual({ ok: false, message: "deceased.noQrAvailable" })
+    // The available-slot lookup must exclude expired sales (currentPeriodEnd),
+    // matching how the APP gates memorial features — otherwise a new memorial
+    // would be born FREE. (Without the fix the where was just { status: 'active' }.)
+    const arg = prismaMock.appUser.findUnique.mock.calls[0][0] as {
+      select: { appSales: { where: Record<string, unknown> } }
+    }
+    expect(arg.select.appSales.where).toEqual({
+      status: "active",
+      currentPeriodEnd: { gt: expect.any(Date) },
+    })
   })
 })
