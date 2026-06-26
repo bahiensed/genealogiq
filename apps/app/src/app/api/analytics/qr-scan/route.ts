@@ -1,5 +1,6 @@
 import { createHash } from "crypto"
 import { NextRequest, NextResponse } from "next/server"
+import { checkRateLimit } from "@genealogiq/services/rate-limit"
 import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
@@ -38,6 +39,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const ip        = getClientIp(req)
   const userAgent = req.headers.get("user-agent") ?? undefined
   const now       = new Date()
+
+  // This route is public by design (scan counting must work pre-auth), so
+  // throttle per IP to stop anyone inflating an arbitrary memorial's scanCount.
+  const limit = await checkRateLimit({
+    key:           `qr-scan:${ip ? hashIp(ip) : "unknown"}`,
+    maxAttempts:   20,
+    windowSeconds: 60,
+  })
+  if (!limit.allowed) {
+    return NextResponse.json({ error: "Too many requests" }, {
+      status:  429,
+      headers: { "Retry-After": String(limit.retryAfter) },
+    })
+  }
 
   await prisma.$transaction([
     prisma.qrScan.create({

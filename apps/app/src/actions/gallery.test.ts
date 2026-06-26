@@ -128,14 +128,13 @@ describe("saveGallery — reorder/replace happy path", () => {
     expect(deleteBlobs).toHaveBeenCalledWith(["https://qa.public.blob.vercel-storage.com/old.jpg"])
     expect(prismaMock.galleryItem.deleteMany).toHaveBeenCalledWith({ where: { userId: "A" } })
     // `order` is re-derived from array index, proving the reorder is persisted.
-    expect(prismaMock.galleryItem.createMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: [
-          expect.objectContaining({ id: "i1", order: 0, userId: "A" }),
-          expect.objectContaining({ id: "i0", order: 1, userId: "A" }),
-        ],
-      }),
-    )
+    const createArg = prismaMock.galleryItem.createMany.mock.calls[0][0]
+    expect(createArg.data).toEqual([
+      expect.objectContaining({ order: 0, userId: "A" }),
+      expect.objectContaining({ order: 1, userId: "A" }),
+    ])
+    // The client-supplied id is NOT persisted — the DB generates the cuid.
+    expect(createArg.data[0]).not.toHaveProperty("id")
   })
 
   it("clears the gallery (empty items) without calling createMany", async () => {
