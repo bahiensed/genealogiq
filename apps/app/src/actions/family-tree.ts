@@ -51,6 +51,19 @@ export async function addRelation(rootId: string, data: unknown): Promise<Action
   ])
   if (!from || !to) return fail(t("familyTree.profileNotFound"))
 
+  // IDOR guard (mirrors updateRelation/removeRelation): the relation must be
+  // anchored to the caller's tree, and any endpoint outside it may only be a
+  // real APP_USER — who is then consent-gated below. A ghost/memorial or a
+  // stranger that isn't in root's reachable tree cannot be wired in by id.
+  const treeIds = await getTreeMemberIds(rootId)
+  const fromInTree = treeIds.has(fromId)
+  const toInTree = treeIds.has(toId)
+  if (!fromInTree && !toInTree) return fail(t("familyTree.notAuthorized"))
+  const outsiderRole = !fromInTree ? from.role : !toInTree ? to.role : null
+  if (outsiderRole !== null && outsiderRole !== "APP_USER") {
+    return fail(t("familyTree.notAuthorized"))
+  }
+
   // Tier limit (only enforced when the tree would grow).
   const features = await getMemorialFeatures(rootId)
   const memberCount = await countTreeMembers(rootId)
@@ -145,6 +158,11 @@ export async function addGhostRelative(rootId: string, data: unknown): Promise<A
     gender, birthDate, deathDate,
     anchorId, kind, subtype, startDate, endDate, linkSpouseId,
   } = parsed.data
+
+  // IDOR guard: the anchor must belong to the caller's tree, otherwise a ghost
+  // could be attached to — and auto-linked into — a stranger's profile by id.
+  const treeIds = await getTreeMemberIds(rootId)
+  if (!treeIds.has(anchorId)) return fail(t("familyTree.notAuthorized"))
 
   // Tier limit (always +1 here).
   const features = await getMemorialFeatures(rootId)

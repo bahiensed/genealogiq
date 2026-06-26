@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
-    familyRelation: { findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
-    appUser: { findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    familyRelation: { findUnique: vi.fn(), findFirst: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    appUser: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    appUserGuardian: { create: vi.fn() },
+    $transaction: vi.fn(),
   },
 }))
 
@@ -20,11 +22,12 @@ vi.mock("@/queries/family-tree", () => ({
   countTreeMembers: vi.fn(),
 }))
 
-import { updateRelation, updateMember } from "./family-tree"
+import { addRelation, addGhostRelative, updateRelation, updateMember } from "./family-tree"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
-import { getTreeMemberIds } from "@/queries/family-tree"
+import { getTreeMemberIds, countTreeMembers } from "@/queries/family-tree"
+import { getMemorialFeatures } from "@/lib/subscription"
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -33,7 +36,22 @@ beforeEach(() => {
   vi.mocked(getProfileById).mockResolvedValue({ id: "A", guardedBy: [] } as never)
   vi.mocked(canManageProfile).mockReturnValue(true)
   vi.mocked(getTreeMemberIds).mockResolvedValue(new Set(["A"]))
+  vi.mocked(getMemorialFeatures).mockResolvedValue({ treeMaxMembers: 50 } as never)
+  vi.mocked(countTreeMembers).mockResolvedValue(1)
 })
+
+// cuid()-shaped ids so the .cuid() schema fields parse and we reach the guard.
+const ROOT = "crootaaaaaaaa"
+const MEMBER = "cmemberaaaaaa"
+const STRANGER1 = "cstrangeronea"
+const STRANGER2 = "cstrangertwoa"
+const FOREIGN_MEMO = "cforeignmemoa"
+
+function mockUsers(byId: Record<string, { id: string; role: string }>) {
+  prismaMock.appUser.findUnique.mockImplementation(
+    ({ where }: { where: { id: string } }) => Promise.resolve(byId[where.id] ?? null),
+  )
+}
 
 describe("updateRelation — C2 IDOR guard", () => {
   it("rejects a relation whose endpoints are outside root's tree and never updates", async () => {
@@ -82,5 +100,79 @@ describe("updateMember — C3 IDOR guard (ghost branch)", () => {
     expect(prismaMock.appUser.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "ghost-1" } }),
     )
+  })
+})
+
+describe("addRelation — IDOR guard", () => {
+  it("rejects a relation between two profiles outside root's tree (stranger↔stranger) and never creates", async () => {
+    mockUsers({
+      [STRANGER1]: { id: STRANGER1, role: "APP_USER" },
+      [STRANGER2]: { id: STRANGER2, role: "APP_USER" },
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT])) // neither endpoint in the tree
+
+    const res = await addRelation(ROOT, { fromId: STRANGER1, toId: STRANGER2, type: "SIBLING" })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
+    expect(prismaMock.familyRelation.create).not.toHaveBeenCalled()
+  })
+
+  it("rejects attaching a foreign ghost/memorial to root (no consent gate protects it)", async () => {
+    mockUsers({
+      [ROOT]: { id: ROOT, role: "APP_USER" },
+      [FOREIGN_MEMO]: { id: FOREIGN_MEMO, role: "APP_MEMO" },
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT])) // memo not reachable from root
+
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: FOREIGN_MEMO, type: "PARENT_OF" })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
+    expect(prismaMock.familyRelation.create).not.toHaveBeenCalled()
+  })
+
+  it("allows linking two members already in root's tree", async () => {
+    mockUsers({
+      [ROOT]: { id: ROOT, role: "APP_USER" },
+      [MEMBER]: { id: MEMBER, role: "APP_GHOST" },
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT, MEMBER]))
+    prismaMock.familyRelation.findFirst.mockResolvedValue({ id: "rel-existing" })
+    prismaMock.familyRelation.create.mockResolvedValue({ id: "rel-new" })
+
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SPOUSE" })
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(prismaMock.familyRelation.create).toHaveBeenCalled()
+  })
+})
+
+describe("addGhostRelative — IDOR guard", () => {
+  it("rejects anchoring a ghost to a profile outside root's tree and never opens the transaction", async () => {
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT])) // anchor not reachable from root
+
+    const res = await addGhostRelative(ROOT, {
+      firstName: "Jane", lastName: "Doe", anchorId: FOREIGN_MEMO, kind: "parent",
+    })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
+    expect(prismaMock.$transaction).not.toHaveBeenCalled()
+  })
+
+  it("allows anchoring a ghost to a member of root's tree", async () => {
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT])) // anchor = ROOT, in tree
+    const tx = {
+      appUser: { create: vi.fn().mockResolvedValue({ id: "ghost-new" }) },
+      appUserGuardian: { create: vi.fn() },
+      familyRelation: { create: vi.fn(), findMany: vi.fn().mockResolvedValue([]) },
+    }
+    prismaMock.$transaction.mockImplementation((cb: (t: typeof tx) => unknown) => cb(tx))
+
+    const res = await addGhostRelative(ROOT, {
+      firstName: "Jane", lastName: "Doe", anchorId: ROOT, kind: "parent",
+    })
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(tx.appUser.create).toHaveBeenCalled()
+    expect(tx.familyRelation.create).toHaveBeenCalled()
   })
 })
