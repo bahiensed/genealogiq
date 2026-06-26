@@ -30,6 +30,7 @@
       "created": "Customer created successfully.",
       "hasDependents": "Cannot delete: customer has dependent records.",
       "hasSales": "Cannot delete a customer with existing sales records.",
+      "hasAppData": "Cannot delete: this funeral home still has {count} app memorial(s)/subscription(s) that would be destroyed.",
       "noOwner": "No owner user found for this customer.",
       "notFound": "Customer not found.",
       "passwordAlreadySet": "This user has already set their password.",

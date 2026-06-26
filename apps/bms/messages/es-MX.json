@@ -30,6 +30,7 @@
       "created": "Cliente creado con éxito.",
       "hasDependents": "No se puede eliminar: el cliente tiene registros dependientes.",
       "hasSales": "No se puede eliminar un cliente con registros de ventas.",
+      "hasAppData": "No se puede eliminar: esta funeraria todavía tiene {count} memorial(es)/suscripción(es) en la app que se destruirían.",
       "noOwner": "No se encontró usuario propietario para este cliente.",
       "notFound": "Cliente no encontrado.",
       "passwordAlreadySet": "Este usuario ya estableció su contraseña.",
