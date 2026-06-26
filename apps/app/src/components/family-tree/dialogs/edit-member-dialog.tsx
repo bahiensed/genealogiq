@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { updateMember } from "@/actions/family-tree"
+import { updateMember } from "@/actions/family-tree.actions"
 import type { TreePerson } from "@/queries/family-tree"
 
 interface Props {

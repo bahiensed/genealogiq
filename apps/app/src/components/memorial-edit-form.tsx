@@ -33,10 +33,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { AddressSection } from "@/components/address/address-section"
-import { getProfileEditSchema, type ProfileEditValues } from "@/schemas/profile"
+import { getProfileEditSchema, type ProfileEditValues } from "@/schemas/profile.schema"
 import { addressDefaultValues } from "@/schemas/address.schema"
-import { updateProfile } from "@/actions/profile"
-import { updateMemorial, deleteMemorial } from "@/actions/memorial"
+import { updateProfile } from "@/actions/profile.actions"
+import { updateMemorial, deleteMemorial } from "@/actions/memorial.actions"
 import { getAvatarColor } from "@/lib/avatar-color"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { useLocale, useTranslations } from "next-intl"

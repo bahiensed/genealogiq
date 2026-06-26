@@ -26,8 +26,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { cn } from "@/lib/utils"
-import { removeMember } from "@/actions/family-tree"
-import { requestGuardianship } from "@/actions/guardian"
+import { removeMember } from "@/actions/family-tree.actions"
+import { requestGuardianship } from "@/actions/guardian.actions"
 import { relationFromRoot } from "@/lib/family-relation-label"
 import { formatLongDate } from "@/lib/format-date"
 import type { TreePerson, TreeRelation } from "@/queries/family-tree"

@@ -62,7 +62,7 @@ import {
   resetPassword,
   changePassword,
   requestEmailChange,
-} from "./auth"
+} from "./auth.actions"
 import { verifySession } from "@/lib/dal"
 import { checkRateLimit } from "@/lib/rate-limit"
 import bcrypt from "bcryptjs"

@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { createMemorial } from "@/actions/memorial"
+import { createMemorial } from "@/actions/memorial.actions"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { useLocale, useTranslations } from "next-intl"
 import { getLocalizedCountries } from "@/consts/countries-data"

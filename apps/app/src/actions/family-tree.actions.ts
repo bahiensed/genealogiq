@@ -14,7 +14,7 @@ import {
   getAddGhostRelativeSchema,
   getUpdateMemberSchema,
   getUpdateRelationSchema,
-} from "@/schemas/family-tree"
+} from "@/schemas/family-tree.schema"
 import { identityTranslator } from "@/schemas/i18n"
 import { notify } from "@/lib/notifications"
 

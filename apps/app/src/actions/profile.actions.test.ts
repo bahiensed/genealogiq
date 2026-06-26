@@ -15,7 +15,7 @@ vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
 vi.mock("@/lib/blob", () => ({ deleteBlobs: vi.fn() }))
 
-import { updateProfile } from "./profile"
+import { updateProfile } from "./profile.actions"
 import { verifySession } from "@/lib/dal"
 import { deleteBlobs } from "@/lib/blob"
 

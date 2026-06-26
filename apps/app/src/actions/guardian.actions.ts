@@ -9,7 +9,7 @@ import { notify } from "@/lib/notifications"
 import {
   requestGuardianshipSchema,
   guardianshipActionSchema,
-} from "@/schemas/guardian"
+} from "@/schemas/guardian.schema"
 
 // ─── requestGuardianship ─────────────────────────────────────────────────────
 //

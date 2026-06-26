@@ -7,7 +7,7 @@ import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { resetPassword } from '@/actions/auth'
+import { resetPassword } from '@/actions/auth.actions'
 
 interface Props {
   token: string

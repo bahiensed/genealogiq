@@ -22,7 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { submitTribute, deleteTribute } from "@/actions/tribute"
+import { submitTribute, deleteTribute } from "@/actions/tribute.actions"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 
 const MAX_TEXT = 512

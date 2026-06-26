@@ -23,9 +23,9 @@ vi.mock("next-intl/server", () => ({
 }))
 // The action calls getMemorialSchema(identityTranslator).safeParse(data); stub the
 // factory so it always hands back an object whose safeParse we control per-test.
-vi.mock("@/schemas/memorial", () => ({ getMemorialSchema: () => ({ safeParse: safeParseMock }) }))
+vi.mock("@/schemas/memorial.schema", () => ({ getMemorialSchema: () => ({ safeParse: safeParseMock }) }))
 
-import { activatePhysicalQr } from "./physical-qr"
+import { activatePhysicalQr } from "./physical-qr.actions"
 import { verifySession } from "@/lib/dal"
 
 const MEMORIAL = { firstName: "Ana", lastName: "Silva" }

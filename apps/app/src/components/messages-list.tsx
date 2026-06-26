@@ -8,10 +8,10 @@ import { Check, X, User, Flower2, ArrowUpRight, Shield, ChevronDown } from "luci
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { approveTribute, rejectTribute } from "@/actions/tribute"
-import { acceptFamilyRequest, rejectFamilyRequest } from "@/actions/family-tree"
-import { approveGuardianship, rejectGuardianship } from "@/actions/guardian"
-import { loadMoreActivity } from "@/actions/messages"
+import { approveTribute, rejectTribute } from "@/actions/tribute.actions"
+import { acceptFamilyRequest, rejectFamilyRequest } from "@/actions/family-tree.actions"
+import { approveGuardianship, rejectGuardianship } from "@/actions/guardian.actions"
+import { loadMoreActivity } from "@/actions/messages.actions"
 import type { ActivityCursor, InboxItem, MessagesData } from "@/queries/notifications"
 import type { NotificationType } from '@genealogiq/db'
 

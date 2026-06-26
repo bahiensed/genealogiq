@@ -3,7 +3,7 @@
 import { useActionState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { forgotPassword } from '@/actions/auth'
+import { forgotPassword } from '@/actions/auth.actions'
 import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

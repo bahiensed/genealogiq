@@ -19,7 +19,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from '@/components/ui/input-group'
-import { changePassword } from '@/actions/auth'
+import { changePassword } from '@/actions/auth.actions'
 
 export function ChangePasswordDialog() {
   const t = useTranslations('Auth')

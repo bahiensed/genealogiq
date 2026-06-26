@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { changeSubscription, createCheckoutSession } from "@/actions/billing"
+import { changeSubscription, createCheckoutSession } from "@/actions/billing.actions"
 import type { SubscriptionRow } from "@/queries/subscriptions"
 import type { ActivePlan } from "@/queries/billing"
 
