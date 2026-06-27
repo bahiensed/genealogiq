@@ -747,9 +747,9 @@
       "selectSubscription": "Selecciona una suscripción."
     },
     "fields": {
-      "bonusSubscription": "Suscripción de bonificación:",
-      "customer": "Cliente:",
-      "totalAmount": "Monto total:"
+      "bonusSubscription": "Suscripción de bonificación",
+      "customer": "Cliente",
+      "totalAmount": "Monto total"
     },
     "hints": {
       "belowSuggested": "Por debajo de lo sugerido {amount} (2× el costo del último paquete) — ¿vendiendo con pérdida?",

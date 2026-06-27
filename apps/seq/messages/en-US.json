@@ -747,9 +747,9 @@
       "selectSubscription": "Select a subscription."
     },
     "fields": {
-      "bonusSubscription": "Bonus subscription:",
-      "customer": "Customer:",
-      "totalAmount": "Total Amount:"
+      "bonusSubscription": "Bonus subscription",
+      "customer": "Customer",
+      "totalAmount": "Total Amount"
     },
     "hints": {
       "belowSuggested": "Below suggested {amount} (2× last package cost) — selling at a loss?",
