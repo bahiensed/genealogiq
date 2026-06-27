@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Building2, Factory, IdCard, Layers, QrCode, ArrowUpRight, Trophy, UserPlus } from 'lucide-react'
 import { verifySession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
@@ -9,12 +9,12 @@ import { RevenueByPackageChart } from '@/components/dashboard/revenue-by-package
 import { CustomerGrowthChart } from '@/components/dashboard/customer-growth-chart'
 import { TopSellersCard } from '@/components/dashboard/top-sellers-card'
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-
 export default async function DashboardPage() {
   await verifySession()
   const stats = await getDashboardStats()
   const t = await getTranslations('Dashboard')
+  const locale = await getLocale()
+  const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
 
   return (
     <div className="flex flex-col gap-6">
