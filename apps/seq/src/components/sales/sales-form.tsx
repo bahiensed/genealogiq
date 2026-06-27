@@ -162,7 +162,7 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
 
   return (
     <>
-    <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-xl">
+    <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-6">
       <FieldGroup>
         {/* Customer search */}
         <Field data-invalid={!!fieldErrors.appUser || undefined}>
