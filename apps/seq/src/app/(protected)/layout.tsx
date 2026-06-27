@@ -20,8 +20,7 @@ export default async function ProtectPagesLayout({
     <SidebarProvider
       style={
         {
-          "--sidebar-width": "14rem",
-          "--sidebar-width-mobile": "14rem",
+          "--sidebar-width": "16rem",
         } as React.CSSProperties
       }
     >

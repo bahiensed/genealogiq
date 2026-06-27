@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { verifyTenantSession } from '@/lib/dal'
 import { getInventoryData } from '@/queries/sales'
 import { SalesForm } from '@/components/sales/sales-form'
-import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Separator } from '@genealogiq/ui/separator'
 
 export default async function SalesPage() {
@@ -18,6 +18,7 @@ export default async function SalesPage() {
           <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
             {t('title')}
           </CardTitle>
+          <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <Separator />
         <CardContent>

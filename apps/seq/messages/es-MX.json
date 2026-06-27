@@ -744,6 +744,7 @@
       "description": "La venta se registrará y se eliminará un QR Code del inventario. ¿Confirmar?",
       "title": "Confirmar venta"
     },
+    "description": "Selecciona el cliente, elige la suscripción de bonificación, ingresa TU precio final y completa la venta.",
     "emptyInventory": "No hay QR Codes en inventario.",
     "errors": {
       "invalidAmount": "Ingresa un monto válido.",
