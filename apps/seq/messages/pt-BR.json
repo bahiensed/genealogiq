@@ -747,9 +747,9 @@
       "selectSubscription": "Selecione uma assinatura."
     },
     "fields": {
-      "bonusSubscription": "Assinatura bônus:",
-      "customer": "Cliente:",
-      "totalAmount": "Valor total:"
+      "bonusSubscription": "Assinatura bônus",
+      "customer": "Cliente",
+      "totalAmount": "Valor total"
     },
     "hints": {
       "belowSuggested": "Abaixo do sugerido {amount} (2× o custo do último pacote) — vendendo com prejuízo?",
