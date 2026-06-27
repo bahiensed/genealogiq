@@ -177,15 +177,15 @@
   },
   "Company": {
     "fields": {
-      "cnpj": "CNPJ:",
-      "countryCode": "Código do País:",
-      "email": "E-mail:",
-      "isActive": "Empresa ativa:",
-      "legalName": "Razão Social:",
-      "municipalRegistration": "Inscrição Municipal:",
-      "phone": "Telefone:",
-      "stateRegistration": "Inscrição Estadual:",
-      "tradeName": "Nome Fantasia:"
+      "cnpj": "CNPJ",
+      "countryCode": "DDI",
+      "email": "E-mail",
+      "isActive": "Empresa ativa",
+      "legalName": "Razão Social",
+      "municipalRegistration": "Inscrição Municipal",
+      "phone": "Telefone",
+      "stateRegistration": "Inscrição Estadual",
+      "tradeName": "Nome Fantasia"
     },
     "sections": {
       "address": "Endereço"
@@ -193,6 +193,10 @@
     "title": "Dados da Empresa",
     "toasts": {
       "updated": "Dados atualizados com sucesso."
+    },
+    "status": {
+      "active": "Ativa",
+      "inactive": "Inativa"
     }
   },
   "CustomerCategories": {
@@ -210,9 +214,9 @@
     },
     "edit": "Editar categoria",
     "fields": {
-      "description": "Descrição:",
-      "isActive": "Categoria ativa:",
-      "name": "Nome:"
+      "description": "Descrição",
+      "isActive": "Categoria ativa",
+      "name": "Nome"
     },
     "new": "Nova categoria",
     "status": {
@@ -872,15 +876,15 @@
     "create": "Novo usuário",
     "edit": "Editar usuário",
     "fields": {
-      "birthDate": "Data de Nascimento:",
-      "countryCode": "Código do País:",
-      "cpf": "CPF:",
-      "email": "E-mail:",
-      "firstName": "Nome:",
-      "isActive": "Usuário ativo:",
-      "lastName": "Sobrenome:",
-      "phone": "Telefone:",
-      "role": "Função:"
+      "birthDate": "Data de Nascimento",
+      "countryCode": "DDI",
+      "cpf": "CPF",
+      "email": "E-mail",
+      "firstName": "Nome",
+      "isActive": "Usuário ativo",
+      "lastName": "Sobrenome",
+      "phone": "Telefone",
+      "role": "Função"
     },
     "new": "Novo funcionário",
     "placeholders": {
