@@ -9,7 +9,7 @@ export default async function NotFound() {
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 text-center">
       <Ghost className="h-16 w-16 text-muted-foreground opacity-40" />
       <div className="space-y-2">
-        <h1 className="text-4xl font-extrabold tracking-tight">{t("title")}</h1>
+        <h1 className="text-4xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="text-muted-foreground">{t("description")}</p>
       </div>
       <Button asChild>

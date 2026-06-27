@@ -16,7 +16,7 @@ export default async function NewMemorializedPage({ params }: { params: Promise<
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+        <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
           {t('new')}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">

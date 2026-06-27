@@ -64,7 +64,8 @@ export function AppSidebar({ modules }: AppSidebarProps) {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b px-8 py-3">
+      {/* ⬇️ altura fixa de 60px (igual ao header) + logo centralizada verticalmente */}
+      <SidebarHeader className="flex h-[60px] justify-center border-b px-6">
         <Image
           src="/logo/sign-dark.png"
           alt="Logo"

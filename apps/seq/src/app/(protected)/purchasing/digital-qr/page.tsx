@@ -29,7 +29,7 @@ export default async function PurchasingPackagesPage() {
       <Suspense fallback={null}>
         <PurchaseStatusToast />
       </Suspense>
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+      <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
         {t('digital.title')}
       </h1>
       <QRStore packages={data} />

@@ -109,7 +109,7 @@ export function CustomerNewForm({ categories = [] }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+      <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
         {t('new')}
       </h1>
 

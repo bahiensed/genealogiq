@@ -47,7 +47,7 @@ export default async function PhysicalQrDetailPage({
         <Link href="/inventory/physical-qr" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground w-fit">
           <ArrowLeft className="h-4 w-4" /> {t('detail.backToInventory')}
         </Link>
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+        <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
           {t('detail.title')}
         </h1>
         <p className="font-mono text-sm tracking-wider text-muted-foreground">{formatGenCode(license.genCode)}</p>
