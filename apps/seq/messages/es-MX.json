@@ -768,6 +768,36 @@
     },
     "title": "Ventas"
   },
+  "Sidebar": {
+    "groups": {
+      "system": "Sistema",
+      "records": "Registros",
+      "categories": "Categorías",
+      "purchasing": "Compras",
+      "inventory": "Inventario",
+      "sales": "Ventas",
+      "finance": "Finanzas"
+    },
+    "items": {
+      "dashboard": "Panel",
+      "buyPhysicalQr": "Comprar Códigos QR Físicos",
+      "myPhysicalQr": "Mis Códigos QR Físicos",
+      "buyDigitalQr": "Comprar Códigos QR Digitales",
+      "myDigitalQr": "Mis Códigos QR Digitales",
+      "customers": "Clientes",
+      "sales": "Ventas",
+      "companyData": "Datos de la Empresa",
+      "employees": "Empleados",
+      "suppliers": "Proveedores",
+      "products": "Productos",
+      "services": "Servicios",
+      "supplierCategories": "Categorías de Proveedores",
+      "productCategories": "Categorías de Productos",
+      "serviceCategories": "Categorías de Servicios",
+      "customerCategories": "Categorías de Clientes",
+      "finance": "Finanzas"
+    }
+  },
   "SupplierCategories": {
     "actions": {
       "deactivate": "Desactivar",
