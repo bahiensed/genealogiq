@@ -171,15 +171,16 @@
   },
   "Company": {
     "fields": {
-      "cnpj": "RFC:",
-      "countryCode": "Código de país:",
-      "email": "Correo electrónico:",
-      "isActive": "Empresa activa:",
-      "legalName": "Razón Social:",
-      "municipalRegistration": "Inscripción Municipal:",
-      "phone": "Teléfono:",
-      "stateRegistration": "Inscripción Estatal:",
-      "tradeName": "Nombre Comercial:"
+      "active": "Activa",
+      "cnpj": "RFC",
+      "countryCode": "Clave",
+      "email": "Correo electrónico",
+      "inactive": "Inactiva",
+      "legalName": "Razón Social",
+      "municipalRegistration": "Inscripción Municipal",
+      "phone": "Teléfono",
+      "stateRegistration": "Inscripción Estatal",
+      "tradeName": "Nombre Comercial"
     },
     "save": "Guardar cambios",
     "sections": {
@@ -201,9 +202,9 @@
     "create": "Crear categoría",
     "editPage": "Editar categoría de cliente",
     "fields": {
-      "active": "Categoría activa:",
-      "description": "Descripción:",
-      "name": "Nombre:"
+      "active": "Categoría activa",
+      "description": "Descripción",
+      "name": "Nombre"
     },
     "new": "Nueva categoría",
     "newPage": "Nueva categoría de cliente",
@@ -244,23 +245,23 @@
       "individual": "Persona física"
     },
     "fields": {
-      "birthDate": "Fecha de nacimiento:",
-      "category": "Categoría:",
-      "cnpj": "RFC:",
-      "companyName": "Razón social:",
-      "countryCode": "Código de país:",
-      "cpf": "RFC:",
-      "email": "Correo:",
-      "firstName": "Nombre:",
-      "lastName": "Apellido:",
-      "municipalRegistration": "Inscripción municipal:",
-      "municipalRegistrationShort": "Insc. mun.:",
-      "notes": "Notas:",
-      "phone": "Teléfono:",
-      "stateRegistration": "Inscripción estatal:",
-      "stateRegistrationShort": "Insc. est.:",
-      "tradeName": "Nombre comercial:",
-      "type": "Tipo:"
+      "birthDate": "Fecha de nacimiento",
+      "category": "Categoría",
+      "cnpj": "RFC",
+      "companyName": "Razón social",
+      "countryCode": "Clave",
+      "cpf": "RFC",
+      "email": "Correo",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "municipalRegistration": "Inscripción municipal",
+      "municipalRegistrationShort": "Insc. mun.",
+      "notes": "Notas",
+      "phone": "Teléfono",
+      "stateRegistration": "Inscripción estatal",
+      "stateRegistrationShort": "Insc. est.",
+      "tradeName": "Nombre comercial",
+      "type": "Tipo"
     },
     "hints": {
       "addressOptional": "La dirección es opcional y se puede completar más tarde.",
@@ -382,16 +383,16 @@
     },
     "edit": "Editar cupón de descuento",
     "fields": {
-      "amount": "Monto ($):",
-      "appliesTo": "Aplica a paquetes específicos (opcional):",
-      "code": "Código:",
-      "description": "Descripción:",
-      "discountType": "Tipo de descuento:",
-      "duration": "Duración:",
-      "durationInMonths": "Duración en meses:",
-      "expiresOn": "Vence el:",
-      "maxRedemptions": "Máximo de canjes:",
-      "percent": "Porcentaje (0-100):"
+      "amount": "Monto ($)",
+      "appliesTo": "Aplica a paquetes específicos (opcional)",
+      "code": "Código",
+      "description": "Descripción",
+      "discountType": "Tipo de descuento",
+      "duration": "Duración",
+      "durationInMonths": "Duración en meses",
+      "expiresOn": "Vence el",
+      "maxRedemptions": "Máximo de canjes",
+      "percent": "Porcentaje (0-100)"
     },
     "hints": {
       "appliesTo": "Deja todo sin marcar para aplicar a todos los paquetes.",
@@ -480,10 +481,10 @@
     "createButton": "Crear {noun}",
     "edit": "Editar {noun}",
     "fields": {
-      "description": "Descripción:",
-      "name": "Nombre del {noun}:",
-      "price": "Precio (US$):",
-      "quantity": "Cantidad de Códigos QR:"
+      "description": "Descripción",
+      "name": "Nombre del {noun}",
+      "price": "Precio (US$)",
+      "quantity": "Cantidad de Códigos QR"
     },
     "new": "Nuevo {noun}",
     "newPackage": "Nuevo paquete",
@@ -557,9 +558,9 @@
       "title": "Confirmar venta"
     },
     "fields": {
-      "customer": "Cliente:",
-      "package": "Paquete:",
-      "quantity": "Cantidad de Paquetes:"
+      "customer": "Cliente",
+      "package": "Paquete",
+      "quantity": "Cantidad de Paquetes"
     },
     "new": "Nueva Venta de Paquete de Códigos QR",
     "newButton": "Nueva venta",
@@ -624,19 +625,19 @@
     "create": "Crear suscripción",
     "edit": "Editar Suscripción",
     "fields": {
-      "bioMaxChars": "Máximo de Caracteres de la Bio:",
-      "bioMaxImages": "Máximo de Imágenes de la Bio:",
-      "code": "Código:",
-      "description": "Descripción:",
-      "galleryMaxImages": "Máximo de Imágenes de la Galería:",
-      "galleryMaxVideos": "Máximo de Videos de la Galería:",
+      "bioMaxChars": "Máximo de Caracteres de la Bio",
+      "bioMaxImages": "Máximo de Imágenes de la Bio",
+      "code": "Código",
+      "description": "Descripción",
+      "galleryMaxImages": "Máximo de Imágenes de la Galería",
+      "galleryMaxVideos": "Máximo de Videos de la Galería",
       "geolocationFullAccess": "Acceso Total a la Geolocalización",
-      "maxProfiles": "Máximo de Perfiles Memo:",
-      "name": "Nombre:",
-      "price": "Precio (US$):",
+      "maxProfiles": "Máximo de Perfiles Memo",
+      "name": "Nombre",
+      "price": "Precio (US$)",
       "qrCodeAccess": "Acceso al Código QR",
-      "termLength": "Duración (en meses):",
-      "treeMaxMembers": "Máximo de Miembros del Árbol Genealógico:"
+      "termLength": "Duración (en meses)",
+      "treeMaxMembers": "Máximo de Miembros del Árbol Genealógico"
     },
     "free": "Gratis",
     "hints": {
@@ -689,9 +690,9 @@
     "create": "Crear categoría",
     "edit": "Editar categoría de proveedor",
     "fields": {
-      "activeCategory": "Categoría activa:",
-      "description": "Descripción:",
-      "name": "Nombre:"
+      "activeCategory": "Categoría activa",
+      "description": "Descripción",
+      "name": "Nombre"
     },
     "new": "Nueva categoría de proveedor",
     "status": {
@@ -736,21 +737,21 @@
       "individual": "Persona Física"
     },
     "fields": {
-      "birthDate": "Fecha de Nacimiento:",
-      "category": "Categoría:",
-      "cnpj": "RFC:",
-      "companyName": "Razón Social:",
-      "countryCode": "Código de País:",
-      "cpf": "RFC:",
-      "email": "Correo electrónico:",
-      "firstName": "Nombre:",
-      "lastName": "Apellido:",
-      "municipalRegistration": "Inscripción Municipal:",
-      "notes": "Notas:",
-      "phone": "Teléfono:",
-      "stateRegistration": "Inscripción Estatal:",
-      "tradeName": "Nombre Comercial:",
-      "type": "Tipo:"
+      "birthDate": "Fecha de Nacimiento",
+      "category": "Categoría",
+      "cnpj": "RFC",
+      "companyName": "Razón Social",
+      "countryCode": "Clave",
+      "cpf": "RFC",
+      "email": "Correo electrónico",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "municipalRegistration": "Inscripción Municipal",
+      "notes": "Notas",
+      "phone": "Teléfono",
+      "stateRegistration": "Inscripción Estatal",
+      "tradeName": "Nombre Comercial",
+      "type": "Tipo"
     },
     "new": "Nuevo proveedor",
     "placeholders": {
