@@ -12,6 +12,8 @@ import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
 import { Switch } from '@genealogiq/ui/switch'
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
+import { Separator } from '@genealogiq/ui/separator'
 import { Field, FieldError, FieldLabel } from '@genealogiq/ui/field'
 import { CurrencyInput } from '@/components/ui/currency-input'
 
@@ -107,135 +109,146 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-3xl">
-      <div className="flex items-center justify-between">
-        <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-          {isEditing ? t('edit') : t('new')}
-        </h1>
-        {isEditing && (
-          <Controller
-            name="isActive"
-            control={control}
-            render={({ field }) => (
-              <div className="flex items-center gap-2">
-                <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
-                <label htmlFor="isActive" className="text-sm cursor-pointer">{t('active')}</label>
-              </div>
-            )}
-          />
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Controller
-          name="code"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>{t('fields.code')}</FieldLabel>
-              <Input
-                {...field}
-                autoComplete="off"
-                aria-invalid={fieldState.invalid}
-                disabled={isFreePlan}
-                onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                placeholder={t('placeholders.code')}
+    <div className="mx-auto max-w-3xl">
+      <Card>
+        <CardHeader>
+          <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
+            {isEditing ? t('edit') : t('new')}
+          </CardTitle>
+          {isEditing && (
+            <CardAction>
+              <Controller
+                name="isActive"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center gap-2">
+                    <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
+                    <label htmlFor="isActive" className="text-sm cursor-pointer">
+                      {field.value ? t('status.active') : t('status.inactive')}
+                    </label>
+                  </div>
+                )}
               />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              <p className="text-xs text-muted-foreground">
-                {isFreePlan ? t('hints.freeCodeReserved') : t('hints.code')}
-              </p>
-            </Field>
+            </CardAction>
           )}
-        />
-        <Controller
-          name="name"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid} className="lg:col-span-2">
-              <FieldLabel>{t('fields.name')}</FieldLabel>
-              <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+        </CardHeader>
+        <Separator />
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <Controller
+                name="code"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t('fields.code')}</FieldLabel>
+                    <Input
+                      {...field}
+                      autoComplete="off"
+                      aria-invalid={fieldState.invalid}
+                      disabled={isFreePlan}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                      placeholder={t('placeholders.code')}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    <p className="text-xs text-muted-foreground">
+                      {isFreePlan ? t('hints.freeCodeReserved') : t('hints.code')}
+                    </p>
+                  </Field>
+                )}
+              />
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid} className="lg:col-span-2">
+                    <FieldLabel>{t('fields.name')}</FieldLabel>
+                    <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <IntField control={control} name="maxProfiles" label={t('fields.maxProfiles')} min={1} />
+              <IntField control={control} name="treeMaxMembers" label={t('fields.treeMaxMembers')} />
+              <div />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <IntField control={control} name="bioMaxChars" label={t('fields.bioMaxChars')} />
+              <IntField control={control} name="bioMaxImages" label={t('fields.bioMaxImages')} />
+              <div />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <IntField control={control} name="galleryMaxImages" label={t('fields.galleryMaxImages')} />
+              <IntField control={control} name="galleryMaxVideos" label={t('fields.galleryMaxVideos')} />
+              <div />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <SwitchField control={control} name="geolocationFullAccess" label={t('fields.geolocationFullAccess')} />
+              <SwitchField control={control} name="qrCodeAccess" label={t('fields.qrCodeAccess')} />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <IntField
+                control={control}
+                name="termLength"
+                label={t('fields.termLength')}
+                helper={t('hints.termLength')}
+              />
+              <Controller
+                name="price"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t('fields.price')}</FieldLabel>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">$</span>
+                      <CurrencyInput
+                        className="pl-7"
+                        value={field.value}
+                        onChange={field.onChange}
+                        autoComplete="off"
+                        aria-invalid={fieldState.invalid}
+                      />
+                    </div>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    <p className="text-xs text-muted-foreground">{t('hints.price')}</p>
+                  </Field>
+                )}
+              />
+              <div />
+            </div>
+
+            <Controller
+              name="description"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>{t('fields.description')}</FieldLabel>
+                  <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={256} aria-invalid={fieldState.invalid} />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+
+            {serverError && <FieldError>{serverError}</FieldError>}
+            <Field orientation="horizontal">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? tc('saving') : isEditing ? tc('save') : t('create')}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => form.reset()}>
+                {tc('reset')}
+              </Button>
             </Field>
-          )}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <IntField control={control} name="maxProfiles" label={t('fields.maxProfiles')} min={1} />
-        <IntField control={control} name="treeMaxMembers" label={t('fields.treeMaxMembers')} />
-        <div />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <IntField control={control} name="bioMaxChars" label={t('fields.bioMaxChars')} />
-        <IntField control={control} name="bioMaxImages" label={t('fields.bioMaxImages')} />
-        <div />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <IntField control={control} name="galleryMaxImages" label={t('fields.galleryMaxImages')} />
-        <IntField control={control} name="galleryMaxVideos" label={t('fields.galleryMaxVideos')} />
-        <div />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <SwitchField control={control} name="geolocationFullAccess" label={t('fields.geolocationFullAccess')} />
-        <SwitchField control={control} name="qrCodeAccess" label={t('fields.qrCodeAccess')} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <IntField
-          control={control}
-          name="termLength"
-          label={t('fields.termLength')}
-          helper={t('hints.termLength')}
-        />
-        <Controller
-          name="price"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>{t('fields.price')}</FieldLabel>
-              <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">$</span>
-                <CurrencyInput
-                  className="pl-7"
-                  value={field.value}
-                  onChange={field.onChange}
-                  autoComplete="off"
-                  aria-invalid={fieldState.invalid}
-                />
-              </div>
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              <p className="text-xs text-muted-foreground">{t('hints.price')}</p>
-            </Field>
-          )}
-        />
-        <div />
-      </div>
-
-      <Controller
-        name="description"
-        control={control}
-        render={({ field, fieldState }) => (
-          <Field data-invalid={fieldState.invalid}>
-            <FieldLabel>{t('fields.description')}</FieldLabel>
-            <Textarea {...field} value={field.value ?? ''} rows={3} maxLength={256} aria-invalid={fieldState.invalid} />
-            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-          </Field>
-        )}
-      />
-
-      {serverError && <FieldError>{serverError}</FieldError>}
-      <Field orientation="horizontal">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? tc('saving') : isEditing ? tc('save') : t('create')}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => form.reset()}>
-          {tc('reset')}
-        </Button>
-      </Field>
-    </form>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
