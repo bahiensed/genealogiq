@@ -73,13 +73,13 @@
       "requestResolved": "Solicitud ya resuelta."
     },
     "memorial": {
-      "noQrCodes": "No hay códigos QR disponibles. Compra un código QR para crear más perfiles.",
+      "noQrCodes": "No hay QR Codes disponibles. Compra un QR Code para crear más perfiles.",
       "notAuthorized": "No tienes permiso para gestionar este perfil.",
       "notFound": "Perfil no encontrado."
     },
     "physicalQr": {
       "alreadyActivated": "Este código ya fue activado.",
-      "notFound": "Código QR no encontrado.",
+      "notFound": "QR Code no encontrado.",
       "raceRetry": "Este código acaba de ser activado. Inténtalo de nuevo."
     },
     "tribute": {
@@ -89,8 +89,8 @@
     }
   },
   "Auth": {
-    "activateDescription": "Ingresa el código de activación impreso en tu código QR físico para vincularlo a un memorial.",
-    "activateTitle": "Activa tu código QR",
+    "activateDescription": "Ingresa el código de activación impreso en tu QR Code físico para vincularlo a un memorial.",
+    "activateTitle": "Activa tu QR Code",
     "alreadyHaveAccount": "¿Ya tienes una cuenta?",
     "backToSignIn": "Volver al inicio de sesión",
     "changeEmailDescription": "Se enviará un enlace de confirmación a la nueva dirección",
@@ -119,7 +119,7 @@
     "forgotSentTitle": "Correo enviado",
     "forgotTitle": "¿Olvidaste tu contraseña?",
     "goToSignIn": "Ir al inicio de sesión",
-    "haveQrCode": "¿Tienes un código QR físico? Actívalo",
+    "haveQrCode": "¿Tienes un QR Code físico? Actívalo",
     "hidePassword": "Ocultar contraseña",
     "lastName": "Apellido",
     "newEmailLabel": "Nuevo correo:",
@@ -726,12 +726,12 @@
     "guardianTitle": "Perfiles a tu cuidado",
     "mapAlt": "Mapa",
     "memorialized": "Conmemorado",
-    "qrAlt": "Código QR",
+    "qrAlt": "QR Code",
     "qrDescription": "Para placas, lápidas y espacios digitales por igual",
     "qrMetricNotGenerated": "Aún no generado",
     "qrMetricPurchase": "Compra para desbloquear",
     "qrMetricReady": "Listo para imprimir",
-    "qrTitle": "Código QR",
+    "qrTitle": "QR Code",
     "removeFromFavorites": "Quitar de favoritos",
     "tooltipFavorites": "Favoritos",
     "tooltipGuarded": "Perfiles a tu cuidado",
@@ -787,9 +787,9 @@
     "billing": {
       "backToHome": "Volver al inicio",
       "compareAllPlans": "Comparar todos los planes",
-      "noPackages": "No hay paquetes de código QR disponibles en este momento.",
-      "subtitle": "Un código QR, escaneable para siempre — para placas, lápidas y espacios digitales",
-      "title": "Obtener un código QR"
+      "noPackages": "No hay paquetes de QR Code disponibles en este momento.",
+      "subtitle": "Un QR Code, escaneable para siempre — para placas, lápidas y espacios digitales",
+      "title": "Obtener un QR Code"
     },
     "client": {
       "copyLink": "Copiar enlace",
@@ -799,7 +799,7 @@
     },
     "landing": {
       "createAccount": "Crear cuenta",
-      "description": "Este código QR está listo para vincularse a un perfil conmemorativo.",
+      "description": "Este QR Code está listo para vincularse a un perfil conmemorativo.",
       "signIn": "Iniciar sesión",
       "title": "Crear un memorial"
     },
@@ -831,28 +831,28 @@
     },
     "profilePage": {
       "backToProfile": "Volver al perfil",
-      "noQrYet": "Aún no hay código QR.",
-      "purchase": "Adquirir código QR",
+      "noQrYet": "Aún no hay QR Code.",
+      "purchase": "Adquirir QR Code",
       "subtitle": "Para placas, lápidas y espacios digitales",
-      "title": "Código QR",
-      "unlockDescription": "Este memorial está en el plan gratuito. Adquiere un código QR para imprimirlo en placas, lápidas y espacios digitales — conserva su memoria en cualquier lugar, escaneable para siempre.",
-      "unlockTitle": "Desbloquea tu código QR"
+      "title": "QR Code",
+      "unlockDescription": "Este memorial está en el plan gratuito. Adquiere un QR Code para imprimirlo en placas, lápidas y espacios digitales — conserva su memoria en cualquier lugar, escaneable para siempre.",
+      "unlockTitle": "Desbloquea tu QR Code"
     },
     "scanButton": {
-      "aria": "Escanear código QR",
-      "labelLong": "Escanear un código QR",
+      "aria": "Escanear QR Code",
+      "labelLong": "Escanear un QR Code",
       "labelShort": "Escanear QR"
     },
     "scanner": {
       "cameraStartFailed": "No se pudo iniciar la cámara.",
       "closeAria": "Cerrar lector",
-      "dialogLabel": "Lector de código QR",
-      "invalidCode": "Código QR inválido.",
-      "notValidProfile": "El código QR no apunta a un perfil válido.",
+      "dialogLabel": "Lector de QR Code",
+      "invalidCode": "QR Code inválido.",
+      "notValidProfile": "El QR Code no apunta a un perfil válido.",
       "permissionDeniedHint": "Permite el acceso a la cámara en la configuración de tu navegador e inténtalo de nuevo.",
       "permissionDeniedTitle": "Acceso a la cámara denegado",
-      "pointCamera": "Apunta la cámara hacia un código QR de Genealogiq",
-      "title": "Escanear un código QR"
+      "pointCamera": "Apunta la cámara hacia un QR Code de Genealogiq",
+      "title": "Escanear un QR Code"
     }
   },
   "Subscriptions": {
@@ -880,8 +880,8 @@
       "gpsAddressOnly": "Solo dirección (sin marcador GPS)",
       "gpsPrecise": "Coordenadas GPS precisas",
       "memorialSlots": "{count, plural, one {# espacio de memorial por compra} other {# espacios de memorial por compra}}",
-      "qrIncluded": "Código QR para placas y lápidas",
-      "qrPaidOnly": "Código QR en los planes de pago",
+      "qrIncluded": "QR Code para placas y lápidas",
+      "qrPaidOnly": "QR Code en los planes de pago",
       "treeMembers": "{count} miembros en el árbol genealógico"
     },
     "freePrice": "Gratis",
@@ -890,10 +890,10 @@
     "payAnnually": "Pagar anualmente {price}",
     "payMonthly": "Pagar mensualmente {price}",
     "qrGate": {
-      "description": "Este memorial está en el plan gratuito. Compra un código QR para imprimirlo en placas, lápidas y espacios digitales — conserva su memoria en cualquier lugar, escaneable para siempre.",
+      "description": "Este memorial está en el plan gratuito. Compra un QR Code para imprimirlo en placas, lápidas y espacios digitales — conserva su memoria en cualquier lugar, escaneable para siempre.",
       "maybeLater": "Quizás más tarde",
-      "purchase": "Comprar código QR",
-      "title": "Desbloquea tu código QR"
+      "purchase": "Comprar QR Code",
+      "title": "Desbloquea tu QR Code"
     },
     "tagline": "La forma perfecta de mantener el vínculo",
     "term": {

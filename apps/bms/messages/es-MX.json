@@ -400,7 +400,7 @@
     },
     "loadError": "No se pudieron cargar los cupones: {message}. Revisa los registros de funciones en Vercel para más detalles.",
     "new": "Nuevo cupón",
-    "packageMeta": "{quantity} códigos QR · {price}",
+    "packageMeta": "{quantity} QR Codes · {price}",
     "placeholders": {
       "code": "WELCOME10",
       "descriptionCreate": "Nota interna opcional",
@@ -484,7 +484,7 @@
       "description": "Descripción",
       "name": "Nombre del {noun}",
       "price": "Precio (US$)",
-      "quantity": "Cantidad de Códigos QR"
+      "quantity": "Cantidad de QR Codes"
     },
     "new": "Nuevo {noun}",
     "newPackage": "Nuevo paquete",
@@ -493,7 +493,7 @@
       "package": "Paquete",
       "product": "Producto"
     },
-    "physicalTitle": "Códigos QR Físicos",
+    "physicalTitle": "QR Codes Físicos",
     "saveChanges": "Guardar cambios",
     "status": {
       "active": "Activo",
@@ -519,10 +519,10 @@
       "emptyProduct": "Aún no hay productos de QR físico.",
       "name": "Nombre del {noun}",
       "price": "Precio del {noun}",
-      "quantity": "Códigos QR / Paquete",
+      "quantity": "QR Codes / Paquete",
       "status": "Estado"
     },
-    "title": "Códigos QR Digitales (B2B)",
+    "title": "QR Codes Digitales (B2B)",
     "toasts": {
       "deactivated": "Paquete desactivado.",
       "deleteConfirm": "El paquete \"{name}\" se eliminará permanentemente.",
@@ -533,13 +533,13 @@
       "digital": "Digital",
       "physical": "Físico"
     },
-    "unitPrice": "Precio unitario por código QR"
+    "unitPrice": "Precio unitario por QR Code"
   },
   "PhysicalQr": {
     "table": {
       "activated": "Activados",
       "available": "Disponibles",
-      "empty": "No se encontraron códigos QR físicos.",
+      "empty": "No se encontraron QR Codes físicos.",
       "package": "Paquete",
       "saleDate": "Fecha de venta",
       "tenant": "Inquilino",
@@ -562,7 +562,7 @@
       "package": "Paquete",
       "quantity": "Cantidad de Paquetes"
     },
-    "new": "Nueva Venta de Paquete de Códigos QR",
+    "new": "Nueva Venta de Paquete de QR Codes",
     "newButton": "Nueva venta",
     "packageOption": {
       "codes": "{count, plural, one {# código} other {# códigos}}"
@@ -577,7 +577,7 @@
     },
     "reverse": {
       "confirm": "Revertir venta",
-      "descriptionDigital": "La venta del paquete \"{package}\" a \"{customer}\" se marcará como revertida y los códigos QR se devolverán al inventario. El registro se conserva con fines de auditoría.",
+      "descriptionDigital": "La venta del paquete \"{package}\" a \"{customer}\" se marcará como revertida y los QR Codes se devolverán al inventario. El registro se conserva con fines de auditoría.",
       "descriptionPhysical": "La venta del paquete \"{package}\" a \"{customer}\" se marcará como revertida. Los códigos de licencia disponibles se invalidarán. Los códigos ya activados permanecen vinculados a sus memoriales. El registro se conserva con fines de auditoría.",
       "reversing": "Revirtiendo…",
       "title": "Confirmar reversión"
@@ -589,7 +589,7 @@
     "submit": "Registrar Venta",
     "submitting": "Enviando…",
     "summary": {
-      "digitalCodes": "Códigos QR a agregar al inventario",
+      "digitalCodes": "QR Codes a agregar al inventario",
       "physicalCodes": "Códigos de licencia físicos a generar",
       "totalPrice": "Precio total",
       "unitPrice": "Precio unitario / código"
@@ -603,9 +603,9 @@
       "quantity": "Cant. de Paquetes",
       "seller": "Vendedor",
       "status": "Estado",
-      "subscriptionUnitPrice": "Precio Un. Código QR",
+      "subscriptionUnitPrice": "Precio Un. QR Code",
       "totalPrice": "Precio Total del Pedido",
-      "totalSubscriptions": "Códigos QR / Paquete"
+      "totalSubscriptions": "QR Codes / Paquete"
     },
     "title": "Ventas Manuales",
     "toasts": {
@@ -635,7 +635,7 @@
       "maxProfiles": "Máximo de Perfiles Memo",
       "name": "Nombre",
       "price": "Precio (US$)",
-      "qrCodeAccess": "Acceso al Código QR",
+      "qrCodeAccess": "Acceso al QR Code",
       "termLength": "Duración (en meses)",
       "treeMaxMembers": "Máximo de Miembros del Árbol Genealógico"
     },
@@ -667,7 +667,7 @@
       "maxProfiles": "Memo",
       "name": "Nombre",
       "price": "Precio",
-      "qrCode": "Código QR",
+      "qrCode": "QR Code",
       "status": "Estado",
       "term": "Duración"
     },

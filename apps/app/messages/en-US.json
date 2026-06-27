@@ -79,7 +79,7 @@
     },
     "physicalQr": {
       "alreadyActivated": "This code has already been activated.",
-      "notFound": "QR code not found.",
+      "notFound": "QR Code not found.",
       "raceRetry": "This code was just activated. Please try again."
     },
     "tribute": {
@@ -89,8 +89,8 @@
     }
   },
   "Auth": {
-    "activateDescription": "Enter the activation code printed on your physical QR code to link it to a memorial.",
-    "activateTitle": "Activate your QR code",
+    "activateDescription": "Enter the activation code printed on your physical QR Code to link it to a memorial.",
+    "activateTitle": "Activate your QR Code",
     "alreadyHaveAccount": "Already have an account?",
     "backToSignIn": "Back to sign in",
     "changeEmailDescription": "A confirmation link will be sent to the new address",
@@ -119,7 +119,7 @@
     "forgotSentTitle": "E-mail sent",
     "forgotTitle": "Forgot your password?",
     "goToSignIn": "Go to sign in",
-    "haveQrCode": "Have a physical QR code? Activate it",
+    "haveQrCode": "Have a physical QR Code? Activate it",
     "hidePassword": "Hide password",
     "lastName": "Last name",
     "newEmailLabel": "New e-mail:",
@@ -726,7 +726,7 @@
     "guardianTitle": "Guarded profiles",
     "mapAlt": "Map",
     "memorialized": "Memorialized",
-    "qrAlt": "QR code",
+    "qrAlt": "QR Code",
     "qrDescription": "For plaques, headstones and digital spaces alike",
     "qrMetricNotGenerated": "Not yet generated",
     "qrMetricPurchase": "Purchase to unlock",
@@ -799,7 +799,7 @@
     },
     "landing": {
       "createAccount": "Create account",
-      "description": "This QR code is ready to be linked to a memorial profile.",
+      "description": "This QR Code is ready to be linked to a memorial profile.",
       "signIn": "Sign in",
       "title": "Create a Memorial"
     },
@@ -839,20 +839,20 @@
       "unlockTitle": "Unlock your QR-Code"
     },
     "scanButton": {
-      "aria": "Scan QR code",
-      "labelLong": "Scan a QR code",
+      "aria": "Scan QR Code",
+      "labelLong": "Scan a QR Code",
       "labelShort": "Scan QR"
     },
     "scanner": {
       "cameraStartFailed": "Could not start camera.",
       "closeAria": "Close scanner",
-      "dialogLabel": "QR code scanner",
-      "invalidCode": "Invalid QR code.",
-      "notValidProfile": "QR code does not point to a valid profile.",
+      "dialogLabel": "QR Code scanner",
+      "invalidCode": "Invalid QR Code.",
+      "notValidProfile": "QR Code does not point to a valid profile.",
       "permissionDeniedHint": "Allow camera access in your browser settings and try again.",
       "permissionDeniedTitle": "Camera access denied",
-      "pointCamera": "Point the camera at a Genealogiq QR code",
-      "title": "Scan a QR code"
+      "pointCamera": "Point the camera at a Genealogiq QR Code",
+      "title": "Scan a QR Code"
     }
   },
   "Subscriptions": {

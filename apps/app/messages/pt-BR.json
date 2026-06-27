@@ -79,7 +79,7 @@
     },
     "physicalQr": {
       "alreadyActivated": "Este código já foi ativado.",
-      "notFound": "Código QR não encontrado.",
+      "notFound": "QR Code não encontrado.",
       "raceRetry": "Este código acabou de ser ativado. Tente novamente."
     },
     "tribute": {
@@ -89,8 +89,8 @@
     }
   },
   "Auth": {
-    "activateDescription": "Digite o código de ativação impresso no seu QR code físico para vinculá-lo a um memorial.",
-    "activateTitle": "Ative seu QR code",
+    "activateDescription": "Digite o código de ativação impresso no seu QR Code físico para vinculá-lo a um memorial.",
+    "activateTitle": "Ative seu QR Code",
     "alreadyHaveAccount": "Já tem uma conta?",
     "backToSignIn": "Voltar para o login",
     "changeEmailDescription": "Um link de confirmação será enviado para o novo endereço",
@@ -119,7 +119,7 @@
     "forgotSentTitle": "E-mail enviado",
     "forgotTitle": "Esqueceu sua senha?",
     "goToSignIn": "Ir para o login",
-    "haveQrCode": "Tem um QR code físico? Ative-o",
+    "haveQrCode": "Tem um QR Code físico? Ative-o",
     "hidePassword": "Ocultar senha",
     "lastName": "Sobrenome",
     "newEmailLabel": "Novo e-mail:",
@@ -726,12 +726,12 @@
     "guardianTitle": "Perfis sob guarda",
     "mapAlt": "Mapa",
     "memorialized": "Memorializado",
-    "qrAlt": "Código QR",
+    "qrAlt": "QR Code",
     "qrDescription": "Para placas, lápides e espaços digitais",
     "qrMetricNotGenerated": "Ainda não gerado",
     "qrMetricPurchase": "Compre para desbloquear",
     "qrMetricReady": "Pronto para imprimir",
-    "qrTitle": "Código QR",
+    "qrTitle": "QR Code",
     "removeFromFavorites": "Remover dos favoritos",
     "tooltipFavorites": "Favoritos",
     "tooltipGuarded": "Perfis sob sua guarda",
@@ -799,7 +799,7 @@
     },
     "landing": {
       "createAccount": "Criar conta",
-      "description": "Este QR code está pronto para ser vinculado a um perfil memorial.",
+      "description": "Este QR Code está pronto para ser vinculado a um perfil memorial.",
       "signIn": "Entrar",
       "title": "Criar um memorial"
     },
@@ -839,20 +839,20 @@
       "unlockTitle": "Desbloqueie seu QR Code"
     },
     "scanButton": {
-      "aria": "Ler QR code",
-      "labelLong": "Ler um QR code",
+      "aria": "Ler QR Code",
+      "labelLong": "Ler um QR Code",
       "labelShort": "Ler QR"
     },
     "scanner": {
       "cameraStartFailed": "Não foi possível iniciar a câmera.",
       "closeAria": "Fechar leitor",
-      "dialogLabel": "Leitor de QR code",
-      "invalidCode": "QR code inválido.",
-      "notValidProfile": "O QR code não aponta para um perfil válido.",
+      "dialogLabel": "Leitor de QR Code",
+      "invalidCode": "QR Code inválido.",
+      "notValidProfile": "O QR Code não aponta para um perfil válido.",
       "permissionDeniedHint": "Permita o acesso à câmera nas configurações do navegador e tente novamente.",
       "permissionDeniedTitle": "Acesso à câmera negado",
-      "pointCamera": "Aponte a câmera para um QR code da Genealogiq",
-      "title": "Ler um QR code"
+      "pointCamera": "Aponte a câmera para um QR Code da Genealogiq",
+      "title": "Ler um QR Code"
     }
   },
   "Subscriptions": {
