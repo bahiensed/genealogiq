@@ -22,6 +22,7 @@ export function DigitalQrStatementTable({ data }: { data: StatementRow[] }) {
     <DataTable
       columns={getColumns(t, locale)}
       data={data}
+      filterColumn="description"
       emptyMessage={t('digital.empty')}
       columnLabels={columnLabels}
     />
