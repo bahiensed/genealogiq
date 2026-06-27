@@ -16,9 +16,9 @@ export {
 
 import { unmaskDigits, maskPhone } from '@genealogiq/core'
 
-export function maskUsdAmount(digits: string): string {
+export function maskUsdAmount(digits: string, locale = 'en-US'): string {
   if (!digits) return ''
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(parseInt(digits, 10) / 100)

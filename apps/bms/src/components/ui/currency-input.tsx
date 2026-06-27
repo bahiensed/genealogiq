@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useLocale } from 'next-intl'
 import { Input } from '@genealogiq/ui/input'
 import { maskUsdAmount } from '@/lib/masks'
 
@@ -10,6 +11,7 @@ interface CurrencyInputProps extends Omit<React.ComponentProps<typeof Input>, 'v
 }
 
 export function CurrencyInput({ value, onChange, ...props }: CurrencyInputProps) {
+  const locale = useLocale()
   const digits = Math.round(value * 100).toString()
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -22,7 +24,7 @@ export function CurrencyInput({ value, onChange, ...props }: CurrencyInputProps)
       {...props}
       type="text"
       inputMode="numeric"
-      value={maskUsdAmount(digits)}
+      value={maskUsdAmount(digits, locale)}
       onChange={handleChange}
     />
   )

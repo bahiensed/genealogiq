@@ -1,13 +1,15 @@
+import { getLocale } from 'next-intl/server'
 import { Avatar, AvatarFallback } from '@genealogiq/ui/avatar'
 import { getInitials } from '@/lib/utils'
-
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
 interface Props {
   data: { name: string; count: number; revenue: number }[]
 }
 
-export function TopSellersCard({ data }: Props) {
+export async function TopSellersCard({ data }: Props) {
+  const locale = await getLocale()
+  const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
+
   if (data.length === 0) {
     return <p className="text-sm text-muted-foreground">No sales in the last 12 months.</p>
   }
