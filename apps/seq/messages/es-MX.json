@@ -177,15 +177,15 @@
   },
   "Company": {
     "fields": {
-      "cnpj": "RFC:",
-      "countryCode": "Código de País:",
-      "email": "Correo electrónico:",
-      "isActive": "Empresa activa:",
-      "legalName": "Razón Social:",
-      "municipalRegistration": "Registro Municipal:",
-      "phone": "Teléfono:",
-      "stateRegistration": "Registro Estatal:",
-      "tradeName": "Nombre Comercial:"
+      "cnpj": "RFC",
+      "countryCode": "Clave",
+      "email": "Correo electrónico",
+      "isActive": "Empresa activa",
+      "legalName": "Razón Social",
+      "municipalRegistration": "Registro Municipal",
+      "phone": "Teléfono",
+      "stateRegistration": "Registro Estatal",
+      "tradeName": "Nombre Comercial"
     },
     "sections": {
       "address": "Dirección"
@@ -193,6 +193,10 @@
     "title": "Datos de la Empresa",
     "toasts": {
       "updated": "Datos actualizados correctamente."
+    },
+    "status": {
+      "active": "Activa",
+      "inactive": "Inactiva"
     }
   },
   "CustomerCategories": {
@@ -210,9 +214,9 @@
     },
     "edit": "Editar categoría",
     "fields": {
-      "description": "Descripción:",
-      "isActive": "Categoría activa:",
-      "name": "Nombre:"
+      "description": "Descripción",
+      "isActive": "Categoría activa",
+      "name": "Nombre"
     },
     "new": "Nueva categoría",
     "status": {
@@ -872,15 +876,15 @@
     "create": "Nuevo usuario",
     "edit": "Editar usuario",
     "fields": {
-      "birthDate": "Fecha de Nacimiento:",
-      "countryCode": "Código de País:",
-      "cpf": "RFC:",
-      "email": "Correo electrónico:",
-      "firstName": "Nombre:",
-      "isActive": "Usuario activo:",
-      "lastName": "Apellido:",
-      "phone": "Teléfono:",
-      "role": "Rol:"
+      "birthDate": "Fecha de Nacimiento",
+      "countryCode": "Clave",
+      "cpf": "RFC",
+      "email": "Correo electrónico",
+      "firstName": "Nombre",
+      "isActive": "Usuario activo",
+      "lastName": "Apellido",
+      "phone": "Teléfono",
+      "role": "Rol"
     },
     "new": "Nuevo empleado",
     "placeholders": {

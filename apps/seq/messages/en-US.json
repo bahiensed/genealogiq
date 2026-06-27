@@ -177,15 +177,15 @@
   },
   "Company": {
     "fields": {
-      "cnpj": "CNPJ:",
-      "countryCode": "Country Code:",
-      "email": "E-mail:",
-      "isActive": "Active company:",
-      "legalName": "Company Name:",
-      "municipalRegistration": "Municipal Registration:",
-      "phone": "Phone:",
-      "stateRegistration": "State Registration:",
-      "tradeName": "Trade Name:"
+      "cnpj": "CNPJ",
+      "countryCode": "IDD",
+      "email": "E-mail",
+      "isActive": "Active company",
+      "legalName": "Company Name",
+      "municipalRegistration": "Municipal Registration",
+      "phone": "Phone",
+      "stateRegistration": "State Registration",
+      "tradeName": "Trade Name"
     },
     "sections": {
       "address": "Address"
@@ -193,6 +193,10 @@
     "title": "Company Data",
     "toasts": {
       "updated": "Data updated successfully."
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
     }
   },
   "CustomerCategories": {
@@ -210,9 +214,9 @@
     },
     "edit": "Edit category",
     "fields": {
-      "description": "Description:",
-      "isActive": "Active category:",
-      "name": "Name:"
+      "description": "Description",
+      "isActive": "Active category",
+      "name": "Name"
     },
     "new": "New category",
     "status": {
@@ -872,15 +876,15 @@
     "create": "New user",
     "edit": "Edit user",
     "fields": {
-      "birthDate": "Date of Birth:",
-      "countryCode": "Country Code:",
-      "cpf": "CPF:",
-      "email": "E-mail:",
-      "firstName": "First Name:",
-      "isActive": "Active user:",
-      "lastName": "Last Name:",
-      "phone": "Phone:",
-      "role": "Role:"
+      "birthDate": "Date of Birth",
+      "countryCode": "IDD",
+      "cpf": "CPF",
+      "email": "E-mail",
+      "firstName": "First Name",
+      "isActive": "Active user",
+      "lastName": "Last Name",
+      "phone": "Phone",
+      "role": "Role"
     },
     "new": "New employee",
     "placeholders": {
