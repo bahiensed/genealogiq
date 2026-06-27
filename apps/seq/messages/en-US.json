@@ -744,6 +744,7 @@
       "description": "The sale will be registered and a QR Code will be removed from inventory. Confirm?",
       "title": "Confirm sale"
     },
+    "description": "Select the customer, choose the bonus subscription, enter YOUR final price and complete the sale.",
     "emptyInventory": "No QR Codes in inventory.",
     "errors": {
       "invalidAmount": "Enter a valid amount.",
