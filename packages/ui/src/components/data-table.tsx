@@ -81,7 +81,7 @@ export function DataTable<TData, TValue>({
         <DataTableViewOptions table={table} columnLabels={columnLabels} />
       </div>
 
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-hidden rounded-md border bg-card">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((hg) => (
