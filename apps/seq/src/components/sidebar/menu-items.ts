@@ -13,7 +13,8 @@ export type ModuleKey =
   | 'moduleFinance'
 
 export interface MenuItem {
-  name: string
+  /** i18n key under the `Sidebar.items` namespace (translated in app-sidebar). */
+  labelKey: string
   url: string
   icon: LucideIcon
   moduleKey?: ModuleKey
@@ -23,72 +24,72 @@ export interface MenuItem {
 
 export const main: MenuItem[][] = [
   [
-    { name: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
+    { labelKey: 'items.dashboard', url: '/dashboard', icon: LayoutDashboard },
   ],
   [
-    { name: 'Buy Physical QR Codes', url: '/purchasing/physical-qr', icon: Fingerprint },
-    { name: 'My Physical QR Codes',  url: '/inventory/physical-qr',  icon: Fingerprint },
+    { labelKey: 'items.buyPhysicalQr', url: '/purchasing/physical-qr', icon: Fingerprint },
+    { labelKey: 'items.myPhysicalQr',  url: '/inventory/physical-qr',  icon: Fingerprint },
   ],
   [
-    { name: 'Buy Digital QR Codes', url: '/purchasing/digital-qr', icon: QrCodeIcon },
-    { name: 'My Digital QR Codes',  url: '/inventory/digital-qr',  icon: QrCodeIcon },
+    { labelKey: 'items.buyDigitalQr', url: '/purchasing/digital-qr', icon: QrCodeIcon },
+    { labelKey: 'items.myDigitalQr',  url: '/inventory/digital-qr',  icon: QrCodeIcon },
   ],
   [
-    { name: 'Customers', url: '/customers', icon: UsersIcon },
-    { name: 'Sales',     url: '/sales',     icon: ShoppingCartIcon },
+    { labelKey: 'items.customers', url: '/customers', icon: UsersIcon },
+    { labelKey: 'items.sales',     url: '/sales',     icon: ShoppingCartIcon },
   ],
 ]
 
 // ─── System (always visible) ─────────────────────────────────────────────────
 
 export const system: MenuItem[] = [
-  { name: 'Company Data', url: '/system/company', icon: BuildingIcon },
-  { name: 'Employees',    url: '/system/users',   icon: IdCardIcon   },
+  { labelKey: 'items.companyData', url: '/system/company', icon: BuildingIcon },
+  { labelKey: 'items.employees',   url: '/system/users',   icon: IdCardIcon   },
 ]
 
 // ─── Records (Customers always-on) ───────────────────────────────────────────
 
 export const records: MenuItem[] = [
-  { name: 'Suppliers', url: '/suppliers', icon: StoreIcon,       moduleKey: 'moduleRecordsSuppliers' },
-  { name: 'Products',  url: '/products',  icon: BoxIcon,         moduleKey: 'moduleRecordsProducts'  },
-  { name: 'Services',  url: '/services',  icon: HandPlatterIcon, moduleKey: 'moduleRecordsServices'  },
-  { name: 'Customers', url: '/customers', icon: UsersIcon        }, // always-on
+  { labelKey: 'items.suppliers', url: '/suppliers', icon: StoreIcon,       moduleKey: 'moduleRecordsSuppliers' },
+  { labelKey: 'items.products',  url: '/products',  icon: BoxIcon,         moduleKey: 'moduleRecordsProducts'  },
+  { labelKey: 'items.services',  url: '/services',  icon: HandPlatterIcon, moduleKey: 'moduleRecordsServices'  },
+  { labelKey: 'items.customers', url: '/customers', icon: UsersIcon        }, // always-on
 ]
 
 // ─── Categories (Customer Categories always-on) ───────────────────────────────
 
 export const categories: MenuItem[] = [
-  { name: 'Supplier Categories', url: '/categories/suppliers', icon: TagIcon,    moduleKey: 'moduleCategoriesSuppliers' },
-  { name: 'Product Categories',  url: '/categories/products',  icon: FolderIcon, moduleKey: 'moduleCategoriesProducts'  },
-  { name: 'Service Categories',  url: '/categories/services',  icon: FolderIcon, moduleKey: 'moduleCategoriesServices'  },
-  { name: 'Customer Categories', url: '/categories/customers', icon: TagIcon     }, // always-on
+  { labelKey: 'items.supplierCategories', url: '/categories/suppliers', icon: TagIcon,    moduleKey: 'moduleCategoriesSuppliers' },
+  { labelKey: 'items.productCategories',  url: '/categories/products',  icon: FolderIcon, moduleKey: 'moduleCategoriesProducts'  },
+  { labelKey: 'items.serviceCategories',  url: '/categories/services',  icon: FolderIcon, moduleKey: 'moduleCategoriesServices'  },
+  { labelKey: 'items.customerCategories', url: '/categories/customers', icon: TagIcon     }, // always-on
 ]
 
 // ─── Purchasing (QR always-on) ───────────────────────────────────────────────
 
 export const purchasing: MenuItem[] = [
-  { name: 'Buy Physical QR Codes', url: '/purchasing/physical-qr', icon: Fingerprint     },
-  { name: 'Buy Digital QR Codes',  url: '/purchasing/digital-qr',  icon: QrCodeIcon      },
-  { name: 'Products',              url: '/purchasing/products',    icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
-  { name: 'Services',              url: '/purchasing/services',    icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
+  { labelKey: 'items.buyPhysicalQr', url: '/purchasing/physical-qr', icon: Fingerprint     },
+  { labelKey: 'items.buyDigitalQr',  url: '/purchasing/digital-qr',  icon: QrCodeIcon      },
+  { labelKey: 'items.products',      url: '/purchasing/products',    icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
+  { labelKey: 'items.services',      url: '/purchasing/services',    icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
 ]
 
 // ─── Inventory (QR always-on) ────────────────────────────────────────────────
 
 export const inventory: MenuItem[] = [
-  { name: 'My Physical QR Codes', url: '/inventory/physical-qr', icon: Fingerprint },
-  { name: 'My Digital QR Codes',  url: '/inventory/digital-qr',  icon: QrCodeIcon  },
-  { name: 'Products',             url: '/inventory/products',    icon: BoxIcon,     moduleKey: 'moduleInventoryProducts' },
+  { labelKey: 'items.myPhysicalQr', url: '/inventory/physical-qr', icon: Fingerprint },
+  { labelKey: 'items.myDigitalQr',  url: '/inventory/digital-qr',  icon: QrCodeIcon  },
+  { labelKey: 'items.products',     url: '/inventory/products',    icon: BoxIcon,     moduleKey: 'moduleInventoryProducts' },
 ]
 
 // ─── Sales (always visible) ───────────────────────────────────────────────────
 
 export const sales: MenuItem[] = [
-  { name: 'Sales', url: '/sales', icon: ShoppingCartIcon },
+  { labelKey: 'items.sales', url: '/sales', icon: ShoppingCartIcon },
 ]
 
 // ─── Finance ──────────────────────────────────────────────────────────────────
 
 export const finance: MenuItem[] = [
-  { name: 'Finance', url: '/finance', icon: BarChart2, moduleKey: 'moduleFinance' },
+  { labelKey: 'items.finance', url: '/finance', icon: BarChart2, moduleKey: 'moduleFinance' },
 ]

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import {
   main,
   system,
@@ -43,6 +44,7 @@ function visibleItems(items: MenuItem[], modules: Modules | null): MenuItem[] {
 
 export function AppSidebar({ modules }: AppSidebarProps) {
   const pathname = usePathname()
+  const t = useTranslations('Sidebar')
 
   const recordsItems    = visibleItems(records,    modules)
   const categoriesItems = visibleItems(categories, modules)
@@ -51,13 +53,13 @@ export function AppSidebar({ modules }: AppSidebarProps) {
   const financeItems    = visibleItems(finance,    modules)
 
   const groups = [
-    { label: 'System',      items: system,          show: true                       },
-    { label: 'Records',     items: recordsItems,    show: recordsItems.length > 0    },
-    { label: 'Categories',  items: categoriesItems, show: categoriesItems.length > 0 },
-    { label: 'Purchasing',  items: purchasingItems, show: true                       },
-    { label: 'Inventory',   items: inventoryItems,  show: true                       },
-    { label: 'Sales',       items: sales,           show: true                       },
-    { label: 'Finance',     items: financeItems,    show: financeItems.length > 0    },
+    { labelKey: 'groups.system',     items: system,          show: true                       },
+    { labelKey: 'groups.records',    items: recordsItems,    show: recordsItems.length > 0    },
+    { labelKey: 'groups.categories', items: categoriesItems, show: categoriesItems.length > 0 },
+    { labelKey: 'groups.purchasing', items: purchasingItems, show: true                       },
+    { labelKey: 'groups.inventory',  items: inventoryItems,  show: true                       },
+    { labelKey: 'groups.sales',      items: sales,           show: true                       },
+    { labelKey: 'groups.finance',    items: financeItems,    show: financeItems.length > 0    },
   ].filter((g) => g.show)
 
   return (
@@ -84,15 +86,15 @@ export function AppSidebar({ modules }: AppSidebarProps) {
         <SidebarGroup>
           <SidebarGroupContent>
             {main.map((section, i) => (
-              <div key={section[0].name}>
+              <div key={section[0].labelKey}>
                 {i > 0 && <SidebarSeparator className="my-1" />}
                 <SidebarMenu>
                   {section.map((item) => (
-                    <SidebarMenuItem key={item.name}>
+                    <SidebarMenuItem key={item.labelKey}>
                       <SidebarMenuButton asChild isActive={pathname === item.url}>
                         <Link href={item.url}>
                           <item.icon />
-                          <span>{item.name}</span>
+                          <span>{t(item.labelKey)}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -105,14 +107,14 @@ export function AppSidebar({ modules }: AppSidebarProps) {
 
         {groups.map((group) => (
           <Collapsible
-            key={group.label}
+            key={group.labelKey}
             className="group/collapsible"
             defaultOpen={group.items.some((item) => pathname.startsWith(item.url))}
           >
             <SidebarGroup>
               <SidebarGroupLabel asChild>
                 <CollapsibleTrigger>
-                  {group.label}
+                  {t(group.labelKey)}
                   <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
@@ -120,11 +122,11 @@ export function AppSidebar({ modules }: AppSidebarProps) {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {group.items.map((item) => (
-                      <SidebarMenuItem key={item.name}>
+                      <SidebarMenuItem key={item.labelKey}>
                         <SidebarMenuButton asChild isActive={pathname === item.url}>
                           <Link href={item.url}>
                             <item.icon />
-                            <span>{item.name}</span>
+                            <span>{t(item.labelKey)}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
