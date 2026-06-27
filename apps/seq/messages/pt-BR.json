@@ -54,7 +54,7 @@
     "deceased": {
       "customerNotFound": "Cliente não encontrado.",
       "guardianAdded": "Responsável adicionado.",
-      "noQrAvailable": "Nenhum QR code disponível para este cliente.",
+      "noQrAvailable": "Nenhum QR Code disponível para este cliente.",
       "notFound": "Perfil não encontrado.",
       "relationExists": "Este responsável já está vinculado ao perfil.",
       "relationNotFound": "Vínculo de responsável não encontrado."
@@ -64,7 +64,7 @@
       "customerNotFound": "Cliente não encontrado.",
       "invalidValue": "Valor da venda inválido.",
       "notAvailable": "Este código não está disponível para venda (já vendido ou ativado).",
-      "notFound": "Código QR não encontrado.",
+      "notFound": "QR Code não encontrado.",
       "notSold": "Este código não está em estado de venda — não é possível desfazer.",
       "saleFailed": "Falha ao registrar a venda ({code}).",
       "saleRecorded": "Venda registrada (baixa efetuada).",
@@ -85,7 +85,7 @@
       "customerNoEmail": "O cliente não possui endereço de e-mail.",
       "customerNotFound": "Cliente não encontrado.",
       "invalidValue": "Valor de venda inválido.",
-      "noQrAvailable": "Nenhum QR code disponível.",
+      "noQrAvailable": "Nenhum QR Code disponível.",
       "registerFailed": "Falha ao registrar a venda ({code}).",
       "subscriptionNotFound": "Assinatura não encontrada.",
       "unexpectedError": "Ocorreu um erro inesperado."
@@ -415,8 +415,8 @@
   "Inventory": {
     "digital": {
       "availableForSale": "Disponível para venda",
-      "buy": "Comprar QR codes digitais",
-      "empty": "Ainda não há atividade de QR codes.",
+      "buy": "Comprar QR Codes digitais",
+      "empty": "Ainda não há atividade de QR Codes.",
       "reconcileNote": "Observação: o extrato abaixo foi reconstruído a partir de compras e vendas e pode diferir ligeiramente deste total atual (por exemplo, vendas estornadas ou ajustes manuais).",
       "reversed": "Estornado",
       "table": {
@@ -502,7 +502,7 @@
       "zip": "CEP:"
     },
     "new": "Novo perfil memorializado",
-    "newAvailable": "{count, plural, =0 {Nenhum QR code disponível} one {# QR code disponível} other {# QR codes disponíveis}}",
+    "newAvailable": "{count, plural, =0 {Nenhum QR Code disponível} one {# QR Code disponível} other {# QR Codes disponíveis}}",
     "newCustomerLabel": "Cliente:",
     "qr": {
       "copyLink": "Copiar link",
@@ -722,14 +722,14 @@
     },
     "empty": {
       "digital": "Nenhum pacote disponível no momento.",
-      "physical": "Nenhum QR code físico disponível no momento."
+      "physical": "Nenhum QR Code físico disponível no momento."
     },
     "physical": {
       "title": "Comprar QR Codes Físicos"
     },
     "toasts": {
       "canceled": "Compra cancelada.",
-      "success": "Compra concluída — os QR codes aparecerão em instantes."
+      "success": "Compra concluída — os QR Codes aparecerão em instantes."
     }
   },
   "Sales": {
@@ -738,13 +738,13 @@
       "registering": "Registrando...",
       "removeCustomer": "Remover cliente"
     },
-    "buyQrCodes": "Comprar QR codes",
+    "buyQrCodes": "Comprar QR Codes",
     "confirm": {
       "confirm": "Confirmar",
-      "description": "A venda será registrada e um QR code será removido do estoque. Confirmar?",
+      "description": "A venda será registrada e um QR Code será removido do estoque. Confirmar?",
       "title": "Confirmar venda"
     },
-    "emptyInventory": "Nenhum QR code em estoque.",
+    "emptyInventory": "Nenhum QR Code em estoque.",
     "errors": {
       "invalidAmount": "Informe um valor válido.",
       "selectCustomer": "Selecione um cliente.",

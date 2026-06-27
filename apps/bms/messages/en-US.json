@@ -400,7 +400,7 @@
     },
     "loadError": "Could not load coupons: {message}. Check Vercel function logs for details.",
     "new": "New coupon",
-    "packageMeta": "{quantity} QR codes · {price}",
+    "packageMeta": "{quantity} QR Codes · {price}",
     "placeholders": {
       "code": "WELCOME10",
       "descriptionCreate": "Optional internal note",
@@ -533,13 +533,13 @@
       "digital": "Digital",
       "physical": "Physical"
     },
-    "unitPrice": "Unit price per QR code"
+    "unitPrice": "Unit price per QR Code"
   },
   "PhysicalQr": {
     "table": {
       "activated": "Activated",
       "available": "Available",
-      "empty": "No physical QR codes found.",
+      "empty": "No physical QR Codes found.",
       "package": "Package",
       "saleDate": "Sale Date",
       "tenant": "Tenant",
@@ -577,7 +577,7 @@
     },
     "reverse": {
       "confirm": "Reverse sale",
-      "descriptionDigital": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed and the QR codes will be returned to inventory. The record is kept for audit purposes.",
+      "descriptionDigital": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed and the QR Codes will be returned to inventory. The record is kept for audit purposes.",
       "descriptionPhysical": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed. Available license codes will be invalidated. Activated codes remain linked to their memorials. The record is kept for audit purposes.",
       "reversing": "Reversing…",
       "title": "Confirm reversal"

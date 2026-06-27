@@ -54,7 +54,7 @@
     "deceased": {
       "customerNotFound": "Customer not found.",
       "guardianAdded": "Guardian added.",
-      "noQrAvailable": "No QR codes available for this customer.",
+      "noQrAvailable": "No QR Codes available for this customer.",
       "notFound": "Profile not found.",
       "relationExists": "This guardian is already linked to the profile.",
       "relationNotFound": "Guardian link not found."
@@ -64,7 +64,7 @@
       "customerNotFound": "Customer not found.",
       "invalidValue": "Invalid sale value.",
       "notAvailable": "This code is not available for sale (already sold or activated).",
-      "notFound": "QR code not found.",
+      "notFound": "QR Code not found.",
       "notSold": "This code is not in a sold state — cannot undo.",
       "saleFailed": "Failed to register sale ({code}).",
       "saleRecorded": "Sale recorded (written off).",
@@ -85,7 +85,7 @@
       "customerNoEmail": "Customer has no email address.",
       "customerNotFound": "Customer not found.",
       "invalidValue": "Invalid sale value.",
-      "noQrAvailable": "No QR codes available.",
+      "noQrAvailable": "No QR Codes available.",
       "registerFailed": "Failed to register sale ({code}).",
       "subscriptionNotFound": "Subscription not found.",
       "unexpectedError": "An unexpected error occurred."
@@ -415,8 +415,8 @@
   "Inventory": {
     "digital": {
       "availableForSale": "Available for sale",
-      "buy": "Buy digital QR codes",
-      "empty": "No QR code activity yet.",
+      "buy": "Buy digital QR Codes",
+      "empty": "No QR Code activity yet.",
       "reconcileNote": "Note: the statement below was reconstructed from purchases and sales and may differ slightly from this live total (e.g. reversed sales or manual adjustments).",
       "reversed": "Reversed",
       "table": {
@@ -438,7 +438,7 @@
       "copyUrl": "Copy URL",
       "exportCsv": "Export CSV"
     },
-    "buy": "Buy physical QR codes",
+    "buy": "Buy physical QR Codes",
     "soldVia": {
       "MANUAL": "Manual",
       "PLATFORM": "Platform"
@@ -456,7 +456,7 @@
     },
     "table": {
       "code": "Code",
-      "empty": "No QR codes found",
+      "empty": "No QR Codes found",
       "memorial": "Memorial",
       "printed": "Printed",
       "soldTo": "Sold to",
@@ -502,7 +502,7 @@
       "zip": "ZIP:"
     },
     "new": "New memorialized profile",
-    "newAvailable": "{count, plural, =0 {No QR codes available} one {# QR code available} other {# QR codes available}}",
+    "newAvailable": "{count, plural, =0 {No QR Codes available} one {# QR Code available} other {# QR Codes available}}",
     "newCustomerLabel": "Customer:",
     "qr": {
       "copyLink": "Copy link",
@@ -722,14 +722,14 @@
     },
     "empty": {
       "digital": "No packages available at the moment.",
-      "physical": "No physical QR codes available at the moment."
+      "physical": "No physical QR Codes available at the moment."
     },
     "physical": {
       "title": "Buy Physical QR Codes"
     },
     "toasts": {
       "canceled": "Purchase canceled.",
-      "success": "Purchase complete — QR codes will appear shortly."
+      "success": "Purchase complete — QR Codes will appear shortly."
     }
   },
   "Sales": {
@@ -738,13 +738,13 @@
       "registering": "Registering...",
       "removeCustomer": "Remove customer"
     },
-    "buyQrCodes": "Buy QR codes",
+    "buyQrCodes": "Buy QR Codes",
     "confirm": {
       "confirm": "Confirm",
-      "description": "The sale will be registered and a QR code will be removed from inventory. Confirm?",
+      "description": "The sale will be registered and a QR Code will be removed from inventory. Confirm?",
       "title": "Confirm sale"
     },
-    "emptyInventory": "No QR codes in inventory.",
+    "emptyInventory": "No QR Codes in inventory.",
     "errors": {
       "invalidAmount": "Enter a valid amount.",
       "selectCustomer": "Select a customer.",

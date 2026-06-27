@@ -400,7 +400,7 @@
     },
     "loadError": "Não foi possível carregar os cupons: {message}. Verifique os logs das funções na Vercel para mais detalhes.",
     "new": "Novo cupom",
-    "packageMeta": "{quantity} QR codes · {price}",
+    "packageMeta": "{quantity} QR Codes · {price}",
     "placeholders": {
       "code": "WELCOME10",
       "descriptionCreate": "Observação interna opcional",
@@ -533,7 +533,7 @@
       "digital": "Digital",
       "physical": "Físico"
     },
-    "unitPrice": "Preço unitário por QR code"
+    "unitPrice": "Preço unitário por QR Code"
   },
   "PhysicalQr": {
     "table": {
@@ -577,7 +577,7 @@
     },
     "reverse": {
       "confirm": "Estornar venda",
-      "descriptionDigital": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada e os QR codes serão devolvidos ao estoque. O registro é mantido para fins de auditoria.",
+      "descriptionDigital": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada e os QR Codes serão devolvidos ao estoque. O registro é mantido para fins de auditoria.",
       "descriptionPhysical": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada. Os códigos de licença disponíveis serão invalidados. Os códigos já ativados permanecem vinculados aos seus memoriais. O registro é mantido para fins de auditoria.",
       "reversing": "Estornando…",
       "title": "Confirmar estorno"

@@ -54,7 +54,7 @@
     "deceased": {
       "customerNotFound": "Cliente no encontrado.",
       "guardianAdded": "Tutor agregado.",
-      "noQrAvailable": "No hay códigos QR disponibles para este cliente.",
+      "noQrAvailable": "No hay QR Codes disponibles para este cliente.",
       "notFound": "Perfil no encontrado.",
       "relationExists": "Este tutor ya está vinculado al perfil.",
       "relationNotFound": "Vínculo de tutor no encontrado."
@@ -64,7 +64,7 @@
       "customerNotFound": "Cliente no encontrado.",
       "invalidValue": "Valor de venta inválido.",
       "notAvailable": "Este código no está disponible para la venta (ya vendido o activado).",
-      "notFound": "Código QR no encontrado.",
+      "notFound": "QR Code no encontrado.",
       "notSold": "Este código no está en estado de venta — no se puede deshacer.",
       "saleFailed": "No se pudo registrar la venta ({code}).",
       "saleRecorded": "Venta registrada (dada de baja).",
@@ -85,7 +85,7 @@
       "customerNoEmail": "El cliente no tiene dirección de correo electrónico.",
       "customerNotFound": "Cliente no encontrado.",
       "invalidValue": "Valor de venta inválido.",
-      "noQrAvailable": "No hay códigos QR disponibles.",
+      "noQrAvailable": "No hay QR Codes disponibles.",
       "registerFailed": "No se pudo registrar la venta ({code}).",
       "subscriptionNotFound": "Suscripción no encontrada.",
       "unexpectedError": "Ocurrió un error inesperado."
@@ -306,7 +306,7 @@
       "addressOptional": "La dirección es opcional y se puede completar más tarde."
     },
     "memorialized": {
-      "acquiredQrCodes": "Códigos QR adquiridos: {count}",
+      "acquiredQrCodes": "QR Codes adquiridos: {count}",
       "availableProfiles": "Perfiles memo disponibles: {count}",
       "create": "Crear perfil memorializado",
       "createdProfiles": "Perfiles memo creados: {count}",
@@ -386,12 +386,12 @@
     }
   },
   "Dashboard": {
-    "availableQr": "Códigos QR disponibles para venta",
+    "availableQr": "QR Codes disponibles para venta",
     "averageTicket": "Ticket promedio",
     "avgRevenuePerSale": "Ingreso promedio por venta este mes",
     "currentlyInStock": "Actualmente en stock",
     "monthlyRevenue": "Ingresos del mes",
-    "qrSoldThisMonth": "Códigos QR vendidos este mes",
+    "qrSoldThisMonth": "QR Codes vendidos este mes",
     "registeredCustomers": "Clientes registrados",
     "revenueThisMonth": "Ingresos este mes",
     "salesThisMonth": "Ventas este mes",
@@ -415,8 +415,8 @@
   "Inventory": {
     "digital": {
       "availableForSale": "Disponible para venta",
-      "buy": "Comprar códigos QR digitales",
-      "empty": "Aún no hay actividad de códigos QR.",
+      "buy": "Comprar QR Codes digitales",
+      "empty": "Aún no hay actividad de QR Codes.",
       "reconcileNote": "Nota: el estado de cuenta a continuación se reconstruyó a partir de compras y ventas y puede diferir ligeramente de este total actual (por ejemplo, ventas revertidas o ajustes manuales).",
       "reversed": "Revertido",
       "table": {
@@ -427,7 +427,7 @@
         "unitPrice": "Precio Unitario",
         "units": "Unidades"
       },
-      "title": "Mis Códigos QR Digitales"
+      "title": "Mis QR Codes Digitales"
     },
     "products": {
       "title": "Inventario de Productos"
@@ -438,7 +438,7 @@
       "copyUrl": "Copiar URL",
       "exportCsv": "Exportar CSV"
     },
-    "buy": "Comprar códigos QR físicos",
+    "buy": "Comprar QR Codes físicos",
     "soldVia": {
       "MANUAL": "Manual",
       "PLATFORM": "Plataforma"
@@ -456,14 +456,14 @@
     },
     "table": {
       "code": "Código",
-      "empty": "No se encontraron códigos QR",
+      "empty": "No se encontraron QR Codes",
       "memorial": "Memorial",
       "printed": "Impreso",
       "soldTo": "Vendido a",
       "status": "Estado",
       "url": "URL"
     },
-    "title": "Mis códigos QR físicos"
+    "title": "Mis QR Codes físicos"
   },
   "Memorialized": {
     "actions": {
@@ -502,7 +502,7 @@
       "zip": "Código postal:"
     },
     "new": "Nuevo perfil memorializado",
-    "newAvailable": "{count, plural, =0 {No hay códigos QR disponibles} one {# código QR disponible} other {# códigos QR disponibles}}",
+    "newAvailable": "{count, plural, =0 {No hay QR Codes disponibles} one {# QR Code disponible} other {# QR Codes disponibles}}",
     "newCustomerLabel": "Cliente:",
     "qr": {
       "copyLink": "Copiar enlace",
@@ -540,7 +540,7 @@
       },
       "printedOn": "Impreso: {date}",
       "scans": "{count, plural, one {# escaneo} other {# escaneos}} — último: {date}",
-      "statusTitle": "Estado del código QR",
+      "statusTitle": "Estado del QR Code",
       "svgDownloaded": "SVG descargado."
     },
     "saveChanges": "Guardar cambios",
@@ -581,7 +581,7 @@
       "empty": "No se encontraron perfiles memorializados.",
       "filterPlaceholder": "Filtrar por nombre…",
       "name": "Nombre",
-      "qrCode": "Código QR"
+      "qrCode": "QR Code"
     },
     "toasts": {
       "created": "Perfil creado correctamente.",
@@ -610,7 +610,7 @@
     },
     "detail": {
       "backToInventory": "Volver al inventario",
-      "title": "Código QR Físico"
+      "title": "QR Code Físico"
     },
     "fields": {
       "buyerName": "Nombre / contacto del comprador",
@@ -643,7 +643,7 @@
       "SOLD": "Vendido"
     },
     "statusCard": {
-      "title": "Estado del código QR"
+      "title": "Estado del QR Code"
     },
     "timeline": {
       "activated": "Activado",
@@ -705,31 +705,31 @@
       "amount": "Cantidad:",
       "buyDigital": "Empieza a Ganar Ahora",
       "buyPhysical": "Comprar y empezar a revender",
-      "digitalDescription": "Paquete con {count} {count, plural, one {Código} other {Códigos}} QR",
+      "digitalDescription": "Paquete con {count} {count, plural, one {QR Code} other {QR Codes}}",
       "digitalHeadline": "Aumenta tus márgenes hasta un 500% con este paquete",
-      "digitalPriceUnit": "{count} {count, plural, one {Código} other {Códigos}} QR por paquete",
+      "digitalPriceUnit": "{count} {count, plural, one {QR Code} other {QR Codes}} por paquete",
       "digitalSubcopy": "Genera {amount}+ en ingresos",
-      "physicalDescription": "{count} {count, plural, one {código} other {códigos}} QR listos para imprimir",
+      "physicalDescription": "{count} {count, plural, one {QR Code} other {QR Codes}} listos para imprimir",
       "physicalHeadline": "Imprime bajo demanda y revende a tu propio precio",
-      "physicalPriceUnit": "{count} {count, plural, one {código} other {códigos}} QR listos para imprimir",
+      "physicalPriceUnit": "{count} {count, plural, one {QR Code} other {QR Codes}} listos para imprimir",
       "physicalSubcopy": "Gana hasta {amount}+ revendiéndolos",
       "priceForAsLittleAs": "Por tan solo",
       "priceFrom": "Desde",
       "processing": "Procesando…"
     },
     "digital": {
-      "title": "Comprar Códigos QR Digitales"
+      "title": "Comprar QR Codes Digitales"
     },
     "empty": {
       "digital": "No hay paquetes disponibles por el momento.",
-      "physical": "No hay códigos QR físicos disponibles por el momento."
+      "physical": "No hay QR Codes físicos disponibles por el momento."
     },
     "physical": {
-      "title": "Comprar Códigos QR Físicos"
+      "title": "Comprar QR Codes Físicos"
     },
     "toasts": {
       "canceled": "Compra cancelada.",
-      "success": "Compra completada — los códigos QR aparecerán en breve."
+      "success": "Compra completada — los QR Codes aparecerán en breve."
     }
   },
   "Sales": {
@@ -738,13 +738,13 @@
       "registering": "Registrando...",
       "removeCustomer": "Eliminar cliente"
     },
-    "buyQrCodes": "Comprar códigos QR",
+    "buyQrCodes": "Comprar QR Codes",
     "confirm": {
       "confirm": "Confirmar",
-      "description": "La venta se registrará y se eliminará un código QR del inventario. ¿Confirmar?",
+      "description": "La venta se registrará y se eliminará un QR Code del inventario. ¿Confirmar?",
       "title": "Confirmar venta"
     },
-    "emptyInventory": "No hay códigos QR en inventario.",
+    "emptyInventory": "No hay QR Codes en inventario.",
     "errors": {
       "invalidAmount": "Ingresa un monto válido.",
       "selectCustomer": "Selecciona un cliente.",
@@ -760,7 +760,7 @@
       "bonusSubscription": "La suscripción de la aplicación que el cliente recibirá gratis",
       "customer": "¿A quién le estás vendiendo?",
       "suggested": "Sugerido: {amount} (2× el costo del último paquete)",
-      "totalAmount": "El precio total cobrado por los códigos QR."
+      "totalAmount": "El precio total cobrado por los QR Codes."
     },
     "placeholders": {
       "customerSearch": "Escribe el nombre o correo electrónico...",
@@ -780,10 +780,10 @@
     },
     "items": {
       "dashboard": "Panel",
-      "buyPhysicalQr": "Comprar Códigos QR Físicos",
-      "myPhysicalQr": "Mis Códigos QR Físicos",
-      "buyDigitalQr": "Comprar Códigos QR Digitales",
-      "myDigitalQr": "Mis Códigos QR Digitales",
+      "buyPhysicalQr": "Comprar QR Codes Físicos",
+      "myPhysicalQr": "Mis QR Codes Físicos",
+      "buyDigitalQr": "Comprar QR Codes Digitales",
+      "myDigitalQr": "Mis QR Codes Digitales",
       "customers": "Clientes",
       "sales": "Ventas",
       "companyData": "Datos de la Empresa",
