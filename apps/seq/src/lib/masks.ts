@@ -14,15 +14,17 @@ export {
   validateCnpj,
 } from '@genealogiq/core'
 
-export function maskCurrency(value: string): string {
+export function maskCurrency(value: string, locale = 'en-US'): string {
   const digits = value.replace(/\D/g, '').slice(0, 10)
   if (!digits) return ''
   const cents = digits.padStart(3, '0')
-  const intPart = parseInt(cents.slice(0, -2), 10).toLocaleString('en-US')
+  const intPart = parseInt(cents.slice(0, -2), 10).toLocaleString(locale)
   const decPart = cents.slice(-2)
-  return `${intPart}.${decPart}`
+  // Decimal separator for the locale ("." for en-US/es-MX, "," for pt-BR).
+  const decimalSep = (1.1).toLocaleString(locale).replace(/[\d\s]/g, '') || '.'
+  return `${intPart}${decimalSep}${decPart}`
 }
 
-export function parseCurrencyDigits(digits: string): number {
-  return parseInt(digits || '0', 10) / 100
+export function parseCurrencyDigits(value: string): number {
+  return parseInt(value.replace(/\D/g, '') || '0', 10) / 100
 }

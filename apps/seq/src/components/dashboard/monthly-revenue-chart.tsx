@@ -1,5 +1,6 @@
 'use client'
 
+import { useLocale } from 'next-intl'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import {
   ChartContainer,
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export function MonthlyRevenueChart({ data }: Props) {
+  const locale = useLocale()
   return (
     <ChartContainer config={chartConfig} className="h-64 w-full">
       <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -41,7 +43,7 @@ export function MonthlyRevenueChart({ data }: Props) {
           content={
             <ChartTooltipContent
               formatter={(value) =>
-                new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value))
+                new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(Number(value))
               }
             />
           }

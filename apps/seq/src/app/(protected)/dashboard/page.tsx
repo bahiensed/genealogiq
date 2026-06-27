@@ -1,4 +1,4 @@
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { Layers, Users, ShoppingCart, Banknote, TrendingUp, UserPlus, QrCode } from 'lucide-react'
 import { verifyTenantSession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
@@ -8,12 +8,12 @@ import { RevenueByPlanChart } from '@/components/dashboard/revenue-by-plan-chart
 import { CustomerGrowthChart } from '@/components/dashboard/customer-growth-chart'
 import { QrConsumptionChart } from '@/components/dashboard/qr-consumption-chart'
 
-const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
-
 export default async function DashboardPage() {
   const { customerId } = await verifyTenantSession()
   const stats = await getDashboardStats(customerId)
   const t = await getTranslations('Dashboard')
+  const locale = await getLocale()
+  const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
 
   return (
     <div className="flex flex-col gap-6">

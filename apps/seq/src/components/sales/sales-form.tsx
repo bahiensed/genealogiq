@@ -68,7 +68,7 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
   const [selected,       setSelected]       = useState<AppUserResult | null>(null)
   const [subscriptionId, setSubscriptionId] = useState('')
   const [value,          setValue]          = useState(
-    suggestedValue != null ? maskCurrency(formatValueAsDigits(suggestedValue)) : '',
+    suggestedValue != null ? formatValueAsDigits(suggestedValue) : '',
   )
 
   const numericValue = parseCurrencyDigits(value)
@@ -234,10 +234,10 @@ export function SalesForm({ subscriptions, suggestedValue }: SalesFormProps) {
         <Field data-invalid={!!fieldErrors.value || undefined}>
           <FieldLabel>{t('fields.totalAmount')}</FieldLabel>
           <MaskedInput
-            maskFn={maskCurrency}
+            maskFn={(v) => maskCurrency(v, locale)}
             value={value}
             onChange={(v) => { setValue(v); setFieldErrors((prev) => ({ ...prev, value: undefined })) }}
-            placeholder="0.00"
+            placeholder={maskCurrency('0', locale)}
             aria-invalid={!!fieldErrors.value}
           />
           <FieldDescription>{t('hints.totalAmount')}</FieldDescription>

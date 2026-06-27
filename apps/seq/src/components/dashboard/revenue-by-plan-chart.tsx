@@ -1,5 +1,6 @@
 'use client'
 
+import { useLocale } from 'next-intl'
 import { Pie, PieChart, Cell } from 'recharts'
 import {
   ChartContainer,
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export function RevenueByPlanChart({ data }: Props) {
+  const locale = useLocale()
   const chartConfig = Object.fromEntries(
     data.map((d, i) => [
       d.name,
@@ -51,7 +53,7 @@ export function RevenueByPlanChart({ data }: Props) {
             <ChartTooltipContent
               nameKey="name"
               formatter={(value) =>
-                new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value))
+                new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(Number(value))
               }
             />
           }
