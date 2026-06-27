@@ -1,6 +1,14 @@
-import { Inter } from 'next/font/google'
+import { Geist, Spectral } from 'next/font/google'
 
-export const inter = Inter({
-    subsets:['latin'],
-    variable:'--font-sans'
+// Corpo / UI — sans humanista, limpa e moderna
+export const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-sans',
+})
+
+// Títulos — serifada elegante (Editorial)
+export const spectral = Spectral({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-spectral',
 })

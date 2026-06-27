@@ -6,7 +6,7 @@ export default async function FinancePage() {
   if (!modules?.moduleFinance) forbidden()
 
   return (
-    <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+    <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
       Finance
     </h1>
   )

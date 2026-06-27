@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { cn } from '@/lib/utils'
-import { inter } from '@/fonts'
+import { geist, spectral } from '@/fonts'
 import '@/styles/globals.css'
 
 import { ThemeProvider } from '@/components/theme/theme-provider'
@@ -26,7 +26,8 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={cn("h-full", "antialiased", "font-sans", inter.variable)}
+      // ⬇️ trocamos `inter.variable` por geist (sans) + spectral (heading)
+      className={cn("h-full", "antialiased", "font-sans", geist.variable, spectral.variable)}
       suppressHydrationWarning
     >
       <body>

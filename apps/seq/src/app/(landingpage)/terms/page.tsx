@@ -5,7 +5,7 @@ export const metadata = {
 export default function TermsPage() {
   return (
     <article className="prose prose-neutral dark:prose-invert max-w-4xl mx-auto">
-      <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
+      <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
         Terms of Use
       </h1>
 

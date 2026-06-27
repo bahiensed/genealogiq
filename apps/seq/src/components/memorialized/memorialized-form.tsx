@@ -86,7 +86,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
       <Accordion type="multiple" defaultValue={['personal', 'death']} className="flex flex-col gap-2">
 
         {/* ── Personal data ── */}
-        <AccordionItem value="personal" className="border rounded-lg px-4">
+        <AccordionItem value="personal" className="border rounded-lg px-4 bg-card">
           <AccordionTrigger className="text-base font-semibold">{t('sections.personal')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
@@ -179,7 +179,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
         </AccordionItem>
 
         {/* ── Death ── */}
-        <AccordionItem value="death" className="border rounded-lg px-4">
+        <AccordionItem value="death" className="border rounded-lg px-4 bg-card">
           <AccordionTrigger className="text-base font-semibold">{t('sections.death')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
@@ -245,7 +245,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
         </AccordionItem>
 
         {/* ── Burial ── */}
-        <AccordionItem value="burial" className="border rounded-lg px-4">
+        <AccordionItem value="burial" className="border rounded-lg px-4 bg-card">
           <AccordionTrigger className="text-base font-semibold">{t('sections.burial')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
@@ -406,7 +406,7 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
         </AccordionItem>
 
         {/* ── Social media + Notes ── */}
-        <AccordionItem value="social" className="border rounded-lg px-4">
+        <AccordionItem value="social" className="border rounded-lg px-4 bg-card">
           <AccordionTrigger className="text-base font-semibold">{t('sections.social')}</AccordionTrigger>
           <AccordionContent className="pt-2 pb-4">
             <FieldGroup>
