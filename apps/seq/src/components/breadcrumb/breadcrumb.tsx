@@ -20,6 +20,7 @@ function formatSegment(segment: string): string {
   return segment
     .replace(/-/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/\bQr\b/g, 'QR')
 }
 
 function useResolvedNames(segments: string[]) {
