@@ -171,15 +171,16 @@
   },
   "Company": {
     "fields": {
-      "cnpj": "CNPJ:",
-      "countryCode": "Country code:",
-      "email": "Email:",
-      "isActive": "Company active:",
-      "legalName": "Legal Name:",
-      "municipalRegistration": "Municipal Registration:",
-      "phone": "Phone:",
-      "stateRegistration": "State Registration:",
-      "tradeName": "Trade Name:"
+      "active": "Active",
+      "cnpj": "CNPJ",
+      "countryCode": "IDD",
+      "email": "Email",
+      "inactive": "Inactive",
+      "legalName": "Legal Name",
+      "municipalRegistration": "Municipal Registration",
+      "phone": "Phone",
+      "stateRegistration": "State Registration",
+      "tradeName": "Trade Name"
     },
     "save": "Save changes",
     "sections": {
@@ -201,9 +202,9 @@
     "create": "Create category",
     "editPage": "Edit customer category",
     "fields": {
-      "active": "Active category:",
-      "description": "Description:",
-      "name": "Name:"
+      "active": "Active category",
+      "description": "Description",
+      "name": "Name"
     },
     "new": "New category",
     "newPage": "New customer category",
@@ -244,23 +245,23 @@
       "individual": "Individual"
     },
     "fields": {
-      "birthDate": "Date of Birth:",
-      "category": "Category:",
-      "cnpj": "CNPJ:",
-      "companyName": "Company Name:",
-      "countryCode": "Country Code:",
-      "cpf": "CPF:",
-      "email": "Email:",
-      "firstName": "First Name:",
-      "lastName": "Last Name:",
-      "municipalRegistration": "Municipal Registration:",
-      "municipalRegistrationShort": "Municipal Reg.:",
-      "notes": "Notes:",
-      "phone": "Phone:",
-      "stateRegistration": "State Registration:",
-      "stateRegistrationShort": "State Reg.:",
-      "tradeName": "Trade Name:",
-      "type": "Type:"
+      "birthDate": "Date of Birth",
+      "category": "Category",
+      "cnpj": "CNPJ",
+      "companyName": "Company Name",
+      "countryCode": "IDD",
+      "cpf": "CPF",
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "municipalRegistration": "Municipal Registration",
+      "municipalRegistrationShort": "Municipal Reg.",
+      "notes": "Notes",
+      "phone": "Phone",
+      "stateRegistration": "State Registration",
+      "stateRegistrationShort": "State Reg.",
+      "tradeName": "Trade Name",
+      "type": "Type"
     },
     "hints": {
       "addressOptional": "Address is optional and can be filled in later.",
@@ -382,16 +383,16 @@
     },
     "edit": "Edit discount coupon",
     "fields": {
-      "amount": "Amount ($):",
-      "appliesTo": "Applies to specific packages (optional):",
-      "code": "Code:",
-      "description": "Description:",
-      "discountType": "Discount type:",
-      "duration": "Duration:",
-      "durationInMonths": "Duration in months:",
-      "expiresOn": "Expires on:",
-      "maxRedemptions": "Max redemptions:",
-      "percent": "Percent (0-100):"
+      "amount": "Amount ($)",
+      "appliesTo": "Applies to specific packages (optional)",
+      "code": "Code",
+      "description": "Description",
+      "discountType": "Discount type",
+      "duration": "Duration",
+      "durationInMonths": "Duration in months",
+      "expiresOn": "Expires on",
+      "maxRedemptions": "Max redemptions",
+      "percent": "Percent (0-100)"
     },
     "hints": {
       "appliesTo": "Leave all unchecked to apply to every package.",
@@ -480,10 +481,10 @@
     "createButton": "Create {noun}",
     "edit": "Edit {noun}",
     "fields": {
-      "description": "Description:",
-      "name": "{noun} Name:",
-      "price": "Price (US$):",
-      "quantity": "QR-Code Quantity:"
+      "description": "Description",
+      "name": "{noun} Name",
+      "price": "Price (US$)",
+      "quantity": "QR-Code Quantity"
     },
     "new": "New {noun}",
     "newPackage": "New package",
@@ -557,9 +558,9 @@
       "title": "Confirm sale"
     },
     "fields": {
-      "customer": "Customer:",
-      "package": "Package:",
-      "quantity": "Package Quantity:"
+      "customer": "Customer",
+      "package": "Package",
+      "quantity": "Package Quantity"
     },
     "new": "New QR Code Package Sale",
     "newButton": "New sale",
@@ -624,19 +625,19 @@
     "create": "Create subscription",
     "edit": "Edit Subscription",
     "fields": {
-      "bioMaxChars": "Bio Max Characters:",
-      "bioMaxImages": "Bio Max Images:",
-      "code": "Code:",
-      "description": "Description:",
-      "galleryMaxImages": "Gallery Max Images:",
-      "galleryMaxVideos": "Gallery Max Videos:",
+      "bioMaxChars": "Bio Max Characters",
+      "bioMaxImages": "Bio Max Images",
+      "code": "Code",
+      "description": "Description",
+      "galleryMaxImages": "Gallery Max Images",
+      "galleryMaxVideos": "Gallery Max Videos",
       "geolocationFullAccess": "Geolocation Full Access",
-      "maxProfiles": "Max Memo Profiles:",
-      "name": "Name:",
-      "price": "Price (US$):",
+      "maxProfiles": "Max Memo Profiles",
+      "name": "Name",
+      "price": "Price (US$)",
       "qrCodeAccess": "QR Code Access",
-      "termLength": "Term Length (in months):",
-      "treeMaxMembers": "Family Tree Max Members:"
+      "termLength": "Term Length (in months)",
+      "treeMaxMembers": "Family Tree Max Members"
     },
     "free": "Free",
     "hints": {
@@ -689,9 +690,9 @@
     "create": "Create category",
     "edit": "Edit supplier category",
     "fields": {
-      "activeCategory": "Active category:",
-      "description": "Description:",
-      "name": "Name:"
+      "activeCategory": "Active category",
+      "description": "Description",
+      "name": "Name"
     },
     "new": "New supplier category",
     "status": {
@@ -736,21 +737,21 @@
       "individual": "Individual"
     },
     "fields": {
-      "birthDate": "Date of Birth:",
-      "category": "Category:",
-      "cnpj": "CNPJ:",
-      "companyName": "Company Name:",
-      "countryCode": "Country Code:",
-      "cpf": "CPF:",
-      "email": "Email:",
-      "firstName": "Name:",
-      "lastName": "Last Name:",
-      "municipalRegistration": "Municipal Registration:",
-      "notes": "Notes:",
-      "phone": "Phone:",
-      "stateRegistration": "State Registration:",
-      "tradeName": "Trade Name:",
-      "type": "Type:"
+      "birthDate": "Date of Birth",
+      "category": "Category",
+      "cnpj": "CNPJ",
+      "companyName": "Company Name",
+      "countryCode": "IDD",
+      "cpf": "CPF",
+      "email": "Email",
+      "firstName": "Name",
+      "lastName": "Last Name",
+      "municipalRegistration": "Municipal Registration",
+      "notes": "Notes",
+      "phone": "Phone",
+      "stateRegistration": "State Registration",
+      "tradeName": "Trade Name",
+      "type": "Type"
     },
     "new": "New supplier",
     "placeholders": {

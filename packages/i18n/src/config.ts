@@ -8,8 +8,8 @@ export const DEFAULT_LOCALE: SupportedLocale = 'en-US'
 
 export const LOCALE_COOKIE_NAME = 'locale'
 
-/** Order shown in the language switcher: Brazil, Mexico, United States. */
-export const LOCALE_DISPLAY_ORDER: SupportedLocale[] = ['pt-BR', 'es-MX', 'en-US']
+/** Order shown in the language switcher: United States, Mexico, Brazil. */
+export const LOCALE_DISPLAY_ORDER: SupportedLocale[] = ['en-US', 'es-MX', 'pt-BR']
 
 /** First-visit geo default: ISO country → locale. Anything else falls back to English. */
 export const COUNTRY_TO_LOCALE: Record<string, SupportedLocale> = {

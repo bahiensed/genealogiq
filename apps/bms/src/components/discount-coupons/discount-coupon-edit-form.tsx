@@ -36,7 +36,7 @@ export function DiscountCouponEditForm({ id, code, description }: DiscountCoupon
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-2xl">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       {serverError && <FieldError>{serverError}</FieldError>}
 
       <FieldGroup>

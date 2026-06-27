@@ -12,6 +12,8 @@ import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
 import { Switch } from '@genealogiq/ui/switch'
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
+import { Separator } from '@genealogiq/ui/separator'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 
 interface SupplierCategoryFormProps {
@@ -48,60 +50,71 @@ export function SupplierCategoryForm({ id, defaultValues }: SupplierCategoryForm
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 max-w-lg">
-      {serverError && <FieldError>{serverError}</FieldError>}
-
-      <FieldGroup>
-        <Controller
-          name="name"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>{t('fields.name')}</FieldLabel>
-              <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+    <div className="mx-auto max-w-lg">
+      <Card>
+        <CardHeader>
+          <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
+            {isEditing ? t('edit') : t('new')}
+          </CardTitle>
+          {isEditing && (
+            <CardAction>
+              <Controller
+                name="isActive"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center gap-2">
+                    <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
+                    <label htmlFor="isActive" className="text-sm cursor-pointer">
+                      {field.value ? t('status.active') : t('status.inactive')}
+                    </label>
+                  </div>
+                )}
+              />
+            </CardAction>
           )}
-        />
+        </CardHeader>
+        <Separator />
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+            {serverError && <FieldError>{serverError}</FieldError>}
 
-        <Controller
-          name="description"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>{t('fields.description')}</FieldLabel>
-              <Textarea {...field} rows={3} aria-invalid={fieldState.invalid} />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            <FieldGroup>
+              <Controller
+                name="name"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t('fields.name')}</FieldLabel>
+                    <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="description"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t('fields.description')}</FieldLabel>
+                    <Textarea {...field} rows={3} aria-invalid={fieldState.invalid} />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
+
+            <Field orientation="horizontal">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (isEditing ? tc('saving') : tc('creating')) : isEditing ? tc('save') : t('create')}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => form.reset()}>
+                {tc('reset')}
+              </Button>
             </Field>
-          )}
-        />
-
-        {isEditing && (
-          <Controller
-            name="isActive"
-            control={control}
-            render={({ field }) => (
-              <Field orientation="horizontal">
-                <Switch
-                  id="isActive"
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-                <FieldLabel htmlFor="isActive" className="cursor-pointer">{t('fields.activeCategory')}</FieldLabel>
-              </Field>
-            )}
-          />
-        )}
-      </FieldGroup>
-
-      <Field orientation="horizontal">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (isEditing ? tc('saving') : tc('creating')) : isEditing ? tc('save') : t('create')}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => form.reset()}>
-          {tc('reset')}
-        </Button>
-      </Field>
-    </form>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
