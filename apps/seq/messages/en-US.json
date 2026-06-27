@@ -768,6 +768,36 @@
     },
     "title": "Sales"
   },
+  "Sidebar": {
+    "groups": {
+      "system": "System",
+      "records": "Records",
+      "categories": "Categories",
+      "purchasing": "Purchasing",
+      "inventory": "Inventory",
+      "sales": "Sales",
+      "finance": "Finance"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "buyPhysicalQr": "Buy Physical QR Codes",
+      "myPhysicalQr": "My Physical QR Codes",
+      "buyDigitalQr": "Buy Digital QR Codes",
+      "myDigitalQr": "My Digital QR Codes",
+      "customers": "Customers",
+      "sales": "Sales",
+      "companyData": "Company Data",
+      "employees": "Employees",
+      "suppliers": "Suppliers",
+      "products": "Products",
+      "services": "Services",
+      "supplierCategories": "Supplier Categories",
+      "productCategories": "Product Categories",
+      "serviceCategories": "Service Categories",
+      "customerCategories": "Customer Categories",
+      "finance": "Finance"
+    }
+  },
   "SupplierCategories": {
     "actions": {
       "deactivate": "Deactivate",
