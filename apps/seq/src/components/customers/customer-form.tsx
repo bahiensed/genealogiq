@@ -91,7 +91,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6 max-w-2xl">
+    <form onSubmit={handleSubmit(onSubmit, scrollToFirstError)} className="flex flex-col gap-6">
 
       <div className="flex items-center justify-between">
         <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">{name}</h1>
@@ -112,7 +112,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
         {/* ── Personal data ── */}
         <AccordionItem value="personal" className="border rounded-lg px-4 bg-card">
           <AccordionTrigger className="text-base font-semibold">{t('sections.personal')}</AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
+          <AccordionContent className="pt-2 pb-4 mx-auto w-full max-w-4xl">
             <FieldGroup>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Controller
@@ -204,7 +204,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
         {/* ── Contact ── */}
         <AccordionItem value="contact" className="border rounded-lg px-4 bg-card">
           <AccordionTrigger className="text-base font-semibold">{t('sections.contact')}</AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
+          <AccordionContent className="pt-2 pb-4 mx-auto w-full max-w-4xl">
             <FieldGroup>
               <Controller
                 name="email"
@@ -295,7 +295,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
         {/* ── Address ── */}
         <AccordionItem value="address" className="border rounded-lg px-4 bg-card">
           <AccordionTrigger className="text-base font-semibold">{t('sections.address')}</AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
+          <AccordionContent className="pt-2 pb-4 mx-auto w-full max-w-4xl">
             <AddressSection
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               control={control as any}
@@ -309,7 +309,7 @@ export function CustomerForm({ id, name, defaultValues, categories = [] }: Custo
         {/* ── Social media ── */}
         <AccordionItem value="social" className="border rounded-lg px-4 bg-card">
           <AccordionTrigger className="text-base font-semibold">{t('sections.social')}</AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4">
+          <AccordionContent className="pt-2 pb-4 mx-auto w-full max-w-4xl">
             <FieldGroup>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {SOCIAL_KEYS.map((key) => (
