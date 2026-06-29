@@ -6,7 +6,7 @@ import { getCustomerCategories } from '@/queries/customer-categories'
 import { CustomerForm } from '@/components/customers/customer-form'
 import { MemorializedDataTable } from '@/components/memorialized/memorialized-data-table'
 import { Button } from '@genealogiq/ui/button'
-import { Card, CardDescription, CardHeader, CardTitle } from '@genealogiq/ui/card'
+import { StatCard } from '@/components/ui/stat-card'
 import { Separator } from '@genealogiq/ui/separator'
 import type { AppUserFormValues } from '@/schemas/app-user.schema'
 
@@ -87,25 +87,12 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-3xl">
           <StatCard label={t('memorialized.acquiredQrCodesLabel')} value={acquiredQRCodes} />
-          <StatCard label={t('memorialized.availableProfilesLabel')} value={availableProfiles} highlight={availableProfiles > 0} />
+          <StatCard label={t('memorialized.availableProfilesLabel')} value={availableProfiles} valueClassName={availableProfiles > 0 ? 'text-primary' : undefined} />
           <StatCard label={t('memorialized.createdProfilesLabel')} value={createdProfiles} />
         </div>
 
         <MemorializedDataTable data={memorializedProfiles} />
       </section>
     </div>
-  )
-}
-
-function StatCard({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) {
-  return (
-    <Card size="sm" className="gap-2">
-      <CardHeader>
-        <CardDescription className="min-h-[2.5em] leading-snug whitespace-pre-line">{label}</CardDescription>
-        <CardTitle className={`text-5xl font-bold tabular-nums ${highlight ? 'text-primary' : ''}`}>
-          {value}
-        </CardTitle>
-      </CardHeader>
-    </Card>
   )
 }
