@@ -30,6 +30,7 @@ export function LicensesDataTable({ data, appUrl }: LicensesDataTableProps) {
       filterColumn="genCode"
       emptyMessage={t('table.empty')}
       columnLabels={columnLabels}
+      initialPageSize={20}
     />
   )
 }

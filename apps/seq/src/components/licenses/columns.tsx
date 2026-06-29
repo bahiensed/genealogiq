@@ -21,7 +21,7 @@ function formatDate(d: Date | null | undefined, locale: string): string {
 const STATUS_STYLE: Record<string, { variant: 'default' | 'secondary' | 'outline'; cls: string }> = {
   AVAILABLE: { variant: 'secondary', cls: '' },
   SOLD:      { variant: 'outline', cls: 'text-amber-600 border-amber-500/40' },
-  ACTIVATED: { variant: 'default', cls: '' },
+  ACTIVATED: { variant: 'outline', cls: 'text-green-600 border-green-500/40' },
 }
 
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -82,7 +82,7 @@ export function buildLicenseColumns(appUrl: string, t: Translator, locale: strin
       header: () => t('table.printed'),
       cell: ({ row }) =>
         row.original.printedAt ? (
-          <span className="inline-flex items-center gap-1 text-emerald-600">
+          <span className="inline-flex items-center gap-1 text-blue-600">
             <Check className="h-3.5 w-3.5" /> {formatDate(row.original.printedAt, locale)}
           </span>
         ) : (

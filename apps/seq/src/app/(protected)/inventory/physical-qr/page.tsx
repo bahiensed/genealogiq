@@ -3,7 +3,9 @@ import { getTranslations } from 'next-intl/server'
 import { getLicenses, getLicenseSummary } from '@/queries/licenses'
 import { LicensesDataTable } from '@/components/licenses/licenses-data-table'
 import { LicensesCsvButton } from '@/components/licenses/licenses-csv-button'
+import { StatCard } from '@/components/ui/stat-card'
 import { Button } from '@genealogiq/ui/button'
+import { Separator } from '@genealogiq/ui/separator'
 
 export default async function LicensesPage({
   searchParams,
@@ -37,24 +39,17 @@ export default async function LicensesPage({
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <SummaryCard label={t('summary.available')} value={summary.available} accent="text-emerald-600" />
-        <SummaryCard label={t('summary.sold')} value={summary.sold} accent="text-amber-600" />
-        <SummaryCard label={t('summary.activated')} value={summary.activated} />
-        <SummaryCard label={t('summary.printed')} value={summary.printed} />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-4xl">
+        <StatCard label={t('summary.available')} value={summary.available} />
+        <StatCard label={t('summary.sold')} value={summary.sold} valueClassName="text-amber-600" />
+        <StatCard label={t('summary.printed')} value={summary.printed} valueClassName="text-blue-600" />
+        <StatCard label={t('summary.activated')} value={summary.activated} valueClassName="text-green-600" />
       </div>
+
+      <Separator />
 
       {/* Licenses (one row per printable QR code) */}
       <LicensesDataTable data={licenses} appUrl={appUrl} />
-    </div>
-  )
-}
-
-function SummaryCard({ label, value, accent }: { label: string; value: number; accent?: string }) {
-  return (
-    <div className="rounded-lg border bg-card p-4">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className={`text-3xl font-bold tabular-nums ${accent ?? ''}`}>{value}</p>
     </div>
   )
 }
