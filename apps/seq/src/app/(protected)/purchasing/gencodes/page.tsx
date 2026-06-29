@@ -5,7 +5,7 @@ import { verifyTenantSession } from '@/lib/dal'
 import { QRStore } from '@/components/purchasing/qr-store'
 import { PurchaseStatusToast } from '@/components/purchasing/purchase-status-toast'
 
-export default async function PurchasingPhysicalQrPage() {
+export default async function PurchasingGenCodePage() {
   await verifyTenantSession()
 
   const t = await getTranslations('Purchasing')

@@ -20,13 +20,13 @@ import {
 } from '@genealogiq/ui/dialog'
 import { ConfirmDeleteDialog } from '@genealogiq/ui/confirm-delete-dialog'
 import {
-  markPhysicalQrPrinted,
-  sellPhysicalQrManually,
-  sellPhysicalQrViaPlatform,
-  undoPhysicalQrSale,
-} from '@/actions/physical-qr.actions'
+  markGenCodePrinted,
+  sellGenCodeManually,
+  sellGenCodeViaPlatform,
+  undoGenCodeSale,
+} from '@/actions/gencode.actions'
 
-export interface PhysicalQrDetail {
+export interface GenCodeDetail {
   genCode:    string
   status:     'AVAILABLE' | 'SOLD' | 'ACTIVATED'
   printedAt:  Date | null
@@ -47,9 +47,9 @@ const STATUS_BADGE: Record<string, { variant: 'default' | 'secondary' | 'outline
   ACTIVATED: { variant: 'default', cls: '' },
 }
 
-export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
+export function GenCodeActions({ license }: { license: GenCodeDetail }) {
   const router = useRouter()
-  const t = useTranslations('PhysicalQr')
+  const t = useTranslations('GenCode')
   const locale = useLocale()
   const [isPending, startTransition] = useTransition()
   const [platformOpen, setPlatformOpen] = useState(false)
@@ -65,7 +65,7 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
 
   function togglePrinted() {
     startTransition(async () => {
-      const res = await markPhysicalQrPrinted(license.genCode, !printed)
+      const res = await markGenCodePrinted(license.genCode, !printed)
       if (!res.ok) toast.error(res.message)
       else { toast.success(printed ? t('toasts.markedNotPrinted') : t('toasts.markedPrinted')); router.refresh() }
     })
@@ -73,7 +73,7 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
 
   function undo() {
     startTransition(async () => {
-      const res = await undoPhysicalQrSale(license.genCode)
+      const res = await undoGenCodeSale(license.genCode)
       if (!res.ok) toast.error(res.message)
       else { if (res.message) toast.success(res.message); setUndoOpen(false); router.refresh() }
     })
@@ -171,7 +171,7 @@ export function PhysicalQrActions({ license }: { license: PhysicalQrDetail }) {
 function ManualSaleDialog({ genCode, open, onOpenChange, onDone }: {
   genCode: string; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void
 }) {
-  const t = useTranslations('PhysicalQr')
+  const t = useTranslations('GenCode')
   const tc = useTranslations('Common')
   const [buyerName, setBuyerName] = useState('')
   const [value, setValue] = useState('')
@@ -180,7 +180,7 @@ function ManualSaleDialog({ genCode, open, onOpenChange, onDone }: {
   function submit() {
     const v = value.trim() ? Number(value) : undefined
     startTransition(async () => {
-      const res = await sellPhysicalQrManually(genCode, { buyerName, value: v })
+      const res = await sellGenCodeManually(genCode, { buyerName, value: v })
       if (!res.ok) toast.error(res.message)
       else { if (res.message) toast.success(res.message); onOpenChange(false); setBuyerName(''); setValue(''); onDone() }
     })
@@ -223,7 +223,7 @@ interface AppUserResult { id: string; firstName: string; lastName: string; email
 function PlatformSaleDialog({ genCode, open, onOpenChange, onDone }: {
   genCode: string; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void
 }) {
-  const t = useTranslations('PhysicalQr')
+  const t = useTranslations('GenCode')
   const tc = useTranslations('Common')
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<AppUserResult[]>([])
@@ -248,7 +248,7 @@ function PlatformSaleDialog({ genCode, open, onOpenChange, onDone }: {
     if (!selected) return
     const v = value.trim() ? Number(value) : undefined
     startTransition(async () => {
-      const res = await sellPhysicalQrViaPlatform(genCode, selected.id, v)
+      const res = await sellGenCodeViaPlatform(genCode, selected.id, v)
       if (!res.ok) toast.error(res.message)
       else { if (res.message) toast.success(res.message); onOpenChange(false); setSelected(null); setQuery(''); setValue(''); onDone() }
     })
