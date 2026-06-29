@@ -6,7 +6,7 @@ import { getCustomerCategories } from '@/queries/customer-categories'
 import { CustomerForm } from '@/components/customers/customer-form'
 import { MemorializedDataTable } from '@/components/memorialized/memorialized-data-table'
 import { Button } from '@genealogiq/ui/button'
-import { Badge } from '@genealogiq/ui/badge'
+import { Card, CardDescription, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Separator } from '@genealogiq/ui/separator'
 import type { AppUserFormValues } from '@/schemas/app-user.schema'
 
@@ -75,16 +75,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
       {/* ── Memorialized profiles ── */}
       <section id="memorialized-profiles" className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-            <h2 className="text-lg font-semibold">{t('memorialized.title')}</h2>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">{t('memorialized.acquiredQrCodes', { count: acquiredQRCodes })}</Badge>
-              <Badge variant={availableProfiles > 0 ? 'default' : 'secondary'}>
-                {t('memorialized.availableProfiles', { count: availableProfiles })}
-              </Badge>
-              <Badge variant="outline">{t('memorialized.createdProfiles', { count: createdProfiles })}</Badge>
-            </div>
-          </div>
+          <h2 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">{t('memorialized.title')}</h2>
           {availableProfiles > 0 && (
             <Button asChild>
               <Link href={`/customers/${id}/memorialized/new`}>
@@ -94,8 +85,27 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
           )}
         </div>
 
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-3xl">
+          <StatCard label={t('memorialized.acquiredQrCodesLabel')} value={acquiredQRCodes} />
+          <StatCard label={t('memorialized.availableProfilesLabel')} value={availableProfiles} highlight={availableProfiles > 0} />
+          <StatCard label={t('memorialized.createdProfilesLabel')} value={createdProfiles} />
+        </div>
+
         <MemorializedDataTable data={memorializedProfiles} />
       </section>
     </div>
+  )
+}
+
+function StatCard({ label, value, highlight = false }: { label: string; value: number; highlight?: boolean }) {
+  return (
+    <Card size="sm" className="gap-2">
+      <CardHeader>
+        <CardDescription className="min-h-[2.5em] leading-snug whitespace-pre-line">{label}</CardDescription>
+        <CardTitle className={`text-5xl font-bold tabular-nums ${highlight ? 'text-primary' : ''}`}>
+          {value}
+        </CardTitle>
+      </CardHeader>
+    </Card>
   )
 }
