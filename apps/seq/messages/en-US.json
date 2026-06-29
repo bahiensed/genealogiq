@@ -59,7 +59,7 @@
       "relationExists": "This guardian is already linked to the profile.",
       "relationNotFound": "Guardian link not found."
     },
-    "physicalQr": {
+    "gencode": {
       "customerNoEmail": "Customer has no email address.",
       "customerNotFound": "Customer not found.",
       "invalidValue": "Invalid sale value.",
@@ -464,7 +464,7 @@
       "status": "Status",
       "url": "URL"
     },
-    "title": "My Physical QR Codes"
+    "title": "My GenCodes"
   },
   "Memorialized": {
     "actions": {
@@ -602,7 +602,7 @@
     "goHome": "Go home",
     "title": "Page not found"
   },
-  "PhysicalQr": {
+  "GenCode": {
     "actions": {
       "manualWriteOff": "Manual write-off (off-platform)",
       "markNotPrinted": "Mark as not printed",
@@ -720,14 +720,15 @@
       "processing": "Processing…"
     },
     "digital": {
-      "title": "Buy Digital QR Codes"
+      "title": "Purchase Digital QR Codes"
     },
     "empty": {
       "digital": "No packages available at the moment.",
       "physical": "No physical QR Codes available at the moment."
     },
     "physical": {
-      "title": "Buy Physical QR Codes"
+      "subtitle": "Purchase GenCodes to print on your memorial plates and resell them to your very own customers",
+      "title": "Purchase GenCodes"
     },
     "toasts": {
       "canceled": "Purchase canceled.",
@@ -783,9 +784,9 @@
     },
     "items": {
       "dashboard": "Dashboard",
-      "buyPhysicalQr": "Buy Physical QR Codes",
-      "myPhysicalQr": "My Physical QR Codes",
-      "buyDigitalQr": "Buy Digital QR Codes",
+      "buyGenCodes": "Purchase GenCodes",
+      "myGenCodes": "My GenCodes",
+      "buyDigitalQr": "Purchase Digital QR Codes",
       "myDigitalQr": "My Digital QR Codes",
       "customers": "Customers",
       "sales": "Sales",

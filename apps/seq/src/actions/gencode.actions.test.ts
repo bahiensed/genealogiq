@@ -27,11 +27,11 @@ vi.mock("@/lib/dal", () => ({ verifyTenantSession: vi.fn() }))
 vi.mock("@/lib/email", () => ({ sendAppWelcomeEmail: vi.fn() }))
 
 import {
-  markPhysicalQrPrinted,
-  sellPhysicalQrManually,
-  sellPhysicalQrViaPlatform,
-  undoPhysicalQrSale,
-} from "./physical-qr.actions"
+  markGenCodePrinted,
+  sellGenCodeManually,
+  sellGenCodeViaPlatform,
+  undoGenCodeSale,
+} from "./gencode.actions"
 import { verifyTenantSession } from "@/lib/dal"
 import { sendAppWelcomeEmail } from "@/lib/email"
 import { Prisma } from "@genealogiq/db"
@@ -44,13 +44,13 @@ beforeEach(() => {
   } as never)
 })
 
-describe("markPhysicalQrPrinted — tenant-scoped ownership", () => {
+describe("markGenCodePrinted — tenant-scoped ownership", () => {
   it("fails when the code is not in the caller's tenant (scoped lookup)", async () => {
     prismaMock.physicalQrLicense.findFirst.mockResolvedValue(null)
 
-    const res = await markPhysicalQrPrinted("GEN-1", true)
+    const res = await markGenCodePrinted("GEN-1", true)
 
-    expect(res).toEqual({ ok: false, message: "physicalQr.notFound" })
+    expect(res).toEqual({ ok: false, message: "gencode.notFound" })
     expect(prismaMock.physicalQrLicense.findFirst).toHaveBeenCalledWith({
       where: { genCode: "GEN-1", tenantId: "c1" },
       select: { id: true },
@@ -62,7 +62,7 @@ describe("markPhysicalQrPrinted — tenant-scoped ownership", () => {
     prismaMock.physicalQrLicense.findFirst.mockResolvedValue({ id: "lic-1" })
     prismaMock.physicalQrLicense.update.mockResolvedValue({})
 
-    const res = await markPhysicalQrPrinted("GEN-1", true)
+    const res = await markGenCodePrinted("GEN-1", true)
 
     expect(res.ok).toBe(true)
     expect(prismaMock.physicalQrLicense.update).toHaveBeenCalledWith({
@@ -72,27 +72,27 @@ describe("markPhysicalQrPrinted — tenant-scoped ownership", () => {
   })
 })
 
-describe("sellPhysicalQrManually — input validation + atomic sale guard", () => {
+describe("sellGenCodeManually — input validation + atomic sale guard", () => {
   it("rejects a blank buyer name before touching the DB", async () => {
-    const res = await sellPhysicalQrManually("GEN-1", { buyerName: "   " })
+    const res = await sellGenCodeManually("GEN-1", { buyerName: "   " })
 
     expect(res).toEqual({ ok: false, message: "common.invalidData" })
     expect(prismaMock.physicalQrLicense.updateMany).not.toHaveBeenCalled()
   })
 
   it("rejects an out-of-range value before touching the DB", async () => {
-    const res = await sellPhysicalQrManually("GEN-1", { buyerName: "Buyer", value: -5 })
+    const res = await sellGenCodeManually("GEN-1", { buyerName: "Buyer", value: -5 })
 
-    expect(res).toEqual({ ok: false, message: "physicalQr.invalidValue" })
+    expect(res).toEqual({ ok: false, message: "gencode.invalidValue" })
     expect(prismaMock.physicalQrLicense.updateMany).not.toHaveBeenCalled()
   })
 
   it("fails when no AVAILABLE code matches (double-sell guard, count === 0)", async () => {
     prismaMock.physicalQrLicense.updateMany.mockResolvedValue({ count: 0 })
 
-    const res = await sellPhysicalQrManually("GEN-1", { buyerName: "Buyer", value: 100 })
+    const res = await sellGenCodeManually("GEN-1", { buyerName: "Buyer", value: 100 })
 
-    expect(res).toEqual({ ok: false, message: "physicalQr.notAvailable" })
+    expect(res).toEqual({ ok: false, message: "gencode.notAvailable" })
     expect(prismaMock.physicalQrLicense.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { genCode: "GEN-1", tenantId: "c1", status: "AVAILABLE" },
@@ -103,19 +103,19 @@ describe("sellPhysicalQrManually — input validation + atomic sale guard", () =
   it("writes off an AVAILABLE code and returns ok", async () => {
     prismaMock.physicalQrLicense.updateMany.mockResolvedValue({ count: 1 })
 
-    const res = await sellPhysicalQrManually("GEN-1", { buyerName: "Buyer", value: 100 })
+    const res = await sellGenCodeManually("GEN-1", { buyerName: "Buyer", value: 100 })
 
-    expect(res).toEqual({ ok: true, message: "physicalQr.saleRecorded" })
+    expect(res).toEqual({ ok: true, message: "gencode.saleRecorded" })
   })
 })
 
-describe("sellPhysicalQrViaPlatform — consumer scoping + transaction branches", () => {
+describe("sellGenCodeViaPlatform — consumer scoping + transaction branches", () => {
   it("fails when the consumer is not in the caller's tenant", async () => {
     prismaMock.appUser.findUnique.mockResolvedValue(null)
 
-    const res = await sellPhysicalQrViaPlatform("GEN-1", "app-user-1", 100)
+    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1", 100)
 
-    expect(res).toEqual({ ok: false, message: "physicalQr.customerNotFound" })
+    expect(res).toEqual({ ok: false, message: "gencode.customerNotFound" })
     expect(prismaMock.appUser.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: "app-user-1", tenantId: "c1" } }),
     )
@@ -125,9 +125,9 @@ describe("sellPhysicalQrViaPlatform — consumer scoping + transaction branches"
   it("fails when the consumer has no email", async () => {
     prismaMock.appUser.findUnique.mockResolvedValue({ id: "app-user-1", email: null })
 
-    const res = await sellPhysicalQrViaPlatform("GEN-1", "app-user-1")
+    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1")
 
-    expect(res).toEqual({ ok: false, message: "physicalQr.customerNoEmail" })
+    expect(res).toEqual({ ok: false, message: "gencode.customerNoEmail" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
@@ -146,13 +146,13 @@ describe("sellPhysicalQrViaPlatform — consumer scoping + transaction branches"
       return cb(tx as never)
     })
 
-    const res = await sellPhysicalQrViaPlatform("GEN-1", "app-user-1")
+    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1")
 
-    expect(res).toEqual({ ok: false, message: "physicalQr.notAvailable" })
+    expect(res).toEqual({ ok: false, message: "gencode.notAvailable" })
     expect(sendAppWelcomeEmail).not.toHaveBeenCalled()
   })
 
-  it("maps a Prisma known request error to physicalQr.saleFailed", async () => {
+  it("maps a Prisma known request error to gencode.saleFailed", async () => {
     prismaMock.appUser.findUnique.mockResolvedValue({
       id: "app-user-1",
       email: "buyer@example.com",
@@ -162,9 +162,9 @@ describe("sellPhysicalQrViaPlatform — consumer scoping + transaction branches"
       new (Prisma.PrismaClientKnownRequestError as unknown as new (message: string) => Error)("P2002"),
     )
 
-    const res = await sellPhysicalQrViaPlatform("GEN-1", "app-user-1")
+    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1")
 
-    expect(res).toEqual({ ok: false, message: "physicalQr.saleFailed" })
+    expect(res).toEqual({ ok: false, message: "gencode.saleFailed" })
     expect(sendAppWelcomeEmail).not.toHaveBeenCalled()
   })
 
@@ -183,9 +183,9 @@ describe("sellPhysicalQrViaPlatform — consumer scoping + transaction branches"
     })
     vi.mocked(sendAppWelcomeEmail).mockRejectedValue(new Error("smtp down"))
 
-    const res = await sellPhysicalQrViaPlatform("GEN-1", "app-user-1", 100)
+    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1", 100)
 
-    expect(res).toEqual({ ok: true, message: "physicalQr.soldViaPlatform" })
+    expect(res).toEqual({ ok: true, message: "gencode.soldViaPlatform" })
     expect(sendAppWelcomeEmail).toHaveBeenCalledWith(
       "buyer@example.com",
       expect.any(String),
@@ -195,13 +195,13 @@ describe("sellPhysicalQrViaPlatform — consumer scoping + transaction branches"
   })
 })
 
-describe("undoPhysicalQrSale — only-while-SOLD guard", () => {
+describe("undoGenCodeSale — only-while-SOLD guard", () => {
   it("fails when no SOLD code matches (already activated / never sold)", async () => {
     prismaMock.physicalQrLicense.updateMany.mockResolvedValue({ count: 0 })
 
-    const res = await undoPhysicalQrSale("GEN-1")
+    const res = await undoGenCodeSale("GEN-1")
 
-    expect(res).toEqual({ ok: false, message: "physicalQr.notSold" })
+    expect(res).toEqual({ ok: false, message: "gencode.notSold" })
     expect(prismaMock.physicalQrLicense.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { genCode: "GEN-1", tenantId: "c1", status: "SOLD" },
@@ -212,8 +212,8 @@ describe("undoPhysicalQrSale — only-while-SOLD guard", () => {
   it("reverses a SOLD code back to AVAILABLE", async () => {
     prismaMock.physicalQrLicense.updateMany.mockResolvedValue({ count: 1 })
 
-    const res = await undoPhysicalQrSale("GEN-1")
+    const res = await undoGenCodeSale("GEN-1")
 
-    expect(res).toEqual({ ok: true, message: "physicalQr.saleUndone" })
+    expect(res).toEqual({ ok: true, message: "gencode.saleUndone" })
   })
 })

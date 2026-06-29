@@ -59,7 +59,7 @@
       "relationExists": "Este responsável já está vinculado ao perfil.",
       "relationNotFound": "Vínculo de responsável não encontrado."
     },
-    "physicalQr": {
+    "gencode": {
       "customerNoEmail": "O cliente não possui endereço de e-mail.",
       "customerNotFound": "Cliente não encontrado.",
       "invalidValue": "Valor da venda inválido.",
@@ -464,7 +464,7 @@
       "status": "Status",
       "url": "URL"
     },
-    "title": "Meus QR Codes físicos"
+    "title": "Meus GenCodes"
   },
   "Memorialized": {
     "actions": {
@@ -602,7 +602,7 @@
     "goHome": "Ir para o início",
     "title": "Página não encontrada"
   },
-  "PhysicalQr": {
+  "GenCode": {
     "actions": {
       "manualWriteOff": "Baixa manual (fora da plataforma)",
       "markNotPrinted": "Marcar como não impresso",
@@ -727,7 +727,8 @@
       "physical": "Nenhum QR Code físico disponível no momento."
     },
     "physical": {
-      "title": "Comprar QR Codes Físicos"
+      "subtitle": "Compre GenCodes para imprimir em suas placas memoriais e revendê-los aos seus próprios clientes",
+      "title": "Comprar GenCodes"
     },
     "toasts": {
       "canceled": "Compra cancelada.",
@@ -783,8 +784,8 @@
     },
     "items": {
       "dashboard": "Painel",
-      "buyPhysicalQr": "Comprar QR Codes Físicos",
-      "myPhysicalQr": "Meus QR Codes Físicos",
+      "buyGenCodes": "Comprar GenCodes",
+      "myGenCodes": "Meus GenCodes",
       "buyDigitalQr": "Comprar QR Codes Digitais",
       "myDigitalQr": "Meus QR Codes Digitais",
       "customers": "Clientes",

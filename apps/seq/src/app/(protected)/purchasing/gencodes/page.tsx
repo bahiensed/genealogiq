@@ -5,7 +5,7 @@ import { verifyTenantSession } from '@/lib/dal'
 import { QRStore } from '@/components/purchasing/qr-store'
 import { PurchaseStatusToast } from '@/components/purchasing/purchase-status-toast'
 
-export default async function PurchasingPhysicalQrPage() {
+export default async function PurchasingGenCodePage() {
   await verifyTenantSession()
 
   const t = await getTranslations('Purchasing')
@@ -29,9 +29,14 @@ export default async function PurchasingPhysicalQrPage() {
       <Suspense fallback={null}>
         <PurchaseStatusToast />
       </Suspense>
-      <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
-        {t('physical.title')}
-      </h1>
+      <div className="flex flex-col gap-1">
+        <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
+          {t('physical.title')}
+        </h1>
+        <p className="text-muted-foreground text-balance">
+          {t('physical.subtitle')}
+        </p>
+      </div>
       <QRStore packages={data} variant="physical" />
     </div>
   )
