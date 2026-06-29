@@ -4,10 +4,10 @@ import { getTranslations } from 'next-intl/server'
 import { ArrowLeft } from 'lucide-react'
 import { getLicenseByGenCode } from '@/queries/licenses'
 import { QrCodePresets } from '@/components/memorialized/qr-code-presets'
-import { PhysicalQrActions } from '@/components/physical-qr/physical-qr-actions'
+import { GenCodeActions } from '@/components/gencode/gencode-actions'
 import { formatGenCode } from '@/lib/gen-code'
 
-export default async function PhysicalQrDetailPage({
+export default async function GenCodeDetailPage({
   params,
 }: {
   params: Promise<{ genCode: string }>
@@ -18,7 +18,7 @@ export default async function PhysicalQrDetailPage({
   const license = await getLicenseByGenCode(genCode)
   if (!license) notFound()
 
-  const t = await getTranslations('PhysicalQr')
+  const t = await getTranslations('GenCode')
 
   const appUrl   = process.env.APP_URL ?? 'https://genealogiq.app'
   const qrUrl    = `${appUrl}/qr/${license.genCode}`
@@ -44,7 +44,7 @@ export default async function PhysicalQrDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <Link href="/inventory/physical-qr" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground w-fit">
+        <Link href="/inventory/gencodes" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground w-fit">
           <ArrowLeft className="h-4 w-4" /> {t('detail.backToInventory')}
         </Link>
         <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
@@ -63,7 +63,7 @@ export default async function PhysicalQrDetailPage({
         {/* Status + sale/print actions */}
         <aside className="lg:col-span-1">
           <div className="lg:sticky lg:top-20">
-            <PhysicalQrActions license={detail} />
+            <GenCodeActions license={detail} />
           </div>
         </aside>
       </div>

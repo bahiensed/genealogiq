@@ -1,4 +1,4 @@
-import { BarChart2, BoxIcon, BuildingIcon, Fingerprint, FolderIcon, HandPlatterIcon, IdCardIcon, LayoutDashboard, QrCodeIcon, ShoppingCartIcon, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
+import { BarChart2, Barcode, BoxIcon, BuildingIcon, FolderIcon, HandPlatterIcon, IdCardIcon, LayoutDashboard, QrCodeIcon, ScanBarcode, ScanLine, ShoppingCartIcon, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
 
 export type ModuleKey =
   | 'moduleRecordsSuppliers'
@@ -27,11 +27,11 @@ export const main: MenuItem[][] = [
     { labelKey: 'items.dashboard', url: '/dashboard', icon: LayoutDashboard },
   ],
   [
-    { labelKey: 'items.buyPhysicalQr', url: '/purchasing/physical-qr', icon: Fingerprint },
-    { labelKey: 'items.myPhysicalQr',  url: '/inventory/physical-qr',  icon: Fingerprint },
+    { labelKey: 'items.buyGenCodes', url: '/purchasing/gencodes', icon: Barcode },
+    { labelKey: 'items.myGenCodes',  url: '/inventory/gencodes',  icon: ScanBarcode },
   ],
   [
-    { labelKey: 'items.buyDigitalQr', url: '/purchasing/digital-qr', icon: QrCodeIcon },
+    { labelKey: 'items.buyDigitalQr', url: '/purchasing/digital-qr', icon: ScanLine },
     { labelKey: 'items.myDigitalQr',  url: '/inventory/digital-qr',  icon: QrCodeIcon },
   ],
   [
@@ -68,8 +68,8 @@ export const categories: MenuItem[] = [
 // ─── Purchasing (QR always-on) ───────────────────────────────────────────────
 
 export const purchasing: MenuItem[] = [
-  { labelKey: 'items.buyPhysicalQr', url: '/purchasing/physical-qr', icon: Fingerprint     },
-  { labelKey: 'items.buyDigitalQr',  url: '/purchasing/digital-qr',  icon: QrCodeIcon      },
+  { labelKey: 'items.buyGenCodes', url: '/purchasing/gencodes', icon: Barcode     },
+  { labelKey: 'items.buyDigitalQr',  url: '/purchasing/digital-qr',  icon: ScanLine      },
   { labelKey: 'items.products',      url: '/purchasing/products',    icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
   { labelKey: 'items.services',      url: '/purchasing/services',    icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
 ]
@@ -77,7 +77,7 @@ export const purchasing: MenuItem[] = [
 // ─── Inventory (QR always-on) ────────────────────────────────────────────────
 
 export const inventory: MenuItem[] = [
-  { labelKey: 'items.myPhysicalQr', url: '/inventory/physical-qr', icon: Fingerprint },
+  { labelKey: 'items.myGenCodes', url: '/inventory/gencodes', icon: ScanBarcode },
   { labelKey: 'items.myDigitalQr',  url: '/inventory/digital-qr',  icon: QrCodeIcon  },
   { labelKey: 'items.products',     url: '/inventory/products',    icon: BoxIcon,     moduleKey: 'moduleInventoryProducts' },
 ]

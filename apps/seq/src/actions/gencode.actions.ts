@@ -14,12 +14,12 @@ const buyerSchema = z.string().trim().min(1, 'Buyer name is required.').max(200)
 const valueSchema = z.number().finite().min(0).max(1_000_000)
 
 function paths(genCode: string) {
-  revalidatePath('/inventory/physical-qr')
-  revalidatePath(`/inventory/physical-qr/${genCode}`)
+  revalidatePath('/inventory/gencodes')
+  revalidatePath(`/inventory/gencodes/${genCode}`)
 }
 
 /** Toggle the operator-set "printed" flag. */
-export async function markPhysicalQrPrinted(genCode: string, printed: boolean): Promise<ActionResult> {
+export async function markGenCodePrinted(genCode: string, printed: boolean): Promise<ActionResult> {
   const t = await getTranslations('Actions')
   const { customerId } = await verifyTenantSession()
 
@@ -27,7 +27,7 @@ export async function markPhysicalQrPrinted(genCode: string, printed: boolean): 
     where:  { genCode, tenantId: customerId },
     select: { id: true },
   })
-  if (!lic) return fail(t('physicalQr.notFound'))
+  if (!lic) return fail(t('gencode.notFound'))
 
   await prisma.physicalQrLicense.update({
     where: { id: lic.id },
@@ -38,7 +38,7 @@ export async function markPhysicalQrPrinted(genCode: string, printed: boolean): 
 }
 
 /** Manual write-off ("baixa") for a sale made outside the platform. */
-export async function sellPhysicalQrManually(
+export async function sellGenCodeManually(
   genCode: string,
   input:   { buyerName: string; value?: number },
 ): Promise<ActionResult> {
@@ -51,7 +51,7 @@ export async function sellPhysicalQrManually(
   let soldValue: number | null = null
   if (input.value != null) {
     const v = valueSchema.safeParse(input.value)
-    if (!v.success) return fail(t('physicalQr.invalidValue'))
+    if (!v.success) return fail(t('gencode.invalidValue'))
     soldValue = v.data
   }
 
@@ -67,14 +67,14 @@ export async function sellPhysicalQrManually(
       soldValue,
     },
   })
-  if (res.count === 0) return fail(t('physicalQr.notAvailable'))
+  if (res.count === 0) return fail(t('gencode.notAvailable'))
 
   paths(genCode)
-  return done(t('physicalQr.saleRecorded'))
+  return done(t('gencode.saleRecorded'))
 }
 
 /** Platform sale: assign the code to a tenant consumer, write it off, and email APP access. */
-export async function sellPhysicalQrViaPlatform(
+export async function sellGenCodeViaPlatform(
   genCode:   string,
   appUserId: string,
   value?:    number,
@@ -85,7 +85,7 @@ export async function sellPhysicalQrViaPlatform(
   let soldValue: number | null = null
   if (value != null) {
     const v = valueSchema.safeParse(value)
-    if (!v.success) return fail(t('physicalQr.invalidValue'))
+    if (!v.success) return fail(t('gencode.invalidValue'))
     soldValue = v.data
   }
 
@@ -93,8 +93,8 @@ export async function sellPhysicalQrViaPlatform(
     where:  { id: appUserId, tenantId: customerId },
     select: { id: true, email: true, firstName: true },
   })
-  if (!consumer) return fail(t('physicalQr.customerNotFound'))
-  if (!consumer.email) return fail(t('physicalQr.customerNoEmail'))
+  if (!consumer) return fail(t('gencode.customerNotFound'))
+  if (!consumer.email) return fail(t('gencode.customerNoEmail'))
 
   const token = randomBytes(32).toString('hex')
 
@@ -123,12 +123,12 @@ export async function sellPhysicalQrViaPlatform(
     })
   } catch (e) {
     if (e instanceof Error && e.message === 'NOT_AVAILABLE') {
-      return fail(t('physicalQr.notAvailable'))
+      return fail(t('gencode.notAvailable'))
     }
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
-      return fail(t('physicalQr.saleFailed', { code: e.code }))
+      return fail(t('gencode.saleFailed', { code: e.code }))
     }
-    return fail(t('physicalQr.unexpectedError'))
+    return fail(t('gencode.unexpectedError'))
   }
 
   try {
@@ -140,11 +140,11 @@ export async function sellPhysicalQrViaPlatform(
   }
 
   paths(genCode)
-  return done(t('physicalQr.soldViaPlatform'))
+  return done(t('gencode.soldViaPlatform'))
 }
 
 /** Reverse a write-off — only while still SOLD (not yet activated by the consumer). */
-export async function undoPhysicalQrSale(genCode: string): Promise<ActionResult> {
+export async function undoGenCodeSale(genCode: string): Promise<ActionResult> {
   const t = await getTranslations('Actions')
   const { customerId } = await verifyTenantSession()
 
@@ -160,8 +160,8 @@ export async function undoPhysicalQrSale(genCode: string): Promise<ActionResult>
       soldValue:       null,
     },
   })
-  if (res.count === 0) return fail(t('physicalQr.notSold'))
+  if (res.count === 0) return fail(t('gencode.notSold'))
 
   paths(genCode)
-  return done(t('physicalQr.saleUndone'))
+  return done(t('gencode.saleUndone'))
 }

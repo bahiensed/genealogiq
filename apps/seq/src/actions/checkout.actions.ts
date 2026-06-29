@@ -31,7 +31,7 @@ export async function createPackageCheckoutSession(
   const customer = await ensureTenantStripeCustomer(tenantId)
   const baseUrl  = process.env.SEQUOIA_URL ?? 'http://localhost:3000'
   // Return the buyer to the page they purchased from (digital vs physical).
-  const returnPath = pkg.type === 'PHYSICAL' ? '/purchasing/physical-qr' : '/purchasing/digital-qr'
+  const returnPath = pkg.type === 'PHYSICAL' ? '/purchasing/gencodes' : '/purchasing/digital-qr'
   const metadata = { tenantId, packageId: pkg.id, quantity: String(quantity), soldById }
 
   const checkout = await stripe.checkout.sessions.create({
