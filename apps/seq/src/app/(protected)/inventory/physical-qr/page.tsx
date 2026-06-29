@@ -41,8 +41,8 @@ export default async function LicensesPage({
       {/* Summary */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-4xl">
         <StatCard label={t('summary.available')} value={summary.available} />
-        <StatCard label={t('summary.sold')} value={summary.sold} valueClassName="text-amber-600" />
         <StatCard label={t('summary.printed')} value={summary.printed} valueClassName="text-blue-600" />
+        <StatCard label={t('summary.sold')} value={summary.sold} valueClassName="text-amber-600" />
         <StatCard label={t('summary.activated')} value={summary.activated} valueClassName="text-green-600" />
       </div>
 

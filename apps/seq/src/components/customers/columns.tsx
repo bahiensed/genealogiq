@@ -28,7 +28,7 @@ function ActionsCell({ row, t }: { row: { original: CustomerRow }; t: Translator
     <RowActions
       menuLabel={t('actions.openMenu')}
       items={[
-        { kind: 'link', label: t('actions.edit'), href: `/customers/${customer.id}` },
+        { kind: 'link', label: t('actions.view'), href: `/customers/${customer.id}` },
         {
           kind: 'action',
           label: customer.isActive ? t('actions.deactivate') : t('actions.reactivate'),

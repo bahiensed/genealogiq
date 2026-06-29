@@ -29,7 +29,7 @@ function ActionsCell({ row, t }: { row: { original: MemorializedRow }; t: Transl
     <RowActions
       menuLabel={t('actions.openMenu')}
       items={[
-        { kind: 'link', label: t('actions.edit'), href: `/memorialized/${profile.id}` },
+        { kind: 'link', label: t('actions.view'), href: `/memorialized/${profile.id}` },
       ]}
     />
   )

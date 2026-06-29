@@ -246,7 +246,8 @@
       "edit": "Edit",
       "openMenu": "Open menu",
       "reactivate": "Reactivate",
-      "resendEmail": "Resend email"
+      "resendEmail": "Resend email",
+      "view": "View"
     },
     "active": "Active?",
     "createCustomer": "Create customer",
@@ -307,9 +308,9 @@
     },
     "memorialized": {
       "create": "Create memorialized profile",
-      "acquiredQrCodesLabel": "Acquired QR Codes",
-      "availableProfilesLabel": "Available\nMemorialized Profiles",
-      "createdProfilesLabel": "Created\nMemorialized Profiles",
+      "acquiredQrCodesLabel": "QR Codes acquired\nby this customer",
+      "availableProfilesLabel": "Memorialized profiles\nstill available",
+      "createdProfilesLabel": "Memorialized profiles\nalready created by the customer",
       "title": "Memorialized Profiles"
     },
     "new": "New customer",
@@ -449,10 +450,10 @@
       "SOLD": "Sold"
     },
     "summary": {
-      "activated": "Activated",
-      "available": "Available QR Codes\nfor sale",
-      "printed": "Printed",
-      "sold": "Sold"
+      "activated": "QR Codes already activated\nby the end consumer",
+      "available": "QR Codes available\nfor printing",
+      "printed": "QR Codes already printed",
+      "sold": "QR Codes sold"
     },
     "table": {
       "code": "Code",
@@ -469,7 +470,8 @@
     "actions": {
       "download": "Download",
       "edit": "Edit",
-      "openMenu": "Open menu"
+      "openMenu": "Open menu",
+      "view": "View"
     },
     "burialHint": "Burial information is optional and can be filled in later.",
     "createProfile": "Create profile",
