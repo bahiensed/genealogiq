@@ -306,10 +306,10 @@
       "addressOptional": "O endereço é opcional e pode ser preenchido depois."
     },
     "memorialized": {
-      "acquiredQrCodes": "QR Codes adquiridos: {count}",
-      "availableProfiles": "Perfis memo disponíveis: {count}",
       "create": "Criar perfil memorializado",
-      "createdProfiles": "Perfis memo criados: {count}",
+      "acquiredQrCodesLabel": "QR Codes adquiridos",
+      "availableProfilesLabel": "Perfis memorializados\ndisponíveis",
+      "createdProfilesLabel": "Perfis memorializados\ncriados",
       "title": "Perfis memorializados"
     },
     "new": "Novo cliente",
