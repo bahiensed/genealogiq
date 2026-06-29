@@ -727,6 +727,7 @@
       "physical": "No hay QR Codes físicos disponibles por el momento."
     },
     "physical": {
+      "subtitle": "Compre GenCodes para imprimir en sus placas memoriales y revenderlos a sus propios clientes",
       "title": "Comprar QR Codes Físicos"
     },
     "toasts": {
