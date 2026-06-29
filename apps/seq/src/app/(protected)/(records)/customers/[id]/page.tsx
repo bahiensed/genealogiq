@@ -86,10 +86,13 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-3xl">
-          <StatCard label={t('memorialized.acquiredQrCodesLabel')} value={acquiredQRCodes} />
-          <StatCard label={t('memorialized.availableProfilesLabel')} value={availableProfiles} valueClassName={availableProfiles > 0 ? 'text-primary' : undefined} />
-          <StatCard label={t('memorialized.createdProfilesLabel')} value={createdProfiles} />
+          <StatCard label={t('memorialized.acquiredQrCodesLabel')} value={acquiredQRCodes} valueClassName="text-amber-600" />
+          <StatCard label={t('memorialized.availableProfilesLabel')} value={availableProfiles} />
+          <StatCard label={t('memorialized.createdProfilesLabel')} value={createdProfiles} valueClassName="text-green-600" />
         </div>
+
+        {/* my-2 (8px) on top of the section's gap-4 (16px) = 24px each side, matching a gap-6 separator */}
+        <Separator className="my-2" />
 
         <MemorializedDataTable data={memorializedProfiles} />
       </section>

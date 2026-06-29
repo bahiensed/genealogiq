@@ -246,7 +246,8 @@
       "edit": "Editar",
       "openMenu": "Abrir menú",
       "reactivate": "Reactivar",
-      "resendEmail": "Reenviar correo"
+      "resendEmail": "Reenviar correo",
+      "view": "Ver"
     },
     "active": "¿Activo?",
     "createCustomer": "Crear cliente",
@@ -307,9 +308,9 @@
     },
     "memorialized": {
       "create": "Crear perfil memorializado",
-      "acquiredQrCodesLabel": "QR Codes adquiridos",
-      "availableProfilesLabel": "Perfiles memorializados\ndisponibles",
-      "createdProfilesLabel": "Perfiles memorializados\ncreados",
+      "acquiredQrCodesLabel": "QR Codes adquiridos\npor este cliente",
+      "availableProfilesLabel": "Perfiles memorializados\naún disponibles",
+      "createdProfilesLabel": "Perfiles memorializados\nya creados por el cliente",
       "title": "Perfiles memorializados"
     },
     "new": "Nuevo cliente",
@@ -449,10 +450,10 @@
       "SOLD": "Vendido"
     },
     "summary": {
-      "activated": "Activados",
-      "available": "QR Codes disponibles\npara venta",
-      "printed": "Impresos",
-      "sold": "Vendidos"
+      "activated": "QR Codes ya activados\npor el consumidor final",
+      "available": "QR Codes disponibles\npara impresión",
+      "printed": "QR Codes ya impresos",
+      "sold": "QR Codes vendidos"
     },
     "table": {
       "code": "Código",
@@ -469,7 +470,8 @@
     "actions": {
       "download": "Descargar",
       "edit": "Editar",
-      "openMenu": "Abrir menú"
+      "openMenu": "Abrir menú",
+      "view": "Ver"
     },
     "burialHint": "La información de sepultura es opcional y puede completarse más tarde.",
     "createProfile": "Crear perfil",
