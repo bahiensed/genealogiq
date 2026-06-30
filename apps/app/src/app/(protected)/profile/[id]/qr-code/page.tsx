@@ -24,6 +24,9 @@ export default async function QrCodePage({ params }: Props) {
   const isFreeMemorial = profile.role === "APP_MEMO" && profile.appSaleId == null && profile.physicalQrLicense == null
   const isGuardian = profile.role === "APP_MEMO" && profile.guardedBy.some((g) => g.guardianId === session.user.id)
 
+  // A memorial's QR Code is accessible only to its guardian(s).
+  if (profile.role === "APP_MEMO" && !isGuardian) notFound()
+
   const appUrl = process.env.APP_URL ?? "https://genealogiq.app"
   const profileUrl = `${appUrl}/profile/${id}`
 
