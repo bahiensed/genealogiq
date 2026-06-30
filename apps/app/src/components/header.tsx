@@ -122,7 +122,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
 
   return (
     <header className="fixed top-0 inset-x-0 z-50">
-      <div className="glass-strong border-x-0 border-t-0 rounded-none">
+      <div className="glass-strong glass-header border-x-0 border-t-0 rounded-none">
         <div className="container flex items-center justify-between gap-3 md:gap-4 h-16">
           <Link href="/home" className="flex items-center group shrink-0" aria-label="Genealogiq">
             <Image src="/logo-dark.png" alt="Genealogiq" width={120} height={28} className="block dark:hidden h-7 w-auto" priority />

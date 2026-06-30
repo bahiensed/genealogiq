@@ -203,6 +203,17 @@
   }
 }
 
+/* Header bar surface — UNLAYERED on purpose. The Tailwind utilities layer
+   overrides the layered .glass-strong backdrop-filter (it computes to `none`),
+   which left the fixed header see-through. Unlayered declarations beat every
+   @layer rule, so this restores an opaque, frosted header like BMS/SEQ. Used
+   together with .glass-strong, which still supplies the border + shadow. */
+.glass-header {
+  background: hsl(var(--glass-bg) / 0.7);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+}
+
 @layer components {
   /* Liquid glass surface — iPadOS 26 style */
   .glass {
