@@ -76,7 +76,7 @@ export default async function ProfileByIdPage({ params }: Props) {
   ] = await Promise.all([
     getFavoriteCount(id),
     isOwn || !sessionUserId ? Promise.resolve(false) : isFavoritedByUser(sessionUserId, id),
-    isMemorialized ? getGeolocationForViewer(id) : Promise.resolve(null),
+    isMemorialized && sessionUserId ? getGeolocationForViewer(id) : Promise.resolve(null),
     getGalleryImageUrls(id, 4),
     getGalleryCount(id),
     getGalleryHasVideos(id),
@@ -119,6 +119,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     isAuthenticated: !!sessionUserId,
   }
 
+  const isAnon = !sessionUserId
   const base = `/profile/${id}`
   const t = await getTranslations("Profile")
 
@@ -130,7 +131,9 @@ export default async function ProfileByIdPage({ params }: Props) {
     icon: Network,
     span: 4,
     preview: <TreePreview memberCount={treeCount} />,
-    href: `${base}/tree`,
+    // Family tree is fully locked to anonymous visitors: the card opens a sign-up
+    // dialog instead of linking.
+    ...(isAnon ? { gated: true, gate: "signup" as const } : { href: `${base}/tree` }),
   }
 
   const bioCard: SectionCard = {
@@ -175,11 +178,13 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "geo",
       title: t("geoTitle"),
       description: t("geoDescription"),
-      metric: geo ? geo.placeName : t("geoEmptyMetric"),
+      metric: isAnon ? t("lockedMetric") : geo ? geo.placeName : t("geoEmptyMetric"),
       icon: MapPin,
       span: 3,
-      preview: <GeoPreview lat={geo?.lat} lon={geo?.lon} />,
-      href: `${base}/geolocation`,
+      // Geolocation is fully locked to anonymous visitors: a locked preview + a sign-up
+      // dialog, never the real map or place name.
+      preview: isAnon ? <GeoPreview locked /> : <GeoPreview lat={geo?.lat} lon={geo?.lon} />,
+      ...(isAnon ? { gated: true, gate: "signup" as const } : { href: `${base}/geolocation` }),
     },
     {
       key: "qr",
