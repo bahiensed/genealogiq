@@ -30,9 +30,22 @@ const EMPTY: RecentProfile[] = []
 // Module-level cache so getClientSnapshot returns a stable reference
 let clientSnapshot: RecentProfile[] | null = null
 
+// Guards against stale/garbage entries (e.g. a half-written shape from an older
+// deploy) so the render path never reads undefined fields off a malformed item.
+function isRecentProfile(x: unknown): x is RecentProfile {
+  return (
+    typeof x === "object" &&
+    x !== null &&
+    typeof (x as RecentProfile).id === "string" &&
+    typeof (x as RecentProfile).firstName === "string" &&
+    typeof (x as RecentProfile).lastName === "string"
+  )
+}
+
 function read(): RecentProfile[] {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]")
+    const parsed: unknown = JSON.parse(localStorage.getItem(KEY) ?? "[]")
+    return Array.isArray(parsed) ? parsed.filter(isRecentProfile) : EMPTY
   } catch {
     return EMPTY
   }
