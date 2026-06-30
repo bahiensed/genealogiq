@@ -89,8 +89,9 @@
     }
   },
   "Auth": {
-    "activateDescription": "Ingresa el código de activación impreso en tu QR Code físico para vincularlo a un memorial.",
-    "activateTitle": "Activa tu QR Code",
+    "activateDescription": "Ingresa el código de activación de tu GenCode para crear una cuenta y vincular el QR Code a un memorial.",
+    "activateGenCode": "Activa tu GenCode",
+    "activateTitle": "Activa tu GenCode",
     "alreadyHaveAccount": "¿Ya tienes una cuenta?",
     "backToSignIn": "Volver al inicio de sesión",
     "changeEmailDescription": "Se enviará un enlace de confirmación a la nueva dirección",
@@ -127,6 +128,7 @@
     "newHere": "¿Nuevo por aquí?",
     "newPassword": "Nueva contraseña",
     "newPasswordLabel": "Nueva contraseña:",
+    "or": "o",
     "password": "Contraseña",
     "rememberPassword": "¿Recuerdas tu contraseña?",
     "resetDescription": "Ingresa tu nueva contraseña a continuación.",
@@ -751,7 +753,7 @@
       "continue": "Continuar",
       "invalid": "Por favor, ingresa un código de activación válido.",
       "label": "Código de activación",
-      "placeholder": "ej.: ABCD-1234-EFGH"
+      "placeholder": "G3N3-4L0G1-QGL0-B4L9"
     },
     "activateMemorial": {
       "activateAndCreate": "Activar y crear perfil",
