@@ -1,10 +1,9 @@
 'use client'
 
 import { useEffect } from "react"
-import { recordView } from "@/hooks/use-recently-viewed"
-import type { MiniProfile } from "@/components/profile-mini-card"
+import { recordView, type RecentProfileInput } from "@/hooks/use-recently-viewed"
 
-export function ProfileViewTracker({ profile }: { profile: MiniProfile }) {
+export function ProfileViewTracker({ profile }: { profile: RecentProfileInput }) {
   useEffect(() => {
     recordView(profile)
     // profile.id is stable per page load; other fields may be serialized references

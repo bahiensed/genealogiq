@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation"
 import { getLocale, getTranslations } from "next-intl/server"
-import { getCountryName } from "@genealogiq/core"
 import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
 import { auth } from "@/auth"
 import { getProfileById } from "@/queries/profile"
@@ -11,13 +10,12 @@ import { countTreeMembers } from "@/queries/family-tree"
 import { getGalleryImageUrls, getGalleryCount, getGalleryHasVideos } from "@/queries/gallery"
 import { getTributeAuthors, getTributeCountByProfileId } from "@/queries/tribute"
 import { getBioByUserId } from "@/queries/bio"
-import { getAvatarColor, getProfileGradient } from "@/lib/avatar-color"
+import { getAvatarColor } from "@/lib/avatar-color"
 import { ProfileBanner, type ProfileData } from "@/components/profile-banner"
 import { BentoGrid, type SectionCard } from "@/components/bento-grid"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { ProfileViewTracker } from "@/components/profile-view-tracker"
 import { QrScanTracker } from "@/components/qr-scan-tracker"
-import type { MiniProfile } from "@/components/profile-mini-card"
 import {
   TreePreview,
   BioPreview,
@@ -29,8 +27,8 @@ import {
   QrPreview,
 } from "@/components/card-previews"
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+function formatDate(date: Date, locale: string): string {
+  return date.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })
 }
 
 interface Props {
@@ -87,6 +85,8 @@ export default async function ProfileByIdPage({ params }: Props) {
   const showQrPurchaseCTA = isFreeMemorial && isGuardian
   const showQrVisitorEmpty = isFreeMemorial && !isGuardian
 
+  const locale = await getLocale()
+
   const profile: ProfileData = {
     id: user.id,
     name,
@@ -95,10 +95,10 @@ export default async function ProfileByIdPage({ params }: Props) {
     type: isMemorialized ? "memorialized" : "living",
     avatarUrl: user.avatarUrl,
     birth: user.birthDate
-      ? { date: formatDate(user.birthDate), place: user.birthPlace ?? "", country: user.birthCountry }
+      ? { date: formatDate(user.birthDate, locale), place: user.birthPlace ?? "", country: user.birthCountry }
       : null,
     death: user.deathDate
-      ? { date: formatDate(user.deathDate), place: user.deathPlace ?? "", country: user.deathCountry }
+      ? { date: formatDate(user.deathDate, locale), place: user.deathPlace ?? "", country: user.deathCountry }
       : null,
     geo: geo ? { lat: geo.lat, lon: geo.lon } : null,
     tributes: tributeCount,
@@ -215,29 +215,24 @@ export default async function ProfileByIdPage({ params }: Props) {
     },
   ]
 
-  const locale = await getLocale()
-  const miniProfile: MiniProfile = {
+  // Raw data for the recently-viewed cache — display strings (subtitle, metric,
+  // status badge) are formatted at render time under the active locale.
+  const recentProfile = {
     id: user.id,
-    name,
-    subtitle: user.birthPlace
-      ? `${user.birthPlace}${user.birthCountry ? `, ${getCountryName(user.birthCountry, locale)}` : ""}`
-      : isMemorialized ? "Memorialized profile" : "",
-    status: isMemorialized ? "Memorialized" : "Living",
-    metric: isMemorialized && user.deathDate
-      ? `✦ ${user.deathDate.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}`
-      : user.birthDate
-        ? `Born ${user.birthDate.toLocaleDateString("en-US", { year: "numeric", month: "short" })}`
-        : "",
-    initials,
-    gradient: getProfileGradient(user.id),
-    href: `/profile/${user.id}`,
-    avatarUrl: user.avatarUrl,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    birthPlace: user.birthPlace ?? null,
+    birthCountry: user.birthCountry ?? null,
+    isMemorialized,
+    birthDate: user.birthDate?.toISOString() ?? null,
+    deathDate: user.deathDate?.toISOString() ?? null,
+    avatarUrl: user.avatarUrl ?? null,
   }
 
   return (
     <div className="min-h-screen relative overflow-x-hidden mt-16">
       <AuroraBackdrop variant="page" intensity="bold" />
-      <ProfileViewTracker profile={miniProfile} />
+      <ProfileViewTracker profile={recentProfile} />
       {isMemorialized && (user.appSaleId != null || user.physicalQrLicense != null) && (
         <QrScanTracker profileId={id} />
       )}

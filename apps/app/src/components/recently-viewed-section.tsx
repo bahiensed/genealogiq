@@ -1,11 +1,38 @@
 'use client'
 
 import { Users } from "lucide-react"
-import { useTranslations } from "next-intl"
-import { ProfileMiniCard } from "@/components/profile-mini-card"
-import { useRecentlyViewed } from "@/hooks/use-recently-viewed"
+import { useLocale, useTranslations } from "next-intl"
+import { getCountryName } from "@genealogiq/core"
+import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
+import { getProfileGradient } from "@/lib/avatar-color"
+import { useRecentlyViewed, type RecentProfile } from "@/hooks/use-recently-viewed"
+
+type Translate = (key: string, values?: Record<string, string>) => string
+
+function toMiniProfile(p: RecentProfile, locale: string, t: Translate): MiniProfile {
+  const birthDate = p.birthDate ? new Date(p.birthDate) : null
+  const deathDate = p.deathDate ? new Date(p.deathDate) : null
+  return {
+    id: p.id,
+    name: `${p.firstName} ${p.lastName}`,
+    subtitle: p.birthPlace
+      ? `${p.birthPlace}${p.birthCountry ? `, ${getCountryName(p.birthCountry, locale)}` : ""}`
+      : p.isMemorialized ? t("memorializedProfile") : "",
+    status: p.isMemorialized ? "Memorialized" : "Living",
+    metric: p.isMemorialized && deathDate
+      ? t("deathMetric", { date: deathDate.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" }) })
+      : birthDate
+        ? t("bornMetric", { date: birthDate.toLocaleDateString(locale, { year: "numeric", month: "short" }) })
+        : "",
+    initials: `${p.firstName[0]}${p.lastName[0]}`.toUpperCase(),
+    gradient: getProfileGradient(p.id),
+    href: `/profile/${p.id}`,
+    avatarUrl: p.avatarUrl,
+  }
+}
 
 export function RecentlyViewedSection() {
+  const locale = useLocale()
   const t = useTranslations("Home")
   const profiles = useRecentlyViewed()
 
@@ -20,12 +47,12 @@ export function RecentlyViewedSection() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {profiles.slice(0, 6).map((profile, i) => (
+      {profiles.slice(0, 6).map((p, i) => (
         <ProfileMiniCard
-          key={profile.id}
-          profile={profile}
+          key={p.id}
+          profile={toMiniProfile(p, locale, t)}
           delay={i * 40}
-          hideLivingBadge={profile.status === "Living"}
+          hideLivingBadge={!p.isMemorialized}
         />
       ))}
     </div>

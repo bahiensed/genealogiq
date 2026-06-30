@@ -1,3 +1,6 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import type { AvatarGradient } from "@/lib/avatar-color"
 
@@ -33,7 +36,9 @@ interface ProfileMiniCardProps {
 }
 
 export function ProfileMiniCard({ profile, delay = 0, hideLivingBadge, hideMetric }: ProfileMiniCardProps) {
+  const t = useTranslations("Home")
   const isMemorial = profile.status === "Memorialized"
+  const statusLabel = isMemorial ? t("memorializedBadge") : t("livingBadge")
   const showBadge = isMemorial || !hideLivingBadge
   const showMetric = !hideMetric
   const showFooter = showBadge || showMetric
@@ -75,7 +80,7 @@ export function ProfileMiniCard({ profile, delay = 0, hideLivingBadge, hideMetri
                   : "bg-gradient-brand-soft text-[hsl(var(--brand-indigo-deep))] dark:text-[hsl(var(--brand-slate-soft))]",
               )}
             >
-              {profile.status}
+              {statusLabel}
             </span>
           ) : (
             <span />
