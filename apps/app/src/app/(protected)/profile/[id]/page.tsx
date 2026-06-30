@@ -85,7 +85,6 @@ export default async function ProfileByIdPage({ params }: Props) {
   const memorialCount = memorials.length
   const isFreeMemorial = isMemorialized && user.appSaleId == null && user.physicalQrLicense == null
   const showQrPurchaseCTA = isFreeMemorial && isGuardian
-  const showQrVisitorEmpty = isFreeMemorial && !isGuardian
 
   const profile: ProfileData = {
     id: user.id,
@@ -176,15 +175,17 @@ export default async function ProfileByIdPage({ params }: Props) {
       key: "qr",
       title: t("qrTitle"),
       description: t("qrDescription"),
-      metric: showQrPurchaseCTA
-        ? t("qrMetricPurchase")
-        : showQrVisitorEmpty
-          ? t("qrMetricNotGenerated")
-          : t("qrMetricReady"),
+      // The memorial's QR Code is guardian-only. Non-guardians see a locked card
+      // (lock icon + "guardian only" note) with no link to the qr-code route.
+      metric: isGuardian
+        ? showQrPurchaseCTA ? t("qrMetricPurchase") : t("qrMetricReady")
+        : t("qrMetricGuardianOnly"),
       icon: QrCode,
       span: 3,
-      preview: <QrPreview />,
-      ...(showQrPurchaseCTA ? { gated: true } : { href: `${base}/qr-code` }),
+      preview: <QrPreview locked={!isGuardian} />,
+      ...(isGuardian
+        ? showQrPurchaseCTA ? { gated: true } : { href: `${base}/qr-code` }
+        : {}),
     },
   ]
 

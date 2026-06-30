@@ -1,4 +1,4 @@
-import { Heart, Star, Images, Flower2, BrickWall, TreePine } from "lucide-react"
+import { Heart, Star, Images, Flower2, BrickWall, TreePine, Lock } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { getAvatarColor, getAvatarGradient } from "@/lib/avatar-color"
 import type { TributeAuthorPreview } from "@/queries/tribute"
@@ -455,8 +455,17 @@ export async function GeoPreview({ lat, lon }: { lat?: number | null; lon?: numb
 
 const QR_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAYAAACLz2ctAAAAAklEQVR4AewaftIAAAQtSURBVO3BUW5jSRIEQY8E739lX2E/hRqABT1OqnvCLH6haslQtWioWjRULRqqFg1Vi178gyT8CVRuJOGGyk8l4UTlJAknKidJ+BOofDdULRqqFg1Vi4aqRUPVoheXVDYk4QkqN5LwLpUTlZMkfJLKhiS8a6haNFQtGqoWDVWLhqpFLx6ShCeoPCEJN1Q+JQk3VD4pCU9Q+amhatFQtWioWjRULRqqFr2o/0vCDZXvknCiUmdD1aKhatFQtWioWjRULXrxH6PyhCR8ShJOVP42Q9WioWrRULVoqFo0VC168RCVP1kSTlR+Kgm/icpvMVQtGqoWDVWLhqpFQ9WiF5eSUGcqJ0k4UTlJwhOS8NsNVYuGqkVD1aKhatFQtSh+4S+UhE9S+ZQknKj8bYaqRUPVoqFq0VC1aKha9OIfJOFE5SQJG1ROVE6ScKLyU0l4gsqNJGxQ+amhatFQtWioWjRULRqqFsUv/CJJOFE5ScKJykkSbqj825JwonIjCScqT0jCicq7hqpFQ9WioWrRULVoqFoUv3CQhCeonCThROUkCScqJ0k4UbmRhBOVn0rCn0DlJAk3VL4bqhYNVYuGqkVD1aKhatGLh6g8IQknKjdUTpJwonIjCd+pnCThROUkCZ+k8gSVkyS8a6haNFQtGqoWDVWLhqpFLz4sCScqN5JwovKEJJyovCsJT1A5ScINlZMknKicJOFThqpFQ9WioWrRULXoxUOS8EkqJ0k4UTlROUnCjSR8p3KShBtJOFG5kYQTlZMknKicJOFE5V1D1aKhatFQtWioWjRULYpfOEjCicqNJPwmKr9FEk5UTpJwonKShCeonCThhsp3Q9WioWrRULVoqFo0VC168cuo3EjCE5JwonKShO9UnpCEE5VPUrmhcpKEdw1Vi4aqRUPVoqFq0VC16MVDknBD5SQJT1A5ScKJyk8l4YbKSRJOkrAhCScqJyrvGqoWDVWLhqpFQ9WioWpR/MJfKAknKidJOFH5qSQ8QeUJSbih8ilD1aKhatFQtWioWjRULXrxD5LwJ1A5UXlCEt6lcqJyIwk3knCickPlJAlPUPluqFo0VC0aqhYNVYuGqkUvLqlsSMKNJNxQOUnCicpvofKEJJyofMpQtWioWjRULRqqFg1Vi148JAlPUPkkld8iCTeS8EkqJ0l4gsp3Q9WioWrRULVoqFo0VC168R+ThBsqJ0l4l8qJyo0k3FA5ScJJEv5tQ9WioWrRULVoqFo0VC168R+jcpKEGyrfJeEkCTdUTlSeoHKShBsqJ0l411C1aKhaNFQtGqoWDVWLXjxE5TdRuaFyIwnvUjlJwkkSfhOVTxmqFg1Vi4aqRUPVoqFq0YtLSfgTJOEJKu9SOUnCicqNJGxIwqcMVYuGqkVD1aKhatFQtSh+oWrJULVoqFo0VC0aqhb9D5sai0l+LRtyAAAAAElFTkSuQmCC"
 
-export async function QrPreview() {
+export async function QrPreview({ locked = false }: { locked?: boolean } = {}) {
   const t = await getTranslations("Profile")
+  if (locked) {
+    return (
+      <div className="flex justify-center">
+        <div className="flex h-28 w-28 items-center justify-center rounded-xl bg-muted/50 ring-1 ring-border/60">
+          <Lock className="h-10 w-10 text-muted-foreground" aria-label={t("qrLockedAlt")} />
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="flex justify-center">
       <div className="bg-white p-2 rounded-xl shadow-sm">
