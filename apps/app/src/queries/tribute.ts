@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma"
 
-export async function getApprovedTributesByProfileId(profileId: string) {
+export async function getApprovedTributesByProfileId(profileId: string, take?: number) {
   return prisma.tribute.findMany({
     where: { profileId, status: "APPROVED" },
     include: { author: { select: { id: true, firstName: true, lastName: true, avatarUrl: true } } },
     orderBy: { createdAt: "desc" },
+    take,
   })
 }
 

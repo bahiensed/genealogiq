@@ -1,14 +1,18 @@
-import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
-import { verifySession } from "@/lib/dal"
+import { auth } from "@/auth"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { GalleryClient } from "@/components/gallery-client"
-import { getGalleryByUserId } from "@/queries/gallery"
+import { SignupWall } from "@/components/auth/signup-wall"
+import { getGalleryByUserId, getGalleryCounts } from "@/queries/gallery"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 import { getMemorialFeatures } from "@/lib/subscription"
 import { UpgradeHint } from "@/components/upgrade-hint"
+
+// Anonymous visitors preview the first few media; the rest is behind the sign-up wall.
+const ANON_GALLERY_LIMIT = 6
 
 interface Props {
   params: Promise<{ id: string }>
@@ -16,22 +20,26 @@ interface Props {
 
 export default async function ProfileGalleryPage({ params }: Props) {
   const { id } = await params
-  const session = await verifySession()
+  const session = await auth()
+  const viewerId = session?.user?.id
+  const isAnon = !viewerId
   const t = await getTranslations("Gallery")
-  const [profile, items, features] = await Promise.all([
-    getProfileById(id),
-    getGalleryByUserId(id),
-    getMemorialFeatures(id),
-  ])
 
-  if (!profile) notFound()
+  const profile = await getProfileById(id)
+  assertPublicMemorialAccess(profile, viewerId, id)
 
-  const isOwn = canManageProfile(profile, session.user.id)
+  const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
+  const features = isOwn ? await getMemorialFeatures(id) : null
   const name = `${profile.firstName} ${profile.lastName}`
 
-  const imageCount = items.filter((i) => i.kind === "image").length
-  const videoCount = items.filter((i) => i.kind === "video").length
-  const atLimit = imageCount >= features.galleryMaxImages || videoCount >= features.galleryMaxVideos
+  // Anonymous: a bounded slice of items + cheap total counts for the badges. Authed:
+  // the full set (the client paginates it). Never materialize the whole table for anon.
+  const items = await getGalleryByUserId(id, isAnon ? ANON_GALLERY_LIMIT : undefined)
+  const counts = isAnon ? await getGalleryCounts(id) : null
+  const imageCount = counts ? counts.images : items.filter((i) => i.kind === "image").length
+  const videoCount = counts ? counts.videos : items.filter((i) => i.kind === "video").length
+  const showWall = isAnon && imageCount + videoCount > ANON_GALLERY_LIMIT
+  const atLimit = !!features && (imageCount >= features.galleryMaxImages || videoCount >= features.galleryMaxVideos)
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -66,10 +74,12 @@ export default async function ProfileGalleryPage({ params }: Props) {
           items={items}
           editHref={`/profile/${id}/gallery/edit`}
           isOwn={isOwn}
-          upgradeHint={isOwn && atLimit
+          upgradeHint={isOwn && atLimit && features
             ? <UpgradeHint context="gallery" currentTier={features.code} />
             : null}
         />
+
+        {showWall && <SignupWall />}
       </main>
     </div>
   )

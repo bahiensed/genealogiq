@@ -1,12 +1,16 @@
-import { notFound } from "next/navigation"
 import { getTranslations } from "next-intl/server"
-import { verifySession } from "@/lib/dal"
+import { auth } from "@/auth"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { TributesClient } from "@/components/tributes-client"
-import { getApprovedTributesByProfileId, getMyTributeForProfile } from "@/queries/tribute"
+import { SignupWall } from "@/components/auth/signup-wall"
+import { getApprovedTributesByProfileId, getMyTributeForProfile, getTributeCountByProfileId } from "@/queries/tribute"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
+
+// Anonymous visitors read a few tributes; the rest (and writing one) needs sign-up.
+const ANON_TRIBUTES_LIMIT = 5
 
 interface Props {
   params: Promise<{ id: string }>
@@ -15,21 +19,26 @@ interface Props {
 export default async function TributesPage({ params }: Props) {
   const { id } = await params
   const t = await getTranslations("Tributes")
-  const session = await verifySession()
+  const session = await auth()
+  const viewerId = session?.user?.id
+  const isAnon = !viewerId
+
   const profile = await getProfileById(id)
-  if (!profile) notFound()
+  assertPublicMemorialAccess(profile, viewerId, id)
 
-  const isExactOwn = id === session.user.id
-  const canWrite = !isExactOwn
+  // Anonymous: a bounded slice of tributes + a cheap total count for the badge / wall
+  // trigger. Authed: the full set (the client paginates it).
+  const tributes = await getApprovedTributesByProfileId(id, isAnon ? ANON_TRIBUTES_LIMIT : undefined)
+  const tributeCount = isAnon ? await getTributeCountByProfileId(id) : tributes.length
+  const showWall = isAnon && tributeCount > ANON_TRIBUTES_LIMIT
 
-  const [tributes, myTribute] = await Promise.all([
-    getApprovedTributesByProfileId(id),
-    getMyTributeForProfile(session.user.id, id),
-  ])
+  const isExactOwn = viewerId === id
+  const canWrite = !isAnon && !isExactOwn
+  const myTribute = viewerId ? await getMyTributeForProfile(viewerId, id) : null
   const hasPendingFromMe = myTribute?.status === "PENDING"
 
   const name = `${profile.firstName} ${profile.lastName}`
-  const isManager = canManageProfile(profile, session.user.id)
+  const isManager = viewerId ? canManageProfile(profile, viewerId) : false
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -44,9 +53,9 @@ export default async function TributesPage({ params }: Props) {
               {!isManager && <p className="text-muted-foreground text-sm mt-1 truncate bg-transparent">{name}</p>}
             </div>
           </div>
-          {tributes.length > 0 && (
+          {tributeCount > 0 && (
             <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
-              {t("count", { count: tributes.length })}
+              {t("count", { count: tributeCount })}
             </span>
           )}
         </div>
@@ -54,11 +63,13 @@ export default async function TributesPage({ params }: Props) {
         <TributesClient
           items={tributes}
           profileId={id}
-          sessionUserId={session.user.id}
+          sessionUserId={viewerId ?? ""}
           canWrite={canWrite}
           isManager={isManager}
           hasPendingFromMe={hasPendingFromMe}
         />
+
+        {showWall && <SignupWall />}
       </main>
     </div>
   )
