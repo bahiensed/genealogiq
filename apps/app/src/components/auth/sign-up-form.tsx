@@ -115,7 +115,7 @@ export function SignUpForm() {
 
         <p className="text-center text-xs text-muted-foreground">
           <Link href="/activate" className="hover:text-foreground transition-colors">
-            {t('haveQrCode')}
+            {t('activateGenCode')}
           </Link>
         </p>
       </form>
