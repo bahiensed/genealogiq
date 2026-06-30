@@ -29,6 +29,7 @@ export interface ProfileData {
   isGuardian: boolean
   guardedCount: number
   isFavoritedByMe?: boolean
+  isAuthenticated?: boolean
 }
 
 interface Props {
@@ -42,6 +43,7 @@ export function ProfileBanner({ profile }: Props) {
   const locale = useLocale()
   const t = useTranslations("Profile")
   const isMemorial = profile.type === "memorialized"
+  const isAuthenticated = profile.isAuthenticated ?? true
   const canEdit = profile.isOwn || profile.isGuardian
   const [favorited, setFavorited] = useState(profile.isFavoritedByMe ?? false)
   const [favCount, setFavCount] = useState(profile.favoritedBy)
@@ -77,7 +79,7 @@ export function ProfileBanner({ profile }: Props) {
                   <SquarePen className="h-5 w-5" />
                 </Link>
               )}
-              {!profile.isOwn && (
+              {!profile.isOwn && isAuthenticated && (
                 <button
                   onClick={() => {
                     startTransition(async () => {
@@ -103,6 +105,15 @@ export function ProfileBanner({ profile }: Props) {
                     )}
                   />
                 </button>
+              )}
+              {!profile.isOwn && !isAuthenticated && (
+                <Link
+                  href={`/sign-in?callbackUrl=${encodeURIComponent(`/profile/${profile.id}`)}`}
+                  aria-label={t("addToFavorites")}
+                  className="h-10 w-10 rounded-full glass border-0 inline-flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+                >
+                  <Heart className="h-5 w-5 text-muted-foreground" />
+                </Link>
               )}
             </div>
 
