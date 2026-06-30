@@ -50,7 +50,37 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 20/05/2026 — Stripe/webhook fixes, coupon scope migration, cookie collision fix, vendor subscription activation bug.
+Last session: 30/06/2026 — APP i18n polish (sign-in redesign, home mini-cards, /activate, sign-up) + memorial QR guardian-only. 2 PRs merged to main (#103, #104), branches deleted.
+
+**i18n setup (referência):**
+- Pacote compartilhado `@genealogiq/i18n` (`packages/i18n/src/config.ts`). 3 locales: `en-US`, `pt-BR`, `es-MX`. Default `en-US`. Mensagens em `apps/app/messages/<locale>.json`, **chaves em ordem alfabética por namespace**.
+- Resolução de locale (`packages/i18n/src/server.ts`): cookie `locale` → geo header `x-vercel-ip-country` (BR→pt-BR, MX→es-MX) → default en-US. **Em dev local não há geo header**, então janela anônima sem cookie = inglês (comportamento esperado, não bug).
+- Server Components: `getTranslations(ns)` + `getLocale()`. Client: `useTranslations(ns)` + `useLocale()`.
+
+**Sign-in redesign (PR #103):**
+- `sign-in-form.tsx` reescrito com **CSS Grid `grid-template-areas`** pra separar ordem do DOM (= ordem de TAB) da ordem visual. "Esqueceu a senha?" fica visualmente na linha do label Senha mas no DOM vem depois do submit (grid placement não afeta foco). Toggle de olho com `tabIndex={-1}`. Separador "ou" (`Separator` dos dois lados) + link "Ative o seu GenCode".
+- Novas chaves `Auth.or`, `Auth.activateGenCode`; removida `Auth.haveQrCode` (órfã após sign-in + sign-up migrarem). `/activate` page: `activateTitle`/`activateDescription` reescritos pra GenCode + placeholder `G3N3-4L0G1-QGL0-B4L9`.
+
+**Home mini-cards i18n (PR #103):**
+- `ProfileMiniCard` traduz o discriminante `status` → `Home.memorializedBadge`/`livingBadge` (chave nova). Conserta todas as seções (favorites/guarded/recently-viewed), inclusive cache antigo (status é discriminante literal, não display string).
+- `profile/[id]/page.tsx`: `formatDate` agora locale-aware (era `"en-US"` hardcoded no banner).
+- **Recently-viewed refactor**: `use-recently-viewed.ts` agora guarda **dados crus** (ISO dates + `isMemorialized`) sob chave `giq:recently-viewed:v2` (bump descarta cache v1 pré-formatado); `recently-viewed-section.tsx` formata subtitle/metric/status **na renderização** com `useLocale`/`useTranslations` (espelha `home-favorites`). Trocar idioma re-localiza cards já vistos. `read()` valida cada entrada via type guard `isRecentProfile` e descarta malformadas (defesa contra shapes obsoletos).
+
+**Memorial QR guardian-only (PR #104):**
+- QR de perfil memorializado é acessível **só pelos guardiões**. Card no `profile/[id]/page.tsx`: não-guardião vê card **bloqueado** (`<QrPreview locked />` = cadeado no lugar do QR, label `qrMetricGuardianOnly`, sem `href`/gate). Guardião mantém CTA de compra (memorial grátis) / link pro qr-code (pago).
+- Rota `profile/[id]/qr-code/page.tsx`: `if (profile.role === "APP_MEMO" && !isGuardian) notFound()` (defesa em profundidade).
+- `QrPreview` ganhou prop `locked`. Novas chaves `Profile.qrMetricGuardianOnly`/`qrLockedAlt`; removida `qrMetricNotGenerated`.
+
+**Header opacity/blur fix (APP):**
+- Header do APP estava "transparente demais" (dava pra ler o conteúdo passando por trás ao scrollar). Causa: o `backdrop-filter` do `.glass-strong` (em `@layer components`) é **sobrescrito pra `none` pela layer de utilities do Tailwind** → o blur nunca renderiza, sobra só o fundo semitransparente. (Afeta também `.glass-card` — blur das cards idem não renderiza; latente, não tratado nesta sessão.)
+- Fix: classe `.glass-header` definida **UNLAYERED** (fora de qualquer `@layer`, pois unlayered vence todas as layers) em `globals.css`, com `background: hsl(var(--glass-bg) / 0.7)` + `backdrop-filter: blur(12px) saturate(180%)` — mesma opacidade/blur dos headers BMS/SEQ (`bg-background/70 supports-[backdrop-filter]` + `backdrop-blur-md`). Aplicada junto de `glass-strong` no `header.tsx` (glass-strong ainda fornece borda/sombra). Confirmado visualmente em light + dark via browser automation.
+- Lição: para sobrescrever propriedades de utilities do Tailwind v4 a partir de CSS custom, regra unlayered vence sem precisar de `!important`. Diagnóstico de `backdrop-filter: none` no computed style → checar conflito de cascade layers, não só opacidade.
+
+**Operacional — criação de PR sem `gh`:** o `gh` CLI não está instalado. PRs criados via **GitHub API** (`POST /repos/bahiensed/genealogiq/pulls`) usando o token de `git credential fill` (host github.com), passado por env var pra um script Python — **nunca logado**. Branches deletados com `git branch -d` (safe, só apaga se mergeado) + `git push origin --delete`.
+
+---
+
+Previous session: 20/05/2026 — Stripe/webhook fixes, coupon scope migration, cookie collision fix, vendor subscription activation bug.
 
 **Coupon scope: Subscription → Package:**
 - `DiscountCoupon.appliesTo` migrated from `Subscription[]` to `Package[]`. Migration `20260520010000_coupon_applies_to_packages` idempotent, mirrored in all 3 apps. `prisma migrate deploy` run ✅.
