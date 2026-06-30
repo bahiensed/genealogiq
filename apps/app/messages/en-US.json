@@ -89,8 +89,9 @@
     }
   },
   "Auth": {
-    "activateDescription": "Enter the activation code printed on your physical QR Code to link it to a memorial.",
-    "activateTitle": "Activate your QR Code",
+    "activateDescription": "Enter your GenCode's activation code to create an account and link the QR Code to a memorial.",
+    "activateGenCode": "Activate your GenCode",
+    "activateTitle": "Activate your GenCode",
     "alreadyHaveAccount": "Already have an account?",
     "backToSignIn": "Back to sign in",
     "changeEmailDescription": "A confirmation link will be sent to the new address",
@@ -119,7 +120,6 @@
     "forgotSentTitle": "E-mail sent",
     "forgotTitle": "Forgot your password?",
     "goToSignIn": "Go to sign in",
-    "haveQrCode": "Have a physical QR Code? Activate it",
     "hidePassword": "Hide password",
     "lastName": "Last name",
     "newEmailLabel": "New e-mail:",
@@ -127,6 +127,7 @@
     "newHere": "New here?",
     "newPassword": "New password",
     "newPasswordLabel": "New password:",
+    "or": "or",
     "password": "Password",
     "rememberPassword": "Remember your password?",
     "resetDescription": "Enter your new password below.",
@@ -503,6 +504,7 @@
     "guardedShort": "guarded",
     "guardedSubtitle": "Memorials watched over with quiet care",
     "guardedTitle": "Profiles I guard",
+    "livingBadge": "Living",
     "memorializedBadge": "Memorialized",
     "memorializedProfile": "Memorialized profile",
     "myProfileSubtitle": "View your page",
@@ -751,7 +753,7 @@
       "continue": "Continue",
       "invalid": "Please enter a valid activation code.",
       "label": "Activation code",
-      "placeholder": "e.g. ABCD-1234-EFGH"
+      "placeholder": "G3N3-4L0G1-QGL0-B4L9"
     },
     "activateMemorial": {
       "activateAndCreate": "Activate & create profile",

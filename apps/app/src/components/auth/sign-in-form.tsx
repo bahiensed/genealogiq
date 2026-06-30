@@ -10,6 +10,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
 
 export function SignInForm() {
   const t = useTranslations('Auth')
@@ -24,34 +25,49 @@ export function SignInForm() {
         <Image src="/tree-light.png" alt="Genealogiq" width={256} height={256} className="hidden object-contain dark:block" style={{ height: "auto" }} priority />
       </div>
 
-      <form action={dispatch} className="glass-card rounded-2xl p-6 space-y-4">
+      <form action={dispatch} className="glass-card rounded-2xl p-6">
         {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
         {state && !state.ok && (
-          <p className="text-sm text-destructive">{state.message}</p>
+          <p className="mb-4 text-sm text-destructive">{state.message}</p>
         )}
 
-        <div className="space-y-1.5">
-          <Label htmlFor="email">{t('email')}</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder={t('emailPlaceholder')}
-            autoComplete="email"
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">{t('password')}</Label>
-            <Link
-              href="/forgot-password"
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {t('forgotPassword')}
-            </Link>
+        {/*
+          DOM order = TAB order: email → password → submit → forgot → GenCode → create account.
+          The grid areas below reposition the "forgot password" link visually into the
+          password label row without moving it in the tab sequence (grid placement does
+          not affect focus order).
+        */}
+        <div
+          className="grid gap-x-3 gap-y-1.5"
+          style={{
+            gridTemplateColumns: '1fr auto',
+            gridTemplateAreas: [
+              '"email email"',
+              '"pwLabel forgot"',
+              '"pwInput pwInput"',
+              '"submit submit"',
+              '"divider divider"',
+              '"gencode gencode"',
+              '"newhere newhere"',
+            ].join(' '),
+          }}
+        >
+          <div className="space-y-1.5" style={{ gridArea: 'email' }}>
+            <Label htmlFor="email">{t('email')}</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder={t('emailPlaceholder')}
+              autoComplete="email"
+            />
           </div>
-          <div className="relative">
+
+          <Label htmlFor="password" className="mt-2.5 self-center" style={{ gridArea: 'pwLabel' }}>
+            {t('password')}
+          </Label>
+
+          <div className="relative mt-1.5" style={{ gridArea: 'pwInput' }}>
             <Input
               id="password"
               name="password"
@@ -61,6 +77,7 @@ export function SignInForm() {
             />
             <button
               type="button"
+              tabIndex={-1}
               onClick={() => setShowPassword((v) => !v)}
               className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors"
               aria-label={showPassword ? t('hidePassword') : t('showPassword')}
@@ -68,27 +85,41 @@ export function SignInForm() {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-        </div>
 
-        <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? t('signingIn') : t('signIn')}
-        </Button>
+          <Button type="submit" className="mt-2.5 w-full" disabled={isPending} style={{ gridArea: 'submit' }}>
+            {isPending ? t('signingIn') : t('signIn')}
+          </Button>
 
-        <p className="text-center text-sm text-muted-foreground">
-          {t('newHere')}{" "}
           <Link
-            href={callbackUrl ? `/sign-up?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/sign-up"}
-            className="text-primary hover:underline font-medium"
+            href="/forgot-password"
+            className="mt-2.5 self-center justify-self-end text-xs text-muted-foreground hover:text-foreground transition-colors"
+            style={{ gridArea: 'forgot' }}
           >
-            {t('createAccount')}
+            {t('forgotPassword')}
           </Link>
-        </p>
 
-        <p className="text-center text-xs text-muted-foreground">
-          <Link href="/activate" className="hover:text-foreground transition-colors">
-            Have a physical QR code? Activate it
-          </Link>
-        </p>
+          <div className="mt-2.5 flex items-center gap-3" style={{ gridArea: 'divider' }}>
+            <Separator className="flex-1" />
+            <span className="text-xs uppercase text-muted-foreground">{t('or')}</span>
+            <Separator className="flex-1" />
+          </div>
+
+          <p className="mt-2.5 text-center text-sm" style={{ gridArea: 'gencode' }}>
+            <Link href="/activate" className="text-primary hover:underline font-medium">
+              {t('activateGenCode')}
+            </Link>
+          </p>
+
+          <p className="mt-2 text-center text-sm text-muted-foreground" style={{ gridArea: 'newhere' }}>
+            {t('newHere')}{" "}
+            <Link
+              href={callbackUrl ? `/sign-up?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/sign-up"}
+              className="text-primary hover:underline font-medium"
+            >
+              {t('createAccount')}
+            </Link>
+          </p>
+        </div>
       </form>
     </div>
   )

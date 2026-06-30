@@ -1,10 +1,28 @@
 import { useSyncExternalStore } from "react"
-import type { MiniProfile } from "@/components/profile-mini-card"
 
-const KEY = "giq:recently-viewed"
+// v2: stores RAW profile data (dates as ISO strings, a role flag) instead of the
+// pre-formatted display strings. The subtitle, death/birth metric and status badge
+// are now formatted at render time under the active locale (see RecentlyViewedSection),
+// so switching language re-localizes already-viewed cards. Bumping the key from v1
+// drops the stale pre-formatted cache.
+const KEY = "giq:recently-viewed:v2"
 const MAX = 6
 
-export type RecentProfile = MiniProfile & { viewedAt: number }
+export interface RecentProfile {
+  id: string
+  firstName: string
+  lastName: string
+  birthPlace: string | null
+  birthCountry: string | null
+  isMemorialized: boolean
+  birthDate: string | null // ISO 8601
+  deathDate: string | null // ISO 8601
+  avatarUrl: string | null
+  viewedAt: number
+}
+
+// What recordView accepts — viewedAt is stamped on write.
+export type RecentProfileInput = Omit<RecentProfile, "viewedAt">
 
 // Stable empty reference for SSR snapshot — must never change
 const EMPTY: RecentProfile[] = []
@@ -12,9 +30,22 @@ const EMPTY: RecentProfile[] = []
 // Module-level cache so getClientSnapshot returns a stable reference
 let clientSnapshot: RecentProfile[] | null = null
 
+// Guards against stale/garbage entries (e.g. a half-written shape from an older
+// deploy) so the render path never reads undefined fields off a malformed item.
+function isRecentProfile(x: unknown): x is RecentProfile {
+  return (
+    typeof x === "object" &&
+    x !== null &&
+    typeof (x as RecentProfile).id === "string" &&
+    typeof (x as RecentProfile).firstName === "string" &&
+    typeof (x as RecentProfile).lastName === "string"
+  )
+}
+
 function read(): RecentProfile[] {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? "[]")
+    const parsed: unknown = JSON.parse(localStorage.getItem(KEY) ?? "[]")
+    return Array.isArray(parsed) ? parsed.filter(isRecentProfile) : EMPTY
   } catch {
     return EMPTY
   }
@@ -25,7 +56,7 @@ function getClientSnapshot(): RecentProfile[] {
   return clientSnapshot
 }
 
-export function recordView(profile: MiniProfile) {
+export function recordView(profile: RecentProfileInput) {
   const existing = read().filter((p) => p.id !== profile.id)
   const updated: RecentProfile[] = [{ ...profile, viewedAt: Date.now() }, ...existing].slice(0, MAX)
   localStorage.setItem(KEY, JSON.stringify(updated))
