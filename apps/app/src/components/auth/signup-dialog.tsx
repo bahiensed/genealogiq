@@ -40,8 +40,8 @@ export function SignupDialog({ open, onOpenChange, dismissible = false }: Props)
         className="sm:max-w-md gap-6 p-8"
       >
         <DialogHeader className="gap-4 text-center sm:text-center">
-          <Image src="/logo-dark.png" alt="Genealogiq" width={140} height={32} className="mx-auto block dark:hidden h-8 w-auto" />
-          <Image src="/logo-light.png" alt="Genealogiq" width={140} height={32} className="mx-auto hidden dark:block h-8 w-auto" />
+          <Image src="/tree-dark.png" alt="Genealogiq" width={256} height={256} className="mx-auto block dark:hidden h-24 w-24 object-contain" priority />
+          <Image src="/tree-light.png" alt="Genealogiq" width={256} height={256} className="mx-auto hidden dark:block h-24 w-24 object-contain" priority />
           <DialogTitle className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
             {t("signupWallTitle")}
           </DialogTitle>
