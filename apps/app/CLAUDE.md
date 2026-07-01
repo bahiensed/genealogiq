@@ -8,7 +8,7 @@ Frontend: React 19 + Next.js v16.2 + Tailwind CSS v4 + shadcn v4.3
 Auth: next-auth v5 (beta) — Credentials provider, split edge/full config
 Email: Resend
 Deploy: Vercel
-Tests: N/A
+Tests: Vitest (unit) — `pnpm test`, blocking no CI (.github/workflows/ci.yml)
 ```
 
 ## PROJECT STRUCTURE
@@ -244,7 +244,7 @@ Previous session: 17/05/2026 — BIG REVIEW Fase 5: APP /messages padronização
 **Out of scope (intencional)**:
 - PENDING notifications retroativos pra rows antigas — produto pré-prod, histórico minúsculo
 - Bell badge unchanged — `getUnreadCount` já era Notification-driven
-- Sem testes automatizados — `Tests: N/A` por design
+- Testes: o APP tem suite **Vitest** (roda no CI via `pnpm test`) — a antiga nota "Tests: N/A por design" estava desatualizada (corrigido 01/07/2026)
 
 ---
 
@@ -480,7 +480,7 @@ BMS, SEQ e APP compartilham o mesmo banco. Roles APP_USER e APP_MEMO foram adici
 *Checklist obrigatório antes de considerar qualquer tarefa concluída:*
 
 □ `npx tsc --noEmit` — 0 errors
-□ `npm test` — all tests pass
+□ `pnpm test` — all tests pass (Vitest; blocking no CI)
 □ `npm run lint` — 0 errors
 
 ## ENV VARS
@@ -532,7 +532,7 @@ SENTRY_AUTH_TOKEN=
 
 /status → Leia CURRENT STATE e responda: (1) o que está pronto, (2) o que está em andamento, (3) blockers, (4) prioridade recomendada para hoje.
 
-/test → Execute `npm test`. Se falhar, analise o erro, proponha fix, e re-execute. Repita até verde.
+/test → Execute `pnpm test`. Se falhar, analise o erro, proponha fix, e re-execute. Repita até verde.
 
 /deploy-check → Execute TODOS os Quality Gates. Se algum falhar, liste os itens pendentes e ofereça fix automático.
 
