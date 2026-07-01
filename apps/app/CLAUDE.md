@@ -50,7 +50,7 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 30/06/2026 — APP i18n polish (sign-in redesign, home mini-cards, /activate, sign-up) + memorial QR guardian-only. 2 PRs merged to main (#103, #104), branches deleted.
+Last session: 30/06/2026 — APP i18n polish + memorial QR guardian-only + header frost fix + "Memorial" badge copy + **public memorial profiles**. PRs #103–#106 merged to main; **#107 (public memorial preview) open**.
 
 **i18n setup (referência):**
 - Pacote compartilhado `@genealogiq/i18n` (`packages/i18n/src/config.ts`). 3 locales: `en-US`, `pt-BR`, `es-MX`. Default `en-US`. Mensagens em `apps/app/messages/<locale>.json`, **chaves em ordem alfabética por namespace**.
@@ -75,6 +75,17 @@ Last session: 30/06/2026 — APP i18n polish (sign-in redesign, home mini-cards,
 - Header do APP estava "transparente demais" (dava pra ler o conteúdo passando por trás ao scrollar). Causa: o `backdrop-filter` do `.glass-strong` (em `@layer components`) é **sobrescrito pra `none` pela layer de utilities do Tailwind** → o blur nunca renderiza, sobra só o fundo semitransparente. (Afeta também `.glass-card` — blur das cards idem não renderiza; latente, não tratado nesta sessão.)
 - Fix: classe `.glass-header` definida **UNLAYERED** (fora de qualquer `@layer`, pois unlayered vence todas as layers) em `globals.css`, com `background: hsl(var(--glass-bg) / 0.7)` + `backdrop-filter: blur(12px) saturate(180%)` — mesma opacidade/blur dos headers BMS/SEQ (`bg-background/70 supports-[backdrop-filter]` + `backdrop-blur-md`). Aplicada junto de `glass-strong` no `header.tsx` (glass-strong ainda fornece borda/sombra). Confirmado visualmente em light + dark via browser automation.
 - Lição: para sobrescrever propriedades de utilities do Tailwind v4 a partir de CSS custom, regra unlayered vence sem precisar de `!important`. Diagnóstico de `backdrop-filter: none` no computed style → checar conflito de cascade layers, não só opacidade.
+
+**Public memorial profiles (PR #107 — em revisão):**
+- Visitante **não logado** agora vê memoriais (`APP_MEMO`) com preview parcial + muro de cadastro (estilo Instagram) — pro fluxo do QR na lápide. Perfis de vivos e rotas de gestão continuam login-only.
+- **Arquitetura**: árvore `profile` movida de `(protected)` → novo route group `(public)` (URLs iguais). `(public)/layout.tsx` é session-aware: `Header` autenticado OU `GuestHeader` (Sign in/Sign up com callbackUrl) pra anônimo. Rotas de gestão/edit self-gate via `verifySession()` no próprio body (auditado — só a main page e o redirect de `tributes/moderate` não chamam).
+- **Gate memorial-only** (`assertPublicMemorialAccess` em `lib/public-profile-access.ts`, assertion fn): anônimo em id inexistente OU perfil de vivo → **ambos** redirect pra sign-in idênticos (sem enumeração 404-vs-redirect — achado do reviewer). `notFound()` só pra viewer autenticado.
+- **Conteúdo parcial** (anon): bio (1 img + citação + excerpt ~400 chars via `lib/bio-excerpt.ts`), galeria (6 mídias), homenagens (5) → depois `<SignupWall/>` (fade + CTAs). Queries com `take` (não materializa a tabela inteira numa página pública — achado do reviewer): `getGalleryByUserId(id, take)`+`getGalleryCounts()`, `getApprovedTributesByProfileId(id, take)`+`getTributeCountByProfileId()`.
+- **Seções travadas** (anon): árvore + geolocalização viram card `gated` com `gate:"signup"` (novo campo em `SectionCard`) → abre `<SignupGate/>` (dialog, espelha `QrCardGate`). Geo NUNCA vaza: preview travado (`GeoPreview locked`) + metric `lockedMetric`, e geo nem é buscada pra anon (`isMemorialized && sessionUserId ? getGeolocationForViewer : null`).
+- **QR scan**: `/qr/[genCode]` ACTIVATED → `/profile/[id]` agora cai direto no memorial público (sem bounce pro login) — corrigido automaticamente ao tornar memoriais públicos.
+- Novas chaves i18n: `Auth.signupWall*`/`signupGate*`/`notNow`, `Profile.lockedMetric`. Boundary files do `(public)` (loading/error/not-found) via `bruna-boundary-files`.
+- **Convenção suite (`nextjs-crud-suite@bahiensed-plugins`)**: feature construída em fatias, cada uma com gates deterministas (tsc/lint/`scripts/check-i18n-parity.mjs`) + 1 pass do agente `nextjs-crud-suite:reviewer` (Security/Correctness/Operability). Auth adaptada ao DAL existente (`@/lib/dal`, next-auth), **NÃO** Better Auth. maestro/entity-builder não se aplicam (não é entidade CRUD nova); usa-se só as personas que fazem sentido (bruna, kato, paula...) + reviewer. Plugin carrega só no início da sessão — habilitar mid-session exige reiniciar.
+- **Gotcha dev server**: mover um route-group dir (`git mv (protected)/profile → (public)/profile`) com o `next dev` (Turbopack) rodando serve **stale** (layout novo + page module antigo) → reiniciar o dev server. E redirect do Next 16+Turbopack em dev **streama via RSC em HTTP 200** → status de redirect anônimo **não é testável por curl** (só browser). Verificação anon = review + reviewer + browser logado-out.
 
 **Operacional — criação de PR sem `gh`:** o `gh` CLI não está instalado. PRs criados via **GitHub API** (`POST /repos/bahiensed/genealogiq/pulls`) usando o token de `git credential fill` (host github.com), passado por env var pra um script Python — **nunca logado**. Branches deletados com `git branch -d` (safe, só apaga se mergeado) + `git push origin --delete`.
 
