@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { SignupDialog } from "@/components/auth/signup-dialog"
 import type { GalleryItemRow } from "@/queries/gallery"
 
 const PAGE_SIZE = 12
@@ -35,9 +36,13 @@ interface Props {
   editHref?: string
   isOwn?: boolean
   upgradeHint?: ReactNode
+  // Anonymous visitors: cap at the first page, no auto-load; clicking a thumbnail or
+  // the fake "load more" button opens a (dismissible) sign-up dialog.
+  gated?: boolean
+  hasMore?: boolean
 }
 
-export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }: Props) {
+export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint, gated = false, hasMore = false }: Props) {
   const t = useTranslations("Gallery")
   const tc = useTranslations("Common")
   const locale = useLocale()
@@ -48,6 +53,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   const listTopRef = useRef<HTMLDivElement | null>(null)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [wallOpen, setWallOpen] = useState(false)
 
   const items = useMemo(() => {
     return [...rawItems].sort((a, b) => {
@@ -74,7 +80,8 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
   }, [sort])
 
   useEffect(() => {
-    if (visibleCount >= items.length) return
+    // Anonymous visitors don't auto-load — the fake "load more" button gates it.
+    if (gated || visibleCount >= items.length) return
     const el = sentinelRef.current
     if (!el) return
     const observer = new IntersectionObserver(
@@ -83,7 +90,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
     )
     observer.observe(el)
     return () => observer.disconnect()
-  }, [visibleCount, items.length])
+  }, [visibleCount, items.length, gated])
 
   useEffect(() => {
     if (!isOpen) return
@@ -155,7 +162,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setLightboxIndex(idx)}
+                onClick={() => (gated ? setWallOpen(true) : setLightboxIndex(idx))}
                 className="mb-4 break-inside-avoid w-full block group rounded-2xl overflow-hidden border border-border/60 bg-card/40 transition-transform hover:scale-[1.01] focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {item.kind === "image" ? (
@@ -185,7 +192,16 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
             ))}
           </div>
 
-          {visibleCount < items.length ? (
+          {gated ? (
+            hasMore ? (
+              <div className="py-10 flex justify-center">
+                <Button variant="outline" className="gap-2" onClick={() => setWallOpen(true)}>
+                  <Images className="h-4 w-4" />
+                  {t("loadMore")}
+                </Button>
+              </div>
+            ) : null
+          ) : visibleCount < items.length ? (
             <div ref={sentinelRef} className="py-10 flex justify-center">
               <div className="h-6 w-6 rounded-full border-2 border-muted-foreground/30 border-t-primary animate-spin" />
             </div>
@@ -270,6 +286,8 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint }:
           )}
         </DialogContent>
       </Dialog>
+
+      {gated && <SignupDialog open={wallOpen} onOpenChange={setWallOpen} dismissible />}
     </>
   )
 }

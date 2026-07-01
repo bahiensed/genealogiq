@@ -1,39 +1,21 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { SignupDialog } from "@/components/auth/signup-dialog"
 
-// Soft sign-up nudge for anonymous visitors on the long memorial content pages
-// (bio / gallery / tributes). Renders nothing until the visitor scrolls into the
-// second fold, then a modal Dialog pops up OVER the intact page — not an inline card,
-// no fade, no layout disruption. Fires once and is dismissible.
+// Hard sign-up wall for the continuous content pages (bio, tributes). Renders nothing
+// until the anonymous visitor has scrolled ~80% of the page, then locks it with a
+// NON-dismissible dialog — they log in, sign up, or leave via the browser back button.
 export function SignupPrompt() {
-  const t = useTranslations("Auth")
-  const pathname = usePathname()
-  const callback = encodeURIComponent(pathname || "/")
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
     let fired = false
     const onScroll = () => {
       if (fired) return
-      // Fire once the visitor is engaged: past the first fold (~second fold) OR near
-      // the bottom of a shorter page — but never on load (requires a real scroll).
-      const pastFirstFold = window.scrollY > window.innerHeight * 0.8
-      const nearBottom =
-        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 120
-      if (window.scrollY > 80 && (pastFirstFold || nearBottom)) {
+      const doc = document.documentElement
+      const depth = (window.scrollY + window.innerHeight) / doc.scrollHeight
+      if (window.scrollY > 80 && depth >= 0.8) {
         fired = true
         setOpen(true)
         window.removeEventListener("scroll", onScroll)
@@ -43,22 +25,5 @@ export function SignupPrompt() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md text-center">
-        <DialogHeader>
-          <DialogTitle className="text-2xl tracking-tight">{t("signupWallTitle")}</DialogTitle>
-          <DialogDescription>{t("signupWallDescription")}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="sm:justify-center gap-2 pt-2">
-          <Button asChild variant="outline" className="rounded-full">
-            <Link href={`/sign-in?callbackUrl=${callback}`}>{t("signIn")}</Link>
-          </Button>
-          <Button asChild className="rounded-full">
-            <Link href={`/sign-up?callbackUrl=${callback}`}>{t("createAccount")}</Link>
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
+  return <SignupDialog open={open} onOpenChange={setOpen} dismissible={false} />
 }

@@ -459,10 +459,8 @@ export async function QrPreview({ locked = false }: { locked?: boolean } = {}) {
   const t = await getTranslations("Profile")
   if (locked) {
     return (
-      <div className="flex justify-center">
-        <div className="flex h-28 w-28 items-center justify-center rounded-xl bg-muted/50 ring-1 ring-border/60">
-          <Lock className="h-10 w-10 text-muted-foreground" aria-label={t("qrLockedAlt")} />
-        </div>
+      <div className="flex h-full min-h-[120px] items-center justify-center">
+        <Lock className="h-16 w-16 text-muted-foreground" aria-label={t("qrLockedAlt")} />
       </div>
     )
   }
