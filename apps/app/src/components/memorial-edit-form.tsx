@@ -419,18 +419,9 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
               <div className="px-6 pb-6 pt-4 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <DateField
-                    name="deathDate" label={t("fields.date")} control={control}
+                    name="deathDate" label={t("fields.date")} control={control} setValue={setValue}
                     clearLabel={t("date.clear")} pickLabel={t("date.pick")}
                     required error={errors.deathDate?.message}
-                    setValue={(n, v) => {
-                      setValue(n as keyof ProfileEditValues, v)
-                      if (!v) {
-                        setValue("deathPlace", "")
-                        setValue("deathState", "")
-                        setValue("deathCountry", "")
-                        setValue("deathCause", "")
-                      }
-                    }}
                     minDate={birthDate ?? undefined}
                   />
                   <div className="space-y-2">
