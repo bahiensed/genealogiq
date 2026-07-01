@@ -27,7 +27,13 @@ export function SignupPrompt() {
   useEffect(() => {
     let fired = false
     const onScroll = () => {
-      if (!fired && window.scrollY > window.innerHeight * 0.9) {
+      if (fired) return
+      // Fire once the visitor is engaged: past the first fold (~second fold) OR near
+      // the bottom of a shorter page — but never on load (requires a real scroll).
+      const pastFirstFold = window.scrollY > window.innerHeight * 0.8
+      const nearBottom =
+        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 120
+      if (window.scrollY > 80 && (pastFirstFold || nearBottom)) {
         fired = true
         setOpen(true)
         window.removeEventListener("scroll", onScroll)

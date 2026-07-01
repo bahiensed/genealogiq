@@ -13,7 +13,7 @@ import { UpgradeHint } from "@/components/upgrade-hint"
 
 // Anonymous visitors preview a generous set of media; a scroll-triggered sign-up
 // dialog nudges them to join for the rest.
-const ANON_GALLERY_LIMIT = 12
+const ANON_GALLERY_LIMIT = 16
 
 interface Props {
   params: Promise<{ id: string }>

@@ -11,7 +11,7 @@ import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 
 // Anonymous visitors read a generous set of tributes; a scroll-triggered sign-up
 // dialog nudges them to join (writing one always needs sign-up).
-const ANON_TRIBUTES_LIMIT = 10
+const ANON_TRIBUTES_LIMIT = 16
 
 interface Props {
   params: Promise<{ id: string }>
