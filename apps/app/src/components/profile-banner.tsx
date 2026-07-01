@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { toggleFavorite } from "@/actions/favorite.actions"
+import { SignupDialog } from "@/components/auth/signup-dialog"
 import { toast } from "sonner"
 
 export interface ProfileData {
@@ -48,6 +49,7 @@ export function ProfileBanner({ profile }: Props) {
   const [favorited, setFavorited] = useState(profile.isFavoritedByMe ?? false)
   const [favCount, setFavCount] = useState(profile.favoritedBy)
   const [isPending, startTransition] = useTransition()
+  const [wallOpen, setWallOpen] = useState(false)
 
   const fallback = (size: string) => (
     <AvatarFallback className={cn("font-semibold text-white", size, profile.avatarColor)}>
@@ -107,13 +109,14 @@ export function ProfileBanner({ profile }: Props) {
                 </button>
               )}
               {!profile.isOwn && !isAuthenticated && (
-                <Link
-                  href={`/sign-in?callbackUrl=${encodeURIComponent(`/profile/${profile.id}`)}`}
+                <button
+                  type="button"
+                  onClick={() => setWallOpen(true)}
                   aria-label={t("addToFavorites")}
                   className="h-10 w-10 rounded-full glass border-0 inline-flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
                 >
                   <Heart className="h-5 w-5 text-muted-foreground" />
-                </Link>
+                </button>
               )}
             </div>
 
@@ -234,6 +237,10 @@ export function ProfileBanner({ profile }: Props) {
           </div>
         </div>
       </div>
+
+      {!profile.isOwn && !isAuthenticated && (
+        <SignupDialog open={wallOpen} onOpenChange={setWallOpen} dismissible />
+      )}
     </section>
   )
 }

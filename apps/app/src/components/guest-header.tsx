@@ -41,13 +41,17 @@ export function GuestHeader() {
               <Moon className="h-4 w-4 block dark:hidden" />
             </Button>
 
-            <Button asChild variant="ghost" size="sm" className="rounded-full">
-              <Link href={`/sign-in?callbackUrl=${callback}`}>{tNav("logIn")}</Link>
-            </Button>
+            {/* Equal-width CTAs: grid-cols-2 sizes both columns to the wider label,
+                so the two buttons match in every locale. */}
+            <div className="grid grid-cols-2 gap-2">
+              <Button asChild variant="ghost" size="sm" className="w-full rounded-full">
+                <Link href={`/sign-in?callbackUrl=${callback}`}>{tNav("logIn")}</Link>
+              </Button>
 
-            <Button asChild size="sm" className="rounded-full">
-              <Link href={`/sign-up?callbackUrl=${callback}`}>{tNav("signUp")}</Link>
-            </Button>
+              <Button asChild size="sm" className="w-full rounded-full">
+                <Link href={`/sign-up?callbackUrl=${callback}`}>{tNav("signUp")}</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
