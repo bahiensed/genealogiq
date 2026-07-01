@@ -330,7 +330,7 @@
       "sibling": "Irmão/Irmã",
       "spouse": "Parceiro(a)"
     },
-    "memorialized": "Memorializado",
+    "memorialized": "Memorial",
     "nameWithMaiden": "{name} (nascida {maidenName})",
     "node": {
       "awaitingConfirmation": "Aguardando confirmação",
@@ -684,10 +684,12 @@
   },
   "Nav": {
     "language": "Idioma",
+    "logIn": "Entrar",
     "messages": "Mensagens",
     "messagesUnread": "{count} mensagens não lidas",
     "myProfile": "Meu perfil",
     "signOut": "Sair",
+    "signUp": "Cadastre-se",
     "subscriptions": "Assinaturas",
     "toggleTheme": "Alternar tema",
     "userMenu": "Menu do usuário"
@@ -729,7 +731,7 @@
     "guardianMetric": "{count, plural, one {# perfil} other {# perfis}}",
     "guardianTitle": "Perfis sob guarda",
     "mapAlt": "Mapa",
-    "memorialized": "Memorializado",
+    "memorialized": "Memorial",
     "qrAlt": "QR Code",
     "qrDescription": "Para placas, lápides e espaços digitais",
     "qrLockedAlt": "Bloqueado",

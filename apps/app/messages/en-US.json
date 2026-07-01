@@ -249,7 +249,7 @@
       "addToTree": "Add to tree",
       "backToSearch": "Back to search",
       "divorced": "Divorced",
-      "ghostHint": "This person stays in the family tree without a profile. You can promote them to a memorialized profile later.",
+      "ghostHint": "This person stays in the family tree without a profile. You can promote them to a memorial profile later.",
       "kindLabel": "Kind:",
       "married": "Married",
       "marriedTo": "Married to <strong>{name}</strong>?",
@@ -330,7 +330,7 @@
       "sibling": "Sibling",
       "spouse": "Partner"
     },
-    "memorialized": "Memorialized",
+    "memorialized": "Memorial",
     "nameWithMaiden": "{name} (née {maidenName})",
     "node": {
       "awaitingConfirmation": "Awaiting confirmation",
@@ -381,7 +381,7 @@
     "bornMetric": "Born {date}",
     "deathMetric": "✦ {date}",
     "empty": "No favorites yet.",
-    "memorializedProfile": "Memorialized profile",
+    "memorializedProfile": "Memorial profile",
     "profileCount": "{count, plural, one {# profile} other {# profiles}}",
     "subtitle": "The ones closest to the heart, kept near, always",
     "title": "Favorites"
@@ -508,7 +508,7 @@
     "guardedTitle": "Profiles I guard",
     "livingBadge": "Living",
     "memorializedBadge": "Memorial",
-    "memorializedProfile": "Memorialized profile",
+    "memorializedProfile": "Memorial profile",
     "myProfileSubtitle": "View your page",
     "myProfileTitle": "My Profile",
     "noProfilesFound": "No profiles found.",
@@ -534,7 +534,7 @@
     },
     "card": {
       "born": "Born {date}",
-      "fallbackSubtitle": "Memorialized profile"
+      "fallbackSubtitle": "Memorial profile"
     },
     "date": {
       "clear": "Clear",
@@ -574,9 +574,9 @@
       "other": "Other"
     },
     "list": {
-      "emptyGuarded": "No memorialized profiles guarded yet.",
-      "emptyOwn": "No memorialized profiles yet.",
-      "newProfile": "New memorialized profile",
+      "emptyGuarded": "No memorial profiles guarded yet.",
+      "emptyOwn": "No memorial profiles yet.",
+      "newProfile": "New memorial profile",
       "sortAria": "Sort profiles",
       "sortAsc": "A → Z",
       "sortDesc": "Z → A",
@@ -590,7 +590,7 @@
     "newPage": {
       "backToGuarded": "Back to guarded profiles",
       "subtitle": "Create a memorial for someone who lives on in your memory.",
-      "title": "New memorialized profile"
+      "title": "New memorial profile"
     },
     "notes": {
       "notPublic": "Not shown publicly."
@@ -684,10 +684,12 @@
   },
   "Nav": {
     "language": "Language",
+    "logIn": "Log in",
     "messages": "Messages",
     "messagesUnread": "{count} unread messages",
     "myProfile": "My profile",
     "signOut": "Sign out",
+    "signUp": "Sign up",
     "subscriptions": "Subscriptions",
     "toggleTheme": "Toggle theme",
     "userMenu": "User menu"
@@ -729,7 +731,7 @@
     "guardianMetric": "{count, plural, one {# profile} other {# profiles}}",
     "guardianTitle": "Guarded profiles",
     "mapAlt": "Map",
-    "memorialized": "Memorialized",
+    "memorialized": "Memorial",
     "qrAlt": "QR Code",
     "qrDescription": "For plaques, headstones and digital spaces alike",
     "qrLockedAlt": "Locked",
@@ -786,7 +788,7 @@
       "waitUpload": "Please wait for the avatar to finish uploading."
     },
     "activatePage": {
-      "subtitle": "Fill in the details of the person you are memorializing.",
+      "subtitle": "Fill in the details of the person you are remembering.",
       "title": "Activate Memorial"
     },
     "billing": {
@@ -919,7 +921,7 @@
         "bio": "Need more characters and images?",
         "gallery": "Need more images and videos?",
         "geolocation": "Need precise GPS coordinates?",
-        "memorialized": "Need more memorialized profiles?",
+        "memorialized": "Need more memorial profiles?",
         "tree": "Need a bigger tree?"
       }
     }

@@ -14,7 +14,6 @@ import { LanguageSwitcher } from "@/components/language-switcher"
 // menu for Sign in / Create account CTAs that return to the current page.
 export function GuestHeader() {
   const { resolvedTheme, setTheme } = useTheme()
-  const t = useTranslations("Auth")
   const tNav = useTranslations("Nav")
   const pathname = usePathname()
   const callback = encodeURIComponent(pathname || "/")
@@ -43,11 +42,11 @@ export function GuestHeader() {
             </Button>
 
             <Button asChild variant="ghost" size="sm" className="rounded-full">
-              <Link href={`/sign-in?callbackUrl=${callback}`}>{t("signIn")}</Link>
+              <Link href={`/sign-in?callbackUrl=${callback}`}>{tNav("logIn")}</Link>
             </Button>
 
             <Button asChild size="sm" className="rounded-full">
-              <Link href={`/sign-up?callbackUrl=${callback}`}>{t("createAccount")}</Link>
+              <Link href={`/sign-up?callbackUrl=${callback}`}>{tNav("signUp")}</Link>
             </Button>
           </div>
         </div>
