@@ -5,7 +5,7 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { useTranslations } from "next-intl"
-import { Moon, Sun, LogIn, UserPlus } from "lucide-react"
+import { Moon, Sun, LogIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/language-switcher"
 
@@ -41,28 +41,20 @@ export function GuestHeader() {
               <Moon className="h-4 w-4 block dark:hidden" />
             </Button>
 
-            {/* xs/sm: icon-only CTAs, matching the theme/language toggles. */}
+            {/* Sign in — icon-only on xs/sm, text on md+. */}
             <Button asChild variant="ghost" size="icon" aria-label={tNav("logIn")} className="md:hidden rounded-full glass border-0 h-9 w-9">
               <Link href={`/sign-in?callbackUrl=${callback}`}>
                 <LogIn className="h-4 w-4" />
               </Link>
             </Button>
-
-            <Button asChild variant="ghost" size="icon" aria-label={tNav("signUp")} className="md:hidden rounded-full glass border-0 h-9 w-9">
-              <Link href={`/sign-up?callbackUrl=${callback}`}>
-                <UserPlus className="h-4 w-4" />
-              </Link>
+            <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex rounded-full">
+              <Link href={`/sign-in?callbackUrl=${callback}`}>{tNav("logIn")}</Link>
             </Button>
 
-            {/* md+: text CTAs, equal width per locale. */}
-            <div className="hidden md:grid grid-cols-2 gap-2">
-              <Button asChild variant="ghost" size="sm" className="w-full rounded-full">
-                <Link href={`/sign-in?callbackUrl=${callback}`}>{tNav("logIn")}</Link>
-              </Button>
-              <Button asChild size="sm" className="w-full rounded-full">
-                <Link href={`/sign-up?callbackUrl=${callback}`}>{tNav("signUp")}</Link>
-              </Button>
-            </div>
+            {/* Sign up — always text, every display. */}
+            <Button asChild size="sm" className="rounded-full">
+              <Link href={`/sign-up?callbackUrl=${callback}`}>{tNav("signUp")}</Link>
+            </Button>
           </div>
         </div>
       </div>
