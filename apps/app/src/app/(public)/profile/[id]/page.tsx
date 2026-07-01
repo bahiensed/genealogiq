@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { getLocale, getTranslations } from "next-intl/server"
 import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
 import { auth } from "@/auth"
@@ -41,10 +41,19 @@ export default async function ProfileByIdPage({ params }: Props) {
   const sessionUserId = session?.user?.id
 
   const user = await getProfileById(id)
+
+  // Anonymous visitors may only view existing memorials. Treat "missing id" and
+  // "living profile" identically — both redirect to sign-in — so the response shape
+  // never discloses whether an id exists (no 404-vs-redirect enumeration). notFound()
+  // only fires for authenticated viewers.
+  if (!sessionUserId && (!user || user.role !== "APP_MEMO")) {
+    redirect(`/sign-in?callbackUrl=${encodeURIComponent(`/profile/${id}`)}`)
+  }
   if (!user) notFound()
 
   const isOwn = sessionUserId ? user.id === sessionUserId : false
   const isMemorialized = user.role === "APP_MEMO"
+
   const isGuardian = isMemorialized && sessionUserId
     ? user.guardedBy.some((g) => g.guardianId === sessionUserId)
     : false
@@ -107,6 +116,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     isGuardian,
     guardedCount: memorialCount,
     isFavoritedByMe,
+    isAuthenticated: !!sessionUserId,
   }
 
   const base = `/profile/${id}`

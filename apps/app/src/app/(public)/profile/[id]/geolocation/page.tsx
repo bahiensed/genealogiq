@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation"
 import Link from "next/link"
 import { getLocale, getTranslations } from "next-intl/server"
 import { getCountryName } from "@genealogiq/core"
@@ -6,10 +5,11 @@ import { MapPin, Plus, SquarePen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
-import { verifySession } from "@/lib/dal"
+import { auth } from "@/auth"
 import { getProfileById } from "@/queries/profile"
 import { getGeolocationForViewer } from "@/queries/geolocation"
 import { canManageProfile } from "@/lib/profile"
+import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -17,15 +17,16 @@ interface Props {
 
 export default async function GeolocationPage({ params }: Props) {
   const { id } = await params
-  const session = await verifySession()
+  const session = await auth()
+  const viewerId = session?.user?.id
 
   const [profile, geo] = await Promise.all([
     getProfileById(id),
     getGeolocationForViewer(id),
   ])
-  if (!profile) notFound()
+  assertPublicMemorialAccess(profile, viewerId, id)
 
-  const isOwn = canManageProfile(profile, session.user.id)
+  const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
   const isEmpty = !geo
   const editHref = `/profile/${id}/geolocation/edit`
   const locale = await getLocale()

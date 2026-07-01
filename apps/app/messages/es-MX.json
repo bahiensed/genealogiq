@@ -138,6 +138,8 @@
     "showPassword": "Mostrar contraseña",
     "signIn": "Iniciar sesión",
     "signingIn": "Iniciando sesión…",
+    "signupWallDescription": "Inicia sesión o regístrate para ver todo el contenido de este memorial.",
+    "signupWallTitle": "Ver todo el contenido",
     "verifyChangedBody": "Inicia sesión de nuevo con tu nueva dirección de correo.",
     "verifyChangedDescription": "Tu correo se ha actualizado correctamente.",
     "verifyChangedTitle": "¡Correo cambiado!",
@@ -247,7 +249,7 @@
       "addToTree": "Agregar al árbol",
       "backToSearch": "Volver a la búsqueda",
       "divorced": "Divorcio",
-      "ghostHint": "Esta persona permanece en el árbol genealógico sin un perfil. Puedes convertirla en un perfil conmemorado más adelante.",
+      "ghostHint": "Esta persona permanece en el árbol genealógico sin un perfil. Puedes convertirla en un perfil memorial más adelante.",
       "kindLabel": "Tipo de familiar:",
       "married": "Matrimonio",
       "marriedTo": "¿Casado(a) con <strong>{name}</strong>?",
@@ -328,7 +330,7 @@
       "sibling": "Hermano(a)",
       "spouse": "Pareja"
     },
-    "memorialized": "Conmemorado",
+    "memorialized": "Memorial",
     "nameWithMaiden": "{name} (de soltera {maidenName})",
     "node": {
       "awaitingConfirmation": "Esperando confirmación",
@@ -379,7 +381,7 @@
     "bornMetric": "Nacido(a) el {date}",
     "deathMetric": "✦ {date}",
     "empty": "Aún no hay favoritos.",
-    "memorializedProfile": "Perfil conmemorativo",
+    "memorializedProfile": "Perfil memorial",
     "profileCount": "{count, plural, one {# perfil} other {# perfiles}}",
     "subtitle": "Los más cercanos al corazón, siempre presentes",
     "title": "Favoritos"
@@ -406,6 +408,7 @@
     "imageAlt": "Elemento de la galería",
     "imageCount": "{count, plural, one {# imagen} other {# imágenes}}",
     "imagesAddedLimit": "{remaining, plural, one {Solo se agregó # imagen — el límite es {max}.} other {Solo se agregaron # imágenes — el límite es {max}.}}",
+    "loadMore": "Cargar más imágenes",
     "location": "Ubicación",
     "locationPlaceholder": "Ciudad, País",
     "maxImagesReached": "Se alcanzó el máximo de {max} imágenes.",
@@ -506,7 +509,7 @@
     "guardedTitle": "Perfiles bajo mi cuidado",
     "livingBadge": "En vida",
     "memorializedBadge": "Memorial",
-    "memorializedProfile": "Perfil conmemorativo",
+    "memorializedProfile": "Perfil memorial",
     "myProfileSubtitle": "Ver tu página",
     "myProfileTitle": "Mi perfil",
     "noProfilesFound": "No se encontraron perfiles.",
@@ -532,7 +535,7 @@
     },
     "card": {
       "born": "Nacimiento {date}",
-      "fallbackSubtitle": "Perfil conmemorativo"
+      "fallbackSubtitle": "Perfil memorial"
     },
     "date": {
       "clear": "Borrar",
@@ -572,9 +575,9 @@
       "other": "Otro"
     },
     "list": {
-      "emptyGuarded": "Aún no hay perfiles conmemorativos bajo tu resguardo.",
-      "emptyOwn": "Aún no hay perfiles conmemorativos.",
-      "newProfile": "Nuevo perfil conmemorativo",
+      "emptyGuarded": "Aún no hay perfiles memoriales bajo tu resguardo.",
+      "emptyOwn": "Aún no hay perfiles memoriales.",
+      "newProfile": "Nuevo perfil memorial",
       "sortAria": "Ordenar perfiles",
       "sortAsc": "A → Z",
       "sortDesc": "Z → A",
@@ -588,7 +591,7 @@
     "newPage": {
       "backToGuarded": "Volver a los perfiles bajo tu resguardo",
       "subtitle": "Crea un memorial para alguien que vive en tu memoria.",
-      "title": "Nuevo perfil conmemorativo"
+      "title": "Nuevo perfil memorial"
     },
     "notes": {
       "notPublic": "No se muestra públicamente."
@@ -619,7 +622,7 @@
     },
     "toasts": {
       "changesReset": "Cambios descartados.",
-      "created": "Perfil conmemorativo creado.",
+      "created": "Perfil memorial creado.",
       "deleted": "Perfil eliminado.",
       "fixFields": "Corrige los campos resaltados.",
       "formReset": "Formulario restablecido.",
@@ -682,10 +685,12 @@
   },
   "Nav": {
     "language": "Idioma",
+    "logIn": "Iniciar sesión",
     "messages": "Mensajes",
     "messagesUnread": "{count} mensajes sin leer",
     "myProfile": "Mi perfil",
     "signOut": "Cerrar sesión",
+    "signUp": "Regístrate",
     "subscriptions": "Suscripciones",
     "toggleTheme": "Cambiar tema",
     "userMenu": "Menú de usuario"
@@ -727,7 +732,7 @@
     "guardianMetric": "{count, plural, one {# perfil} other {# perfiles}}",
     "guardianTitle": "Perfiles a tu cuidado",
     "mapAlt": "Mapa",
-    "memorialized": "Conmemorado",
+    "memorialized": "Memorial",
     "qrAlt": "QR Code",
     "qrDescription": "Para placas, lápidas y espacios digitales por igual",
     "qrLockedAlt": "Bloqueado",
@@ -767,7 +772,7 @@
       "clear": "Limpiar",
       "country": "País",
       "countryPlaceholder": "País",
-      "created": "Perfil conmemorativo creado.",
+      "created": "Perfil memorial creado.",
       "date": "Fecha",
       "death": "Fallecimiento",
       "familyNamePlaceholder": "Apellido",
@@ -784,7 +789,7 @@
       "waitUpload": "Espera a que termine de subirse la foto."
     },
     "activatePage": {
-      "subtitle": "Completa los datos de la persona que estás conmemorando.",
+      "subtitle": "Completa los datos de la persona que estás recordando.",
       "title": "Activar memorial"
     },
     "billing": {
@@ -802,7 +807,7 @@
     },
     "landing": {
       "createAccount": "Crear cuenta",
-      "description": "Este QR Code está listo para vincularse a un perfil conmemorativo.",
+      "description": "Este QR Code está listo para vincularse a un perfil memorial.",
       "signIn": "Iniciar sesión",
       "title": "Crear un memorial"
     },

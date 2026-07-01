@@ -138,6 +138,8 @@
     "showPassword": "Mostrar senha",
     "signIn": "Entrar",
     "signingIn": "Entrando…",
+    "signupWallDescription": "Entre ou cadastre-se para ver todo o conteúdo desse memorial.",
+    "signupWallTitle": "Ver todo o conteúdo",
     "verifyChangedBody": "Entre novamente com seu novo endereço de e-mail.",
     "verifyChangedDescription": "Seu e-mail foi atualizado com sucesso.",
     "verifyChangedTitle": "E-mail alterado!",
@@ -328,7 +330,7 @@
       "sibling": "Irmão/Irmã",
       "spouse": "Parceiro(a)"
     },
-    "memorialized": "Memorializado",
+    "memorialized": "Memorial",
     "nameWithMaiden": "{name} (nascida {maidenName})",
     "node": {
       "awaitingConfirmation": "Aguardando confirmação",
@@ -406,6 +408,7 @@
     "imageAlt": "Item da galeria",
     "imageCount": "{count, plural, one {# imagem} other {# imagens}}",
     "imagesAddedLimit": "{remaining, plural, one {Apenas # imagem adicionada — o limite é {max}.} other {Apenas # imagens adicionadas — o limite é {max}.}}",
+    "loadMore": "Carregar mais imagens",
     "location": "Local",
     "locationPlaceholder": "Cidade, País",
     "maxImagesReached": "Limite de {max} imagens atingido.",
@@ -682,10 +685,12 @@
   },
   "Nav": {
     "language": "Idioma",
+    "logIn": "Entrar",
     "messages": "Mensagens",
     "messagesUnread": "{count} mensagens não lidas",
     "myProfile": "Meu perfil",
     "signOut": "Sair",
+    "signUp": "Cadastre-se",
     "subscriptions": "Assinaturas",
     "toggleTheme": "Alternar tema",
     "userMenu": "Menu do usuário"
@@ -727,7 +732,7 @@
     "guardianMetric": "{count, plural, one {# perfil} other {# perfis}}",
     "guardianTitle": "Perfis sob guarda",
     "mapAlt": "Mapa",
-    "memorialized": "Memorializado",
+    "memorialized": "Memorial",
     "qrAlt": "QR Code",
     "qrDescription": "Para placas, lápides e espaços digitais",
     "qrLockedAlt": "Bloqueado",
