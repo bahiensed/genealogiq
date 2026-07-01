@@ -6,7 +6,7 @@ import { useForm, useWatch, Controller, type Control } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import {
-  User, Calendar, Flower2, Phone, MapPin, Globe, FileText,
+  User, Calendar, Flower2, Globe, FileText,
   CalendarIcon, Image as ImageIcon, Trash2, Save, RotateCcw,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -32,37 +32,37 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { AddressSection } from "@/components/address/address-section"
 import { getProfileEditSchema, type ProfileEditValues } from "@/schemas/profile.schema"
-import { addressDefaultValues } from "@/schemas/address.schema"
 import { updateProfile } from "@/actions/profile.actions"
 import { updateMemorial, deleteMemorial } from "@/actions/memorial.actions"
 import { getAvatarColor } from "@/lib/avatar-color"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { useLocale, useTranslations } from "next-intl"
-import { getLocalizedCountries } from "@/consts/countries-data"
+import { getLocalizedCountries, COUNTRY_BY_ISO } from "@/consts/countries-data"
 import { cn } from "@/lib/utils"
 import type { EditProfileRow } from "@/queries/profile"
+
+const RequiredMark = () => <span className="text-destructive">*</span>
 
 // ─── Date picker helper ───────────────────────────────────────────────────────
 
 function DateField({
-  name, label, control, setValue, disabled, minDate, clearLabel, pickLabel,
+  name, label, control, setValue, disabled, minDate, clearLabel, pickLabel, required, error,
 }: {
   name: string; label: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: Control<ProfileEditValues>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: (name: any, value: any) => void
   disabled?: boolean; minDate?: Date
   clearLabel: string; pickLabel: string
+  required?: boolean; error?: string
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const value: Date | null = useWatch({ control: control as any, name }) ?? null
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between h-5">
-        <Label>{label}</Label>
+        <Label>{label} {required && <RequiredMark />}</Label>
         {value && !disabled && (
           <button type="button" onClick={() => setValue(name, null)} className="text-xs text-muted-foreground hover:text-foreground">
             {clearLabel}
@@ -94,6 +94,55 @@ function DateField({
           />
         </PopoverContent>
       </Popover>
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  )
+}
+
+// ─── State / Province (cascades from the chosen country) ───────────────────────
+// BR / MX / US carry a states list → render a Select; every other country falls
+// back to a free-text Input. Mirrors the AddressSection pattern.
+
+function StateField({
+  control, countryField, stateField, id, label, placeholder, disabled, error,
+}: {
+  control: Control<ProfileEditValues>
+  countryField: "birthCountry" | "deathCountry"
+  stateField: "birthState" | "deathState"
+  id: string; label: string; placeholder: string; disabled?: boolean; error?: string
+}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const country = (useWatch({ control: control as any, name: countryField }) as string) ?? ""
+  const states = COUNTRY_BY_ISO[country]?.states ?? []
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label} <RequiredMark /></Label>
+      <Controller
+        control={control}
+        name={stateField}
+        render={({ field }) =>
+          states.length > 0 ? (
+            <Select value={(field.value as string) ?? ""} onValueChange={field.onChange} disabled={disabled}>
+              <SelectTrigger id={id}><SelectValue placeholder={placeholder} /></SelectTrigger>
+              <SelectContent>
+                {states.map((s) => (
+                  <SelectItem key={s.code} value={s.code}>{s.code} - {s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <Input
+              id={id}
+              maxLength={100}
+              disabled={disabled}
+              placeholder={placeholder}
+              value={(field.value as string) ?? ""}
+              onChange={field.onChange}
+            />
+          )
+        }
+      />
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
 }
@@ -113,43 +162,30 @@ function SectionTrigger({ icon: Icon, label }: { icon: React.ElementType; label:
 
 function buildDefaults(initial: EditProfileRow): ProfileEditValues {
   return {
-    firstName:        initial.firstName,
-    lastName:         initial.lastName,
-    maidenName:       initial.maidenName       ?? "",
-    nickname:         initial.nickname         ?? "",
-    gender:           (initial.gender as ProfileEditValues["gender"]) ?? null,
-    nationalId:       initial.nationalId       ?? "",
-    avatarUrl:        initial.avatarUrl        ?? null,
-    birthDate:        initial.birthDate        ?? null,
-    birthPlace:       initial.birthPlace       ?? "",
-    birthState:       initial.birthState       ?? "",
-    birthCountry:     initial.birthCountry     ?? "",
-    deathDate:        initial.deathDate        ?? null,
-    deathPlace:       initial.deathPlace       ?? "",
-    deathState:       initial.deathState       ?? "",
-    deathCountry:     initial.deathCountry     ?? "",
-    deathCause:       initial.deathCause       ?? "",
-    phoneCountryCode: initial.phoneCountryCode ?? "55",
-    phone:            initial.phone            ?? "",
-    website:          initial.website          ?? "",
-    instagram:        initial.instagram        ?? "",
-    linkedin:         initial.linkedin         ?? "",
-    fb:               initial.fb               ?? "",
-    x:                initial.x                ?? "",
-    tiktok:           initial.tiktok           ?? "",
-    youtube:          initial.youtube          ?? "",
-    otherSocial:      initial.otherSocial      ?? "",
-    notes:            initial.notes            ?? "",
-    address: {
-      zip:          initial.address?.zip          ?? addressDefaultValues.zip,
-      street:       initial.address?.street       ?? addressDefaultValues.street,
-      number:       initial.address?.number       ?? addressDefaultValues.number,
-      complement:   initial.address?.complement   ?? addressDefaultValues.complement,
-      neighborhood: initial.address?.neighborhood ?? addressDefaultValues.neighborhood,
-      city:         initial.address?.city         ?? addressDefaultValues.city,
-      state:        initial.address?.state        ?? addressDefaultValues.state,
-      country:      initial.address?.country      ?? addressDefaultValues.country,
-    },
+    firstName:    initial.firstName,
+    lastName:     initial.lastName,
+    maidenName:   initial.maidenName   ?? "",
+    nickname:     initial.nickname     ?? "",
+    gender:       (initial.gender as ProfileEditValues["gender"]) ?? null,
+    avatarUrl:    initial.avatarUrl    ?? null,
+    birthDate:    initial.birthDate    ?? null,
+    birthPlace:   initial.birthPlace   ?? "",
+    birthState:   initial.birthState   ?? "",
+    birthCountry: initial.birthCountry ?? "",
+    deathDate:    initial.deathDate    ?? null,
+    deathPlace:   initial.deathPlace   ?? "",
+    deathState:   initial.deathState   ?? "",
+    deathCountry: initial.deathCountry ?? "",
+    deathCause:   initial.deathCause   ?? "",
+    website:      initial.website      ?? "",
+    instagram:    initial.instagram    ?? "",
+    linkedin:     initial.linkedin     ?? "",
+    fb:           initial.fb           ?? "",
+    x:            initial.x            ?? "",
+    tiktok:       initial.tiktok       ?? "",
+    youtube:      initial.youtube      ?? "",
+    otherSocial:  initial.otherSocial  ?? "",
+    notes:        initial.notes        ?? "",
   }
 }
 
@@ -174,11 +210,10 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
 
   const defaults = buildDefaults(initial)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { control, register, setValue, handleSubmit, reset, watch, formState: { errors } } =
     useForm<ProfileEditValues>({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      resolver: useMemo(() => zodResolver(getProfileEditSchema(tErr)) as any, [tErr]),
+      resolver: useMemo(() => zodResolver(getProfileEditSchema(tErr, isMemorialized)) as any, [tErr, isMemorialized]),
       defaultValues: defaults,
     })
 
@@ -284,12 +319,12 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
               {/* Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="first-name">{t("fields.firstName")} <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="first-name">{t("fields.firstName")} <RequiredMark /></Label>
                   <Input id="first-name" maxLength={100} placeholder={t("placeholders.firstName")} {...register("firstName")} />
                   {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last-name">{t("fields.lastName")} <span className="text-destructive">*</span></Label>
+                  <Label htmlFor="last-name">{t("fields.lastName")} <RequiredMark /></Label>
                   <Input id="last-name" maxLength={100} placeholder={t("placeholders.lastName")} {...register("lastName")} />
                   {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
                 </div>
@@ -298,19 +333,19 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
               {/* Maiden name + Nickname */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="maiden-name">{t("fields.maidenName")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Label htmlFor="maiden-name">{t("fields.maidenName")}</Label>
                   <Input id="maiden-name" maxLength={100} placeholder={t("placeholders.maidenName")} {...register("maidenName")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nickname">{t("fields.nickname")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Label htmlFor="nickname">{t("fields.nickname")}</Label>
                   <Input id="nickname" maxLength={100} placeholder={t("placeholders.nickname")} {...register("nickname")} />
                 </div>
               </div>
 
-              {/* Gender + National ID */}
+              {/* Gender (6 cols) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="gender">{t("fields.gender")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Label htmlFor="gender">{t("fields.gender")} <RequiredMark /></Label>
                   <Controller
                     control={control}
                     name="gender"
@@ -325,10 +360,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                       </Select>
                     )}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="national-id">{t("fields.nationalId")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
-                  <Input id="national-id" maxLength={50} placeholder={t("placeholders.nationalId")} {...register("nationalId")} />
+                  {errors.gender && <p className="text-xs text-destructive">{errors.gender.message}</p>}
                 </div>
               </div>
             </div>
@@ -343,28 +375,35 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
           <AccordionContent>
             <div className="px-6 pb-6 pt-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <DateField name="birthDate" label={t("fields.date")} control={control} setValue={setValue} clearLabel={t("date.clear")} pickLabel={t("date.pick")} />
+                <DateField name="birthDate" label={t("fields.date")} control={control} setValue={setValue} clearLabel={t("date.clear")} pickLabel={t("date.pick")} required error={errors.birthDate?.message} />
                 <div className="space-y-2">
-                  <Label htmlFor="birth-country">{t("fields.country")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Label htmlFor="birth-country">{t("fields.country")} <RequiredMark /></Label>
                   <Controller
                     control={control}
                     name="birthCountry"
                     render={({ field }) => (
-                      <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                      <Select value={field.value ?? ""} onValueChange={(val) => { field.onChange(val); setValue("birthState", "") }}>
                         <SelectTrigger id="birth-country"><SelectValue placeholder={t("placeholders.country")} /></SelectTrigger>
                         <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
                       </Select>
                     )}
                   />
+                  {errors.birthCountry && <p className="text-xs text-destructive">{errors.birthCountry.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="birth-city">{t("fields.city")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Label htmlFor="birth-city">{t("fields.city")} <RequiredMark /></Label>
                   <Input id="birth-city" maxLength={100} placeholder={t("placeholders.city")} {...register("birthPlace")} />
+                  {errors.birthPlace && <p className="text-xs text-destructive">{errors.birthPlace.message}</p>}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="birth-state">{t("fields.state")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
-                  <Input id="birth-state" maxLength={100} placeholder={t("placeholders.state")} {...register("birthState")} />
-                </div>
+                <StateField
+                  control={control}
+                  countryField="birthCountry"
+                  stateField="birthState"
+                  id="birth-state"
+                  label={t("fields.state")}
+                  placeholder={t("placeholders.state")}
+                  error={errors.birthState?.message}
+                />
               </div>
             </div>
           </AccordionContent>
@@ -382,6 +421,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                   <DateField
                     name="deathDate" label={t("fields.date")} control={control}
                     clearLabel={t("date.clear")} pickLabel={t("date.pick")}
+                    required error={errors.deathDate?.message}
                     setValue={(n, v) => {
                       setValue(n as keyof ProfileEditValues, v)
                       if (!v) {
@@ -394,71 +434,43 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                     minDate={birthDate ?? undefined}
                   />
                   <div className="space-y-2">
-                    <Label htmlFor="death-country">{t("fields.country")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                    <Label htmlFor="death-country">{t("fields.country")} <RequiredMark /></Label>
                     <Controller
                       control={control}
                       name="deathCountry"
                       render={({ field }) => (
-                        <Select value={field.value ?? ""} onValueChange={field.onChange} disabled={!deathDate}>
+                        <Select value={field.value ?? ""} onValueChange={(val) => { field.onChange(val); setValue("deathState", "") }} disabled={!deathDate}>
                           <SelectTrigger id="death-country"><SelectValue placeholder={t("placeholders.country")} /></SelectTrigger>
                           <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
                         </Select>
                       )}
                     />
+                    {errors.deathCountry && <p className="text-xs text-destructive">{errors.deathCountry.message}</p>}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="death-city">{t("fields.city")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                    <Label htmlFor="death-city">{t("fields.city")} <RequiredMark /></Label>
                     <Input id="death-city" maxLength={100} placeholder={t("placeholders.city")} disabled={!deathDate} {...register("deathPlace")} />
+                    {errors.deathPlace && <p className="text-xs text-destructive">{errors.deathPlace.message}</p>}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="death-state">{t("fields.state")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
-                    <Input id="death-state" maxLength={100} placeholder={t("placeholders.state")} disabled={!deathDate} {...register("deathState")} />
-                  </div>
+                  <StateField
+                    control={control}
+                    countryField="deathCountry"
+                    stateField="deathState"
+                    id="death-state"
+                    label={t("fields.state")}
+                    placeholder={t("placeholders.state")}
+                    disabled={!deathDate}
+                    error={errors.deathState?.message}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="death-cause">{t("fields.deathCause")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
+                  <Label htmlFor="death-cause">{t("fields.deathCause")}</Label>
                   <Input id="death-cause" maxLength={200} placeholder={t("placeholders.deathCause")} disabled={!deathDate} {...register("deathCause")} />
                 </div>
               </div>
             </AccordionContent>
           </AccordionItem>
         )}
-
-        {/* ── Contact ──────────────────────────────────────────── */}
-        <AccordionItem value="contact" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
-          <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-            <SectionTrigger icon={Phone} label={t("sections.contact")} />
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="px-6 pb-6 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">{t("fields.phone")} <span className="text-muted-foreground text-xs">{t("fields.optional")}</span></Label>
-                <div className="flex gap-2">
-                  <Input id="phone-cc" maxLength={5} placeholder="+55" className="w-20 shrink-0" {...register("phoneCountryCode")} />
-                  <Input id="phone" maxLength={30} placeholder="(11) 99999-9999" className="flex-1" {...register("phone")} />
-                </div>
-              </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* ── Address ──────────────────────────────────────────── */}
-        <AccordionItem value="address" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
-          <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-            <SectionTrigger icon={MapPin} label={t("sections.address")} />
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="px-6 pb-6 pt-4">
-              <AddressSection
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                control={control as any}
-                setValue={setValue}
-                errors={errors}
-                prefix="address"
-              />
-            </div>
-          </AccordionContent>
-        </AccordionItem>
 
         {/* ── Social networks ───────────────────────────────────── */}
         <AccordionItem value="social" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
