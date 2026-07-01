@@ -4,7 +4,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
     appUser: { findUnique: vi.fn(), update: vi.fn() },
-    address: { create: vi.fn(), update: vi.fn(), delete: vi.fn() },
   },
 }))
 
@@ -19,12 +18,16 @@ import { updateProfile } from "./profile.actions"
 import { verifySession } from "@/lib/dal"
 import { deleteBlobs } from "@/lib/blob"
 
-// Minimal payload that passes getProfileEditSchema (firstName/lastName required,
-// address object present but all fields nullish).
+// Minimal payload that passes getProfileEditSchema for a living profile: name,
+// gender and birth date/city/state/country are all required now.
 const validInput = (overrides: Record<string, unknown> = {}) => ({
   firstName: "Ada",
   lastName: "Lovelace",
-  address: {},
+  gender: "FEMALE",
+  birthDate: "1815-12-10",
+  birthPlace: "London",
+  birthState: "England",
+  birthCountry: "GB",
   ...overrides,
 })
 
@@ -32,7 +35,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   // Self-scoped: the only identity that matters is the live session user.
   vi.mocked(verifySession).mockResolvedValue({ user: { id: "self" } } as never)
-  prismaMock.appUser.findUnique.mockResolvedValue({ avatarUrl: null, addressId: null })
+  prismaMock.appUser.findUnique.mockResolvedValue({ avatarUrl: null })
   prismaMock.appUser.update.mockResolvedValue({})
 })
 
@@ -43,6 +46,13 @@ describe("updateProfile — input validation", () => {
     expect(res).toEqual({ ok: false, message: "common.invalidData" })
     expect(prismaMock.appUser.update).not.toHaveBeenCalled()
     expect(prismaMock.appUser.findUnique).not.toHaveBeenCalled()
+  })
+
+  it("rejects when the newly-required fields are missing (gender / birth)", async () => {
+    const res = await updateProfile({ firstName: "Ada", lastName: "Lovelace" })
+
+    expect(res).toEqual({ ok: false, message: "common.invalidData" })
+    expect(prismaMock.appUser.update).not.toHaveBeenCalled()
   })
 
   it("rejects a non-object payload before touching the DB", async () => {
@@ -95,13 +105,25 @@ describe("updateProfile — self-scoping (living users)", () => {
     )
 
     expect(res.ok).toBe(true)
-    const writeArg = prismaMock.appUser.update.mock.calls[0][0]
-    const data = writeArg.data
+    const data = prismaMock.appUser.update.mock.calls[0][0].data
     expect(data).not.toHaveProperty("deathDate")
     expect(data).not.toHaveProperty("deathPlace")
     expect(data).not.toHaveProperty("deathState")
     expect(data).not.toHaveProperty("deathCountry")
     expect(data).not.toHaveProperty("deathCause")
+  })
+
+  it("leaves the removed National ID / contact / address columns untouched on save", async () => {
+    // These fields are no longer in the form/schema; existing data must be preserved,
+    // so the write must not mention them at all.
+    const res = await updateProfile(validInput({ nationalId: "999", phone: "555", address: { city: "x" } }))
+
+    expect(res.ok).toBe(true)
+    const data = prismaMock.appUser.update.mock.calls[0][0].data
+    expect(data).not.toHaveProperty("nationalId")
+    expect(data).not.toHaveProperty("phone")
+    expect(data).not.toHaveProperty("phoneCountryCode")
+    expect(data).not.toHaveProperty("addressId")
   })
 })
 
@@ -109,7 +131,6 @@ describe("updateProfile — avatar blob pruning", () => {
   it("deletes the stale avatar blob when the avatar changes", async () => {
     prismaMock.appUser.findUnique.mockResolvedValue({
       avatarUrl: "https://qa.public.blob.vercel-storage.com/old.jpg",
-      addressId: null,
     })
 
     const res = await updateProfile(validInput({ avatarUrl: "https://qa.public.blob.vercel-storage.com/new.jpg" }))
@@ -121,37 +142,11 @@ describe("updateProfile — avatar blob pruning", () => {
   it("does not delete the blob when the avatar is unchanged", async () => {
     prismaMock.appUser.findUnique.mockResolvedValue({
       avatarUrl: "https://qa.public.blob.vercel-storage.com/same.jpg",
-      addressId: null,
     })
 
     const res = await updateProfile(validInput({ avatarUrl: "https://qa.public.blob.vercel-storage.com/same.jpg" }))
 
     expect(res.ok).toBe(true)
     expect(deleteBlobs).not.toHaveBeenCalled()
-  })
-})
-
-describe("updateProfile — address upsert + happy path", () => {
-  it("creates a new address when fields are provided and links it to the user", async () => {
-    prismaMock.address.create.mockResolvedValue({ id: "addr-1" })
-
-    const res = await updateProfile(validInput({ address: { city: "London", street: "Baker St" } }))
-
-    expect(res).toEqual({ ok: true, message: undefined })
-    expect(prismaMock.address.create).toHaveBeenCalledTimes(1)
-    expect(prismaMock.appUser.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ addressId: "addr-1" }) }),
-    )
-  })
-
-  it("returns ok with no addressId when the address payload is empty (best-effort cleanup)", async () => {
-    // No existing address, empty payload -> no create, addressId null.
-    const res = await updateProfile(validInput({ address: {} }))
-
-    expect(res).toEqual({ ok: true, message: undefined })
-    expect(prismaMock.address.create).not.toHaveBeenCalled()
-    expect(prismaMock.appUser.update).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ addressId: null }) }),
-    )
   })
 })
