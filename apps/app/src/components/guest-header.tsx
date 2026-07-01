@@ -5,7 +5,7 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { useTranslations } from "next-intl"
-import { Moon, Sun } from "lucide-react"
+import { Moon, Sun, LogIn, UserPlus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/language-switcher"
 
@@ -41,13 +41,24 @@ export function GuestHeader() {
               <Moon className="h-4 w-4 block dark:hidden" />
             </Button>
 
-            {/* Equal-width CTAs: grid-cols-2 sizes both columns to the wider label,
-                so the two buttons match in every locale. */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* xs/sm: icon-only CTAs, matching the theme/language toggles. */}
+            <Button asChild variant="ghost" size="icon" aria-label={tNav("logIn")} className="md:hidden rounded-full glass border-0 h-9 w-9">
+              <Link href={`/sign-in?callbackUrl=${callback}`}>
+                <LogIn className="h-4 w-4" />
+              </Link>
+            </Button>
+
+            <Button asChild variant="ghost" size="icon" aria-label={tNav("signUp")} className="md:hidden rounded-full glass border-0 h-9 w-9">
+              <Link href={`/sign-up?callbackUrl=${callback}`}>
+                <UserPlus className="h-4 w-4" />
+              </Link>
+            </Button>
+
+            {/* md+: text CTAs, equal width per locale. */}
+            <div className="hidden md:grid grid-cols-2 gap-2">
               <Button asChild variant="ghost" size="sm" className="w-full rounded-full">
                 <Link href={`/sign-in?callbackUrl=${callback}`}>{tNav("logIn")}</Link>
               </Button>
-
               <Button asChild size="sm" className="w-full rounded-full">
                 <Link href={`/sign-up?callbackUrl=${callback}`}>{tNav("signUp")}</Link>
               </Button>
