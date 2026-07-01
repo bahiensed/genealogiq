@@ -3,7 +3,7 @@ import { auth } from "@/auth"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { GalleryClient } from "@/components/gallery-client"
-import { SignupWall } from "@/components/auth/signup-wall"
+import { SignupPrompt } from "@/components/auth/signup-prompt"
 import { getGalleryByUserId, getGalleryCounts } from "@/queries/gallery"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
@@ -11,8 +11,9 @@ import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 import { getMemorialFeatures } from "@/lib/subscription"
 import { UpgradeHint } from "@/components/upgrade-hint"
 
-// Anonymous visitors preview the first few media; the rest is behind the sign-up wall.
-const ANON_GALLERY_LIMIT = 6
+// Anonymous visitors preview a generous set of media; a scroll-triggered sign-up
+// dialog nudges them to join for the rest.
+const ANON_GALLERY_LIMIT = 12
 
 interface Props {
   params: Promise<{ id: string }>
@@ -38,7 +39,6 @@ export default async function ProfileGalleryPage({ params }: Props) {
   const counts = isAnon ? await getGalleryCounts(id) : null
   const imageCount = counts ? counts.images : items.filter((i) => i.kind === "image").length
   const videoCount = counts ? counts.videos : items.filter((i) => i.kind === "video").length
-  const showWall = isAnon && imageCount + videoCount > ANON_GALLERY_LIMIT
   const atLimit = !!features && (imageCount >= features.galleryMaxImages || videoCount >= features.galleryMaxVideos)
 
   return (
@@ -79,8 +79,9 @@ export default async function ProfileGalleryPage({ params }: Props) {
             : null}
         />
 
-        {showWall && <SignupWall />}
       </main>
+
+      {isAnon && <SignupPrompt />}
     </div>
   )
 }

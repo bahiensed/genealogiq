@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation"
-import { verifySession } from "@/lib/dal"
+import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 import { getFamilyTree } from "@/queries/family-tree"
 import { getMemorialFeatures } from "@/lib/subscription"
 import { computeLayout } from "@/components/family-tree/canvas/layout"
@@ -16,25 +16,29 @@ interface Props {
 
 export default async function TreePage({ params }: Props) {
   const { id } = await params
-  const session = await verifySession()
+  const session = await auth()
+  const viewerId = session?.user?.id
 
   const profile = await getProfileById(id)
-  if (!profile) notFound()
+  assertPublicMemorialAccess(profile, viewerId, id)
 
-  const canManage = canManageProfile(profile, session.user.id)
+  const canManage = viewerId ? canManageProfile(profile, viewerId) : false
 
-  const [{ persons, relations }, features, guardianRows] = await Promise.all([
+  const [{ persons, relations }, features] = await Promise.all([
     getFamilyTree(id),
     getMemorialFeatures(id),
-    prisma.appUserGuardian.findMany({
-      where:  { guardianId: session.user.id },
-      select: { appUserId: true, status: true },
-    }),
   ])
+  // Anonymous visitors view the tree read-only, so no guardian lookup is needed.
+  const guardianRows = viewerId
+    ? await prisma.appUserGuardian.findMany({
+        where:  { guardianId: viewerId },
+        select: { appUserId: true, status: true },
+      })
+    : []
 
   // Sets of person ids the session user can edit (ACCEPTED guardian or self)
   // and those with a pending co-management request from the session user.
-  const managedIds   = new Set<string>([session.user.id])
+  const managedIds   = new Set<string>(viewerId ? [viewerId] : [])
   const requestedIds = new Set<string>()
   for (const g of guardianRows) {
     if (g.status === "ACCEPTED") managedIds.add(g.appUserId)
@@ -80,7 +84,7 @@ export default async function TreePage({ params }: Props) {
           persons={persons}
           relations={relations}
           rootId={id}
-          sessionUserId={session.user.id}
+          sessionUserId={viewerId ?? ""}
           canManage={canManage}
           managedIds={Array.from(managedIds)}
           requestedIds={Array.from(requestedIds)}

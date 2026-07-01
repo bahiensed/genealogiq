@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { BioImageCarousel } from "@/components/bio-image-carousel"
-import { SignupWall } from "@/components/auth/signup-wall"
+import { SignupPrompt } from "@/components/auth/signup-prompt"
 import { auth } from "@/auth"
 import { getBioByUserId } from "@/queries/bio"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
-import { bioExcerpt } from "@/lib/bio-excerpt"
 import { getMemorialFeatures } from "@/lib/subscription"
 import { UpgradeHint } from "@/components/upgrade-hint"
 
@@ -39,12 +38,6 @@ export default async function ProfileBioPage({ params }: Props) {
   const textLen = bio?.text?.length ?? 0
   const imageCount = bio?.images.length ?? 0
   const atLimit = !!features && (textLen >= features.bioMaxChars || imageCount >= features.bioMaxImages)
-
-  // Anonymous preview: one image, the quote, and a text excerpt; the wall appears when
-  // there is more behind it.
-  const excerpt = isAnon && bio?.text ? bioExcerpt(bio.text) : null
-  const previewImages = bio ? (isAnon ? bio.images.slice(0, 1) : bio.images) : []
-  const showWall = isAnon && !isEmpty && ((excerpt?.truncated ?? false) || imageCount > 1)
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -91,9 +84,9 @@ export default async function ProfileBioPage({ params }: Props) {
           </div>
         ) : (
           <>
-            {previewImages.length > 0 && (
+            {bio.images.length > 0 && (
               <section className="mb-10 animate-fade-in" style={{ animationDelay: "80ms" }}>
-                <BioImageCarousel images={previewImages} />
+                <BioImageCarousel images={bio.images} />
               </section>
             )}
 
@@ -109,32 +102,23 @@ export default async function ProfileBioPage({ params }: Props) {
               </section>
             )}
 
-            {isAnon
-              ? excerpt && (
-                  <section
-                    className="glass-card no-sheen px-6 py-8 md:px-10 md:py-10 animate-fade-in"
-                    style={{ animationDelay: "240ms" }}
-                  >
-                    <p className="text-base md:text-lg leading-relaxed text-foreground/90">{excerpt.text}</p>
-                  </section>
-                )
-              : paragraphs.length > 0 && (
-                  <section
-                    className="glass-card no-sheen px-6 py-8 md:px-10 md:py-10 animate-fade-in"
-                    style={{ animationDelay: "240ms" }}
-                  >
-                    <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground/90">
-                      {paragraphs.map((p, i) => (
-                        <p key={i}>{p}</p>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-            {showWall && <SignupWall />}
+            {paragraphs.length > 0 && (
+              <section
+                className="glass-card no-sheen px-6 py-8 md:px-10 md:py-10 animate-fade-in"
+                style={{ animationDelay: "240ms" }}
+              >
+                <div className="space-y-4 text-base md:text-lg leading-relaxed text-foreground/90">
+                  {paragraphs.map((p, i) => (
+                    <p key={i}>{p}</p>
+                  ))}
+                </div>
+              </section>
+            )}
           </>
         )}
       </main>
+
+      {isAnon && <SignupPrompt />}
     </div>
   )
 }

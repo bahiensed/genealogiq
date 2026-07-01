@@ -433,15 +433,8 @@ function osmTileUrl(lat: number, lon: number, zoom: number) {
   return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`
 }
 
-export async function GeoPreview({ lat, lon, locked = false }: { lat?: number | null; lon?: number | null; locked?: boolean }) {
+export async function GeoPreview({ lat, lon }: { lat?: number | null; lon?: number | null }) {
   const t = await getTranslations("Profile")
-  if (locked) {
-    return (
-      <div className="flex h-full w-full min-h-[120px] items-center justify-center rounded-xl bg-muted/50 ring-1 ring-border/60">
-        <Lock className="h-10 w-10 text-muted-foreground" aria-label={t("qrLockedAlt")} />
-      </div>
-    )
-  }
   const resolvedLat = lat ?? -22.959167
   const resolvedLng = lon ?? -43.188333
   const mapUrl = osmTileUrl(resolvedLat, resolvedLng, 14)

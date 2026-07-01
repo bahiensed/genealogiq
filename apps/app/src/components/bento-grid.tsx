@@ -4,7 +4,6 @@ import type { LucideIcon } from "lucide-react"
 import { ArrowUpRight } from "lucide-react"
 import { GlassIcon } from "@/components/glass-icon"
 import { QrCardGate } from "@/components/qr-card-gate"
-import { SignupGate } from "@/components/auth/signup-gate"
 import { cn } from "@/lib/utils"
 
 export interface SectionCard {
@@ -17,8 +16,6 @@ export interface SectionCard {
   preview?: ReactNode
   href?: string
   gated?: boolean
-  // Which dialog a gated card opens: "qr" (purchase, default) or "signup" (anon lock).
-  gate?: "qr" | "signup"
 }
 
 interface Props {
@@ -65,15 +62,14 @@ export function BentoGrid({ cards }: Props) {
           )
 
           if (card.gated) {
-            const GateComponent = card.gate === "signup" ? SignupGate : QrCardGate
             return (
-              <GateComponent
+              <QrCardGate
                 key={card.key}
                 className={cn(className, "text-left")}
                 style={{ animationDelay: `${i * 60}ms` }}
               >
                 {inner}
-              </GateComponent>
+              </QrCardGate>
             )
           }
 

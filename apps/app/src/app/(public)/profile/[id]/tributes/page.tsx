@@ -3,14 +3,15 @@ import { auth } from "@/auth"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { TributesClient } from "@/components/tributes-client"
-import { SignupWall } from "@/components/auth/signup-wall"
+import { SignupPrompt } from "@/components/auth/signup-prompt"
 import { getApprovedTributesByProfileId, getMyTributeForProfile, getTributeCountByProfileId } from "@/queries/tribute"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 
-// Anonymous visitors read a few tributes; the rest (and writing one) needs sign-up.
-const ANON_TRIBUTES_LIMIT = 5
+// Anonymous visitors read a generous set of tributes; a scroll-triggered sign-up
+// dialog nudges them to join (writing one always needs sign-up).
+const ANON_TRIBUTES_LIMIT = 10
 
 interface Props {
   params: Promise<{ id: string }>
@@ -30,7 +31,6 @@ export default async function TributesPage({ params }: Props) {
   // trigger. Authed: the full set (the client paginates it).
   const tributes = await getApprovedTributesByProfileId(id, isAnon ? ANON_TRIBUTES_LIMIT : undefined)
   const tributeCount = isAnon ? await getTributeCountByProfileId(id) : tributes.length
-  const showWall = isAnon && tributeCount > ANON_TRIBUTES_LIMIT
 
   const isExactOwn = viewerId === id
   const canWrite = !isAnon && !isExactOwn
@@ -69,8 +69,9 @@ export default async function TributesPage({ params }: Props) {
           hasPendingFromMe={hasPendingFromMe}
         />
 
-        {showWall && <SignupWall />}
       </main>
+
+      {isAnon && <SignupPrompt />}
     </div>
   )
 }
