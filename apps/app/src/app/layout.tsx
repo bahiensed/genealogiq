@@ -7,6 +7,7 @@ import '@/styles/globals.css'
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
+import { Footer } from "@/components/footer"
 
 export const metadata: Metadata = {
   title: "Genealogiq",
@@ -36,6 +37,7 @@ export default async function RootLayout({
           >
             <TooltipProvider>
               {children}
+              <Footer />
               <Toaster richColors />
             </TooltipProvider>
           </ThemeProvider>
