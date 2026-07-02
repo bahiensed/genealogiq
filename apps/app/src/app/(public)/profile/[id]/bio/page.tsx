@@ -31,7 +31,6 @@ export default async function ProfileBioPage({ params }: Props) {
   const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
   const isAnon = !viewerId
   const features = isOwn ? await getMemorialFeatures(id) : null
-  const name = `${profile.firstName} ${profile.lastName}`
 
   const isEmpty = !bio || (!bio.quote && !bio.text && bio.images.length === 0)
   const paragraphs = bio?.text?.split(/\n\n+/).filter(Boolean) ?? []
@@ -59,9 +58,12 @@ export default async function ProfileBioPage({ params }: Props) {
               </Button>
             )}
           </div>
-          <p className="text-muted-foreground mt-2 italic">
-            {isOwn ? t("subtitleOwn") : t("subtitleOther", { name })}
-          </p>
+          <p className="text-muted-foreground mt-2 italic">{t("subtitle")}</p>
+          {!isEmpty && (
+            <p className="scroll-m-20 text-2xl font-semibold tracking-tight mt-1">
+              {profile.firstName} {profile.lastName}
+            </p>
+          )}
           {isOwn && atLimit && features && (
             <div className="mt-2">
               <UpgradeHint context="bio" currentTier={features.code} />

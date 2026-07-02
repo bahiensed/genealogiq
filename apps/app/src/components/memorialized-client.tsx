@@ -17,13 +17,14 @@ type SortDir = "az" | "za"
 
 interface Props {
   profiles:     MiniProfile[]
+  name:         string
   isOwn:        boolean
   canCreate:    boolean
   newHref:      string
   upgradeHint?: ReactNode
 }
 
-export function MemorializedClient({ profiles, isOwn, canCreate, newHref, upgradeHint }: Props) {
+export function MemorializedClient({ profiles, name, isOwn, canCreate, newHref, upgradeHint }: Props) {
   const t = useTranslations("Memorialized")
   const [sort, setSort] = useState<SortDir>("az")
   const isEmpty = profiles.length === 0
@@ -35,7 +36,7 @@ export function MemorializedClient({ profiles, isOwn, canCreate, newHref, upgrad
 
   return (
     <>
-      <section className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
+      <section className="mb-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
         <div className="flex flex-col gap-1 min-w-0">
           <p className="text-muted-foreground italic">{t("list.tagline")}</p>
           {upgradeHint}
@@ -65,6 +66,8 @@ export function MemorializedClient({ profiles, isOwn, canCreate, newHref, upgrad
           )}
         </div>
       </section>
+
+      {!isEmpty && <p className="scroll-m-20 text-xl lg:text-2xl font-semibold tracking-tight mb-8">{name}</p>}
 
       {isEmpty ? (
         <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
