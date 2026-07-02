@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/components/theme/theme-provider'
 import { TooltipProvider } from '@genealogiq/ui/tooltip'
 import { Toaster } from "@genealogiq/ui/sonner"
 import { CookieConsent } from '@/components/cookies/cookie-consent'
+import { Footer } from '@/components/footer'
 
 export const metadata: Metadata = {
   title: "Genealogiq | Sequoia",
@@ -40,6 +41,7 @@ export default async function RootLayout({
           >
             <TooltipProvider>
               {children}
+              <Footer />
               <Toaster richColors />
               <CookieConsent />
             </TooltipProvider>

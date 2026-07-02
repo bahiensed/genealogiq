@@ -457,6 +457,27 @@
     "title": "Something went wrong",
     "wholeNumber": "Must be a whole number"
   },
+  "Feedback": {
+    "dialog": {
+      "bugDescription": "Tell us what went wrong. We'll take a look as soon as possible.",
+      "bugTitle": "Report a bug",
+      "feedbackDescription": "Share your suggestions or ideas to help us improve.",
+      "feedbackTitle": "Send feedback"
+    },
+    "fields": {
+      "message": "Message",
+      "messagePlaceholder": "Describe the issue or share your idea..."
+    },
+    "links": {
+      "reportBug": "Report a bug",
+      "sendFeedback": "Send feedback"
+    },
+    "submit": "Send",
+    "toasts": {
+      "bugSent": "Bug report sent. Thank you!",
+      "feedbackSent": "Feedback sent. Thank you!"
+    }
+  },
   "Nav": {
     "language": "Language",
     "profile": "Profile",
