@@ -227,7 +227,7 @@ export function ProfileBanner({ profile }: Props) {
                         rel="noopener noreferrer"
                         className="text-foreground font-medium hover:underline truncate min-w-0"
                       >
-                        {profile.geo.lat.toFixed(2)}, {profile.geo.lon.toFixed(2)}
+                        {profile.geo.lat.toFixed(4)}, {profile.geo.lon.toFixed(4)}
                       </a>
                     </div>
                   )}
