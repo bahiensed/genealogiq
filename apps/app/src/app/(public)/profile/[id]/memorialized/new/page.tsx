@@ -29,7 +29,7 @@ export default async function MemorialNewPage({ params }: Props) {
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
-      <main className="container relative pt-24 pb-32 max-w-4xl">
+      <main className="container relative pt-24 pb-32">
         <section className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 animate-fade-in">
           <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">

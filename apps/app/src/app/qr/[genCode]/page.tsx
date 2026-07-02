@@ -30,7 +30,7 @@ export default async function PhysicalQrPage({ params }: Props) {
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
-      <main className="container relative z-10 pt-24 pb-32 max-w-2xl">
+      <main className="container relative z-10 pt-24 pb-32">
         {session?.user ? (
           <div className="space-y-6">
             <div>

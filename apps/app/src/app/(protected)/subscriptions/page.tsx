@@ -30,7 +30,7 @@ export default async function SubscriptionsPage({ searchParams }: Props) {
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
-      <main className="container relative pt-24 pb-32 max-w-6xl">
+      <main className="container relative pt-24 pb-32">
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href="/home" label={t("backToHome")} />

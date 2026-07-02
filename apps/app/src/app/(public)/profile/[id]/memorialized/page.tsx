@@ -89,7 +89,7 @@ export default async function MemorializedPage({ params }: Props) {
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="top" />
 
-      <main className="container relative pt-24 pb-32 max-w-6xl">
+      <main className="container relative pt-24 pb-32">
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
