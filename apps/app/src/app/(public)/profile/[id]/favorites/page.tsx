@@ -42,6 +42,11 @@ export default async function FavoritesPage({ params }: Props) {
           <p className="text-muted-foreground mt-2 italic">
             {t("subtitle")}
           </p>
+          {favorites.length > 0 && (
+            <p className="scroll-m-20 text-xl lg:text-2xl font-semibold tracking-tight mt-1">
+              {profile.firstName} {profile.lastName}
+            </p>
+          )}
         </div>
 
         <FavoritesClient items={favorites} />

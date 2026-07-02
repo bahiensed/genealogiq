@@ -40,6 +40,7 @@ const initials = (name: string) =>
 
 interface Props {
   items: ApprovedTributeRow[]
+  name: string
   profileId: string
   sessionUserId: string
   canWrite: boolean
@@ -47,7 +48,7 @@ interface Props {
   hasPendingFromMe?: boolean
 }
 
-export function TributesClient({ items, profileId, sessionUserId, canWrite, isManager = false, hasPendingFromMe }: Props) {
+export function TributesClient({ items, name, profileId, sessionUserId, canWrite, isManager = false, hasPendingFromMe }: Props) {
   const t = useTranslations("Tributes")
   const tc = useTranslations("Common")
   const locale = useLocale()
@@ -103,7 +104,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
 
   return (
     <>
-      <section className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
+      <section className="mb-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
         <div className="flex flex-col gap-1 min-w-0">
           <p className="text-muted-foreground italic">
             {t("list.subtitle")}
@@ -142,6 +143,8 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
           )}
         </div>
       </section>
+
+      {items.length > 0 && <p className="scroll-m-20 text-xl lg:text-2xl font-semibold tracking-tight mb-8">{name}</p>}
 
       <div ref={listTopRef} />
 

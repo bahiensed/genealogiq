@@ -50,7 +50,6 @@ export default async function ProfileGalleryPage({ params }: Props) {
             <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
             <div className="min-w-0">
               <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
-              {!isOwn && <p className="text-muted-foreground text-sm mt-1 truncate bg-transparent">{name}</p>}
             </div>
           </div>
           {(imageCount > 0 || videoCount > 0) && (
@@ -71,6 +70,7 @@ export default async function ProfileGalleryPage({ params }: Props) {
 
         <GalleryClient
           items={items}
+          name={name}
           editHref={`/profile/${id}/gallery/edit`}
           isOwn={isOwn}
           gated={isAnon}

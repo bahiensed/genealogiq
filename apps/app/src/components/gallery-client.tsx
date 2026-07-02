@@ -33,6 +33,7 @@ const formatDuration = (sec: number) => {
 
 interface Props {
   items: GalleryItemRow[]
+  name: string
   editHref?: string
   isOwn?: boolean
   upgradeHint?: ReactNode
@@ -42,7 +43,7 @@ interface Props {
   hasMore?: boolean
 }
 
-export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint, gated = false, hasMore = false }: Props) {
+export function GalleryClient({ items: rawItems, name, editHref, isOwn, upgradeHint, gated = false, hasMore = false }: Props) {
   const t = useTranslations("Gallery")
   const tc = useTranslations("Common")
   const locale = useLocale()
@@ -109,7 +110,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint, g
 
   return (
     <>
-      <section className="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
+      <section className="mb-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
         <div className="flex flex-col gap-1 min-w-0">
           <p className="text-muted-foreground italic">{t("tagline")}</p>
           {upgradeHint}
@@ -139,6 +140,8 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint, g
           )}
         </div>
       </section>
+
+      {!isEmpty && <p className="scroll-m-20 text-xl lg:text-2xl font-semibold tracking-tight mb-8">{name}</p>}
 
       <div ref={listTopRef} />
 
