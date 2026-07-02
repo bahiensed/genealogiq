@@ -460,7 +460,7 @@
     "addImage": "Adicionar imagem",
     "addLocation": "Adicionar local",
     "addSubtitle": "Adicione o local de descanso e como encontrá-lo.",
-    "addTitle": "Adicionar Localização",
+    "addTitle": "Adicionar Geolocalização",
     "address": "Endereço",
     "backToGeolocation": "Voltar à localização",
     "backToProfile": "Voltar ao perfil",
@@ -469,7 +469,7 @@
     "deleteDialogTitle": "Excluir localização?",
     "deleteLocation": "Excluir local",
     "editSubtitle": "Atualize o local, o endereço e as coordenadas.",
-    "editTitle": "Editar Localização",
+    "editTitle": "Editar Geolocalização",
     "emptyState": "Nenhum local definido ainda.",
     "gate": {
       "description": "Marque um ponto nas coordenadas GPS exatas para que os visitantes possam navegar direto até o local. Disponível nos planos Década e Século.",
@@ -492,7 +492,7 @@
     "section": "Setor / quadra",
     "sectionPlaceholder": "ex.: Jardim da Paz, Quadra 42",
     "tagline": "Um lugar para reencontrar, de qualquer lugar",
-    "title": "Localização",
+    "title": "Geolocalização",
     "toasts": {
       "deleted": "Localização excluída.",
       "fixFields": "Corrija os campos destacados.",

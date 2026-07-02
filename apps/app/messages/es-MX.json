@@ -460,7 +460,7 @@
     "addImage": "Agregar imagen",
     "addLocation": "Agregar ubicación",
     "addSubtitle": "Agrega el lugar de descanso y cómo encontrarlo.",
-    "addTitle": "Agregar Ubicación",
+    "addTitle": "Agregar Geolocalización",
     "address": "Dirección",
     "backToGeolocation": "Volver a la ubicación",
     "backToProfile": "Volver al perfil",
@@ -469,7 +469,7 @@
     "deleteDialogTitle": "¿Eliminar ubicación?",
     "deleteLocation": "Eliminar ubicación",
     "editSubtitle": "Actualiza el lugar, la dirección y las coordenadas.",
-    "editTitle": "Editar Ubicación",
+    "editTitle": "Editar Geolocalización",
     "emptyState": "Aún no se ha definido una ubicación.",
     "gate": {
       "description": "Coloca un marcador en las coordenadas GPS exactas para que los visitantes puedan navegar directo al lugar. Disponible en los planes Década y Século.",
@@ -492,7 +492,7 @@
     "section": "Sección / lote",
     "sectionPlaceholder": "ej.: Jardín de la Paz, Lote 42",
     "tagline": "Un lugar para reencontrarse, desde cualquier parte",
-    "title": "Ubicación",
+    "title": "Geolocalización",
     "toasts": {
       "deleted": "Ubicación eliminada.",
       "fixFields": "Corrige los campos resaltados.",
