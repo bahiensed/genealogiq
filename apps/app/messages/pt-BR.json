@@ -385,6 +385,27 @@
     "subtitle": "Os mais próximos do coração, sempre por perto",
     "title": "Favoritos"
   },
+  "Feedback": {
+    "dialog": {
+      "bugDescription": "Conte o que deu errado. Vamos analisar assim que possível.",
+      "bugTitle": "Reportar um bug",
+      "feedbackDescription": "Compartilhe suas sugestões ou ideias para nos ajudar a melhorar.",
+      "feedbackTitle": "Enviar feedback"
+    },
+    "fields": {
+      "message": "Mensagem",
+      "messagePlaceholder": "Descreva o problema ou compartilhe sua ideia..."
+    },
+    "links": {
+      "reportBug": "Reportar um bug",
+      "sendFeedback": "Enviar feedback"
+    },
+    "submit": "Enviar",
+    "toasts": {
+      "bugSent": "Bug reportado. Obrigado!",
+      "feedbackSent": "Feedback enviado. Obrigado!"
+    }
+  },
   "Gallery": {
     "addImage": "Adicionar imagem",
     "addMedia": "Adicionar mídia",

@@ -62,6 +62,25 @@ export function sendAccountDeletionEmail({ to }: { to: string }): Promise<void> 
   `)
 }
 
+export interface FeedbackEmail {
+  to: string
+  type: "bug" | "feedback"
+  message: string
+  contactEmail?: string
+  page?: string
+}
+
+export function sendFeedbackEmail({ to, type, message, contactEmail, page }: FeedbackEmail): Promise<void> {
+  const subject = type === "bug" ? "Genealogiq — Bug report" : "Genealogiq — Feedback"
+  return send(to, subject, `
+    <p><strong>Type:</strong> ${type === "bug" ? "Bug report" : "Feedback"}</p>
+    ${page ? `<p><strong>Page:</strong> ${page}</p>` : ""}
+    ${contactEmail ? `<p><strong>Reply to:</strong> ${contactEmail}</p>` : ""}
+    <p><strong>Message:</strong></p>
+    <p>${message.replace(/\n/g, "<br/>")}</p>
+  `)
+}
+
 export function sendWelcomeEmail({
   to,
   token,
