@@ -413,6 +413,27 @@
     "retry": "Intentar de nuevo",
     "title": "Algo salió mal"
   },
+  "Feedback": {
+    "dialog": {
+      "bugDescription": "Cuéntanos qué salió mal. Lo revisaremos lo antes posible.",
+      "bugTitle": "Reportar un error",
+      "feedbackDescription": "Comparte tus sugerencias o ideas para ayudarnos a mejorar.",
+      "feedbackTitle": "Enviar comentarios"
+    },
+    "fields": {
+      "message": "Mensaje",
+      "messagePlaceholder": "Describe el problema o comparte tu idea..."
+    },
+    "links": {
+      "reportBug": "Reportar un error",
+      "sendFeedback": "Enviar comentarios"
+    },
+    "submit": "Enviar",
+    "toasts": {
+      "bugSent": "Error reportado. ¡Gracias!",
+      "feedbackSent": "Comentarios enviados. ¡Gracias!"
+    }
+  },
   "Inventory": {
     "digital": {
       "availableForSale": "Disponible para venta",
