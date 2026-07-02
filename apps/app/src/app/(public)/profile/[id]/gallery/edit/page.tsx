@@ -41,7 +41,7 @@ export default async function GalleryEditPage({ params }: Props) {
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
-      <main className="container relative pt-24 pb-32 max-w-5xl">
+      <main className="container relative pt-24 pb-32">
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href={`/profile/${id}/gallery`} label={t("backToGallery")} />

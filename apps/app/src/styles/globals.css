@@ -53,10 +53,28 @@
   --animate-root-glow: root-glow 4s ease-in-out infinite;
 }
 
+/* Tailwind v4's bare `container` utility is just `width: 100%` — no
+   auto-centering, padding, or responsive max-width by default. This restores
+   the standard responsive breakpoint scale (sm/md/lg/xl) while keeping this
+   app's centering + horizontal padding. Capped at `xl` (1280px) — content
+   never grows past that even on 2xl+ screens. */
 @utility container {
+  width: 100%;
   margin-inline: auto;
   padding-inline: 1.5rem;
-  max-width: 1024px;
+
+  @media (width >= theme(--breakpoint-sm)) {
+    max-width: theme(--breakpoint-sm);
+  }
+  @media (width >= theme(--breakpoint-md)) {
+    max-width: theme(--breakpoint-md);
+  }
+  @media (width >= theme(--breakpoint-lg)) {
+    max-width: theme(--breakpoint-lg);
+  }
+  @media (width >= theme(--breakpoint-xl)) {
+    max-width: theme(--breakpoint-xl);
+  }
 }
 
 :root {

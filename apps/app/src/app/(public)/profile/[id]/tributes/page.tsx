@@ -44,7 +44,7 @@ export default async function TributesPage({ params }: Props) {
     <div className="min-h-screen relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
-      <main className="container relative pt-24 pb-32 max-w-6xl">
+      <main className="container relative pt-24 pb-32">
         <div className="flex items-center justify-between gap-3 mb-2 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
