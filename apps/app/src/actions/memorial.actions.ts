@@ -130,8 +130,9 @@ export async function updateMemorial(profileId: string, data: unknown): Promise<
     await deleteBlobs([profile.avatarUrl])
   }
 
-  // National ID / contact / address are no longer part of the form — leave those
-  // columns untouched so any existing data is preserved.
+  // Memorials have no phone/contact/address of their own, and National ID is no
+  // longer part of the form — leave those columns untouched so any existing data
+  // is preserved.
   await prisma.appUser.update({
     where: { id: profileId },
     data: {

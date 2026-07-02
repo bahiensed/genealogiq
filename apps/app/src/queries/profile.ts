@@ -49,6 +49,7 @@ const EDIT_SELECT = {
   ...PUBLIC_SELECT,
   // Restricted PII (M1) — owner/guardian only
   nationalId: true,
+  email: true,
   phone: true,
   phoneCountryCode: true,
   notes: true,

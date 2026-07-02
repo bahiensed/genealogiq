@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
     appUser: { findUnique: vi.fn(), update: vi.fn() },
+    address: { create: vi.fn(), update: vi.fn(), delete: vi.fn() },
   },
 }))
 
@@ -19,7 +20,8 @@ import { verifySession } from "@/lib/dal"
 import { deleteBlobs } from "@/lib/blob"
 
 // Minimal payload that passes getProfileEditSchema for a living profile: name,
-// gender and birth date/city/state/country are all required now.
+// gender and birth date/city/state/country are all required now; address object
+// must be present (its sub-fields are all nullish).
 const validInput = (overrides: Record<string, unknown> = {}) => ({
   firstName: "Ada",
   lastName: "Lovelace",
@@ -28,6 +30,7 @@ const validInput = (overrides: Record<string, unknown> = {}) => ({
   birthPlace: "London",
   birthState: "England",
   birthCountry: "GB",
+  address: {},
   ...overrides,
 })
 
@@ -35,7 +38,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   // Self-scoped: the only identity that matters is the live session user.
   vi.mocked(verifySession).mockResolvedValue({ user: { id: "self" } } as never)
-  prismaMock.appUser.findUnique.mockResolvedValue({ avatarUrl: null })
+  prismaMock.appUser.findUnique.mockResolvedValue({ avatarUrl: null, addressId: null })
   prismaMock.appUser.update.mockResolvedValue({})
 })
 
@@ -113,17 +116,29 @@ describe("updateProfile — self-scoping (living users)", () => {
     expect(data).not.toHaveProperty("deathCause")
   })
 
-  it("leaves the removed National ID / contact / address columns untouched on save", async () => {
-    // These fields are no longer in the form/schema; existing data must be preserved,
-    // so the write must not mention them at all.
-    const res = await updateProfile(validInput({ nationalId: "999", phone: "555", address: { city: "x" } }))
+  it("leaves the removed National ID column untouched on save", async () => {
+    // nationalId is no longer in the form/schema; existing data must be preserved,
+    // so the write must not mention it at all.
+    const res = await updateProfile(validInput({ nationalId: "999" }))
 
     expect(res.ok).toBe(true)
     const data = prismaMock.appUser.update.mock.calls[0][0].data
     expect(data).not.toHaveProperty("nationalId")
-    expect(data).not.toHaveProperty("phone")
-    expect(data).not.toHaveProperty("phoneCountryCode")
-    expect(data).not.toHaveProperty("addressId")
+  })
+
+  it("persists phone and address for a living profile", async () => {
+    prismaMock.address.create.mockResolvedValue({ id: "addr-1" })
+
+    const res = await updateProfile(
+      validInput({ phone: "555", phoneCountryCode: "1", address: { city: "Springfield" } }),
+    )
+
+    expect(res.ok).toBe(true)
+    expect(prismaMock.address.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ city: "Springfield" }) }),
+    )
+    const data = prismaMock.appUser.update.mock.calls[0][0].data
+    expect(data).toMatchObject({ phone: "555", phoneCountryCode: "1", addressId: "addr-1" })
   })
 })
 

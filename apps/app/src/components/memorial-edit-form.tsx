@@ -2,11 +2,11 @@
 
 import { useMemo, useRef, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { useForm, useWatch, Controller, type Control } from "react-hook-form"
+import { useForm, useWatch, Controller, type Control, type FieldErrors } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import {
-  User, Calendar, Flower2, Globe, FileText,
+  User, Calendar, Flower2, Phone, MapPin, Globe, FileText,
   CalendarIcon, Image as ImageIcon, Trash2, Save, RotateCcw,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -32,7 +32,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { AddressSection } from "@/components/address/address-section"
+import { ChangeEmailDialog } from "@/components/auth/change-email-dialog"
 import { getProfileEditSchema, type ProfileEditValues } from "@/schemas/profile.schema"
+import { addressDefaultValues } from "@/schemas/address.schema"
+import { maskPhoneByCountry, unmaskDigits } from "@/lib/masks"
 import { updateProfile } from "@/actions/profile.actions"
 import { updateMemorial, deleteMemorial } from "@/actions/memorial.actions"
 import { getAvatarColor } from "@/lib/avatar-color"
@@ -177,6 +181,8 @@ function buildDefaults(initial: EditProfileRow): ProfileEditValues {
     deathState:   initial.deathState   ?? "",
     deathCountry: initial.deathCountry ?? "",
     deathCause:   initial.deathCause   ?? "",
+    phoneCountryCode: initial.phoneCountryCode ?? "55",
+    phone:            initial.phone            ?? "",
     website:      initial.website      ?? "",
     instagram:    initial.instagram    ?? "",
     linkedin:     initial.linkedin     ?? "",
@@ -186,7 +192,29 @@ function buildDefaults(initial: EditProfileRow): ProfileEditValues {
     youtube:      initial.youtube      ?? "",
     otherSocial:  initial.otherSocial  ?? "",
     notes:        initial.notes        ?? "",
+    address: {
+      zip:          initial.address?.zip          ?? addressDefaultValues.zip,
+      street:       initial.address?.street       ?? addressDefaultValues.street,
+      number:       initial.address?.number       ?? addressDefaultValues.number,
+      complement:   initial.address?.complement   ?? addressDefaultValues.complement,
+      neighborhood: initial.address?.neighborhood ?? addressDefaultValues.neighborhood,
+      city:         initial.address?.city         ?? addressDefaultValues.city,
+      state:        initial.address?.state        ?? addressDefaultValues.state,
+      country:      initial.address?.country      ?? addressDefaultValues.country,
+    },
   }
+}
+
+// ─── Accordion section membership (for opening sections that contain errors) ──
+
+const SECTION_FIELDS: Record<string, ReadonlyArray<keyof ProfileEditValues>> = {
+  identity: ["avatarUrl", "firstName", "lastName", "maidenName", "nickname", "gender"],
+  birth:    ["birthDate", "birthCountry", "birthPlace", "birthState"],
+  death:    ["deathDate", "deathCountry", "deathPlace", "deathState", "deathCause"],
+  contact:  ["phoneCountryCode", "phone"],
+  address:  ["address"],
+  social:   ["website", "instagram", "linkedin", "fb", "x", "tiktok", "youtube", "otherSocial"],
+  notes:    ["notes"],
 }
 
 // ─── Main form ────────────────────────────────────────────────────────────────
@@ -206,6 +234,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   const router        = useRouter()
   const [isPending, startTransition] = useTransition()
   const [uploading, setUploading]    = useState(false)
+  const [openSections, setOpenSections] = useState<string[]>(["identity"])
   const fileInputRef  = useRef<HTMLInputElement>(null)
 
   const defaults = buildDefaults(initial)
@@ -222,6 +251,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   const lastName   = watch("lastName")
   const deathDate  = watch("deathDate")
   const birthDate  = watch("birthDate")
+  const phoneCountryCode = watch("phoneCountryCode")
 
   const initials    = [firstName?.[0], lastName?.[0]].filter(Boolean).join("").toUpperCase() || "?"
   const avatarColor = getAvatarColor(initial.id)
@@ -266,6 +296,16 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
     })
   }
 
+  // Opens (without collapsing) every accordion section that has a field error.
+  const onInvalid = (formErrors: FieldErrors<ProfileEditValues>) => {
+    const errorKeys = Object.keys(formErrors) as (keyof ProfileEditValues)[]
+    const sectionsWithErrors = Object.entries(SECTION_FIELDS)
+      .filter(([, fields]) => fields.some((f) => errorKeys.includes(f)))
+      .map(([section]) => section)
+    setOpenSections((prev) => Array.from(new Set([...prev, ...sectionsWithErrors])))
+    toast.error(t("toasts.fixFields"))
+  }
+
   const handleReset  = () => { reset(defaults); toast(t("toasts.changesReset")) }
 
   const handleDelete = () => {
@@ -280,8 +320,8 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <form onSubmit={handleSubmit(onSubmit, () => toast.error(t("toasts.fixFields")))} className="space-y-3 animate-fade-in" style={{ animationDelay: "80ms" }}>
-      <Accordion type="multiple" defaultValue={["identity"]} className="space-y-3">
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-3 animate-fade-in" style={{ animationDelay: "80ms" }}>
+      <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="space-y-3">
 
         {/* ── Identity ─────────────────────────────────────────── */}
         <AccordionItem value="identity" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
@@ -458,6 +498,67 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                   <Label htmlFor="death-cause">{t("fields.deathCause")}</Label>
                   <Input id="death-cause" maxLength={200} placeholder={t("placeholders.deathCause")} disabled={!deathDate} {...register("deathCause")} />
                 </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* ── Contact (living profiles only) ────────────────────── */}
+        {!isMemorialized && (
+          <AccordionItem value="contact" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
+            <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
+              <SectionTrigger icon={Phone} label={t("sections.contact")} />
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="px-6 pb-6 pt-4">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+                  <div className="space-y-2 w-full sm:w-20 shrink-0">
+                    <Label htmlFor="phone-cc">{t("fields.countryCode")}</Label>
+                    <Input id="phone-cc" maxLength={5} placeholder="+55" {...register("phoneCountryCode")} />
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    <Label htmlFor="phone">{t("fields.phone")}</Label>
+                    <Controller
+                      control={control}
+                      name="phone"
+                      render={({ field }) => (
+                        <Input
+                          id="phone"
+                          inputMode="tel"
+                          maxLength={20}
+                          placeholder="(11) 99999-9999"
+                          value={maskPhoneByCountry(field.value ?? "", unmaskDigits(phoneCountryCode ?? ""))}
+                          onChange={(e) => field.onChange(unmaskDigits(e.target.value))}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="space-y-2 flex-1">
+                    <Label htmlFor="email">{t("fields.email")}</Label>
+                    <Input id="email" value={initial.email ?? ""} disabled />
+                  </div>
+                  <ChangeEmailDialog />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* ── Address (living profiles only) ────────────────────── */}
+        {!isMemorialized && (
+          <AccordionItem value="address" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
+            <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
+              <SectionTrigger icon={MapPin} label={t("sections.address")} />
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="px-6 pb-6 pt-4">
+                <AddressSection
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  control={control as any}
+                  setValue={setValue}
+                  errors={errors}
+                  prefix="address"
+                />
               </div>
             </AccordionContent>
           </AccordionItem>
