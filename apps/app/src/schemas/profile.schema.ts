@@ -37,6 +37,11 @@ export function getProfileEditSchema(t: Translator, isMemorialized = false) {
       deathCountry: isMemorialized ? requiredText() : optionalText(),
       deathCause:   z.string().trim().max(200).optional(),
 
+      // Contact + Address (all optional; the memorial form doesn't render these)
+      phoneCountryCode: z.string().trim().max(5).optional(),
+      phone:            z.string().trim().max(30).optional(),
+      address:          addressSchema,
+
       // Social (all optional)
       website:     z.string().trim().max(250).optional(),
       instagram:   z.string().trim().max(250).optional(),

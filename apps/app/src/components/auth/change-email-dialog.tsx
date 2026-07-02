@@ -19,9 +19,9 @@ export function ChangeEmailDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="text-sm text-foreground underline underline-offset-4 hover:no-underline cursor-pointer">
+        <Button type="button" variant="outline" size="sm">
           {t('changeEmailTrigger')}
-        </button>
+        </Button>
       </DialogTrigger>
 
       <DialogContent>
