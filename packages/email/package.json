@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "resend": "^6.16.0"
+    "resend": "^6.17.1"
   },
   "devDependencies": {
     "typescript": "^5",
