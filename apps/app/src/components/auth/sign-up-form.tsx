@@ -10,11 +10,13 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PasswordRequirements } from '@/components/auth/password-requirements'
 
 export function SignUpForm() {
   const t = useTranslations('Auth')
   const [state, dispatch, isPending] = useActionState(signUp, undefined)
   const [showPassword, setShowPassword] = useState(false)
+  const [password, setPassword] = useState('')
   const callbackUrl = useSearchParams().get('callbackUrl')
 
   return (
@@ -84,6 +86,7 @@ export function SignUpForm() {
               autoComplete="new-password"
               aria-invalid={!!state?.fieldErrors?.password}
               className="pr-10"
+              onChange={(e) => setPassword(e.target.value)}
             />
             <button
               type="button"
@@ -94,6 +97,7 @@ export function SignUpForm() {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
+          <PasswordRequirements password={password} />
           {state?.fieldErrors?.password?.[0] && (
             <p className="text-xs text-destructive">{state.fieldErrors.password[0]}</p>
           )}
