@@ -50,7 +50,9 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 30/06–01/07/2026 — APP i18n polish + memorial QR guardian-only + header frost fix + "Memorial" badge copy + **public memorial profiles** (foundation 30/06 + refinamentos do muro de cadastro 01/07). PRs #103–#106 merged to main; **#107 (public memorial preview) aberto — 13 commits, tudo pushed**.
+Last session: 08/07/2026 — Sign-up: caixinha de regras de senha ao vivo. `password-requirements.tsx` (novo, client component) espelha exatamente os 5 regex do `strongPassword` compartilhado (`packages/auth/src/schemas.ts`) e acende cada regra em verde conforme o usuário digita (era só erro pós-submit). `sign-up-form.tsx` ganhou state local `password` via `onChange` (input continua uncontrolled/name-based pro `useActionState`+FormData — não recebeu prop `value`). Chaves novas (`passwordRequirementsTitle` + 5 `passwordRule*`) nos 3 locales, ordem alfabética. Escopo intencional: só sign-up (`ResetPasswordForm`/`ChangePasswordDialog` usam o mesmo schema e podem reusar o componente depois, mas não foram tocados). Verificado ao vivo no browser (`/sign-up`, pt-BR) — todas as 5 regras acendem independentemente. `tsc` + `check-i18n-parity.mjs` ✅. PR #119 (branch `feat/signup-password-requirements-checklist`) aberto.
+
+Previous session: 30/06–01/07/2026 — APP i18n polish + memorial QR guardian-only + header frost fix + "Memorial" badge copy + **public memorial profiles** (foundation 30/06 + refinamentos do muro de cadastro 01/07). PRs #103–#106 merged to main; **#107 (public memorial preview) aberto — 13 commits, tudo pushed**.
 
 **i18n setup (referência):**
 - Pacote compartilhado `@genealogiq/i18n` (`packages/i18n/src/config.ts`). 3 locales: `en-US`, `pt-BR`, `es-MX`. Default `en-US`. Mensagens em `apps/app/messages/<locale>.json`, **chaves em ordem alfabética por namespace**.
