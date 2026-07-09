@@ -585,16 +585,22 @@
       "date": "Fecha",
       "deathCause": "Causa del fallecimiento",
       "email": "Correo electrónico",
+      "facebook": "Facebook",
       "firstName": "Nombre",
       "gender": "Género",
+      "instagram": "Instagram",
       "lastName": "Apellido",
+      "linkedin": "LinkedIn",
       "maidenName": "Apellido de soltera",
       "nationalId": "Identificación oficial",
       "nickname": "Apodo",
       "otherSocial": "Otro",
       "phone": "Teléfono",
       "state": "Estado / Provincia",
-      "website": "Sitio web"
+      "tiktok": "TikTok",
+      "website": "Sitio web",
+      "x": "X (Twitter)",
+      "youtube": "YouTube"
     },
     "gender": {
       "female": "Femenino",
