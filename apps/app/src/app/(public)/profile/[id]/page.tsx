@@ -57,6 +57,9 @@ export default async function ProfileByIdPage({ params }: Props) {
   const isGuardian = isMemorialized && sessionUserId
     ? user.guardedBy.some((g) => g.guardianId === sessionUserId)
     : false
+  const guardians = isMemorialized
+    ? user.guardedBy.map((g) => ({ id: g.guardianId, firstName: g.guardian.firstName }))
+    : []
   const name = `${user.firstName} ${user.lastName}`
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
 
@@ -114,6 +117,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     mediaTotal: galleryCount,
     isOwn,
     isGuardian,
+    guardians,
     guardedCount: memorialCount,
     isFavoritedByMe,
     isAuthenticated: !!sessionUserId,

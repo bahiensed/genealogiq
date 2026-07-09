@@ -39,7 +39,7 @@ const PUBLIC_SELECT = {
   physicalQrLicense: { select: { id: true } },
   guardedBy: {
     where:  { status: "ACCEPTED" as const },
-    select: { guardianId: true, status: true },
+    select: { guardianId: true, status: true, guardian: { select: { firstName: true } } },
   },
 } as const
 

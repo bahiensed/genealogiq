@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
-import { Cake, Feather, Heart, Images, Flower2, MapPin, SquarePen, BrickWall } from "lucide-react"
+import { Cake, Feather, Heart, Images, Flower2, MapPin, SquarePen, BrickWall, User } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -28,6 +28,7 @@ export interface ProfileData {
   mediaTotal: number
   isOwn: boolean
   isGuardian: boolean
+  guardians?: { id: string; firstName: string }[]
   guardedCount: number
   isFavoritedByMe?: boolean
   isAuthenticated?: boolean
@@ -46,6 +47,8 @@ export function ProfileBanner({ profile }: Props) {
   const isMemorial = profile.type === "memorialized"
   const isAuthenticated = profile.isAuthenticated ?? true
   const canEdit = profile.isOwn || profile.isGuardian
+  const geo = profile.geo && (profile.geo.lat !== 0 || profile.geo.lon !== 0) ? profile.geo : null
+  const guardians = isAuthenticated && profile.guardians?.length ? profile.guardians : null
   const [favorited, setFavorited] = useState(profile.isFavoritedByMe ?? false)
   const [favCount, setFavCount] = useState(profile.favoritedBy)
   const [isPending, startTransition] = useTransition()
@@ -218,17 +221,39 @@ export function ProfileBanner({ profile }: Props) {
                       </span>
                     </div>
                   )}
-                  {isMemorial && profile.geo && (profile.geo.lat !== 0 || profile.geo.lon !== 0) && (
-                    <div className="flex items-center gap-2 text-muted-foreground justify-center lg:justify-start min-w-0">
-                      <MapPin className="h-4 w-4 text-primary shrink-0" />
-                      <a
-                        href={`https://www.google.com/maps?q=${profile.geo.lat},${profile.geo.lon}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-foreground font-medium hover:underline truncate min-w-0"
-                      >
-                        {profile.geo.lat.toFixed(4)}, {profile.geo.lon.toFixed(4)}
-                      </a>
+                  {isMemorial && (geo || guardians) && (
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 justify-center lg:justify-start min-w-0">
+                      {geo && (
+                        <div className="flex items-center gap-2 text-muted-foreground min-w-0">
+                          <MapPin className="h-4 w-4 text-primary shrink-0" />
+                          <span className="truncate min-w-0">
+                            {t("coordinatesLabel")}{" "}
+                            <Link
+                              href={`/profile/${profile.id}/geolocation`}
+                              className="text-foreground font-medium hover:underline"
+                            >
+                              {geo.lat.toFixed(4)}, {geo.lon.toFixed(4)}
+                            </Link>
+                          </span>
+                        </div>
+                      )}
+                      {guardians && (
+                        <div className="flex items-center gap-2 text-muted-foreground min-w-0">
+                          <User className="h-4 w-4 text-primary shrink-0" />
+                          <span className="truncate min-w-0">
+                            {t("guardianLabel", { count: guardians.length })}{" "}
+                            {guardians.slice(0, 3).map((guardian, index) => (
+                              <span key={guardian.id}>
+                                {index > 0 && ", "}
+                                <Link href={`/profile/${guardian.id}`} className="text-foreground font-medium hover:underline">
+                                  {guardian.firstName}
+                                </Link>
+                              </span>
+                            ))}
+                            {guardians.length > 3 && ` +${guardians.length - 3}`}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
