@@ -495,8 +495,8 @@
     "placeNamePlaceholder": "ex.: Cemitério São Francisco",
     "removePhoto": "Remover foto",
     "reset": "Redefinir",
-    "section": "Setor / quadra",
-    "sectionPlaceholder": "ex.: Jardim da Paz, Quadra 42",
+    "section": "Endereçamento",
+    "sectionPlaceholder": "Setor, quadra, alameda, via, jazigo, etc.",
     "tagline": "Um lugar para reencontrar, de qualquer lugar",
     "title": "Geolocalização",
     "toasts": {

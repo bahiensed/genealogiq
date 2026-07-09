@@ -495,8 +495,8 @@
     "placeNamePlaceholder": "ej.: Panteón San Francisco",
     "removePhoto": "Quitar foto",
     "reset": "Restablecer",
-    "section": "Sección / lote",
-    "sectionPlaceholder": "ej.: Jardín de la Paz, Lote 42",
+    "section": "Detalles de ubicación",
+    "sectionPlaceholder": "Sección, manzana, andador, vía, gaveta, etc.",
     "tagline": "Un lugar para reencontrarse, desde cualquier parte",
     "title": "Geolocalización",
     "toasts": {

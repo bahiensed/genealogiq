@@ -495,8 +495,8 @@
     "placeNamePlaceholder": "e.g. São Francisco Cemetery",
     "removePhoto": "Remove photo",
     "reset": "Reset",
-    "section": "Section / plot",
-    "sectionPlaceholder": "e.g. Garden of Peace, Plot 42",
+    "section": "Location details",
+    "sectionPlaceholder": "Section, block, alley, path, vault, etc.",
     "tagline": "A place to meet again, from anywhere",
     "title": "Geolocation",
     "toasts": {

@@ -352,7 +352,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
 
       {/* Section / plot */}
       <div className="space-y-2">
-        <Label htmlFor="geo-section" className="text-base">{t("section")} <span className="text-muted-foreground text-xs">{t("optional")}</span></Label>
+        <Label htmlFor="geo-section" className="text-base">{t("section")}</Label>
         <Input id="geo-section" maxLength={200} placeholder={t("sectionPlaceholder")} {...register("section")} />
       </div>
 
