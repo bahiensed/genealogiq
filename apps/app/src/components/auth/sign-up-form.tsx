@@ -1,23 +1,57 @@
 'use client'
 
-import { useState, useActionState } from 'react'
+import { useMemo, useState, useEffect, useActionState, startTransition } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { signUp } from '@/actions/auth.actions'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PasswordRequirements } from '@/components/auth/password-requirements'
+import { getSignUpSchema, type SignUpFormValues } from '@/schemas/auth.schema'
 
 export function SignUpForm() {
   const t = useTranslations('Auth')
+  const tErr = useTranslations('Errors')
   const [state, dispatch, isPending] = useActionState(signUp, undefined)
   const [showPassword, setShowPassword] = useState(false)
   const [password, setPassword] = useState('')
   const callbackUrl = useSearchParams().get('callbackUrl')
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpFormValues>({
+    resolver: useMemo(() => zodResolver(getSignUpSchema(tErr, t)), [tErr, t]),
+  })
+
+  // The server can additionally reject an email that passed client-side format
+  // validation (already in use). That server error should stick around only
+  // until the user edits the field again — after that it's stale.
+  const [emailServerErrorDismissed, setEmailServerErrorDismissed] = useState(false)
+  useEffect(() => setEmailServerErrorDismissed(false), [state])
+
+  const { onChange: emailOnChange, ...emailField } = register('email')
+  const { onChange: passwordOnChange, ...passwordField } = register('password')
+
+  const onValid = (data: SignUpFormValues) => {
+    const formData = new FormData()
+    formData.set('firstName', data.firstName)
+    formData.set('lastName', data.lastName)
+    formData.set('email', data.email)
+    formData.set('password', data.password)
+    if (callbackUrl) formData.set('callbackUrl', callbackUrl)
+    startTransition(() => dispatch(formData))
+  }
+
+  const emailError = errors.email?.message
+    ?? (!emailServerErrorDismissed ? state?.fieldErrors?.email?.[0] : undefined)
 
   return (
     <div className="animate-fade-in w-full max-w-md">
@@ -26,8 +60,7 @@ export function SignUpForm() {
         <Image src="/tree-light.png" alt="Genealogiq" width={256} height={256} className="hidden object-contain dark:block" style={{ height: "auto" }} priority />
       </div>
 
-      <form action={dispatch} className="glass-card rounded-2xl p-8 space-y-4">
-        {callbackUrl && <input type="hidden" name="callbackUrl" value={callbackUrl} />}
+      <form onSubmit={handleSubmit(onValid)} className="glass-card rounded-2xl p-8 space-y-4">
         {state && !state.ok && (
           <p className="text-sm text-destructive">{state.message}</p>
         )}
@@ -37,26 +70,26 @@ export function SignUpForm() {
             <Label htmlFor="firstName">{t('firstName')}</Label>
             <Input
               id="firstName"
-              name="firstName"
               type="text"
               autoComplete="given-name"
-              aria-invalid={!!state?.fieldErrors?.firstName}
+              aria-invalid={!!errors.firstName}
+              {...register('firstName')}
             />
-            {state?.fieldErrors?.firstName?.[0] && (
-              <p className="text-xs text-destructive">{state.fieldErrors.firstName[0]}</p>
+            {errors.firstName?.message && (
+              <p className="text-xs text-destructive">{errors.firstName.message}</p>
             )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="lastName">{t('lastName')}</Label>
             <Input
               id="lastName"
-              name="lastName"
               type="text"
               autoComplete="family-name"
-              aria-invalid={!!state?.fieldErrors?.lastName}
+              aria-invalid={!!errors.lastName}
+              {...register('lastName')}
             />
-            {state?.fieldErrors?.lastName?.[0] && (
-              <p className="text-xs text-destructive">{state.fieldErrors.lastName[0]}</p>
+            {errors.lastName?.message && (
+              <p className="text-xs text-destructive">{errors.lastName.message}</p>
             )}
           </div>
         </div>
@@ -65,14 +98,15 @@ export function SignUpForm() {
           <Label htmlFor="email">{t('email')}</Label>
           <Input
             id="email"
-            name="email"
             type="email"
             placeholder={t('emailPlaceholder')}
             autoComplete="email"
-            aria-invalid={!!state?.fieldErrors?.email}
+            aria-invalid={!!emailError}
+            {...emailField}
+            onChange={(e) => { emailOnChange(e); setEmailServerErrorDismissed(true) }}
           />
-          {state?.fieldErrors?.email?.[0] && (
-            <p className="text-xs text-destructive">{state.fieldErrors.email[0]}</p>
+          {emailError && (
+            <p className="text-xs text-destructive">{emailError}</p>
           )}
         </div>
 
@@ -81,12 +115,13 @@ export function SignUpForm() {
           <div className="relative">
             <Input
               id="password"
-              name="password"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
-              aria-invalid={!!state?.fieldErrors?.password}
+              aria-invalid={!!errors.password}
               className="pr-10"
-              onChange={(e) => setPassword(e.target.value)}
+              value={password}
+              {...passwordField}
+              onChange={(e) => { passwordOnChange(e); setPassword(e.target.value) }}
             />
             <button
               type="button"
@@ -98,14 +133,20 @@ export function SignUpForm() {
             </button>
           </div>
           <PasswordRequirements password={password} />
-          {state?.fieldErrors?.password?.[0] && (
-            <p className="text-xs text-destructive">{state.fieldErrors.password[0]}</p>
+          {errors.password?.message && (
+            <p className="text-xs text-destructive">{errors.password.message}</p>
           )}
         </div>
 
         <Button type="submit" className="w-full" disabled={isPending}>
           {isPending ? t('creatingAccount') : t('createAccount')}
         </Button>
+
+        <p className="text-center text-sm">
+          <Link href="/activate" className="text-primary hover:underline font-medium">
+            {t('activateGenCode')}
+          </Link>
+        </p>
 
         <p className="text-center text-sm text-muted-foreground">
           {t('alreadyHaveAccount')}{" "}
@@ -114,12 +155,6 @@ export function SignUpForm() {
             className="text-primary hover:underline font-medium"
           >
             {t('signIn')}
-          </Link>
-        </p>
-
-        <p className="text-center text-xs text-muted-foreground">
-          <Link href="/activate" className="hover:text-foreground transition-colors">
-            {t('activateGenCode')}
           </Link>
         </p>
       </form>

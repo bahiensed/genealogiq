@@ -7,17 +7,19 @@ import { getTranslations } from "next-intl/server"
 import { signIn, signOut } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import {
-  SignUpSchema,
   ResetPasswordSchema,
   ChangePasswordSchema,
   ChangeEmailSchema,
   DeleteAccountSchema,
 } from "@/lib/auth"
+import { getSignUpSchema } from "@/schemas/auth.schema"
+import { identityTranslator } from "@/schemas/i18n"
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendEmailChangeEmail,
   sendAccountDeletionEmail,
+  sendAccountExistsEmail,
 } from "@/lib/email"
 import { verifySession } from "@/lib/dal"
 import { safeCallback } from "@/lib/safe-callback"
@@ -74,7 +76,7 @@ export async function signUp(
     password: formData.get("password"),
   }
 
-  const validated = SignUpSchema.safeParse(data)
+  const validated = getSignUpSchema(identityTranslator, identityTranslator).safeParse(data)
   if (!validated.success) {
     return failFields(t("common.invalidData"), flattenError(validated.error).fieldErrors)
   }
@@ -83,12 +85,20 @@ export async function signUp(
   const limit = await checkRateLimit({ key: `signup:ip:${ip}`, maxAttempts: 5, windowSeconds: 3600 })
   if (!limit.allowed) return fail(t("auth.tooManySignUpAttempts", { minutes: Math.ceil(limit.retryAfter / 60) }))
 
+  // Carry the post-verification destination (e.g. /qr/<code>) into the email link
+  // so the buyer returns to the activation flow after confirming their email.
+  const callbackUrl = safeCallback(formData.get("callbackUrl") as string | null)
+
   const existing = await prisma.appUser.findFirst({
     where: { email: validated.data.email },
-    select: { id: true },
+    select: { id: true, firstName: true },
   })
   if (existing) {
-    return failFields(t("common.invalidData"), { email: [t("auth.emailInUse")] })
+    // Redirect identically to the success path instead of revealing that the
+    // email is taken — an "email already in use" response is a user-enumeration
+    // oracle. The actual account owner is notified by email instead.
+    await sendAccountExistsEmail(validated.data.email, existing.firstName ?? undefined)
+    redirect("/verify-email")
   }
 
   const hashedPassword = await bcrypt.hash(validated.data.password, 12)
@@ -116,9 +126,6 @@ export async function signUp(
     },
   })
 
-  // Carry the post-verification destination (e.g. /qr/<code>) into the email link
-  // so the buyer returns to the activation flow after confirming their email.
-  const callbackUrl = safeCallback(formData.get("callbackUrl") as string | null)
   await sendVerificationEmail(validated.data.email, token, validated.data.firstName, callbackUrl ?? undefined)
 
   redirect("/verify-email")

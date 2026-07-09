@@ -174,6 +174,28 @@ export function sendAppConsumerVerificationEmail({
   }))
 }
 
+// Notice sent instead of a verification link when someone attempts to sign up
+// with an email that already has an account. The sign-up action redirects to
+// /verify-email either way (new account or existing one) so the response can't
+// be used to enumerate registered emails — only the actual account owner finds
+// out, via this email.
+export function sendAppAccountExistsEmail({
+  to,
+  baseUrl,
+  name,
+}: { to: string; baseUrl: string; name?: string }): Promise<void> {
+  const greeting = name ? `Olá ${name},` : "Olá,"
+  return send(to, "Genealogiq — Você já tem uma conta", `
+    <p>${greeting}</p>
+    <p>Alguém tentou criar uma nova conta na Genealogiq usando este endereço de e-mail, mas você já possui uma conta com a gente.</p>
+    <p>Se foi você, é só entrar normalmente:</p>
+    <p><a href="${baseUrl}/sign-in">Entrar na minha conta</a></p>
+    <p>Esqueceu sua senha? <a href="${baseUrl}/forgot-password">Redefina aqui</a>.</p>
+    <p>Se não foi você, pode ignorar este e-mail com segurança.</p>
+    <p>Equipe Genealogiq</p>
+  `)
+}
+
 // Welcome email for a Sequoia (SEQ) tenant staff member — distinct copy/tone from
 // the generic staff welcome. Sent when an admin creates the staff account; the
 // link sets their password.
