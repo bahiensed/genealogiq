@@ -4,7 +4,7 @@ import { useState, useActionState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { FieldLabel } from '@/components/ui/field'
 import {
   Dialog,
   DialogContent,
@@ -52,7 +52,7 @@ export function ChangePasswordDialog() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cp-currentPassword">{t('currentPasswordLabel')}</Label>
+            <FieldLabel htmlFor="cp-currentPassword" required>{t('currentPasswordLabel')}</FieldLabel>
             <InputGroup aria-invalid={!!state?.fieldErrors?.currentPassword}>
               <InputGroupInput
                 id="cp-currentPassword"
@@ -76,7 +76,7 @@ export function ChangePasswordDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cp-newPassword">{t('newPasswordLabel')}</Label>
+            <FieldLabel htmlFor="cp-newPassword" required>{t('newPasswordLabel')}</FieldLabel>
             <InputGroup aria-invalid={!!state?.fieldErrors?.newPassword}>
               <InputGroupInput
                 id="cp-newPassword"

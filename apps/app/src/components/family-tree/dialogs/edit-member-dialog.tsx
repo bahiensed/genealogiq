@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { FieldLabel } from "@/components/ui/field"
 import {
   Select,
   SelectContent,
@@ -76,28 +76,28 @@ export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: P
         <div className="space-y-3 py-2">
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1.5">
-              <Label htmlFor="e-first">{t("fields.firstName")}</Label>
+              <FieldLabel htmlFor="e-first" required>{t("fields.firstName")}</FieldLabel>
               <Input id="e-first" value={firstName} onChange={(e) => setFirstName(e.target.value)} maxLength={64} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="e-last">{t("fields.lastName")}</Label>
+              <FieldLabel htmlFor="e-last" required>{t("fields.lastName")}</FieldLabel>
               <Input id="e-last" value={lastName} onChange={(e) => setLastName(e.target.value)} maxLength={64} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1.5">
-              <Label htmlFor="e-maiden">{t("fields.maidenName")}</Label>
+              <FieldLabel htmlFor="e-maiden">{t("fields.maidenName")}</FieldLabel>
               <Input id="e-maiden" value={maidenName} onChange={(e) => setMaidenName(e.target.value)} maxLength={64} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="e-nick">{t("fields.nickname")}</Label>
+              <FieldLabel htmlFor="e-nick">{t("fields.nickname")}</FieldLabel>
               <Input id="e-nick" value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={40} />
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label>{t("fields.gender")}</Label>
+            <FieldLabel>{t("fields.gender")}</FieldLabel>
             <Select value={gender} onValueChange={(v) => setGender(v as "MALE" | "FEMALE" | "OTHER")}>
-              <SelectTrigger><SelectValue placeholder={t("fields.genderOptional")} /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("fields.genderSelect")} /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="FEMALE">{t("gender.female")}</SelectItem>
                 <SelectItem value="MALE">{t("gender.male")}</SelectItem>
@@ -107,11 +107,11 @@ export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: P
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1.5">
-              <Label htmlFor="e-birth">{t("fields.birthDate")}</Label>
+              <FieldLabel htmlFor="e-birth">{t("fields.birthDate")}</FieldLabel>
               <Input id="e-birth" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="e-death">{t("fields.deathDate")}</Label>
+              <FieldLabel htmlFor="e-death">{t("fields.deathDate")}</FieldLabel>
               <Input id="e-death" type="date" value={deathDate} onChange={(e) => setDeathDate(e.target.value)} />
             </div>
           </div>

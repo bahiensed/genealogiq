@@ -9,7 +9,7 @@ import { upload } from "@vercel/blob/client"
 import { compressImage } from "@/lib/image-compress"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { FieldLabel } from "@/components/ui/field"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -45,15 +45,15 @@ const empty: FormState = {
   deathDate: undefined, deathPlace: "", deathCountry: "",
 }
 
-const DateField = ({ id, label, value, onChange, disabled, disabledDays, clearLabel, pickLabel }: {
+const DateField = ({ id, label, value, onChange, disabled, disabledDays, clearLabel, pickLabel, required }: {
   id: string; label: string; value: Date | undefined
   onChange: (d: Date | undefined) => void; disabled?: boolean
   disabledDays?: (d: Date) => boolean
-  clearLabel: string; pickLabel: string
+  clearLabel: string; pickLabel: string; required?: boolean
 }) => (
   <div className="space-y-2">
     <div className="flex items-center justify-between h-5">
-      <Label htmlFor={id}>{label}</Label>
+      <FieldLabel htmlFor={id} required={required}>{label}</FieldLabel>
       {value && !disabled && (
         <button type="button" onClick={() => onChange(undefined)} className="text-xs text-muted-foreground hover:text-foreground">
           {clearLabel}
@@ -187,18 +187,18 @@ export function MemorialCreateForm() {
       {/* Name */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="first-name">{t("fields.firstName")}</Label>
+          <FieldLabel htmlFor="first-name" required>{t("fields.firstName")}</FieldLabel>
           <Input id="first-name" value={form.firstName} onChange={(e) => update("firstName", e.target.value)} placeholder={t("placeholders.firstName")} maxLength={100} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="last-name">{t("fields.lastName")}</Label>
+          <FieldLabel htmlFor="last-name" required>{t("fields.lastName")}</FieldLabel>
           <Input id="last-name" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} placeholder={t("placeholders.lastName")} maxLength={100} />
         </div>
       </div>
 
       {/* Gender */}
       <div className="space-y-2">
-        <Label htmlFor="gender">{t("fields.gender")}</Label>
+        <FieldLabel htmlFor="gender">{t("fields.gender")}</FieldLabel>
         <Select value={form.gender} onValueChange={(v) => update("gender", v as FormState["gender"])}>
           <SelectTrigger id="gender"><SelectValue placeholder={t("placeholders.notSpecified")} /></SelectTrigger>
           <SelectContent>
@@ -210,15 +210,15 @@ export function MemorialCreateForm() {
 
       {/* Birth */}
       <div className="space-y-3">
-        <Label className="text-base">{t("sections.birth")}</Label>
+        <FieldLabel className="text-base">{t("sections.birth")}</FieldLabel>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <DateField id="birth-date" label={t("fields.date")} value={form.birthDate} onChange={(d) => update("birthDate", d)} clearLabel={t("date.clear")} pickLabel={t("date.pick")} />
+          <DateField id="birth-date" label={t("fields.date")} value={form.birthDate} onChange={(d) => update("birthDate", d)} clearLabel={t("date.clear")} pickLabel={t("date.pick")} required />
           <div className="space-y-2">
-            <Label htmlFor="birth-place">{t("fields.city")}</Label>
+            <FieldLabel htmlFor="birth-place">{t("fields.city")}</FieldLabel>
             <Input id="birth-place" value={form.birthPlace} onChange={(e) => update("birthPlace", e.target.value)} placeholder={t("placeholders.city")} maxLength={100} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="birth-country">{t("fields.country")}</Label>
+            <FieldLabel htmlFor="birth-country">{t("fields.country")}</FieldLabel>
             <Select value={form.birthCountry} onValueChange={(v) => update("birthCountry", v)}>
               <SelectTrigger id="birth-country"><SelectValue placeholder={t("placeholders.country")} /></SelectTrigger>
               <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
@@ -229,7 +229,7 @@ export function MemorialCreateForm() {
 
       {/* Death */}
       <div className="space-y-3">
-        <Label className="text-base">{t("sections.death")}</Label>
+        <FieldLabel className="text-base">{t("sections.death")}</FieldLabel>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <DateField
             id="death-date" label={t("fields.date")}
@@ -238,13 +238,14 @@ export function MemorialCreateForm() {
             disabledDays={(d) => (form.birthDate ? d < form.birthDate : false) || d > new Date()}
             clearLabel={t("date.clear")}
             pickLabel={t("date.pick")}
+            required
           />
           <div className="space-y-2">
-            <Label htmlFor="death-place">{t("fields.city")}</Label>
+            <FieldLabel htmlFor="death-place">{t("fields.city")}</FieldLabel>
             <Input id="death-place" value={form.deathPlace} onChange={(e) => update("deathPlace", e.target.value)} placeholder={t("placeholders.city")} disabled={!form.deathDate} maxLength={100} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="death-country">{t("fields.country")}</Label>
+            <FieldLabel htmlFor="death-country">{t("fields.country")}</FieldLabel>
             <Select value={form.deathCountry} onValueChange={(v) => update("deathCountry", v)} disabled={!form.deathDate}>
               <SelectTrigger id="death-country"><SelectValue placeholder={t("placeholders.country")} /></SelectTrigger>
               <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>

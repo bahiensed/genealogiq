@@ -390,7 +390,7 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
       {/* Notes */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="geo-notes" className="text-base">{t("notes")} <span className="text-muted-foreground text-xs">{t("optional")}</span></Label>
+          <Label htmlFor="geo-notes" className="text-base">{t("notes")}</Label>
           <span className="text-xs text-muted-foreground">{notesValue.length}/{MAX_NOTES}</span>
         </div>
         <Textarea

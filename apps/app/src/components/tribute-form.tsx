@@ -8,7 +8,7 @@ import { toast } from "sonner"
 import { upload } from "@vercel/blob/client"
 import { compressImage } from "@/lib/image-compress"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
+import { FieldLabel } from "@/components/ui/field"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -112,7 +112,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
 
       {/* Image */}
       <div className="space-y-3">
-        <Label className="text-base">{t("form.photoLabel")}</Label>
+        <FieldLabel className="text-base">{t("form.photoLabel")}</FieldLabel>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {imageUrl ? (
             <div className="relative group aspect-square rounded-xl overflow-hidden border border-border/60">
@@ -151,7 +151,7 @@ export function TributeForm({ profileId, authorName, existing }: Props) {
       {/* Text */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="tribute-text" className="text-base">{t("form.textLabel")}</Label>
+          <FieldLabel htmlFor="tribute-text" className="text-base" required>{t("form.textLabel")}</FieldLabel>
           <span className="text-xs text-muted-foreground">{text.length}/{MAX_TEXT}</span>
         </div>
         <Textarea

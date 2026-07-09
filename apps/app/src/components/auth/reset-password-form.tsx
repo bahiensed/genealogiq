@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { FieldLabel } from '@/components/ui/field'
 import { resetPassword } from '@/actions/auth.actions'
 
 interface Props {
@@ -31,7 +31,7 @@ export function ResetPasswordForm({ token, callbackUrl }: Props) {
         )}
 
         <div className="space-y-1.5">
-          <Label htmlFor="password">{t('newPassword')}</Label>
+          <FieldLabel htmlFor="password" required>{t('newPassword')}</FieldLabel>
           <div className="relative">
             <Input
               id="password"

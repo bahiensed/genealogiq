@@ -7,7 +7,7 @@ import { forgotPassword } from '@/actions/auth.actions'
 import { AuthCard } from '@/components/auth/auth-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { FieldLabel } from '@/components/ui/field'
 
 export function ForgotPasswordForm() {
   const t = useTranslations('Auth')
@@ -24,7 +24,7 @@ export function ForgotPasswordForm() {
         )}
 
         <div className="space-y-1.5">
-          <Label htmlFor="email">{t('email')}</Label>
+          <FieldLabel htmlFor="email" required>{t('email')}</FieldLabel>
           <Input
             id="email"
             name="email"

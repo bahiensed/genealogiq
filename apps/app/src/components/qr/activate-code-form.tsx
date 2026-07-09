@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { FieldLabel } from '@/components/ui/field'
 
 // Normalizes user input to the canonical code shape used by /qr/[genCode]:
 // uppercase, alphanumeric only (drops hyphens, spaces, and any pasted noise).
@@ -34,7 +34,7 @@ export function ActivateCodeForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="code">{t("activateCode.label")}</Label>
+        <FieldLabel htmlFor="code" required>{t("activateCode.label")}</FieldLabel>
         <Input
           id="code"
           name="code"

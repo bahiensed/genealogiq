@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { FieldLabel } from "@/components/ui/field"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
@@ -205,7 +205,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-2 gap-2 items-end">
             <div className="space-y-1.5">
-              <Label>{t("addRelative.kindLabel")}</Label>
+              <FieldLabel>{t("addRelative.kindLabel")}</FieldLabel>
               <Select value={kind} onValueChange={(v) => setKind(v as RelationKind)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -217,7 +217,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
             </div>
             {kind === "spouse" && (
               <div className="space-y-1.5">
-                <Label>{t("addRelative.typeLabel")}</Label>
+                <FieldLabel>{t("addRelative.typeLabel")}</FieldLabel>
                 <Select value={spouseSubtype} onValueChange={(v) => setSpouseSubtype(v as SpouseSubtype)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -233,12 +233,12 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
           {kind === "spouse" && (
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1.5">
-                <Label htmlFor="rel-start">{startLabel}:</Label>
+                <FieldLabel htmlFor="rel-start">{startLabel}:</FieldLabel>
                 <Input id="rel-start" type="date" value={marriedAt} onChange={(e) => setMarriedAt(e.target.value)} />
               </div>
               {needsEndDate && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="rel-end">{endLabel}:</Label>
+                  <FieldLabel htmlFor="rel-end">{endLabel}:</FieldLabel>
                   <Input id="rel-end" type="date" value={endedAt} onChange={(e) => setEndedAt(e.target.value)} />
                 </div>
               )}
@@ -316,26 +316,26 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-first">{t("fields.firstName")}</Label>
+                  <FieldLabel htmlFor="g-first" required>{t("fields.firstName")}</FieldLabel>
                   <Input id="g-first" value={firstName} onChange={(e) => setFirstName(e.target.value)} maxLength={64} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-last">{t("fields.lastName")}</Label>
+                  <FieldLabel htmlFor="g-last" required>{t("fields.lastName")}</FieldLabel>
                   <Input id="g-last" value={lastName} onChange={(e) => setLastName(e.target.value)} maxLength={64} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-maiden">{t("fields.maidenName")}</Label>
+                  <FieldLabel htmlFor="g-maiden">{t("fields.maidenName")}</FieldLabel>
                   <Input id="g-maiden" value={maidenName} onChange={(e) => setMaidenName(e.target.value)} maxLength={64} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-nick">{t("fields.nickname")}</Label>
+                  <FieldLabel htmlFor="g-nick">{t("fields.nickname")}</FieldLabel>
                   <Input id="g-nick" value={nickname} onChange={(e) => setNickname(e.target.value)} maxLength={40} />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>{t("fields.gender")}</Label>
+                <FieldLabel>{t("fields.gender")}</FieldLabel>
                 <Select value={gender} onValueChange={(v) => setGender(v as "MALE" | "FEMALE" | "OTHER")}>
                   <SelectTrigger><SelectValue placeholder={t("fields.genderSelect")} /></SelectTrigger>
                   <SelectContent>
@@ -347,11 +347,11 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-birth">{t("fields.birthDate")}</Label>
+                  <FieldLabel htmlFor="g-birth">{t("fields.birthDate")}</FieldLabel>
                   <Input id="g-birth" type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="g-death">{t("fields.deathDate")}</Label>
+                  <FieldLabel htmlFor="g-death">{t("fields.deathDate")}</FieldLabel>
                   <Input id="g-death" type="date" value={deathDate} onChange={(e) => setDeathDate(e.target.value)} />
                 </div>
               </div>

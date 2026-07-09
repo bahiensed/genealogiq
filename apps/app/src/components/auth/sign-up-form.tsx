@@ -11,7 +11,7 @@ import { signUp } from '@/actions/auth.actions'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { FieldLabel } from '@/components/ui/field'
 import { PasswordRequirements } from '@/components/auth/password-requirements'
 import { getSignUpSchema, type SignUpFormValues } from '@/schemas/auth.schema'
 
@@ -67,7 +67,7 @@ export function SignUpForm() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="firstName">{t('firstName')}</Label>
+            <FieldLabel htmlFor="firstName" required>{t('firstName')}</FieldLabel>
             <Input
               id="firstName"
               type="text"
@@ -80,7 +80,7 @@ export function SignUpForm() {
             )}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="lastName">{t('lastName')}</Label>
+            <FieldLabel htmlFor="lastName" required>{t('lastName')}</FieldLabel>
             <Input
               id="lastName"
               type="text"
@@ -95,7 +95,7 @@ export function SignUpForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="email">{t('email')}</Label>
+          <FieldLabel htmlFor="email" required>{t('email')}</FieldLabel>
           <Input
             id="email"
             type="email"
@@ -111,7 +111,7 @@ export function SignUpForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password">{t('password')}</Label>
+          <FieldLabel htmlFor="password" required>{t('password')}</FieldLabel>
           <div className="relative">
             <Input
               id="password"
