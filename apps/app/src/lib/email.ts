@@ -6,6 +6,7 @@ import {
   sendPasswordResetEmail as _reset,
   sendAccountDeletionEmail as _delete,
   sendFeedbackEmail as _feedback,
+  sendAppAccountExistsEmail as _accountExists,
   type FeedbackEmail,
 } from "@genealogiq/email"
 
@@ -21,4 +22,7 @@ export const sendVerificationEmail   = (to: string, token: string, name?: string
 export const sendEmailChangeEmail    = (to: string, token: string) => _change({ to, token, baseUrl: APP() })
 export const sendPasswordResetEmail  = (to: string, token: string) => _reset({ to, token, baseUrl: APP() })
 export const sendAccountDeletionEmail = (to: string) => _delete({ to })
+// Sent instead of a verification link when sign-up hits an email already in
+// use — see the doc comment on the shared template for why.
+export const sendAccountExistsEmail  = (to: string, name?: string) => _accountExists({ to, baseUrl: APP(), name })
 export const sendFeedback = (data: Omit<FeedbackEmail, "to">) => _feedback({ ...data, to: FEEDBACK_TO })

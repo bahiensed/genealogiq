@@ -42,6 +42,7 @@ vi.mock("@/lib/email", () => ({
   sendPasswordResetEmail: vi.fn(),
   sendEmailChangeEmail: vi.fn(),
   sendAccountDeletionEmail: vi.fn(),
+  sendAccountExistsEmail: vi.fn(),
 }))
 vi.mock("@/lib/safe-callback", () => ({ safeCallback: vi.fn(() => null) }))
 vi.mock("@/lib/blob", () => ({ deleteBlobs: vi.fn() }))
@@ -66,7 +67,7 @@ import {
 import { verifySession } from "@/lib/dal"
 import { checkRateLimit } from "@/lib/rate-limit"
 import bcrypt from "bcryptjs"
-import { sendVerificationEmail, sendPasswordResetEmail } from "@/lib/email"
+import { sendVerificationEmail, sendPasswordResetEmail, sendAccountExistsEmail } from "@/lib/email"
 
 // A FormData factory keyed by the names the action reads.
 const fd = (fields: Record<string, string>) => {
@@ -116,14 +117,12 @@ describe("signUp", () => {
     expect(prismaMock.appUser.create).not.toHaveBeenCalled()
   })
 
-  it("reports a duplicate email as an inline field error and does not create the user", async () => {
-    prismaMock.appUser.findFirst.mockResolvedValue({ id: "existing" })
+  it("redirects a duplicate email exactly like a fresh sign-up (no enumeration oracle) and emails the owner instead", async () => {
+    prismaMock.appUser.findFirst.mockResolvedValue({ id: "existing", firstName: "Ada" })
 
-    const res = await signUp(undefined, fd(VALID_SIGNUP))
+    await expect(signUp(undefined, fd(VALID_SIGNUP))).rejects.toThrow("NEXT_REDIRECT:/verify-email")
 
-    expect(res?.ok).toBe(false)
-    expect(res?.message).toBe("common.invalidData")
-    expect(res?.fieldErrors).toEqual({ email: ["auth.emailInUse"] })
+    expect(sendAccountExistsEmail).toHaveBeenCalledWith("ada@example.com", "Ada")
     expect(prismaMock.appUser.create).not.toHaveBeenCalled()
   })
 

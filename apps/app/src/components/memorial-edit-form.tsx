@@ -14,7 +14,7 @@ import { upload } from "@vercel/blob/client"
 import { compressImage } from "@/lib/image-compress"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { FieldLabel, FieldError } from "@/components/ui/field"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar as CalendarPicker } from "@/components/ui/calendar"
@@ -46,8 +46,6 @@ import { getLocalizedCountries, COUNTRY_BY_ISO } from "@/consts/countries-data"
 import { cn } from "@/lib/utils"
 import type { EditProfileRow } from "@/queries/profile"
 
-const RequiredMark = () => <span className="text-destructive">*</span>
-
 // ─── Date picker helper ───────────────────────────────────────────────────────
 
 function DateField({
@@ -66,7 +64,7 @@ function DateField({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between h-5">
-        <Label>{label} {required && <RequiredMark />}</Label>
+        <FieldLabel required={required}>{label}</FieldLabel>
         {value && !disabled && (
           <button type="button" onClick={() => setValue(name, null)} className="text-xs text-muted-foreground hover:text-foreground">
             {clearLabel}
@@ -98,7 +96,7 @@ function DateField({
           />
         </PopoverContent>
       </Popover>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      <FieldError errors={[{ message: error }]} />
     </div>
   )
 }
@@ -108,19 +106,19 @@ function DateField({
 // back to a free-text Input. Mirrors the AddressSection pattern.
 
 function StateField({
-  control, countryField, stateField, id, label, placeholder, disabled, error,
+  control, countryField, stateField, id, label, placeholder, disabled, error, required,
 }: {
   control: Control<ProfileEditValues>
   countryField: "birthCountry" | "deathCountry"
   stateField: "birthState" | "deathState"
-  id: string; label: string; placeholder: string; disabled?: boolean; error?: string
+  id: string; label: string; placeholder: string; disabled?: boolean; error?: string; required?: boolean
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const country = (useWatch({ control: control as any, name: countryField }) as string) ?? ""
   const states = COUNTRY_BY_ISO[country]?.states ?? []
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label} <RequiredMark /></Label>
+      <FieldLabel htmlFor={id} required={required}>{label}</FieldLabel>
       <Controller
         control={control}
         name={stateField}
@@ -146,7 +144,7 @@ function StateField({
           )
         }
       />
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      <FieldError errors={[{ message: error }]} />
     </div>
   )
 }
@@ -359,25 +357,25 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
               {/* Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="first-name">{t("fields.firstName")} <RequiredMark /></Label>
+                  <FieldLabel htmlFor="first-name" required>{t("fields.firstName")}</FieldLabel>
                   <Input id="first-name" maxLength={100} placeholder={t("placeholders.firstName")} {...register("firstName")} />
-                  {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
+                  <FieldError errors={[errors.firstName]} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="last-name">{t("fields.lastName")} <RequiredMark /></Label>
+                  <FieldLabel htmlFor="last-name" required>{t("fields.lastName")}</FieldLabel>
                   <Input id="last-name" maxLength={100} placeholder={t("placeholders.lastName")} {...register("lastName")} />
-                  {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
+                  <FieldError errors={[errors.lastName]} />
                 </div>
               </div>
 
               {/* Maiden name + Nickname */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="maiden-name">{t("fields.maidenName")}</Label>
+                  <FieldLabel htmlFor="maiden-name">{t("fields.maidenName")}</FieldLabel>
                   <Input id="maiden-name" maxLength={100} placeholder={t("placeholders.maidenName")} {...register("maidenName")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nickname">{t("fields.nickname")}</Label>
+                  <FieldLabel htmlFor="nickname">{t("fields.nickname")}</FieldLabel>
                   <Input id="nickname" maxLength={100} placeholder={t("placeholders.nickname")} {...register("nickname")} />
                 </div>
               </div>
@@ -385,7 +383,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
               {/* Gender (6 cols) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="gender">{t("fields.gender")} <RequiredMark /></Label>
+                  <FieldLabel htmlFor="gender" required>{t("fields.gender")}</FieldLabel>
                   <Controller
                     control={control}
                     name="gender"
@@ -400,7 +398,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                       </Select>
                     )}
                   />
-                  {errors.gender && <p className="text-xs text-destructive">{errors.gender.message}</p>}
+                  <FieldError errors={[errors.gender]} />
                 </div>
               </div>
             </div>
@@ -417,7 +415,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DateField name="birthDate" label={t("fields.date")} control={control} setValue={setValue} clearLabel={t("date.clear")} pickLabel={t("date.pick")} required error={errors.birthDate?.message} />
                 <div className="space-y-2">
-                  <Label htmlFor="birth-country">{t("fields.country")} <RequiredMark /></Label>
+                  <FieldLabel htmlFor="birth-country" required>{t("fields.country")}</FieldLabel>
                   <Controller
                     control={control}
                     name="birthCountry"
@@ -428,12 +426,12 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                       </Select>
                     )}
                   />
-                  {errors.birthCountry && <p className="text-xs text-destructive">{errors.birthCountry.message}</p>}
+                  <FieldError errors={[errors.birthCountry]} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="birth-city">{t("fields.city")} <RequiredMark /></Label>
+                  <FieldLabel htmlFor="birth-city" required>{t("fields.city")}</FieldLabel>
                   <Input id="birth-city" maxLength={100} placeholder={t("placeholders.city")} {...register("birthPlace")} />
-                  {errors.birthPlace && <p className="text-xs text-destructive">{errors.birthPlace.message}</p>}
+                  <FieldError errors={[errors.birthPlace]} />
                 </div>
                 <StateField
                   control={control}
@@ -443,6 +441,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                   label={t("fields.state")}
                   placeholder={t("placeholders.state")}
                   error={errors.birthState?.message}
+                  required
                 />
               </div>
             </div>
@@ -465,7 +464,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                     minDate={birthDate ?? undefined}
                   />
                   <div className="space-y-2">
-                    <Label htmlFor="death-country">{t("fields.country")} <RequiredMark /></Label>
+                    <FieldLabel htmlFor="death-country" required>{t("fields.country")}</FieldLabel>
                     <Controller
                       control={control}
                       name="deathCountry"
@@ -476,12 +475,12 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                         </Select>
                       )}
                     />
-                    {errors.deathCountry && <p className="text-xs text-destructive">{errors.deathCountry.message}</p>}
+                    <FieldError errors={[errors.deathCountry]} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="death-city">{t("fields.city")} <RequiredMark /></Label>
+                    <FieldLabel htmlFor="death-city" required>{t("fields.city")}</FieldLabel>
                     <Input id="death-city" maxLength={100} placeholder={t("placeholders.city")} disabled={!deathDate} {...register("deathPlace")} />
-                    {errors.deathPlace && <p className="text-xs text-destructive">{errors.deathPlace.message}</p>}
+                    <FieldError errors={[errors.deathPlace]} />
                   </div>
                   <StateField
                     control={control}
@@ -492,10 +491,11 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                     placeholder={t("placeholders.state")}
                     disabled={!deathDate}
                     error={errors.deathState?.message}
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="death-cause">{t("fields.deathCause")}</Label>
+                  <FieldLabel htmlFor="death-cause">{t("fields.deathCause")}</FieldLabel>
                   <Input id="death-cause" maxLength={200} placeholder={t("placeholders.deathCause")} disabled={!deathDate} {...register("deathCause")} />
                 </div>
               </div>
@@ -513,11 +513,11 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
               <div className="px-6 pb-6 pt-4">
                 <div className="flex flex-col sm:flex-row sm:items-end gap-4">
                   <div className="space-y-2 w-full sm:w-20 shrink-0">
-                    <Label htmlFor="phone-cc">{t("fields.countryCode")}</Label>
+                    <FieldLabel htmlFor="phone-cc">{t("fields.countryCode")}</FieldLabel>
                     <Input id="phone-cc" maxLength={5} placeholder="+55" {...register("phoneCountryCode")} />
                   </div>
                   <div className="space-y-2 flex-1">
-                    <Label htmlFor="phone">{t("fields.phone")}</Label>
+                    <FieldLabel htmlFor="phone">{t("fields.phone")}</FieldLabel>
                     <Controller
                       control={control}
                       name="phone"
@@ -534,7 +534,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
                     />
                   </div>
                   <div className="space-y-2 flex-1">
-                    <Label htmlFor="email">{t("fields.email")}</Label>
+                    <FieldLabel htmlFor="email">{t("fields.email")}</FieldLabel>
                     <Input id="email" value={initial.email ?? ""} disabled />
                   </div>
                   <ChangeEmailDialog />
@@ -573,35 +573,35 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
             <div className="px-6 pb-6 pt-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="website">{t("fields.website")}</Label>
+                  <FieldLabel htmlFor="website">{t("fields.website")}</FieldLabel>
                   <Input id="website" maxLength={250} placeholder="https://example.com" {...register("website")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="instagram">Instagram</Label>
+                  <FieldLabel htmlFor="instagram">{t("fields.instagram")}</FieldLabel>
                   <Input id="instagram" maxLength={250} placeholder={t("placeholders.handleOrUrl")} {...register("instagram")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="linkedin">LinkedIn</Label>
+                  <FieldLabel htmlFor="linkedin">{t("fields.linkedin")}</FieldLabel>
                   <Input id="linkedin" maxLength={250} placeholder="linkedin.com/in/..." {...register("linkedin")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="facebook">Facebook</Label>
+                  <FieldLabel htmlFor="facebook">{t("fields.facebook")}</FieldLabel>
                   <Input id="facebook" maxLength={250} placeholder="facebook.com/..." {...register("fb")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="x">X (Twitter)</Label>
+                  <FieldLabel htmlFor="x">{t("fields.x")}</FieldLabel>
                   <Input id="x" maxLength={250} placeholder={t("placeholders.handleOrUrl")} {...register("x")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="tiktok">TikTok</Label>
+                  <FieldLabel htmlFor="tiktok">{t("fields.tiktok")}</FieldLabel>
                   <Input id="tiktok" maxLength={250} placeholder={t("placeholders.handleOrUrl")} {...register("tiktok")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="youtube">YouTube</Label>
+                  <FieldLabel htmlFor="youtube">{t("fields.youtube")}</FieldLabel>
                   <Input id="youtube" maxLength={250} placeholder="youtube.com/..." {...register("youtube")} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="other-social">{t("fields.otherSocial")}</Label>
+                  <FieldLabel htmlFor="other-social">{t("fields.otherSocial")}</FieldLabel>
                   <Input id="other-social" maxLength={250} placeholder={t("placeholders.otherLink")} {...register("otherSocial")} />
                 </div>
               </div>
@@ -616,7 +616,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
           </AccordionTrigger>
           <AccordionContent>
             <div className="px-6 pb-6 pt-4 space-y-2">
-              <Label htmlFor="notes" className="sr-only">{t("sections.notes")}</Label>
+              <FieldLabel htmlFor="notes" className="sr-only">{t("sections.notes")}</FieldLabel>
               <Textarea
                 id="notes"
                 maxLength={1000}

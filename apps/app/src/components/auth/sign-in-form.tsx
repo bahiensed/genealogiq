@@ -9,7 +9,7 @@ import { login } from '@/actions/auth.actions'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { FieldLabel } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
 
 export function SignInForm() {
@@ -53,7 +53,7 @@ export function SignInForm() {
           }}
         >
           <div className="space-y-1.5" style={{ gridArea: 'email' }}>
-            <Label htmlFor="email">{t('email')}</Label>
+            <FieldLabel htmlFor="email" required>{t('email')}</FieldLabel>
             <Input
               id="email"
               name="email"
@@ -63,9 +63,9 @@ export function SignInForm() {
             />
           </div>
 
-          <Label htmlFor="password" className="mt-2.5 self-center" style={{ gridArea: 'pwLabel' }}>
+          <FieldLabel htmlFor="password" required className="mt-2.5 self-center" style={{ gridArea: 'pwLabel' }}>
             {t('password')}
-          </Label>
+          </FieldLabel>
 
           <div className="relative mt-1.5" style={{ gridArea: 'pwInput' }}>
             <Input

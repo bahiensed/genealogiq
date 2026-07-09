@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
-import { Label } from '@/components/ui/label'
+import { FieldLabel } from '@/components/ui/field'
 
 export function ChangeEmailDialog() {
   const t = useTranslations('Auth')
@@ -41,7 +41,7 @@ export function ChangeEmailDialog() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ce-newEmail">{t('newEmailLabel')}</Label>
+            <FieldLabel htmlFor="ce-newEmail" required>{t('newEmailLabel')}</FieldLabel>
             <Input
               id="ce-newEmail"
               name="newEmail"
@@ -56,7 +56,7 @@ export function ChangeEmailDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="ce-currentPassword">{t('currentPasswordLabel')}</Label>
+            <FieldLabel htmlFor="ce-currentPassword" required>{t('currentPasswordLabel')}</FieldLabel>
             <InputGroup aria-invalid={!!state?.fieldErrors?.currentPassword}>
               <InputGroupInput
                 id="ce-currentPassword"

@@ -8,7 +8,7 @@ import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+import { FieldLabel } from "@/components/ui/field"
 import { Textarea } from "@/components/ui/textarea"
 import { sendFeedback } from "@/actions/feedback.actions"
 import { getFeedbackSchema, type FeedbackValues } from "@/schemas/feedback.schema"
@@ -63,7 +63,7 @@ export function FeedbackDialog({ type, label, className }: Props) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="space-y-2">
-            <Label htmlFor="feedback-message">{t("fields.message")}</Label>
+            <FieldLabel htmlFor="feedback-message" required>{t("fields.message")}</FieldLabel>
             <Textarea
               id="feedback-message"
               maxLength={2000}

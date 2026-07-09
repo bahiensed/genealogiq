@@ -9,7 +9,7 @@ import { upload } from "@vercel/blob/client"
 import { compressImage } from "@/lib/image-compress"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { FieldLabel } from "@/components/ui/field"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -46,15 +46,15 @@ const empty: FormState = {
   deathDate: undefined, deathPlace: "", deathCountry: "",
 }
 
-const DateField = ({ id, label, value, onChange, disabledDays, clearLabel, pickLabel }: {
+const DateField = ({ id, label, value, onChange, disabledDays, clearLabel, pickLabel, required }: {
   id: string; label: string; value: Date | undefined
   onChange: (d: Date | undefined) => void
   disabledDays?: (d: Date) => boolean
-  clearLabel: string; pickLabel: string
+  clearLabel: string; pickLabel: string; required?: boolean
 }) => (
   <div className="space-y-2">
     <div className="flex items-center justify-between h-5">
-      <Label htmlFor={id}>{label}</Label>
+      <FieldLabel htmlFor={id} required={required}>{label}</FieldLabel>
       {value && (
         <button type="button" onClick={() => onChange(undefined)} className="text-xs text-muted-foreground hover:text-foreground">
           {clearLabel}
@@ -196,18 +196,18 @@ export function ActivateMemorialForm({ genCode }: ActivateMemorialFormProps) {
         {/* Name */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="first-name">{t("activateMemorial.firstName")}</Label>
+            <FieldLabel htmlFor="first-name" required>{t("activateMemorial.firstName")}</FieldLabel>
             <Input id="first-name" value={form.firstName} onChange={(e) => update("firstName", e.target.value)} placeholder={t("activateMemorial.namePlaceholder")} maxLength={100} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="last-name">{t("activateMemorial.lastName")}</Label>
+            <FieldLabel htmlFor="last-name" required>{t("activateMemorial.lastName")}</FieldLabel>
             <Input id="last-name" value={form.lastName} onChange={(e) => update("lastName", e.target.value)} placeholder={t("activateMemorial.familyNamePlaceholder")} maxLength={100} />
           </div>
         </div>
 
         {/* Gender */}
         <div className="space-y-2">
-          <Label htmlFor="gender">{t("activateMemorial.gender")}</Label>
+          <FieldLabel htmlFor="gender">{t("activateMemorial.gender")}</FieldLabel>
           <Select value={form.gender} onValueChange={(v) => update("gender", v as FormState["gender"])}>
             <SelectTrigger id="gender"><SelectValue placeholder={t("activateMemorial.notSpecified")} /></SelectTrigger>
             <SelectContent>
@@ -219,15 +219,15 @@ export function ActivateMemorialForm({ genCode }: ActivateMemorialFormProps) {
 
         {/* Birth */}
         <div className="space-y-3">
-          <Label className="text-base">{t("activateMemorial.birth")}</Label>
+          <FieldLabel className="text-base">{t("activateMemorial.birth")}</FieldLabel>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <DateField id="birth-date" label={t("activateMemorial.date")} value={form.birthDate} onChange={(d) => update("birthDate", d)} clearLabel={t("activateMemorial.clear")} pickLabel={t("activateMemorial.pickDate")} />
+            <DateField id="birth-date" label={t("activateMemorial.date")} value={form.birthDate} onChange={(d) => update("birthDate", d)} clearLabel={t("activateMemorial.clear")} pickLabel={t("activateMemorial.pickDate")} required />
             <div className="space-y-2">
-              <Label htmlFor="birth-place">{t("activateMemorial.city")}</Label>
+              <FieldLabel htmlFor="birth-place">{t("activateMemorial.city")}</FieldLabel>
               <Input id="birth-place" value={form.birthPlace} onChange={(e) => update("birthPlace", e.target.value)} placeholder={t("activateMemorial.cityPlaceholder")} maxLength={100} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="birth-country">{t("activateMemorial.country")}</Label>
+              <FieldLabel htmlFor="birth-country">{t("activateMemorial.country")}</FieldLabel>
               <Select value={form.birthCountry} onValueChange={(v) => update("birthCountry", v)}>
                 <SelectTrigger id="birth-country"><SelectValue placeholder={t("activateMemorial.countryPlaceholder")} /></SelectTrigger>
                 <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
@@ -238,7 +238,7 @@ export function ActivateMemorialForm({ genCode }: ActivateMemorialFormProps) {
 
         {/* Death */}
         <div className="space-y-3">
-          <Label className="text-base">{t("activateMemorial.death")}</Label>
+          <FieldLabel className="text-base">{t("activateMemorial.death")}</FieldLabel>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <DateField
               id="death-date" label={t("activateMemorial.date")}
@@ -246,13 +246,14 @@ export function ActivateMemorialForm({ genCode }: ActivateMemorialFormProps) {
               onChange={(d) => { update("deathDate", d); if (!d) { update("deathPlace", ""); update("deathCountry", "") } }}
               disabledDays={(d) => (form.birthDate ? d < form.birthDate : false) || d > new Date()}
               clearLabel={t("activateMemorial.clear")} pickLabel={t("activateMemorial.pickDate")}
+              required
             />
             <div className="space-y-2">
-              <Label htmlFor="death-place">{t("activateMemorial.city")}</Label>
+              <FieldLabel htmlFor="death-place">{t("activateMemorial.city")}</FieldLabel>
               <Input id="death-place" value={form.deathPlace} onChange={(e) => update("deathPlace", e.target.value)} placeholder={t("activateMemorial.cityPlaceholder")} disabled={!form.deathDate} maxLength={100} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="death-country">{t("activateMemorial.country")}</Label>
+              <FieldLabel htmlFor="death-country">{t("activateMemorial.country")}</FieldLabel>
               <Select value={form.deathCountry} onValueChange={(v) => update("deathCountry", v)} disabled={!form.deathDate}>
                 <SelectTrigger id="death-country"><SelectValue placeholder={t("activateMemorial.countryPlaceholder")} /></SelectTrigger>
                 <SelectContent>{countryOptions.map((c) => <SelectItem key={c.iso} value={c.iso}>{c.name}</SelectItem>)}</SelectContent>
