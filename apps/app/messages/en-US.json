@@ -731,6 +731,10 @@
     "goHome": "Go home",
     "title": "Page not found"
   },
+  "Offline": {
+    "description": "It looks like you lost your connection. Reconnect to keep browsing.",
+    "title": "You're offline"
+  },
   "Profile": {
     "addToFavorites": "Add to favorites",
     "bioDescription": "A life told in chapters: moments, places and turning points",

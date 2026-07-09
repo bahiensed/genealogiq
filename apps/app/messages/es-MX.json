@@ -731,6 +731,10 @@
     "goHome": "Ir al inicio",
     "title": "Página no encontrada"
   },
+  "Offline": {
+    "description": "Parece que perdiste la conexión. Vuelve a conectarte para seguir navegando.",
+    "title": "Estás sin conexión"
+  },
   "Profile": {
     "addToFavorites": "Agregar a favoritos",
     "bioDescription": "Una vida contada en capítulos: momentos, lugares y giros decisivos",

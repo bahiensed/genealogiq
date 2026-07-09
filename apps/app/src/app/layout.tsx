@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { inter } from '@/fonts'
@@ -8,10 +8,18 @@ import { ThemeProvider } from '@/components/theme/theme-provider'
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { Footer } from "@/components/footer"
+import { RegisterServiceWorker } from "@/components/register-service-worker"
 
 export const metadata: Metadata = {
   title: "Genealogiq",
   description: "Genealogiq",
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: "#616198",
 }
 
 export default async function RootLayout({
@@ -39,6 +47,7 @@ export default async function RootLayout({
               {children}
               <Footer />
               <Toaster richColors />
+              <RegisterServiceWorker />
             </TooltipProvider>
           </ThemeProvider>
         </NextIntlClientProvider>
