@@ -806,6 +806,15 @@
     "tributesMetric": "{count, plural, one {# homenagem} other {# homenagens}}",
     "tributesTitle": "Homenagens"
   },
+  "Push": {
+    "description": "Receba avisos neste dispositivo sobre homenagens, convites para a árvore e pedidos de cogerenciamento.",
+    "disable": "Desativar",
+    "enable": "Ativar notificações",
+    "enabled": "As notificações estão ativas neste dispositivo.",
+    "error": "Não foi possível atualizar as notificações. Tente novamente.",
+    "notNow": "Agora não",
+    "title": "Não perca nada"
+  },
   "Qr": {
     "activateCode": {
       "continue": "Continuar",

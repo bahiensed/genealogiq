@@ -21,6 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { updatePreferredLocale } from '@/actions/locale.actions'
 
 const FLAGS: Record<string, typeof BR> = { BR, MX, US }
 
@@ -35,6 +36,8 @@ export function LanguageSwitcher() {
     if (value === locale) return
     startTransition(async () => {
       await setLocale(value)
+      // Persist the choice for push payload localization (no-op for guests).
+      void updatePreferredLocale(value)
       // Ask the service worker to re-capture the /offline snapshot, which is
       // rendered in the (cookie) locale that was active when it was cached.
       navigator.serviceWorker?.controller?.postMessage({ type: "locale-changed" })

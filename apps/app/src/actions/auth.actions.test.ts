@@ -56,6 +56,9 @@ vi.mock("bcryptjs", () => ({
 vi.mock("@/auth", () => ({ signIn: vi.fn(), signOut: vi.fn() }))
 // _login is built from this factory at module import; return a no-op callable.
 vi.mock("@genealogiq/auth/login", () => ({ createLoginAction: () => vi.fn(async () => undefined) }))
+// signUp seeds preferredLocale from the request locale; cookies() has no
+// request scope in tests, so stub the resolver.
+vi.mock("@genealogiq/i18n/server", () => ({ resolveLocale: vi.fn(async () => "en-US") }))
 
 import {
   signUp,

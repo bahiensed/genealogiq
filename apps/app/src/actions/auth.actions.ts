@@ -23,6 +23,7 @@ import {
 } from "@/lib/email"
 import { verifySession } from "@/lib/dal"
 import { safeCallback } from "@/lib/safe-callback"
+import { resolveLocale } from "@genealogiq/i18n/server"
 import { deleteBlobs } from "@/lib/blob"
 import { getClientIp, checkRateLimit } from "@/lib/rate-limit"
 import { hashToken, done, fail, type ActionResult } from "@genealogiq/core"
@@ -110,6 +111,9 @@ export async function signUp(
       email: validated.data.email,
       password: hashedPassword,
       role: "APP_USER",
+      // Seed push-payload localization from the request locale (cookie → geo
+      // header → en-US); the language switcher keeps it updated afterwards.
+      preferredLocale: await resolveLocale(),
     },
     select: { id: true },
   })

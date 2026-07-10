@@ -532,6 +532,12 @@ NEXT_PUBLIC_SENTRY_DSN=
 SENTRY_ORG=
 SENTRY_PROJECT=
 SENTRY_AUTH_TOKEN=
+
+# web push (VAPID) — generate once with `npx web-push generate-vapid-keys`;
+# public key is public by design; missing values disable push gracefully.
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=
 ```
 
 ## HOOKS

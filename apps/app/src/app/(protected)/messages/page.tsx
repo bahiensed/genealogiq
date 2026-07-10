@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { MessagesList } from "@/components/messages-list"
+import { PushBanner } from "@/components/push-banner"
 import { verifySession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import { getMessages } from "@/queries/notifications"
@@ -34,6 +35,10 @@ export default async function MessagesPage() {
               {t("pendingBadge", { count: totalPending })}
             </span>
           )}
+        </div>
+
+        <div className="mt-4 mb-2">
+          <PushBanner />
         </div>
 
         <MessagesList data={data} />

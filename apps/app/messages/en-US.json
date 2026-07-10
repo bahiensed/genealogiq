@@ -806,6 +806,15 @@
     "tributesMetric": "{count, plural, one {# tribute} other {# tributes}}",
     "tributesTitle": "Tributes"
   },
+  "Push": {
+    "description": "Get notified on this device about tributes, family tree invitations and co-management requests.",
+    "disable": "Disable",
+    "enable": "Enable notifications",
+    "enabled": "Push notifications are on for this device.",
+    "error": "Could not update notifications. Please try again.",
+    "notNow": "Not now",
+    "title": "Don't miss anything"
+  },
   "Qr": {
     "activateCode": {
       "continue": "Continue",
