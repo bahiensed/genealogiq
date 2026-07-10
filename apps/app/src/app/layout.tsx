@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { inter } from '@/fonts'
@@ -8,10 +8,28 @@ import { ThemeProvider } from '@/components/theme/theme-provider'
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { Footer } from "@/components/footer"
+import { RegisterServiceWorker } from "@/components/register-service-worker"
+import { PwaInstallDialog } from "@/components/pwa-install-dialog"
 
 export const metadata: Metadata = {
   title: "Genealogiq",
   description: "Genealogiq",
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Genealogiq",
+    statusBarStyle: "default",
+  },
+}
+
+export const viewport: Viewport = {
+  // Light: --brand-indigo; dark: the dark --background hsl(240 24% 18%).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#616198" },
+    { media: "(prefers-color-scheme: dark)", color: "#232339" },
+  ],
 }
 
 export default async function RootLayout({
@@ -39,6 +57,8 @@ export default async function RootLayout({
               {children}
               <Footer />
               <Toaster richColors />
+              <RegisterServiceWorker />
+              <PwaInstallDialog />
             </TooltipProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

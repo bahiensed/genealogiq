@@ -35,6 +35,9 @@ export function LanguageSwitcher() {
     if (value === locale) return
     startTransition(async () => {
       await setLocale(value)
+      // Ask the service worker to re-capture the /offline snapshot, which is
+      // rendered in the (cookie) locale that was active when it was cached.
+      navigator.serviceWorker?.controller?.postMessage({ type: "locale-changed" })
       router.refresh()
     })
   }

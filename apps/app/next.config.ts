@@ -6,6 +6,16 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@genealogiq/auth", "@genealogiq/core", "@genealogiq/i18n", "@genealogiq/email", "@genealogiq/db", "@genealogiq/services"],
+  async headers() {
+    return [
+      {
+        // The service worker script must never be served stale, or new
+        // deploys' workers would be picked up late (or not at all).
+        source: "/sw.js",
+        headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }],
+      },
+    ];
+  },
 };
 
 // Sentry wraps the inner (next-intl) config so both plugins compose.

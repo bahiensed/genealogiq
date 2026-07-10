@@ -546,6 +546,18 @@
     "seeAll": "Ver todos",
     "tagline": "Escanea, busca y visita un perfil"
   },
+  "InstallPrompt": {
+    "betaNote": "Pueden ocurrir errores ocasionales.",
+    "betaTitle": "La app de Genealogiq está en fase Beta de desarrollo.",
+    "declineButton": "Ahora no",
+    "description": "Instala la app de Genealogiq ahora en tu dispositivo para una mejor experiencia",
+    "gotItButton": "Entendido",
+    "installButton": "Instalar",
+    "iosStep1": "Toca el botón Compartir en la barra del navegador.",
+    "iosStep2": "Desplázate hacia abajo y toca \"Agregar a pantalla de inicio\".",
+    "iosStep3": "Toca \"Agregar\" para confirmar.",
+    "title": "¡Instala la app de Genealogiq ahora!"
+  },
   "Memorialized": {
     "actions": {
       "createProfile": "Crear perfil",
@@ -720,6 +732,8 @@
     "messages": "Mensajes",
     "messagesUnread": "{count} mensajes sin leer",
     "myProfile": "Mi perfil",
+    "openMenu": "Abrir menú",
+    "searchProfiles": "Buscar perfiles",
     "signOut": "Cerrar sesión",
     "signUp": "Regístrate",
     "subscriptions": "Suscripciones",
@@ -730,6 +744,11 @@
     "description": "La página que buscas no existe o ha sido eliminada.",
     "goHome": "Ir al inicio",
     "title": "Página no encontrada"
+  },
+  "Offline": {
+    "description": "Parece que perdiste la conexión. Vuelve a conectarte para seguir navegando.",
+    "retry": "Intentar de nuevo",
+    "title": "Estás sin conexión"
   },
   "Profile": {
     "addToFavorites": "Agregar a favoritos",
