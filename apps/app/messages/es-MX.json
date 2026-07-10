@@ -547,15 +547,16 @@
     "tagline": "Escanea, busca y visita un perfil"
   },
   "InstallPrompt": {
-    "betaNotice": "Genealogiq está en fase beta — pueden ocurrir errores ocasionales. Gracias por tu paciencia mientras mejoramos.",
+    "betaNote": "Pueden ocurrir errores ocasionales.",
+    "betaTitle": "La app de Genealogiq está en fase Beta de desarrollo.",
     "declineButton": "Ahora no",
-    "description": "Agrega Genealogiq a tu pantalla de inicio para un acceso rápido y una experiencia de pantalla completa.",
+    "description": "Instala la app de Genealogiq ahora en tu dispositivo para una mejor experiencia",
     "gotItButton": "Entendido",
     "installButton": "Instalar",
     "iosStep1": "Toca el botón Compartir en la barra del navegador.",
     "iosStep2": "Desplázate hacia abajo y toca \"Agregar a pantalla de inicio\".",
     "iosStep3": "Toca \"Agregar\" para confirmar.",
-    "title": "Instala Genealogiq"
+    "title": "¡Instala la app de Genealogiq ahora!"
   },
   "Memorialized": {
     "actions": {

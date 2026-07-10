@@ -1,22 +1,25 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Share, Info } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Share } from "lucide-react"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { usePwaInstall } from "@/hooks/use-pwa-install"
 
 // Invites the visitor to install the app. Chromium browsers get a real
 // Install button (beforeinstallprompt); iOS gets Add-to-Home-Screen
-// instructions; browsers with neither render nothing. Declining (button,
-// ESC or outside click) hides it for 21 days — see lib/pwa-install.ts.
+// instructions; browsers with neither render nothing. Declining ("Agora
+// não" or ESC) hides it for 21 days — see lib/pwa-install.ts. An
+// AlertDialog (no X button, no outside-click close) keeps the choice
+// explicit: accidental outside clicks don't burn the 21-day cooldown.
 export function PwaInstallDialog() {
   const t = useTranslations("InstallPrompt")
   const { mode, open, install, dismiss } = usePwaInstall()
@@ -24,17 +27,17 @@ export function PwaInstallDialog() {
   if (mode === null) return null
 
   return (
-    <Dialog
+    <AlertDialog
       open={open}
       onOpenChange={(isOpen) => {
         if (!isOpen) dismiss()
       }}
     >
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>{t("description")}</DialogDescription>
-        </DialogHeader>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t("title")}</AlertDialogTitle>
+          <AlertDialogDescription>{t("description")}</AlertDialogDescription>
+        </AlertDialogHeader>
 
         {mode === "ios" && (
           <ol className="list-decimal space-y-1 pl-5 text-sm">
@@ -47,24 +50,32 @@ export function PwaInstallDialog() {
           </ol>
         )}
 
-        <p className="flex items-start gap-2 text-xs text-muted-foreground">
-          <Info aria-hidden className="h-4 w-4 shrink-0" />
-          {t("betaNotice")}
-        </p>
+        <div className="flex flex-col gap-1">
+          <small className="text-sm leading-none font-medium">{t("betaTitle")}</small>
+          <small className="text-sm text-muted-foreground">{t("betaNote")}</small>
+        </div>
 
-        <DialogFooter>
+        <AlertDialogFooter>
           {mode === "native" ? (
             <>
-              <Button variant="outline" onClick={dismiss}>
-                {t("declineButton")}
-              </Button>
-              <Button onClick={install}>{t("installButton")}</Button>
+              <AlertDialogCancel>{t("declineButton")}</AlertDialogCancel>
+              {/* preventDefault keeps Radix from closing (and onOpenChange
+                  from marking the 21-day decline) — install() closes after
+                  the browser prompt resolves. */}
+              <AlertDialogAction
+                onClick={(event) => {
+                  event.preventDefault()
+                  void install()
+                }}
+              >
+                {t("installButton")}
+              </AlertDialogAction>
             </>
           ) : (
-            <Button onClick={dismiss}>{t("gotItButton")}</Button>
+            <AlertDialogAction>{t("gotItButton")}</AlertDialogAction>
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
