@@ -50,7 +50,21 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
-Last session: 10/07/2026 — **PWA hardening (best practices) + install-prompt dialog** (branch `feat/app-pwa-tier1-installability`, PR #123).
+Last session: 10/07/2026 (tarde) — **Tier 2 PWA: Web Push notifications** (branch `feat/app-web-push`).
+
+- **Fan-out**: `notify()` (`lib/notifications.ts`) agora agenda `after(() => sendPushForNotification(args))` — ponto único; os 10 call sites intactos. Todos os 9 `NotificationType` disparam push.
+- **DB** (`packages/db` — schema ÚNICO; convenção de espelhar ×3 apps está MORTA, CI `check-schema-parity` proíbe): model `PushSubscription` (`app_push_subscriptions`, endpoint unique, cascade) + `AppUser.preferredLocale`. Migration `20260710000000_web_push_subscriptions` aditiva/idempotente — **`prisma migrate deploy` JÁ RODADO no Neon** (pelo Douglas).
+- **Envio** (`lib/push.ts`, server-only): payload trilíngue de `lib/push-payload.ts` (copy hardcoded em `Record<SupportedLocale, Record<NotificationType,…>>` — NÃO em messages/*.json, paridade via tipo); locale do destinatário = `preferredLocale` (semeado no signUp via `resolveLocale()`, atualizado pelo language-switcher via `updatePreferredLocale` — `auth()` direto, não `verifySession`, por causa de guests); deep-links espelham o DISPATCH de messages-list; prune automático 404/410; sem VAPID env = no-op com 1 warn; nunca lança (roda em `after()`).
+- **Cliente**: `lib/push-client.ts` + `hooks/use-push-subscription.ts` (máquina loading/unsupported/denied/available/subscribing/subscribed; permissão SÓ atrás do clique) + `components/push-banner.tsx` em `/messages` (dispensa 30d `giq:push-banner-dismissed`; inscrito → linha compacta com Desativar). iOS Safari não-instalado cai em unsupported (sem PushManager) e não mostra nada.
+- **SW**: handlers `push` (fallback genérico p/ push sem payload) + `notificationclick` (foca aba ou abre; URL relativa resolvida na origin). Sem bump de cache.
+- **Actions**: `subscribePush` (Zod, rate-limit 10/h, upsert por endpoint reatribuindo userId — device compartilhado) / `unsubscribePush` (deleteMany por endpoint, sem user-scoping de propósito). UA lido de `headers()`, nunca do client.
+- **Env**: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` (gerar: `npx web-push generate-vapid-keys`). Chaves locais de dev preenchidas no `.env` (gitignored). **PENDÊNCIA OPERACIONAL: provisionar VAPID no Vercel prod** (chaves NOVAS de prod, não as de dev). ⚠️ `NEXT_PUBLIC_*` é inlined em build-time — rebuild após setar.
+- **Gotcha aprendido**: `pnpm add` de dentro de `apps/app` quebrou symlinks de `packages/services` (stripe/next) → typecheck falhou; `pnpm install` na raiz conserta.
+- **E2E ao vivo verificado** (build prod local + Chrome): banner pt-BR → Ativar → permissão → row no banco (UA server-side) → push REAL via FCM (201) exibido pelo SW com payload/tag/deep-link corretos (nota: houve janela de ~1 update do SW onde 2 pushes se perderam logo após a inscrição — depois de `reg.update()` tudo entregou) → Desativar removeu subscription do browser E row do banco → banner voltou. Fallback en-US p/ `preferredLocale` null confirmado.
+- Gates: tsc ✅ · 387 testes (30 novos) ✅ · i18n parity+keys ✅ · schema-parity ✅ · lint baseline ✅ · build ✅.
+- **v1 declarada**: sem lista de devices; permission-denied sem hint; sem handler `pushsubscriptionchange` (self-heal via prune).
+
+Previous session: 10/07/2026 — **PWA hardening (best practices) + install-prompt dialog** (branch `feat/app-pwa-tier1-installability`, PR #123).
 
 **Hardening do Tier 1 (auditoria completa da implementação de 09/07):**
 - `public/sw.js` reescrito: navigation preload habilitado (tira a latência de boot do SW de toda navegação); runtime cache `giq-next-assets-v1` pra `/_next/static/*` (cache-first, immutable, FIFO trim 80 entries) — **conserta a página offline renderizando sem CSS**; snapshot de `/offline` re-buscado ao máximo 1×/hora após navegação online (não fica stale entre deploys); precache com `{ cache: "reload" }`; split critical (`/offline` + manifest, addAll — falha = retry no próximo load) vs optional (ícones/brand/fonts, allSettled — asset renomeado não quebra instalação); fallback inline trilíngue 503 se o cache do /offline for evicted (antes: `respondWith(undefined)` → TypeError); navegações POST nunca respondidas com cache. `skipWaiting`+`claim` mantidos (safe: navegação é network-first).
@@ -532,6 +546,12 @@ NEXT_PUBLIC_SENTRY_DSN=
 SENTRY_ORG=
 SENTRY_PROJECT=
 SENTRY_AUTH_TOKEN=
+
+# web push (VAPID) — generate once with `npx web-push generate-vapid-keys`;
+# public key is public by design; missing values disable push gracefully.
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=
 ```
 
 ## HOOKS

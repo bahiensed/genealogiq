@@ -1,6 +1,8 @@
 import "server-only"
 
+import { after } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { sendPushForNotification } from "@/lib/push"
 
 type NotificationType =
   | "TRIBUTE_PENDING"
@@ -33,6 +35,9 @@ export async function notify(args: NotifyArgs) {
       appUserGuardianId: args.appUserGuardianId ?? null,
     },
   })
+  // Web push fan-out runs after the response is flushed — it never slows the
+  // calling action, and sendPushForNotification never throws.
+  after(() => sendPushForNotification(args))
 }
 
 export async function markNotificationsRead(
