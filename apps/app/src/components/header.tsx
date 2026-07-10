@@ -23,10 +23,11 @@ import { useTranslations } from "next-intl"
 import { signOut } from "next-auth/react"
 
 function BellLink({ unreadCount }: { unreadCount: number }) {
+  const t = useTranslations("Nav")
   return (
     <Link
       href="/messages"
-      aria-label={unreadCount > 0 ? `${unreadCount} unread messages` : "Messages"}
+      aria-label={unreadCount > 0 ? t("messagesUnread", { count: unreadCount }) : t("messages")}
       className="relative rounded-full glass border-0 h-9 w-9 inline-flex items-center justify-center hover:bg-accent/50 transition-colors"
     >
       <Bell className="h-4 w-4" />
@@ -140,7 +141,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
           <button
             className="md:hidden rounded-full glass h-9 w-9 inline-flex items-center justify-center shrink-0"
             onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Open menu"
+            aria-label={t("openMenu")}
           >
             {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
@@ -158,7 +159,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
                 variant="ghost"
                 size="icon"
                 onClick={() => { setSearchOpen(true); setMobileOpen(false) }}
-                aria-label="Search profiles"
+                aria-label={t("searchProfiles")}
                 className="rounded-full glass border-0 h-9 w-9"
               >
                 <Search className="h-4 w-4" />
@@ -171,7 +172,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
 
       <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
         <DialogContent className="sm:max-w-md p-4 top-[15%] translate-y-0">
-          <DialogTitle className="sr-only">Search profiles</DialogTitle>
+          <DialogTitle className="sr-only">{t("searchProfiles")}</DialogTitle>
           <HeaderSearch onNavigate={() => setSearchOpen(false)} />
         </DialogContent>
       </Dialog>

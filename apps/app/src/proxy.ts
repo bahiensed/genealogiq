@@ -11,5 +11,11 @@ export default auth(function proxy(_req: NextRequest) {
 })
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
+  // Excludes API routes, Next internals, and PWA/static assets (service
+  // worker, manifest, favicon, fonts/, icons/, common image/font extensions)
+  // — none of them need the auth proxy, and the SW/manifest must not pay the
+  // JWT-decode cost on every fetch. Pages (including /offline) stay matched.
+  matcher: [
+    "/((?!api|_next/static|_next/image|sw\\.js|manifest\\.webmanifest|favicon\\.ico|fonts/|icons/|.*\\.(?:png|jpg|jpeg|webp|svg|ico|woff2?)$).*)",
+  ],
 }

@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { Footer } from "@/components/footer"
 import { RegisterServiceWorker } from "@/components/register-service-worker"
+import { PwaInstallDialog } from "@/components/pwa-install-dialog"
 
 export const metadata: Metadata = {
   title: "Genealogiq",
@@ -16,10 +17,19 @@ export const metadata: Metadata = {
   icons: {
     apple: "/icons/apple-touch-icon.png",
   },
+  appleWebApp: {
+    capable: true,
+    title: "Genealogiq",
+    statusBarStyle: "default",
+  },
 }
 
 export const viewport: Viewport = {
-  themeColor: "#616198",
+  // Light: --brand-indigo; dark: the dark --background hsl(240 24% 18%).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#616198" },
+    { media: "(prefers-color-scheme: dark)", color: "#232339" },
+  ],
 }
 
 export default async function RootLayout({
@@ -48,6 +58,7 @@ export default async function RootLayout({
               <Footer />
               <Toaster richColors />
               <RegisterServiceWorker />
+              <PwaInstallDialog />
             </TooltipProvider>
           </ThemeProvider>
         </NextIntlClientProvider>

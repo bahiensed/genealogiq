@@ -546,6 +546,17 @@
     "seeAll": "See all",
     "tagline": "Scan, search & visit a profile"
   },
+  "InstallPrompt": {
+    "betaNotice": "Genealogiq is in beta — you may run into occasional errors. Thanks for your patience while we improve.",
+    "declineButton": "Not now",
+    "description": "Add Genealogiq to your home screen for quick access and a full-screen experience.",
+    "gotItButton": "Got it",
+    "installButton": "Install",
+    "iosStep1": "Tap the Share button in your browser's toolbar.",
+    "iosStep2": "Scroll down and tap \"Add to Home Screen\".",
+    "iosStep3": "Tap \"Add\" to confirm.",
+    "title": "Install Genealogiq"
+  },
   "Memorialized": {
     "actions": {
       "createProfile": "Create profile",
@@ -720,6 +731,8 @@
     "messages": "Messages",
     "messagesUnread": "{count} unread messages",
     "myProfile": "My profile",
+    "openMenu": "Open menu",
+    "searchProfiles": "Search profiles",
     "signOut": "Sign out",
     "signUp": "Sign up",
     "subscriptions": "Subscriptions",
@@ -733,6 +746,7 @@
   },
   "Offline": {
     "description": "It looks like you lost your connection. Reconnect to keep browsing.",
+    "retry": "Try again",
     "title": "You're offline"
   },
   "Profile": {

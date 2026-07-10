@@ -546,6 +546,17 @@
     "seeAll": "Ver todos",
     "tagline": "Escaneie, busque e visite um perfil"
   },
+  "InstallPrompt": {
+    "betaNotice": "O Genealogiq está em fase beta — erros ocasionais podem acontecer. Obrigado pela paciência enquanto melhoramos.",
+    "declineButton": "Agora não",
+    "description": "Adicione o Genealogiq à sua tela inicial para acesso rápido e uma experiência em tela cheia.",
+    "gotItButton": "Entendi",
+    "installButton": "Instalar",
+    "iosStep1": "Toque no botão Compartilhar na barra do navegador.",
+    "iosStep2": "Role para baixo e toque em \"Adicionar à Tela de Início\".",
+    "iosStep3": "Toque em \"Adicionar\" para confirmar.",
+    "title": "Instale o Genealogiq"
+  },
   "Memorialized": {
     "actions": {
       "createProfile": "Criar perfil",
@@ -720,6 +731,8 @@
     "messages": "Mensagens",
     "messagesUnread": "{count} mensagens não lidas",
     "myProfile": "Meu perfil",
+    "openMenu": "Abrir menu",
+    "searchProfiles": "Buscar perfis",
     "signOut": "Sair",
     "signUp": "Cadastre-se",
     "subscriptions": "Assinaturas",
@@ -733,6 +746,7 @@
   },
   "Offline": {
     "description": "Parece que você perdeu a conexão. Reconecte-se para continuar navegando.",
+    "retry": "Tentar novamente",
     "title": "Você está offline"
   },
   "Profile": {
