@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Html5Qrcode } from "html5-qrcode"
 import { QrCode } from "lucide-react"
@@ -42,7 +42,18 @@ export function QrScannerModal({ onClose }: Props) {
   const scannerRef = useRef<Html5Qrcode | null>(null)
   const [hasPermission, setHasPermission] = useState<"pending" | "granted" | "denied">("pending")
 
+  // Radix mounts DialogContent through Presence, one state cycle after this
+  // component commits — so the scan region does not exist yet when our effect
+  // first runs, and html5-qrcode resolves it by id. This callback ref tells us
+  // when the node is actually in the DOM.
+  const [regionReady, setRegionReady] = useState(false)
+  const regionRef = useCallback((node: HTMLDivElement | null) => {
+    setRegionReady(node !== null)
+  }, [])
+
   useEffect(() => {
+    if (!regionReady) return
+
     const scanner = new Html5Qrcode(SCANNER_ELEMENT_ID, { verbose: false })
     scannerRef.current = scanner
     let started = false
@@ -93,7 +104,7 @@ export function QrScannerModal({ onClose }: Props) {
       unmounted = true
       stopSafely()
     }
-  }, [router, onClose, t])
+  }, [router, onClose, t, regionReady])
 
   return (
     <Dialog open onOpenChange={(next) => { if (!next) onClose() }}>
@@ -112,7 +123,7 @@ export function QrScannerModal({ onClose }: Props) {
             resolves it by id when the effect runs, before permission is known. */}
         <div className={hasPermission === "denied" ? "hidden" : "flex flex-col items-center gap-4"}>
           <div className="relative w-full max-w-xs aspect-square rounded-2xl overflow-hidden border-2 border-primary/40">
-            <div id={SCANNER_ELEMENT_ID} className="h-full w-full" />
+            <div id={SCANNER_ELEMENT_ID} ref={regionRef} className="h-full w-full" />
             {hasPermission === "pending" && (
               <div className="absolute inset-0 flex items-center justify-center bg-background/70">
                 <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
