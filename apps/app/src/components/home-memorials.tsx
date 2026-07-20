@@ -7,7 +7,9 @@ import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-car
 import { getProfileGradient } from "@/lib/avatar-color"
 import type { MemorialRow } from "@/queries/memorial"
 
-const VISIBLE = 6
+/** How many cards this section renders — also the point above which a
+ *  "see all" link is worth showing. Exported so the two cannot drift. */
+export const VISIBLE = 6
 
 function shuffle<T>(arr: T[]): T[] {
   const copy = [...arr]
