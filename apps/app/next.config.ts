@@ -6,6 +6,12 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@genealogiq/auth", "@genealogiq/core", "@genealogiq/i18n", "@genealogiq/email", "@genealogiq/db", "@genealogiq/services"],
+  images: {
+    // 75 is next/image's default; 90 is used for the wordmark logo, whose text
+    // shows compression artefacts at 75. Next 16 requires every used quality to
+    // be allow-listed here.
+    qualities: [75, 90],
+  },
   async headers() {
     return [
       {
@@ -27,5 +33,11 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   authToken: process.env.SENTRY_AUTH_TOKEN,
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  disableLogger: true,
+  // Replaces the deprecated `disableLogger`: tree-shakes Sentry debug logging
+  // from production bundles (no-op under Turbopack dev, which is expected).
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
 });

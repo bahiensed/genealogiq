@@ -23,8 +23,8 @@ export function GuestHeader() {
       <div className="glass-strong glass-header border-x-0 border-t-0 rounded-none">
         <div className="container flex items-center justify-between gap-3 md:gap-4 h-16">
           <Link href="/" className="flex items-center group shrink-0" aria-label="Genealogiq">
-            <Image src="/logo-dark.png" alt="Genealogiq" width={120} height={28} className="block dark:hidden h-7 w-auto" priority />
-            <Image src="/logo-light.png" alt="Genealogiq" width={120} height={28} className="hidden dark:block h-7 w-auto" priority />
+            <Image src="/logo-dark.png" alt="Genealogiq" width={162} height={28} quality={90} className="block dark:hidden" style={{ width: "auto", height: "auto" }} priority />
+            <Image src="/logo-light.png" alt="Genealogiq" width={162} height={28} quality={90} className="hidden dark:block" style={{ width: "auto", height: "auto" }} priority />
           </Link>
 
           <div className="flex items-center gap-2 shrink-0">
