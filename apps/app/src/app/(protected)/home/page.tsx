@@ -5,7 +5,7 @@ import { verifySession } from "@/lib/dal"
 import { GlassIcon } from "@/components/glass-icon"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { HomeSearch } from "@/components/home-search"
-import { HomeFavorites } from "@/components/home-favorites"
+import { HomeFavorites, VISIBLE as FAVORITES_VISIBLE } from "@/components/home-favorites"
 import { HomeMemorials, VISIBLE as GUARDED_VISIBLE } from "@/components/home-memorials"
 import { RecentlyViewedSection } from "@/components/recently-viewed-section"
 import { RecentlyViewedCount } from "@/components/recently-viewed-count"
@@ -105,7 +105,8 @@ export default async function HomePage() {
           subtitle={t("favoritesSubtitle")}
           seeAllLabel={t("seeAll")}
           delay={260}
-          seeMoreHref={`/profile/${userId}/favorites`}
+          // Only worth offering once there is more than this section shows.
+          seeMoreHref={favorites.length > FAVORITES_VISIBLE ? `/profile/${userId}/favorites` : undefined}
           emptyIcon={Heart}
           emptyText={t("favoritesEmpty")}
         >
