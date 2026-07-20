@@ -914,8 +914,6 @@
     },
     "scanner": {
       "cameraStartFailed": "Não foi possível iniciar a câmera.",
-      "closeAria": "Fechar leitor",
-      "dialogLabel": "Leitor de QR Code",
       "invalidCode": "QR Code inválido.",
       "notValidProfile": "O QR Code não aponta para um perfil válido.",
       "permissionDeniedHint": "Permita o acesso à câmera nas configurações do navegador e tente novamente.",
