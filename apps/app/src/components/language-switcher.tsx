@@ -25,7 +25,12 @@ import { updatePreferredLocale } from '@/actions/locale.actions'
 
 const FLAGS: Record<string, typeof BR> = { BR, MX, US }
 
-export function LanguageSwitcher() {
+interface Props {
+  /** Called once a language is picked, so an enclosing menu can close itself. */
+  onSelected?: () => void
+}
+
+export function LanguageSwitcher({ onSelected }: Props) {
   const raw = useLocale()
   const locale: SupportedLocale = isSupportedLocale(raw) ? raw : DEFAULT_LOCALE
   const t = useTranslations('Nav')
@@ -33,6 +38,9 @@ export function LanguageSwitcher() {
   const [isPending, startTransition] = useTransition()
 
   function handleSelect(value: SupportedLocale) {
+    // Fires even when re-picking the active locale: the user made a choice, so
+    // any menu wrapping this switcher should close either way.
+    onSelected?.()
     if (value === locale) return
     startTransition(async () => {
       await setLocale(value)

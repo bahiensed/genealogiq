@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
-import { Moon, Sun, Menu, X, Bell, User, LogOut, Sprout, Search } from "lucide-react"
+import { Moon, Sun, Menu, Bell, User, LogOut, Sprout, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -22,11 +22,12 @@ import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import { signOut } from "next-auth/react"
 
-function BellLink({ unreadCount }: { unreadCount: number }) {
+function BellLink({ unreadCount, onNavigate }: { unreadCount: number; onNavigate?: () => void }) {
   const t = useTranslations("Nav")
   return (
     <Link
       href="/messages"
+      onClick={onNavigate}
       aria-label={unreadCount > 0 ? t("messagesUnread", { count: unreadCount }) : t("messages")}
       className="relative rounded-full glass border-0 h-9 w-9 inline-flex items-center justify-center hover:bg-accent/50 transition-colors"
     >
@@ -53,21 +54,42 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const pathname = usePathname()
   const showSearch = pathname !== "/home"
+  const headerRef = useRef<HTMLElement | null>(null)
+
+  // Tapping anywhere outside the header collapses the mobile menu, so the X is
+  // not the only way out. Radix renders the avatar/language menus in a portal
+  // outside this subtree, so those clicks are excluded — otherwise opening a
+  // dropdown would immediately close the menu underneath it.
+  useEffect(() => {
+    if (!mobileOpen) return
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Element | null
+      if (!target) return
+      if (headerRef.current?.contains(target)) return
+      if (target.closest("[data-radix-popper-content-wrapper]")) return
+      setMobileOpen(false)
+    }
+    document.addEventListener("pointerdown", onPointerDown)
+    return () => document.removeEventListener("pointerdown", onPointerDown)
+  }, [mobileOpen])
 
   const initials = userName
     ? userName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
     : undefined
 
-  const controls = (
+  // `onAction` is passed only by the mobile row, so picking anything there
+  // collapses the menu. The two dropdowns are the exception: they fire it when
+  // an item inside them is chosen, not when their trigger opens.
+  const renderControls = (onAction?: () => void) => (
     <>
-      <BellLink unreadCount={unreadCount} />
+      <BellLink unreadCount={unreadCount} onNavigate={onAction} />
 
-      <LanguageSwitcher />
+      <LanguageSwitcher onSelected={onAction} />
 
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+        onClick={() => { setTheme(resolvedTheme === "dark" ? "light" : "dark"); onAction?.() }}
         aria-label={t("toggleTheme")}
         className="rounded-full glass border-0 h-9 w-9"
       >
@@ -97,13 +119,13 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
             </>
           )}
           <DropdownMenuItem asChild>
-            <Link href="/profile" className="gap-2 cursor-pointer">
+            <Link href="/profile" onClick={onAction} className="gap-2 cursor-pointer">
               <User className="h-4 w-4" />
               {t("myProfile")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/subscriptions" className="gap-2 cursor-pointer">
+            <Link href="/subscriptions" onClick={onAction} className="gap-2 cursor-pointer">
               <Sprout className="h-4 w-4" />
               {t("subscriptions")}
             </Link>
@@ -111,7 +133,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="gap-2 text-destructive focus:text-destructive cursor-pointer"
-            onSelect={() => signOut({ callbackUrl: "/" })}
+            onSelect={() => { onAction?.(); signOut({ callbackUrl: "/" }) }}
           >
             <LogOut className="h-4 w-4" />
             {t("signOut")}
@@ -122,7 +144,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
   )
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50">
+    <header ref={headerRef} className="fixed top-0 inset-x-0 z-50">
       <div className="glass-strong glass-header border-x-0 border-t-0 rounded-none">
         <div className="container flex items-center justify-between gap-3 md:gap-4 h-16">
           <Link href="/home" className="flex items-center group shrink-0" aria-label="Genealogiq">
@@ -136,15 +158,19 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
             </div>
           )}
 
-          <div className="hidden md:flex items-center gap-2 shrink-0">{controls}</div>
+          <div className="hidden md:flex items-center gap-2 shrink-0">{renderControls()}</div>
 
-          <button
-            className="md:hidden rounded-full glass h-9 w-9 inline-flex items-center justify-center shrink-0"
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label={t("openMenu")}
-          >
-            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+          {/* Only the opener: the menu closes by picking an item or tapping outside. */}
+          {!mobileOpen && (
+            <button
+              className="md:hidden rounded-full glass h-9 w-9 inline-flex items-center justify-center shrink-0"
+              onClick={() => setMobileOpen(true)}
+              aria-label={t("openMenu")}
+              aria-expanded={false}
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         <div
@@ -153,7 +179,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
             mobileOpen ? "max-h-32 opacity-100" : "max-h-0 opacity-0",
           )}
         >
-          <div className="container flex items-center justify-end gap-2 pb-4 pt-2">
+          <div className="container flex items-center justify-center gap-2 pb-4">
             {showSearch && (
               <Button
                 variant="ghost"
@@ -165,7 +191,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
                 <Search className="h-4 w-4" />
               </Button>
             )}
-            {controls}
+            {renderControls(() => setMobileOpen(false))}
           </div>
         </div>
       </div>
