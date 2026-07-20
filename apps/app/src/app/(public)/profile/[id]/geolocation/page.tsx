@@ -32,6 +32,7 @@ export default async function GeolocationPage({ params }: Props) {
   const locale = await getLocale()
   const t = await getTranslations("Geolocation")
   const tc = await getTranslations("Common")
+  const editLabel = isEmpty ? t("addLocation") : tc("edit")
 
   const photos = geo
     ? [geo.photo1, geo.photo2, geo.photo3].filter((p): p is string => !!p)
@@ -52,7 +53,7 @@ export default async function GeolocationPage({ params }: Props) {
               <Button asChild className="shrink-0 gap-2">
                 <Link href={editHref}>
                   {isEmpty ? <Plus className="h-4 w-4" /> : <SquarePen className="h-4 w-4" />}
-                  {isEmpty ? t("addLocation") : tc("edit")}
+                  <span className="sr-only md:not-sr-only">{editLabel}</span>
                 </Link>
               </Button>
             )}
