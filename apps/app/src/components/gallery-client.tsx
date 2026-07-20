@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
 import { useLocale, useTranslations } from "next-intl"
-import { Play, X, ChevronLeft, ChevronRight, Images, ImagePlus, ArrowDownUp } from "lucide-react"
+import { Play, X, ChevronLeft, ChevronRight, Images, ImagePlus, SquarePen, ArrowDownUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import {
@@ -48,6 +48,7 @@ export function GalleryClient({ items: rawItems, name, editHref, isOwn, upgradeH
   const tc = useTranslations("Common")
   const locale = useLocale()
   const isEmpty = rawItems.length === 0
+  const editLabel = isEmpty ? t("addMedia") : tc("edit")
 
   const [sort, setSort] = useState<SortDir>("newest")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -133,8 +134,8 @@ export function GalleryClient({ items: rawItems, name, editHref, isOwn, upgradeH
           {isOwn && editHref && (
             <Button asChild className="gap-2">
               <Link href={editHref}>
-                {isEmpty ? <ImagePlus className="h-4 w-4" /> : <Images className="h-4 w-4" />}
-                {isEmpty ? t("addMedia") : tc("edit")}
+                {isEmpty ? <ImagePlus className="h-4 w-4" /> : <SquarePen className="h-4 w-4" />}
+                <span className="sr-only md:not-sr-only">{editLabel}</span>
               </Link>
             </Button>
           )}

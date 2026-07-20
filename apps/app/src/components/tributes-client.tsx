@@ -101,6 +101,7 @@ export function TributesClient({ items, name, profileId, sessionUserId, canWrite
 
   const visible = sorted.slice(0, visibleCount)
   const writeHref = `/profile/${profileId}/tributes/edit`
+  const writeLabel = myTribute ? t("list.editYourTribute") : t("list.sendATribute")
 
   return (
     <>
@@ -137,7 +138,7 @@ export function TributesClient({ items, name, profileId, sessionUserId, canWrite
             <Button asChild className="gap-2">
               <Link href={writeHref}>
                 {myTribute ? <SquarePen className="h-4 w-4" /> : <Send className="h-4 w-4" />}
-                {myTribute ? t("list.editYourTribute") : t("list.sendATribute")}
+                <span className="sr-only md:not-sr-only">{writeLabel}</span>
               </Link>
             </Button>
           )}
