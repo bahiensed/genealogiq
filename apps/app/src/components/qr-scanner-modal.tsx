@@ -3,12 +3,33 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Html5Qrcode } from "html5-qrcode"
-import { X, QrCode } from "lucide-react"
+import { QrCode } from "lucide-react"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 const SCANNER_ELEMENT_ID = "qr-scanner-region"
+
+// The browser reports a blocked camera through the DOMException name, which is
+// stable across locales — the message string is not. html5-qrcode sometimes
+// rejects with a bare string instead of an Error, so the message is kept as a
+// last-resort fallback for those cases.
+function isPermissionDenied(err: unknown): boolean {
+  if (err instanceof DOMException) {
+    return err.name === "NotAllowedError" || err.name === "SecurityError"
+  }
+  const name = typeof err === "object" && err !== null && "name" in err ? String(err.name) : ""
+  if (name === "NotAllowedError" || name === "SecurityError") return true
+  const msg = err instanceof Error ? err.message : String(err)
+  return msg.toLowerCase().includes("permission")
+}
 
 interface Props {
   onClose: () => void
@@ -60,8 +81,7 @@ export function QrScannerModal({ onClose }: Props) {
         else setHasPermission("granted")
       })
       .catch((err: unknown) => {
-        const msg = err instanceof Error ? err.message : String(err)
-        if (msg.toLowerCase().includes("permission")) {
+        if (isPermissionDenied(err)) {
           setHasPermission("denied")
         } else {
           toast.error(t("scanner.cameraStartFailed"))
@@ -76,53 +96,46 @@ export function QrScannerModal({ onClose }: Props) {
   }, [router, onClose, t])
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-sm animate-fade-in"
-      role="dialog"
-      aria-label={t("scanner.dialogLabel")}
-    >
-      <div className="flex items-center justify-between px-5 py-4 border-b border-border/60">
-        <div className="flex items-center gap-2">
-          <QrCode className="h-5 w-5 text-primary" />
-          <span className="font-semibold">{t("scanner.title")}</span>
-        </div>
-        <Button variant="ghost" size="icon" onClick={onClose} aria-label={t("scanner.closeAria")}>
-          <X className="h-5 w-5" />
-        </Button>
-      </div>
+    <Dialog open onOpenChange={(next) => { if (!next) onClose() }}>
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <QrCode className="h-5 w-5 text-primary" />
+            {t("scanner.title")}
+          </DialogTitle>
+          <DialogDescription>
+            {hasPermission === "denied" ? t("scanner.permissionDeniedHint") : t("scanner.pointCamera")}
+          </DialogDescription>
+        </DialogHeader>
 
-      <div className="flex-1 flex flex-col items-center justify-center gap-6 p-6">
-        {hasPermission === "denied" ? (
-          <div className="text-center space-y-3 max-w-xs">
-            <QrCode className="h-12 w-12 text-muted-foreground mx-auto" />
+        {/* The scanner region must stay mounted in every state: html5-qrcode
+            resolves it by id when the effect runs, before permission is known. */}
+        <div className={hasPermission === "denied" ? "hidden" : "flex flex-col items-center gap-4"}>
+          <div className="relative w-full max-w-xs aspect-square rounded-2xl overflow-hidden border-2 border-primary/40">
+            <div id={SCANNER_ELEMENT_ID} className="h-full w-full" />
+            {hasPermission === "pending" && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/70">
+                <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+              </div>
+            )}
+            <div className="pointer-events-none absolute inset-0">
+              <div className="absolute top-3 left-3 h-8 w-8 border-t-2 border-l-2 border-primary rounded-tl-lg" />
+              <div className="absolute top-3 right-3 h-8 w-8 border-t-2 border-r-2 border-primary rounded-tr-lg" />
+              <div className="absolute bottom-3 left-3 h-8 w-8 border-b-2 border-l-2 border-primary rounded-bl-lg" />
+              <div className="absolute bottom-3 right-3 h-8 w-8 border-b-2 border-r-2 border-primary rounded-br-lg" />
+            </div>
+          </div>
+        </div>
+
+        {hasPermission === "denied" && (
+          <div className="flex flex-col items-center gap-3 text-center">
+            <QrCode className="h-12 w-12 text-muted-foreground" />
+            {/* The hint itself is carried by DialogDescription above. */}
             <p className="font-medium">{t("scanner.permissionDeniedTitle")}</p>
-            <p className="text-sm text-muted-foreground">
-              {t("scanner.permissionDeniedHint")}
-            </p>
             <Button onClick={onClose}>{tc("close")}</Button>
           </div>
-        ) : (
-          <>
-            <div className="relative w-full max-w-xs aspect-square rounded-2xl overflow-hidden border-2 border-primary/40">
-              <div id={SCANNER_ELEMENT_ID} className="h-full w-full" />
-              {hasPermission === "pending" && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/70">
-                  <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                </div>
-              )}
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute top-3 left-3 h-8 w-8 border-t-2 border-l-2 border-primary rounded-tl-lg" />
-                <div className="absolute top-3 right-3 h-8 w-8 border-t-2 border-r-2 border-primary rounded-tr-lg" />
-                <div className="absolute bottom-3 left-3 h-8 w-8 border-b-2 border-l-2 border-primary rounded-bl-lg" />
-                <div className="absolute bottom-3 right-3 h-8 w-8 border-b-2 border-r-2 border-primary rounded-br-lg" />
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground text-center">
-              {t("scanner.pointCamera")}
-            </p>
-          </>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

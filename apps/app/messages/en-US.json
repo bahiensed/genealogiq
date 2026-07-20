@@ -914,8 +914,6 @@
     },
     "scanner": {
       "cameraStartFailed": "Could not start camera.",
-      "closeAria": "Close scanner",
-      "dialogLabel": "QR Code scanner",
       "invalidCode": "Invalid QR Code.",
       "notValidProfile": "QR Code does not point to a valid profile.",
       "permissionDeniedHint": "Allow camera access in your browser settings and try again.",
