@@ -122,19 +122,21 @@ export function QrScannerModal({ onClose }: Props) {
         {/* The scanner region must stay mounted in every state: html5-qrcode
             resolves it by id when the effect runs, before permission is known. */}
         <div className={hasPermission === "denied" ? "hidden" : "flex flex-col items-center gap-4"}>
-          <div className="relative w-full max-w-xs aspect-square rounded-2xl overflow-hidden border-2 border-primary/40">
-            <div id={SCANNER_ELEMENT_ID} ref={regionRef} className="h-full w-full" />
+          <div className="relative w-full max-w-xs aspect-square rounded-2xl overflow-hidden border-2 border-primary/40 bg-black">
+            {/* html5-qrcode injects a <video> at the camera's native ratio, which
+                is shorter than this square frame — centring it keeps the whole
+                picture and splits the leftover space evenly instead of pooling
+                it at the bottom. */}
+            <div
+              id={SCANNER_ELEMENT_ID}
+              ref={regionRef}
+              className="flex h-full w-full items-center justify-center"
+            />
             {hasPermission === "pending" && (
               <div className="absolute inset-0 flex items-center justify-center bg-background/70">
                 <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
               </div>
             )}
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute top-3 left-3 h-8 w-8 border-t-2 border-l-2 border-primary rounded-tl-lg" />
-              <div className="absolute top-3 right-3 h-8 w-8 border-t-2 border-r-2 border-primary rounded-tr-lg" />
-              <div className="absolute bottom-3 left-3 h-8 w-8 border-b-2 border-l-2 border-primary rounded-bl-lg" />
-              <div className="absolute bottom-3 right-3 h-8 w-8 border-b-2 border-r-2 border-primary rounded-br-lg" />
-            </div>
           </div>
         </div>
 
