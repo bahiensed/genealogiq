@@ -17,7 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/adapter-pg": "^7.9.0",
     "@prisma/client": "^7.7.0"
   },
   "devDependencies": {
