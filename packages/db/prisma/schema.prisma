@@ -445,6 +445,8 @@ model AppUser {
   physicalQrPurchases PhysicalQrLicense[]  @relation("PhysicalQrBuyer")
   pushSubscriptions   PushSubscription[]
   qrCode              QrCode?
+  treeNodePositionsAsRoot   TreeNodePosition[] @relation("TreeNodePositionRoot")
+  treeNodePositionsAsPerson TreeNodePosition[] @relation("TreeNodePositionPerson")
 
   @@index([tenantId])
   @@index([categoryId])
@@ -625,6 +627,29 @@ model FamilyRelation {
   @@index([fromId], map: "family_relations_app_from_id_idx")
   @@index([toId], map: "family_relations_app_to_id_idx")
   @@map("app_family_relations")
+}
+
+// Manual drag-to-reposition offset for one person's card within one tree,
+// layered on top of computeLayout()'s output. `generation` snapshots the
+// layout engine's BFS generation for `personId` at save-time — if a later
+// relation change reshapes the tree and the person's generation no longer
+// matches, the app treats the override as stale and ignores it rather than
+// misplacing them relative to their (now different) family unit.
+model TreeNodePosition {
+  id         String   @id @default(cuid())
+  rootId     String   @map("root_id")
+  personId   String   @map("person_id")
+  dx         Float
+  dy         Float
+  generation Int
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  root       AppUser  @relation("TreeNodePositionRoot", fields: [rootId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tree_node_positions_root_id_fkey")
+  person     AppUser  @relation("TreeNodePositionPerson", fields: [personId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "tree_node_positions_person_id_fkey")
+
+  @@unique([rootId, personId], map: "tree_node_positions_root_person_key")
+  @@index([rootId], map: "tree_node_positions_root_id_idx")
+  @@map("app_tree_node_positions")
 }
 
 model Notification {

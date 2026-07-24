@@ -31,3 +31,11 @@ export function siblingStyle(subtype: string): Style {
   if (subtype === "step")    return { stroke: muted, width: 1.5, dashArray: "2 4" }
   return { stroke: muted, width: 1.5 }
 }
+
+/** Overrides any subtype styling for an edge on the relationship-path
+ *  compare tool's highlighted path — deliberately ignores dash patterns so
+ *  the whole path reads as one continuous, solid line regardless of the
+ *  mix of blood/step/adopted relations it crosses. */
+export function highlightStyle(): Style {
+  return { stroke: "hsl(var(--primary))", width: 3 }
+}

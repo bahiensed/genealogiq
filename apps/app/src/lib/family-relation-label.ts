@@ -3,16 +3,82 @@ import type { TreePerson, TreeRelation } from "@/queries/family-tree"
 
 type Direction = "parent" | "child" | "spouse" | "sibling"
 
-interface Step {
-  via:    Direction
-  toId:   string
-  isStep: boolean   // step / adopted PARENT_OF
+export interface RelationPathStep {
+  via:        Direction
+  toId:       string
+  /** The TreeRelation.id this step traversed — lets a caller (e.g. the
+   *  canvas's relationship-path highlight) map the path back onto edges. */
+  relationId: string
+  isStep:     boolean   // step / adopted PARENT_OF
+}
+
+export interface RelationPath {
+  targetId: string
+  /** In order from rootId to targetId; empty only if rootId === targetId
+   *  (which this function refuses — see below). */
+  steps:    RelationPathStep[]
+}
+
+/**
+ * Shortest path from `rootId` to `targetId` through the relations graph
+ * (unweighted BFS — first path found is shortest by hop count). Each step
+ * carries the relation id it traversed, so a caller can highlight the exact
+ * edges. Returns null when unreachable within `maxHops`, or when
+ * rootId === targetId (a path to yourself is meaningless here).
+ */
+export function findRelationPath(
+  relations: TreeRelation[],
+  rootId: string,
+  targetId: string,
+  maxHops = 12,
+): RelationPath | null {
+  if (rootId === targetId) return null
+
+  // Build directed adjacency from relations.
+  const adj = new Map<string, RelationPathStep[]>()
+  const push = (from: string, step: RelationPathStep) => {
+    const arr = adj.get(from) ?? []
+    arr.push(step)
+    adj.set(from, arr)
+  }
+  for (const r of relations) {
+    const isStep = r.subtype === "step" || r.subtype === "adopted"
+    if (r.type === "PARENT_OF") {
+      push(r.toId,   { via: "parent", toId: r.fromId, relationId: r.id, isStep })
+      push(r.fromId, { via: "child",  toId: r.toId,   relationId: r.id, isStep })
+    } else if (r.type === "SPOUSE") {
+      push(r.fromId, { via: "spouse", toId: r.toId,   relationId: r.id, isStep: false })
+      push(r.toId,   { via: "spouse", toId: r.fromId, relationId: r.id, isStep: false })
+    } else if (r.type === "SIBLING") {
+      const sibStep = r.subtype === "half" || r.subtype === "step"
+      push(r.fromId, { via: "sibling", toId: r.toId,   relationId: r.id, isStep: sibStep })
+      push(r.toId,   { via: "sibling", toId: r.fromId, relationId: r.id, isStep: sibStep })
+    }
+  }
+
+  type QueueItem = { id: string; steps: RelationPathStep[] }
+  const queue: QueueItem[] = [{ id: rootId, steps: [] }]
+  const visited = new Set<string>([rootId])
+
+  while (queue.length > 0) {
+    const cur = queue.shift()!
+    if (cur.steps.length >= maxHops) continue
+    for (const s of adj.get(cur.id) ?? []) {
+      if (visited.has(s.toId)) continue
+      visited.add(s.toId)
+      const nextSteps = [...cur.steps, s]
+      if (s.toId === targetId) return { targetId, steps: nextSteps }
+      queue.push({ id: s.toId, steps: nextSteps })
+    }
+  }
+  return null
 }
 
 /**
  * Computes a human label for `targetId` from the perspective of `rootId`,
- * walking up to 4 hops through the relations graph. Picks the shortest path
- * by total step weight; returns the most-specific gendered label we can.
+ * walking up to 4 hops through the relations graph (see findRelationPath).
+ * Picks the shortest path by hop count; returns the most-specific gendered
+ * label we can.
  *
  * `t` must be scoped to the "FamilyTree" namespace (keys live under
  * "relation.*") — accepting a Translator (rather than hardcoding English)
@@ -20,7 +86,8 @@ interface Step {
  * chart), not just the client component that calls it today.
  *
  * Returns null for the root itself; falls back to relation.relative for
- * paths we don't have specific copy for.
+ * paths we don't have specific copy for (including "unreachable within 4
+ * hops" — a real but distant relative, not a stranger).
  */
 export function relationFromRoot(
   persons: Record<string, TreePerson>,
@@ -32,55 +99,12 @@ export function relationFromRoot(
   if (rootId === targetId) return null
   if (!persons[targetId]) return null
 
-  // Build directed adjacency from relations.
-  const adj = new Map<string, Step[]>()
-  const push = (from: string, step: Step) => {
-    const arr = adj.get(from) ?? []
-    arr.push(step)
-    adj.set(from, arr)
-  }
-  for (const r of relations) {
-    const isStep = r.subtype === "step" || r.subtype === "adopted"
-    if (r.type === "PARENT_OF") {
-      push(r.toId,   { via: "parent", toId: r.fromId, isStep })
-      push(r.fromId, { via: "child",  toId: r.toId,   isStep })
-    } else if (r.type === "SPOUSE") {
-      push(r.fromId, { via: "spouse", toId: r.toId,   isStep: false })
-      push(r.toId,   { via: "spouse", toId: r.fromId, isStep: false })
-    } else if (r.type === "SIBLING") {
-      push(r.fromId, { via: "sibling", toId: r.toId,  isStep: r.subtype === "half" || r.subtype === "step" })
-      push(r.toId,   { via: "sibling", toId: r.fromId, isStep: r.subtype === "half" || r.subtype === "step" })
-    }
-  }
+  const path = findRelationPath(relations, rootId, targetId, 4)
+  if (!path) return t("relation.relative")
 
-  // BFS, track path as a sequence of Directions + flags.
-  type PathItem = { id: string; via: Direction[]; flags: { isStep: boolean }[] }
-  const queue: PathItem[] = [{ id: rootId, via: [], flags: [] }]
-  const visited = new Set<string>([rootId])
-  const maxHops = 4
-
-  let found: PathItem | null = null
-  while (queue.length > 0) {
-    const cur = queue.shift()!
-    if (cur.via.length >= maxHops) continue
-    const steps = adj.get(cur.id) ?? []
-    for (const s of steps) {
-      if (visited.has(s.toId)) continue
-      visited.add(s.toId)
-      const next: PathItem = {
-        id:    s.toId,
-        via:   [...cur.via, s.via],
-        flags: [...cur.flags, { isStep: s.isStep }],
-      }
-      if (s.toId === targetId) { found = next; break }
-      queue.push(next)
-    }
-    if (found) break
-  }
-
-  if (!found) return t("relation.relative")
-
-  return labelForPath(found.via, found.flags, persons[targetId]!.gender, t)
+  const via   = path.steps.map((s) => s.via)
+  const flags = path.steps.map((s) => ({ isStep: s.isStep }))
+  return labelForPath(via, flags, persons[targetId]!.gender, t)
 }
 
 function labelForPath(

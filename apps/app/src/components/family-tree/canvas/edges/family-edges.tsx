@@ -3,34 +3,46 @@
 import { Fragment } from "react"
 import type { LaidNode, ParentLineGeom, CoupleLineGeom, SiblingLineGeom } from "../layout"
 import { NODE_W, NODE_H, Y_GEN } from "../layout"
-import { parentStyle, spouseStyle, siblingStyle } from "./edge-style"
+import { parentStyle, spouseStyle, siblingStyle, highlightStyle } from "./edge-style"
 
 interface Props {
   nodes:        LaidNode[]
   parentLines:  ParentLineGeom[]
   coupleLines:  CoupleLineGeom[]
   siblingLines: SiblingLineGeom[]
+  /** Relation ids on the compare tool's currently-highlighted path, if any. */
+  highlightedRelationIds?: Set<string>
 }
 
 interface Pos { x: number; y: number }
 
 const TRUNK_OFFSET = 28   // vertical distance below parent card before the horizontal trunk
 
-export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: Props) {
+export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines, highlightedRelationIds }: Props) {
   const pos = new Map<string, Pos>()
   for (const n of nodes) pos.set(n.id, { x: n.x, y: n.y })
 
+  const isHighlighted = (relationId: string) => highlightedRelationIds?.has(relationId) ?? false
+
   // ─── Group parent lines by child (to detect two-parent T-junctions) ──────────
-  const parentsByChild = new Map<string, { parentId: string; subtype: string }[]>()
+  const parentsByChild = new Map<string, { parentId: string; subtype: string; relationId: string }[]>()
   for (const p of parentLines) {
     const arr = parentsByChild.get(p.childId) ?? []
-    arr.push({ parentId: p.parentId, subtype: p.subtype })
+    arr.push({ parentId: p.parentId, subtype: p.subtype, relationId: p.relationId })
     parentsByChild.set(p.childId, arr)
   }
 
   // ─── Two-parent families: children with exactly two parents ─────────────────
   // Grouped by sorted parent-pair key so multiple children share one trunk.
-  const familiesByPair = new Map<string, { parents: [string, string]; children: string[]; subtypes: Map<string, string> }>()
+  // `highlightedChildren` tracks which of this family's children sit on the
+  // compare tool's highlighted path — the SHARED vertical-drop/horizontal-trunk
+  // segments highlight if ANY of them does (simpler and reads fine even
+  // though other siblings pass through the same trunk); each child's own
+  // stub highlights individually.
+  const familiesByPair = new Map<string, {
+    parents: [string, string]; children: string[]
+    subtypes: Map<string, string>; highlightedChildren: Set<string>
+  }>()
   for (const [childId, ps] of parentsByChild.entries()) {
     if (ps.length < 2) continue
     const sortedIds = ps.map((p) => p.parentId).sort()
@@ -39,22 +51,29 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: P
       parents:  [sortedIds[0], sortedIds[1]] as [string, string],
       children: [],
       subtypes: new Map<string, string>(),
+      highlightedChildren: new Set<string>(),
     }
     family.children.push(childId)
     const subKey = ps[0].subtype === "blood" ? ps[1].subtype : ps[0].subtype
     family.subtypes.set(childId, subKey)
+    if (ps.some((p) => isHighlighted(p.relationId))) family.highlightedChildren.add(childId)
     familiesByPair.set(key, family)
   }
 
   // ─── Single-parent families: parent with 2+ children ────────────────────────
   // We group by parent; later we render a T-junction only when count >= 2.
-  const singleParentGroups = new Map<string, { children: string[]; subtypes: Map<string, string> }>()
+  const singleParentGroups = new Map<string, {
+    children: string[]; subtypes: Map<string, string>; highlightedChildren: Set<string>
+  }>()
   for (const [childId, ps] of parentsByChild.entries()) {
     if (ps.length !== 1) continue
-    const { parentId, subtype } = ps[0]
-    const group = singleParentGroups.get(parentId) ?? { children: [] as string[], subtypes: new Map<string, string>() }
+    const { parentId, subtype, relationId } = ps[0]
+    const group = singleParentGroups.get(parentId) ?? {
+      children: [] as string[], subtypes: new Map<string, string>(), highlightedChildren: new Set<string>(),
+    }
     group.children.push(childId)
     group.subtypes.set(childId, subtype)
+    if (isHighlighted(relationId)) group.highlightedChildren.add(childId)
     singleParentGroups.set(parentId, group)
   }
 
@@ -86,7 +105,7 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: P
         const rightX = Math.max(parentMidX, ...childCenters)
 
         const trunkSubtype = fam.subtypes.values().next().value ?? "blood"
-        const tStyle = parentStyle(trunkSubtype)
+        const tStyle = fam.highlightedChildren.size > 0 ? highlightStyle() : parentStyle(trunkSubtype)
 
         return (
           <Fragment key={`fam-${i}`}>
@@ -109,7 +128,9 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: P
               const cp = pos.get(cid)
               if (!cp) return null
               const stubX    = cp.x + NODE_W / 2
-              const subStyle = parentStyle(fam.subtypes.get(cid) ?? trunkSubtype)
+              const subStyle = fam.highlightedChildren.has(cid)
+                ? highlightStyle()
+                : parentStyle(fam.subtypes.get(cid) ?? trunkSubtype)
               return (
                 <line
                   key={`stub-${i}-${cid}`}
@@ -145,7 +166,7 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: P
           const rightX = Math.max(parentCenterX, ...childCenters)
 
           const trunkSubtype = g.subtypes.values().next().value ?? "blood"
-          const tStyle = parentStyle(trunkSubtype)
+          const tStyle = g.highlightedChildren.size > 0 ? highlightStyle() : parentStyle(trunkSubtype)
 
           return (
             <Fragment key={`sp-tj-${parentId}`}>
@@ -168,7 +189,9 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: P
                 const cp = pos.get(cid)
                 if (!cp) return null
                 const stubX    = cp.x + NODE_W / 2
-                const subStyle = parentStyle(g.subtypes.get(cid) ?? trunkSubtype)
+                const subStyle = g.highlightedChildren.has(cid)
+                  ? highlightStyle()
+                  : parentStyle(g.subtypes.get(cid) ?? trunkSubtype)
                 return (
                   <line
                     key={`sp-stub-${parentId}-${cid}`}
@@ -202,7 +225,7 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: P
         const ay    = a.y + NODE_H
         const by    = b.y
         const midY  = ay + (by - ay) / 2
-        const style = parentStyle(p.subtype)
+        const style = isHighlighted(p.relationId) ? highlightStyle() : parentStyle(p.subtype)
         // Soft L-path (elbow at midpoint); straight line when parent and child are aligned.
         const d = `M ${ax} ${ay} L ${ax} ${midY} L ${bx} ${midY} L ${bx} ${by}`
         return (
@@ -224,7 +247,7 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: P
         const x1    = a.x + NODE_W
         const y1    = a.y + NODE_H / 2
         const x2    = b.x
-        const style = spouseStyle(c.subtype)
+        const style = isHighlighted(c.relationId) ? highlightStyle() : spouseStyle(c.subtype)
         const sameRow = Math.abs(a.y - b.y) < 4
         const d = sameRow
           ? `M ${Math.min(x1, x2)} ${y1} L ${Math.max(x1, x2)} ${y1}`
@@ -249,7 +272,7 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines }: P
         const x1    = a.x + NODE_W / 2
         const x2    = b.x + NODE_W / 2
         const y1    = a.y + NODE_H / 2
-        const style = siblingStyle(s.subtype)
+        const style = isHighlighted(s.relationId) ? highlightStyle() : siblingStyle(s.subtype)
         return (
           <line
             key={`sb-${i}`}

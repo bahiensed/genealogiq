@@ -15,6 +15,35 @@
 //   4. Stitch the descendant forest + ancestor forest around the subject.
 //   5. Build edge geometry arrays and bounds from the placed positions.
 //
+// Pedigree collapse (the same real person legitimately reachable via two
+// distinct branches — e.g. a cousin marriage converging on a shared
+// great-grandparent, or two cousins who marry each other) is handled by
+// `DedupState`: the FIRST time a person is placed — as a focal descendant, a
+// focal ancestor, or a SPOUSE card inside a couple slot — they get their
+// real id as node id ("primary"); every subsequent placement, through any of
+// those three paths, gets a synthetic occurrence id and renders as a leaf
+// stub (no further recursion) — see `resolveOccurrence` below, the single
+// choke point `dedup.placedAsPrimary` is written through. This is orthogonal
+// to `visited`, which stays the pure recursion-termination guard it always
+// was (a real ancestry cycle must still be prevented — the DB-layer cycle
+// guard has a known PENDING-vs-PENDING blind spot, so this is not purely
+// redundant with it). Ancestor-side duplicates additionally get a
+// correctly-routed connecting edge via `dedup.parentEdgeOverrides` (see
+// layoutAncestorSubtreeIndividual) — descendant-side duplicates (including
+// spouse-card duplicates) are stubbed but their incoming edge is left to the
+// default (primary-occurrence) resolution, a deliberate, documented v1 scope
+// cut: the position-collision failure mode (mis-drawn edges) is
+// architecturally only possible on the ancestor side (see the husband/wife
+// split in layoutAncestorCoupleBlock), so that's where getting edge routing
+// exactly right matters.
+//
+// User-driven collapse (`collapsedIds`, a computeLayout param) reuses this
+// exact same "stub, don't recurse" shape — a collapsed occurrence renders
+// its card but not its descendants/ancestors, same as a pedigree-collapse
+// duplicate. It is orthogonal to `dedup`: a collapsed person still claims
+// their real id as primary the first time they're placed. Not persisted —
+// pure client view state, reset on reload (see family-tree-canvas.tsx).
+//
 // v1 limitations (out of scope here, documented for later upgrades):
 //   - Extras at gen <= -2 (great-aunts/uncles, etc.) render as couple slots
 //     only — their own descendants are not shown to keep deep generations
@@ -38,31 +67,58 @@ export const X_TIGHT   = 24   // gap inside a couple
 export const X_SIBLING = 40   // gap between siblings of the same parents
 export const X_FAMILY  = 64   // gap between unrelated family blocks at the same level
 
-// ─── Output types (unchanged shape) ─────────────────────────────────────────
+// ─── Output types ────────────────────────────────────────────────────────────
 
 export interface LaidNode {
-  id: string
-  x:  number
-  y:  number
+  /** Node/occurrence id — unique. Equals `personId` for the first (primary)
+   *  occurrence of a person; a synthetic `"<personId>~dupN"` for every
+   *  subsequent occurrence (pedigree collapse). Use as React key / edge
+   *  position-map key. */
+  id:          string
+  /** The real person id — always. Use this for persons[id] lookups,
+   *  selection/session comparisons, and any mutation-layer call. */
+  personId:    string
+  /** True for every occurrence after the first — renders as a leaf stub
+   *  (no further recursion into that person's own parents/children). */
+  isDuplicate: boolean
+  /** True when this occurrence has further content in `collapseDirection`
+   *  (descendants if "down", ancestors if "up") that user-driven collapse
+   *  can hide — regardless of whether it's currently collapsed. Always
+   *  false for a duplicate. Lets the UI show a collapse/expand toggle only
+   *  where there is something to toggle. */
+  hasCollapsible:   boolean
+  /** True when `hasCollapsible` content is currently hidden (this
+   *  occurrence's id was in the `collapsedIds` passed to computeLayout). */
+  isCollapsed:      boolean
+  /** Which side collapsing this occurrence would hide — "down" for
+   *  descendants, "up" for ancestors. Meaningless when !hasCollapsible. */
+  collapseDirection: "up" | "down"
+  x: number
+  y: number
 }
 
 export interface ParentLineGeom {
-  parentId: string
-  childId:  string
-  subtype:  string
+  parentId:   string
+  childId:    string
+  subtype:    string
+  /** The underlying TreeRelation.id — lets a caller (e.g. the relationship-
+   *  path compare tool) highlight the exact edge a path traversed. */
+  relationId: string
 }
 
 export interface CoupleLineGeom {
-  aId:     string
-  bId:     string
-  subtype: string
-  endDate: Date | null
+  aId:        string
+  bId:        string
+  subtype:    string
+  endDate:    Date | null
+  relationId: string
 }
 
 export interface SiblingLineGeom {
-  aId:     string
-  bId:     string
-  subtype: string
+  aId:        string
+  bId:        string
+  subtype:    string
+  relationId: string
 }
 
 export interface LayoutResult {
@@ -74,11 +130,61 @@ export interface LayoutResult {
   generation:   Map<string, number>
 }
 
+// ─── Pedigree-collapse dedup state (one instance per computeLayout() call) ──
+
+interface DedupState {
+  /** Real person ids already placed once. Never cloned — shared across every
+   *  recursive branch, including the husband/wife split, so a second branch
+   *  reaching the same person is detected regardless of which branch got
+   *  there first. */
+  placedAsPrimary: Set<string>
+  /** Allocates a unique synthetic occurrence id for a duplicate placement. */
+  nextDupId: (personId: string) => string
+  /** Ancestor-chain PARENT_OF edges that must connect to a specific
+   *  (possibly-duplicate) occurrence rather than the default "whichever
+   *  occurrence owns the bare real id" resolution. Keyed by
+   *  `${realParentId}|${realChildId}`; only populated when the parent
+   *  occurrence in question is itself a duplicate — the primary case is
+   *  already correct via the default resolution. */
+  parentEdgeOverrides: Map<string, string>
+}
+
+function createDedupState(): DedupState {
+  const dupCounts = new Map<string, number>()
+  return {
+    placedAsPrimary: new Set<string>(),
+    nextDupId: (personId: string) => {
+      const n = (dupCounts.get(personId) ?? 0) + 1
+      dupCounts.set(personId, n)
+      return `${personId}~dup${n}`
+    },
+    parentEdgeOverrides: new Map<string, string>(),
+  }
+}
+
+// ─── User-driven collapse (not persisted — pure client view state) ─────────
+
+interface CollapseEntry {
+  hasCollapsible:    boolean
+  isCollapsed:       boolean
+  collapseDirection: "up" | "down"
+}
+
+const NOT_COLLAPSIBLE: CollapseEntry = { hasCollapsible: false, isCollapsed: false, collapseDirection: "down" }
+
+/** Keyed by occurrence (node) id, populated at the same recursive call sites
+ *  that decide whether to descend further — see layoutDescendantSubtree /
+ *  layoutAncestorSubtreeIndividual / layoutHalfMarriageBlock. */
+type CollapseInfo = Map<string, CollapseEntry>
+
 // ─── Block: a placed subtree, anchor at x=0 ─────────────────────────────────
 
+interface PlacedPos { x: number; y: number; personId: string; isDuplicate: boolean }
+
 interface Block {
-  /** Person → {x, y} relative to the block's anchor (anchor.x = 0). */
-  positions: Map<string, { x: number; y: number }>
+  /** Node id → placed position + occurrence metadata, relative to the
+   *  block's anchor (anchor.x = 0). */
+  positions: Map<string, PlacedPos>
   /** Horizontal extent of the block (relative to anchor=0). */
   leftX:  number
   rightX: number
@@ -111,9 +217,15 @@ function placeRightOf(left: Block, right: Block, gap: number): Block {
 
 // ─── Couple slot (single person OR couple of 2) ─────────────────────────────
 
+interface SlotCard {
+  nodeId:      string
+  personId:    string
+  isDuplicate: boolean
+}
+
 interface CoupleSlot {
-  /** Cards in left-to-right order — 1 or 2 ids. */
-  cards: string[]
+  /** Cards in left-to-right order — 1 or 2. */
+  cards: SlotCard[]
   /** x of the LEFT card relative to the slot anchor. */
   leftCardX: number
   /** The "focal" person inside the couple (the one whose ancestors/descendants we follow). */
@@ -122,38 +234,62 @@ interface CoupleSlot {
   width: number
 }
 
-/** Build a couple slot for a focal person, ordered older-leftmost.
- *  Returns slot + the anchor position (focal's card center). */
+// Prefer the exact date; fall back to the (always-populated, redaction-safe)
+// year so a redacted person still sorts by approximate age instead of
+// always landing last.
+function ageOf(persons: Record<string, TreePerson>, id: string): number {
+  const p = persons[id]
+  if (p?.birthDate) return p.birthDate.getTime()
+  if (p?.birthYear) return Date.UTC(p.birthYear, 0, 1)
+  return Number.POSITIVE_INFINITY
+}
+
+/** Single choke point for pedigree-collapse bookkeeping: the first placement
+ *  of a person (through ANY path — focal descendant, focal ancestor, or
+ *  spouse card) claims their real id; every later placement, through any
+ *  path, is a duplicate and gets a synthetic occurrence id. Centralizing
+ *  this means a person reached first as someone's spouse and later as a
+ *  focal placement (or vice versa) is still caught correctly. */
+function resolveOccurrence(personId: string, dedup: DedupState): SlotCard {
+  const isDuplicate = dedup.placedAsPrimary.has(personId)
+  if (!isDuplicate) dedup.placedAsPrimary.add(personId)
+  return { nodeId: isDuplicate ? dedup.nextDupId(personId) : personId, personId, isDuplicate }
+}
+
+/** Build a couple slot for a focal person, ordered older-leftmost. Both the
+ *  focal and spouse cards go through `resolveOccurrence` — either one may
+ *  turn out to be a duplicate (already placed via a different branch), in
+ *  which case that card renders as a stub instead of colliding with its
+ *  earlier position. */
 function buildCoupleSlot(
   focalId:  string,
   graph:    FamilyGraph,
   persons:  Record<string, TreePerson>,
+  dedup:    DedupState,
   // If provided, force pairing with this specific spouse. Otherwise use the active spouse.
   forcedSpouseId?: string | null,
 ): CoupleSlot {
+  const focalCard = resolveOccurrence(focalId, dedup)
+
+  if (focalCard.isDuplicate) {
+    return { cards: [focalCard], leftCardX: 0, focalId, width: NODE_W }
+  }
+
   const spouseId = forcedSpouseId ?? graph.spouseOf.get(focalId) ?? null
   if (!spouseId || !persons[spouseId]) {
-    return { cards: [focalId], leftCardX: 0, focalId, width: NODE_W }
+    return { cards: [focalCard], leftCardX: 0, focalId, width: NODE_W }
   }
-  // Prefer the exact date; fall back to the (always-populated, redaction-safe)
-  // year so a redacted person still sorts by approximate age instead of
-  // always landing last.
-  const ageOf = (id: string) => {
-    const p = persons[id]
-    if (p?.birthDate) return p.birthDate.getTime()
-    if (p?.birthYear) return Date.UTC(p.birthYear, 0, 1)
-    return Number.POSITIVE_INFINITY
-  }
-  const olderLeft = ageOf(focalId) <= ageOf(spouseId)
-  const cards = olderLeft ? [focalId, spouseId] : [spouseId, focalId]
+  const spouseCard = resolveOccurrence(spouseId, dedup)
+  const olderLeft = ageOf(persons, focalId) <= ageOf(persons, spouseId)
+  const cards = olderLeft ? [focalCard, spouseCard] : [spouseCard, focalCard]
   return { cards, leftCardX: 0, focalId, width: 2 * NODE_W + X_TIGHT }
 }
 
 function slotToBlock(slot: CoupleSlot, gen: number): Block {
-  const positions = new Map<string, { x: number; y: number }>()
+  const positions = new Map<string, PlacedPos>()
   let x = slot.leftCardX
-  for (const id of slot.cards) {
-    positions.set(id, { x, y: gen * Y_GEN })
+  for (const card of slot.cards) {
+    positions.set(card.nodeId, { x, y: gen * Y_GEN, personId: card.personId, isDuplicate: card.isDuplicate })
     x += NODE_W + X_TIGHT
   }
   return { positions, leftX: slot.leftCardX, rightX: slot.leftCardX + slot.width }
@@ -163,29 +299,41 @@ function slotToBlock(slot: CoupleSlot, gen: number): Block {
 
 /** Lay out a person and all their descendants. Returns a block anchored such
  *  that the focal person's card top-left is at x=0 inside the returned block.
- *  Children are placed centered under the focal couple. */
+ *  Children are placed centered under the focal couple. A duplicate
+ *  occurrence (pedigree collapse) renders as a leaf stub — no children, and
+ *  so does a user-collapsed one (`collapsedIds`), which reuses the exact
+ *  same "stub, don't recurse" shape. */
 function layoutDescendantSubtree(
-  focalId:  string,
-  graph:    FamilyGraph,
-  persons:  Record<string, TreePerson>,
-  gen:      number,
-  visited:  Set<string>,
+  focalId:      string,
+  graph:        FamilyGraph,
+  persons:      Record<string, TreePerson>,
+  gen:          number,
+  visited:      Set<string>,
+  dedup:        DedupState,
+  collapsedIds: Set<string>,
+  collapseInfo: CollapseInfo,
 ): Block {
   if (visited.has(focalId)) return emptyBlock()
   visited.add(focalId)
 
-  const slot      = buildCoupleSlot(focalId, graph, persons)
+  const isDuplicate = dedup.placedAsPrimary.has(focalId)
+  const slot      = buildCoupleSlot(focalId, graph, persons, dedup)
   const slotBlock = slotToBlock(slot, gen)
 
-  // Children come from the focal's marriage unit (NOT spouse's other unit).
   const marriage = graph.marriageUnit.get(focalId)
+  const hasKids  = !isDuplicate && !!marriage && marriage.children.length > 0
+  const isCollapsed = hasKids && collapsedIds.has(focalId)
+  const focalCard = slot.cards.find((c) => c.personId === focalId)
+  if (focalCard) collapseInfo.set(focalCard.nodeId, { hasCollapsible: hasKids, isCollapsed, collapseDirection: "down" })
+
+  if (isDuplicate || isCollapsed) return slotBlock
   if (!marriage || marriage.children.length === 0) return slotBlock
 
   // Build each child's subtree.
   const childBlocks: Block[] = []
   for (const childId of marriage.children) {
     if (visited.has(childId)) continue
-    const cb = layoutDescendantSubtree(childId, graph, persons, gen + 1, visited)
+    const cb = layoutDescendantSubtree(childId, graph, persons, gen + 1, visited, dedup, collapsedIds, collapseInfo)
     if (cb.positions.size === 0) continue
     childBlocks.push(cb)
   }
@@ -224,23 +372,43 @@ function layoutDescendantSubtree(
 /** Lay out the focal person + all their ancestors going UP. Returns a block
  *  anchored such that the focal's card top-left sits at x=0 (NOT centered on
  *  the couple — we anchor on the focal individual so the caller can stitch
- *  multiple branches under a couple precisely). */
+ *  multiple branches under a couple precisely).
+ *
+ *  `viaChildId` is the real id of the person this ancestor is being placed
+ *  AS A PARENT OF (always a primary occurrence — recursion never continues
+ *  past a duplicate, see below). When this placement turns out to be a
+ *  duplicate, we record a `parentEdgeOverrides` entry so the edge-building
+ *  pass in computeLayout connects THIS specific relation to THIS specific
+ *  occurrence instead of the default (primary) one — this is what fixes the
+ *  "edge stretches to the wrong branch" manifestation of pedigree collapse. */
 function layoutAncestorSubtreeIndividual(
-  focalId:  string,
-  graph:    FamilyGraph,
-  persons:  Record<string, TreePerson>,
-  gen:      number,
-  visited:  Set<string>,
+  focalId:      string,
+  graph:        FamilyGraph,
+  persons:      Record<string, TreePerson>,
+  gen:          number,
+  visited:      Set<string>,
+  dedup:        DedupState,
+  viaChildId:   string,
+  collapsedIds: Set<string>,
+  collapseInfo: CollapseInfo,
 ): Block {
   if (visited.has(focalId)) return emptyBlock()
   visited.add(focalId)
 
-  // Focal-only slot (a single card; the couple is built one level down by the caller).
-  const block = new Map<string, { x: number; y: number }>()
-  block.set(focalId, { x: 0, y: gen * Y_GEN })
-  const focalBlock: Block = { positions: block, leftX: 0, rightX: NODE_W }
+  const card = resolveOccurrence(focalId, dedup)
+  if (card.isDuplicate) dedup.parentEdgeOverrides.set(`${focalId}|${viaChildId}`, card.nodeId)
 
   const birth = graph.birthUnit.get(focalId)
+  const hasParents = !card.isDuplicate && !!birth && birth.parents.length > 0
+  const isCollapsed = hasParents && collapsedIds.has(focalId)
+  collapseInfo.set(card.nodeId, { hasCollapsible: hasParents, isCollapsed, collapseDirection: "up" })
+
+  // Focal-only slot (a single card; the couple is built one level down by the caller).
+  const block = new Map<string, PlacedPos>()
+  block.set(card.nodeId, { x: 0, y: gen * Y_GEN, personId: focalId, isDuplicate: card.isDuplicate })
+  const focalBlock: Block = { positions: block, leftX: 0, rightX: NODE_W }
+
+  if (card.isDuplicate || isCollapsed) return focalBlock
   if (!birth || birth.parents.length === 0) return focalBlock
 
   // Build the parents-couple block at gen-1.
@@ -251,6 +419,10 @@ function layoutAncestorSubtreeIndividual(
     persons,
     gen - 1,
     visited,
+    dedup,
+    focalId,
+    collapsedIds,
+    collapseInfo,
   )
 
   // Center the parents block over the focal's card center.
@@ -264,36 +436,35 @@ function layoutAncestorSubtreeIndividual(
 /** Lay out a parents couple plus their ancestors. The couple's cards live at
  *  the given `gen`. The block anchors so that the couple's center is at x=0. */
 function layoutAncestorCoupleBlock(
-  parents:  string[],
-  graph:    FamilyGraph,
-  persons:  Record<string, TreePerson>,
-  gen:      number,
-  visited:  Set<string>,
+  parents:      string[],
+  graph:        FamilyGraph,
+  persons:      Record<string, TreePerson>,
+  gen:          number,
+  visited:      Set<string>,
+  dedup:        DedupState,
+  viaChildId:   string,
+  collapsedIds: Set<string>,
+  collapseInfo: CollapseInfo,
 ): Block {
   // Single parent — fall back to the individual case.
   if (parents.length === 1) {
-    return layoutAncestorSubtreeIndividual(parents[0], graph, persons, gen, visited)
+    return layoutAncestorSubtreeIndividual(parents[0], graph, persons, gen, visited, dedup, viaChildId, collapsedIds, collapseInfo)
   }
 
   // Two parents: order older-leftmost.
-  // Prefer the exact date; fall back to the (always-populated, redaction-safe)
-  // year so a redacted person still sorts by approximate age instead of
-  // always landing last.
-  const ageOf = (id: string) => {
-    const p = persons[id]
-    if (p?.birthDate) return p.birthDate.getTime()
-    if (p?.birthYear) return Date.UTC(p.birthYear, 0, 1)
-    return Number.POSITIVE_INFINITY
-  }
   const [husbandId, wifeId] = parents[0] === parents[1]
     ? parents
-    : (ageOf(parents[0]) <= ageOf(parents[1]) ? [parents[0], parents[1]] : [parents[1], parents[0]])
+    : (ageOf(persons, parents[0]) <= ageOf(persons, parents[1]) ? [parents[0], parents[1]] : [parents[1], parents[0]])
 
   // Recursively layout each parent's ancestor tree. Each returns a block
   // anchored on the parent's own card (top-left at x=0 in that block).
-  const husbandBlock = layoutAncestorSubtreeIndividual(husbandId, graph, persons, gen, new Set(visited))
-  const wifeBlock    = layoutAncestorSubtreeIndividual(wifeId,    graph, persons, gen, new Set(visited))
-  // (We pass separate visited sets so each side gets to recurse independently.)
+  // `visited` is cloned per side (unchanged from before this fix) so each
+  // branch's recursion-termination bookkeeping is independent — but `dedup`
+  // is NEVER cloned, so a person reached by both sides is correctly detected
+  // as a duplicate on the second side, regardless of which side gets there
+  // first.
+  const husbandBlock = layoutAncestorSubtreeIndividual(husbandId, graph, persons, gen, new Set(visited), dedup, viaChildId, collapsedIds, collapseInfo)
+  const wifeBlock    = layoutAncestorSubtreeIndividual(wifeId,    graph, persons, gen, new Set(visited), dedup, viaChildId, collapsedIds, collapseInfo)
   // Mark the actual parents as visited in the shared set to avoid loops elsewhere.
   visited.add(husbandId)
   visited.add(wifeId)
@@ -344,19 +515,28 @@ function layoutHalfMarriageBlock(
   graph:         FamilyGraph,
   persons:       Record<string, TreePerson>,
   visited:       Set<string>,
+  dedup:         DedupState,
+  collapsedIds:  Set<string>,
+  collapseInfo:  CollapseInfo,
 ): Block {
   if (visited.has(otherSpouseId)) return emptyBlock()
   visited.add(otherSpouseId)
 
-  const positions = new Map<string, { x: number; y: number }>()
-  positions.set(otherSpouseId, { x: 0, y: gen * Y_GEN })
+  const card = resolveOccurrence(otherSpouseId, dedup)
+  const hasKids = !card.isDuplicate && unit.children.length > 0
+  const isCollapsed = hasKids && collapsedIds.has(otherSpouseId)
+  collapseInfo.set(card.nodeId, { hasCollapsible: hasKids, isCollapsed, collapseDirection: "down" })
+
+  const positions = new Map<string, PlacedPos>()
+  positions.set(card.nodeId, { x: 0, y: gen * Y_GEN, personId: otherSpouseId, isDuplicate: card.isDuplicate })
   const block: Block = { positions, leftX: 0, rightX: NODE_W }
 
+  if (card.isDuplicate || isCollapsed) return block
   if (unit.children.length === 0) return block
 
   const childBlocks: Block[] = []
   for (const childId of unit.children) {
-    const cb = layoutDescendantSubtree(childId, graph, persons, gen + 1, visited)
+    const cb = layoutDescendantSubtree(childId, graph, persons, gen + 1, visited, dedup, collapsedIds, collapseInfo)
     if (cb.positions.size > 0) childBlocks.push(cb)
   }
   if (childBlocks.length === 0) return block
@@ -374,11 +554,15 @@ function layoutHalfMarriageBlock(
 // ─── Top-level orchestration ────────────────────────────────────────────────
 
 export function computeLayout(
-  persons:   Record<string, TreePerson>,
-  relations: TreeRelation[],
-  rootId:    string,
+  persons:      Record<string, TreePerson>,
+  relations:    TreeRelation[],
+  rootId:       string,
+  // User-driven, not persisted — see the module-level v1-limitations note.
+  collapsedIds: Set<string> = new Set(),
 ): LayoutResult {
   const graph = buildFamilyGraph(persons, relations)
+  const dedup = createDedupState()
+  const collapseInfo: CollapseInfo = new Map()
 
   // BFS to derive `generation` (still useful for downstream consumers + ancestor
   // tree-header stats). Same rule as before: parent = -1, child = +1, spouse/sibling = 0.
@@ -402,7 +586,7 @@ export function computeLayout(
 
   // 1. Descendant subtree from the subject.
   const visited = new Set<string>()
-  const descendantBlock = layoutDescendantSubtree(rootId, graph, persons, 0, visited)
+  const descendantBlock = layoutDescendantSubtree(rootId, graph, persons, 0, visited, dedup, collapsedIds, collapseInfo)
 
   // The descendant block anchors on the subject's couple center at x=0.
   // We'll keep that as the global origin (subject couple center at x=0, y=0).
@@ -411,19 +595,10 @@ export function computeLayout(
   //    Distribute across the descendant block:
   //      - siblings older than subject → place LEFT of the descendant block
   //      - siblings younger than subject → place RIGHT
-  // Prefer the exact date; fall back to the (always-populated, redaction-safe)
-  // year so a redacted person still sorts by approximate age instead of
-  // always landing last.
-  const ageOf = (id: string) => {
-    const p = persons[id]
-    if (p?.birthDate) return p.birthDate.getTime()
-    if (p?.birthYear) return Date.UTC(p.birthYear, 0, 1)
-    return Number.POSITIVE_INFINITY
-  }
   const siblings = (graph.siblingsOf.get(rootId) ?? [])
     .filter((id) => persons[id])
-    .sort((a, b) => ageOf(a) - ageOf(b))
-  const subjectAge = ageOf(rootId)
+    .sort((a, b) => ageOf(persons, a) - ageOf(persons, b))
+  const subjectAge = ageOf(persons, rootId)
 
   let combined = descendantBlock
 
@@ -446,7 +621,7 @@ export function computeLayout(
     for (const unit of subjectOthers) {
       const otherSpouseId = unit.parents.find((p) => p !== rootId)
       if (!otherSpouseId) continue
-      const halfBlock = layoutHalfMarriageBlock(otherSpouseId, unit, 0, graph, persons, visited)
+      const halfBlock = layoutHalfMarriageBlock(otherSpouseId, unit, 0, graph, persons, visited, dedup, collapsedIds, collapseInfo)
       if (halfBlock.positions.size === 0) continue
       if (othersOnLeft) {
         const dx = combined.leftX - X_FAMILY - halfBlock.rightX
@@ -461,8 +636,8 @@ export function computeLayout(
   // Older siblings (left of subject)
   for (let i = siblings.length - 1; i >= 0; i--) {
     const sib = siblings[i]
-    if (ageOf(sib) > subjectAge) continue
-    const sibBlock = layoutDescendantSubtree(sib, graph, persons, 0, visited)
+    if (ageOf(persons, sib) > subjectAge) continue
+    const sibBlock = layoutDescendantSubtree(sib, graph, persons, 0, visited, dedup, collapsedIds, collapseInfo)
     if (sibBlock.positions.size === 0) continue
     // Place sibBlock LEFT of combined with X_FAMILY gap.
     const dx = combined.leftX - X_FAMILY - sibBlock.rightX
@@ -471,8 +646,8 @@ export function computeLayout(
   }
   // Younger siblings (right of subject)
   for (const sib of siblings) {
-    if (ageOf(sib) <= subjectAge) continue
-    const sibBlock = layoutDescendantSubtree(sib, graph, persons, 0, visited)
+    if (ageOf(persons, sib) <= subjectAge) continue
+    const sibBlock = layoutDescendantSubtree(sib, graph, persons, 0, visited, dedup, collapsedIds, collapseInfo)
     if (sibBlock.positions.size === 0) continue
     combined = placeRightOf(combined, sibBlock, X_FAMILY)
   }
@@ -480,7 +655,7 @@ export function computeLayout(
   // 3. Ancestor side: subject's parents couple + their ancestors.
   const subjectBirth = graph.birthUnit.get(rootId)
   if (subjectBirth && subjectBirth.parents.length > 0) {
-    const parentsBlock = layoutAncestorCoupleBlock(subjectBirth.parents, graph, persons, -1, visited)
+    const parentsBlock = layoutAncestorCoupleBlock(subjectBirth.parents, graph, persons, -1, visited, dedup, rootId, collapsedIds, collapseInfo)
     // The parents block is anchored on the parents-couple center at x=0.
     // We want to center it over the SUBJECT's birth-family sibling row — i.e.
     // the midpoint of subject + subject's siblings. That's the midpoint of the
@@ -508,7 +683,7 @@ export function computeLayout(
       for (const unit of otherUnits) {
         const otherSpouseId = unit.parents.find((p) => p !== parentId)
         if (!otherSpouseId) continue
-        const halfBlock = layoutHalfMarriageBlock(otherSpouseId, unit, -1, graph, persons, visited)
+        const halfBlock = layoutHalfMarriageBlock(otherSpouseId, unit, -1, graph, persons, visited, dedup, collapsedIds, collapseInfo)
         if (halfBlock.positions.size === 0) continue
         if (onLeft) {
           const dx = combined.leftX - X_FAMILY - halfBlock.rightX
@@ -535,14 +710,14 @@ export function computeLayout(
         ? parentPos.x < partnerPos.x
         : true   // default left if single parent
       // Sort the extras by age (oldest first).
-      auntsUncles.sort((a, b) => ageOf(a) - ageOf(b))
+      auntsUncles.sort((a, b) => ageOf(persons, a) - ageOf(persons, b))
       // When extras live on the LEFT we want the oldest furthest from the parent
       // couple, so iterate youngest-first (and prepend to the left repeatedly).
       const iterOrder = onLeft ? [...auntsUncles].reverse() : auntsUncles
 
       for (const auId of iterOrder) {
         if (visited.has(auId)) continue
-        const auBlock = layoutDescendantSubtree(auId, graph, persons, -1, visited)
+        const auBlock = layoutDescendantSubtree(auId, graph, persons, -1, visited, dedup, collapsedIds, collapseInfo)
         if (auBlock.positions.size === 0) continue
         if (onLeft) {
           const dx = combined.leftX - X_FAMILY - auBlock.rightX
@@ -560,12 +735,16 @@ export function computeLayout(
     // rendered as a couple slot only — no descendants — to keep deep branches
     // compact and avoid pulling cousins-of-grandparents into the subject row.
     // Side is decided per-ancestor by x sign: x<0 → paternal/left, x>=0 → maternal/right.
+    // Duplicate (pedigree-collapse stub) entries are excluded from this
+    // collateral-sibling discovery pass — a stub is a leaf by construction,
+    // and `graph.siblingsOf` is keyed by real person ids, not occurrence ids.
     const ancestorsByGen = new Map<number, string[]>()
-    for (const [id, pos] of combined.positions.entries()) {
+    for (const [, pos] of combined.positions.entries()) {
+      if (pos.isDuplicate) continue
       const g = Math.round(pos.y / Y_GEN)
       if (g > -2) continue
       const arr = ancestorsByGen.get(g) ?? []
-      arr.push(id)
+      arr.push(pos.personId)
       ancestorsByGen.set(g, arr)
     }
     const ancestorGens = Array.from(ancestorsByGen.keys()).sort((a, b) => b - a)   // -2, -3, ...
@@ -582,11 +761,11 @@ export function computeLayout(
 
       for (const ancId of onLeft) {
         const sibs = (graph.siblingsOf.get(ancId) ?? []).filter((id) => persons[id])
-        sibs.sort((a, b) => ageOf(a) - ageOf(b))
+        sibs.sort((a, b) => ageOf(persons, a) - ageOf(persons, b))
         // Place oldest furthest from focal by iterating youngest-first.
         for (const sibId of [...sibs].reverse()) {
           if (visited.has(sibId)) continue
-          const slot = buildCoupleSlot(sibId, graph, persons)
+          const slot = buildCoupleSlot(sibId, graph, persons, dedup)
           const slotBlock = slotToBlock(slot, g)
           const dx = combined.leftX - X_SIBLING - slotBlock.rightX
           shiftBlock(slotBlock, dx)
@@ -598,10 +777,10 @@ export function computeLayout(
       }
       for (const ancId of onRight) {
         const sibs = (graph.siblingsOf.get(ancId) ?? []).filter((id) => persons[id])
-        sibs.sort((a, b) => ageOf(a) - ageOf(b))
+        sibs.sort((a, b) => ageOf(persons, a) - ageOf(persons, b))
         for (const sibId of sibs) {
           if (visited.has(sibId)) continue
-          const slot = buildCoupleSlot(sibId, graph, persons)
+          const slot = buildCoupleSlot(sibId, graph, persons, dedup)
           const slotBlock = slotToBlock(slot, g)
           combined = placeRightOf(combined, slotBlock, X_SIBLING)
           visited.add(sibId)
@@ -616,7 +795,11 @@ export function computeLayout(
   const nodes: LaidNode[] = []
   let minX =  Infinity, maxX = -Infinity, minY =  Infinity, maxY = -Infinity
   for (const [id, p] of combined.positions.entries()) {
-    nodes.push({ id, x: p.x, y: p.y })
+    const collapse = collapseInfo.get(id) ?? NOT_COLLAPSIBLE
+    nodes.push({
+      id, personId: p.personId, isDuplicate: p.isDuplicate, x: p.x, y: p.y,
+      hasCollapsible: collapse.hasCollapsible, isCollapsed: collapse.isCollapsed, collapseDirection: collapse.collapseDirection,
+    })
     if (p.x         < minX) minX = p.x
     if (p.x + NODE_W > maxX) maxX = p.x + NODE_W
     if (p.y         < minY) minY = p.y
@@ -625,6 +808,11 @@ export function computeLayout(
   if (!Number.isFinite(minX)) { minX = 0; maxX = NODE_W; minY = 0; maxY = NODE_H }
 
   // 5. Edge geometry — derived from raw relations, same shape as the old layout.
+  // PARENT_OF edges consult `dedup.parentEdgeOverrides` so a relation whose
+  // parent occurrence was placed as a pedigree-collapse duplicate connects to
+  // THAT occurrence rather than the (visually distant) primary one — see the
+  // module-level comment and layoutAncestorSubtreeIndividual for why this is
+  // only needed (and only populated) on the ancestor side.
   const parentLines:  ParentLineGeom[]  = []
   const coupleLines:  CoupleLineGeom[]  = []
   const siblingLines: SiblingLineGeom[] = []
@@ -636,14 +824,15 @@ export function computeLayout(
   for (const r of relations) {
     if (r.status === "REJECTED") continue
     if (r.type === "PARENT_OF") {
-      parentLines.push({ parentId: r.fromId, childId: r.toId, subtype: r.subtype ?? "blood" })
+      const overrideNodeId = dedup.parentEdgeOverrides.get(`${r.fromId}|${r.toId}`)
+      parentLines.push({ parentId: overrideNodeId ?? r.fromId, childId: r.toId, subtype: r.subtype ?? "blood", relationId: r.id })
     } else if (r.type === "SPOUSE") {
-      coupleLines.push({ aId: r.fromId, bId: r.toId, subtype: r.subtype ?? "married", endDate: r.endDate })
+      coupleLines.push({ aId: r.fromId, bId: r.toId, subtype: r.subtype ?? "married", endDate: r.endDate, relationId: r.id })
     } else if (r.type === "SIBLING") {
       // Only emit a SIBLING line when the two people don't share a parent in
       // the tree (the parent-line T-junction would otherwise convey it).
       if (!sharedParents(r.fromId, r.toId)) {
-        siblingLines.push({ aId: r.fromId, bId: r.toId, subtype: r.subtype ?? "blood" })
+        siblingLines.push({ aId: r.fromId, bId: r.toId, subtype: r.subtype ?? "blood", relationId: r.id })
       }
     }
   }
@@ -656,4 +845,24 @@ export function computeLayout(
     bounds: { minX, maxX, minY, maxY },
     generation,
   }
+}
+
+/** Layer saved drag-to-reposition offsets on top of a computed layout. A
+ *  duplicate (pedigree-collapse stub) is never offset — its position is
+ *  fully determined by the primary occurrence it stands in for. An override
+ *  whose snapshotted `generation` no longer matches the live layout is
+ *  stale (a relation change reshaped the tree since it was saved) and is
+ *  ignored, rather than misplacing the node relative to its now-different
+ *  family unit. */
+export function applyPositionOverrides(
+  nodes: LaidNode[],
+  overrides: Record<string, { dx: number; dy: number; generation: number }>,
+  generation: Map<string, number>,
+): LaidNode[] {
+  return nodes.map((n) => {
+    if (n.isDuplicate) return n
+    const override = overrides[n.personId]
+    if (!override || override.generation !== generation.get(n.personId)) return n
+    return { ...n, x: n.x + override.dx, y: n.y + override.dy }
+  })
 }

@@ -19,6 +19,10 @@ interface Viewport {
 
 interface ViewportContextValue {
   viewport: Viewport
+  /** Container's current pixel size — {0,0} until the first ResizeObserver
+   *  tick. Lets overlays (e.g. the mini-map) convert between screen and
+   *  world space without re-measuring the DOM themselves. */
+  size:     { w: number; h: number }
   zoomBy:   (factor: number) => void
   fitView:  () => void
   focusOn:  (x: number, y: number, scale?: number) => void
@@ -32,8 +36,8 @@ export function useViewport(): ViewportContextValue {
   return ctx
 }
 
-const MIN_SCALE = 0.25
-const MAX_SCALE = 2.5
+export const MIN_SCALE = 0.25
+export const MAX_SCALE = 2.5
 const ZOOM_STEP = 1.2
 // Initial zoom is 4 zoom-steps below the maximum.
 const INITIAL_SCALE = MAX_SCALE / Math.pow(ZOOM_STEP, 4)
@@ -222,8 +226,8 @@ export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTa
   }, [fitView, autoFit])
 
   const ctxValue = useMemo<ViewportContextValue>(
-    () => ({ viewport, zoomBy, fitView, focusOn }),
-    [viewport, zoomBy, fitView, focusOn],
+    () => ({ viewport, size, zoomBy, fitView, focusOn }),
+    [viewport, size, zoomBy, fitView, focusOn],
   )
 
   return (

@@ -280,14 +280,23 @@
     "canvasSearch": {
       "buttonTitle": "Search the tree (/)",
       "noMatches": "No matches.",
-      "placeholder": "Search by name…",
+      "placeholder": "Search by name...",
       "search": "Search"
+    },
+    "compare": {
+      "button": "Compare",
+      "clear": "Clear",
+      "noPath": "No connection found in this tree.",
+      "pickPlaceholder": "Click a person on the tree",
+      "resultLine": "{targetName} is {rootName}'s {label}.",
+      "title": "Relationship path"
     },
     "controls": {
       "fitTree": "Fit whole tree",
       "fitTreeTitle": "Fit whole tree (F)",
       "focusRoot": "Focus on root",
       "focusRootTitle": "Focus on the tree owner",
+      "miniMap": "Mini-map — click or drag to navigate",
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out"
     },
@@ -320,6 +329,7 @@
     },
     "header": {
       "addRelative": "Add relative",
+      "backToProfile": "Back to profile",
       "title": "{name}'s Family Tree",
       "upgradePlan": "Upgrade plan"
     },
@@ -350,6 +360,9 @@
     "nameWithMaiden": "{name} (née {maidenName})",
     "node": {
       "awaitingConfirmation": "Awaiting confirmation",
+      "collapse": "Collapse",
+      "duplicateHint": "Also appears elsewhere in this tree, due to a shared ancestor",
+      "expand": "Expand",
       "memorial": "Memorial",
       "pending": "Pending",
       "you": "You"
@@ -398,7 +411,21 @@
       "title": "Remove from tree?"
     },
     "stats": {
-      "generations": "{count, plural, one {# generation} other {# generations}}",
+      "generations": "{count, plural, one {{word} generation} other {{word} generations}}",
+      "generationsWord": {
+        "eight": "eight",
+        "eleven": "eleven",
+        "five": "five",
+        "four": "four",
+        "nine": "nine",
+        "one": "one",
+        "seven": "seven",
+        "six": "six",
+        "ten": "ten",
+        "three": "three",
+        "twelve": "twelve",
+        "two": "two"
+      },
       "peopleOfLimit": "/{limit} people"
     },
     "subtypes": {

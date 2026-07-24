@@ -280,14 +280,23 @@
     "canvasSearch": {
       "buttonTitle": "Buscar na árvore (/)",
       "noMatches": "Nenhuma correspondência.",
-      "placeholder": "Buscar por nome…",
+      "placeholder": "Buscar por nome...",
       "search": "Buscar"
+    },
+    "compare": {
+      "button": "Comparar",
+      "clear": "Limpar",
+      "noPath": "Nenhuma conexão encontrada nesta árvore.",
+      "pickPlaceholder": "Clique em uma pessoa na árvore",
+      "resultLine": "{targetName} é {label} de {rootName}.",
+      "title": "Caminho de parentesco"
     },
     "controls": {
       "fitTree": "Ajustar toda a árvore",
       "fitTreeTitle": "Ajustar toda a árvore (F)",
       "focusRoot": "Focar na raiz",
       "focusRootTitle": "Focar no dono da árvore",
+      "miniMap": "Mini-mapa — clique ou arraste para navegar",
       "zoomIn": "Aproximar",
       "zoomOut": "Afastar"
     },
@@ -320,6 +329,7 @@
     },
     "header": {
       "addRelative": "Adicionar parente",
+      "backToProfile": "Voltar ao perfil",
       "title": "Árvore Genealógica de {name}",
       "upgradePlan": "Mudar de plano"
     },
@@ -350,6 +360,9 @@
     "nameWithMaiden": "{name} (nascida {maidenName})",
     "node": {
       "awaitingConfirmation": "Aguardando confirmação",
+      "collapse": "Recolher",
+      "duplicateHint": "Também aparece em outro lugar desta árvore, por causa de um ancestral em comum",
+      "expand": "Expandir",
       "memorial": "Memorial",
       "pending": "Pendente",
       "you": "Você"
@@ -398,7 +411,21 @@
       "title": "Remover da árvore?"
     },
     "stats": {
-      "generations": "{count, plural, one {# geração} other {# gerações}}",
+      "generations": "{count, plural, one {{word} geração} other {{word} gerações}}",
+      "generationsWord": {
+        "eight": "oito",
+        "eleven": "onze",
+        "five": "cinco",
+        "four": "quatro",
+        "nine": "nove",
+        "one": "uma",
+        "seven": "sete",
+        "six": "seis",
+        "ten": "dez",
+        "three": "três",
+        "twelve": "doze",
+        "two": "duas"
+      },
       "peopleOfLimit": "/{limit} pessoas"
     },
     "subtypes": {

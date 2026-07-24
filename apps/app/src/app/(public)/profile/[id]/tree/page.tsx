@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
-import { getFamilyTree } from "@/queries/family-tree"
+import { getFamilyTree, getNodePositions } from "@/queries/family-tree"
 import { getMemorialFeatures } from "@/lib/subscription"
 import { computeLayout } from "@/components/family-tree/canvas/layout"
 import { FamilyTreeCanvas } from "@/components/family-tree/canvas/family-tree-canvas"
@@ -24,9 +24,10 @@ export default async function TreePage({ params }: Props) {
 
   const canManage = viewerId ? canManageProfile(profile, viewerId) : false
 
-  const [{ persons, relations }, features] = await Promise.all([
+  const [{ persons, relations }, features, initialPositions] = await Promise.all([
     getFamilyTree(id, { id: viewerId ?? null, canManage }),
     getMemorialFeatures(id),
+    getNodePositions(id),
   ])
   // Anonymous visitors view the tree read-only, so no guardian lookup is needed.
   const guardianRows = viewerId
@@ -88,6 +89,7 @@ export default async function TreePage({ params }: Props) {
           canManage={canManage}
           managedIds={Array.from(managedIds)}
           requestedIds={Array.from(requestedIds)}
+          initialPositions={initialPositions}
         />
       </div>
     </div>
