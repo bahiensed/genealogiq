@@ -64,20 +64,52 @@ export function sendAccountDeletionEmail({ to }: { to: string }): Promise<void> 
 
 export interface FeedbackEmail {
   to: string
-  type: "bug" | "feedback"
+  type: "bug" | "feedback" | "contact" | "career"
   message: string
+  // Legacy field (BMS/SEQ): the sender's email, derived server-side from their
+  // session. APP's dialog collects it as an explicit form field instead — use
+  // `email` there; `contactEmail` stays for backward compatibility.
   contactEmail?: string
+  email?: string
+  cvUrl?: string
   page?: string
 }
 
-export function sendFeedbackEmail({ to, type, message, contactEmail, page }: FeedbackEmail): Promise<void> {
-  const subject = type === "bug" ? "Genealogiq — Bug report" : "Genealogiq — Feedback"
-  return send(to, subject, `
-    <p><strong>Type:</strong> ${type === "bug" ? "Bug report" : "Feedback"}</p>
-    ${page ? `<p><strong>Page:</strong> ${page}</p>` : ""}
-    ${contactEmail ? `<p><strong>Reply to:</strong> ${contactEmail}</p>` : ""}
+// User-supplied strings (message/email/page) end up as raw HTML in the notification
+// email — escape them so a submitted "<img src=x onerror=...>" can't execute in
+// whatever mail client renders it.
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
+const FEEDBACK_SUBJECTS: Record<FeedbackEmail["type"], string> = {
+  bug: "Genealogiq — Bug report",
+  feedback: "Genealogiq — Feedback",
+  contact: "Genealogiq — Contact",
+  career: "Genealogiq — Career application",
+}
+
+const FEEDBACK_TYPE_LABELS: Record<FeedbackEmail["type"], string> = {
+  bug: "Bug report",
+  feedback: "Feedback",
+  contact: "Contact",
+  career: "Career application",
+}
+
+export function sendFeedbackEmail({ to, type, message, contactEmail, email, cvUrl, page }: FeedbackEmail): Promise<void> {
+  const replyTo = email ?? contactEmail
+  return send(to, FEEDBACK_SUBJECTS[type], `
+    <p><strong>Type:</strong> ${FEEDBACK_TYPE_LABELS[type]}</p>
+    ${page ? `<p><strong>Page:</strong> ${escapeHtml(page)}</p>` : ""}
+    ${replyTo ? `<p><strong>Reply to:</strong> ${escapeHtml(replyTo)}</p>` : ""}
+    ${cvUrl ? `<p><strong>CV:</strong> <a href="${escapeHtml(cvUrl)}">Download</a></p>` : ""}
     <p><strong>Message:</strong></p>
-    <p>${message.replace(/\n/g, "<br/>")}</p>
+    <p>${escapeHtml(message).replace(/\n/g, "<br/>")}</p>
   `)
 }
 

@@ -39,7 +39,7 @@ export default async function ProfileBioPage({ params }: Props) {
   const atLimit = !!features && (textLen >= features.bioMaxChars || imageCount >= features.bioMaxImages)
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden">
+    <div className="relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32">

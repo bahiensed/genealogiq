@@ -245,7 +245,7 @@ export default async function ProfileByIdPage({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden mt-16">
+    <div className="relative overflow-x-hidden mt-16">
       <AuroraBackdrop variant="page" intensity="bold" />
       <ProfileViewTracker profile={recentProfile} />
       {isMemorialized && (user.appSaleId != null || user.physicalQrLicense != null) && (

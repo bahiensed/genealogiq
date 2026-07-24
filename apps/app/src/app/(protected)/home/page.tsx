@@ -29,7 +29,7 @@ export default async function HomePage() {
   const firstName = currentUser?.firstName ?? t("greetingFallbackName")
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden">
+    <div className="relative overflow-x-hidden">
       <AuroraBackdrop />
 
       <main className="container relative pt-24 pb-32">
@@ -148,7 +148,7 @@ interface HomeSectionProps {
 
 function HomeSection({ id, icon, title, subtitle, seeAllLabel, delay, seeMoreHref, emptyIcon: EmptyIcon, emptyText, children }: HomeSectionProps) {
   return (
-    <section id={id} className="mb-[3.75rem] animate-fade-in scroll-mt-24" style={{ animationDelay: `${delay}ms` }}>
+    <section id={id} className="mb-[3.75rem] last:mb-0 animate-fade-in scroll-mt-24" style={{ animationDelay: `${delay}ms` }}>
       {/* Icon spans both text lines; "see all" sits at the far right of the subtitle row. */}
       <div className="mb-4 flex items-center gap-3">
         <GlassIcon icon={icon} size="sm" />

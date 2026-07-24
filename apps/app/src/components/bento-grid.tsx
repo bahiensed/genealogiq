@@ -31,7 +31,7 @@ const spanClass: Record<NonNullable<SectionCard["span"]>, string> = {
 
 export function BentoGrid({ cards }: Props) {
   return (
-    <section className="container mt-12 sm:mt-14 md:mt-14 lg:mt-12 mb-24">
+    <section className="container mt-12 sm:mt-14 md:mt-14 lg:mt-12 mb-32">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 md:gap-5">
         {cards.map((card, i) => {
           const inner = (

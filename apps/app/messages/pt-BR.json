@@ -54,6 +54,10 @@
     "favorite": {
       "cannotFavoriteSelf": "Você não pode favoritar o seu próprio perfil."
     },
+    "feedback": {
+      "captchaFailed": "Verificação de segurança falhou. Tente novamente.",
+      "tooManyRequests": "Muitas solicitações. Tente novamente em {minutes} minuto(s)."
+    },
     "gallery": {
       "imageLimit": "O limite de imagens é {max} para este plano.",
       "notAuthorized": "Você não tem permissão para gerenciar esta galeria.",
@@ -392,23 +396,46 @@
   },
   "Feedback": {
     "dialog": {
-      "bugDescription": "Conte o que deu errado. Vamos analisar assim que possível.",
+      "bugDescription": "O que deu errado? Vamos analisar e responder assim que possível.",
       "bugTitle": "Reportar um bug",
-      "feedbackDescription": "Compartilhe suas sugestões ou ideias para nos ajudar a melhorar.",
-      "feedbackTitle": "Enviar feedback"
+      "careerDescription": "Interessado em se juntar à nossa equipe? Conte um pouco sobre você e anexe seu currículo.",
+      "careerTitle": "Carreira",
+      "contactDescription": "Obrigado pelo contato. Vamos responder sua solicitação assim que possível.",
+      "contactTitle": "Contato"
     },
     "fields": {
+      "cv": "Currículo (CV)",
+      "cvRemove": "Remover currículo",
+      "cvUpload": "Enviar currículo (PDF)",
+      "cvUploading": "Enviando...",
+      "email": "E-mail",
+      "emailPlaceholder": "voce@exemplo.com",
       "message": "Mensagem",
-      "messagePlaceholder": "Descreva o problema ou compartilhe sua ideia..."
+      "messagePlaceholder": {
+        "bug": "Descreva o problema.",
+        "career": "Conte sobre sua experiência e a vaga de seu interesse.",
+        "contact": "Envie sua mensagem."
+      }
+    },
+    "footer": {
+      "cancellationRefund": "Cancelamento e Reembolso",
+      "copyright": "© Genealogiq Global Ltda, {year}.",
+      "privacy": "Política de Privacidade",
+      "terms": "Termos de Serviço"
     },
     "links": {
-      "reportBug": "Reportar um bug",
-      "sendFeedback": "Enviar feedback"
+      "career": "Carreira",
+      "contact": "Contato",
+      "reportBug": "Reportar um bug"
     },
     "submit": "Enviar",
     "toasts": {
       "bugSent": "Bug reportado. Obrigado!",
-      "feedbackSent": "Feedback enviado. Obrigado!"
+      "careerSent": "Candidatura enviada. Obrigado!",
+      "contactSent": "Mensagem enviada. Obrigado!",
+      "cvInvalidType": "Envie um arquivo PDF.",
+      "cvTooLarge": "Arquivo muito grande (máx. 5MB).",
+      "cvUploadFailed": "Falha ao enviar o currículo."
     }
   },
   "Gallery": {
@@ -557,6 +584,12 @@
     "iosStep2": "Role para baixo e toque em \"Adicionar à Tela de Início\".",
     "iosStep3": "Toque em \"Adicionar\" para confirmar.",
     "title": "Instale o Genealogiq App agora!"
+  },
+  "Legal": {
+    "cancellationRefundTitle": "Cancelamento e Reembolso",
+    "comingSoon": "Conteúdo em breve.",
+    "privacyTitle": "Política de Privacidade",
+    "termsTitle": "Termos de Serviço"
   },
   "Memorialized": {
     "actions": {

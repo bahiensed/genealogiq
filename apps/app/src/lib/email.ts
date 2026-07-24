@@ -25,4 +25,4 @@ export const sendAccountDeletionEmail = (to: string) => _delete({ to })
 // Sent instead of a verification link when sign-up hits an email already in
 // use — see the doc comment on the shared template for why.
 export const sendAccountExistsEmail  = (to: string, name?: string) => _accountExists({ to, baseUrl: APP(), name })
-export const sendFeedback = (data: Omit<FeedbackEmail, "to">) => _feedback({ ...data, to: FEEDBACK_TO })
+export const sendFeedback = (data: Omit<FeedbackEmail, "to" | "contactEmail">) => _feedback({ ...data, to: FEEDBACK_TO })
