@@ -2,55 +2,162 @@
 
 import { useCallback, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 import { SvgCanvas } from "./svg-canvas"
 import { ViewportControls } from "./viewport-controls"
+import { CanvasSearch } from "./canvas-search"
+import { MiniMap } from "./mini-map"
+import { CompareTool } from "./compare-tool"
 import { PersonNode } from "./person-node"
 import { FamilyEdges } from "./edges/family-edges"
-import { computeLayout, NODE_W, NODE_H } from "./layout"
+import { computeLayout, applyPositionOverrides, NODE_W, NODE_H, type LaidNode } from "./layout"
 import { AddRelativeDialog } from "../dialogs/add-relative-dialog"
 import { EditMemberDialog } from "../dialogs/edit-member-dialog"
 import { PersonInfoSheet } from "../dialogs/person-info-sheet"
-import type { TreePerson, TreeRelation } from "@/queries/family-tree"
+import { saveNodePosition } from "@/actions/tree-position.actions"
+import { findRelationPath, relationFromRoot } from "@/lib/family-relation-label"
+import type { TreePerson, TreeRelation, NodePositionOverride } from "@/queries/family-tree"
 
 type Kind = "parent" | "child" | "spouse" | "sibling"
 
 interface Props {
-  persons:        Record<string, TreePerson>
-  relations:      TreeRelation[]
-  rootId:         string
-  sessionUserId:  string
-  canManage:      boolean
-  managedIds:     string[]
-  requestedIds:   string[]
+  persons:          Record<string, TreePerson>
+  relations:        TreeRelation[]
+  rootId:           string
+  sessionUserId:    string
+  canManage:        boolean
+  managedIds:       string[]
+  requestedIds:     string[]
+  initialPositions: Record<string, NodePositionOverride>
 }
 
-export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, canManage, managedIds, requestedIds }: Props) {
+export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, canManage, managedIds, requestedIds, initialPositions }: Props) {
   const router = useRouter()
-  const layout = useMemo(() => computeLayout(persons, relations, rootId), [persons, relations, rootId])
+  const t = useTranslations("FamilyTree")
 
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [sheetOpen,  setSheetOpen]  = useState(false)
-  const [adder,      setAdder]      = useState<{ anchorId: string; kind: Kind } | null>(null)
-  const [editing,    setEditing]    = useState<TreePerson | null>(null)
+  const [selectedId,    setSelectedId]    = useState<string | null>(null)
+  const [sheetOpen,     setSheetOpen]     = useState(false)
+  const [adder,         setAdder]         = useState<{ anchorId: string; kind: Kind } | null>(null)
+  const [editing,       setEditing]       = useState<TreePerson | null>(null)
+  const [positions,     setPositions]     = useState(initialPositions)
+  // Pure client view state, never persisted — resets on reload (see
+  // layout/index.ts's module-level collapse comment).
+  const [collapsedIds,  setCollapsedIds]  = useState<Set<string>>(() => new Set())
+  const [compareActive, setCompareActive] = useState(false)
+  const [comparePicks,  setComparePicks]  = useState<[string | null, string | null]>([null, null])
+
+  const layout = useMemo(
+    () => computeLayout(persons, relations, rootId, collapsedIds),
+    [persons, relations, rootId, collapsedIds],
+  )
 
   const activePerson = selectedId ? persons[selectedId] ?? null : null
 
-  const paddedBounds = useMemo(() => ({
-    minX: layout.bounds.minX - 40,
-    maxX: layout.bounds.maxX + 40,
-    minY: layout.bounds.minY - 40,
-    maxY: layout.bounds.maxY + 40,
-  }), [layout.bounds])
+  const positionedNodes: LaidNode[] = useMemo(
+    () => applyPositionOverrides(layout.nodes, positions, layout.generation),
+    [layout.nodes, layout.generation, positions],
+  )
+
+  const paddedBounds = useMemo(() => {
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+    for (const n of positionedNodes) {
+      if (n.x         < minX) minX = n.x
+      if (n.x + NODE_W > maxX) maxX = n.x + NODE_W
+      if (n.y         < minY) minY = n.y
+      if (n.y + NODE_H > maxY) maxY = n.y + NODE_H
+    }
+    if (!Number.isFinite(minX)) { minX = 0; maxX = NODE_W; minY = 0; maxY = NODE_H }
+    return { minX: minX - 40, maxX: maxX + 40, minY: minY - 40, maxY: maxY + 40 }
+  }, [positionedNodes])
 
   const rootCenter = useMemo(() => {
-    const r = layout.nodes.find((n) => n.id === rootId)
+    // rootId is always a primary occurrence (it's where the layout recursion
+    // starts, before any duplicate can exist), so personId === id here.
+    const r = positionedNodes.find((n) => n.personId === rootId && !n.isDuplicate)
     if (!r) return null
     return { x: r.x + NODE_W / 2, y: r.y + NODE_H / 2 }
-  }, [layout.nodes, rootId])
+  }, [positionedNodes, rootId])
+
+  const nodePositions = useMemo(
+    () => new Map(positionedNodes.map((n) => [n.id, { x: n.x, y: n.y }])),
+    [positionedNodes],
+  )
+
+  // Compare tool: shortest path between the two picks, if both are set.
+  // `comparePath` (up to 12 hops) is the authoritative "are they connected
+  // at all" signal; `compareLabel` (relationFromRoot, capped at 4 hops for
+  // vocabulary reasons) is display text only — it may fall back to the
+  // generic "relative" for a real but distant connection, which is fine
+  // once comparePath has already confirmed connectivity.
+  const [comparePick1, comparePick2] = comparePicks
+  const comparePath = useMemo(
+    () => (comparePick1 && comparePick2 ? findRelationPath(relations, comparePick1, comparePick2) : null),
+    [relations, comparePick1, comparePick2],
+  )
+  const compareLabel = useMemo(
+    () => (comparePick1 && comparePick2 ? relationFromRoot(persons, relations, comparePick1, comparePick2, t) : null),
+    [persons, relations, comparePick1, comparePick2, t],
+  )
+  const highlightedRelationIds = useMemo(
+    () => new Set(comparePath?.steps.map((s) => s.relationId) ?? []),
+    [comparePath],
+  )
+  const onPathPersonIds = useMemo(() => {
+    const ids = new Set<string>()
+    if (comparePath && comparePick1) {
+      ids.add(comparePick1)
+      for (const s of comparePath.steps) ids.add(s.toId)
+    }
+    return ids
+  }, [comparePath, comparePick1])
+
+  const handleReposition = useCallback((personId: string, ddx: number, ddy: number) => {
+    const gen = layout.generation.get(personId)
+    if (gen === undefined) return
+    const base = positions[personId]
+    const baseDx = base && base.generation === gen ? base.dx : 0
+    const baseDy = base && base.generation === gen ? base.dy : 0
+    const updated: NodePositionOverride = { dx: baseDx + ddx, dy: baseDy + ddy, generation: gen }
+    setPositions((prev) => ({ ...prev, [personId]: updated }))
+    // Optimistic: the local state above is already this session's source of
+    // truth, so a failure here just means the nudge doesn't survive a reload.
+    saveNodePosition(rootId, { personId, ...updated }).then((result) => {
+      if (!result.ok) toast.error(result.message)
+    })
+  }, [layout.generation, positions, rootId])
+
+  const handleComparePick = useCallback((personId: string) => {
+    setComparePicks((prev) => {
+      if (prev.includes(personId)) return [null, null]
+      if (!prev[0]) return [personId, null]
+      // Keep the anchor (pick 1) fixed and let further clicks update pick 2,
+      // so comparing the same anchor against several people doesn't require
+      // re-picking it each time.
+      return [prev[0], personId]
+    })
+  }, [])
+
+  const handleCloseCompare = useCallback(() => {
+    setCompareActive(false)
+    setComparePicks([null, null])
+  }, [])
+
+  const handleClearComparePicks = useCallback(() => setComparePicks([null, null]), [])
 
   const handleNodeActivate = useCallback((id: string) => {
+    if (compareActive) { handleComparePick(id); return }
     setSelectedId(id)
     setSheetOpen(true)
+  }, [compareActive, handleComparePick])
+
+  const handleToggleCollapse = useCallback((personId: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(personId)) next.delete(personId)
+      else next.add(personId)
+      return next
+    })
   }, [])
 
   const handleAdd = useCallback((anchorId: string, kind: Kind) => {
@@ -83,15 +190,16 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
 
   const edges = (
     <FamilyEdges
-      nodes={layout.nodes}
+      nodes={positionedNodes}
       parentLines={layout.parentLines}
       coupleLines={layout.coupleLines}
       siblingLines={layout.siblingLines}
+      highlightedRelationIds={highlightedRelationIds}
     />
   )
 
-  const nodes = layout.nodes.map((n) => {
-    const p = persons[n.id]
+  const nodes = positionedNodes.map((n) => {
+    const p = persons[n.personId]
     if (!p) return null
     return (
       <PersonNode
@@ -99,10 +207,19 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
         person={p}
         x={n.x}
         y={n.y}
-        isRoot={n.id === rootId}
-        isSessionUser={n.id === sessionUserId}
-        isSelected={selectedId === n.id}
-        onActivate={() => handleNodeActivate(n.id)}
+        isRoot={n.personId === rootId}
+        isSessionUser={n.personId === sessionUserId}
+        isSelected={selectedId === n.personId}
+        isDuplicate={n.isDuplicate}
+        draggable={canManage && !n.isDuplicate}
+        onReposition={(ddx, ddy) => handleReposition(n.personId, ddx, ddy)}
+        hasCollapsible={n.hasCollapsible}
+        isCollapsed={n.isCollapsed}
+        collapseDirection={n.collapseDirection}
+        onToggleCollapse={() => handleToggleCollapse(n.personId)}
+        isOnPath={onPathPersonIds.has(n.personId)}
+        comparePickIndex={n.personId === comparePick1 ? 1 : n.personId === comparePick2 ? 2 : null}
+        onActivate={() => handleNodeActivate(n.personId)}
       />
     )
   })
@@ -114,7 +231,23 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
         initialTarget={rootCenter}
         edges={edges}
         nodes={nodes}
-        overlays={<ViewportControls rootCenter={rootCenter} />}
+        overlays={
+          <>
+            <ViewportControls rootCenter={rootCenter} />
+            <CanvasSearch persons={persons} nodePositions={nodePositions} onPick={handleNodeActivate} />
+            <MiniMap nodes={positionedNodes} bounds={paddedBounds} />
+            <CompareTool
+              active={compareActive}
+              onActivate={() => setCompareActive(true)}
+              onClose={handleCloseCompare}
+              persons={persons}
+              picks={comparePicks}
+              onClear={handleClearComparePicks}
+              connected={!!comparePath}
+              label={compareLabel}
+            />
+          </>
+        }
       />
 
       {adder && (

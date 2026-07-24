@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import { getLocale, getTranslations } from "next-intl/server"
-import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, QrCode } from "lucide-react"
+import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, MapPinned, QrCode } from "lucide-react"
 import { auth } from "@/auth"
 import { getProfileById } from "@/queries/profile"
 import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
@@ -8,6 +8,7 @@ import { getGeolocationForViewer } from "@/queries/geolocation"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
 import { countTreeMembers } from "@/queries/family-tree"
 import { getGalleryImageUrls, getGalleryCount, getGalleryHasVideos } from "@/queries/gallery"
+import { getPlacesForMap } from "@/queries/places"
 import { getTributeAuthors, getTributeCountByProfileId } from "@/queries/tribute"
 import { getBioByUserId } from "@/queries/bio"
 import { getAvatarColor } from "@/lib/avatar-color"
@@ -24,6 +25,7 @@ import {
   FavoritesPreview,
   GuardianPreview,
   GeoPreview,
+  PlacesPreview,
   QrPreview,
 } from "@/components/card-previews"
 
@@ -70,6 +72,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     galleryImages,
     galleryCount,
     galleryHasVideos,
+    placesPins,
     tributeAuthors,
     tributeCount,
     favorites,
@@ -83,6 +86,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     getGalleryImageUrls(id, 4),
     getGalleryCount(id),
     getGalleryHasVideos(id),
+    getPlacesForMap(id),
     getTributeAuthors(id, 5),
     getTributeCountByProfileId(id),
     !isMemorialized ? getFavoritesByUserId(id) : Promise.resolve([]),
@@ -170,11 +174,23 @@ export default async function ProfileByIdPage({ params }: Props) {
     href: `${base}/tributes`,
   }
 
+  const placesCard: SectionCard = {
+    key: "places",
+    title: t("placesTitle"),
+    description: t("placesDescription"),
+    metric: placesPins.length > 0 ? t("placesMetric", { count: placesPins.length }) : t("placesEmptyMetric"),
+    icon: MapPinned,
+    span: 3,
+    preview: <PlacesPreview pins={placesPins} />,
+    href: `${base}/places`,
+  }
+
   const memorializedCards: SectionCard[] = [
     treeCard,
     bioCard,
     galleryCard,
     tributesCard,
+    placesCard,
     {
       key: "geo",
       title: t("geoTitle"),
@@ -208,6 +224,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     bioCard,
     galleryCard,
     tributesCard,
+    placesCard,
     {
       key: "favorites",
       title: t("favoritesTitle"),

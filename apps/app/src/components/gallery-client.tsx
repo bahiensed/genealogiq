@@ -151,7 +151,7 @@ export function GalleryClient({ items: rawItems, name, editHref, isOwn, upgradeH
           <Images className="h-10 w-10 text-muted-foreground" />
           <p className="text-muted-foreground">{t("empty")}</p>
           {isOwn && editHref && (
-            <Button asChild className="gap-2">
+            <Button asChild variant="outline" size="sm" className="gap-2">
               <Link href={editHref}>
                 <ImagePlus className="h-4 w-4" />
                 {t("addMedia")}

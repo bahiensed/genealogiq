@@ -1,33 +1,51 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
-const { prismaMock } = vi.hoisted(() => ({
-  prismaMock: {
+const { prismaMock, PrismaKnownError } = vi.hoisted(() => {
+  class PrismaKnownError extends Error {
+    code: string
+    constructor(message: string, code: string) {
+      super(message)
+      this.code = code
+    }
+  }
+  const prismaMock = {
     familyRelation: { findUnique: vi.fn(), findFirst: vi.fn(), findMany: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     appUser: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     appUserGuardian: { create: vi.fn() },
+    notification: { updateMany: vi.fn() },
     $transaction: vi.fn(),
-  },
-}))
+  }
+  return { prismaMock, PrismaKnownError }
+})
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
+vi.mock("@genealogiq/db", () => ({ Prisma: { PrismaClientKnownRequestError: PrismaKnownError } }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
 vi.mock("@/queries/profile", () => ({ getProfileById: vi.fn() }))
 vi.mock("@/lib/profile", () => ({ canManageProfile: vi.fn() }))
 vi.mock("@/lib/subscription", () => ({ getMemorialFeatures: vi.fn() }))
 vi.mock("@/lib/notifications", () => ({ notify: vi.fn() }))
+vi.mock("@genealogiq/services/rate-limit", () => ({ checkRateLimit: vi.fn() }))
 vi.mock("@/queries/family-tree", () => ({
   getTreeMemberIds: vi.fn(),
   countTreeMembers: vi.fn(),
+  createsAncestryCycle: vi.fn(),
+  hasConflictingRelationType: vi.fn(),
 }))
 
-import { addRelation, addGhostRelative, updateRelation, removeRelation, updateMember } from "./family-tree.actions"
+import {
+  addRelation, addGhostRelative, updateRelation, removeRelation, updateMember, acceptFamilyRequest,
+} from "./family-tree.actions"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { notify } from "@/lib/notifications"
-import { getTreeMemberIds, countTreeMembers } from "@/queries/family-tree"
+import { checkRateLimit } from "@genealogiq/services/rate-limit"
+import {
+  getTreeMemberIds, countTreeMembers, createsAncestryCycle, hasConflictingRelationType,
+} from "@/queries/family-tree"
 import { getMemorialFeatures } from "@/lib/subscription"
 
 beforeEach(() => {
@@ -39,6 +57,9 @@ beforeEach(() => {
   vi.mocked(getTreeMemberIds).mockResolvedValue(new Set(["A"]))
   vi.mocked(getMemorialFeatures).mockResolvedValue({ treeMaxMembers: 50 } as never)
   vi.mocked(countTreeMembers).mockResolvedValue(1)
+  vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true, retryAfter: 0 })
+  vi.mocked(createsAncestryCycle).mockResolvedValue(false)
+  vi.mocked(hasConflictingRelationType).mockResolvedValue(false)
 })
 
 // cuid()-shaped ids so the .cuid() schema fields parse and we reach the guard.
@@ -253,5 +274,292 @@ describe("removeRelation — pending-invite management (ACCEPTED-only membership
 
     expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
     expect(prismaMock.familyRelation.delete).not.toHaveBeenCalled()
+  })
+})
+
+describe("addRelation — cycle, conflicting-type & rate-limit guards", () => {
+  beforeEach(() => {
+    mockUsers({
+      [ROOT]: { id: ROOT, role: "APP_USER" },
+      [MEMBER]: { id: MEMBER, role: "APP_GHOST" },
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT, MEMBER]))
+    prismaMock.familyRelation.findFirst.mockResolvedValue({ id: "rel-existing" })
+    prismaMock.familyRelation.create.mockResolvedValue({ id: "rel-new" })
+  })
+
+  it("rejects a PARENT_OF relation that would create an ancestry cycle", async () => {
+    vi.mocked(createsAncestryCycle).mockResolvedValue(true)
+
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "PARENT_OF" })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.relationCycle" })
+    expect(prismaMock.familyRelation.create).not.toHaveBeenCalled()
+  })
+
+  it("does not check for cycles on non-PARENT_OF relation types", async () => {
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SIBLING" })
+
+    expect(res.ok).toBe(true)
+    expect(createsAncestryCycle).not.toHaveBeenCalled()
+  })
+
+  it("rejects when the pair already has a different relation type", async () => {
+    vi.mocked(hasConflictingRelationType).mockResolvedValue(true)
+
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SPOUSE" })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.conflictingRelationType" })
+    expect(prismaMock.familyRelation.create).not.toHaveBeenCalled()
+  })
+
+  it("rejects when the rate limit is exceeded, before touching the DB", async () => {
+    vi.mocked(checkRateLimit).mockResolvedValue({ allowed: false, retryAfter: 30 })
+
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SIBLING" })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.tooManyRequests" })
+    expect(prismaMock.familyRelation.create).not.toHaveBeenCalled()
+  })
+
+  it("reports a friendly message on a genuine unique-constraint violation", async () => {
+    prismaMock.familyRelation.create.mockRejectedValue(new PrismaKnownError("Unique constraint failed", "P2002"))
+
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SIBLING" })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.relationExists" })
+  })
+
+  it("rethrows a non-unique-constraint error instead of masking it", async () => {
+    prismaMock.familyRelation.create.mockRejectedValue(new Error("connection reset"))
+
+    await expect(addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SIBLING" }))
+      .rejects.toThrow("connection reset")
+  })
+})
+
+describe("addGhostRelative — auto-link inherits ACCEPTED relations only", () => {
+  it("looks up the anchor's parents by ACCEPTED status when adding a sibling", async () => {
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT]))
+    const findManyMock = vi.fn().mockResolvedValue([])
+    const tx = {
+      appUser: { create: vi.fn().mockResolvedValue({ id: "ghost-new" }) },
+      appUserGuardian: { create: vi.fn() },
+      familyRelation: { create: vi.fn(), findUnique: vi.fn().mockResolvedValue(null), findMany: findManyMock },
+    }
+    prismaMock.$transaction.mockImplementation((cb: (t: typeof tx) => unknown) => cb(tx))
+
+    const res = await addGhostRelative(ROOT, { firstName: "Jane", lastName: "Doe", anchorId: ROOT, kind: "sibling" })
+
+    expect(res.ok).toBe(true)
+    expect(findManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ status: "ACCEPTED" }) }),
+    )
+  })
+
+  it("looks up the anchor's siblings by ACCEPTED status when adding a parent", async () => {
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT]))
+    const findManyMock = vi.fn().mockResolvedValue([])
+    const tx = {
+      appUser: { create: vi.fn().mockResolvedValue({ id: "ghost-new" }) },
+      appUserGuardian: { create: vi.fn() },
+      familyRelation: { create: vi.fn(), findUnique: vi.fn().mockResolvedValue(null), findMany: findManyMock },
+    }
+    prismaMock.$transaction.mockImplementation((cb: (t: typeof tx) => unknown) => cb(tx))
+
+    const res = await addGhostRelative(ROOT, { firstName: "Jane", lastName: "Doe", anchorId: ROOT, kind: "parent" })
+
+    expect(res.ok).toBe(true)
+    expect(findManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ status: "ACCEPTED" }) }),
+    )
+  })
+
+  it("rejects when the rate limit is exceeded, before opening the transaction", async () => {
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT]))
+    vi.mocked(checkRateLimit).mockResolvedValue({ allowed: false, retryAfter: 30 })
+
+    const res = await addGhostRelative(ROOT, { firstName: "Jane", lastName: "Doe", anchorId: ROOT, kind: "parent" })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.tooManyRequests" })
+    expect(prismaMock.$transaction).not.toHaveBeenCalled()
+  })
+})
+
+describe("acceptFamilyRequest", () => {
+  it("fails when the relation is not found", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue(null)
+
+    const res = await acceptFamilyRequest("rel-1")
+
+    expect(res).toEqual({ ok: false, message: "familyTree.requestNotFound" })
+  })
+
+  it("fails when the relation is not PENDING", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      id: "rel-1", type: "SPOUSE", status: "ACCEPTED", fromId: "A", toId: "mgr", requestedById: "A",
+    })
+
+    const res = await acceptFamilyRequest("rel-1")
+
+    expect(res).toEqual({ ok: false, message: "familyTree.requestAlreadyDecided" })
+  })
+
+  it("fails when the caller is not a party to the relation", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      id: "rel-1", type: "SPOUSE", status: "PENDING", fromId: "A", toId: "B", requestedById: "A",
+    })
+
+    const res = await acceptFamilyRequest("rel-1")
+
+    expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
+  })
+
+  it("fails when the caller is the original requester", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      id: "rel-1", type: "SPOUSE", status: "PENDING", fromId: "mgr", toId: "B", requestedById: "mgr",
+    })
+
+    const res = await acceptFamilyRequest("rel-1")
+
+    expect(res).toEqual({ ok: false, message: "familyTree.notAuthorized" })
+  })
+
+  it("rejects a PARENT_OF acceptance that would create an ancestry cycle", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      id: "rel-1", type: "PARENT_OF", status: "PENDING", fromId: "B", toId: "mgr", requestedById: "B",
+    })
+    vi.mocked(createsAncestryCycle).mockResolvedValue(true)
+
+    const res = await acceptFamilyRequest("rel-1")
+
+    expect(res).toEqual({ ok: false, message: "familyTree.relationCycle" })
+    expect(prismaMock.$transaction).not.toHaveBeenCalled()
+  })
+
+  it("accepts a non-SIBLING request: flips status, transforms the notification, and notifies only after commit", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      id: "rel-1", type: "SPOUSE", status: "PENDING", fromId: "B", toId: "mgr", requestedById: "B",
+    })
+    const callOrder: string[] = []
+    const tx = {
+      familyRelation: { update: vi.fn(async () => { callOrder.push("tx.update") }), findMany: vi.fn() },
+      notification: { updateMany: vi.fn(async () => { callOrder.push("tx.notification") }) },
+      appUser: { findUnique: vi.fn() },
+      appUserGuardian: { upsert: vi.fn() },
+    }
+    prismaMock.$transaction.mockImplementation(async (cb: (t: typeof tx) => unknown) => {
+      callOrder.push("tx.start")
+      await cb(tx)
+      callOrder.push("tx.commit")
+    })
+    vi.mocked(notify).mockImplementation(async () => { callOrder.push("notify") })
+
+    const res = await acceptFamilyRequest("rel-1")
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(tx.familyRelation.update).toHaveBeenCalledWith({ where: { id: "rel-1" }, data: { status: "ACCEPTED" } })
+    expect(tx.notification.updateMany).toHaveBeenCalled()
+    expect(notify).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "FAMILY_REQUEST_ACCEPTED", userId: "B" }),
+    )
+    // notify() must fire only after the transaction has committed — never mid-transaction.
+    expect(callOrder).toEqual(["tx.start", "tx.update", "tx.notification", "tx.commit", "notify"])
+  })
+
+  it("SIBLING bonus: looks up the inviter's parents by ACCEPTED status only", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      id: "rel-1", type: "SIBLING", status: "PENDING", fromId: "B", toId: "mgr", requestedById: "B",
+    })
+    const findManyMock = vi.fn().mockResolvedValue([])
+    const tx = {
+      familyRelation: { update: vi.fn(), findMany: findManyMock },
+      notification: { updateMany: vi.fn() },
+      appUser: { findUnique: vi.fn() },
+      appUserGuardian: { upsert: vi.fn() },
+    }
+    prismaMock.$transaction.mockImplementation(async (cb: (t: typeof tx) => unknown) => cb(tx))
+
+    await acceptFamilyRequest("rel-1")
+
+    expect(findManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ type: "PARENT_OF", toId: "B", status: "ACCEPTED" }) }),
+    )
+  })
+
+  it("SIBLING bonus: files a PENDING co-guardian request for a qualifying ghost/memorial parent and notifies its accepted guardians", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      id: "rel-1", type: "SIBLING", status: "PENDING", fromId: "B", toId: "mgr", requestedById: "B",
+    })
+    const tx = {
+      familyRelation: { update: vi.fn(), findMany: vi.fn().mockResolvedValue([{ fromId: "parent-1" }]) },
+      notification: { updateMany: vi.fn() },
+      appUser: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: "parent-1", role: "APP_GHOST",
+          guardedBy: [{ guardianId: "existing-guardian", status: "ACCEPTED" }],
+        }),
+      },
+      appUserGuardian: { upsert: vi.fn().mockResolvedValue({ id: "gship-new" }) },
+    }
+    prismaMock.$transaction.mockImplementation(async (cb: (t: typeof tx) => unknown) => cb(tx))
+
+    const res = await acceptFamilyRequest("rel-1")
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(tx.appUserGuardian.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where:  { appUserId_guardianId: { appUserId: "parent-1", guardianId: "mgr" } },
+        create: expect.objectContaining({
+          appUserId: "parent-1", guardianId: "mgr", status: "PENDING", requestedById: "mgr",
+        }),
+      }),
+    )
+    expect(notify).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "GUARDIAN_REQUEST_PENDING", userId: "existing-guardian", appUserGuardianId: "gship-new",
+      }),
+    )
+  })
+
+  it("SIBLING bonus: skips a parent the accepter already guards, regardless of status", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      id: "rel-1", type: "SIBLING", status: "PENDING", fromId: "B", toId: "mgr", requestedById: "B",
+    })
+    const tx = {
+      familyRelation: { update: vi.fn(), findMany: vi.fn().mockResolvedValue([{ fromId: "parent-1" }]) },
+      notification: { updateMany: vi.fn() },
+      appUser: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: "parent-1", role: "APP_GHOST",
+          guardedBy: [{ guardianId: "mgr", status: "PENDING" }],
+        }),
+      },
+      appUserGuardian: { upsert: vi.fn() },
+    }
+    prismaMock.$transaction.mockImplementation(async (cb: (t: typeof tx) => unknown) => cb(tx))
+
+    const res = await acceptFamilyRequest("rel-1")
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(tx.appUserGuardian.upsert).not.toHaveBeenCalled()
+  })
+
+  it("SIBLING bonus: skips a shared parent who is a real living APP_USER", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({
+      id: "rel-1", type: "SIBLING", status: "PENDING", fromId: "B", toId: "mgr", requestedById: "B",
+    })
+    const tx = {
+      familyRelation: { update: vi.fn(), findMany: vi.fn().mockResolvedValue([{ fromId: "parent-1" }]) },
+      notification: { updateMany: vi.fn() },
+      appUser: { findUnique: vi.fn().mockResolvedValue({ id: "parent-1", role: "APP_USER", guardedBy: [] }) },
+      appUserGuardian: { upsert: vi.fn() },
+    }
+    prismaMock.$transaction.mockImplementation(async (cb: (t: typeof tx) => unknown) => cb(tx))
+
+    const res = await acceptFamilyRequest("rel-1")
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(tx.appUserGuardian.upsert).not.toHaveBeenCalled()
   })
 })

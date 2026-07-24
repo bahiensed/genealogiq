@@ -20,14 +20,22 @@ export function spouseStyle(subtype: string): Style {
   const grey  = "hsl(0 0% 65% / 0.55)"
   if (subtype === "divorced") return { stroke: grey, width: 1.5, dashArray: "5 4" }
   if (subtype === "partner")  return { stroke: grey, width: 1.5, dashArray: "1 4" }
-  if (subtype === "widowed")  return { stroke: grey, width: 1.5, dashArray: "5 4" }
+  if (subtype === "widowed")  return { stroke: grey, width: 1.5, dashArray: "1 6 4 6" }
   return { stroke: rose, width: 1.5 }
 }
 
 export function siblingStyle(subtype: string): Style {
   const muted = "hsl(var(--muted-foreground) / 0.5)"
   if (subtype === "half")    return { stroke: muted, width: 1.5, dashArray: "5 4" }
-  if (subtype === "adopted") return { stroke: muted, width: 1.5, dashArray: "5 4" }
+  if (subtype === "adopted") return { stroke: muted, width: 1.5, dashArray: "1 3" }
   if (subtype === "step")    return { stroke: muted, width: 1.5, dashArray: "2 4" }
   return { stroke: muted, width: 1.5 }
+}
+
+/** Overrides any subtype styling for an edge on the relationship-path
+ *  compare tool's highlighted path — deliberately ignores dash patterns so
+ *  the whole path reads as one continuous, solid line regardless of the
+ *  mix of blood/step/adopted relations it crosses. */
+export function highlightStyle(): Style {
+  return { stroke: "hsl(var(--primary))", width: 3 }
 }

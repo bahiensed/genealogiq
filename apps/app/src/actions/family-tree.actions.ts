@@ -3,12 +3,19 @@
 import { revalidatePath } from "next/cache"
 import { getTranslations } from "next-intl/server"
 import { done, fail, type ActionResult } from "@genealogiq/core"
+import { Prisma } from "@genealogiq/db"
+import { checkRateLimit } from "@genealogiq/services/rate-limit"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
-import { countTreeMembers, getTreeMemberIds } from "@/queries/family-tree"
+import {
+  countTreeMembers,
+  getTreeMemberIds,
+  createsAncestryCycle,
+  hasConflictingRelationType,
+} from "@/queries/family-tree"
 import {
   getAddRelationSchema,
   getAddGhostRelativeSchema,
@@ -17,6 +24,10 @@ import {
 } from "@/schemas/family-tree.schema"
 import { identityTranslator } from "@/schemas/i18n"
 import { notify } from "@/lib/notifications"
+
+function isUniqueConstraintError(e: unknown): boolean {
+  return e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002"
+}
 
 type RelationType = "PARENT_OF" | "SPOUSE" | "SIBLING"
 
@@ -56,6 +67,9 @@ export async function addRelation(rootId: string, data: unknown): Promise<Action
 
   const profile = await getProfileById(rootId)
   if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("familyTree.notAuthorized"))
+
+  const limit = await checkRateLimit({ key: `family-tree:add:${session.user.id}`, maxAttempts: 60, windowSeconds: 3600 })
+  if (!limit.allowed) return fail(t("familyTree.tooManyRequests"))
 
   const parsed = getAddRelationSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return fail(parsed.error.issues[0].message)
@@ -115,6 +129,13 @@ export async function addRelation(rootId: string, data: unknown): Promise<Action
   // PARENT_OF / SIBLING use null to mean a regular blood relation.
   const finalSubtype = subtype ?? (type === "SPOUSE" ? "married" : null)
 
+  if (type === "PARENT_OF" && (await createsAncestryCycle(fromId, toId))) {
+    return fail(t("familyTree.relationCycle"))
+  }
+  if (await hasConflictingRelationType(fromId, toId, type)) {
+    return fail(t("familyTree.conflictingRelationType"))
+  }
+
   let createdRelationId: string
   try {
     const created = await prisma.familyRelation.create({
@@ -131,8 +152,9 @@ export async function addRelation(rootId: string, data: unknown): Promise<Action
       select: { id: true },
     })
     createdRelationId = created.id
-  } catch {
-    return fail(t("familyTree.relationExists"))
+  } catch (e) {
+    if (isUniqueConstraintError(e)) return fail(t("familyTree.relationExists"))
+    throw e
   }
 
   if (needsConsent && outsiderId) {
@@ -152,14 +174,14 @@ export async function addRelation(rootId: string, data: unknown): Promise<Action
   if (linkSpouseId && type === "PARENT_OF" && fromInTree) {
     // The new parent is fromId (PARENT_OF: parent → child).
     const newParentId = fromId
-    if (newParentId !== linkSpouseId) {
+    if (newParentId !== linkSpouseId && !(await hasConflictingRelationType(newParentId, linkSpouseId, "SPOUSE"))) {
       const [a, b] = normalizePair("SPOUSE", newParentId, linkSpouseId)
       try {
         await prisma.familyRelation.create({
           data: { fromId: a, toId: b, type: "SPOUSE", subtype: "married", status: "ACCEPTED" },
         })
-      } catch {
-        // Already exists — ignore.
+      } catch (e) {
+        if (!isUniqueConstraintError(e)) throw e
       }
     }
   }
@@ -176,6 +198,9 @@ export async function addGhostRelative(rootId: string, data: unknown): Promise<A
 
   const profile = await getProfileById(rootId)
   if (!profile || !canManageProfile(profile, session.user.id)) return fail(t("familyTree.notAuthorized"))
+
+  const limit = await checkRateLimit({ key: `family-tree:add:${session.user.id}`, maxAttempts: 60, windowSeconds: 3600 })
+  if (!limit.allowed) return fail(t("familyTree.tooManyRequests"))
 
   const parsed = getAddGhostRelativeSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return fail(parsed.error.issues[0].message)
@@ -247,15 +272,21 @@ export async function addGhostRelative(rootId: string, data: unknown): Promise<A
       },
     })
 
-    // Spouse link to an existing parent when adding a 2nd parent.
+    // Spouse link to an existing parent when adding a 2nd parent. Ghost is
+    // brand new, so the only possible conflict is a genuine duplicate SPOUSE
+    // row — check first rather than relying on a caught DB error: Postgres
+    // aborts the whole transaction on the first failed statement, and catching
+    // the JS exception doesn't un-abort it.
     if (linkSpouseId && kindType === "PARENT_OF" && kind === "parent" && linkSpouseId !== ghost.id) {
       const [a, b] = normalizePair("SPOUSE", ghost.id, linkSpouseId)
-      try {
+      const exists = await tx.familyRelation.findUnique({
+        where:  { fromId_toId_type: { fromId: a, toId: b, type: "SPOUSE" } },
+        select: { id: true },
+      })
+      if (!exists) {
         await tx.familyRelation.create({
           data: { fromId: a, toId: b, type: "SPOUSE", subtype: "married", status: "ACCEPTED" },
         })
-      } catch {
-        // Already exists — ignore.
       }
     }
 
@@ -264,19 +295,23 @@ export async function addGhostRelative(rootId: string, data: unknown): Promise<A
     const createParentOf = async (parentId: string, childId: string) => {
       if (parentId === childId) return
       const [a, b] = normalizePair("PARENT_OF", parentId, childId)
-      try {
+      const exists = await tx.familyRelation.findUnique({
+        where:  { fromId_toId_type: { fromId: a, toId: b, type: "PARENT_OF" } },
+        select: { id: true },
+      })
+      if (!exists) {
         await tx.familyRelation.create({
           data: { fromId: a, toId: b, type: "PARENT_OF", subtype: null, status: "ACCEPTED" },
         })
-      } catch {
-        // Already exists — ignore.
       }
     }
 
     if (kind === "sibling") {
-      // The new sibling inherits the anchor's parents.
+      // The new sibling inherits the anchor's parents. ACCEPTED only — a
+      // still-PENDING (not yet consented) parent link must not be treated as
+      // membership, or the invitee gets auto-linked with zero consent.
       const parentRels = await tx.familyRelation.findMany({
-        where: { toId: anchorId, type: "PARENT_OF", status: { not: "REJECTED" } },
+        where: { toId: anchorId, type: "PARENT_OF", status: "ACCEPTED" },
         select: { fromId: true },
       })
       for (const pr of parentRels) await createParentOf(pr.fromId, ghost.id)
@@ -297,10 +332,11 @@ export async function addGhostRelative(rootId: string, data: unknown): Promise<A
       }
     } else if (kind === "parent") {
       // The new parent inherits the anchor's siblings as additional children.
+      // ACCEPTED only — see the sibling branch above for why.
       const sibRels = await tx.familyRelation.findMany({
         where: {
           type:   "SIBLING",
-          status: { not: "REJECTED" },
+          status: "ACCEPTED",
           OR: [{ fromId: anchorId }, { toId: anchorId }],
         },
         select: { fromId: true, toId: true },
@@ -490,77 +526,87 @@ export async function acceptFamilyRequest(relationId: string): Promise<ActionRes
   const isTarget = relation.fromId === session.user.id || relation.toId === session.user.id
   if (!isTarget || relation.requestedById === session.user.id) return fail(t("familyTree.notAuthorized"))
 
-  await prisma.familyRelation.update({
-    where: { id: relationId },
-    data:  { status: "ACCEPTED" },
-  })
-
-  // Transform the accepter's own PENDING notification into ACCEPTED in-place so
-  // it persists in their Recent Activity ("You joined <requester>'s family tree").
-  await prisma.notification.updateMany({
-    where: { familyRelationId: relationId, userId: session.user.id, type: "FAMILY_REQUEST_PENDING" },
-    data:  { type: "FAMILY_REQUEST_ACCEPTED", readAt: new Date() },
-  })
-
-  if (relation.requestedById) {
-    await notify({
-      type:             "FAMILY_REQUEST_ACCEPTED",
-      userId:           relation.requestedById,
-      actorId:          session.user.id,
-      familyRelationId: relationId,
-    })
+  if (relation.type === "PARENT_OF" && (await createsAncestryCycle(relation.fromId, relation.toId))) {
+    return fail(t("familyTree.relationCycle"))
   }
 
-  // Bonus: when accepting a SIBLING invitation, the accepter automatically
-  // files a PENDING co-guardianship request for each ghost/memorial parent of
-  // the inviter — those are the shared parents the accepter now also "owns".
-  // The inviter (current guardian) gets a notification and approves/declines.
-  if (relation.type === "SIBLING" && relation.requestedById) {
-    const inviterId  = relation.requestedById
-    const accepterId = session.user.id
+  // notify() writes through the global prisma client (not `tx`) and schedules a
+  // push side-effect — collect what to send here, fire only after the
+  // transaction below has durably committed.
+  type PendingNotify =
+    | { kind: "FAMILY_REQUEST_ACCEPTED"; userId: string }
+    | { kind: "GUARDIAN_REQUEST_PENDING"; userId: string; appUserGuardianId: string }
+  const toNotify: PendingNotify[] = []
 
-    const parentRels = await prisma.familyRelation.findMany({
-      where: {
-        type:   "PARENT_OF",
-        toId:   inviterId,
-        status: { not: "REJECTED" },
-      },
-      select: { fromId: true },
+  await prisma.$transaction(async (tx) => {
+    await tx.familyRelation.update({
+      where: { id: relationId },
+      data:  { status: "ACCEPTED" },
     })
 
-    for (const pr of parentRels) {
-      const parent = await prisma.appUser.findUnique({
-        where:  { id: pr.fromId },
-        select: {
-          id: true, role: true,
-          guardedBy: { select: { guardianId: true, status: true } },
-        },
-      })
-      if (!parent) continue
-      if (parent.role !== "APP_GHOST" && parent.role !== "APP_MEMO") continue
-      if (parent.guardedBy.some((g) => g.guardianId === accepterId)) continue
+    // Transform the accepter's own PENDING notification into ACCEPTED in-place so
+    // it persists in their Recent Activity ("You joined <requester>'s family tree").
+    await tx.notification.updateMany({
+      where: { familyRelationId: relationId, userId: session.user.id, type: "FAMILY_REQUEST_PENDING" },
+      data:  { type: "FAMILY_REQUEST_ACCEPTED", readAt: new Date() },
+    })
 
-      const created = await prisma.appUserGuardian.create({
-        data: {
-          appUserId:     parent.id,
-          guardianId:    accepterId,
-          status:        "PENDING",
-          requestedById: accepterId,
-        },
-        select: { id: true },
+    if (relation.requestedById) {
+      toNotify.push({ kind: "FAMILY_REQUEST_ACCEPTED", userId: relation.requestedById })
+    }
+
+    // Bonus: when accepting a SIBLING invitation, the accepter automatically
+    // files a PENDING co-guardianship request for each ghost/memorial parent of
+    // the inviter — those are the shared parents the accepter now also "owns".
+    // The inviter (current guardian) gets a notification and approves/declines.
+    if (relation.type === "SIBLING" && relation.requestedById) {
+      const inviterId  = relation.requestedById
+      const accepterId = session.user.id
+
+      // ACCEPTED only — a still-PENDING parent link must not be treated as
+      // membership (mirrors the same fix in addGhostRelative).
+      const parentRels = await tx.familyRelation.findMany({
+        where: { type: "PARENT_OF", toId: inviterId, status: "ACCEPTED" },
+        select: { fromId: true },
       })
 
-      const recipients = parent.guardedBy
-        .filter((g) => g.status === "ACCEPTED")
-        .map((g) => g.guardianId)
-      for (const uid of recipients) {
-        await notify({
-          type:              "GUARDIAN_REQUEST_PENDING",
-          userId:            uid,
-          actorId:           accepterId,
-          appUserGuardianId: created.id,
+      for (const pr of parentRels) {
+        const parent = await tx.appUser.findUnique({
+          where:  { id: pr.fromId },
+          select: {
+            id: true, role: true,
+            guardedBy: { select: { guardianId: true, status: true } },
+          },
         })
+        if (!parent) continue
+        if (parent.role !== "APP_GHOST" && parent.role !== "APP_MEMO") continue
+        if (parent.guardedBy.some((g) => g.guardianId === accepterId)) continue
+
+        // upsert (not create): two accepts racing to the same shared parent
+        // could otherwise both pass the check above and collide on the unique
+        // constraint INSIDE this transaction — upsert is atomic against that.
+        const guardianship = await tx.appUserGuardian.upsert({
+          where:  { appUserId_guardianId: { appUserId: parent.id, guardianId: accepterId } },
+          create: { appUserId: parent.id, guardianId: accepterId, status: "PENDING", requestedById: accepterId },
+          update: {},
+          select: { id: true },
+        })
+
+        const recipients = parent.guardedBy
+          .filter((g) => g.status === "ACCEPTED")
+          .map((g) => g.guardianId)
+        for (const uid of recipients) {
+          toNotify.push({ kind: "GUARDIAN_REQUEST_PENDING", userId: uid, appUserGuardianId: guardianship.id })
+        }
       }
+    }
+  })
+
+  for (const n of toNotify) {
+    if (n.kind === "FAMILY_REQUEST_ACCEPTED") {
+      await notify({ type: "FAMILY_REQUEST_ACCEPTED", userId: n.userId, actorId: session.user.id, familyRelationId: relationId })
+    } else {
+      await notify({ type: "GUARDIAN_REQUEST_PENDING", userId: n.userId, actorId: session.user.id, appUserGuardianId: n.appUserGuardianId })
     }
   }
 

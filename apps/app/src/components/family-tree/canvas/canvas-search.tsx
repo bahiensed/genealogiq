@@ -4,16 +4,20 @@ import { useEffect, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useViewport } from "./svg-canvas"
+import { NODE_W, NODE_H } from "./layout"
 import type { TreePerson } from "@/queries/family-tree"
 
 interface Props {
-  persons: Record<string, TreePerson>
-  onPick:  (id: string) => void
+  persons:       Record<string, TreePerson>
+  nodePositions: Map<string, { x: number; y: number }>
+  onPick:        (id: string) => void
 }
 
-export function CanvasSearch({ persons, onPick }: Props) {
+export function CanvasSearch({ persons, nodePositions, onPick }: Props) {
   const t = useTranslations("FamilyTree")
   const tc = useTranslations("Common")
+  const { focusOn } = useViewport()
   const [open, setOpen]     = useState(false)
   const [query, setQuery]   = useState("")
   const inputRef            = useRef<HTMLInputElement>(null)
@@ -41,6 +45,14 @@ export function CanvasSearch({ persons, onPick }: Props) {
         .filter((p) => `${p.firstName} ${p.lastName} ${p.maidenName ?? ""} ${p.nickname ?? ""}`.toLowerCase().includes(q))
         .slice(0, 5)
     : []
+
+  const handlePick = (id: string) => {
+    const pos = nodePositions.get(id)
+    if (pos) focusOn(pos.x + NODE_W / 2, pos.y + NODE_H / 2)
+    onPick(id)
+    setOpen(false)
+    setQuery("")
+  }
 
   if (!open) {
     return (
@@ -86,7 +98,7 @@ export function CanvasSearch({ persons, onPick }: Props) {
               <li key={p.id}>
                 <button
                   type="button"
-                  onClick={() => { onPick(p.id); setOpen(false); setQuery("") }}
+                  onClick={() => handlePick(p.id)}
                   className={cn(
                     "w-full text-left px-3 py-2 text-sm hover:bg-accent/60 transition-colors flex items-center gap-2",
                   )}
@@ -95,9 +107,9 @@ export function CanvasSearch({ persons, onPick }: Props) {
                     {p.firstName} {p.lastName}
                     {p.nickname && <span className="text-muted-foreground italic"> &ldquo;{p.nickname}&rdquo;</span>}
                   </span>
-                  {p.birthDate && (
+                  {p.birthYear && (
                     <span className="text-xs text-muted-foreground tabular-nums">
-                      {new Date(p.birthDate).getFullYear()}
+                      {p.birthYear}
                     </span>
                   )}
                 </button>
