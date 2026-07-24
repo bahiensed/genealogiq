@@ -25,7 +25,7 @@ export default async function TreePage({ params }: Props) {
   const canManage = viewerId ? canManageProfile(profile, viewerId) : false
 
   const [{ persons, relations }, features] = await Promise.all([
-    getFamilyTree(id),
+    getFamilyTree(id, { id: viewerId ?? null, canManage }),
     getMemorialFeatures(id),
   ])
   // Anonymous visitors view the tree read-only, so no guardian lookup is needed.

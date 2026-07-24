@@ -1,11 +1,11 @@
 import { z } from "zod"
 
 export const requestGuardianshipSchema = z.object({
-  profileId: z.string().min(1),
+  profileId: z.string().cuid(),
 })
 
 export const guardianshipActionSchema = z.object({
-  guardianshipId: z.string().min(1),
+  guardianshipId: z.string().cuid(),
 })
 
 export type RequestGuardianshipInput = z.infer<typeof requestGuardianshipSchema>

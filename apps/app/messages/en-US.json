@@ -42,13 +42,16 @@
     "familyTree": {
       "cannotRelateSelf": "A profile cannot be related to itself.",
       "cannotRemoveRoot": "You cannot remove the tree root.",
+      "conflictingRelationType": "These two people already have a different type of relation.",
       "memberNotFound": "Member not found.",
       "notAuthorized": "Not authorized.",
       "profileNotFound": "Profile not found.",
+      "relationCycle": "This would create a cycle in the family tree.",
       "relationExists": "This relation already exists.",
       "relationNotFound": "Relation not found.",
       "requestAlreadyDecided": "This request has already been decided.",
       "requestNotFound": "Request not found.",
+      "tooManyRequests": "Too many requests. Please try again later.",
       "treeLimitReached": "Family tree limit is {limit} people on this plan."
     },
     "favorite": {
@@ -70,7 +73,8 @@
       "profileNotFound": "Profile not found.",
       "requestNotFound": "Request not found.",
       "requestPending": "You already have a pending request for this profile.",
-      "requestResolved": "Request already resolved."
+      "requestResolved": "Request already resolved.",
+      "tooManyRequests": "Too many requests. Please try again later."
     },
     "memorial": {
       "noQrCodes": "No available QR Codes. Purchase a QR Code to create more profiles.",
@@ -240,6 +244,7 @@
     }
   },
   "Errors": {
+    "deathBeforeBirth": "Death date must be on or after the birth date",
     "description": "An unexpected error occurred. Please try again.",
     "endBeforeStart": "End date must be on or after the start date",
     "invalidDate": "Invalid date",
@@ -330,6 +335,7 @@
       "editDisabledHint": "You can only edit your own profile, your memorials, or people you added to the tree.",
       "editHint": "Update name, dates and details.",
       "pending": "Pending",
+      "relationships": "Relationships",
       "seeProfile": "See profile",
       "thisIsYou": "This is you",
       "timeline": "Timeline"
@@ -347,6 +353,44 @@
       "memorial": "Memorial",
       "pending": "Pending",
       "you": "You"
+    },
+    "relation": {
+      "aunt": "Your aunt",
+      "brother": "Your brother",
+      "brotherInLaw": "Your brother-in-law",
+      "cousin": "Your cousin",
+      "daughter": "Your daughter",
+      "father": "Your father",
+      "fatherInLaw": "Your father-in-law",
+      "grandNephew": "Your grand-nephew",
+      "grandNiece": "Your grand-niece",
+      "grandfather": "Your grandfather",
+      "granddaughter": "Your granddaughter",
+      "grandmother": "Your grandmother",
+      "grandson": "Your grandson",
+      "greatAunt": "Your great-aunt",
+      "greatGrandfather": "Your great-grandfather",
+      "greatGranddaughter": "Your great-granddaughter",
+      "greatGrandmother": "Your great-grandmother",
+      "greatGrandson": "Your great-grandson",
+      "greatUncle": "Your great-uncle",
+      "halfBrother": "Your half-brother",
+      "halfSister": "Your half-sister",
+      "husband": "Your husband",
+      "mother": "Your mother",
+      "motherInLaw": "Your mother-in-law",
+      "nephew": "Your nephew",
+      "niece": "Your niece",
+      "relative": "Your relative",
+      "sister": "Your sister",
+      "sisterInLaw": "Your sister-in-law",
+      "son": "Your son",
+      "stepDaughter": "Your step-daughter",
+      "stepFather": "Your step-father",
+      "stepMother": "Your step-mother",
+      "stepSon": "Your step-son",
+      "uncle": "Your uncle",
+      "wife": "Your wife"
     },
     "removeDialog": {
       "ghostDescription": "{name} will be deleted permanently from the tree and from the system along with their relations to others in the tree. This cannot be undone.",

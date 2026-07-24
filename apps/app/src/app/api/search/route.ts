@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { checkRateLimit } from "@genealogiq/services/rate-limit"
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 
@@ -10,6 +11,11 @@ import { prisma } from "@/lib/prisma"
 export async function GET(request: Request): Promise<NextResponse> {
   const session = await auth()
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  // Bounds reconnaissance for target-selection abuse (this is the only way to
+  // discover a profileId to spam requestGuardianship/addRelation against).
+  const limit = await checkRateLimit({ key: `search:${session.user.id}`, maxAttempts: 120, windowSeconds: 3600 })
+  if (!limit.allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 })
 
   const q = new URL(request.url).searchParams.get("q")?.trim() ?? ""
   if (q.length < 3) return NextResponse.json([])

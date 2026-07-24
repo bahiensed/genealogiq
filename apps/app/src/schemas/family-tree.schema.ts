@@ -18,7 +18,11 @@ export const RELATION_TYPES = ["PARENT_OF", "SPOUSE", "SIBLING"] as const
 export type RelationType = typeof RELATION_TYPES[number]
 
 const makeDateString = (t: Translator) =>
-  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t("invalidDate")).optional().nullable()
+  z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, t("invalidDate"))
+    .refine((s) => !Number.isNaN(new Date(s).getTime()), t("invalidDate"))
+    .optional()
+    .nullable()
 
 const subtypeForType = (type: RelationType): readonly string[] =>
   type === "PARENT_OF" ? PARENT_OF_SUBTYPES
@@ -42,6 +46,9 @@ export function getAddRelationSchema(t: Translator) {
   }).refine((d) => !d.subtype || subtypeForType(d.type).includes(d.subtype), {
     message: t("invalidSubtypeForType"),
     path:    ["subtype"],
+  }).refine((d) => !d.startDate || !d.endDate || d.endDate >= d.startDate, {
+    message: t("endBeforeStart"),
+    path:    ["endDate"],
   })
 }
 
@@ -78,6 +85,12 @@ export function getAddGhostRelativeSchema(t: Translator) {
   }, {
     message: t("invalidSubtypeForKind"),
     path:    ["subtype"],
+  }).refine((d) => !d.startDate || !d.endDate || d.endDate >= d.startDate, {
+    message: t("endBeforeStart"),
+    path:    ["endDate"],
+  }).refine((d) => !d.birthDate || !d.deathDate || d.deathDate >= d.birthDate, {
+    message: t("deathBeforeBirth"),
+    path:    ["deathDate"],
   })
 }
 
@@ -88,6 +101,9 @@ export type AddGhostRelativeInput = z.infer<ReturnType<typeof getAddGhostRelativ
 export function getUpdateMemberSchema(t: Translator) {
   return makeGhostIdentity(t).extend({
     avatarUrl: z.string().regex(BLOB_URL_PATTERN, t("invalidUrl")).optional().nullable(),
+  }).refine((d) => !d.birthDate || !d.deathDate || d.deathDate >= d.birthDate, {
+    message: t("deathBeforeBirth"),
+    path:    ["deathDate"],
   })
 }
 
@@ -101,6 +117,9 @@ export function getUpdateRelationSchema(t: Translator) {
     subtype:   z.string().min(1).optional().nullable(),
     startDate: dateString,
     endDate:   dateString,
+  }).refine((d) => !d.startDate || !d.endDate || d.endDate >= d.startDate, {
+    message: t("endBeforeStart"),
+    path:    ["endDate"],
   })
 }
 

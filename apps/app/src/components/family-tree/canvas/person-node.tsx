@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl"
 import { User, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { formatYear } from "@/lib/format-date"
 import type { TreePerson } from "@/queries/family-tree"
 import { NODE_W, NODE_H } from "./layout"
 
@@ -31,8 +30,10 @@ export function PersonNode({ person, x, y, isRoot, isSessionUser, isSelected, on
         : "ring-border/50"
 
   const initials = `${person.firstName[0] ?? ""}${person.lastName[0] ?? ""}`.toUpperCase()
-  const birthYear = formatYear(person.birthDate)
-  const deathYear = formatYear(person.deathDate)
+  // Read the always-populated year fields directly (not derived from
+  // birthDate/deathDate) so a redacted person still shows a year.
+  const birthYear = person.birthYear != null ? String(person.birthYear) : ""
+  const deathYear = person.deathYear != null ? String(person.deathYear) : ""
   const yearLabel = deathYear ? `${birthYear || "—"} – ${deathYear}` : birthYear
 
   const displayName = person.maidenName
@@ -42,10 +43,20 @@ export function PersonNode({ person, x, y, isRoot, isSessionUser, isSelected, on
   return (
     <div
       data-node={person.id}
+      role="button"
+      tabIndex={0}
+      aria-label={displayName}
       onClick={(e) => { e.stopPropagation(); onActivate() }}
+      onKeyDown={(e) => {
+        if (e.key !== "Enter" && e.key !== " ") return
+        e.preventDefault()
+        e.stopPropagation()
+        onActivate()
+      }}
       className={cn(
         "absolute cursor-pointer rounded-xl border bg-card/85 backdrop-blur-md flex items-center gap-2.5 px-2.5 pointer-events-auto",
         "transition-[transform,box-shadow,border-color,opacity] duration-150",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:border-primary/30",
         isGhost || isPending ? "border-dashed border-border/70" : "border-white/30",
         isSelected && "ring-2 ring-primary/70 border-primary/30",
         isRoot && "scale-[1.04]",

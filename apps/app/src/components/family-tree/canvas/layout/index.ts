@@ -135,7 +135,15 @@ function buildCoupleSlot(
   if (!spouseId || !persons[spouseId]) {
     return { cards: [focalId], leftCardX: 0, focalId, width: NODE_W }
   }
-  const ageOf = (id: string) => persons[id]?.birthDate?.getTime() ?? Number.POSITIVE_INFINITY
+  // Prefer the exact date; fall back to the (always-populated, redaction-safe)
+  // year so a redacted person still sorts by approximate age instead of
+  // always landing last.
+  const ageOf = (id: string) => {
+    const p = persons[id]
+    if (p?.birthDate) return p.birthDate.getTime()
+    if (p?.birthYear) return Date.UTC(p.birthYear, 0, 1)
+    return Number.POSITIVE_INFINITY
+  }
   const olderLeft = ageOf(focalId) <= ageOf(spouseId)
   const cards = olderLeft ? [focalId, spouseId] : [spouseId, focalId]
   return { cards, leftCardX: 0, focalId, width: 2 * NODE_W + X_TIGHT }
@@ -268,7 +276,15 @@ function layoutAncestorCoupleBlock(
   }
 
   // Two parents: order older-leftmost.
-  const ageOf = (id: string) => persons[id]?.birthDate?.getTime() ?? Number.POSITIVE_INFINITY
+  // Prefer the exact date; fall back to the (always-populated, redaction-safe)
+  // year so a redacted person still sorts by approximate age instead of
+  // always landing last.
+  const ageOf = (id: string) => {
+    const p = persons[id]
+    if (p?.birthDate) return p.birthDate.getTime()
+    if (p?.birthYear) return Date.UTC(p.birthYear, 0, 1)
+    return Number.POSITIVE_INFINITY
+  }
   const [husbandId, wifeId] = parents[0] === parents[1]
     ? parents
     : (ageOf(parents[0]) <= ageOf(parents[1]) ? [parents[0], parents[1]] : [parents[1], parents[0]])
@@ -395,7 +411,15 @@ export function computeLayout(
   //    Distribute across the descendant block:
   //      - siblings older than subject → place LEFT of the descendant block
   //      - siblings younger than subject → place RIGHT
-  const ageOf = (id: string) => persons[id]?.birthDate?.getTime() ?? Number.POSITIVE_INFINITY
+  // Prefer the exact date; fall back to the (always-populated, redaction-safe)
+  // year so a redacted person still sorts by approximate age instead of
+  // always landing last.
+  const ageOf = (id: string) => {
+    const p = persons[id]
+    if (p?.birthDate) return p.birthDate.getTime()
+    if (p?.birthYear) return Date.UTC(p.birthYear, 0, 1)
+    return Number.POSITIVE_INFINITY
+  }
   const siblings = (graph.siblingsOf.get(rootId) ?? [])
     .filter((id) => persons[id])
     .sort((a, b) => ageOf(a) - ageOf(b))

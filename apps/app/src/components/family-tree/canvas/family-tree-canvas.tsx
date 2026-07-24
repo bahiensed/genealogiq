@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { SvgCanvas } from "./svg-canvas"
 import { ViewportControls } from "./viewport-controls"
+import { CanvasSearch } from "./canvas-search"
 import { PersonNode } from "./person-node"
 import { FamilyEdges } from "./edges/family-edges"
 import { computeLayout, NODE_W, NODE_H } from "./layout"
@@ -47,6 +48,11 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
     if (!r) return null
     return { x: r.x + NODE_W / 2, y: r.y + NODE_H / 2 }
   }, [layout.nodes, rootId])
+
+  const nodePositions = useMemo(
+    () => new Map(layout.nodes.map((n) => [n.id, { x: n.x, y: n.y }])),
+    [layout.nodes],
+  )
 
   const handleNodeActivate = useCallback((id: string) => {
     setSelectedId(id)
@@ -114,7 +120,12 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
         initialTarget={rootCenter}
         edges={edges}
         nodes={nodes}
-        overlays={<ViewportControls rootCenter={rootCenter} />}
+        overlays={
+          <>
+            <ViewportControls rootCenter={rootCenter} />
+            <CanvasSearch persons={persons} nodePositions={nodePositions} onPick={handleNodeActivate} />
+          </>
+        }
       />
 
       {adder && (

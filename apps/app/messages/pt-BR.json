@@ -42,13 +42,16 @@
     "familyTree": {
       "cannotRelateSelf": "Um perfil não pode ser relacionado a si mesmo.",
       "cannotRemoveRoot": "Você não pode remover a pessoa principal da árvore.",
+      "conflictingRelationType": "Essas duas pessoas já têm um tipo de relação diferente.",
       "memberNotFound": "Membro não encontrado.",
       "notAuthorized": "Sem autorização.",
       "profileNotFound": "Perfil não encontrado.",
+      "relationCycle": "Isso criaria um ciclo na árvore genealógica.",
       "relationExists": "Esta relação já existe.",
       "relationNotFound": "Relação não encontrada.",
       "requestAlreadyDecided": "Esta solicitação já foi respondida.",
       "requestNotFound": "Solicitação não encontrada.",
+      "tooManyRequests": "Muitas solicitações. Tente novamente mais tarde.",
       "treeLimitReached": "O limite da árvore genealógica é de {limit} pessoas neste plano."
     },
     "favorite": {
@@ -70,7 +73,8 @@
       "profileNotFound": "Perfil não encontrado.",
       "requestNotFound": "Solicitação não encontrada.",
       "requestPending": "Você já tem uma solicitação pendente para este perfil.",
-      "requestResolved": "Solicitação já resolvida."
+      "requestResolved": "Solicitação já resolvida.",
+      "tooManyRequests": "Muitas solicitações. Tente novamente mais tarde."
     },
     "memorial": {
       "noQrCodes": "Nenhum QR Code disponível. Compre um QR Code para criar mais perfis.",
@@ -240,6 +244,7 @@
     }
   },
   "Errors": {
+    "deathBeforeBirth": "A data de falecimento deve ser igual ou posterior à data de nascimento",
     "description": "Ocorreu um erro inesperado. Tente novamente.",
     "endBeforeStart": "A data final deve ser igual ou posterior à inicial",
     "invalidDate": "Data inválida",
@@ -330,6 +335,7 @@
       "editDisabledHint": "Você só pode editar o seu próprio perfil, os seus memoriais ou pessoas que você adicionou à árvore.",
       "editHint": "Atualize nome, datas e detalhes.",
       "pending": "Pendente",
+      "relationships": "Relacionamentos",
       "seeProfile": "Ver perfil",
       "thisIsYou": "Este é você",
       "timeline": "Linha do tempo"
@@ -347,6 +353,44 @@
       "memorial": "Memorial",
       "pending": "Pendente",
       "you": "Você"
+    },
+    "relation": {
+      "aunt": "Sua tia",
+      "brother": "Seu irmão",
+      "brotherInLaw": "Seu cunhado",
+      "cousin": "Seu primo",
+      "daughter": "Sua filha",
+      "father": "Seu pai",
+      "fatherInLaw": "Seu sogro",
+      "grandNephew": "Seu sobrinho-neto",
+      "grandNiece": "Sua sobrinha-neta",
+      "grandfather": "Seu avô",
+      "granddaughter": "Sua neta",
+      "grandmother": "Sua avó",
+      "grandson": "Seu neto",
+      "greatAunt": "Sua tia-avó",
+      "greatGrandfather": "Seu bisavô",
+      "greatGranddaughter": "Sua bisneta",
+      "greatGrandmother": "Sua bisavó",
+      "greatGrandson": "Seu bisneto",
+      "greatUncle": "Seu tio-avô",
+      "halfBrother": "Seu meio-irmão",
+      "halfSister": "Sua meia-irmã",
+      "husband": "Seu marido",
+      "mother": "Sua mãe",
+      "motherInLaw": "Sua sogra",
+      "nephew": "Seu sobrinho",
+      "niece": "Sua sobrinha",
+      "relative": "Seu parente",
+      "sister": "Sua irmã",
+      "sisterInLaw": "Sua cunhada",
+      "son": "Seu filho",
+      "stepDaughter": "Sua enteada",
+      "stepFather": "Seu padrasto",
+      "stepMother": "Sua madrasta",
+      "stepSon": "Seu enteado",
+      "uncle": "Seu tio",
+      "wife": "Sua esposa"
     },
     "removeDialog": {
       "ghostDescription": "{name} será excluído(a) permanentemente da árvore e do sistema, junto com suas relações com as outras pessoas da árvore. Isso não pode ser desfeito.",
