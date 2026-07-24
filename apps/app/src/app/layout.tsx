@@ -54,7 +54,7 @@ export default async function RootLayout({
             enableSystem
           >
             <TooltipProvider>
-              {children}
+              <div className="flex-1 flex flex-col">{children}</div>
               <Footer />
               <Toaster richColors />
               <RegisterServiceWorker />

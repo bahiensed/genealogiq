@@ -1,22 +1,37 @@
+import Link from "next/link"
 import { getTranslations } from "next-intl/server"
-import { auth } from "@/auth"
 import { FeedbackDialog } from "@/components/feedback-dialog"
 
-// Rendered once in the root layout so it covers every route. Only shown to
-// authenticated users — anonymous visitors (including on public memorial
-// pages) never see these links.
+// Rendered once in the root layout so it covers every route, authenticated
+// or not — Privacy/Terms/Cancellation must be reachable by anonymous visitors.
 export async function Footer() {
-  const session = await auth()
-  if (!session?.user) return null
-
   const t = await getTranslations("Feedback")
+  const year = new Date().getFullYear()
+
+  const linkClass = "text-muted-foreground hover:text-foreground underline-offset-4 hover:underline transition-colors"
 
   return (
-    <footer className="w-full py-4 px-4 md:px-8">
-      <div className="container mx-auto flex justify-end items-center gap-3 text-xs">
-        <FeedbackDialog type="bug" label={t("links.reportBug")} />
-        <span aria-hidden className="text-muted-foreground">|</span>
-        <FeedbackDialog type="feedback" label={t("links.sendFeedback")} />
+    <footer className="w-full pt-4 pb-8 px-4 md:px-8">
+      <div className="container mx-auto flex flex-col gap-2 text-xs">
+        <div className="flex justify-end">
+          <FeedbackDialog type="bug" label={t("links.reportBug")} />
+        </div>
+
+        <hr className="mt-2 border-border" />
+
+        <p className="mt-2 text-center text-muted-foreground">{t("footer.copyright", { year })}</p>
+
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+          <FeedbackDialog type="contact" label={t("links.contact")} />
+          <span aria-hidden className="text-muted-foreground">|</span>
+          <FeedbackDialog type="career" label={t("links.career")} />
+          <span aria-hidden className="text-muted-foreground">|</span>
+          <Link href="/privacy" className={linkClass}>{t("footer.privacy")}</Link>
+          <span aria-hidden className="text-muted-foreground">|</span>
+          <Link href="/terms" className={linkClass}>{t("footer.terms")}</Link>
+          <span aria-hidden className="text-muted-foreground">|</span>
+          <Link href="/cancellation-refund" className={linkClass}>{t("footer.cancellationRefund")}</Link>
+        </div>
       </div>
     </footer>
   )

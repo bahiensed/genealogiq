@@ -31,7 +31,7 @@ export default async function QrCodePage({ params }: Props) {
   const profileUrl = `${appUrl}/profile/${id}`
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden">
+    <div className="relative overflow-x-hidden">
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32">
