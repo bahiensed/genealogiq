@@ -1,4 +1,4 @@
-import { Heart, Star, Images, Flower2, BrickWall, TreePine, Lock, QrCode } from "lucide-react"
+import { Heart, Star, Images, Flower2, BrickWall, TreePine, Lock, QrCode, MapPinned } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { getAvatarColor, getAvatarGradient } from "@/lib/avatar-color"
 import type { TributeAuthorPreview } from "@/queries/tribute"
@@ -453,6 +453,42 @@ export async function GeoPreview({ lat, lon }: { lat?: number | null; lon?: numb
   )
 }
 
+
+export async function PlacesPreview({ pins }: { pins: { lat: number; lon: number }[] }) {
+  const t = await getTranslations("Profile")
+  const valid = pins.filter((p) => p.lat !== 0 || p.lon !== 0)
+
+  if (valid.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[120px] gap-2 py-4">
+        <MapPinned className="h-8 w-8 text-muted-foreground/50" />
+        <p className="text-xs text-muted-foreground">{t("placesEmptyMetric")}</p>
+      </div>
+    )
+  }
+
+  // Center the static tile on the centroid of the pins.
+  const cLat = valid.reduce((s, p) => s + p.lat, 0) / valid.length
+  const cLon = valid.reduce((s, p) => s + p.lon, 0) / valid.length
+  const mapUrl = osmTileUrl(cLat, cLon, valid.length > 1 ? 11 : 14)
+
+  return (
+    <div className="relative h-full w-full min-h-[120px] rounded-xl overflow-hidden bg-muted">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={mapUrl} alt={t("mapAlt")} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent" />
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <span className="relative flex h-3 w-3">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-primary ring-2 ring-background" />
+        </span>
+      </div>
+      <div className="absolute bottom-2 right-2 rounded-full bg-background/80 backdrop-blur-md border border-border/60 px-2.5 py-0.5 text-[11px] font-semibold">
+        {valid.length}
+      </div>
+    </div>
+  )
+}
 
 export async function QrPreview({ locked = false }: { locked?: boolean } = {}) {
   const t = await getTranslations("Profile")

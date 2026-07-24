@@ -120,6 +120,7 @@ model Subscription {
   bioMaxImages          Int       @map("bio_max_images")
   galleryMaxImages      Int       @map("gallery_max_images")
   galleryMaxVideos      Int       @map("gallery_max_videos")
+  geoPlacesMax          Int       @default(3) @map("geo_places_max")
   geolocationFullAccess Boolean   @default(false) @map("geolocation_full_access")
   qrCodeAccess          Boolean   @default(false) @map("qr_code_access")
   stripeProductId       String?   @unique @map("stripe_product_id")
@@ -423,6 +424,7 @@ model AppUser {
   favoritesGiven      Favorite[]           @relation("FavoriteUser")
   galleryItems        GalleryItem[]
   geolocation         Geolocation?
+  geoPlaces           GeoPlace[]
   actorNotifications  Notification[]       @relation("ActorNotifications")
   notifications       Notification[]       @relation("UserNotifications")
   appSales            AppSale[]            @relation("AppSaleBuyer")
@@ -531,6 +533,38 @@ model GalleryItem {
 
   @@index([userId], map: "gallery_items_app_user_id_idx")
   @@map("app_gallery_items")
+}
+
+// ─── Geolocalizações (plural) — many life-places per profile ─────────────────
+// Distinct from the singular `Geolocation` (1:1 resting place) above, which is
+// kept intact for now. A profile can register many important places (birth,
+// school, first kiss, vacation…), each with coordinates, photos and categories.
+model GeoPlace {
+  id           String    @id(map: "geo_places_pkey") @default(cuid())
+  title        String    @db.VarChar(120)
+  description  String?   @db.VarChar(2000)
+  categories   String[]  @default([])
+  lat          Float
+  lon          Float
+  zip          String?   @db.VarChar
+  street       String?   @db.VarChar(200)
+  number       String?   @db.VarChar(20)
+  complement   String?   @db.VarChar(200)
+  neighborhood String?   @db.VarChar(100)
+  city         String?   @db.VarChar(100)
+  state        String?   @db.VarChar(100)
+  country      String?   @db.VarChar(100)
+  photos       String[]  @default([])
+  startDate    DateTime? @map("start_date") @db.Timestamp(6)
+  endDate      DateTime? @map("end_date") @db.Timestamp(6)
+  order        Int       @default(0)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  userId       String    @map("app_user_id") @db.VarChar
+  user         AppUser   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "geo_places_app_user_id_fkey")
+
+  @@index([userId], map: "geo_places_app_user_id_idx")
+  @@map("app_geo_places")
 }
 
 model Favorite {
