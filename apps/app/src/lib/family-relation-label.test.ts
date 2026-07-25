@@ -162,3 +162,28 @@ describe("relationFromRoot (regression, post-refactor)", () => {
     expect(relationFromRoot(persons, relations, "a", "e", identityTranslator)).toBe("relation.relative")
   })
 })
+
+describe("relationFromRoot with possessive=false (compare tool)", () => {
+  // The compare tool's sentence ("{target} is {root}'s {label}") already
+  // names both people — the possessive "relation.*" keys ("Your cousin")
+  // would wrongly claim the relationship is to the reader, so this mode
+  // must read from "relation.bare.*" ("cousin") instead.
+  it("reads from relation.bare.* instead of relation.*", () => {
+    const persons = personsOf("mom", "kid")
+    persons.mom.gender = "FEMALE"
+    const relations = [parentOf("mom", "kid")]
+    expect(relationFromRoot(persons, relations, "kid", "mom", identityTranslator, false)).toBe("relation.bare.mother")
+  })
+
+  it("still falls back to relation.bare.relative (not relation.relative) when unreachable", () => {
+    const relations = [parentOf("a", "b"), parentOf("b", "c"), parentOf("c", "d"), parentOf("d", "e")]
+    const persons = personsOf("a", "b", "c", "d", "e")
+    expect(relationFromRoot(persons, relations, "a", "e", identityTranslator, false)).toBe("relation.bare.relative")
+  })
+
+  it("applies gender/step branching identically to the possessive form, just under relation.bare.*", () => {
+    const persons = personsOf("stepdad", "kid")
+    const relations = [parentOf("stepdad", "kid", "step")]
+    expect(relationFromRoot(persons, relations, "kid", "stepdad", identityTranslator, false)).toBe("relation.bare.stepFather")
+  })
+})

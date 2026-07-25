@@ -96,7 +96,11 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
     [relations, comparePick1, comparePick2],
   )
   const compareLabel = useMemo(
-    () => (comparePick1 && comparePick2 ? relationFromRoot(persons, relations, comparePick1, comparePick2, t) : null),
+    // possessive=false: "{targetName} is {rootName}'s {label}" already names
+    // both people, so the bare noun ("cousin") is needed — the possessive
+    // form ("Your cousin") would wrongly claim the relationship is to the
+    // viewer, not to rootName (see relationFromRoot's own doc comment).
+    () => (comparePick1 && comparePick2 ? relationFromRoot(persons, relations, comparePick1, comparePick2, t, false) : null),
     [persons, relations, comparePick1, comparePick2, t],
   )
   const highlightedRelationIds = useMemo(
@@ -234,18 +238,24 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
         overlays={
           <>
             <ViewportControls rootCenter={rootCenter} />
-            <CanvasSearch persons={persons} nodePositions={nodePositions} onPick={handleNodeActivate} />
-            <MiniMap nodes={positionedNodes} bounds={paddedBounds} />
-            <CompareTool
-              active={compareActive}
-              onActivate={() => setCompareActive(true)}
-              onClose={handleCloseCompare}
-              persons={persons}
-              picks={comparePicks}
-              onClear={handleClearComparePicks}
-              connected={!!comparePath}
-              label={compareLabel}
-            />
+            {/* Right-aligned column: search, then compare, then the mini-map.
+             *  Anchored via `bottom`, not `top`, so the mini-map (last in DOM,
+             *  bottom of the column) never moves when a panel above it opens
+             *  and grows taller — only the column's top edge shifts up. */}
+            <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-2">
+              <CanvasSearch persons={persons} nodePositions={nodePositions} onPick={handleNodeActivate} />
+              <CompareTool
+                active={compareActive}
+                onActivate={() => setCompareActive(true)}
+                onClose={handleCloseCompare}
+                persons={persons}
+                picks={comparePicks}
+                onClear={handleClearComparePicks}
+                connected={!!comparePath}
+                label={compareLabel}
+              />
+              <MiniMap nodes={positionedNodes} bounds={paddedBounds} />
+            </div>
           </>
         }
       />

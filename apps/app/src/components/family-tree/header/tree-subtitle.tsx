@@ -33,10 +33,7 @@ export function TreeSubtitle({ persons, generations, memberLimit, currentTier }:
 
   return (
     <p className="text-sm text-muted-foreground tabular-nums">
-      <span>{t("stats.generations", { count: gens, word })}</span>
-      <span className="mx-1.5 text-muted-foreground/50">·</span>
-      <span className={cn(tone)}>{count}</span>
-      <span className="text-muted-foreground/70">{t("stats.peopleOfLimit", { limit: memberLimit })}</span>
+      {t("stats.generations", { count: gens, word })} (<span className={cn(tone)}>{count}</span><span className="text-muted-foreground/70">{t("stats.peopleOfLimit", { limit: memberLimit })}</span>)
       {atLimit && currentTier !== "CENTURY" && (
         <>
           <span className="mx-1.5 text-muted-foreground/50">·</span>

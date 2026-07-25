@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslations } from "next-intl"
-import { GitCompareArrows, X } from "lucide-react"
+import { GitCompare, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { TreePerson } from "@/queries/family-tree"
 
@@ -41,17 +41,17 @@ export function CompareTool({ active, onActivate, onClose, persons, picks, onCle
       <button
         type="button"
         onClick={onActivate}
-        className="absolute top-4 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 rounded-full bg-background/80 backdrop-blur-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+        className="inline-flex items-center gap-2 rounded-full bg-background/80 backdrop-blur-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
         title={t("compare.button")}
       >
-        <GitCompareArrows className="h-3.5 w-3.5" />
+        <GitCompare className="h-3.5 w-3.5" />
         {t("compare.button")}
       </button>
     )
   }
 
   return (
-    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 w-[min(360px,92vw)] rounded-xl border border-border/60 bg-background/90 backdrop-blur-xl shadow-lg overflow-hidden">
+    <div className="w-[min(360px,92vw)] rounded-xl border border-border/60 bg-background/90 backdrop-blur-xl shadow-lg overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border/60">
         <span className="text-xs font-semibold text-muted-foreground">{t("compare.title")}</span>
         <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label={tc("close")}>

@@ -38,9 +38,14 @@ export function useViewport(): ViewportContextValue {
 
 export const MIN_SCALE = 0.25
 export const MAX_SCALE = 2.5
-const ZOOM_STEP = 1.2
-// Initial zoom is 4 zoom-steps below the maximum.
-const INITIAL_SCALE = MAX_SCALE / Math.pow(ZOOM_STEP, 4)
+// Page-load zoom, centered on the profile owner (see initialTarget below).
+// Anchored to the card's NATIVE size (scale 1 = NODE_W×NODE_H design
+// dimensions) rather than a fraction of MAX_SCALE — MAX_SCALE is just the
+// manual zoom-in ceiling and has no relation to how populated any given
+// tree is, so tying the initial zoom to it either crops a big tree down to
+// one card or barely zooms a small one. A modest zoom-in past native size
+// reads as intentional without risking cropping out the immediate family.
+const INITIAL_SCALE = 1.2
 const FALLBACK_VIEWPORT: Viewport = { tx: 0, ty: 0, scale: 1 }
 
 interface SvgCanvasProps {
@@ -93,8 +98,12 @@ export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTa
     return { tx, ty, scale }
   }, [bounds, size])
 
-  // Page-load viewport: zoomed in (max - 4 steps) on the initial target if provided,
-  // otherwise auto-fit the whole tree.
+  // Page-load viewport: INITIAL_SCALE centered on the initial target if
+  // provided, otherwise auto-fit the whole tree. Also the fallback "current
+  // viewport" for every interaction handler below (drag, wheel, pinch, zoom
+  // buttons, arrow keys) while userViewport is still null — so the FIRST
+  // interaction continues smoothly from whatever's on screen instead of
+  // jumping to autoFit()'s (usually different) scale/position.
   const initialFit = useCallback((): Viewport => {
     if (size.w === 0 || size.h === 0) return FALLBACK_VIEWPORT
     if (!initialTarget) return autoFit()
@@ -124,7 +133,7 @@ export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTa
 
   const zoomBy = useCallback((factor: number) => {
     setUserViewport((prev) => {
-      const v = prev ?? autoFit()
+      const v = prev ?? initialFit()
       const cx = size.w / 2
       const cy = size.h / 2
       const nextScale = clamp(v.scale * factor, MIN_SCALE, MAX_SCALE)
@@ -135,7 +144,7 @@ export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTa
         ty:    cy - (cy - v.ty) * k,
       }
     })
-  }, [autoFit, size])
+  }, [initialFit, size])
 
   // Pointer state: pan with single pointer; pinch with two pointers.
   const pointers = useRef<Map<number, { x: number; y: number }>>(new Map())
@@ -161,7 +170,7 @@ export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTa
       const dx = e.clientX - prev.x
       const dy = e.clientY - prev.y
       setUserViewport((cur) => {
-        const v = cur ?? autoFit()
+        const v = cur ?? initialFit()
         return { ...v, tx: v.tx + dx, ty: v.ty + dy }
       })
     } else if (pointers.current.size === 2) {
@@ -174,7 +183,7 @@ export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTa
         const dxMid = midX - lastPinch.current.midX
         const dyMid = midY - lastPinch.current.midY
         setUserViewport((cur) => {
-          const v = cur ?? autoFit()
+          const v = cur ?? initialFit()
           const nextScale = clamp(v.scale * factor, MIN_SCALE, MAX_SCALE)
           const k = nextScale / v.scale
           return {
@@ -186,7 +195,7 @@ export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTa
       }
       lastPinch.current = { dist, midX, midY }
     }
-  }, [autoFit])
+  }, [initialFit])
 
   const onPointerUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     pointers.current.delete(e.pointerId)
@@ -200,7 +209,7 @@ export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTa
     const cy = rect ? e.clientY - rect.top  : size.h / 2
     const factor = 1 - e.deltaY * 0.0015
     setUserViewport((cur) => {
-      const v = cur ?? autoFit()
+      const v = cur ?? initialFit()
       const nextScale = clamp(v.scale * factor, MIN_SCALE, MAX_SCALE)
       const k = nextScale / v.scale
       return {
@@ -209,21 +218,21 @@ export function SvgCanvas({ bounds, edges, nodes, overlays, className, initialTa
         ty:    cy - (cy - v.ty) * k,
       }
     })
-  }, [autoFit, size])
+  }, [initialFit, size])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return
       if (e.key === "f") { e.preventDefault(); fitView() }
-      else if (e.key === "ArrowLeft")  setUserViewport((v) => ({ ...(v ?? autoFit()), tx: (v?.tx ?? autoFit().tx) + 50 }))
-      else if (e.key === "ArrowRight") setUserViewport((v) => ({ ...(v ?? autoFit()), tx: (v?.tx ?? autoFit().tx) - 50 }))
-      else if (e.key === "ArrowUp")    setUserViewport((v) => ({ ...(v ?? autoFit()), ty: (v?.ty ?? autoFit().ty) + 50 }))
-      else if (e.key === "ArrowDown")  setUserViewport((v) => ({ ...(v ?? autoFit()), ty: (v?.ty ?? autoFit().ty) - 50 }))
+      else if (e.key === "ArrowLeft")  setUserViewport((v) => { const b = v ?? initialFit(); return { ...b, tx: b.tx + 50 } })
+      else if (e.key === "ArrowRight") setUserViewport((v) => { const b = v ?? initialFit(); return { ...b, tx: b.tx - 50 } })
+      else if (e.key === "ArrowUp")    setUserViewport((v) => { const b = v ?? initialFit(); return { ...b, ty: b.ty + 50 } })
+      else if (e.key === "ArrowDown")  setUserViewport((v) => { const b = v ?? initialFit(); return { ...b, ty: b.ty - 50 } })
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [fitView, autoFit])
+  }, [fitView, initialFit])
 
   const ctxValue = useMemo<ViewportContextValue>(
     () => ({ viewport, size, zoomBy, fitView, focusOn }),

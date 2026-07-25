@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/components/theme/theme-provider'
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { Footer } from "@/components/footer"
+import { FooterVisibility } from "@/components/footer-visibility"
 import { RegisterServiceWorker } from "@/components/register-service-worker"
 import { PwaInstallDialog } from "@/components/pwa-install-dialog"
 
@@ -55,7 +56,7 @@ export default async function RootLayout({
           >
             <TooltipProvider>
               <div className="flex-1 flex flex-col">{children}</div>
-              <Footer />
+              <FooterVisibility><Footer /></FooterVisibility>
               <Toaster richColors />
               <RegisterServiceWorker />
               <PwaInstallDialog />

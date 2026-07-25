@@ -71,7 +71,7 @@ export function MiniMap({ nodes, bounds }: Props) {
       data-no-pan
       role="img"
       aria-label={t("controls.miniMap")}
-      className="absolute bottom-4 right-4 z-10 rounded-lg border border-border/60 bg-background/80 backdrop-blur-md shadow-sm cursor-crosshair touch-none"
+      className="shrink-0 rounded-lg border border-border/60 bg-background/80 backdrop-blur-md shadow-sm cursor-crosshair touch-none"
       style={{ touchAction: "none" }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}

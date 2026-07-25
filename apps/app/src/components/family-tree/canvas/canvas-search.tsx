@@ -59,18 +59,17 @@ export function CanvasSearch({ persons, nodePositions, onPick }: Props) {
       <button
         type="button"
         onClick={() => { setOpen(true); requestAnimationFrame(() => inputRef.current?.focus()) }}
-        className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 rounded-full bg-background/80 backdrop-blur-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+        className="inline-flex items-center gap-2 rounded-full bg-background/80 backdrop-blur-md border border-border/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
         title={t("canvasSearch.buttonTitle")}
       >
         <Search className="h-3.5 w-3.5" />
         {t("canvasSearch.search")}
-        <kbd className="text-[10px] font-medium px-1 py-px rounded bg-muted">/</kbd>
       </button>
     )
   }
 
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 w-[min(360px,90vw)] rounded-xl border border-border/60 bg-background/90 backdrop-blur-xl shadow-lg overflow-hidden">
+    <div className="w-[min(360px,90vw)] rounded-xl border border-border/60 bg-background/90 backdrop-blur-xl shadow-lg overflow-hidden">
       <div className="flex items-center gap-2 px-3 py-2 border-b border-border/60">
         <Search className="h-4 w-4 text-muted-foreground shrink-0" />
         <input
