@@ -30,7 +30,7 @@ export default async function NewPlacePage({ params }: Props) {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href={`/profile/${id}/places`} label={t("backToPlaces")} />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("newTitle")}</h1>
+            <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("newTitle")}</h1>
           </div>
           <div className="mt-2 flex items-start justify-between gap-3">
             <p className="text-muted-foreground italic">{t("editSubtitle")}</p>

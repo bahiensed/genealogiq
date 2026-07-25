@@ -35,7 +35,7 @@ export default async function ProfileEditPage({ params }: Props) {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href={`/profile/${id}`} label={t("editPage.backToProfile")} />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("editPage.title")}</h1>
+            <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("editPage.title")}</h1>
           </div>
           <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
             <div className="flex flex-col gap-1 min-w-0 bg-transparent">

@@ -44,7 +44,7 @@ export default async function BioEditPage({ params }: Props) {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href={`/profile/${id}/bio`} label={t("backToBiography")} />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">
+            <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">
               {isCreating ? t("editTitleCreate") : t("editTitleEdit")}
             </h1>
           </div>

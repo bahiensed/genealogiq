@@ -39,7 +39,7 @@ export default async function TributeWritePage({ params }: Props) {
           <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">
               <BackButton href={`/profile/${id}/tributes`} label={t("backToTributes")} />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">
+              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">
                 {isEditing ? t("list.editYourTribute") : t("list.sendATribute")}
               </h1>
             </div>

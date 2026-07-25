@@ -45,7 +45,7 @@ export function TreeHeader({ rootFirstName, rootId, persons, generations, member
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <BackButton href={`/profile/${rootId}`} label={t("header.backToProfile")} />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">
+            <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">
               {t("header.title", { name: rootFirstName })}
             </h1>
           </div>

@@ -34,7 +34,7 @@ export default async function MemorialNewPage({ params }: Props) {
           <div className="bg-transparent">
             <div className="flex items-center gap-3 md:gap-4">
               <BackButton href={`/profile/${id}/memorialized`} label={t("newPage.backToGuarded")} />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("newPage.title")}</h1>
+              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("newPage.title")}</h1>
             </div>
             <p className="text-muted-foreground mt-2 bg-transparent">
               {t("newPage.subtitle")}

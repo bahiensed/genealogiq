@@ -40,7 +40,7 @@ export default async function GeolocationEditPage({ params }: Props) {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href={`/profile/${id}/geolocation`} label={t("backToGeolocation")} />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">
+            <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">
               {isCreating ? t("addTitle") : t("editTitle")}
             </h1>
           </div>

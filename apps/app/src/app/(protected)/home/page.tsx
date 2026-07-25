@@ -35,7 +35,7 @@ export default async function HomePage() {
       <main className="container relative pt-24 pb-32">
         {/* Hero */}
         <div className="mb-8 animate-fade-in">
-          <h1 className="text-4xl md:text-5xl font-semibold tracking-tight">
+          <h1 className="text-4xl font-semibold tracking-tight">
             <Greeting firstName={firstName} />
           </h1>
           <p className="text-muted-foreground mt-2 italic">

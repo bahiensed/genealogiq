@@ -28,7 +28,7 @@ export default async function MessagesPage() {
         <div className="flex items-center justify-between gap-3 mb-2 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <BackButton href="/home" label={t("backToHome")} />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
+            <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
           </div>
           {totalPending > 0 && (
             <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">

@@ -95,7 +95,7 @@ export default async function MemorializedPage({ params }: Props) {
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
               <BackButton href={`/profile/${id}`} label={t("listPage.backToProfile")} />
               {/* Wraps on xs (the title is long in pt/es); single line from sm up. */}
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight sm:whitespace-nowrap">{t("listPage.title")}</h1>
+              <h1 className="text-4xl font-semibold tracking-tight sm:whitespace-nowrap">{t("listPage.title")}</h1>
             </div>
             {memorials.length > 0 && (
               <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">

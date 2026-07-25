@@ -47,7 +47,7 @@ export default async function GeolocationPage({ params }: Props) {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
               <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
+              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
             </div>
             {isOwn && (
               <Button asChild className="shrink-0 gap-2">

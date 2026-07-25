@@ -34,7 +34,7 @@ export default async function SubscriptionsPage({ searchParams }: Props) {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4">
             <BackButton href="/home" label={t("backToHome")} />
-            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
+            <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
           </div>
           <section className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
             <div className="flex flex-col gap-1 min-w-0">

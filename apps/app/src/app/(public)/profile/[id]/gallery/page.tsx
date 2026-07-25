@@ -49,7 +49,7 @@ export default async function ProfileGalleryPage({ params }: Props) {
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
             <div className="min-w-0">
-              <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
+              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
             </div>
           </div>
           {(imageCount > 0 || videoCount > 0) && (
