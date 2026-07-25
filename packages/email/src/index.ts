@@ -196,7 +196,11 @@ export function sendAppConsumerVerificationEmail({
   callbackUrl,
 }: TokenEmail & { name?: string; callbackUrl?: string }): Promise<void> {
   const cb = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : ""
-  const url = `${baseUrl}/verify-email?token=${token}${cb}`
+  // Points at the API route (not the /verify-email page directly) so clicking
+  // it auto-logs the user in — see apps/app/src/app/api/verify-email/route.ts.
+  // sendEmailChangeEmail below is unrelated and keeps linking straight to the
+  // page; do not repoint it, it's shared by BMS/SEQ which have no such route.
+  const url = `${baseUrl}/api/verify-email?token=${token}${cb}`
   const greeting = name ? `Olá ${name},` : "Olá,"
   return send(to, "Bem-vindo à Genealogiq — confirme o seu e-mail", appConsumerBody({
     greeting,

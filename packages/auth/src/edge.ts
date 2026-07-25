@@ -32,6 +32,14 @@ function applySession(session: any, token: Record<string, unknown>) {
   return session
 }
 
+// Was an implicit @auth/core default (session + cookie maxAge both fell back to
+// this same value without either being declared anywhere in this codebase).
+// Made explicit so any out-of-band session-minting code (e.g. apps/app's
+// verify-email auto-login route, which calls next-auth/jwt's encode() directly
+// instead of going through signIn()) can import the exact value NextAuth itself
+// uses, instead of it only living inside @auth/core's internals.
+export const SESSION_MAX_AGE_SECONDS = 30 * 24 * 60 * 60
+
 /**
  * Edge-safe NextAuth config (no DB / bcrypt). Used directly by middleware and
  * spread into the node config. The canonical `session` + `authorized` callbacks
@@ -41,7 +49,15 @@ function applySession(session: any, token: Record<string, unknown>) {
 export function createEdgeAuthConfig(opts: EdgeAuthOptions) {
   return {
     cookies: {
-      sessionToken: { name: opts.cookieName },
+      sessionToken: {
+        name: opts.cookieName,
+        // httpOnly/sameSite/path were also implicit @auth/core defaults —
+        // made explicit for the same out-of-band-minting reason as the maxAge
+        // above. `secure` is deliberately omitted: it must be computed per-
+        // request from the request's own protocol, both by NextAuth itself
+        // and by any code manually setting this cookie.
+        options: { httpOnly: true, sameSite: "lax" as const, path: "/" },
+      },
     },
     pages: {
       signIn: "/sign-in",

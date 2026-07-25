@@ -1,7 +1,27 @@
 import NextAuth, { type NextAuthConfig } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { authorizeUser } from "./authorize"
+import { SESSION_MAX_AGE_SECONDS } from "./edge"
 import type { AppPrincipal, AuthUserRow } from "./types"
+
+/** The JWT payload shape a real login produces — extracted so out-of-band
+ *  session-minting code (next-auth/jwt's encode(), called directly instead of
+ *  through signIn()) can reuse the exact same shape instead of re-deriving it.
+ *  `email`/`sub` are included explicitly here even though a normal login's
+ *  token already has them pre-populated by @auth/core before the jwt()
+ *  callback below runs — encode() starts from an empty token, so this is the
+ *  only place those two fields get set for an out-of-band mint. */
+export function buildSessionToken(p: AppPrincipal): Record<string, unknown> {
+  return {
+    name:  p.name,
+    email: p.email,
+    sub:   p.id,
+    id:    p.id,
+    role:  p.role,
+    image: p.image ?? null,
+    ...(p.customerId !== undefined ? { customerId: p.customerId } : {}),
+  }
+}
 
 export interface CreateAuthOptions<Row extends AuthUserRow> {
   /** Edge-safe config from createEdgeAuthConfig() — provides cookies, pages,
@@ -30,8 +50,9 @@ export function createAuth<Row extends AuthUserRow>(opts: CreateAuthOptions<Row>
     // Explicit: the Credentials provider has no DB session table — sessions are
     // stateless JWTs (the edge authorized()/jwt callbacks read role/customerId
     // from the token). This is NextAuth's default for Credentials, declared here
-    // so the strategy and its implications aren't implicit.
-    session: { strategy: "jwt" },
+    // so the strategy and its implications aren't implicit. `maxAge` was also
+    // an implicit default — see SESSION_MAX_AGE_SECONDS's own comment in edge.ts.
+    session: { strategy: "jwt", maxAge: SESSION_MAX_AGE_SECONDS },
     providers: [
       Credentials({
         credentials: { email: {}, password: {} },
@@ -46,12 +67,7 @@ export function createAuth<Row extends AuthUserRow>(opts: CreateAuthOptions<Row>
       ...opts.edgeConfig.callbacks,
       jwt({ token, user, trigger, session }) {
         if (user) {
-          const p = user as unknown as AppPrincipal
-          token.id    = p.id
-          token.name  = p.name
-          token.role  = p.role
-          token.image = p.image ?? null
-          if (p.customerId !== undefined) token.customerId = p.customerId
+          Object.assign(token, buildSessionToken(user as unknown as AppPrincipal))
         }
         if (trigger === "update" && session && typeof session === "object" && "image" in session) {
           token.image = (session as { image: string | null }).image
