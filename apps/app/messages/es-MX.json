@@ -192,7 +192,7 @@
     "reset": "Restablecer",
     "subtitle": "Una vida recordada con palabras e imágenes",
     "textPlaceholder": "Escribe la biografía...",
-    "title": "Biografía",
+    "title": "Biografía de {name}",
     "toastDeleted": "Biografía eliminada.",
     "toastFilesSkipped": "{count, plural, one {# archivo omitido. Usa {formats}.} other {# archivos omitidos. Usa {formats}.}}",
     "toastLimitedAdded": "{count, plural, one {Solo se agregó # imagen — el límite es {max}.} other {Solo se agregaron # imágenes — el límite es {max}.}}",
@@ -330,7 +330,7 @@
     "header": {
       "addRelative": "Agregar familiar",
       "backToProfile": "Volver al perfil",
-      "title": "Árbol genealógico de {name}",
+      "title": "Árbol de {name}",
       "upgradePlan": "Cambiar de plan"
     },
     "infoSheet": {
@@ -502,7 +502,7 @@
     "memorializedProfile": "Perfil memorial",
     "profileCount": "{count, plural, one {# perfil} other {# perfiles}}",
     "subtitle": "Los más cercanos al corazón, siempre presentes",
-    "title": "Favoritos"
+    "title": "Favoritos de {name}"
   },
   "Feedback": {
     "dialog": {
@@ -584,7 +584,7 @@
     "sortNewest": "Más recientes primero",
     "sortOldest": "Más antiguos primero",
     "tagline": "Momentos eternizados: luz, risas y la calma entre ellos",
-    "title": "Galería",
+    "title": "Galería de {name}",
     "transcodeFailed": "No se pudo convertir \"{name}\" — usa MP4 con resolución de hasta 1080p.",
     "upgradePlan": "Mejorar plan",
     "uploadFailed": "No se pudo subir {name}",
@@ -772,7 +772,7 @@
     "listPage": {
       "backToProfile": "Volver al perfil",
       "profileCount": "{count, plural, one {# perfil} other {# perfiles}}",
-      "title": "Perfiles bajo tu resguardo"
+      "title": "Memoriales"
     },
     "newPage": {
       "backToGuarded": "Volver a los perfiles bajo tu resguardo",
@@ -1171,7 +1171,7 @@
       "sendATribute": "Enviar un homenaje",
       "subtitle": "Palabras que quedan: pequeñas llamas que llevan quienes recuerdan"
     },
-    "title": "Homenajes",
+    "title": "Homenajes para {name}",
     "toasts": {
       "deleted": "Homenaje eliminado.",
       "submitted": "Homenaje enviado para aprobación.",
@@ -1258,7 +1258,7 @@
     "reset": "Restablecer",
     "startDate": "Fecha de inicio",
     "tagline": "Espacio y tiempo que moldean una vida en experiencias que marcan, compartidas para siempre",
-    "title": "Geolocalizaciones",
+    "title": "Geolocalizaciones de {name}",
     "titleLabel": "Título",
     "titlePlaceholder": "ej.: La casa de mi infancia",
     "toasts": {

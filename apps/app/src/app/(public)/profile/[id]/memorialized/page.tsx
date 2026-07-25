@@ -62,8 +62,6 @@ export default async function MemorializedPage({ params }: Props) {
   ])
   if (!profile) notFound()
 
-  const name = `${profile.firstName} ${profile.lastName}`
-
   const availableSlots = sales.reduce(
     (sum, s) => sum + Math.max(0, s.subscription.maxProfiles - s._count.assignedTo),
     0,
@@ -107,7 +105,6 @@ export default async function MemorializedPage({ params }: Props) {
 
         <MemorializedClient
           profiles={memorials.map((m) => toMiniProfile(m, miniProfileCtx))}
-          name={name}
           isOwn={isOwn}
           canCreate={canCreate}
           newHref={`/profile/${id}/memorialized/new`}

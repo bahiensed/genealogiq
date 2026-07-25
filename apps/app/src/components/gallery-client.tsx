@@ -33,7 +33,6 @@ const formatDuration = (sec: number) => {
 
 interface Props {
   items: GalleryItemRow[]
-  name: string
   editHref?: string
   isOwn?: boolean
   upgradeHint?: ReactNode
@@ -43,7 +42,7 @@ interface Props {
   hasMore?: boolean
 }
 
-export function GalleryClient({ items: rawItems, name, editHref, isOwn, upgradeHint, gated = false, hasMore = false }: Props) {
+export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint, gated = false, hasMore = false }: Props) {
   const t = useTranslations("Gallery")
   const tc = useTranslations("Common")
   const locale = useLocale()
@@ -141,8 +140,6 @@ export function GalleryClient({ items: rawItems, name, editHref, isOwn, upgradeH
           )}
         </div>
       </section>
-
-      {!isEmpty && <p className="scroll-m-20 text-xl lg:text-2xl font-semibold tracking-tight mb-8">{name}</p>}
 
       <div ref={listTopRef} />
 

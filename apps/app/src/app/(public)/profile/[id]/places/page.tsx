@@ -37,7 +37,7 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
         <div className="flex items-center justify-between gap-3 mb-2 animate-fade-in">
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
-            <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
+            <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title", { name: profile.firstName })}</h1>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {places.length > 0 && (

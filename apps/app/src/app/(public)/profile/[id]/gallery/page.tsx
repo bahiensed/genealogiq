@@ -30,7 +30,6 @@ export default async function ProfileGalleryPage({ params }: Props) {
 
   const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
   const features = isOwn ? await getMemorialFeatures(id) : null
-  const name = `${profile.firstName} ${profile.lastName}`
 
   // Anonymous: a bounded slice of items + cheap total counts for the badges. Authed:
   // the full set (the client paginates it). Never materialize the whole table for anon.
@@ -49,7 +48,7 @@ export default async function ProfileGalleryPage({ params }: Props) {
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
             <div className="min-w-0">
-              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
+              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title", { name: profile.firstName })}</h1>
             </div>
           </div>
           {(imageCount > 0 || videoCount > 0) && (
@@ -70,7 +69,6 @@ export default async function ProfileGalleryPage({ params }: Props) {
 
         <GalleryClient
           items={items}
-          name={name}
           editHref={`/profile/${id}/gallery/edit`}
           isOwn={isOwn}
           gated={isAnon}

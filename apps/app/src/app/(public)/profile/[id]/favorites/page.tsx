@@ -31,7 +31,7 @@ export default async function FavoritesPage({ params }: Props) {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 md:gap-4 min-w-0">
               <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
-              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
+              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title", { name: profile.firstName })}</h1>
             </div>
             {favorites.length > 0 && (
               <span className="shrink-0 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5">
@@ -42,11 +42,6 @@ export default async function FavoritesPage({ params }: Props) {
           <p className="text-muted-foreground mt-2 italic">
             {t("subtitle")}
           </p>
-          {favorites.length > 0 && (
-            <p className="scroll-m-20 text-xl lg:text-2xl font-semibold tracking-tight mt-1">
-              {profile.firstName} {profile.lastName}
-            </p>
-          )}
         </div>
 
         <FavoritesClient items={favorites} />

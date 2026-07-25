@@ -192,7 +192,7 @@
     "reset": "Reset",
     "subtitle": "A life remembered through words and images",
     "textPlaceholder": "Write biography...",
-    "title": "Biography",
+    "title": "{name}'s Biography",
     "toastDeleted": "Biography deleted.",
     "toastFilesSkipped": "{count, plural, one {# file skipped. Use {formats}.} other {# files skipped. Use {formats}.}}",
     "toastLimitedAdded": "{count, plural, one {Only # image added — limit is {max}.} other {Only # images added — limit is {max}.}}",
@@ -330,7 +330,7 @@
     "header": {
       "addRelative": "Add relative",
       "backToProfile": "Back to profile",
-      "title": "{name}'s Family Tree",
+      "title": "{name}'s Tree",
       "upgradePlan": "Upgrade plan"
     },
     "infoSheet": {
@@ -502,7 +502,7 @@
     "memorializedProfile": "Memorial profile",
     "profileCount": "{count, plural, one {# profile} other {# profiles}}",
     "subtitle": "The ones closest to the heart, kept near, always",
-    "title": "Favorites"
+    "title": "{name}'s Favorites"
   },
   "Feedback": {
     "dialog": {
@@ -584,7 +584,7 @@
     "sortNewest": "Newest first",
     "sortOldest": "Oldest first",
     "tagline": "Frozen moments: light, laughter and the quiet in between",
-    "title": "Gallery",
+    "title": "{name}'s Gallery",
     "transcodeFailed": "Could not convert \"{name}\" — please use MP4 under 1080p.",
     "upgradePlan": "Upgrade plan",
     "uploadFailed": "Failed to upload {name}",
@@ -772,7 +772,7 @@
     "listPage": {
       "backToProfile": "Back to profile",
       "profileCount": "{count, plural, one {# profile} other {# profiles}}",
-      "title": "Guarded profiles"
+      "title": "Memorials"
     },
     "newPage": {
       "backToGuarded": "Back to guarded profiles",
@@ -1171,7 +1171,7 @@
       "sendATribute": "Send a tribute",
       "subtitle": "Words left behind: small flames carried by those who remember"
     },
-    "title": "Tributes",
+    "title": "Tributes for {name}",
     "toasts": {
       "deleted": "Tribute deleted.",
       "submitted": "Tribute submitted for approval.",
@@ -1258,7 +1258,7 @@
     "reset": "Reset",
     "startDate": "Start date",
     "tagline": "Space and time that shape a life into defining experiences, shared forever",
-    "title": "Geolocations",
+    "title": "{name}'s Geolocations",
     "titleLabel": "Title",
     "titlePlaceholder": "e.g. My childhood home",
     "toasts": {

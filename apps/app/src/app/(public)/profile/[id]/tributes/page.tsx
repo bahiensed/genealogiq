@@ -37,7 +37,6 @@ export default async function TributesPage({ params }: Props) {
   const myTribute = viewerId ? await getMyTributeForProfile(viewerId, id) : null
   const hasPendingFromMe = myTribute?.status === "PENDING"
 
-  const name = `${profile.firstName} ${profile.lastName}`
   const isManager = viewerId ? canManageProfile(profile, viewerId) : false
 
   return (
@@ -49,7 +48,7 @@ export default async function TributesPage({ params }: Props) {
           <div className="flex items-center gap-3 md:gap-4 min-w-0">
             <BackButton href={`/profile/${id}`} label={t("backToProfile")} />
             <div className="min-w-0">
-              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title")}</h1>
+              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap">{t("title", { name: profile.firstName })}</h1>
             </div>
           </div>
           {tributeCount > 0 && (
@@ -61,7 +60,6 @@ export default async function TributesPage({ params }: Props) {
 
         <TributesClient
           items={tributes}
-          name={name}
           profileId={id}
           sessionUserId={viewerId ?? ""}
           canWrite={canWrite}
