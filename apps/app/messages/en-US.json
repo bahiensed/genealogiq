@@ -1261,6 +1261,8 @@
     "address": "Address",
     "backToPlaces": "Back to geolocations",
     "backToProfile": "Back to profile",
+    "carouselNext": "Next",
+    "carouselPrevious": "Previous",
     "cat_achievement": "Achievement",
     "cat_baptism_church": "Baptism church",
     "cat_birth": "Birth",

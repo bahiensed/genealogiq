@@ -1261,6 +1261,8 @@
     "address": "Dirección",
     "backToPlaces": "Volver a las geolocalizaciones",
     "backToProfile": "Volver al perfil",
+    "carouselNext": "Siguiente",
+    "carouselPrevious": "Anterior",
     "cat_achievement": "Logro",
     "cat_baptism_church": "Iglesia del bautismo",
     "cat_birth": "Nacimiento",

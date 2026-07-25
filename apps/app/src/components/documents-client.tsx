@@ -13,11 +13,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { SignupDialog } from "@/components/auth/signup-dialog"
+import { formatDateTime } from "@/lib/format-date"
 import type { DocumentRow } from "@/queries/documents"
-
-function formatDate(date: Date, locale: string): string {
-  return date.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" })
-}
 
 interface Props {
   documents: DocumentRow[]
@@ -80,7 +77,7 @@ export function DocumentsClient({ documents, profileId, isOwn, gated = false, ha
                   </Badge>
                 )}
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <CalendarDays className="h-3 w-3" />{t("dateLabel")} {formatDate(doc.createdAt, locale)}
+                  <CalendarDays className="h-3 w-3" />{t("dateLabel")} {formatDateTime(doc.createdAt, locale)}
                 </span>
               </div>
             </div>
@@ -119,7 +116,7 @@ export function DocumentsClient({ documents, profileId, isOwn, gated = false, ha
               )}
 
               <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-                <CalendarDays className="h-4 w-4" />{t("dateLabel")} {formatDate(active.createdAt, locale)}
+                <CalendarDays className="h-4 w-4" />{t("dateLabel")} {formatDateTime(active.createdAt, locale)}
               </p>
 
               <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/60">

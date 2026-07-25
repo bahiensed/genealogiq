@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import Link from "next/link"
 import { Map, MapPinPlus, MapPinPen } from "lucide-react"
@@ -20,6 +21,9 @@ interface Props {
 export default async function ProfilePlacesPage({ params, searchParams }: Props) {
   const { id } = await params
   const { place } = await searchParams
+  // Compatibility with QR codes/links generated before place detail moved to
+  // its own route — they still carry ?place=<id>, so send them straight there.
+  if (place) redirect(`/profile/${id}/places/${place}`)
   const session = await auth()
   const viewerId = session?.user?.id
   const isAnon = !viewerId
@@ -64,7 +68,7 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
         </div>
         <p className="text-muted-foreground italic mb-8 animate-fade-in">{t("tagline")}</p>
 
-        <PlacesClient places={places} profileId={id} isOwn={isOwn} initialPlaceId={place ?? null} />
+        <PlacesClient places={places} profileId={id} isOwn={isOwn} />
       </main>
 
       {isAnon && <SignupPrompt />}

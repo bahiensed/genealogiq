@@ -27,13 +27,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { deleteTribute } from "@/actions/tribute.actions"
+import { formatDateTime } from "@/lib/format-date"
 import type { ApprovedTributeRow } from "@/queries/tribute"
 
 const PAGE_SIZE = 10
 type SortDir = "newest" | "oldest"
-
-const formatDate = (d: Date, locale: string) =>
-  d.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" })
 
 const initials = (name: string) =>
   name.split(" ").filter(Boolean).slice(0, 2).map((n) => n[0]?.toUpperCase() ?? "").join("")
@@ -180,7 +178,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
                           <span className="text-sm font-medium truncate">{authorName}</span>
                           {isMine && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{t("card.yoursBadge")}</Badge>}
                         </div>
-                        <div className="text-xs text-muted-foreground">{formatDate(tribute.createdAt, locale)}</div>
+                        <div className="text-xs text-muted-foreground">{formatDateTime(tribute.createdAt, locale)}</div>
                       </div>
                       {(isMine || isManager) && (
                         <AlertDialog>

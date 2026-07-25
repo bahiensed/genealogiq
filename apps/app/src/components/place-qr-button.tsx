@@ -31,8 +31,8 @@ interface Props {
   placeId: string
 }
 
-// Generates a QR (client-side) that resolves to this profile's geolocation
-// collection, pre-focused on this place. All per-place QRs open the collection.
+// Generates a QR (client-side) that resolves directly to this place's own
+// detail page.
 export function PlaceQrButton({ profileId, placeId }: Props) {
   const t = useTranslations("Places")
   const [open, setOpen] = useState(false)
@@ -41,7 +41,7 @@ export function PlaceQrButton({ profileId, placeId }: Props) {
 
   useEffect(() => {
     if (!open) return
-    const target = `${window.location.origin}/profile/${profileId}/places?place=${placeId}`
+    const target = `${window.location.origin}/profile/${profileId}/places/${placeId}`
     setUrl(target)
     let active = true
     QRCode.toString(target, {

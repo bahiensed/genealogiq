@@ -36,3 +36,22 @@ export function formatYear(d: Date | string | null | undefined): string {
   const date = typeof d === "string" ? new Date(d) : d
   return new Intl.DateTimeFormat("en-US", { year: "numeric", timeZone: "UTC" }).format(date)
 }
+
+export function formatDateRange(
+  start: Date | string | null | undefined,
+  end: Date | string | null | undefined,
+  locale: string,
+): string | null {
+  if (start && end) return `${formatDateShort(start, locale)} — ${formatDateShort(end, locale)}`
+  if (start) return formatDateShort(start, locale)
+  if (end) return formatDateShort(end, locale)
+  return null
+}
+
+// For real timestamps (createdAt-style) — no forced UTC, local time is correct
+// for an actual moment in time. Distinct from the date-only helpers above.
+export function formatDateTime(d: Date | string | null | undefined, locale: string): string {
+  if (!d) return ""
+  const date = typeof d === "string" ? new Date(d) : d
+  return new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" }).format(date)
+}

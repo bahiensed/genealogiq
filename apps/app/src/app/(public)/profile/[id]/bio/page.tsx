@@ -4,7 +4,7 @@ import { NotebookText, NotebookPen, Quote } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
-import { BioImageCarousel } from "@/components/bio-image-carousel"
+import { ImageCarousel } from "@/components/image-carousel"
 import { SignupPrompt } from "@/components/auth/signup-prompt"
 import { auth } from "@/auth"
 import { getBioByUserId } from "@/queries/bio"
@@ -87,7 +87,12 @@ export default async function ProfileBioPage({ params }: Props) {
           <>
             {bio.images.length > 0 && (
               <section className="mb-10 animate-fade-in" style={{ animationDelay: "80ms" }}>
-                <BioImageCarousel images={bio.images} />
+                <ImageCarousel
+                  images={bio.images}
+                  altText={() => t("photoAlt")}
+                  prevLabel={t("carouselPrevious")}
+                  nextLabel={t("carouselNext")}
+                />
               </section>
             )}
 

@@ -20,6 +20,12 @@ export async function getPlacesCount(userId: string): Promise<number> {
   return prisma.geoPlace.count({ where: { userId } })
 }
 
+// Single place for the detail page — scoped to userId so a placeId can never
+// resolve under the wrong profile's URL.
+export async function getPlaceById(userId: string, placeId: string) {
+  return prisma.geoPlace.findFirst({ where: { id: placeId, userId } })
+}
+
 // Lightweight projection for the map view and the profile-card preview — only
 // what a pin needs. Skips rows without real coordinates (0,0).
 export async function getPlacesForMap(userId: string, take?: number) {
