@@ -21,7 +21,8 @@ import { deleteBlobs } from "@/lib/blob"
 
 // Minimal payload that passes getProfileEditSchema for a living profile: name,
 // gender and birth date/city/state/country are all required now; address object
-// must be present (its sub-fields are all nullish).
+// must be present (its sub-fields are all nullish); isPublicProfile is required
+// (the form always submits it via the privacy Switch's controlled value).
 const validInput = (overrides: Record<string, unknown> = {}) => ({
   firstName: "Ada",
   lastName: "Lovelace",
@@ -31,6 +32,7 @@ const validInput = (overrides: Record<string, unknown> = {}) => ({
   birthState: "England",
   birthCountry: "GB",
   address: {},
+  isPublicProfile: true,
   ...overrides,
 })
 

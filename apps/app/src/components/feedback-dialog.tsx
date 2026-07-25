@@ -137,7 +137,7 @@ export function FeedbackDialog({ type, label, className }: Props) {
             <Textarea
               id={`feedback-message-${type}`}
               maxLength={2000}
-              rows={5}
+              rows={10}
               placeholder={t(`fields.messagePlaceholder.${type}`)}
               {...register("message")}
             />

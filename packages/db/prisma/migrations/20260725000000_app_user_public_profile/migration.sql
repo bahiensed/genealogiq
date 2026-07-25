@@ -1,0 +1,17 @@
+-- Living users (AppRole.APP_USER) can now opt out of the same anonymous,
+-- public-visitor visibility memorials have always had. Defaults to TRUE
+-- (opt-out model) for both existing and new rows, so nothing changes for any
+-- row until the user explicitly turns it off in their profile settings.
+--
+-- Meaningful for APP_USER rows only:
+--   - APP_MEMO rows are public via role alone regardless of this column
+--     (see assertPublicMemorialAccess); the column is stored but ignored.
+--   - APP_GHOST rows are NEVER made publicly reachable by this column —
+--     ghosts have no login/session and (today) no guardian-facing edit UI
+--     either, so nobody could ever turn this back off for them. The
+--     application gate deliberately checks role = 'APP_USER' rather than
+--     role != 'APP_MEMO', specifically so this default can't silently
+--     expose every existing ghost.
+--
+-- Additive and idempotent so it can be re-applied safely.
+ALTER TABLE "app_users" ADD COLUMN IF NOT EXISTS "is_public_profile" BOOLEAN NOT NULL DEFAULT true;

@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar as CalendarPicker } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import {
   AlertDialog,
@@ -190,6 +191,7 @@ function buildDefaults(initial: EditProfileRow): ProfileEditValues {
     youtube:      initial.youtube      ?? "",
     otherSocial:  initial.otherSocial  ?? "",
     notes:        initial.notes        ?? "",
+    isPublicProfile: initial.isPublicProfile,
     address: {
       zip:          initial.address?.zip          ?? addressDefaultValues.zip,
       street:       initial.address?.street       ?? addressDefaultValues.street,
@@ -319,6 +321,28 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
 
   return (
     <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-3 animate-fade-in" style={{ animationDelay: "80ms" }}>
+      {/* Public-visibility toggle — fixed card, not tucked in an accordion
+          section: profiles are public by DEFAULT (opt-out model), so the
+          control needs to be seen without expanding anything. */}
+      {!isMemorialized && (
+        <div className="glass-card no-sheen rounded-2xl p-5 flex items-center justify-between gap-4 border border-primary/20 bg-primary/5">
+          <div className="flex items-start gap-3 min-w-0">
+            <Globe className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium">{t("privacy.label")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("privacy.description")}</p>
+            </div>
+          </div>
+          <Controller
+            control={control}
+            name="isPublicProfile"
+            render={({ field }) => (
+              <Switch checked={field.value} onCheckedChange={field.onChange} aria-label={t("privacy.label")} />
+            )}
+          />
+        </div>
+      )}
+
       <Accordion type="multiple" value={openSections} onValueChange={setOpenSections} className="space-y-3">
 
         {/* ── Identity ─────────────────────────────────────────── */}

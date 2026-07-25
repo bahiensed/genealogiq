@@ -653,6 +653,7 @@
   },
   "Home": {
     "bornMetric": "Nacido el {date}",
+    "bornYearMetric": "Nacido(a) en {year}",
     "clearSearch": "Limpiar búsqueda",
     "deathMetric": "✦ {date}",
     "favoritesEmpty": "Aún no hay perfiles favoritos.",
@@ -796,6 +797,10 @@
       "otherLink": "Cualquier otro enlace",
       "state": "Estado o provincia"
     },
+    "privacy": {
+      "description": "Cualquier persona puede ver tu perfil sin iniciar sesión. Desactívalo para exigir inicio de sesión.",
+      "label": "Perfil público"
+    },
     "sections": {
       "address": "Dirección",
       "birth": "Nacimiento",
@@ -898,9 +903,11 @@
     "bioEmptyMetric": "Aún no hay biografía",
     "bioMetric": "Leer",
     "bioTitle": "Biografía",
+    "bornInYear": "Nació en <strong>{year}</strong>",
     "bornOn": "Nació el <strong>{date}</strong>",
     "bornOnInPlace": "Nació el <strong>{date}</strong> en <strong>{place}</strong>",
     "coordinatesLabel": "Coordenadas:",
+    "deceasedInYear": "Falleció en <strong>{year}</strong>",
     "deceasedOn": "Falleció el <strong>{date}</strong>",
     "deceasedOnInPlace": "Falleció el <strong>{date}</strong> en <strong>{place}</strong>",
     "editProfileAria": "Editar perfil",

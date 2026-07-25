@@ -54,6 +54,11 @@ export function getProfileEditSchema(t: Translator, isMemorialized = false) {
 
       // Notes
       notes: z.string().trim().max(1000).optional(),
+
+      // Visibility (living profiles only; present in the shared schema so the
+      // memorial form's parse doesn't choke on it, but updateMemorial never
+      // reads this key — see actions/memorial.actions.ts, unchanged).
+      isPublicProfile: z.boolean(),
     })
     .superRefine((val, ctx) => {
       if (val.gender == null) ctx.addIssue({ code: "custom", path: ["gender"], message: t("required") })

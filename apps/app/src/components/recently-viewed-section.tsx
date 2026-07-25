@@ -23,7 +23,9 @@ function toMiniProfile(p: RecentProfile, locale: string, t: Translate): MiniProf
       ? t("deathMetric", { date: deathDate.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" }) })
       : birthDate
         ? t("bornMetric", { date: birthDate.toLocaleDateString(locale, { year: "numeric", month: "short" }) })
-        : "",
+        : p.birthYear
+          ? t("bornYearMetric", { year: String(p.birthYear) })
+          : "",
     initials: `${p.firstName[0]}${p.lastName[0]}`.toUpperCase(),
     gradient: getProfileGradient(p.id),
     href: `/profile/${p.id}`,

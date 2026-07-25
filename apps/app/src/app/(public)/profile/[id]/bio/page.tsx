@@ -8,7 +8,7 @@ import { BioImageCarousel } from "@/components/bio-image-carousel"
 import { SignupPrompt } from "@/components/auth/signup-prompt"
 import { auth } from "@/auth"
 import { getBioByUserId } from "@/queries/bio"
-import { getProfileById } from "@/queries/profile"
+import { getProfileById, redactLivingProfile } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 import { getMemorialFeatures } from "@/lib/subscription"
@@ -25,11 +25,15 @@ export default async function ProfileBioPage({ params }: Props) {
   const t = await getTranslations("Bio")
   const tc = await getTranslations("Common")
 
-  const [profile, bio] = await Promise.all([getProfileById(id), getBioByUserId(id)])
-  assertPublicMemorialAccess(profile, viewerId, id)
+  const [rawProfile, bio] = await Promise.all([getProfileById(id), getBioByUserId(id)])
+  assertPublicMemorialAccess(rawProfile, viewerId, id)
 
-  const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
+  const isOwn = viewerId ? canManageProfile(rawProfile, viewerId) : false
   const isAnon = !viewerId
+  // No birth/death date is rendered on this page today — redacting here is
+  // preventive, so a future "born on X" line can't reintroduce the leak this
+  // same rule closes on the profile root page (see queries/profile.ts).
+  const profile = redactLivingProfile(rawProfile, { id: viewerId ?? null, canManage: isOwn })
   const features = isOwn ? await getMemorialFeatures(id) : null
 
   const isEmpty = !bio || (!bio.quote && !bio.text && bio.images.length === 0)

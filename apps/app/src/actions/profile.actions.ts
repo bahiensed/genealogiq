@@ -23,6 +23,7 @@ export async function updateProfile(data: unknown): Promise<ActionResult> {
     website, instagram, linkedin, fb, x, tiktok, youtube, otherSocial,
     notes,
     address,
+    isPublicProfile,
   } = parsed.data
 
   const current = await prisma.appUser.findUnique({
@@ -61,6 +62,7 @@ export async function updateProfile(data: unknown): Promise<ActionResult> {
       youtube:          youtube          || null,
       otherSocial:      otherSocial      || null,
       notes:            notes            || null,
+      isPublicProfile,
       addressId,
     },
   })

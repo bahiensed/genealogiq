@@ -3,7 +3,8 @@ import { auth } from "@/auth"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { PlacesMapLoader } from "@/components/places-map-loader"
-import { getPlacesForMap } from "@/queries/places"
+import { SignupPrompt } from "@/components/auth/signup-prompt"
+import { getPlacesForMap, ANON_PLACES_LIMIT } from "@/queries/places"
 import { getProfileById } from "@/queries/profile"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 
@@ -15,12 +16,16 @@ export default async function ProfilePlacesMapPage({ params }: Props) {
   const { id } = await params
   const session = await auth()
   const viewerId = session?.user?.id
+  const isAnon = !viewerId
   const t = await getTranslations("Places")
 
   const profile = await getProfileById(id)
   assertPublicMemorialAccess(profile, viewerId, id)
 
-  const pins = await getPlacesForMap(id)
+  // Same bound as the list page's hard wall — without this, the list page's
+  // "View map" button would be a trivial bypass (anon sees every pin here
+  // even when blocked from place #13+ on the list).
+  const pins = await getPlacesForMap(id, isAnon ? ANON_PLACES_LIMIT : undefined)
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -38,6 +43,8 @@ export default async function ProfilePlacesMapPage({ params }: Props) {
           </div>
         </div>
       </main>
+
+      {isAnon && <SignupPrompt />}
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import type { TreeViewer } from "@/queries/family-tree"
 
 // Fields safe to expose to ANY authenticated viewer of a profile. PII that only
 // the owner/guardian may see (nationalId, phone, notes, full address) lives in
@@ -7,6 +8,7 @@ import { prisma } from "@/lib/prisma"
 const PUBLIC_SELECT = {
   id: true,
   role: true,
+  isPublicProfile: true,
   // Identity
   firstName: true,
   lastName: true,
@@ -90,3 +92,40 @@ export async function getProfileForEdit(id: string) {
 
 export type ProfileRow = NonNullable<Awaited<ReturnType<typeof getProfileById>>>
 export type EditProfileRow = NonNullable<Awaited<ReturnType<typeof getProfileForEdit>>>
+
+/**
+ * Redacts a living (APP_USER) profile's exact birth/death date+place(+state,
+ * +cause) to year-only for any viewer who is neither the profile's owner nor
+ * an accepted guardian. Mirrors getFamilyTree()'s per-person redaction rule
+ * (queries/family-tree.ts) — same TreeViewer shape, same condition — so a
+ * living person shows the same coarsened data whether viewed via their own
+ * profile pages or as a node in someone else's family tree. Memorials
+ * (APP_MEMO) and ghosts (APP_GHOST) are never redacted here — this function
+ * simply doesn't fire for anything that isn't APP_USER. Photo (avatarUrl) is
+ * never redacted, matching the tree.
+ *
+ * Deliberately broader than the tree's current redaction: also nulls
+ * birthState/deathState/deathCause, which getFamilyTree doesn't even fetch
+ * today. Hiding city/country but leaving state visible, or hiding when/where
+ * someone died but leaving why, would be an incomplete redaction.
+ */
+export function redactLivingProfile<T extends ProfileRow>(
+  profile: T,
+  viewer: TreeViewer,
+): T & { birthYear: number | null; deathYear: number | null } {
+  const isRedacted = profile.role === "APP_USER" && profile.id !== viewer.id && !viewer.canManage
+  return {
+    ...profile,
+    birthYear:    profile.birthDate ? profile.birthDate.getUTCFullYear() : null,
+    deathYear:    profile.deathDate ? profile.deathDate.getUTCFullYear() : null,
+    birthDate:    isRedacted ? null : profile.birthDate,
+    birthPlace:   isRedacted ? null : profile.birthPlace,
+    birthState:   isRedacted ? null : profile.birthState,
+    birthCountry: isRedacted ? null : profile.birthCountry,
+    deathDate:    isRedacted ? null : profile.deathDate,
+    deathPlace:   isRedacted ? null : profile.deathPlace,
+    deathState:   isRedacted ? null : profile.deathState,
+    deathCountry: isRedacted ? null : profile.deathCountry,
+    deathCause:   isRedacted ? null : profile.deathCause,
+  }
+}

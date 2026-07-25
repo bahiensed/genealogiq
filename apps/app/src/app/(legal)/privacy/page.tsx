@@ -4,9 +4,11 @@ export default async function PrivacyPage() {
   const t = await getTranslations("Legal")
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-16">
-      <h1 className="text-2xl font-bold tracking-tight">{t("privacyTitle")}</h1>
-      <p className="mt-4 text-muted-foreground">{t("comingSoon")}</p>
-    </div>
+    <main className="container relative pt-24 pb-32">
+      <div className="mb-8 animate-fade-in">
+        <h1 className="text-4xl font-semibold tracking-tight">{t("privacyTitle")}</h1>
+        <p className="mt-4 text-muted-foreground">{t("comingSoon")}</p>
+      </div>
+    </main>
   )
 }

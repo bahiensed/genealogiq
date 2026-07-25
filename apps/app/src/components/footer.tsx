@@ -21,16 +21,21 @@ export async function Footer() {
 
         <p className="mt-2 text-center text-muted-foreground">{t("footer.copyright", { year })}</p>
 
-        <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
-          <FeedbackDialog type="contact" label={t("links.contact")} />
-          <span aria-hidden className="text-muted-foreground">|</span>
-          <FeedbackDialog type="career" label={t("links.career")} />
-          <span aria-hidden className="text-muted-foreground">|</span>
-          <Link href="/privacy" className={linkClass}>{t("footer.privacy")}</Link>
-          <span aria-hidden className="text-muted-foreground">|</span>
-          <Link href="/terms" className={linkClass}>{t("footer.terms")}</Link>
-          <span aria-hidden className="text-muted-foreground">|</span>
-          <Link href="/cancellation-refund" className={linkClass}>{t("footer.cancellationRefund")}</Link>
+        {/* Deterministic 2+3 split on xs/sm (Contact+Career, then the 3 legal
+            links) instead of relying on natural flex-wrap, since link text
+            length varies a lot by locale (pt-BR "Cancelamento e Reembolso"
+            is much longer than en-US) and could wrap at a different point
+            per language. The two groups sit side by side as one row from md up. */}
+        <div className="mt-2 flex flex-col items-center gap-2 md:flex-row md:flex-wrap md:justify-center">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <FeedbackDialog type="contact" label={t("links.contact")} />
+            <FeedbackDialog type="career" label={t("links.career")} />
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Link href="/privacy" className={linkClass}>{t("footer.privacy")}</Link>
+            <Link href="/terms" className={linkClass}>{t("footer.terms")}</Link>
+            <Link href="/cancellation-refund" className={linkClass}>{t("footer.cancellationRefund")}</Link>
+          </div>
         </div>
       </div>
     </footer>

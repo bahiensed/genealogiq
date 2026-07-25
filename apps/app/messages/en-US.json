@@ -653,6 +653,7 @@
   },
   "Home": {
     "bornMetric": "Born {date}",
+    "bornYearMetric": "Born {year}",
     "clearSearch": "Clear search",
     "deathMetric": "✦ {date}",
     "favoritesEmpty": "No favorite profile yet.",
@@ -796,6 +797,10 @@
       "otherLink": "Any other link",
       "state": "State or province"
     },
+    "privacy": {
+      "description": "Anyone can view your profile without signing in. Turn this off to require sign-in.",
+      "label": "Public profile"
+    },
     "sections": {
       "address": "Address",
       "birth": "Birth",
@@ -898,9 +903,11 @@
     "bioEmptyMetric": "No biography yet",
     "bioMetric": "Read",
     "bioTitle": "Biography",
+    "bornInYear": "Born in <strong>{year}</strong>",
     "bornOn": "Born on <strong>{date}</strong>",
     "bornOnInPlace": "Born on <strong>{date}</strong> in <strong>{place}</strong>",
     "coordinatesLabel": "Coordinates:",
+    "deceasedInYear": "Deceased in <strong>{year}</strong>",
     "deceasedOn": "Deceased on <strong>{date}</strong>",
     "deceasedOnInPlace": "Deceased on <strong>{date}</strong> in <strong>{place}</strong>",
     "editProfileAria": "Edit profile",

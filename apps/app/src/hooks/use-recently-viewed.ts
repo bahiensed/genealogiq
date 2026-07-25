@@ -5,7 +5,10 @@ import { useSyncExternalStore } from "react"
 // are now formatted at render time under the active locale (see RecentlyViewedSection),
 // so switching language re-localizes already-viewed cards. Bumping the key from v1
 // drops the stale pre-formatted cache.
-const KEY = "giq:recently-viewed:v2"
+// v3: adds birthYear/deathYear. The caller now passes an already-redacted profile
+// (see queries/profile.ts's redactLivingProfile) — birthDate/deathDate are null
+// for a redacted living person, so the year fields are the only display fallback.
+const KEY = "giq:recently-viewed:v3"
 const MAX = 6
 
 export interface RecentProfile {
@@ -15,8 +18,10 @@ export interface RecentProfile {
   birthPlace: string | null
   birthCountry: string | null
   isMemorialized: boolean
-  birthDate: string | null // ISO 8601
-  deathDate: string | null // ISO 8601
+  birthDate: string | null // ISO 8601 — null when redacted (see birthYear)
+  deathDate: string | null // ISO 8601 — null when redacted (see deathYear)
+  birthYear: number | null
+  deathYear: number | null
   avatarUrl: string | null
   viewedAt: number
 }

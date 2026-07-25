@@ -384,6 +384,10 @@ model AppUser {
   phone               String?
   notes               String?
   isActive            Boolean              @default(true) @map("is_active")
+  // Opt-OUT public-visibility toggle for living users (role=APP_USER). Ignored
+  // for APP_MEMO (already public via role alone) and APP_GHOST (never publicly
+  // reachable regardless of this value — see assertPublicMemorialAccess).
+  isPublicProfile     Boolean              @default(true) @map("is_public_profile")
   fb                  String?
   instagram           String?
   linkedin            String?

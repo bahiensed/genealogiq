@@ -6,7 +6,8 @@ import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { Button } from "@/components/ui/button"
 import { PlacesClient } from "@/components/places-client"
-import { getPlacesByUserId } from "@/queries/places"
+import { SignupPrompt } from "@/components/auth/signup-prompt"
+import { getPlacesByUserId, ANON_PLACES_LIMIT } from "@/queries/places"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
@@ -21,13 +22,14 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
   const { place } = await searchParams
   const session = await auth()
   const viewerId = session?.user?.id
+  const isAnon = !viewerId
   const t = await getTranslations("Places")
 
   const profile = await getProfileById(id)
   assertPublicMemorialAccess(profile, viewerId, id)
 
   const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
-  const places = await getPlacesByUserId(id)
+  const places = await getPlacesByUserId(id, isAnon ? ANON_PLACES_LIMIT : undefined)
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -64,6 +66,8 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
 
         <PlacesClient places={places} profileId={id} isOwn={isOwn} initialPlaceId={place ?? null} />
       </main>
+
+      {isAnon && <SignupPrompt />}
     </div>
   )
 }
