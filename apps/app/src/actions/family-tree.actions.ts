@@ -136,25 +136,47 @@ export async function addRelation(rootId: string, data: unknown): Promise<Action
     return fail(t("familyTree.conflictingRelationType"))
   }
 
+  const relationData = {
+    subtype:       finalSubtype,
+    startDate:     toDate(startDate),
+    endDate:       toDate(endDate),
+    status:        needsConsent ? "PENDING" : "ACCEPTED",
+    requestedById: needsConsent ? session.user.id : null,
+  }
+
+  // A REJECTED relation keeps its row (rejectFamilyRequest preserves it for
+  // the audit trail + linked notifications) instead of being deleted — but
+  // @@unique([fromId, toId, type]) doesn't know about status, so a blind
+  // create() would hit that same row's constraint on every retry, even
+  // though REJECTED relations are filtered out of every read path and so
+  // look, from the tree UI, like they were never sent. Revive the existing
+  // row instead of inserting a new one when that's the case; a genuine
+  // PENDING/ACCEPTED duplicate still fails as before.
+  const existingRelation = await prisma.familyRelation.findUnique({
+    where:  { fromId_toId_type: { fromId: normFrom, toId: normTo, type } },
+    select: { id: true, status: true },
+  })
+
   let createdRelationId: string
-  try {
-    const created = await prisma.familyRelation.create({
-      data: {
-        fromId:        normFrom,
-        toId:          normTo,
-        type,
-        subtype:       finalSubtype,
-        startDate:     toDate(startDate),
-        endDate:       toDate(endDate),
-        status:        needsConsent ? "PENDING" : "ACCEPTED",
-        requestedById: needsConsent ? session.user.id : null,
-      },
+  if (existingRelation) {
+    if (existingRelation.status !== "REJECTED") return fail(t("familyTree.relationExists"))
+    const revived = await prisma.familyRelation.update({
+      where:  { id: existingRelation.id },
+      data:   relationData,
       select: { id: true },
     })
-    createdRelationId = created.id
-  } catch (e) {
-    if (isUniqueConstraintError(e)) return fail(t("familyTree.relationExists"))
-    throw e
+    createdRelationId = revived.id
+  } else {
+    try {
+      const created = await prisma.familyRelation.create({
+        data:   { fromId: normFrom, toId: normTo, type, ...relationData },
+        select: { id: true },
+      })
+      createdRelationId = created.id
+    } catch (e) {
+      if (isUniqueConstraintError(e)) return fail(t("familyTree.relationExists"))
+      throw e
+    }
   }
 
   if (needsConsent && outsiderId) {
@@ -176,13 +198,28 @@ export async function addRelation(rootId: string, data: unknown): Promise<Action
     const newParentId = fromId
     if (newParentId !== linkSpouseId && !(await hasConflictingRelationType(newParentId, linkSpouseId, "SPOUSE"))) {
       const [a, b] = normalizePair("SPOUSE", newParentId, linkSpouseId)
-      try {
-        await prisma.familyRelation.create({
-          data: { fromId: a, toId: b, type: "SPOUSE", subtype: "married", status: "ACCEPTED" },
+      // Same REJECTED-revival as the main relation above — an earlier,
+      // unrelated SPOUSE proposal between these two that got rejected must
+      // not silently block this in-tree, no-consent-needed auto-link forever.
+      const existingSpouseRelation = await prisma.familyRelation.findUnique({
+        where:  { fromId_toId_type: { fromId: a, toId: b, type: "SPOUSE" } },
+        select: { id: true, status: true },
+      })
+      if (!existingSpouseRelation) {
+        try {
+          await prisma.familyRelation.create({
+            data: { fromId: a, toId: b, type: "SPOUSE", subtype: "married", status: "ACCEPTED" },
+          })
+        } catch (e) {
+          if (!isUniqueConstraintError(e)) throw e
+        }
+      } else if (existingSpouseRelation.status === "REJECTED") {
+        await prisma.familyRelation.update({
+          where: { id: existingSpouseRelation.id },
+          data:  { status: "ACCEPTED", subtype: "married", requestedById: null },
         })
-      } catch (e) {
-        if (!isUniqueConstraintError(e)) throw e
       }
+      // else: already PENDING or ACCEPTED — nothing to do, matches prior behavior.
     }
   }
 

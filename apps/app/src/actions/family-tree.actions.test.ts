@@ -60,6 +60,13 @@ beforeEach(() => {
   vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true, retryAfter: 0 })
   vi.mocked(createsAncestryCycle).mockResolvedValue(false)
   vi.mocked(hasConflictingRelationType).mockResolvedValue(false)
+  // Default: no pre-existing relation between any pair (addRelation's own
+  // REJECTED-revival check). Tests for that behavior override this
+  // explicitly; everyone else gets a clean "nothing exists yet" baseline
+  // instead of leaking whatever a DIFFERENT describe block's test last set
+  // this same mock to (vi.clearAllMocks() resets call history, not
+  // implementations set via mockResolvedValue).
+  prismaMock.familyRelation.findUnique.mockResolvedValue(null)
 })
 
 // cuid()-shaped ids so the .cuid() schema fields parse and we reach the guard.
@@ -335,6 +342,100 @@ describe("addRelation — cycle, conflicting-type & rate-limit guards", () => {
 
     await expect(addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SIBLING" }))
       .rejects.toThrow("connection reset")
+  })
+})
+
+describe("addRelation — revives a REJECTED relation instead of failing on retry", () => {
+  beforeEach(() => {
+    mockUsers({
+      [ROOT]: { id: ROOT, role: "APP_USER" },
+      [MEMBER]: { id: MEMBER, role: "APP_GHOST" },
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT, MEMBER]))
+    prismaMock.familyRelation.findFirst.mockResolvedValue({ id: "rel-existing" })
+  })
+
+  it("updates the existing REJECTED row instead of inserting a new one", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({ id: "rel-old", status: "REJECTED" })
+    prismaMock.familyRelation.update.mockResolvedValue({ id: "rel-old" })
+
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SIBLING" })
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(prismaMock.familyRelation.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: "rel-old" }, data: expect.objectContaining({ status: "ACCEPTED" }) }),
+    )
+    expect(prismaMock.familyRelation.create).not.toHaveBeenCalled()
+  })
+
+  it("still fails with relationExists when the existing row is PENDING (genuine duplicate)", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({ id: "rel-old", status: "PENDING" })
+
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SIBLING" })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.relationExists" })
+    expect(prismaMock.familyRelation.update).not.toHaveBeenCalled()
+    expect(prismaMock.familyRelation.create).not.toHaveBeenCalled()
+  })
+
+  it("still fails with relationExists when the existing row is ACCEPTED (genuine duplicate)", async () => {
+    prismaMock.familyRelation.findUnique.mockResolvedValue({ id: "rel-old", status: "ACCEPTED" })
+
+    const res = await addRelation(ROOT, { fromId: ROOT, toId: MEMBER, type: "SIBLING" })
+
+    expect(res).toEqual({ ok: false, message: "familyTree.relationExists" })
+    expect(prismaMock.familyRelation.update).not.toHaveBeenCalled()
+  })
+
+  it("revives with the NEW request's data — e.g. a fresh requestedById and PENDING status for a re-sent invite", async () => {
+    mockUsers({
+      [MEMBER]: { id: MEMBER, role: "APP_GHOST" },
+      [STRANGER1]: { id: STRANGER1, role: "APP_USER" },
+    })
+    prismaMock.familyRelation.findFirst.mockResolvedValue(null)
+    prismaMock.familyRelation.findUnique.mockResolvedValue({ id: "rel-old", status: "REJECTED" })
+    prismaMock.familyRelation.update.mockResolvedValue({ id: "rel-old" })
+
+    const res = await addRelation(ROOT, { fromId: MEMBER, toId: STRANGER1, type: "SIBLING" })
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(prismaMock.familyRelation.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "rel-old" },
+        data:  expect.objectContaining({ status: "PENDING", requestedById: "mgr" }),
+      }),
+    )
+    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ userId: STRANGER1, familyRelationId: "rel-old" }))
+  })
+
+  it("also revives a REJECTED row in the linkSpouseId auto-link side-channel", async () => {
+    const NEW_PARENT = "cnewparentaaa"
+    mockUsers({
+      [NEW_PARENT]: { id: NEW_PARENT, role: "APP_GHOST" },
+      [MEMBER]:     { id: MEMBER,     role: "APP_GHOST" },
+    })
+    vi.mocked(getTreeMemberIds).mockResolvedValue(new Set([ROOT, NEW_PARENT, MEMBER]))
+    // 1st findUnique = the main PARENT_OF relation's own revival check (nothing
+    // existing yet); 2nd = the linkSpouseId SPOUSE-pair check (existing REJECTED row).
+    prismaMock.familyRelation.findUnique
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ id: "spouse-rel-old", status: "REJECTED" })
+    prismaMock.familyRelation.create.mockResolvedValue({ id: "rel-new" })
+    prismaMock.familyRelation.update.mockResolvedValue({ id: "spouse-rel-old" })
+
+    const res = await addRelation(ROOT, {
+      fromId: NEW_PARENT, toId: MEMBER, type: "PARENT_OF", linkSpouseId: ROOT,
+    })
+
+    expect(res).toEqual({ ok: true, message: undefined })
+    // Main relation still goes through create(); only the spousal side-channel revives.
+    expect(prismaMock.familyRelation.create).toHaveBeenCalledTimes(1)
+    expect(prismaMock.familyRelation.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "spouse-rel-old" },
+        data:  expect.objectContaining({ status: "ACCEPTED", subtype: "married" }),
+      }),
+    )
   })
 })
 
