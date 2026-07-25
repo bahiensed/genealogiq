@@ -34,7 +34,7 @@ export function TreeSubtitle({ persons, generations, memberLimit, currentTier }:
   const word = wordKey ? t(`stats.generationsWord.${wordKey}`) : String(gens)
 
   return (
-    <p className={cn("mt-2 tabular-nums", tone)}>
+    <p className={cn("mt-2 italic tabular-nums", tone)}>
       {t("stats.summary", { count, gens, word })}
       {atLimit && currentTier !== "CENTURY" && (
         <>
