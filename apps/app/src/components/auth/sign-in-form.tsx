@@ -110,7 +110,7 @@ export function SignInForm() {
             </Link>
           </p>
 
-          <p className="mt-2 text-center text-sm text-muted-foreground" style={{ gridArea: 'newhere' }}>
+          <p className="mt-3 text-center text-sm text-muted-foreground" style={{ gridArea: 'newhere' }}>
             {t('newHere')}{" "}
             <Link
               href={callbackUrl ? `/sign-up?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/sign-up"}

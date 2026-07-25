@@ -12,6 +12,7 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FieldLabel } from '@/components/ui/field'
+import { Separator } from '@/components/ui/separator'
 import { getSignUpSchema, type SignUpFormValues } from '@/schemas/auth.schema'
 
 export function SignUpForm() {
@@ -136,13 +137,19 @@ export function SignUpForm() {
           {isPending ? t('creatingAccount') : t('createAccount')}
         </Button>
 
+        <div className="flex items-center gap-3">
+          <Separator className="flex-1" />
+          <span className="text-xs uppercase text-muted-foreground">{t('or')}</span>
+          <Separator className="flex-1" />
+        </div>
+
         <p className="text-center text-sm">
           <Link href="/activate" className="text-primary hover:underline font-medium">
             {t('activateGenCode')}
           </Link>
         </p>
 
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="mt-3 text-center text-sm text-muted-foreground">
           {t('alreadyHaveAccount')}{" "}
           <Link
             href={callbackUrl ? `/sign-in?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/sign-in"}
