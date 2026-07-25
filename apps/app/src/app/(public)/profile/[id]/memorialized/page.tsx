@@ -10,6 +10,7 @@ import { getProfileById } from "@/queries/profile"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
 import { prisma } from "@/lib/prisma"
 import { UpgradeHint } from "@/components/upgrade-hint"
+import { formatDateShort, formatMonthYear } from "@/lib/format-date"
 import type { MemorialRow } from "@/queries/memorial"
 
 interface MiniProfileContext {
@@ -28,9 +29,9 @@ function toMiniProfile(m: MemorialRow, ctx: MiniProfileContext): MiniProfile {
     // status is a discriminator consumed by the shared ProfileMiniCard (not owned here); kept as the literal value
     status: "Memorialized",
     metric: m.deathDate
-      ? `✦ ${m.deathDate.toLocaleDateString(ctx.locale, { year: "numeric", month: "short", day: "numeric" })}`
+      ? `✦ ${formatDateShort(m.deathDate, ctx.locale)}`
       : m.birthDate
-        ? ctx.bornLabel(m.birthDate.toLocaleDateString(ctx.locale, { year: "numeric", month: "short" }))
+        ? ctx.bornLabel(formatMonthYear(m.birthDate, ctx.locale))
         : "",
     initials: `${m.firstName[0]}${m.lastName[0]}`.toUpperCase(),
     gradient: getProfileGradient(m.id),

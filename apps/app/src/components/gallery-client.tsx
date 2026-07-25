@@ -13,17 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { SignupDialog } from "@/components/auth/signup-dialog"
+import { formatDateLong } from "@/lib/format-date"
 import type { GalleryItemRow } from "@/queries/gallery"
 
 const PAGE_SIZE = 12
 type SortDir = "newest" | "oldest"
-
-const formatDate = (iso: string | null | undefined, locale: string) => {
-  if (!iso) return ""
-  const d = new Date(iso)
-  if (isNaN(d.getTime())) return ""
-  return d.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })
-}
 
 const formatDuration = (sec: number) => {
   const m = Math.floor(sec / 60)
@@ -241,7 +235,7 @@ export function GalleryClient({ items: rawItems, editHref, isOwn, upgradeHint, g
                   <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4 sm:p-6 text-white transition-opacity duration-300 opacity-100 sm:opacity-0 sm:group-hover/media:opacity-100">
                     {(currentItem.takenAt || currentItem.location) && (
                       <div className="text-xs sm:text-sm opacity-90">
-                        {[formatDate(currentItem.takenAt, locale), currentItem.location].filter(Boolean).join(" · ")}
+                        {[formatDateLong(currentItem.takenAt, locale), currentItem.location].filter(Boolean).join(" · ")}
                       </div>
                     )}
                     {currentItem.description && (

@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
 import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
 import { getProfileGradient } from "@/lib/avatar-color"
+import { formatDateShort, formatMonthYear } from "@/lib/format-date"
 import { useRecentlyViewed, type RecentProfile } from "@/hooks/use-recently-viewed"
 
 type Translate = (key: string, values?: Record<string, string>) => string
@@ -20,9 +21,9 @@ function toMiniProfile(p: RecentProfile, locale: string, t: Translate): MiniProf
       : p.isMemorialized ? t("memorializedProfile") : "",
     status: p.isMemorialized ? "Memorialized" : "Living",
     metric: p.isMemorialized && deathDate
-      ? t("deathMetric", { date: deathDate.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" }) })
+      ? t("deathMetric", { date: formatDateShort(deathDate, locale) })
       : birthDate
-        ? t("bornMetric", { date: birthDate.toLocaleDateString(locale, { year: "numeric", month: "short" }) })
+        ? t("bornMetric", { date: formatMonthYear(birthDate, locale) })
         : p.birthYear
           ? t("bornYearMetric", { year: String(p.birthYear) })
           : "",

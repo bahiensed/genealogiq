@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
 import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
 import { getProfileGradient } from "@/lib/avatar-color"
+import { formatDateShort, formatMonthYear } from "@/lib/format-date"
 import type { FavoriteRow } from "@/queries/favorite"
 
 /** How many cards this section renders — also the point above which a
@@ -33,9 +34,9 @@ function toMiniProfile(fav: FavoriteRow, locale: string, t: Translate): MiniProf
       : isMemorialized ? t("memorializedProfile") : "",
     status: isMemorialized ? "Memorialized" : "Living",
     metric: isMemorialized && p.deathDate
-      ? t("deathMetric", { date: p.deathDate.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" }) })
+      ? t("deathMetric", { date: formatDateShort(p.deathDate, locale) })
       : p.birthDate
-        ? t("bornMetric", { date: p.birthDate.toLocaleDateString(locale, { year: "numeric", month: "short" }) })
+        ? t("bornMetric", { date: formatMonthYear(p.birthDate, locale) })
         : "",
     initials: `${p.firstName[0]}${p.lastName[0]}`.toUpperCase(),
     gradient: getProfileGradient(p.id),

@@ -30,10 +30,7 @@ import {
   DocumentsPreview,
   PetsPreview,
 } from "@/components/card-previews"
-
-function formatDate(date: Date, locale: string): string {
-  return date.toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })
-}
+import { formatDateLong } from "@/lib/format-date"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -119,12 +116,12 @@ export default async function ProfileByIdPage({ params }: Props) {
     type: isMemorialized ? "memorialized" : "living",
     avatarUrl: user.avatarUrl,
     birth: user.birthDate
-      ? { date: formatDate(user.birthDate, locale), place: user.birthPlace ?? "", country: user.birthCountry }
+      ? { date: formatDateLong(user.birthDate, locale), place: user.birthPlace ?? "", country: user.birthCountry }
       : user.birthYear
         ? { date: String(user.birthYear), place: "", country: null, yearOnly: true }
         : null,
     death: user.deathDate
-      ? { date: formatDate(user.deathDate, locale), place: user.deathPlace ?? "", country: user.deathCountry }
+      ? { date: formatDateLong(user.deathDate, locale), place: user.deathPlace ?? "", country: user.deathCountry }
       : user.deathYear
         ? { date: String(user.deathYear), place: "", country: null, yearOnly: true }
         : null,

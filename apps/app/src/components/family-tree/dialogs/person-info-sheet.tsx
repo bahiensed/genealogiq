@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils"
 import { removeMember } from "@/actions/family-tree.actions"
 import { requestGuardianship } from "@/actions/guardian.actions"
 import { relationFromRoot } from "@/lib/family-relation-label"
-import { formatLongDate } from "@/lib/format-date"
+import { formatDateShort } from "@/lib/format-date"
 import { EditRelationDialog } from "./edit-relation-dialog"
 import type { TreePerson, TreeRelation } from "@/queries/family-tree"
 
@@ -285,7 +285,7 @@ export function PersonInfoSheet({
                     <div className="min-w-0 flex-1 pt-0.5">
                       <p className="text-sm leading-tight">{eventLabel(e, t)}</p>
                       {e.date ? (
-                        <p className="text-xs text-muted-foreground tabular-nums mt-0.5">{formatLongDate(e.date)}</p>
+                        <p className="text-xs text-muted-foreground tabular-nums mt-0.5">{formatDateShort(e.date, locale)}</p>
                       ) : "year" in e && e.year ? (
                         <p className="text-xs text-muted-foreground tabular-nums mt-0.5">{e.year}</p>
                       ) : null}

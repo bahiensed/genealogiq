@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
 import { Heart } from "lucide-react"
 import { ProfileMiniCard, type MiniProfile, type AvatarGradient } from "@/components/profile-mini-card"
+import { formatDateShort, formatMonthYear } from "@/lib/format-date"
 import type { FavoriteRow } from "@/queries/favorite"
 
 type Translate = (key: string, values?: Record<string, string>) => string
@@ -37,9 +38,9 @@ function toMiniProfile(fav: FavoriteRow, index: number, locale: string, t: Trans
     subtitle,
     status: isMemorialized ? "Memorialized" : "Living",
     metric: isMemorialized && target.deathDate
-      ? t("deathMetric", { date: target.deathDate.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" }) })
+      ? t("deathMetric", { date: formatDateShort(target.deathDate, locale) })
       : target.birthDate
-        ? t("bornMetric", { date: target.birthDate.toLocaleDateString(locale, { year: "numeric", month: "short" }) })
+        ? t("bornMetric", { date: formatMonthYear(target.birthDate, locale) })
         : "",
     initials: `${target.firstName[0]}${target.lastName[0]}`.toUpperCase(),
     gradient: GRADIENTS[index % GRADIENTS.length],

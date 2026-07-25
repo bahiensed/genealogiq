@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { PlaceQrButton } from "@/components/place-qr-button"
+import { formatDateShort } from "@/lib/format-date"
 import type { GeoPlaceRow } from "@/queries/places"
 
 function formatRange(
@@ -20,10 +21,9 @@ function formatRange(
   end: Date | null,
   locale: string,
 ): string | null {
-  const fmt = (d: Date) => d.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" })
-  if (start && end) return `${fmt(start)} — ${fmt(end)}`
-  if (start) return fmt(start)
-  if (end) return fmt(end)
+  if (start && end) return `${formatDateShort(start, locale)} — ${formatDateShort(end, locale)}`
+  if (start) return formatDateShort(start, locale)
+  if (end) return formatDateShort(end, locale)
   return null
 }
 
