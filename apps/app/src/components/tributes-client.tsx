@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations, useLocale } from "next-intl"
-import { Send, SquarePen, Flower2, ArrowDownUp, Trash2 } from "lucide-react"
+import { Send, SquarePen, Flower, ArrowDownUp, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -148,7 +148,7 @@ export function TributesClient({ items, profileId, sessionUserId, canWrite, isMa
 
       {items.length === 0 ? (
         <div className="glass-card flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in">
-          <Flower2 className="h-10 w-10 text-muted-foreground" />
+          <Flower className="h-10 w-10 text-muted-foreground" />
           <p className="text-muted-foreground">{t("list.empty")}</p>
           {canWrite && (
             <Button asChild className="gap-2">

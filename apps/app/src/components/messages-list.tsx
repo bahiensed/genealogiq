@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useLocale, useTranslations } from "next-intl"
-import { Check, X, User, Flower2, ArrowUpRight, Shield, ChevronDown } from "lucide-react"
+import { Check, X, User, Flower, ArrowUpRight, Shield, ChevronDown } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -351,7 +351,7 @@ export function MessagesList({ data }: Props) {
   if (!hasPending && !hasActivity) {
     return (
       <div className="glass-card no-sheen flex flex-col items-center justify-center gap-3 py-20 text-center animate-fade-in mt-6">
-        <Flower2 className="h-10 w-10 text-muted-foreground/50" />
+        <Flower className="h-10 w-10 text-muted-foreground/50" />
         <p className="text-muted-foreground">{t("empty")}</p>
       </div>
     )

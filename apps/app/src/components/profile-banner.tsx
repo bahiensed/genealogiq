@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useLocale, useTranslations } from "next-intl"
 import { getCountryName } from "@genealogiq/core"
-import { Cake, Feather, Heart, Images, Flower2, MapPin, SquarePen, BrickWall, User } from "lucide-react"
+import { Cake, Feather, Heart, Images, Flower, MapPin, SquarePen, BrickWall, User } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -153,7 +153,7 @@ export function ProfileBanner({ profile }: Props) {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
-                          <Flower2 className="h-3 w-3 mr-1" />
+                          <Flower className="h-3 w-3 mr-1" />
                           {profile.tributes}
                         </Badge>
                       </TooltipTrigger>

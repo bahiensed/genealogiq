@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server"
-import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, FileText, PawPrint } from "lucide-react"
+import { Network, BookOpenText, Images, Heart, Flower, BrickWall, MapPin, FileText, PawPrint } from "lucide-react"
 import { auth } from "@/auth"
 import { getProfileById, redactLivingProfile } from "@/queries/profile"
 import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
@@ -159,7 +159,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     title: t("bioTitle"),
     description: t("bioDescription"),
     metric: hasBio ? t("bioMetric") : t("bioEmptyMetric"),
-    icon: BookOpen,
+    icon: BookOpenText,
     span: 2,
     preview: <BioPreview hasBio={hasBio} initial1={user.firstName[0]} initial2={user.lastName[0]} />,
     href: `${base}/bio`,
@@ -192,7 +192,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     title: t("tributesTitle"),
     description: t("tributesDescription"),
     metric: tributeCount > 0 ? t("tributesMetric", { count: tributeCount }) : t("tributesEmptyMetric"),
-    icon: Flower2,
+    icon: Flower,
     span: 2,
     preview: <TributesPreview authors={tributeAuthors} />,
     href: `${base}/tributes`,

@@ -6,7 +6,7 @@ import { useForm, useWatch, Controller, type Control, type FieldErrors } from "r
 import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import {
-  User, Calendar, Flower2, Phone, MapPin, Globe, FileText,
+  User, Calendar, Flower, Phone, MapPin, Globe, FileText,
   CalendarIcon, Image as ImageIcon, Trash2, Save, RotateCcw,
 } from "lucide-react"
 import { toast } from "sonner"
@@ -476,7 +476,7 @@ export function MemorialEditForm({ profileId, initial, isMemorialized = true }: 
         {isMemorialized && (
           <AccordionItem value="death" className="glass-card no-sheen border-0 rounded-2xl overflow-hidden">
             <AccordionTrigger className="px-6 py-4 text-base font-medium hover:no-underline [&[data-state=open]]:border-b [&[data-state=open]]:border-border/60">
-              <SectionTrigger icon={Flower2} label={t("sections.death")} />
+              <SectionTrigger icon={Flower} label={t("sections.death")} />
             </AccordionTrigger>
             <AccordionContent>
               <div className="px-6 pb-6 pt-4 space-y-4">

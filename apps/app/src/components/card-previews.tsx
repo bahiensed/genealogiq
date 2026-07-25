@@ -1,4 +1,4 @@
-import { Heart, Star, Images, Flower2, BrickWall, TreePine, Lock, QrCode, MapPinned, FileText, PawPrint } from "lucide-react"
+import { Heart, Star, Images, Flower, BrickWall, Network, Lock, QrCode, MapPin, FileText, PawPrint, BookOpenText } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { getAvatarColor, getAvatarGradient } from "@/lib/avatar-color"
 import type { TributeAuthorPreview } from "@/queries/tribute"
@@ -10,7 +10,7 @@ export async function TreePreview({ memberCount = 0 }: { memberCount?: number })
     const t = await getTranslations("Profile")
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
-        <TreePine className="h-8 w-8 text-muted-foreground/50" />
+        <Network className="h-8 w-8 text-muted-foreground/50" />
         <p className="text-xs text-muted-foreground">{t("emptyRelatives")}</p>
       </div>
     )
@@ -170,7 +170,7 @@ function manuscriptStrokes(y: number, x0: number, length: number, seed: number):
   return parts.join(" ")
 }
 
-export function BioPreview({
+export async function BioPreview({
   hasBio = false,
   initial1 = "A",
   initial2 = "B",
@@ -180,57 +180,38 @@ export function BioPreview({
   initial2?: string
 }) {
   if (!hasBio) {
-    const bar = "h-2.5 rounded-full skeleton-block"
-    const thumb = "rounded-xl skeleton-block shrink-0"
+    const t = await getTranslations("Profile")
     return (
-      <div className="space-y-3.5">
-        <div className="flex gap-3 items-start">
-          <div className={`${thumb} h-14 w-14`} />
-          <div className="flex-1 space-y-2 pt-1">
-            <div className={`${bar} w-full`} />
-            <div className={`${bar} w-[88%]`} />
-            <div className={`${bar} w-[55%]`} />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className={`${bar} w-[95%]`} />
-          <div className={`${bar} w-[82%]`} />
-          <div className={`${bar} w-[60%]`} />
-        </div>
-        <div className="space-y-2">
-          <div className={`${bar} w-full`} />
-          <div className={`${bar} w-[90%]`} />
-          <div className={`${bar} w-[78%]`} />
-          <div className={`${bar} w-[50%]`} />
-        </div>
+      <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
+        <BookOpenText className="h-8 w-8 text-muted-foreground/50" />
+        <p className="text-xs text-muted-foreground">{t("bioEmptyMetric")}</p>
       </div>
     )
   }
 
   // Manuscript-style preview — evokes a medieval scholastic autograph (Aquinas-esque).
-  // Two paragraphs: drop cap initial1 with 6 lines, then initial2 with 7 lines.
+  // Two paragraphs: drop cap initial1 with 5 lines, then initial2 with 6 lines — each
+  // paragraph's last line is shortened to read as a natural trailing line-end.
   const lines = [
     // Paragraph 1 (drop cap initial1) — line spacing 14
     { y: 16,  x: 30, len: 204, s: 1.2 },
     { y: 30,  x: 30, len: 206, s: 2.7 },
     { y: 44,  x: 6,  len: 228, s: 3.4 },
     { y: 58,  x: 6,  len: 226, s: 4.1 },
-    { y: 72,  x: 6,  len: 230, s: 5.6 },
-    { y: 86,  x: 6,  len: 160, s: 6.3 },
-    // (blank y≈100 — paragraph break)
+    { y: 72,  x: 6,  len: 150, s: 5.6 },
+    // (blank y≈86 — paragraph break)
     // Paragraph 2 (drop cap initial2)
-    { y: 114, x: 30, len: 204, s: 7.0 },
-    { y: 128, x: 30, len: 206, s: 7.9 },
-    { y: 142, x: 6,  len: 228, s: 8.6 },
-    { y: 156, x: 6,  len: 224, s: 9.3 },
-    { y: 170, x: 6,  len: 230, s: 10.1 },
-    { y: 184, x: 6,  len: 222, s: 10.8 },
-    { y: 198, x: 6,  len: 70,  s: 11.5 },
+    { y: 100, x: 30, len: 204, s: 7.0 },
+    { y: 114, x: 30, len: 206, s: 7.9 },
+    { y: 128, x: 6,  len: 228, s: 8.6 },
+    { y: 142, x: 6,  len: 224, s: 9.3 },
+    { y: 156, x: 6,  len: 230, s: 10.1 },
+    { y: 170, x: 6,  len: 140, s: 10.8 },
   ]
 
   return (
     <svg
-      viewBox="0 0 240 210"
+      viewBox="0 0 240 182"
       preserveAspectRatio="xMidYMin meet"
       className="w-full h-full text-foreground/55"
       aria-hidden
@@ -247,7 +228,7 @@ export function BioPreview({
       >{initial1.toUpperCase()}</text>
       <text
         x="3"
-        y="131"
+        y="117"
         fontFamily="serif"
         fontSize="32"
         fontWeight="700"
@@ -322,7 +303,7 @@ export async function TributesPreview({ authors }: { authors: TributeAuthorPrevi
     const t = await getTranslations("Profile")
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
-        <Flower2 className="h-8 w-8 text-muted-foreground/50" />
+        <Flower className="h-8 w-8 text-muted-foreground/50" />
         <p className="text-xs text-muted-foreground">{t("emptyTributes")}</p>
       </div>
     )
@@ -461,7 +442,7 @@ export async function PlacesPreview({ pins }: { pins: { lat: number; lon: number
   if (valid.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[120px] gap-2 py-4">
-        <MapPinned className="h-8 w-8 text-muted-foreground/50" />
+        <MapPin className="h-8 w-8 text-muted-foreground/50" />
         <p className="text-xs text-muted-foreground">{t("placesEmptyMetric")}</p>
       </div>
     )
@@ -530,10 +511,12 @@ export async function DocumentsPreview({ documents }: { documents: { id: string;
   )
 }
 
-export function PetsPreview() {
+export async function PetsPreview() {
+  const t = await getTranslations("Profile")
   return (
-    <div className="flex h-full min-h-[120px] items-center justify-center">
-      <PawPrint className="h-16 w-16 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
+      <PawPrint className="h-8 w-8 text-muted-foreground/50" />
+      <p className="text-xs text-muted-foreground">{t("emptyPets")}</p>
     </div>
   )
 }
