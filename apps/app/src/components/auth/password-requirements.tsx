@@ -5,10 +5,6 @@ import { Check } from 'lucide-react'
 
 const RULES = [
   { key: 'passwordRuleLength', test: (value: string) => value.length >= 8 },
-  { key: 'passwordRuleUppercase', test: (value: string) => /[A-Z]/.test(value) },
-  { key: 'passwordRuleLowercase', test: (value: string) => /[a-z]/.test(value) },
-  { key: 'passwordRuleNumber', test: (value: string) => /[0-9]/.test(value) },
-  { key: 'passwordRuleSpecial', test: (value: string) => /[^a-zA-Z0-9]/.test(value) },
 ] as const
 
 export function PasswordRequirements({ password }: { password: string }) {
