@@ -136,6 +136,7 @@ export function FeedbackDialog({ type, label, className }: Props) {
             <FieldLabel htmlFor={`feedback-message-${type}`} required>{t("fields.message")}</FieldLabel>
             <Textarea
               id={`feedback-message-${type}`}
+              className="min-h-40"
               maxLength={2000}
               rows={10}
               placeholder={t(`fields.messagePlaceholder.${type}`)}

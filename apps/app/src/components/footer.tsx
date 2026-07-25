@@ -26,12 +26,12 @@ export async function Footer() {
             length varies a lot by locale (pt-BR "Cancelamento e Reembolso"
             is much longer than en-US) and could wrap at a different point
             per language. The two groups sit side by side as one row from md up. */}
-        <div className="mt-2 flex flex-col items-center gap-2 md:flex-row md:flex-wrap md:justify-center">
-          <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="mt-2 flex flex-col items-center gap-3 md:flex-row md:flex-wrap md:justify-center">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <FeedbackDialog type="contact" label={t("links.contact")} />
             <FeedbackDialog type="career" label={t("links.career")} />
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <Link href="/privacy" className={linkClass}>{t("footer.privacy")}</Link>
             <Link href="/terms" className={linkClass}>{t("footer.terms")}</Link>
             <Link href="/cancellation-refund" className={linkClass}>{t("footer.cancellationRefund")}</Link>
