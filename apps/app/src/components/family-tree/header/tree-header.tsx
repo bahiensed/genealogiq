@@ -26,51 +26,67 @@ export function TreeHeader({ rootFirstName, rootId, persons, generations, member
   const t = useTranslations("FamilyTree")
   const [open, setOpen] = useState(false)
   return (
-    <div className="relative z-10 flex items-center justify-between gap-3 px-4 md:px-6 py-3 md:py-4 border-b border-border/60 bg-background/60 backdrop-blur-md shrink-0">
-      <div className="flex items-center gap-3 md:gap-4 min-w-0">
-        <BackButton href={`/profile/${rootId}`} label={t("header.backToProfile")} />
-        <div className="min-w-0">
-          <h1 className="text-xl md:text-3xl font-semibold tracking-tight truncate">
-            {t("header.title", { name: rootFirstName })}
-          </h1>
-          <TreeSubtitle persons={persons} generations={generations} memberLimit={memberLimit} currentTier={currentTier} />
-        </div>
-      </div>
+    // Outer bar stays full-bleed (border/background span the viewport). The
+    // inner structure is bio/page.tsx's icon+title/subtitle block verbatim:
+    // `<div className="mb-8">` > [title row] + [subtitle `<p>`] as SIBLINGS —
+    // the subtitle is NOT nested inside the icon+title group, so it spans
+    // full width starting at the icon's own left edge, same as Bio/Gallery,
+    // not indented to start under the title text.
+    //
+    // Top padding is NOT bio's own pt-24: the site header is `fixed`, out of
+    // flow, so bio's <main> (which sits in normal flow, unaware of it) needs
+    // pt-24 to both clear the header's own height (h-16 = 64px) AND add
+    // breathing room (32px) below it. This page's own container is already
+    // `fixed top-16`, i.e. already starts right at the header's bottom edge
+    // — so it only needs that remaining 32px (pt-8), not the full pt-24, or
+    // the header's height gets cleared twice.
+    <div className="relative z-10 border-b border-border/60 bg-background/60 backdrop-blur-md shrink-0">
+      <div className="container pt-8 pb-8">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            <BackButton href={`/profile/${rootId}`} label={t("header.backToProfile")} />
+            <h1 className="text-4xl md:text-5xl font-semibold tracking-tight whitespace-nowrap">
+              {t("header.title", { name: rootFirstName })}
+            </h1>
+          </div>
 
-      {canManage && (
-        atLimit ? (
-          <Button size="sm" asChild className="gap-1.5 shrink-0">
-            <Link href="/subscriptions">
-              <Sprout className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">{t("header.upgradePlan")}</span>
-            </Link>
-          </Button>
-        ) : (
-          <>
-            <Button
-              size="sm"
-              className="gap-1.5 shrink-0"
-              onClick={() => setOpen(true)}
-              aria-label={t("header.addRelative")}
-              title={t("header.addRelative")}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">{t("header.addRelative")}</span>
-            </Button>
-            {open && (
-              <AddRelativeDialog
-                open={true}
-                onClose={() => setOpen(false)}
-                anchorId={rootId}
-                rootId={rootId}
-                initialKind="parent"
-                anchorParents={rootParents}
-                onSuccess={() => { setOpen(false); window.location.reload() }}
-              />
-            )}
-          </>
-        )
-      )}
+          {canManage && (
+            atLimit ? (
+              <Button size="sm" asChild className="gap-1.5 shrink-0">
+                <Link href="/subscriptions">
+                  <Sprout className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">{t("header.upgradePlan")}</span>
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button
+                  size="sm"
+                  className="gap-1.5 shrink-0"
+                  onClick={() => setOpen(true)}
+                  aria-label={t("header.addRelative")}
+                  title={t("header.addRelative")}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span className="hidden md:inline">{t("header.addRelative")}</span>
+                </Button>
+                {open && (
+                  <AddRelativeDialog
+                    open={true}
+                    onClose={() => setOpen(false)}
+                    anchorId={rootId}
+                    rootId={rootId}
+                    initialKind="parent"
+                    anchorParents={rootParents}
+                    onSuccess={() => { setOpen(false); window.location.reload() }}
+                  />
+                )}
+              </>
+            )
+          )}
+        </div>
+        <TreeSubtitle persons={persons} generations={generations} memberLimit={memberLimit} currentTier={currentTier} />
+      </div>
     </div>
   )
 }

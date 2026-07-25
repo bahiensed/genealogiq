@@ -453,22 +453,21 @@
       "title": "¿Eliminar del árbol?"
     },
     "stats": {
-      "generations": "{count, plural, one {{word} generación} other {{word} generaciones}}",
       "generationsWord": {
-        "eight": "Ocho",
-        "eleven": "Once",
-        "five": "Cinco",
-        "four": "Cuatro",
-        "nine": "Nueve",
-        "one": "Una",
-        "seven": "Siete",
-        "six": "Seis",
-        "ten": "Diez",
-        "three": "Tres",
-        "twelve": "Doce",
-        "two": "Dos"
+        "eight": "ocho",
+        "eleven": "once",
+        "five": "cinco",
+        "four": "cuatro",
+        "nine": "nueve",
+        "one": "una",
+        "seven": "siete",
+        "six": "seis",
+        "ten": "diez",
+        "three": "tres",
+        "twelve": "doce",
+        "two": "dos"
       },
-      "peopleOfLimit": "/{limit} personas"
+      "summary": "Árbol con {count, plural, one {# persona distribuida} other {# personas distribuidas}} en {word} {gens, plural, one {generación} other {generaciones}}"
     },
     "subtypes": {
       "adopted": "Adoptado(a)",

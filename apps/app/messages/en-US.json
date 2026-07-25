@@ -453,22 +453,21 @@
       "title": "Remove from tree?"
     },
     "stats": {
-      "generations": "{count, plural, one {{word} generation} other {{word} generations}}",
       "generationsWord": {
-        "eight": "Eight",
-        "eleven": "Eleven",
-        "five": "Five",
-        "four": "Four",
-        "nine": "Nine",
-        "one": "One",
-        "seven": "Seven",
-        "six": "Six",
-        "ten": "Ten",
-        "three": "Three",
-        "twelve": "Twelve",
-        "two": "Two"
+        "eight": "eight",
+        "eleven": "eleven",
+        "five": "five",
+        "four": "four",
+        "nine": "nine",
+        "one": "one",
+        "seven": "seven",
+        "six": "six",
+        "ten": "ten",
+        "three": "three",
+        "twelve": "twelve",
+        "two": "two"
       },
-      "peopleOfLimit": "/{limit} people"
+      "summary": "Tree with {count, plural, one {# person} other {# people}} spread across {word} {gens, plural, one {generation} other {generations}}"
     },
     "subtypes": {
       "adopted": "Adopted",

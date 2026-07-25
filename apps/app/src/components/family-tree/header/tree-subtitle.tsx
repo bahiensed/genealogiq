@@ -23,7 +23,9 @@ export function TreeSubtitle({ persons, generations, memberLimit, currentTier }:
   const count = Object.keys(persons).length
   const ratio = count / memberLimit
   const atLimit = ratio >= 1
-  const tone = !atLimit && ratio >= 0.9 ? "text-amber-600 dark:text-amber-400" : ""
+  // Tints the whole line (not just the count) since the sentence no longer
+  // shows the limit number to give the amber tint context on its own.
+  const tone = ratio >= 0.9 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"
 
   const gens = generations.size > 0
     ? Math.max(...generations.values()) - Math.min(...generations.values()) + 1
@@ -32,8 +34,8 @@ export function TreeSubtitle({ persons, generations, memberLimit, currentTier }:
   const word = wordKey ? t(`stats.generationsWord.${wordKey}`) : String(gens)
 
   return (
-    <p className="text-sm text-muted-foreground tabular-nums">
-      {t("stats.generations", { count: gens, word })} (<span className={cn(tone)}>{count}</span><span className="text-muted-foreground/70">{t("stats.peopleOfLimit", { limit: memberLimit })}</span>)
+    <p className={cn("mt-2 tabular-nums", tone)}>
+      {t("stats.summary", { count, gens, word })}
       {atLimit && currentTier !== "CENTURY" && (
         <>
           <span className="mx-1.5 text-muted-foreground/50">·</span>

@@ -453,22 +453,21 @@
       "title": "Remover da árvore?"
     },
     "stats": {
-      "generations": "{count, plural, one {{word} geração} other {{word} gerações}}",
       "generationsWord": {
-        "eight": "Oito",
-        "eleven": "Onze",
-        "five": "Cinco",
-        "four": "Quatro",
-        "nine": "Nove",
-        "one": "Uma",
-        "seven": "Sete",
-        "six": "Seis",
-        "ten": "Dez",
-        "three": "Três",
-        "twelve": "Doze",
-        "two": "Duas"
+        "eight": "oito",
+        "eleven": "onze",
+        "five": "cinco",
+        "four": "quatro",
+        "nine": "nove",
+        "one": "uma",
+        "seven": "sete",
+        "six": "seis",
+        "ten": "dez",
+        "three": "três",
+        "twelve": "doze",
+        "two": "duas"
       },
-      "peopleOfLimit": "/{limit} pessoas"
+      "summary": "Árvore com {count, plural, one {# pessoa distribuída} other {# pessoas distribuídas}} em {word} {gens, plural, one {geração} other {gerações}}"
     },
     "subtypes": {
       "adopted": "Adotado(a)",
