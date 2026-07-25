@@ -105,6 +105,13 @@ export function PersonNode({
         ? "ring-[hsl(var(--brand-indigo)/0.55)]"
         : "ring-border/50"
 
+  // Compare-path highlight: pick 1 = blue, pick 2 = green, everyone else on
+  // the path in between = amber. Matches compare-tool.tsx's badge colors.
+  const pathColor =
+    comparePickIndex === 1 ? "ring-blue-500/70 border-blue-500/40"
+      : comparePickIndex === 2 ? "ring-green-500/70 border-green-500/40"
+        : "ring-amber-500/70 border-amber-500/40"
+
   const initials = `${person.firstName[0] ?? ""}${person.lastName[0] ?? ""}`.toUpperCase()
   // Read the always-populated year fields directly (not derived from
   // birthDate/deathDate) so a redacted person still shows a year.
@@ -141,7 +148,7 @@ export function PersonNode({
         isGhost || isPending ? "border-dashed border-border/70" : "border-white/30",
         isDuplicate && "border-dashed border-border/50 opacity-70",
         isSelected && "ring-2 ring-primary/70 border-primary/30",
-        isOnPath && !isSelected && "ring-2 ring-amber-500/70 border-amber-500/40",
+        isOnPath && !isSelected && `ring-2 ${pathColor}`,
         isRoot && !dragPreview && "scale-[1.04]",
         isPending && "opacity-60",
         dragPreview && "z-20 shadow-xl",
@@ -190,7 +197,12 @@ export function PersonNode({
       </div>
 
       {comparePickIndex && (
-        <span className="absolute -top-1.5 -left-1.5 z-10 h-4 w-4 rounded-full bg-amber-500 text-white text-[9px] font-bold flex items-center justify-center shadow-sm">
+        <span
+          className={cn(
+            "absolute -top-1.5 -left-1.5 z-10 h-4 w-4 rounded-full text-white text-[9px] font-bold flex items-center justify-center shadow-sm",
+            comparePickIndex === 1 ? "bg-blue-500" : "bg-green-500",
+          )}
+        >
           {comparePickIndex}
         </span>
       )}

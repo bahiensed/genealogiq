@@ -289,11 +289,11 @@
     },
     "compare": {
       "button": "Compare",
-      "clear": "Clear",
+      "clear": "Undo comparison",
       "noPath": "No connection found in this tree.",
       "pickPlaceholder": "Click a person on the tree",
-      "resultLine": "{targetName} is {rootName}'s {label}.",
-      "title": "Relationship path"
+      "resultLine": "{rootName} is {targetName}'s {label}.",
+      "title": "Relationship"
     },
     "controls": {
       "fitTree": "Fit whole tree",

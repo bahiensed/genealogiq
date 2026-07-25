@@ -96,11 +96,15 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
     [relations, comparePick1, comparePick2],
   )
   const compareLabel = useMemo(
-    // possessive=false: "{targetName} is {rootName}'s {label}" already names
-    // both people, so the bare noun ("cousin") is needed — the possessive
-    // form ("Your cousin") would wrongly claim the relationship is to the
-    // viewer, not to rootName (see relationFromRoot's own doc comment).
-    () => (comparePick1 && comparePick2 ? relationFromRoot(persons, relations, comparePick1, comparePick2, t, false) : null),
+    // possessive=false: "{rootName} is {targetName}'s {label}" already names
+    // both people, so the bare noun ("grandmother") is needed — the
+    // possessive form ("Your grandmother") would wrongly claim the
+    // relationship is to the viewer (see relationFromRoot's own doc
+    // comment). Args are pick2-then-pick1 (not pick1-then-pick2) because the
+    // sentence's subject is pick1 ("Beatrice is Leonardo's grandmother") —
+    // the label must describe pick1 relative to pick2, i.e. pick1 is
+    // relationFromRoot's targetId here, pick2 its rootId.
+    () => (comparePick1 && comparePick2 ? relationFromRoot(persons, relations, comparePick2, comparePick1, t, false) : null),
     [persons, relations, comparePick1, comparePick2, t],
   )
   const highlightedRelationIds = useMemo(

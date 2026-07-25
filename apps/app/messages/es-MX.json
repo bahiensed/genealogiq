@@ -289,11 +289,11 @@
     },
     "compare": {
       "button": "Comparar",
-      "clear": "Limpiar",
+      "clear": "Deshacer comparación",
       "noPath": "No se encontró conexión en este árbol.",
       "pickPlaceholder": "Haz clic en una persona del árbol",
-      "resultLine": "{targetName} es {label} de {rootName}.",
-      "title": "Camino de parentesco"
+      "resultLine": "{rootName} es {label} de {targetName}.",
+      "title": "Parentesco"
     },
     "controls": {
       "fitTree": "Ajustar todo el árbol",
