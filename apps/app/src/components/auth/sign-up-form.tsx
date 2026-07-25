@@ -12,7 +12,6 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FieldLabel } from '@/components/ui/field'
-import { PasswordRequirements } from '@/components/auth/password-requirements'
 import { getSignUpSchema, type SignUpFormValues } from '@/schemas/auth.schema'
 
 export function SignUpForm() {
@@ -20,7 +19,6 @@ export function SignUpForm() {
   const tErr = useTranslations('Errors')
   const [state, dispatch, isPending] = useActionState(signUp, undefined)
   const [showPassword, setShowPassword] = useState(false)
-  const [password, setPassword] = useState('')
   const callbackUrl = useSearchParams().get('callbackUrl')
 
   const {
@@ -38,7 +36,6 @@ export function SignUpForm() {
   useEffect(() => setEmailServerErrorDismissed(false), [state])
 
   const { onChange: emailOnChange, ...emailField } = register('email')
-  const { onChange: passwordOnChange, ...passwordField } = register('password')
 
   const onValid = (data: SignUpFormValues) => {
     const formData = new FormData()
@@ -119,9 +116,7 @@ export function SignUpForm() {
               autoComplete="new-password"
               aria-invalid={!!errors.password}
               className="pr-10"
-              value={password}
-              {...passwordField}
-              onChange={(e) => { passwordOnChange(e); setPassword(e.target.value) }}
+              {...register('password')}
             />
             <button
               type="button"
@@ -132,7 +127,6 @@ export function SignUpForm() {
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
-          <PasswordRequirements password={password} />
           {errors.password?.message && (
             <p className="text-xs text-destructive">{errors.password.message}</p>
           )}
