@@ -1,4 +1,4 @@
-import { Heart, Star, Images, Flower2, BrickWall, TreePine, Lock, QrCode, MapPinned } from "lucide-react"
+import { Heart, Star, Images, Flower2, BrickWall, TreePine, Lock, QrCode, MapPinned, FileText, PawPrint } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 import { getAvatarColor, getAvatarGradient } from "@/lib/avatar-color"
 import type { TributeAuthorPreview } from "@/queries/tribute"
@@ -502,6 +502,38 @@ export async function QrPreview({ locked = false }: { locked?: boolean } = {}) {
   return (
     <div className="flex h-full min-h-[120px] items-center justify-center">
       <QrCode className="h-16 w-16 text-muted-foreground" aria-label={t("qrAlt")} />
+    </div>
+  )
+}
+
+export async function DocumentsPreview({ documents }: { documents: { id: string; title: string }[] }) {
+  if (documents.length === 0) {
+    const t = await getTranslations("Profile")
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
+        <FileText className="h-8 w-8 text-muted-foreground/50" />
+        <p className="text-xs text-muted-foreground">{t("emptyDocuments")}</p>
+      </div>
+    )
+  }
+  return (
+    <div className="space-y-2">
+      {documents.slice(0, 3).map((doc) => (
+        <div key={doc.id} className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center shrink-0">
+            <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+          <p className="flex-1 min-w-0 text-xs font-medium truncate">{doc.title}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export function PetsPreview() {
+  return (
+    <div className="flex h-full min-h-[120px] items-center justify-center">
+      <PawPrint className="h-16 w-16 text-muted-foreground" />
     </div>
   )
 }

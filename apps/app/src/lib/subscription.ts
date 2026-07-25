@@ -11,6 +11,7 @@ export interface SubscriptionFeatures {
   galleryMaxImages: number
   galleryMaxVideos: number
   geoPlacesMax: number
+  documentsMax: number
   geolocationFullAccess: boolean
   qrCodeAccess: boolean
 }
@@ -23,6 +24,7 @@ const FEATURE_SELECT = {
   galleryMaxImages:      true,
   galleryMaxVideos:      true,
   geoPlacesMax:          true,
+  documentsMax:          true,
   geolocationFullAccess: true,
   qrCodeAccess:          true,
 } as const
@@ -35,6 +37,7 @@ export const PHYSICAL_QR_FEATURES: SubscriptionFeatures = {
   galleryMaxImages: 50,
   galleryMaxVideos: 10,
   geoPlacesMax: 50,
+  documentsMax: 50,
   geolocationFullAccess: true,
   qrCodeAccess: true,
 }
@@ -47,6 +50,7 @@ const FREE_FALLBACK: SubscriptionFeatures = {
   galleryMaxImages: 10,
   galleryMaxVideos: 2,
   geoPlacesMax: 3,
+  documentsMax: 10,
   geolocationFullAccess: false,
   qrCodeAccess: false,
 }

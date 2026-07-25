@@ -20,8 +20,8 @@ export interface ProfileData {
   avatarColor: string
   type: "living" | "memorialized"
   avatarUrl?: string | null
-  birth?: { date: string; place: string; country?: string | null } | null
-  death?: { date: string; place: string; country?: string | null } | null
+  birth?: { date: string; place: string; country?: string | null; yearOnly?: boolean } | null
+  death?: { date: string; place: string; country?: string | null; yearOnly?: boolean } | null
   geo?: { lat: number; lon: number } | null
   tributes: number
   favoritedBy: number
@@ -191,16 +191,21 @@ export function ProfileBanner({ profile }: Props) {
                     <div className="flex items-center gap-2 text-muted-foreground justify-center lg:justify-start min-w-0">
                       <Cake className="h-4 w-4 text-primary shrink-0" />
                       <span className="truncate min-w-0">
-                        {profile.birth.place
-                          ? t.rich("bornOnInPlace", {
-                              date: profile.birth.date,
-                              place: formatPlace(profile.birth.place, profile.birth.country, locale),
+                        {profile.birth.yearOnly
+                          ? t.rich("bornInYear", {
+                              year: profile.birth.date,
                               strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
                             })
-                          : t.rich("bornOn", {
-                              date: profile.birth.date,
-                              strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
-                            })}
+                          : profile.birth.place
+                            ? t.rich("bornOnInPlace", {
+                                date: profile.birth.date,
+                                place: formatPlace(profile.birth.place, profile.birth.country, locale),
+                                strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                              })
+                            : t.rich("bornOn", {
+                                date: profile.birth.date,
+                                strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                              })}
                       </span>
                     </div>
                   )}
@@ -208,16 +213,21 @@ export function ProfileBanner({ profile }: Props) {
                     <div className="flex items-center gap-2 text-muted-foreground justify-center lg:justify-start min-w-0">
                       <Feather className="h-4 w-4 text-primary shrink-0" />
                       <span className="truncate min-w-0">
-                        {profile.death.place
-                          ? t.rich("deceasedOnInPlace", {
-                              date: profile.death.date,
-                              place: formatPlace(profile.death.place, profile.death.country, locale),
+                        {profile.death.yearOnly
+                          ? t.rich("deceasedInYear", {
+                              year: profile.death.date,
                               strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
                             })
-                          : t.rich("deceasedOn", {
-                              date: profile.death.date,
-                              strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
-                            })}
+                          : profile.death.place
+                            ? t.rich("deceasedOnInPlace", {
+                                date: profile.death.date,
+                                place: formatPlace(profile.death.place, profile.death.country, locale),
+                                strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                              })
+                            : t.rich("deceasedOn", {
+                                date: profile.death.date,
+                                strong: (chunks) => <span className="text-foreground font-medium">{chunks}</span>,
+                              })}
                       </span>
                     </div>
                   )}
@@ -229,7 +239,7 @@ export function ProfileBanner({ profile }: Props) {
                           <span className="truncate min-w-0">
                             {t("coordinatesLabel")}{" "}
                             <Link
-                              href={`/profile/${profile.id}/geolocation`}
+                              href={`/profile/${profile.id}/places`}
                               className="text-foreground font-medium hover:underline"
                             >
                               {geo.lat.toFixed(4)}, {geo.lon.toFixed(4)}

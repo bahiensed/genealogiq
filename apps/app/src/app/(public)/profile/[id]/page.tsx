@@ -1,17 +1,19 @@
-import { notFound, redirect } from "next/navigation"
 import { getLocale, getTranslations } from "next-intl/server"
-import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, MapPinned, QrCode } from "lucide-react"
+import { Network, BookOpen, Images, Heart, Flower2, BrickWall, MapPin, FileText, PawPrint } from "lucide-react"
 import { auth } from "@/auth"
-import { getProfileById } from "@/queries/profile"
+import { getProfileById, redactLivingProfile } from "@/queries/profile"
 import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
 import { getGeolocationForViewer } from "@/queries/geolocation"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
 import { countTreeMembers } from "@/queries/family-tree"
 import { getGalleryImageUrls, getGalleryCount, getGalleryHasVideos } from "@/queries/gallery"
 import { getPlacesForMap } from "@/queries/places"
+import { getDocumentsByUserId, getDocumentsCount } from "@/queries/documents"
 import { getTributeAuthors, getTributeCountByProfileId } from "@/queries/tribute"
 import { getBioByUserId } from "@/queries/bio"
 import { getAvatarColor } from "@/lib/avatar-color"
+import { canManageProfile } from "@/lib/profile"
+import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 import { ProfileBanner, type ProfileData } from "@/components/profile-banner"
 import { BentoGrid, type SectionCard } from "@/components/bento-grid"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
@@ -24,9 +26,9 @@ import {
   TributesPreview,
   FavoritesPreview,
   GuardianPreview,
-  GeoPreview,
   PlacesPreview,
-  QrPreview,
+  DocumentsPreview,
+  PetsPreview,
 } from "@/components/card-previews"
 
 function formatDate(date: Date, locale: string): string {
@@ -42,26 +44,28 @@ export default async function ProfileByIdPage({ params }: Props) {
   const session = await auth()
   const sessionUserId = session?.user?.id
 
-  const user = await getProfileById(id)
+  const isAnon = !sessionUserId
+  const rawUser = await getProfileById(id)
+  assertPublicMemorialAccess(rawUser, sessionUserId, id)
 
-  // Anonymous visitors may only view existing memorials. Treat "missing id" and
-  // "living profile" identically — both redirect to sign-in — so the response shape
-  // never discloses whether an id exists (no 404-vs-redirect enumeration). notFound()
-  // only fires for authenticated viewers.
-  if (!sessionUserId && (!user || user.role !== "APP_MEMO")) {
-    redirect(`/sign-in?callbackUrl=${encodeURIComponent(`/profile/${id}`)}`)
-  }
-  if (!user) notFound()
-
-  const isOwn = sessionUserId ? user.id === sessionUserId : false
-  const isMemorialized = user.role === "APP_MEMO"
+  const isOwn = sessionUserId ? rawUser.id === sessionUserId : false
+  const isMemorialized = rawUser.role === "APP_MEMO"
 
   const isGuardian = isMemorialized && sessionUserId
-    ? user.guardedBy.some((g) => g.guardianId === sessionUserId)
+    ? rawUser.guardedBy.some((g) => g.guardianId === sessionUserId)
     : false
   const guardians = isMemorialized
-    ? user.guardedBy.map((g) => ({ id: g.guardianId, firstName: g.guardian.firstName }))
+    ? rawUser.guardedBy.map((g) => ({ id: g.guardianId, firstName: g.guardian.firstName }))
     : []
+
+  // Redact this living person's exact birth/death date+place for any viewer
+  // who isn't the owner or an accepted guardian — same rule getFamilyTree()
+  // applies when this person appears in someone ELSE's tree. Kept separate
+  // from isOwn/isGuardian above (which are memorial-guardian-specific and
+  // feed the edit-pencil visibility) to avoid any behavior change there.
+  const canManageThis = sessionUserId ? canManageProfile(rawUser, sessionUserId) : false
+  const user = redactLivingProfile(rawUser, { id: sessionUserId ?? null, canManage: canManageThis })
+
   const name = `${user.firstName} ${user.lastName}`
   const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
 
@@ -79,6 +83,8 @@ export default async function ProfileByIdPage({ params }: Props) {
     memorials,
     bio,
     treeCount,
+    documentsPreview,
+    documentsCount,
   ] = await Promise.all([
     getFavoriteCount(id),
     isOwn || !sessionUserId ? Promise.resolve(false) : isFavoritedByUser(sessionUserId, id),
@@ -93,12 +99,15 @@ export default async function ProfileByIdPage({ params }: Props) {
     !isMemorialized ? getMemorialsByCreatorId(id) : Promise.resolve([]),
     getBioByUserId(id),
     countTreeMembers(id),
+    // Preview/metric only ever reflect PUBLIC documents unless the viewer can
+    // manage this profile — private documents must never reach an unauthorized
+    // viewer's RSC payload, even just as a title in the bento-card preview.
+    getDocumentsByUserId(id, { includePrivate: canManageThis, take: 3 }),
+    getDocumentsCount(id, canManageThis),
   ])
 
   const hasBio = !!bio && !!(bio.text || bio.quote || bio.images.length > 0)
   const memorialCount = memorials.length
-  const isFreeMemorial = isMemorialized && user.appSaleId == null && user.physicalQrLicense == null
-  const showQrPurchaseCTA = isFreeMemorial && isGuardian
 
   const locale = await getLocale()
 
@@ -111,10 +120,14 @@ export default async function ProfileByIdPage({ params }: Props) {
     avatarUrl: user.avatarUrl,
     birth: user.birthDate
       ? { date: formatDate(user.birthDate, locale), place: user.birthPlace ?? "", country: user.birthCountry }
-      : null,
+      : user.birthYear
+        ? { date: String(user.birthYear), place: "", country: null, yearOnly: true }
+        : null,
     death: user.deathDate
       ? { date: formatDate(user.deathDate, locale), place: user.deathPlace ?? "", country: user.deathCountry }
-      : null,
+      : user.deathYear
+        ? { date: String(user.deathYear), place: "", country: null, yearOnly: true }
+        : null,
     geo: geo ? { lat: geo.lat, lon: geo.lon } : null,
     tributes: tributeCount,
     favoritedBy,
@@ -136,7 +149,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     description: t("treeDescription"),
     metric: treeCount > 1 ? t("treeMetric", { count: treeCount }) : t("treeEmptyMetric"),
     icon: Network,
-    span: 4,
+    span: 2,
     preview: <TreePreview memberCount={treeCount} />,
     href: `${base}/tree`,
   }
@@ -152,13 +165,24 @@ export default async function ProfileByIdPage({ params }: Props) {
     href: `${base}/bio`,
   }
 
+  const documentsCard: SectionCard = {
+    key: "documents",
+    title: t("documentsTitle"),
+    description: t("documentsDescription"),
+    metric: documentsCount > 0 ? t("documentsMetric", { count: documentsCount }) : t("documentsEmptyMetric"),
+    icon: FileText,
+    span: 2,
+    preview: <DocumentsPreview documents={documentsPreview} />,
+    href: `${base}/documents`,
+  }
+
   const galleryCard: SectionCard = {
     key: "gallery",
     title: t("galleryTitle"),
     description: t("galleryDescription"),
     metric: galleryCount > 0 ? t("galleryMetric", { count: galleryCount }) : t("galleryEmptyMetric"),
     icon: Images,
-    span: 3,
+    span: 2,
     preview: <GalleryPreview images={galleryImages} hasVideos={galleryHasVideos} />,
     href: `${base}/gallery`,
   }
@@ -169,7 +193,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     description: t("tributesDescription"),
     metric: tributeCount > 0 ? t("tributesMetric", { count: tributeCount }) : t("tributesEmptyMetric"),
     icon: Flower2,
-    span: 3,
+    span: 2,
     preview: <TributesPreview authors={tributeAuthors} />,
     href: `${base}/tributes`,
   }
@@ -179,8 +203,8 @@ export default async function ProfileByIdPage({ params }: Props) {
     title: t("placesTitle"),
     description: t("placesDescription"),
     metric: placesPins.length > 0 ? t("placesMetric", { count: placesPins.length }) : t("placesEmptyMetric"),
-    icon: MapPinned,
-    span: 3,
+    icon: MapPin,
+    span: 2,
     preview: <PlacesPreview pins={placesPins} />,
     href: `${base}/places`,
   }
@@ -188,52 +212,33 @@ export default async function ProfileByIdPage({ params }: Props) {
   const memorializedCards: SectionCard[] = [
     treeCard,
     bioCard,
+    documentsCard,
     galleryCard,
-    tributesCard,
     placesCard,
-    {
-      key: "geo",
-      title: t("geoTitle"),
-      description: t("geoDescription"),
-      metric: geo ? geo.placeName : t("geoEmptyMetric"),
-      icon: MapPin,
-      span: 3,
-      preview: <GeoPreview lat={geo?.lat} lon={geo?.lon} />,
-      href: `${base}/geolocation`,
-    },
-    {
-      key: "qr",
-      title: t("qrTitle"),
-      description: t("qrDescription"),
-      // The memorial's QR Code is guardian-only. Non-guardians see a locked card
-      // (lock icon + "guardian only" note) with no link to the qr-code route.
-      metric: isGuardian
-        ? showQrPurchaseCTA ? t("qrMetricPurchase") : t("qrMetricReady")
-        : t("qrMetricGuardianOnly"),
-      icon: QrCode,
-      span: 3,
-      preview: <QrPreview locked={!isGuardian} />,
-      ...(isGuardian
-        ? showQrPurchaseCTA ? { gated: true } : { href: `${base}/qr-code` }
-        : {}),
-    },
+    tributesCard,
   ]
 
   const livingCards: SectionCard[] = [
     treeCard,
     bioCard,
+    documentsCard,
     galleryCard,
-    tributesCard,
     placesCard,
+    tributesCard,
     {
       key: "favorites",
       title: t("favoritesTitle"),
       description: t("favoritesDescription"),
       metric: favorites.length > 0 ? t("favoritesMetric", { count: favorites.length }) : t("favoritesEmptyMetric"),
       icon: Heart,
-      span: 3,
+      span: 2,
       preview: <FavoritesPreview favorites={favorites} />,
-      href: `${base}/favorites`,
+      // /favorites and /memorialized are verifySession()-gated (bare redirect
+      // to sign-in, no callbackUrl, none of the polished SignupDialog/Prompt
+      // treatment the other cards get) — an anonymous visitor gets a jarring
+      // dead end if they click through, so the card stays href-less (inert,
+      // same pattern the Pets placeholder below always uses) while anonymous.
+      ...(isAnon ? {} : { href: `${base}/favorites` }),
     },
     {
       key: "guardian",
@@ -241,9 +246,18 @@ export default async function ProfileByIdPage({ params }: Props) {
       description: t("guardianDescription"),
       metric: memorialCount > 0 ? t("guardianMetric", { count: memorialCount }) : t("guardianEmptyMetric"),
       icon: BrickWall,
-      span: 3,
+      span: 2,
       preview: <GuardianPreview memorials={memorials} />,
-      href: `${base}/memorialized`,
+      ...(isAnon ? {} : { href: `${base}/memorialized` }),
+    },
+    {
+      key: "pets",
+      title: t("petsTitle"),
+      description: t("petsDescription"),
+      metric: t("petsComingSoon"),
+      icon: PawPrint,
+      span: 2,
+      preview: <PetsPreview />,
     },
   ]
 
@@ -258,6 +272,8 @@ export default async function ProfileByIdPage({ params }: Props) {
     isMemorialized,
     birthDate: user.birthDate?.toISOString() ?? null,
     deathDate: user.deathDate?.toISOString() ?? null,
+    birthYear: user.birthYear,
+    deathYear: user.deathYear,
     avatarUrl: user.avatarUrl ?? null,
   }
 

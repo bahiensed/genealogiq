@@ -121,6 +121,7 @@ model Subscription {
   galleryMaxImages      Int       @map("gallery_max_images")
   galleryMaxVideos      Int       @map("gallery_max_videos")
   geoPlacesMax          Int       @default(3) @map("geo_places_max")
+  documentsMax          Int       @default(10) @map("documents_max")
   geolocationFullAccess Boolean   @default(false) @map("geolocation_full_access")
   qrCodeAccess          Boolean   @default(false) @map("qr_code_access")
   stripeProductId       String?   @unique @map("stripe_product_id")
@@ -429,6 +430,7 @@ model AppUser {
   galleryItems        GalleryItem[]
   geolocation         Geolocation?
   geoPlaces           GeoPlace[]
+  documents           Document[]
   actorNotifications  Notification[]       @relation("ActorNotifications")
   notifications       Notification[]       @relation("UserNotifications")
   appSales            AppSale[]            @relation("AppSaleBuyer")
@@ -571,6 +573,24 @@ model GeoPlace {
 
   @@index([userId], map: "geo_places_app_user_id_idx")
   @@map("app_geo_places")
+}
+
+model Document {
+  id          String    @id(map: "documents_pkey") @default(cuid())
+  title       String    @db.VarChar(120)
+  description String?   @db.VarChar(2000)
+  category    String    @db.VarChar(50)
+  fileUrl     String    @map("file_url") @db.VarChar
+  fileName    String?   @map("file_name") @db.VarChar(255)
+  isPublic    Boolean   @default(true) @map("is_public")
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  userId      String    @map("app_user_id") @db.VarChar
+  user        AppUser   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "documents_app_user_id_fkey")
+
+  @@index([userId], map: "documents_app_user_id_idx")
+  @@map("app_documents")
 }
 
 model Favorite {
