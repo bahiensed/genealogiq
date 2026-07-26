@@ -21,8 +21,22 @@ export async function getPlacesCount(userId: string): Promise<number> {
 }
 
 // Single place for the detail page — scoped to userId so a placeId can never
-// resolve under the wrong profile's URL.
-export async function getPlaceById(userId: string, placeId: string) {
+// resolve under the wrong profile's URL. When anonLimit is passed (anonymous
+// viewer), the place must also fall within the same first-N slice
+// getPlacesByUserId's own ordering would give the list/map — otherwise a QR
+// code or a direct link to place #13+ would bypass the anon truncation
+// entirely. Checked via an id-only query in that identical order rather than
+// re-deriving "first N" a second way.
+export async function getPlaceById(userId: string, placeId: string, anonLimit?: number) {
+  if (anonLimit !== undefined) {
+    const visible = await prisma.geoPlace.findMany({
+      where: { userId },
+      orderBy: [{ startDate: "asc" }, { order: "asc" }, { createdAt: "asc" }],
+      take: anonLimit,
+      select: { id: true },
+    })
+    if (!visible.some((p) => p.id === placeId)) return null
+  }
   return prisma.geoPlace.findFirst({ where: { id: placeId, userId } })
 }
 

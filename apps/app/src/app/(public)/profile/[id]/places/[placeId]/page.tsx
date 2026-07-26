@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
 import { getTranslations, getLocale } from "next-intl/server"
 import { getCountryName } from "@genealogiq/core"
@@ -11,7 +11,7 @@ import { PlaceQrTrigger } from "@/components/place-qr-trigger"
 import { PlaceQrDisplay } from "@/components/place-qr-display"
 import { SignupPrompt } from "@/components/auth/signup-prompt"
 import { auth } from "@/auth"
-import { getPlaceById } from "@/queries/places"
+import { getPlaceById, ANON_PLACES_LIMIT } from "@/queries/places"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
@@ -34,8 +34,15 @@ export default async function PlaceDetailPage({ params }: Props) {
   assertPublicMemorialAccess(profile, viewerId, id)
 
   const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
-  const place = await getPlaceById(id, placeId)
-  if (!place) notFound()
+  const place = await getPlaceById(id, placeId, isAnon ? ANON_PLACES_LIMIT : undefined)
+  if (!place) {
+    // For anon, a null here is ambiguous by design (doesn't exist vs. exists
+    // but past the anon limit) — send them to the list, which already shows
+    // the correct truncated view and its own wall, instead of inventing a
+    // second "you've hit the limit" UI just for this route.
+    if (isAnon) redirect(`/profile/${id}/places`)
+    notFound()
+  }
 
   const addressLine = [place.neighborhood, place.city, place.state, getCountryName(place.country, locale)]
     .filter(Boolean)
