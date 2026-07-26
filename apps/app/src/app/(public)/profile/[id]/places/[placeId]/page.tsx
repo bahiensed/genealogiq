@@ -49,42 +49,25 @@ export default async function PlaceDetailPage({ params }: Props) {
       <AuroraBackdrop variant="page" intensity="bold" />
 
       <main className="container relative pt-24 pb-32">
-        {/* Header — mirrors tributes/page.tsx exactly: title+back left, a
-            right-aligned pill area (there it's a tribute count, here it's the
-            category badges), hidden below sm just like the count pill is. The
-            title can wrap (no whitespace-nowrap) once space gets tight. */}
-        <div className="flex items-center justify-between gap-3 mb-2 animate-fade-in">
-          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+        {/* Header — title+back left, actions right, same line, mirrors the
+            list page's title row. The QR trigger only shows up while the
+            code hasn't been generated yet; once place.qrGenerated persists,
+            it's gone for good and the code itself shows up in the content
+            grid below instead. Not gated to isOwn (unlike Edit) — generating
+            a place's QR has always been open to any viewer. The title can
+            wrap (no whitespace-nowrap) once space gets tight. */}
+        <div className="flex items-start justify-between gap-3 mb-2 animate-fade-in">
+          <div className="flex items-start gap-3 md:gap-4 min-w-0">
             <BackButton href={`/profile/${id}/places`} label={t("backToPlaces")} />
             <div className="min-w-0">
               <h1 className="text-4xl font-semibold tracking-tight">{place.title}</h1>
             </div>
           </div>
-          {place.categories.length > 0 && (
-            <div className="shrink-0 hidden sm:flex flex-wrap justify-end gap-1.5">
-              {place.categories.map((c) => (
-                <span
-                  key={c}
-                  className="inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5"
-                >
-                  {t(`cat_${c}`)}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Subtitle row — clone of tributes-client.tsx's subtitle+actions row.
-            The QR trigger only shows up while the code hasn't been generated
-            yet; once place.qrGenerated persists, it's gone for good and the
-            code itself shows up below instead. Not gated to isOwn (unlike
-            Edit) — generating a place's QR has always been open to any
-            viewer. */}
-        <section className="mb-3 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 animate-fade-in">
-          <div className="flex flex-col gap-1 min-w-0">
-            <p className="text-muted-foreground italic">{t("detailTitle")}</p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0 self-end lg:self-auto">
+          {/* h-9 md:h-10 matches BackButton's own responsive size, which in
+              turn matches text-4xl's 40px line-height at md+ — so this box's
+              vertical center lands on the center of the title's first line
+              even if the title wraps to a second line below it. */}
+          <div className="h-9 md:h-10 flex items-center gap-2 shrink-0">
             {!place.qrGenerated && <PlaceQrTrigger profileId={id} placeId={placeId} />}
             {isOwn && (
               <Button asChild className="gap-2">
@@ -95,56 +78,77 @@ export default async function PlaceDetailPage({ params }: Props) {
               </Button>
             )}
           </div>
-        </section>
+        </div>
 
-        {/* Content grid: description 3/4-2/3, right rail (QR + location +
-            dates, always left-aligned within its own column) 1/4-1/3, single
-            column below md with the right rail first. Extra mt- here (vs. the
+        <p className="text-muted-foreground italic mb-3 animate-fade-in">{t("detailTitle")}</p>
+
+        {/* Content grid: description 2/3-3/4, geolocation data 1/3-1/4.
+            Single column below md, geo data first. Extra mt- here (vs. the
             mb-2/mb-3 above) is the deliberately larger gap between the
             title/subtitle/actions area and this. */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8 animate-fade-in">
-          <div className="order-2 md:order-1 md:col-span-2 lg:col-span-3 min-w-0 pr-4">
+          <div className="order-2 md:order-1 md:col-span-2 lg:col-span-3 min-w-0">
             {place.description && (
               <p className="leading-relaxed whitespace-pre-wrap">{place.description}</p>
             )}
+
+            {place.photos.length > 0 && (
+              <div className="mt-8 animate-fade-in" style={{ animationDelay: "80ms" }}>
+                <PlacePhotoGrid photos={place.photos} title={place.title} />
+              </div>
+            )}
           </div>
 
-          <div className="order-1 md:order-2 md:col-span-1 lg:col-span-1 flex flex-col items-start gap-6">
-            {place.qrGenerated && <PlaceQrDisplay profileId={id} placeId={placeId} />}
+          <div className="order-1 md:order-2 md:col-span-1 lg:col-span-1 flex flex-col">
+            <div className="items-end flex flex-col gap-6">
+              {place.qrGenerated && <PlaceQrDisplay profileId={id} placeId={placeId} />}
 
-            {hasCoordinates && (
-              <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-primary shrink-0" />
-                  <span className="tabular-nums">{coordFormat.format(place.lat)} {coordFormat.format(place.lon)}</span>
-                </div>
-                {addressLine && <p>{addressLine}</p>}
-                <div className="flex items-center gap-2 pt-1">
-                  <Map className="h-4 w-4 text-primary shrink-0" />
-                  <Link href={`/profile/${id}/places/map`} className="text-primary hover:underline">
-                    {t("viewMap")}
-                  </Link>
-                </div>
-              </div>
-            )}
+              <div className="w-fit items-start flex flex-col gap-1 text-sm text-muted-foreground">
+                {hasCoordinates && (
+                  <>
+                    <div className="flex gap-2">
+                      <MapPin className="h-4 w-4 text-primary shrink-0" />
+                      <div className="flex flex-col gap-1">
+                        <span className="tabular-nums">{coordFormat.format(place.lat)} {coordFormat.format(place.lon)}</span>
+                        {addressLine && <p>{addressLine}</p>}
+                      </div>
+                    </div>
 
-            {hasDates && (
-              <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                <CalendarDays className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                <div className="flex flex-col">
-                  {place.startDate && <span>{formatDateProse(place.startDate, locale)}</span>}
-                  {place.endDate && <span>{formatDateProse(place.endDate, locale)}</span>}
-                </div>
+                    <div className="flex items-center gap-2 pb-6">
+                      <Map className="h-4 w-4 text-primary shrink-0" />
+                      <Link href={`/profile/${id}/places/map`} className="text-primary hover:underline">
+                        {t("viewMap")}
+                      </Link>
+                    </div>
+                  </>
+                )}
+
+                {hasDates && (
+                  <div className="flex gap-2">
+                    <CalendarDays className="h-4 w-4 text-primary shrink-0" />
+                    <div className="flex flex-col gap-1">
+                      {place.startDate && <span>{formatDateProse(place.startDate, locale)}</span>}
+                      {place.endDate && <span>{formatDateProse(place.endDate, locale)}</span>}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+
+              {place.categories.length > 0 && (
+                <div className="flex flex-wrap justify-end gap-1.5">
+                  {place.categories.map((c) => (
+                    <span
+                      key={c}
+                      className="inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-0.5 lowercase"
+                    >
+                      {t(`cat_${c}`)}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
-
-        {place.photos.length > 0 && (
-          <div className="mt-12 animate-fade-in" style={{ animationDelay: "80ms" }}>
-            <PlacePhotoGrid photos={place.photos} title={place.title} />
-          </div>
-        )}
       </main>
 
       {isAnon && <SignupPrompt />}

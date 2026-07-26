@@ -38,9 +38,9 @@ export function PlaceQrDisplay({ profileId, placeId }: Props) {
   }, [profileId, placeId])
 
   if (!dataUrl) {
-    return <div className="h-32 w-32 rounded-xl border border-border/60 bg-muted/30 animate-pulse" />
+    return <div className="h-48 w-48 rounded-xl border border-border/60 bg-muted/30 animate-pulse" />
   }
 
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={dataUrl} alt={t("qrTitle")} className="h-32 w-32 rounded-xl border border-border/60" />
+  return <img src={dataUrl} alt={t("qrTitle")} className="h-48 w-48 rounded-xl border border-border/60" />
 }
