@@ -1,11 +1,19 @@
 import { prisma } from "@/lib/prisma"
 
-export async function getGalleryByUserId(userId: string, take?: number) {
-  return prisma.galleryItem.findMany({
+// redactMetaForAnon: an anonymous viewer's click-gate never lets the lightbox
+// (the only UI that shows takenAt/location/description) open — but without
+// this, those fields still rode along in the RSC payload for every visible
+// item, inspectable without ever passing the gate. Nulled the same way
+// redactLivingProfile nulls sensitive fields conditionally, not selected out,
+// so the return shape stays identical either way.
+export async function getGalleryByUserId(userId: string, take?: number, redactMetaForAnon = false) {
+  const items = await prisma.galleryItem.findMany({
     where: { userId },
     orderBy: { order: "asc" },
     take,
   })
+  if (!redactMetaForAnon) return items
+  return items.map((item) => ({ ...item, takenAt: null, location: null, description: null }))
 }
 
 // Image/video totals via two cheap indexed counts — used for the gallery badges on
