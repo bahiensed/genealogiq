@@ -154,8 +154,13 @@ export function PersonInfoSheet({
   // Anyone in the tree (except the root) can be removed by a tree-level manager.
   // Ghosts get deleted entirely; real users/memorials are just disconnected.
   const canRemoveMember = canManage && !isSelf
-  // Co-management requests apply to ghosts/memorials the user does not yet manage.
-  const canRequestCoManage = (isGhost || isMemorial) && !userManagesThis && !alreadyRequested
+  // Co-management requests apply to ghosts/memorials the user does not yet
+  // manage. Requires a session — the action itself already redirects an
+  // anonymous requester to sign-in, but every other write control in this
+  // sheet already disables itself for anon via its own boolean, and this one
+  // hadn't (managedIds/requestedIds are just empty sets for anon, which
+  // otherwise leaves this looking identically requestable).
+  const canRequestCoManage = (isGhost || isMemorial) && !userManagesThis && !alreadyRequested && !!sessionUserId
 
   // Every relation touching this person, for the Relationships list below.
   // Non-REJECTED (not just ACCEPTED) so a manager can also see — and, via the
