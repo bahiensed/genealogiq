@@ -55,3 +55,22 @@ export function formatDateTime(d: Date | string | null | undefined, locale: stri
   const date = typeof d === "string" ? new Date(d) : d
   return new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" }).format(date)
 }
+
+// pt-BR prose dates use an ordinal "1º" for the first day of the month ("1º de
+// agosto de 2001") but a cardinal number for every other day ("13 de outubro
+// de 2006") — en-US/es-MX don't use this pattern at all. Intl has no format
+// option for it, so the day part is patched after formatToParts() gives us the
+// correctly-ordered, correctly-connected parts for the locale.
+export function formatDateProse(d: Date | string | null | undefined, locale: string): string {
+  if (!d) return ""
+  const date = typeof d === "string" ? new Date(d) : d
+  const parts = new Intl.DateTimeFormat(locale, {
+    day:      "numeric",
+    month:    "long",
+    year:     "numeric",
+    timeZone: "UTC",
+  }).formatToParts(date)
+  return parts
+    .map((part) => (part.type === "day" && locale === "pt-BR" && part.value === "1" ? "1º" : part.value))
+    .join("")
+}

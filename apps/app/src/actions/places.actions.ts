@@ -72,6 +72,32 @@ export async function savePlace(
   return done()
 }
 
+/**
+ * Marks a place's QR code as generated so its detail page renders the code
+ * directly on future loads instead of the "Generate" button. Deliberately
+ * has no verifySession()/canManageProfile guard, unlike every sibling action
+ * here — the QR button itself has always been open to any viewer (not just
+ * the owner), and the only thing this flips is a boolean on a row already
+ * scoped to profileId+placeId; the QR content itself is a deterministic URL,
+ * nothing user-suppliable, so there's nothing sensitive to gate.
+ */
+export async function markPlaceQrGenerated(profileId: string, placeId: string): Promise<ActionResult> {
+  const t = await getTranslations("Actions")
+
+  const existing = await prisma.geoPlace.findFirst({
+    where: { id: placeId, userId: profileId },
+    select: { qrGenerated: true },
+  })
+  if (!existing) return fail(t("places.notFound"))
+
+  if (!existing.qrGenerated) {
+    await prisma.geoPlace.update({ where: { id: placeId }, data: { qrGenerated: true } })
+    revalidatePath(`/profile/${profileId}/places/${placeId}`)
+  }
+
+  return done()
+}
+
 export async function deletePlace(profileId: string, placeId: string): Promise<ActionResult> {
   const t = await getTranslations("Actions")
   const session = await verifySession()

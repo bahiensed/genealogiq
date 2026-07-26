@@ -565,6 +565,7 @@ model GeoPlace {
   photos       String[]  @default([])
   startDate    DateTime? @map("start_date") @db.Timestamp(6)
   endDate      DateTime? @map("end_date") @db.Timestamp(6)
+  qrGenerated  Boolean   @default(false) @map("qr_generated")
   order        Int       @default(0)
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
