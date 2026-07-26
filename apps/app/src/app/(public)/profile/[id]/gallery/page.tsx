@@ -33,7 +33,7 @@ export default async function ProfileGalleryPage({ params }: Props) {
 
   // Anonymous: a bounded slice of items + cheap total counts for the badges. Authed:
   // the full set (the client paginates it). Never materialize the whole table for anon.
-  const items = await getGalleryByUserId(id, isAnon ? ANON_GALLERY_LIMIT : undefined)
+  const items = await getGalleryByUserId(id, isAnon ? ANON_GALLERY_LIMIT : undefined, isAnon)
   const counts = isAnon ? await getGalleryCounts(id) : null
   const imageCount = counts ? counts.images : items.filter((i) => i.kind === "image").length
   const videoCount = counts ? counts.videos : items.filter((i) => i.kind === "video").length

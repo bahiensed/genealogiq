@@ -21,7 +21,7 @@ export default async function HomePage() {
   const t = await getTranslations("Home")
 
   const [favorites, memorials, currentUser] = await Promise.all([
-    getFavoritesByUserId(userId),
+    getFavoritesByUserId(userId, userId),
     getMemorialsByCreatorId(userId),
     prisma.appUser.findUnique({ where: { id: userId }, select: { firstName: true } }),
   ])

@@ -92,7 +92,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     getPlacesForMap(id),
     getTributeAuthors(id, 5),
     getTributeCountByProfileId(id),
-    !isMemorialized ? getFavoritesByUserId(id) : Promise.resolve([]),
+    !isMemorialized ? getFavoritesByUserId(id, sessionUserId) : Promise.resolve([]),
     !isMemorialized ? getMemorialsByCreatorId(id) : Promise.resolve([]),
     getBioByUserId(id),
     countTreeMembers(id),

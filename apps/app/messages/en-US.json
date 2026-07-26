@@ -555,6 +555,7 @@
   "Favorites": {
     "backToProfile": "Back to profile",
     "bornMetric": "Born {date}",
+    "bornYearMetric": "Born {year}",
     "deathMetric": "✦ {date}",
     "empty": "No favorites yet.",
     "memorializedProfile": "Memorial profile",

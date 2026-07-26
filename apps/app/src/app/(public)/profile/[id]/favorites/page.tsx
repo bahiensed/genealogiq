@@ -13,12 +13,12 @@ interface Props {
 
 export default async function FavoritesPage({ params }: Props) {
   const { id } = await params
-  await verifySession()
+  const session = await verifySession()
   const t = await getTranslations("Favorites")
 
   const [profile, favorites] = await Promise.all([
     getProfileById(id),
-    getFavoritesByUserId(id),
+    getFavoritesByUserId(id, session.user.id),
   ])
   if (!profile) notFound()
 

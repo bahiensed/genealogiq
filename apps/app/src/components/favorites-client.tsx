@@ -41,7 +41,9 @@ function toMiniProfile(fav: FavoriteRow, index: number, locale: string, t: Trans
       ? t("deathMetric", { date: formatDateShort(target.deathDate, locale) })
       : target.birthDate
         ? t("bornMetric", { date: formatMonthYear(target.birthDate, locale) })
-        : "",
+        : target.birthYear
+          ? t("bornYearMetric", { year: String(target.birthYear) })
+          : "",
     initials: `${target.firstName[0]}${target.lastName[0]}`.toUpperCase(),
     gradient: GRADIENTS[index % GRADIENTS.length],
     href: `/profile/${target.id}`,

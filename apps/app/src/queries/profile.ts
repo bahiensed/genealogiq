@@ -93,23 +93,42 @@ export async function getProfileForEdit(id: string) {
 export type ProfileRow = NonNullable<Awaited<ReturnType<typeof getProfileById>>>
 export type EditProfileRow = NonNullable<Awaited<ReturnType<typeof getProfileForEdit>>>
 
+// Minimal structural shape redactLivingProfile actually needs — deliberately
+// narrower than ProfileRow so any query projecting a living person (not just
+// getProfileById's full select) can reuse this without over-selecting fields
+// it doesn't otherwise want, the same convention canManageProfile already
+// uses for its own minimal structural type.
+export interface RedactableProfile {
+  role:         string
+  id:           string
+  birthDate:    Date | null
+  birthPlace:   string | null
+  birthState:   string | null
+  birthCountry: string | null
+  deathDate:    Date | null
+  deathPlace:   string | null
+  deathState:   string | null
+  deathCountry: string | null
+  deathCause:   string | null
+}
+
 /**
  * Redacts a living (APP_USER) profile's exact birth/death date+place(+state,
  * +cause) to year-only for any viewer who is neither the profile's owner nor
  * an accepted guardian. Mirrors getFamilyTree()'s per-person redaction rule
  * (queries/family-tree.ts) — same TreeViewer shape, same condition — so a
  * living person shows the same coarsened data whether viewed via their own
- * profile pages or as a node in someone else's family tree. Memorials
- * (APP_MEMO) and ghosts (APP_GHOST) are never redacted here — this function
- * simply doesn't fire for anything that isn't APP_USER. Photo (avatarUrl) is
- * never redacted, matching the tree.
+ * profile pages, as a node in someone else's family tree, or in someone
+ * else's favorites list. Memorials (APP_MEMO) and ghosts (APP_GHOST) are
+ * never redacted here — this function simply doesn't fire for anything that
+ * isn't APP_USER. Photo (avatarUrl) is never redacted, matching the tree.
  *
  * Deliberately broader than the tree's current redaction: also nulls
  * birthState/deathState/deathCause, which getFamilyTree doesn't even fetch
  * today. Hiding city/country but leaving state visible, or hiding when/where
  * someone died but leaving why, would be an incomplete redaction.
  */
-export function redactLivingProfile<T extends ProfileRow>(
+export function redactLivingProfile<T extends RedactableProfile>(
   profile: T,
   viewer: TreeViewer,
 ): T & { birthYear: number | null; deathYear: number | null } {
