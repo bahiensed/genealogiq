@@ -16,15 +16,20 @@ import { notFound, redirect } from "next/navigation"
 // notFound() — so the response shape never discloses which case applies (no
 // 404-vs-redirect enumeration). notFound() fires only for authenticated
 // viewers on a genuinely missing id. Asserts `profile` non-null afterwards.
+// Pulled out so any other read path that lists/previews OTHER profiles (e.g.
+// Favorites) can apply the identical "what counts as public" rule instead of
+// re-deriving it — the family-tree redaction bug happened because this exact
+// rule lived in more than one place and drifted.
+export function isProfilePubliclyVisible(profile: { role: string; isPublicProfile: boolean }): boolean {
+  return profile.role === "APP_MEMO" || (profile.role === "APP_USER" && profile.isPublicProfile)
+}
+
 export function assertPublicMemorialAccess<T extends { role: string; isPublicProfile: boolean }>(
   profile: T | null,
   viewerId: string | undefined,
   profileId: string,
 ): asserts profile is T {
-  const isPublic = !!profile && (
-    profile.role === "APP_MEMO" ||
-    (profile.role === "APP_USER" && profile.isPublicProfile)
-  )
+  const isPublic = !!profile && isProfilePubliclyVisible(profile)
   if (!viewerId && !isPublic) {
     redirect(`/sign-in?callbackUrl=${encodeURIComponent(`/profile/${profileId}`)}`)
   }
