@@ -68,7 +68,7 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
         </div>
         <p className="text-muted-foreground italic mb-8 animate-fade-in">{t("tagline")}</p>
 
-        <PlacesClient places={places} profileId={id} isOwn={isOwn} />
+        <PlacesClient places={places} profileId={id} isOwn={isOwn} gated={isAnon} />
       </main>
 
       {isAnon && <SignupPrompt />}

@@ -3,6 +3,7 @@ import { auth } from "@/auth"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { GalleryClient } from "@/components/gallery-client"
+import { SignupPrompt } from "@/components/auth/signup-prompt"
 import { getGalleryByUserId, getGalleryCounts } from "@/queries/gallery"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
@@ -78,6 +79,8 @@ export default async function ProfileGalleryPage({ params }: Props) {
             : null}
         />
       </main>
+
+      {isAnon && <SignupPrompt />}
     </div>
   )
 }

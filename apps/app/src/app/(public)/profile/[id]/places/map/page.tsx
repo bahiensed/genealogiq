@@ -47,7 +47,7 @@ export default async function ProfilePlacesMapPage({ params }: Props) {
       </div>
 
       <div className="flex-1 relative">
-        <PlacesMapLoader pins={pins} />
+        <PlacesMapLoader pins={pins} gated={isAnon} />
       </div>
 
       {isAnon && <SignupPrompt />}

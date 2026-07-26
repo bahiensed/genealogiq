@@ -11,7 +11,7 @@ const PlacesMap = dynamic(() => import("@/components/places-map").then((m) => m.
   loading: () => <div className="h-full w-full animate-pulse rounded-2xl bg-muted" />,
 })
 
-export function PlacesMapLoader({ pins }: { pins: GeoPlaceMapPin[] }) {
+export function PlacesMapLoader({ pins, gated = false }: { pins: GeoPlaceMapPin[]; gated?: boolean }) {
   const t = useTranslations("Places")
   if (pins.filter((p) => p.lat !== 0 || p.lon !== 0).length === 0) {
     return (
@@ -20,5 +20,5 @@ export function PlacesMapLoader({ pins }: { pins: GeoPlaceMapPin[] }) {
       </div>
     )
   }
-  return <PlacesMap pins={pins} />
+  return <PlacesMap pins={pins} gated={gated} />
 }

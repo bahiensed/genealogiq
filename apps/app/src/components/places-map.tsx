@@ -1,11 +1,12 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet"
 import MarkerClusterGroup from "react-leaflet-cluster"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import { groupOfCategory, type PlaceCategoryGroup } from "@/consts/place-categories"
+import { SignupDialog } from "@/components/auth/signup-dialog"
 import type { GeoPlaceMapPin } from "@/queries/places"
 
 // Pin color per life-stage group, so the map reads at a glance.
@@ -54,42 +55,57 @@ function FitBounds({ pins }: { pins: GeoPlaceMapPin[] }) {
 
 interface Props {
   pins: GeoPlaceMapPin[]
+  // Anonymous visitors: clicking a pin opens the sign-up dialog instead of
+  // the normal photo+title popup, matching the list/detail pages' gating.
+  gated?: boolean
 }
 
-export function PlacesMap({ pins }: Props) {
+export function PlacesMap({ pins, gated = false }: Props) {
+  const [wallOpen, setWallOpen] = useState(false)
   const valid = pins.filter((p) => p.lat !== 0 || p.lon !== 0)
   const center: [number, number] = valid.length
     ? [valid[0].lat, valid[0].lon]
     : [-22.959167, -43.188333]
 
   return (
-    <MapContainer
-      center={center}
-      zoom={13}
-      scrollWheelZoom
-      className="h-full w-full"
-      style={{ background: "hsl(var(--muted))" }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <MarkerClusterGroup chunkedLoading>
-        {valid.map((p) => (
-          <Marker key={p.id} position={[p.lat, p.lon]} icon={pinIcon(colorOf(p))}>
-            <Popup>
-              <div className="space-y-1">
-                {p.photo && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.photo} alt={p.title} className="w-40 h-24 object-cover rounded" />
-                )}
-                <p className="font-semibold text-sm">{p.title}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MarkerClusterGroup>
-      <FitBounds pins={valid} />
-    </MapContainer>
+    <>
+      <MapContainer
+        center={center}
+        zoom={13}
+        scrollWheelZoom
+        className="h-full w-full"
+        style={{ background: "hsl(var(--muted))" }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <MarkerClusterGroup chunkedLoading>
+          {valid.map((p) => (
+            <Marker
+              key={p.id}
+              position={[p.lat, p.lon]}
+              icon={pinIcon(colorOf(p))}
+              eventHandlers={gated ? { click: () => setWallOpen(true) } : undefined}
+            >
+              {!gated && (
+                <Popup>
+                  <div className="space-y-1">
+                    {p.photo && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.photo} alt={p.title} className="w-40 h-24 object-cover rounded" />
+                    )}
+                    <p className="font-semibold text-sm">{p.title}</p>
+                  </div>
+                </Popup>
+              )}
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+        <FitBounds pins={valid} />
+      </MapContainer>
+
+      {gated && <SignupDialog open={wallOpen} onOpenChange={setWallOpen} dismissible />}
+    </>
   )
 }
