@@ -28,21 +28,27 @@ export default async function ProfilePlacesMapPage({ params }: Props) {
   const pins = await getPlacesForMap(id, isAnon ? ANON_PLACES_LIMIT : undefined)
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden">
-      <AuroraBackdrop variant="page" intensity="bold" />
+    // Full-screen fixed canvas, same shape as the family tree page: its own
+    // pan/zoom surface, not a scrolling page with the map boxed in a card.
+    // FooterVisibility hides the site footer on this route for the same
+    // reason it hides it on /tree — a scrolling footer below a fixed-position
+    // canvas would sit unreachable, and clutters what's meant to read as an
+    // immersive view.
+    <div className="fixed top-16 inset-x-0 bottom-0 flex flex-col">
+      <AuroraBackdrop />
 
-      <main className="container relative pt-24 pb-16">
-        <div className="flex items-center gap-3 md:gap-4 mb-6 animate-fade-in">
-          <BackButton href={`/profile/${id}/places`} label={t("backToPlaces")} />
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight whitespace-nowrap">{t("mapTitle")}</h1>
-        </div>
-
-        <div className="glass-card no-sheen p-2 overflow-hidden animate-fade-in">
-          <div className="h-[70vh] w-full overflow-hidden rounded-2xl">
-            <PlacesMapLoader pins={pins} />
+      <div className="relative z-10 border-b border-border/60 bg-background/60 backdrop-blur-md shrink-0">
+        <div className="container pt-8 pb-8">
+          <div className="flex items-center gap-3 md:gap-4 min-w-0">
+            <BackButton href={`/profile/${id}/places`} label={t("backToPlaces")} />
+            <h1 className="text-3xl md:text-4xl font-semibold tracking-tight whitespace-nowrap">{t("mapTitle")}</h1>
           </div>
         </div>
-      </main>
+      </div>
+
+      <div className="flex-1 relative">
+        <PlacesMapLoader pins={pins} />
+      </div>
 
       {isAnon && <SignupPrompt />}
     </div>
