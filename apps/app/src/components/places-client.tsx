@@ -66,7 +66,7 @@ export async function PlacesClient({ places, profileId, isOwn }: Props) {
               {p.categories.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {p.categories.slice(0, 3).map((c) => (
-                    <Badge key={c} variant="secondary" className="text-[10px]">{t(`cat_${c}`)}</Badge>
+                    <Badge key={c} variant="secondary" className="text-[10px] lowercase">{t(`cat_${c}`)}</Badge>
                   ))}
                   {p.categories.length > 3 && (
                     <Badge variant="outline" className="text-[10px]">+{p.categories.length - 3}</Badge>
