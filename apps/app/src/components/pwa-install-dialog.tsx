@@ -28,9 +28,10 @@ export function PwaInstallDialog() {
   const t = useTranslations("InstallPrompt")
   const { mode, open, install, dismiss, neverAskAgain, setNeverAskAgain } = usePwaInstall()
 
-  // /install is a dedicated, always-on install page (no cooldown/opt-out) —
-  // this auto-popup would be redundant with its own button right there.
-  if (pathname === "/install" || mode === null) return null
+  // /install is a dedicated, always-on install page (no cooldown/opt-out),
+  // and /home has its own InstallBanner (same eligibility/cooldown) — this
+  // auto-popup would be redundant with either.
+  if (pathname === "/install" || pathname === "/home" || mode === null) return null
 
   return (
     <AlertDialog

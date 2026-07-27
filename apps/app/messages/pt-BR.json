@@ -745,6 +745,11 @@
     "tagline": "Escaneie, busque e visite um perfil"
   },
   "InstallPrompt": {
+    "banner": {
+      "description": "Acesso mais rápido, direto da tela inicial.",
+      "iosCta": "Ver como instalar",
+      "title": "Instale o Genealogiq"
+    },
     "betaNote": "Erros ocasionais podem acontecer.",
     "betaTitle": "O Genealogiq App está na fase Beta de desenvolvimento.",
     "declineButton": "Agora não",

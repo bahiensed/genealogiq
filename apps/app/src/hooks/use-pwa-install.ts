@@ -14,11 +14,16 @@ import {
   wasInstalled,
 } from "@/lib/pwa-install"
 
-/** Delay before the dialog opens, so it never competes with page load. */
+/** Default delay before the dialog opens, so it never competes with page load. */
 const OPEN_DELAY_MS = 3000
 
 /**
- * Drives the PWA install dialog.
+ * Drives the PWA install prompt — the floating popup (default) and the /home
+ * banner (`delayMs: 0`) share this: same eligibility (cooldown/opt-out),
+ * same listeners, same install()/dismiss() bookkeeping. Only the popup needs
+ * an entrance delay (a modal popping in immediately would compete with page
+ * load); the banner is a passive, non-blocking element, so it shows as soon
+ * as eligibility + the browser's event resolve, same as PushBanner.
  *
  * - "native": Chromium fired beforeinstallprompt — we can trigger the real
  *   install prompt. If the event fires before hydration it is missed for that
@@ -33,9 +38,10 @@ const OPEN_DELAY_MS = 3000
  *   ("Don't ask me again"), or the browser supports neither path (e.g.
  *   Firefox desktop) — render nothing.
  */
-export function usePwaInstall() {
+export function usePwaInstall(opts?: { delayMs?: number }) {
+  const delayMs = opts?.delayMs ?? OPEN_DELAY_MS
   const [mode, setMode] = useState<"native" | "ios" | null>(null)
-  const [delayElapsed, setDelayElapsed] = useState(false)
+  const [delayElapsed, setDelayElapsed] = useState(delayMs === 0)
   const [closed, setClosed] = useState(false)
   const [neverAskAgain, setNeverAskAgain] = useState(false)
   const promptEvent = useRef<BeforeInstallPromptEvent | null>(null)
@@ -71,14 +77,15 @@ export function usePwaInstall() {
       setMode("ios")
     }
 
-    const timer = window.setTimeout(() => setDelayElapsed(true), OPEN_DELAY_MS)
+    // delayMs === 0 (the banner): delayElapsed already starts true, no timer needed.
+    const timer = delayMs > 0 ? window.setTimeout(() => setDelayElapsed(true), delayMs) : undefined
 
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt)
       window.removeEventListener("appinstalled", onAppInstalled)
-      window.clearTimeout(timer)
+      if (timer !== undefined) window.clearTimeout(timer)
     }
-  }, [])
+  }, [delayMs])
 
   const dismiss = useCallback(() => {
     if (neverAskAgain) markNeverAskAgain()

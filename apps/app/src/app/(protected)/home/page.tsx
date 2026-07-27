@@ -11,6 +11,7 @@ import { RecentlyViewedSection } from "@/components/recently-viewed-section"
 import { RecentlyViewedCount } from "@/components/recently-viewed-count"
 import { Greeting } from "@/components/greeting"
 import { ScanQrButton } from "@/components/scan-qr-button"
+import { InstallBanner } from "@/components/install-banner"
 import { prisma } from "@/lib/prisma"
 import { getFavoritesByUserId } from "@/queries/favorite"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
@@ -42,6 +43,8 @@ export default async function HomePage() {
             {t("tagline")}
           </p>
         </div>
+
+        <InstallBanner />
 
         {/* Action row */}
         <section className="relative z-10 mb-8 flex flex-col-reverse lg:flex-row gap-3 md:gap-4 animate-fade-in" style={{ animationDelay: "80ms" }}>
