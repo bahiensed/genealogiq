@@ -4,11 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import {
   type BeforeInstallPromptEvent,
   getDismissedRaw,
+  getNeverAskAgain,
   isDismissedWithinCooldown,
   isIosDevice,
   isStandaloneDisplay,
   markDismissed,
   markInstalled,
+  markNeverAskAgain,
   wasInstalled,
 } from "@/lib/pwa-install"
 
@@ -27,13 +29,15 @@ const OPEN_DELAY_MS = 3000
  *   instructions instead. iOS also has no appinstalled event, so an installed
  *   iOS user browsing in Safari may see the dialog again after the dismissal
  *   cooldown. Accepted.
- * - null: already installed, dismissed within cooldown, or the browser
- *   supports neither path (e.g. Firefox desktop) — render nothing.
+ * - null: already installed, dismissed within cooldown, opted out permanently
+ *   ("Don't ask me again"), or the browser supports neither path (e.g.
+ *   Firefox desktop) — render nothing.
  */
 export function usePwaInstall() {
   const [mode, setMode] = useState<"native" | "ios" | null>(null)
   const [delayElapsed, setDelayElapsed] = useState(false)
   const [closed, setClosed] = useState(false)
+  const [neverAskAgain, setNeverAskAgain] = useState(false)
   const promptEvent = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
@@ -44,6 +48,7 @@ export function usePwaInstall() {
     const eligible =
       !isStandaloneDisplay() &&
       !wasInstalled() &&
+      !getNeverAskAgain() &&
       !isDismissedWithinCooldown(getDismissedRaw(), Date.now())
 
     const onBeforeInstallPrompt = (event: Event) => {
@@ -76,9 +81,10 @@ export function usePwaInstall() {
   }, [])
 
   const dismiss = useCallback(() => {
-    markDismissed()
+    if (neverAskAgain) markNeverAskAgain()
+    else markDismissed()
     setClosed(true)
-  }, [])
+  }, [neverAskAgain])
 
   const install = useCallback(async () => {
     const event = promptEvent.current
@@ -88,17 +94,22 @@ export function usePwaInstall() {
     const { outcome } = await event.userChoice
     if (outcome === "accepted") {
       markInstalled()
+    } else if (neverAskAgain) {
+      // Checked "Don't ask me again" before declining the browser's own prompt.
+      markNeverAskAgain()
     } else {
       // The user declined the browser's own prompt — same cooldown as Decline.
       markDismissed()
     }
     setClosed(true)
-  }, [])
+  }, [neverAskAgain])
 
   return {
     mode,
     open: delayElapsed && !closed && mode !== null,
     install,
     dismiss,
+    neverAskAgain,
+    setNeverAskAgain,
   }
 }

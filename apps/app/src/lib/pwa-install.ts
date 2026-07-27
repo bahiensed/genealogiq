@@ -4,9 +4,10 @@
 
 export const PWA_DISMISSED_KEY = "giq:pwa-install-dismissed"
 export const PWA_INSTALLED_KEY = "giq:pwa-installed"
+export const PWA_NEVER_ASK_KEY = "giq:pwa-install-never-ask"
 
-/** How long a decline hides the install dialog. */
-export const DISMISS_COOLDOWN_MS = 21 * 24 * 60 * 60 * 1000
+/** How long a plain decline hides the install dialog. */
+export const DISMISS_COOLDOWN_MS = 2 * 24 * 60 * 60 * 1000
 
 /**
  * Chromium's install-prompt event (not yet in lib.dom — it's a
@@ -52,6 +53,21 @@ export function markDismissed(): void {
   try {
     window.localStorage.setItem(PWA_DISMISSED_KEY, String(Date.now()))
   } catch {}
+}
+
+/** Permanent opt-out ("Don't ask me again") — never expires, unlike the 48h cooldown above. */
+export function markNeverAskAgain(): void {
+  try {
+    window.localStorage.setItem(PWA_NEVER_ASK_KEY, "1")
+  } catch {}
+}
+
+export function getNeverAskAgain(): boolean {
+  try {
+    return window.localStorage.getItem(PWA_NEVER_ASK_KEY) === "1"
+  } catch {
+    return false
+  }
 }
 
 export function markInstalled(): void {

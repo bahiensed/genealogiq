@@ -1,5 +1,6 @@
 "use client"
 
+import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Share } from "lucide-react"
 import {
@@ -12,19 +13,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 import { usePwaInstall } from "@/hooks/use-pwa-install"
 
 // Invites the visitor to install the app. Chromium browsers get a real
 // Install button (beforeinstallprompt); iOS gets Add-to-Home-Screen
 // instructions; browsers with neither render nothing. Declining ("Agora
-// não" or ESC) hides it for 21 days — see lib/pwa-install.ts. An
-// AlertDialog (no X button, no outside-click close) keeps the choice
-// explicit: accidental outside clicks don't burn the 21-day cooldown.
+// não" or ESC) hides it for 48h — see lib/pwa-install.ts — unless "Don't ask
+// me again" is checked, which opts out permanently. An AlertDialog (no X
+// button, no outside-click close) keeps the choice explicit: accidental
+// outside clicks don't burn the cooldown.
 export function PwaInstallDialog() {
+  const pathname = usePathname()
   const t = useTranslations("InstallPrompt")
-  const { mode, open, install, dismiss } = usePwaInstall()
+  const { mode, open, install, dismiss, neverAskAgain, setNeverAskAgain } = usePwaInstall()
 
-  if (mode === null) return null
+  // /install is a dedicated, always-on install page (no cooldown/opt-out) —
+  // this auto-popup would be redundant with its own button right there.
+  if (pathname === "/install" || mode === null) return null
 
   return (
     <AlertDialog
@@ -55,13 +61,18 @@ export function PwaInstallDialog() {
           <small className="text-sm text-muted-foreground">{t("betaNote")}</small>
         </div>
 
+        <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+          <Checkbox checked={neverAskAgain} onCheckedChange={(v) => setNeverAskAgain(v === true)} />
+          <span>{t("neverAskCheckbox")}</span>
+        </label>
+
         <AlertDialogFooter>
           {mode === "native" ? (
             <>
               <AlertDialogCancel>{t("declineButton")}</AlertDialogCancel>
               {/* preventDefault keeps Radix from closing (and onOpenChange
-                  from marking the 21-day decline) — install() closes after
-                  the browser prompt resolves. */}
+                  from marking the decline) — install() closes after the
+                  browser prompt resolves. */}
               <AlertDialogAction
                 onClick={(event) => {
                   event.preventDefault()

@@ -47,8 +47,8 @@ describe("isDismissedWithinCooldown", () => {
   })
 
   it("is false once the cooldown has fully elapsed", () => {
-    const twentyTwoDaysAgo = now - 22 * 24 * 60 * 60 * 1000
-    expect(isDismissedWithinCooldown(String(twentyTwoDaysAgo), now)).toBe(false)
+    const threeDaysAgo = now - 3 * 24 * 60 * 60 * 1000
+    expect(isDismissedWithinCooldown(String(threeDaysAgo), now)).toBe(false)
   })
 
   it("is false exactly at the cooldown boundary", () => {
