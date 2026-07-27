@@ -5,16 +5,17 @@ import { useTranslations } from "next-intl"
 import { Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { GlassIcon } from "@/components/glass-icon"
-import { usePwaInstall } from "@/hooks/use-pwa-install"
+import { useInstallBanner } from "@/hooks/use-install-banner"
 
-// Same eligibility/cooldown as the floating popup (usePwaInstall), just with
-// no entrance delay — a banner doesn't compete with page load the way a
-// modal does. Chromium/Android gets a real 1-tap Install button; iOS (no
-// programmatic install exists) links to /install for the Share steps.
-// PwaInstallDialog suppresses itself on /home so the two never double up.
+// Deliberately independent of the floating popup's dismiss cooldown/opt-out
+// (see hooks/use-install-banner.ts) — this banner has no decline button and
+// keeps showing until the app is actually installed. Chromium/Android gets a
+// real 1-tap Install button; iOS (no programmatic install exists) links to
+// /install for the Share steps. PwaInstallDialog suppresses itself on /home
+// so the two never compete for the same click.
 export function InstallBanner() {
   const t = useTranslations("InstallPrompt")
-  const { mode, open, install, dismiss } = usePwaInstall({ delayMs: 0 })
+  const { mode, open, install } = useInstallBanner()
 
   if (!open) return null
 
@@ -27,10 +28,7 @@ export function InstallBanner() {
           <p className="text-sm text-muted-foreground">{t("banner.description")}</p>
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
-        <Button variant="ghost" size="sm" onClick={dismiss}>
-          {t("declineButton")}
-        </Button>
+      <div className="shrink-0 self-end sm:self-auto">
         {mode === "native" ? (
           <Button size="sm" onClick={() => void install()}>
             {t("installButton")}
