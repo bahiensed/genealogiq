@@ -21,7 +21,10 @@ export type PwaInstallPageStatus = "checking" | "installed" | "native" | "ios" |
 // arrived (the listener below still upgrades a late event to "native" — see
 // its comment — but showing the wrong terminal state even briefly reads as
 // broken, so the goal here is to not need that rescue in the first place).
-const SETTLE_MS = 5000
+// Bumped from 5s to 10s: production testing showed 5s still wasn't always
+// enough (slower connections/devices need more time for the precache above
+// to finish before Chrome fires the event).
+const SETTLE_MS = 10000
 
 /**
  * Drives the dedicated /install page. Unlike use-pwa-install.ts (the
