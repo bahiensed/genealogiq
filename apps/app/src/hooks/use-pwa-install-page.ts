@@ -11,8 +11,17 @@ import {
 
 export type PwaInstallPageStatus = "checking" | "installed" | "native" | "ios" | "unsupported"
 
-/** How long to wait for beforeinstallprompt before concluding "unsupported". */
-const SETTLE_MS = 1500
+// How long to wait for beforeinstallprompt before concluding "unsupported".
+// Generous on purpose: on a genuinely first-ever visit (cold HTTP cache),
+// Chrome only dispatches this event once our service worker reaches
+// "activated" — which itself waits on its install-phase precache (~13 files,
+// including a couple ~140KB images) to finish downloading. 1.5s reliably
+// wasn't enough real-world time for that on a fresh machine/connection,
+// which produced a false "unsupported" moments before the real event
+// arrived (the listener below still upgrades a late event to "native" — see
+// its comment — but showing the wrong terminal state even briefly reads as
+// broken, so the goal here is to not need that rescue in the first place).
+const SETTLE_MS = 5000
 
 /**
  * Drives the dedicated /install page. Unlike use-pwa-install.ts (the
