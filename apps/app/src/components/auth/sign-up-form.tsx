@@ -54,8 +54,8 @@ export function SignUpForm() {
   return (
     <div className="animate-fade-in w-full max-w-md">
       <div className="flex flex-col items-center text-center mb-8">
-        <Image src="/tree-dark.png" alt="Genealogiq" width={256} height={256} className="object-contain dark:hidden" style={{ height: "auto" }} priority />
-        <Image src="/tree-light.png" alt="Genealogiq" width={256} height={256} className="hidden object-contain dark:block" style={{ height: "auto" }} priority />
+        <Image src="/tree-dark.png" alt="Genealogiq" width={256} height={177} className="object-contain dark:hidden" style={{ height: "auto" }} priority />
+        <Image src="/tree-light.png" alt="Genealogiq" width={256} height={177} className="hidden object-contain dark:block" style={{ height: "auto" }} priority />
       </div>
 
       <form onSubmit={handleSubmit(onValid)} className="glass-card rounded-2xl p-8 space-y-4">

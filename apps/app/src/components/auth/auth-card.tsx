@@ -15,7 +15,7 @@ export function AuthCard({ title, description, children }: Props) {
           src="/tree-dark.png"
           alt="Genealogiq"
           width={256}
-          height={256}
+          height={177}
           className="object-contain dark:hidden"
           style={{ height: "auto" }}
           priority
@@ -24,7 +24,7 @@ export function AuthCard({ title, description, children }: Props) {
           src="/tree-light.png"
           alt="Genealogiq"
           width={256}
-          height={256}
+          height={177}
           className="hidden object-contain dark:block"
           style={{ height: "auto" }}
           priority
