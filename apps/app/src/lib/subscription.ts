@@ -2,126 +2,75 @@ import "server-only"
 
 import { cache } from "react"
 import { prisma } from "@/lib/prisma"
+import { FREE, PREMIUM, PHYSICAL_QR, type PlanQuotas } from "@/lib/plan-quotas"
 
-export interface SubscriptionFeatures {
-  code: string
-  treeMaxMembers: number
-  bioMaxChars: number
-  bioMaxImages: number
-  galleryMaxImages: number
-  galleryMaxVideos: number
-  geoPlacesMax: number
-  documentsMax: number
-  geolocationFullAccess: boolean
-  qrCodeAccess: boolean
-}
+export type { PlanQuotas } from "@/lib/plan-quotas"
 
-const FEATURE_SELECT = {
-  code:                  true,
-  treeMaxMembers:        true,
-  bioMaxChars:           true,
-  bioMaxImages:          true,
-  galleryMaxImages:      true,
-  galleryMaxVideos:      true,
-  geoPlacesMax:          true,
-  documentsMax:          true,
-  geolocationFullAccess: true,
-  qrCodeAccess:          true,
-} as const
-
-export const PHYSICAL_QR_FEATURES: SubscriptionFeatures = {
-  code: "PHYSICAL_QR",
-  treeMaxMembers: 50,
-  bioMaxChars: 5000,
-  bioMaxImages: 10,
-  galleryMaxImages: 50,
-  galleryMaxVideos: 10,
-  geoPlacesMax: 50,
-  documentsMax: 50,
-  geolocationFullAccess: true,
-  qrCodeAccess: true,
-}
-
-const FREE_FALLBACK: SubscriptionFeatures = {
-  code: "FREE",
-  treeMaxMembers: 5,
-  bioMaxChars: 2000,
-  bioMaxImages: 3,
-  galleryMaxImages: 10,
-  galleryMaxVideos: 2,
-  geoPlacesMax: 3,
-  documentsMax: 10,
-  geolocationFullAccess: false,
-  qrCodeAccess: false,
-}
-
-/**
- * Returns the FREE-tier features, cached per request via React.cache().
- * Falls back to a hardcoded shape only if the FREE row is missing from the DB
- * (should never happen — seeded by migration).
- */
-export const getFreeSubscription = cache(async (): Promise<SubscriptionFeatures> => {
-  const row = await prisma.subscription.findUnique({
-    where: { code: "FREE" },
-    select: FEATURE_SELECT,
-  })
-  return row ?? FREE_FALLBACK
-})
-
-/**
- * Resolves the feature limits for a given profile:
- *   1. If the profile is a memorial assigned to a live AppSale (appSaleId set)
- *      → use that sale's subscription features.
- *   2. Else if the profile itself is the buyer of any live AppSale
- *      (i.e. this is an active user's own profile, not a memorial)
- *      → use that buyer's highest-tier active plan.
- *   3. Else → FREE tier.
- *
- * Cached per (profileId, request) so repeated callers share a single DB hit.
- */
-export const getMemorialFeatures = cache(async (profileId: string): Promise<SubscriptionFeatures> => {
+// Does this profile itself have a live AppSale as the BUYER — the only DB
+// signal getMemorialFeatures still needs. Which Subscription row/code that
+// sale references no longer matters: any live paid sale maps uniformly to
+// the local PREMIUM config (plan-quotas.ts) — BMS can rename/reprice/retire
+// its own Subscription rows without this ever needing to change.
+async function hasLivePaidSale(profileId: string): Promise<boolean> {
   const now = new Date()
-
-  // 0. Physical QR license — no AppSale needed, fixed feature set
-  const profile = await prisma.appUser.findUnique({
-    where: { id: profileId },
-    select: {
-      physicalQrLicense: { select: { id: true } },
-      appSale: {
-        select: {
-          status:           true,
-          currentPeriodEnd: true,
-          subscription:     { select: FEATURE_SELECT },
-        },
-      },
-    },
-  })
-
-  if (profile?.physicalQrLicense) return PHYSICAL_QR_FEATURES
-
-  const assignedSale = profile?.appSale
-  const assignedIsLive =
-    !!assignedSale &&
-    (assignedSale.status === "active" || assignedSale.status === "trialing") &&
-    !!assignedSale.currentPeriodEnd &&
-    assignedSale.currentPeriodEnd > now
-
-  if (assignedIsLive && assignedSale.subscription) return assignedSale.subscription
-
-  // 2. Buyer-side: this user owns a live subscription (their own active profile)
-  const buyerSale = await prisma.appSale.findFirst({
+  const sale = await prisma.appSale.findFirst({
     where: {
       appUserId:        profileId,
       status:           { in: ["active", "trialing"] },
       currentPeriodEnd: { gt: now },
     },
-    // Highest tier wins when multiple — sort by subscription.price desc.
-    orderBy: { subscription: { price: "desc" } },
-    select:  { subscription: { select: FEATURE_SELECT } },
+    select: { id: true },
+  })
+  return !!sale
+}
+
+// Shared "is this specific AppSale row currently in its paid period"
+// predicate — used both for a memorial's own directly-assigned legacy slot
+// (below) and, in qr-quota.ts, to bypass the QR rank heuristic for a profile
+// that already has its own dedicated paid slot.
+export function isSaleLive(sale: { status: string | null; currentPeriodEnd: Date | null } | null | undefined): boolean {
+  if (!sale) return false
+  const now = new Date()
+  return (sale.status === "active" || sale.status === "trialing") && !!sale.currentPeriodEnd && sale.currentPeriodEnd > now
+}
+
+/**
+ * Resolves the plan quotas for a given profile.
+ *
+ * Living profile (APP_USER): physicalQrLicense > own live paid AppSale > FREE.
+ *
+ * Memorial profile (APP_MEMO): physicalQrLicense > any ACCEPTED guardian's own
+ * live paid AppSale (cascades — one guardian's subscription covers every
+ * memorial they manage) > a legacy AppSale assigned directly to this memorial
+ * (preserves bulk-slot sales already made through BMS/SEQ) > FREE.
+ *
+ * Cached per (profileId, request) so repeated callers share the same lookups.
+ */
+export const getMemorialFeatures = cache(async (profileId: string): Promise<PlanQuotas> => {
+  const profile = await prisma.appUser.findUnique({
+    where: { id: profileId },
+    select: {
+      role:              true,
+      physicalQrLicense: { select: { id: true } },
+      appSale:           { select: { status: true, currentPeriodEnd: true } },
+    },
   })
 
-  if (buyerSale?.subscription) return buyerSale.subscription
+  if (profile?.physicalQrLicense) return PHYSICAL_QR
 
-  // 3. Fall back to FREE
-  return getFreeSubscription()
+  if (profile?.role === "APP_MEMO") {
+    const guardians = await prisma.appUserGuardian.findMany({
+      where:  { appUserId: profileId, status: "ACCEPTED" },
+      select: { guardianId: true },
+    })
+    const guardiansPaying = await Promise.all(guardians.map((g) => hasLivePaidSale(g.guardianId)))
+    if (guardiansPaying.some(Boolean)) return PREMIUM
+
+    if (isSaleLive(profile.appSale)) return PREMIUM
+
+    return FREE
+  }
+
+  if (await hasLivePaidSale(profileId)) return PREMIUM
+  return FREE
 })

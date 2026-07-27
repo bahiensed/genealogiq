@@ -30,6 +30,8 @@ import {
 } from "@/lib/upload-validation"
 import { compressImage } from "@/lib/image-compress"
 import { inspectVideo, needsTranscode, transcodeToHD } from "@/lib/video-transcode"
+import { LimitReachedDialog } from "@/components/limit-reached-dialog"
+import type { PlanTier } from "@/lib/plan-quotas"
 import type { GalleryItemRow } from "@/queries/gallery"
 
 const MAX_VIDEO_SECONDS = 300
@@ -81,17 +83,27 @@ function MetaFields({ item, onChange }: { item: MediaEntry; idx: number; onChang
 interface Props {
   initial: GalleryItemRow[]
   profileId: string
+  // The plan's combined image pool max (shared with Bio/Geolocalizações), not
+  // a gallery-only number. maxVideos has no other source today (Bio/GeoPlace
+  // have no video field), so it stays a plain gallery-only number.
   maxImages: number
   maxVideos: number
+  // How much of the image pool is already used by OTHER modules (Bio +
+  // Geolocalizações) — subtracted from maxImages to get what's left for this
+  // gallery specifically.
+  otherImagesUsed: number
+  tier: PlanTier
 }
 
-export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Props) {
+export function GalleryEditForm({ initial, profileId, maxImages, maxVideos, otherImagesUsed, tier }: Props) {
   const t = useTranslations("Gallery")
   const tc = useTranslations("Common")
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const imgInputRef = useRef<HTMLInputElement>(null)
   const vidInputRef = useRef<HTMLInputElement>(null)
+  const effectiveMaxImages = Math.max(0, maxImages - otherImagesUsed)
+  const [limitContext, setLimitContext] = useState<"media-images" | "media-videos" | null>(null)
 
   const toEntry = (row: GalleryItemRow): MediaEntry => ({
     id: row.id,
@@ -125,15 +137,15 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
       toast.warning(t("filesSkipped", { count: all.length - valid.length, formats: IMAGE_FORMATS_LABEL }))
     }
     if (valid.length === 0) return
-    const remaining = maxImages - images.length
-    const upgradeAction = { label: t("upgradePlan"), onClick: () => router.push("/subscriptions") }
+    const remaining = effectiveMaxImages - images.length
     if (remaining <= 0) {
-      toast.warning(t("maxImagesReached", { max: maxImages }), { action: upgradeAction })
+      setLimitContext("media-images")
       return
     }
+    const upgradeAction = { label: t("upgradePlan"), onClick: () => router.push("/subscriptions") }
     const toProcess = valid.slice(0, remaining)
     if (valid.length > remaining) {
-      toast.warning(t("imagesAddedLimit", { remaining, max: maxImages }), { action: upgradeAction })
+      toast.warning(t("imagesAddedLimit", { remaining, max: effectiveMaxImages }), { action: upgradeAction })
     }
 
     const placeholders: MediaEntry[] = toProcess.map((f) => ({
@@ -178,11 +190,11 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
     }
     if (valid.length === 0) return
     const remaining = maxVideos - videos.length
-    const upgradeAction = { label: t("upgradePlan"), onClick: () => router.push("/subscriptions") }
     if (remaining <= 0) {
-      toast.warning(t("maxVideosReached", { max: maxVideos }), { action: upgradeAction })
+      setLimitContext("media-videos")
       return
     }
+    const upgradeAction = { label: t("upgradePlan"), onClick: () => router.push("/subscriptions") }
     const candidates = valid.slice(0, remaining)
     if (valid.length > remaining) {
       toast.warning(t("videosProcessedLimit", { remaining, max: maxVideos }), { action: upgradeAction })
@@ -287,11 +299,11 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base">{t("photos")}</Label>
-          <span className="text-xs text-muted-foreground">{images.length}/{maxImages}</span>
+          <span className="text-xs text-muted-foreground">{images.length}/{effectiveMaxImages}</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {images.length < maxImages && (
+          {images.length < effectiveMaxImages && (
             <button type="button" onClick={() => imgInputRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-border/70 hover:border-primary hover:bg-accent/40 transition flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-foreground">
               <ImagePlus className="h-6 w-6" />
               <span className="text-xs font-medium">{t("addImage")}</span>
@@ -398,6 +410,14 @@ export function GalleryEditForm({ initial, profileId, maxImages, maxVideos }: Pr
           </div>
         )}
       </div>
+
+      <LimitReachedDialog
+        open={limitContext !== null}
+        onOpenChange={(next) => !next && setLimitContext(null)}
+        context={limitContext ?? "media-images"}
+        limit={limitContext === "media-videos" ? maxVideos : maxImages}
+        tier={tier}
+      />
     </div>
   )
 }

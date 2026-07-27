@@ -32,9 +32,11 @@ import {
 } from "@/components/ui/accordion"
 import { AddressSection } from "@/components/address/address-section"
 import { PlaceCategorySelect } from "@/components/place-category-select"
+import { LimitReachedDialog } from "@/components/limit-reached-dialog"
 import { savePlace, deletePlace } from "@/actions/places.actions"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { getPlaceSchema, type PlaceFormValues, PLACE_MAX_PHOTOS } from "@/schemas/place.schema"
+import type { PlanTier } from "@/lib/plan-quotas"
 import type { GeoPlaceRow } from "@/queries/places"
 
 function toISODate(date: Date | null | undefined): string {
@@ -68,9 +70,16 @@ function buildDefaults(existing: GeoPlaceRow | null): PlaceFormValues {
 interface Props {
   profileId: string
   existing: GeoPlaceRow | null
+  // The plan's combined image pool max (shared with Bio/Gallery), not a
+  // places-only number.
+  mediaMax: number
+  // How many of that pool are already used by OTHER modules AND other places
+  // — subtracted from mediaMax to get what's left for THIS place specifically.
+  otherImagesUsed: number
+  tier: PlanTier
 }
 
-export function PlaceEditForm({ profileId, existing }: Props) {
+export function PlaceEditForm({ profileId, existing, mediaMax, otherImagesUsed, tier }: Props) {
   const router = useRouter()
   const t = useTranslations("Places")
   const tc = useTranslations("Common")
@@ -79,6 +88,9 @@ export function PlaceEditForm({ profileId, existing }: Props) {
   const isEditing = !!existing
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploadingCount, setUploadingCount] = useState(0)
+  const [limitDialogOpen, setLimitDialogOpen] = useState(false)
+  const effectiveMediaMax = Math.max(0, mediaMax - otherImagesUsed)
+  const photoRoomMax = Math.min(PLACE_MAX_PHOTOS, effectiveMediaMax)
 
   const {
     control,
@@ -98,7 +110,11 @@ export function PlaceEditForm({ profileId, existing }: Props) {
 
   const handleAddPhotos = async (files: FileList | null) => {
     if (!files || files.length === 0) return
-    const room = PLACE_MAX_PHOTOS - photos.length
+    if (photos.length >= effectiveMediaMax) {
+      setLimitDialogOpen(true)
+      return
+    }
+    const room = photoRoomMax - photos.length
     const picked = Array.from(files).slice(0, room)
 
     for (const file of picked) {
@@ -180,7 +196,7 @@ export function PlaceEditForm({ profileId, existing }: Props) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base">{t("photos")}</Label>
-          <span className="text-xs text-muted-foreground">{photos.length}/{PLACE_MAX_PHOTOS}</span>
+          <span className="text-xs text-muted-foreground">{photos.length}/{photoRoomMax}</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {photos.map((photo, i) => (
@@ -197,7 +213,7 @@ export function PlaceEditForm({ profileId, existing }: Props) {
               </button>
             </div>
           ))}
-          {photos.length < PLACE_MAX_PHOTOS && (
+          {photos.length < photoRoomMax && (
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
@@ -342,6 +358,14 @@ export function PlaceEditForm({ profileId, existing }: Props) {
           </div>
         )}
       </div>
+
+      <LimitReachedDialog
+        open={limitDialogOpen}
+        onOpenChange={setLimitDialogOpen}
+        context="media-images"
+        limit={mediaMax}
+        tier={tier}
+      />
     </form>
   )
 }

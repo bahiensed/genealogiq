@@ -15,7 +15,7 @@ export function UpgradeHint({ context, currentTier, inline = false }: Props) {
   const t = useTranslations("Subscriptions")
 
   // Top tier — nothing to upsell.
-  if (currentTier === "CENTURY") return null
+  if (currentTier === "PHYSICAL_QR") return null
 
   const content = (
     <>

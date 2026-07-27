@@ -5,9 +5,10 @@ import Link from "next/link"
 import { useLocale, useTranslations } from "next-intl"
 import { MapPin, MapPinPlus, CalendarDays } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { SignupDialog } from "@/components/auth/signup-dialog"
+import { QuotaGatedLink } from "@/components/quota-gated-link"
 import { formatDateRange } from "@/lib/format-date"
+import type { PlanTier } from "@/lib/plan-quotas"
 import type { GeoPlaceRow } from "@/queries/places"
 
 function addressLine(p: GeoPlaceRow): string | null {
@@ -23,9 +24,20 @@ interface Props {
   // truncated anon-visible slice — opens the sign-up dialog instead of
   // navigating to the place's detail page, matching Documents/Gallery.
   gated?: boolean
+  atLimit?: boolean
+  geoPlacesMax?: number
+  tier?: PlanTier
 }
 
-export function PlacesClient({ places, profileId, isOwn, gated = false }: Props) {
+export function PlacesClient({
+  places,
+  profileId,
+  isOwn,
+  gated = false,
+  atLimit = false,
+  geoPlacesMax = 0,
+  tier = "FREE",
+}: Props) {
   const t = useTranslations("Places")
   const locale = useLocale()
   const [wallOpen, setWallOpen] = useState(false)
@@ -36,11 +48,18 @@ export function PlacesClient({ places, profileId, isOwn, gated = false }: Props)
         <MapPin className="h-10 w-10 text-muted-foreground" />
         <p className="text-muted-foreground text-sm">{t("emptyTitle")}</p>
         {isOwn && (
-          <Button asChild variant="outline" size="sm" className="gap-2">
-            <Link href={`/profile/${profileId}/places/new`}>
-              <MapPinPlus className="h-4 w-4" />{t("addPlace")}
-            </Link>
-          </Button>
+          <QuotaGatedLink
+            href={`/profile/${profileId}/places/new`}
+            atLimit={atLimit}
+            limitContext="geoPlaces"
+            limit={geoPlacesMax}
+            tier={tier}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <MapPinPlus className="h-4 w-4" />{t("addPlace")}
+          </QuotaGatedLink>
         )}
       </div>
     )

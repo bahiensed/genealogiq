@@ -18,6 +18,7 @@ import { PersonInfoSheet } from "../dialogs/person-info-sheet"
 import { saveNodePosition } from "@/actions/tree-position.actions"
 import { findRelationPath, relationFromRoot } from "@/lib/family-relation-label"
 import type { TreePerson, TreeRelation, NodePositionOverride } from "@/queries/family-tree"
+import type { PlanTier } from "@/lib/plan-quotas"
 
 type Kind = "parent" | "child" | "spouse" | "sibling"
 
@@ -30,9 +31,12 @@ interface Props {
   managedIds:       string[]
   requestedIds:     string[]
   initialPositions: Record<string, NodePositionOverride>
+  memberCount:      number
+  memberLimit:      number
+  currentTier:      PlanTier
 }
 
-export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, canManage, managedIds, requestedIds, initialPositions }: Props) {
+export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, canManage, managedIds, requestedIds, initialPositions, memberCount, memberLimit, currentTier }: Props) {
   const router = useRouter()
   const t = useTranslations("FamilyTree")
 
@@ -273,6 +277,9 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
           initialKind={adder.kind}
           anchorParents={anchorParentsFor(adder.anchorId)}
           onSuccess={onSuccess}
+          memberCount={memberCount}
+          memberLimit={memberLimit}
+          tier={currentTier}
         />
       )}
 

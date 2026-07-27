@@ -25,6 +25,8 @@ import {
 import { cn } from "@/lib/utils"
 import { addRelation, addGhostRelative } from "@/actions/family-tree.actions"
 import { SPOUSE_SUBTYPES, type SpouseSubtype } from "@/schemas/family-tree.schema"
+import { LimitReachedDialog } from "@/components/limit-reached-dialog"
+import type { PlanTier } from "@/lib/plan-quotas"
 
 type RelationKind = "parent" | "spouse" | "sibling" | "child"
 type Mode = "search" | "create"
@@ -53,6 +55,9 @@ interface Props {
   /** Existing parents of the anchor — used to offer the "Married to X" checkbox when adding a 2nd parent. */
   anchorParents?: ExistingParent[]
   onSuccess?: () => void
+  memberCount: number
+  memberLimit: number
+  tier: PlanTier
 }
 
 const KIND_ORDER: RelationKind[] = ["parent", "spouse", "sibling", "child"]
@@ -67,10 +72,11 @@ function genderRingClass(gender: string | null) {
   return "ring-border/40"
 }
 
-export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind = "parent", anchorParents = [], onSuccess }: Props) {
+export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind = "parent", anchorParents = [], onSuccess, memberCount, memberLimit, tier }: Props) {
   const t = useTranslations("FamilyTree")
   const tc = useTranslations("Common")
   const [isPending, startTransition] = useTransition()
+  const [limitDialogOpen, setLimitDialogOpen] = useState(false)
   const [mode, setMode]   = useState<Mode>("search")
   const [kind, setKind]   = useState<RelationKind>(initialKind)
   const [spouseSubtype, setSpouseSubtype] = useState<SpouseSubtype>("married")
@@ -139,6 +145,13 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
       toast.error(t("toasts.nameRequired"))
       return
     }
+    // A new ghost is always a brand-new node — unlike linking to an existing
+    // person (handleConfirmExisting), which may or may not grow the tree
+    // depending on server-side involvesNew logic this doesn't try to mirror.
+    if (memberCount >= memberLimit) {
+      setLimitDialogOpen(true)
+      return
+    }
     startTransition(async () => {
       const result = await addGhostRelative(rootId, {
         firstName, lastName,
@@ -182,7 +195,10 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
   const endLabel   = spouseSubtype === "widowed" ? t("addRelative.widowed") : t("addRelative.divorced")
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose() }}>
+    <>
+    {/* Hidden (not unmounted) while the limit dialog shows on top of it, so
+        typed ghost-form state survives a dismiss instead of resetting. */}
+    <Dialog open={open && !limitDialogOpen} onOpenChange={(v) => { if (!v && !limitDialogOpen) handleClose() }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
@@ -374,5 +390,14 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <LimitReachedDialog
+      open={limitDialogOpen}
+      onOpenChange={setLimitDialogOpen}
+      context="tree"
+      limit={memberLimit}
+      tier={tier}
+    />
+    </>
   )
 }

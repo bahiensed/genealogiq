@@ -8,6 +8,9 @@ import { PlaceEditForm } from "@/components/place-edit-form"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { getMemorialFeatures } from "@/lib/subscription"
+import { getPlacesCount } from "@/queries/places"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -21,6 +24,13 @@ export default async function NewPlacePage({ params }: Props) {
   const profile = await getProfileById(id)
   if (!profile) notFound()
   if (!canManageProfile(profile, session.user.id)) redirect(`/profile/${id}/places`)
+
+  const [features, count, combinedMedia] = await Promise.all([
+    getMemorialFeatures(id),
+    getPlacesCount(id),
+    getCombinedMediaUsage(id),
+  ])
+  if (count >= features.geoPlacesMax) redirect(`/profile/${id}/places`)
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -40,7 +50,13 @@ export default async function NewPlacePage({ params }: Props) {
           </div>
         </div>
 
-        <PlaceEditForm profileId={id} existing={null} />
+        <PlaceEditForm
+          profileId={id}
+          existing={null}
+          mediaMax={features.mediaMaxImages}
+          otherImagesUsed={combinedMedia.images}
+          tier={features.code}
+        />
       </main>
     </div>
   )

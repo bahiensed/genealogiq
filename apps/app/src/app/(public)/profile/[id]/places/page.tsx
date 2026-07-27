@@ -11,7 +11,9 @@ import { SignupPrompt } from "@/components/auth/signup-prompt"
 import { getPlacesByUserId, ANON_PLACES_LIMIT } from "@/queries/places"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { getMemorialFeatures } from "@/lib/subscription"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
+import { QuotaGatedLink } from "@/components/quota-gated-link"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -33,7 +35,11 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
   assertPublicMemorialAccess(profile, viewerId, id)
 
   const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
-  const places = await getPlacesByUserId(id, isAnon ? ANON_PLACES_LIMIT : undefined)
+  const [places, features] = await Promise.all([
+    getPlacesByUserId(id, isAnon ? ANON_PLACES_LIMIT : undefined),
+    getMemorialFeatures(id),
+  ])
+  const atLimit = places.length >= features.geoPlacesMax
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -55,20 +61,34 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
               </Button>
             )}
             {isOwn && (
-              <Button asChild size="sm" className="gap-1.5">
-                <Link href={`/profile/${id}/places/new`}>
-                  {places.length > 0
-                    ? <MapPinPen className="h-4 w-4" />
-                    : <MapPinPlus className="h-4 w-4" />}
-                  <span className="hidden sm:inline">{t("addPlace")}</span>
-                </Link>
-              </Button>
+              <QuotaGatedLink
+                href={`/profile/${id}/places/new`}
+                atLimit={atLimit}
+                limitContext="geoPlaces"
+                limit={features.geoPlacesMax}
+                tier={features.code}
+                size="sm"
+                className="gap-1.5"
+              >
+                {places.length > 0
+                  ? <MapPinPen className="h-4 w-4" />
+                  : <MapPinPlus className="h-4 w-4" />}
+                <span className="hidden sm:inline">{t("addPlace")}</span>
+              </QuotaGatedLink>
             )}
           </div>
         </div>
         <p className="text-muted-foreground italic mb-8 animate-fade-in">{t("tagline")}</p>
 
-        <PlacesClient places={places} profileId={id} isOwn={isOwn} gated={isAnon} />
+        <PlacesClient
+          places={places}
+          profileId={id}
+          isOwn={isOwn}
+          gated={isAnon}
+          atLimit={atLimit}
+          geoPlacesMax={features.geoPlacesMax}
+          tier={features.code}
+        />
       </main>
 
       {isAnon && <SignupPrompt />}

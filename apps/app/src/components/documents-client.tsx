@@ -13,7 +13,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { SignupDialog } from "@/components/auth/signup-dialog"
+import { QuotaGatedLink } from "@/components/quota-gated-link"
 import { formatDateTime } from "@/lib/format-date"
+import type { PlanTier } from "@/lib/plan-quotas"
 import type { DocumentRow } from "@/queries/documents"
 
 interface Props {
@@ -25,9 +27,21 @@ interface Props {
   // the sign-up dialog instead of the detail/download dialog.
   gated?: boolean
   hasMore?: boolean
+  atLimit?: boolean
+  documentsMax?: number
+  tier?: PlanTier
 }
 
-export function DocumentsClient({ documents, profileId, isOwn, gated = false, hasMore = false }: Props) {
+export function DocumentsClient({
+  documents,
+  profileId,
+  isOwn,
+  gated = false,
+  hasMore = false,
+  atLimit = false,
+  documentsMax = 0,
+  tier = "FREE",
+}: Props) {
   const t = useTranslations("Documents")
   const tc = useTranslations("Common")
   const locale = useLocale()
@@ -40,11 +54,18 @@ export function DocumentsClient({ documents, profileId, isOwn, gated = false, ha
         <FileText className="h-10 w-10 text-muted-foreground" />
         <p className="text-muted-foreground text-sm">{t("emptyTitle")}</p>
         {isOwn && (
-          <Button asChild variant="outline" size="sm" className="gap-2">
-            <Link href={`/profile/${profileId}/documents/new`}>
-              <FilePlus className="h-4 w-4" />{t("addDocument")}
-            </Link>
-          </Button>
+          <QuotaGatedLink
+            href={`/profile/${profileId}/documents/new`}
+            atLimit={atLimit}
+            limitContext="documents"
+            limit={documentsMax}
+            tier={tier}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <FilePlus className="h-4 w-4" />{t("addDocument")}
+          </QuotaGatedLink>
         )}
       </div>
     )

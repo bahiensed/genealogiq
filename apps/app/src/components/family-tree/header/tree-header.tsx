@@ -9,20 +9,22 @@ import { BackButton } from "@/components/back-button"
 import { AddRelativeDialog } from "../dialogs/add-relative-dialog"
 import { TreeSubtitle } from "./tree-subtitle"
 import type { TreePerson } from "@/queries/family-tree"
+import type { PlanTier } from "@/lib/plan-quotas"
 
 interface Props {
   rootFirstName: string
   rootId:        string
   persons:       Record<string, TreePerson>
   generations:   Map<string, number>
+  memberCount:   number
   memberLimit:   number
-  currentTier:   string
+  currentTier:   PlanTier
   canManage:     boolean
   atLimit:       boolean
   rootParents:   Array<{ id: string; name: string }>
 }
 
-export function TreeHeader({ rootFirstName, rootId, persons, generations, memberLimit, currentTier, canManage, atLimit, rootParents }: Props) {
+export function TreeHeader({ rootFirstName, rootId, persons, generations, memberCount, memberLimit, currentTier, canManage, atLimit, rootParents }: Props) {
   const t = useTranslations("FamilyTree")
   const [open, setOpen] = useState(false)
   return (
@@ -78,6 +80,9 @@ export function TreeHeader({ rootFirstName, rootId, persons, generations, member
                     rootId={rootId}
                     initialKind="parent"
                     anchorParents={rootParents}
+                    memberCount={memberCount}
+                    memberLimit={memberLimit}
+                    tier={currentTier}
                     onSuccess={() => { setOpen(false); window.location.reload() }}
                   />
                 )}

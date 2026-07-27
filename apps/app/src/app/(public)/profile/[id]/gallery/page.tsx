@@ -9,6 +9,7 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 import { UpgradeHint } from "@/components/upgrade-hint"
 
 // Anonymous visitors see only the first page of media (Instagram-style); clicking a
@@ -30,15 +31,21 @@ export default async function ProfileGalleryPage({ params }: Props) {
   assertPublicMemorialAccess(profile, viewerId, id)
 
   const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
-  const features = isOwn ? await getMemorialFeatures(id) : null
+  const [features, combinedMedia] = isOwn
+    ? await Promise.all([getMemorialFeatures(id), getCombinedMediaUsage(id)])
+    : [null, null]
 
   // Anonymous: a bounded slice of items + cheap total counts for the badges. Authed:
   // the full set (the client paginates it). Never materialize the whole table for anon.
   const items = await getGalleryByUserId(id, isAnon ? ANON_GALLERY_LIMIT : undefined, isAnon)
   const counts = isAnon ? await getGalleryCounts(id) : null
+  // These two are Gallery's OWN counts (for the page's own badges) — atLimit
+  // below checks the combined cross-module pool instead, which is a
+  // different, usually larger number.
   const imageCount = counts ? counts.images : items.filter((i) => i.kind === "image").length
   const videoCount = counts ? counts.videos : items.filter((i) => i.kind === "video").length
-  const atLimit = !!features && (imageCount >= features.galleryMaxImages || videoCount >= features.galleryMaxVideos)
+  const atLimit = !!features && !!combinedMedia &&
+    (combinedMedia.images >= features.mediaMaxImages || combinedMedia.videos >= features.mediaMaxVideos)
 
   return (
     <div className="relative overflow-x-hidden">

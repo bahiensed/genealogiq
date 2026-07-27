@@ -6,9 +6,7 @@ import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { MemorialCreateForm } from "@/components/memorial-create-form"
 import { verifySession } from "@/lib/dal"
-import { countMemorialsByCreatorId } from "@/queries/memorial"
-
-const MAX_MEMORIALS = 2
+import { getMemorialCreationStatus } from "@/lib/memorial-quota"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -22,8 +20,8 @@ export default async function MemorialNewPage({ params }: Props) {
 
   if (id !== session.user.id) redirect(`/profile/${id}/memorialized`)
 
-  const count = await countMemorialsByCreatorId(id)
-  if (count >= MAX_MEMORIALS) redirect(`/profile/${id}/memorialized`)
+  const creationStatus = await getMemorialCreationStatus(id)
+  if (!creationStatus.allowed) redirect(`/profile/${id}/memorialized`)
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">

@@ -14,8 +14,7 @@ import { getMemorialFeatures } from "@/lib/subscription"
 
 /**
  * Create (documentId = null) or update an existing document.
- * Quota is enforced on creation only, and only when DOCUMENTS_ENFORCE_QUOTA is
- * "true" — the infrastructure is ready but inert until billing goes live.
+ * Quota is enforced on creation only.
  */
 export async function saveDocument(
   profileId: string,
@@ -47,10 +46,10 @@ export async function saveDocument(
 
     await prisma.document.update({ where: { id: documentId }, data: flat })
   } else {
-    // Create — enforce the per-plan cap (gated, inert in dev).
+    // Create — enforce the per-plan cap.
     const count = await prisma.document.count({ where: { userId: profileId } })
     const { documentsMax } = await getMemorialFeatures(profileId)
-    if (process.env.DOCUMENTS_ENFORCE_QUOTA === "true" && count >= documentsMax) {
+    if (count >= documentsMax) {
       return fail(t("documents.limitReached", { max: documentsMax }))
     }
 

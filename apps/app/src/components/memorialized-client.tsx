@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, type ReactNode } from "react"
-import Link from "next/link"
 import { ArrowDownUp, Plus } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
@@ -12,18 +11,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ProfileMiniCard, type MiniProfile } from "@/components/profile-mini-card"
+import { QuotaGatedLink } from "@/components/quota-gated-link"
+import type { PlanTier } from "@/lib/plan-quotas"
 
 type SortDir = "az" | "za"
 
 interface Props {
   profiles:     MiniProfile[]
   isOwn:        boolean
-  canCreate:    boolean
+  // Create UI is only ever shown for your own memorials list (a guardian
+  // viewing someone else's list never sees it, regardless of quota).
+  showCreate:   boolean
+  atLimit:      boolean
+  memorialsMax: number
+  tier:         PlanTier
   newHref:      string
   upgradeHint?: ReactNode
 }
 
-export function MemorializedClient({ profiles, isOwn, canCreate, newHref, upgradeHint }: Props) {
+export function MemorializedClient({ profiles, isOwn, showCreate, atLimit, memorialsMax, tier, newHref, upgradeHint }: Props) {
   const t = useTranslations("Memorialized")
   const [sort, setSort] = useState<SortDir>("az")
   const isEmpty = profiles.length === 0
@@ -55,13 +61,18 @@ export function MemorializedClient({ profiles, isOwn, canCreate, newHref, upgrad
               </DropdownMenuContent>
             </DropdownMenu>
           )}
-          {canCreate && (
-            <Button asChild className="gap-2">
-              <Link href={newHref}>
-                <Plus className="h-4 w-4" />
-                {t("list.newProfile")}
-              </Link>
-            </Button>
+          {showCreate && (
+            <QuotaGatedLink
+              href={newHref}
+              atLimit={atLimit}
+              limitContext="memorials"
+              limit={memorialsMax}
+              tier={tier}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              {t("list.newProfile")}
+            </QuotaGatedLink>
           )}
         </div>
       </section>

@@ -11,6 +11,7 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 
 function toDate(value: string | null | undefined): Date | null {
   if (!value) return null
@@ -19,9 +20,10 @@ function toDate(value: string | null | undefined): Date | null {
 }
 
 /**
- * Create (placeId = null) or update an existing geo-place.
- * Quota is enforced on creation only, and only when GEO_PLACES_ENFORCE_QUOTA is
- * "true" — the infrastructure is ready but inert until billing goes live.
+ * Create (placeId = null) or update an existing geo-place. Enforces two
+ * independent caps: how many place ROWS this profile may have (create only),
+ * and — on both create and update — this place's own photos against the
+ * combined image pool shared with Bio and Gallery.
  */
 export async function savePlace(
   profileId: string,
@@ -45,6 +47,8 @@ export async function savePlace(
     endDate: toDate(endDate),
   }
 
+  const features = await getMemorialFeatures(profileId)
+
   if (placeId) {
     // Update — the row must belong to this profile.
     const existing = await prisma.geoPlace.findFirst({
@@ -53,16 +57,26 @@ export async function savePlace(
     })
     if (!existing) return fail(t("places.notFound"))
 
+    const combined = await getCombinedMediaUsage(profileId)
+    const otherImages = combined.images - existing.photos.length
+    if (otherImages + flat.photos.length > features.mediaMaxImages) {
+      return fail(t("places.imageLimit", { max: features.mediaMaxImages }))
+    }
+
     const newPhotos = new Set(flat.photos)
     await deleteBlobs(existing.photos.filter((u) => !newPhotos.has(u)))
 
     await prisma.geoPlace.update({ where: { id: placeId }, data: flat })
   } else {
-    // Create — enforce the per-plan cap (gated, inert in dev).
+    // Create — enforce the per-plan row cap.
     const count = await prisma.geoPlace.count({ where: { userId: profileId } })
-    const { geoPlacesMax } = await getMemorialFeatures(profileId)
-    if (process.env.GEO_PLACES_ENFORCE_QUOTA === "true" && count >= geoPlacesMax) {
-      return fail(t("places.limitReached", { max: geoPlacesMax }))
+    if (count >= features.geoPlacesMax) {
+      return fail(t("places.limitReached", { max: features.geoPlacesMax }))
+    }
+
+    const combined = await getCombinedMediaUsage(profileId)
+    if (combined.images + flat.photos.length > features.mediaMaxImages) {
+      return fail(t("places.imageLimit", { max: features.mediaMaxImages }))
     }
 
     await prisma.geoPlace.create({ data: { userId: profileId, order: count, ...flat } })

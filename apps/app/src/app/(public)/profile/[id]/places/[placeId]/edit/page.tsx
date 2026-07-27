@@ -9,6 +9,8 @@ import { verifySession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 
 interface Props {
   params: Promise<{ id: string; placeId: string }>
@@ -19,13 +21,17 @@ export default async function EditPlacePage({ params }: Props) {
   const session = await verifySession()
   const [t, tc] = await Promise.all([getTranslations("Places"), getTranslations("Common")])
 
-  const [profile, existing] = await Promise.all([
+  const [profile, existing, features, combinedMedia] = await Promise.all([
     getProfileById(id),
     prisma.geoPlace.findFirst({ where: { id: placeId, userId: id } }),
+    getMemorialFeatures(id),
+    getCombinedMediaUsage(id),
   ])
   if (!profile) notFound()
   if (!canManageProfile(profile, session.user.id)) redirect(`/profile/${id}/places`)
   if (!existing) notFound()
+
+  const otherImagesUsed = combinedMedia.images - existing.photos.length
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -45,7 +51,13 @@ export default async function EditPlacePage({ params }: Props) {
           </div>
         </div>
 
-        <PlaceEditForm profileId={id} existing={existing} />
+        <PlaceEditForm
+          profileId={id}
+          existing={existing}
+          mediaMax={features.mediaMaxImages}
+          otherImagesUsed={otherImagesUsed}
+          tier={features.code}
+        />
       </main>
     </div>
   )

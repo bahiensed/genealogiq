@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
@@ -46,10 +46,6 @@ beforeEach(() => {
   prismaMock.document.count.mockResolvedValue(0)
 })
 
-afterEach(() => {
-  delete process.env.DOCUMENTS_ENFORCE_QUOTA
-})
-
 describe("saveDocument — guards", () => {
   it("rejects when the profile does not exist", async () => {
     vi.mocked(getProfileById).mockResolvedValue(null as never)
@@ -72,17 +68,16 @@ describe("saveDocument — guards", () => {
   })
 })
 
-describe("saveDocument — quota (gated by DOCUMENTS_ENFORCE_QUOTA)", () => {
-  it("blocks creation at/over the limit when the flag is enabled", async () => {
-    process.env.DOCUMENTS_ENFORCE_QUOTA = "true"
+describe("saveDocument — quota (always enforced)", () => {
+  it("blocks creation at/over the limit", async () => {
     prismaMock.document.count.mockResolvedValue(3)
     const res = await saveDocument("A", null, validData)
     expect(res).toEqual({ ok: false, message: "documents.limitReached" })
     expect(prismaMock.document.create).not.toHaveBeenCalled()
   })
 
-  it("does NOT block when the flag is absent, even over the limit (dev default)", async () => {
-    prismaMock.document.count.mockResolvedValue(99)
+  it("allows creation under the limit", async () => {
+    prismaMock.document.count.mockResolvedValue(2)
     prismaMock.document.create.mockResolvedValue({ id: "d1" })
     const res = await saveDocument("A", null, validData)
     expect(res).toEqual({ ok: true, message: undefined })

@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
     bio: { upsert: vi.fn(), findUnique: vi.fn(), deleteMany: vi.fn() },
-    bioImage: { findMany: vi.fn(), deleteMany: vi.fn(), createMany: vi.fn() },
+    bioImage: { findMany: vi.fn(), deleteMany: vi.fn(), createMany: vi.fn(), count: vi.fn() },
   },
 }))
 
@@ -17,12 +17,14 @@ vi.mock("@/queries/profile", () => ({ getProfileById: vi.fn() }))
 vi.mock("@/lib/profile", () => ({ canManageProfile: vi.fn() }))
 vi.mock("@/lib/blob", () => ({ deleteBlobs: vi.fn() }))
 vi.mock("@/lib/subscription", () => ({ getMemorialFeatures: vi.fn() }))
+vi.mock("@/queries/media-usage", () => ({ getCombinedMediaUsage: vi.fn() }))
 
 import { saveBio, deleteBio } from "./bio.actions"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 import { deleteBlobs } from "@/lib/blob"
 
 const validImage = (url: string, order = 0) => ({
@@ -37,7 +39,9 @@ beforeEach(() => {
   vi.mocked(verifySession).mockResolvedValue({ user: { id: "mgr" } } as never)
   vi.mocked(getProfileById).mockResolvedValue({ id: "A", guardedBy: [] } as never)
   vi.mocked(canManageProfile).mockReturnValue(true)
-  vi.mocked(getMemorialFeatures).mockResolvedValue({ bioMaxChars: 10000, bioMaxImages: 10 } as never)
+  vi.mocked(getMemorialFeatures).mockResolvedValue({ bioMaxChars: 10000, mediaMaxImages: 10 } as never)
+  vi.mocked(getCombinedMediaUsage).mockResolvedValue({ images: 0, videos: 0 })
+  prismaMock.bioImage.count.mockResolvedValue(0)
 })
 
 describe("saveBio — ownership + validation guards", () => {
@@ -67,7 +71,7 @@ describe("saveBio — ownership + validation guards", () => {
   })
 
   it("enforces the bio character quota with the localized limit message", async () => {
-    vi.mocked(getMemorialFeatures).mockResolvedValue({ bioMaxChars: 5, bioMaxImages: 10 } as never)
+    vi.mocked(getMemorialFeatures).mockResolvedValue({ bioMaxChars: 5, mediaMaxImages: 10 } as never)
 
     const res = await saveBio("A", { text: "way too long", images: [] })
 
@@ -76,7 +80,7 @@ describe("saveBio — ownership + validation guards", () => {
   })
 
   it("enforces the image-count quota with the localized limit message", async () => {
-    vi.mocked(getMemorialFeatures).mockResolvedValue({ bioMaxChars: 10000, bioMaxImages: 1 } as never)
+    vi.mocked(getMemorialFeatures).mockResolvedValue({ bioMaxChars: 10000, mediaMaxImages: 1 } as never)
 
     const res = await saveBio("A", {
       text: "ok",
@@ -84,6 +88,22 @@ describe("saveBio — ownership + validation guards", () => {
         validImage("https://qa.public.blob.vercel-storage.com/a.jpg", 0),
         validImage("https://qa.public.blob.vercel-storage.com/b.jpg", 1),
       ],
+    })
+
+    expect(res).toEqual({ ok: false, message: "bio.imageLimit" })
+    expect(prismaMock.bio.upsert).not.toHaveBeenCalled()
+  })
+
+  it("rejects a new bio image when the combined pool is full from Gallery/Places, even with room in bio's own count", async () => {
+    // mediaMaxImages is 10, but 10 are already used elsewhere (Gallery/Places)
+    // and this bio currently has 0 of its own — adding 1 would exceed the pool.
+    vi.mocked(getMemorialFeatures).mockResolvedValue({ bioMaxChars: 10000, mediaMaxImages: 10 } as never)
+    vi.mocked(getCombinedMediaUsage).mockResolvedValue({ images: 10, videos: 0 })
+    prismaMock.bioImage.count.mockResolvedValue(0)
+
+    const res = await saveBio("A", {
+      text: "ok",
+      images: [validImage("https://qa.public.blob.vercel-storage.com/a.jpg", 0)],
     })
 
     expect(res).toEqual({ ok: false, message: "bio.imageLimit" })

@@ -11,34 +11,33 @@ import { identityTranslator } from "@/schemas/i18n"
 import { getProfileById, getProfileForEdit } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
+import { getMemorialCreationStatus } from "@/lib/memorial-quota"
 
 export async function createMemorial(data: unknown): Promise<ActionResult<{ id: string }>> {
   const t = await getTranslations("Actions")
   const session = await verifySession()
 
-  const [createdCount, sales] = await Promise.all([
-    prisma.appUser.count({
-      where: { role: "APP_MEMO", guardedBy: { some: { guardianId: session.user.id, status: "ACCEPTED" } } },
-    }),
-    prisma.appSale.findMany({
-      where: { appUserId: session.user.id },
-      orderBy: { createdAt: "asc" },
-      select: {
-        id: true,
-        subscription: { select: { maxProfiles: true } },
-        _count: { select: { assignedTo: true } },
-      },
-    }),
-  ])
-
-  // Pick the first AppSale that still has an open slot (fewer assigned memorials
-  // than its subscription's maxProfiles).
-  const nextSale = sales.find((s) => s._count.assignedTo < s.subscription.maxProfiles)
-
-  // Free tier: allow 1 memorial without AppSale. Beyond that, require a sale slot.
-  if (!nextSale && createdCount >= 1) {
-    return fail(t("memorial.noQrCodes"))
+  // Can the guardian create ANOTHER memorial at all (plan's memorialsMax) —
+  // independent of whether this new one gets bound to a paid slot below.
+  const creationStatus = await getMemorialCreationStatus(session.user.id)
+  if (!creationStatus.allowed) {
+    return fail(t("memorial.limitReached", { max: creationStatus.limit }))
   }
+
+  // Separately: does this new memorial get bound to a legacy paid AppSale
+  // slot (bulk sales made through BMS/SEQ) — pick the first sale that still
+  // has an open slot (fewer assigned memorials than its subscription's
+  // maxProfiles). Unrelated to the guardian-level cap just checked above.
+  const sales = await prisma.appSale.findMany({
+    where: { appUserId: session.user.id },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      subscription: { select: { maxProfiles: true } },
+      _count: { select: { assignedTo: true } },
+    },
+  })
+  const nextSale = sales.find((s) => s._count.assignedTo < s.subscription.maxProfiles)
 
   const parsed = getMemorialSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return fail(t("common.invalidData"))

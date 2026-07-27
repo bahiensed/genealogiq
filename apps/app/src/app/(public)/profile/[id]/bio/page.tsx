@@ -12,6 +12,7 @@ import { getProfileById, redactLivingProfile } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 import { UpgradeHint } from "@/components/upgrade-hint"
 
 interface Props {
@@ -34,13 +35,15 @@ export default async function ProfileBioPage({ params }: Props) {
   // preventive, so a future "born on X" line can't reintroduce the leak this
   // same rule closes on the profile root page (see queries/profile.ts).
   const profile = redactLivingProfile(rawProfile, { id: viewerId ?? null, canManage: isOwn })
-  const features = isOwn ? await getMemorialFeatures(id) : null
+  const [features, combinedMedia] = isOwn
+    ? await Promise.all([getMemorialFeatures(id), getCombinedMediaUsage(id)])
+    : [null, null]
 
   const isEmpty = !bio || (!bio.quote && !bio.text && bio.images.length === 0)
   const paragraphs = bio?.text?.split(/\n\n+/).filter(Boolean) ?? []
   const textLen = bio?.text?.length ?? 0
-  const imageCount = bio?.images.length ?? 0
-  const atLimit = !!features && (textLen >= features.bioMaxChars || imageCount >= features.bioMaxImages)
+  const atLimit = !!features && !!combinedMedia &&
+    (textLen >= features.bioMaxChars || combinedMedia.images >= features.mediaMaxImages)
 
   return (
     <div className="relative overflow-x-hidden">

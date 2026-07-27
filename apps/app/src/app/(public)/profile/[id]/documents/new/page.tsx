@@ -8,6 +8,8 @@ import { DocumentEditForm } from "@/components/document-edit-form"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
+import { getMemorialFeatures } from "@/lib/subscription"
+import { getDocumentsCount } from "@/queries/documents"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -21,6 +23,12 @@ export default async function NewDocumentPage({ params }: Props) {
   const profile = await getProfileById(id)
   if (!profile) notFound()
   if (!canManageProfile(profile, session.user.id)) redirect(`/profile/${id}/documents`)
+
+  const [features, count] = await Promise.all([
+    getMemorialFeatures(id),
+    getDocumentsCount(id, true),
+  ])
+  if (count >= features.documentsMax) redirect(`/profile/${id}/documents`)
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">

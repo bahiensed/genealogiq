@@ -73,6 +73,7 @@ export default async function TreePage({ params }: Props) {
         rootId={id}
         persons={persons}
         generations={generation}
+        memberCount={memberCount}
         memberLimit={memberLimit}
         currentTier={features.code}
         canManage={canManage}
@@ -90,6 +91,9 @@ export default async function TreePage({ params }: Props) {
           managedIds={Array.from(managedIds)}
           requestedIds={Array.from(requestedIds)}
           initialPositions={initialPositions}
+          memberCount={memberCount}
+          memberLimit={memberLimit}
+          currentTier={features.code}
         />
       </div>
     </div>

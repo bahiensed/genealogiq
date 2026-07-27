@@ -10,6 +10,7 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 
 export async function saveBio(profileId: string, data: unknown): Promise<ActionResult> {
   const t = await getTranslations("Actions")
@@ -28,8 +29,18 @@ export async function saveBio(profileId: string, data: unknown): Promise<ActionR
   if ((text?.length ?? 0) > features.bioMaxChars) {
     return fail(t("bio.charLimit", { max: features.bioMaxChars }))
   }
-  if (images.length > features.bioMaxImages) {
-    return fail(t("bio.imageLimit", { max: features.bioMaxImages }))
+
+  // Images share one combined pool with Gallery and Geolocalizações — check
+  // what's used OUTSIDE this bio (combined total minus this bio's own current
+  // images, since this save replaces the bio's whole image set) plus what
+  // this save is about to submit.
+  const [combined, currentBioImageCount] = await Promise.all([
+    getCombinedMediaUsage(profileId),
+    prisma.bioImage.count({ where: { bio: { userId: profileId } } }),
+  ])
+  const otherImages = combined.images - currentBioImageCount
+  if (otherImages + images.length > features.mediaMaxImages) {
+    return fail(t("bio.imageLimit", { max: features.mediaMaxImages }))
   }
 
   const bio = await prisma.bio.upsert({

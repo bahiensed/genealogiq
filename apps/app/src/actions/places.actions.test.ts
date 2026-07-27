@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
+import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
@@ -20,12 +20,14 @@ vi.mock("@/queries/profile", () => ({ getProfileById: vi.fn() }))
 vi.mock("@/lib/profile", () => ({ canManageProfile: vi.fn() }))
 vi.mock("@/lib/blob", () => ({ deleteBlobs: vi.fn() }))
 vi.mock("@/lib/subscription", () => ({ getMemorialFeatures: vi.fn() }))
+vi.mock("@/queries/media-usage", () => ({ getCombinedMediaUsage: vi.fn() }))
 
 import { savePlace, deletePlace } from "./places.actions"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 import { deleteBlobs } from "@/lib/blob"
 
 const validData = {
@@ -45,12 +47,9 @@ beforeEach(() => {
   vi.mocked(verifySession).mockResolvedValue({ user: { id: "mgr" } } as never)
   vi.mocked(getProfileById).mockResolvedValue({ id: "A", guardedBy: [] } as never)
   vi.mocked(canManageProfile).mockReturnValue(true)
-  vi.mocked(getMemorialFeatures).mockResolvedValue({ geoPlacesMax: 3 } as never)
+  vi.mocked(getMemorialFeatures).mockResolvedValue({ geoPlacesMax: 3, mediaMaxImages: 100 } as never)
+  vi.mocked(getCombinedMediaUsage).mockResolvedValue({ images: 0, videos: 0 })
   prismaMock.geoPlace.count.mockResolvedValue(0)
-})
-
-afterEach(() => {
-  delete process.env.GEO_PLACES_ENFORCE_QUOTA
 })
 
 describe("savePlace — guards", () => {
@@ -75,21 +74,53 @@ describe("savePlace — guards", () => {
   })
 })
 
-describe("savePlace — quota (gated by GEO_PLACES_ENFORCE_QUOTA)", () => {
-  it("blocks creation at/over the limit when the flag is enabled", async () => {
-    process.env.GEO_PLACES_ENFORCE_QUOTA = "true"
+describe("savePlace — row-count quota (always enforced)", () => {
+  it("blocks creation at/over the limit", async () => {
     prismaMock.geoPlace.count.mockResolvedValue(3)
     const res = await savePlace("A", null, validData)
     expect(res).toEqual({ ok: false, message: "places.limitReached" })
     expect(prismaMock.geoPlace.create).not.toHaveBeenCalled()
   })
 
-  it("does NOT block when the flag is absent, even over the limit (dev default)", async () => {
-    prismaMock.geoPlace.count.mockResolvedValue(99)
+  it("allows creation under the limit", async () => {
+    prismaMock.geoPlace.count.mockResolvedValue(2)
     prismaMock.geoPlace.create.mockResolvedValue({ id: "p1" })
     const res = await savePlace("A", null, validData)
     expect(res).toEqual({ ok: true, message: undefined })
     expect(prismaMock.geoPlace.create).toHaveBeenCalled()
+  })
+})
+
+describe("savePlace — combined image pool quota", () => {
+  it("rejects a new place's photos when the combined pool is already full from Bio/Gallery", async () => {
+    vi.mocked(getMemorialFeatures).mockResolvedValue({ geoPlacesMax: 3, mediaMaxImages: 2 } as never)
+    vi.mocked(getCombinedMediaUsage).mockResolvedValue({ images: 2, videos: 0 })
+    const res = await savePlace("A", null, {
+      ...validData,
+      photos: ["https://qa.public.blob.vercel-storage.com/a.jpg"],
+    })
+    expect(res).toEqual({ ok: false, message: "places.imageLimit" })
+    expect(prismaMock.geoPlace.create).not.toHaveBeenCalled()
+  })
+
+  it("rejects adding photos to an existing place when it would exceed the combined pool", async () => {
+    vi.mocked(getMemorialFeatures).mockResolvedValue({ geoPlacesMax: 3, mediaMaxImages: 2 } as never)
+    // This place already has 1 photo (part of the combined total of 2); adding
+    // 2 more would bring the total to 3, over the limit of 2.
+    prismaMock.geoPlace.findFirst.mockResolvedValue({
+      photos: ["https://qa.public.blob.vercel-storage.com/keep.jpg"],
+    })
+    vi.mocked(getCombinedMediaUsage).mockResolvedValue({ images: 2, videos: 0 })
+    const res = await savePlace("A", "p1", {
+      ...validData,
+      photos: [
+        "https://qa.public.blob.vercel-storage.com/keep.jpg",
+        "https://qa.public.blob.vercel-storage.com/new1.jpg",
+        "https://qa.public.blob.vercel-storage.com/new2.jpg",
+      ],
+    })
+    expect(res).toEqual({ ok: false, message: "places.imageLimit" })
+    expect(prismaMock.geoPlace.update).not.toHaveBeenCalled()
   })
 })
 

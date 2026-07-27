@@ -8,6 +8,10 @@ import { verifySession } from "@/lib/dal"
 import { getMemorialSchema } from "@/schemas/memorial.schema"
 import { identityTranslator } from "@/schemas/i18n"
 
+// Deliberately does NOT check getMemorialCreationStatus/memorialsMax — a
+// redeemed physical QR license is itself a standalone purchase, independent
+// of the guardian's own plan's memorial quota. Gating this against
+// memorialsMax would mean charging for the same slot twice.
 export async function activatePhysicalQr(
   genCode: string,
   data: unknown,

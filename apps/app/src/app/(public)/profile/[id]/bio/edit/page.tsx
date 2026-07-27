@@ -10,6 +10,7 @@ import { getBioByUserId } from "@/queries/bio"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 import { UpgradeHint } from "@/components/upgrade-hint"
 
 interface Props {
@@ -22,10 +23,11 @@ export default async function BioEditPage({ params }: Props) {
   const t = await getTranslations("Bio")
   const tc = await getTranslations("Common")
 
-  const [profile, bio, features] = await Promise.all([
+  const [profile, bio, features, combinedMedia] = await Promise.all([
     getProfileById(id),
     getBioByUserId(id),
     getMemorialFeatures(id),
+    getCombinedMediaUsage(id),
   ])
   if (!profile) notFound()
 
@@ -34,7 +36,8 @@ export default async function BioEditPage({ params }: Props) {
   const isCreating = !bio
   const textLen = bio?.text?.length ?? 0
   const imageCount = bio?.images.length ?? 0
-  const atLimit = textLen >= features.bioMaxChars || imageCount >= features.bioMaxImages
+  const otherImagesUsed = combinedMedia.images - imageCount
+  const atLimit = textLen >= features.bioMaxChars || combinedMedia.images >= features.mediaMaxImages
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -65,7 +68,9 @@ export default async function BioEditPage({ params }: Props) {
           initial={bio}
           profileId={id}
           maxChars={features.bioMaxChars}
-          maxImages={features.bioMaxImages}
+          maxImages={features.mediaMaxImages}
+          otherImagesUsed={otherImagesUsed}
+          tier={features.code}
         />
       </main>
     </div>

@@ -86,7 +86,7 @@
       "tooManyRequests": "Too many requests. Please try again later."
     },
     "memorial": {
-      "noQrCodes": "No available QR Codes. Purchase a QR Code to create more profiles.",
+      "limitReached": "You reached the limit of {max} memorials on your plan.",
       "notAuthorized": "You are not authorized to manage this profile.",
       "notFound": "Profile not found."
     },
@@ -96,6 +96,7 @@
       "raceRetry": "This code was just activated. Please try again."
     },
     "places": {
+      "imageLimit": "Image limit is {max} for this plan.",
       "limitReached": "You reached the limit of {max} geolocations on your plan.",
       "notAuthorized": "You are not allowed to manage this profile.",
       "notFound": "Geolocation not found."
@@ -753,6 +754,15 @@
     "iosStep1": "Tap the Share button in your browser's toolbar.",
     "iosStep2": "Scroll down and tap \"Add to Home Screen\".",
     "iosStep3": "Tap \"Add\" to confirm.",
+    "neverAskCheckbox": "Don't ask me again",
+    "page": {
+      "checking": "Checking your browser…",
+      "installedMessage": "Genealogiq is already installed on this device.",
+      "installedTitle": "You're all set!",
+      "openAppButton": "Open Genealogiq",
+      "unsupportedMessage": "Your browser doesn't support one-tap installation. Try opening this page in Chrome, Edge or Samsung Internet on Android, or use your browser's own menu to add Genealogiq to your home screen.",
+      "unsupportedTitle": "One-tap install isn't available here"
+    },
     "title": "Install the Genealogiq App now!"
   },
   "Legal": {
@@ -760,6 +770,40 @@
     "comingSoon": "Content coming soon.",
     "privacyTitle": "Privacy Policy",
     "termsTitle": "Terms of Service"
+  },
+  "LimitReached": {
+    "cta": {
+      "extraOnly": "See options",
+      "maxedOut": "See my plan",
+      "upgrade": "Upgrade plan"
+    },
+    "description": {
+      "bio": "Your plan allows up to {limit} biography characters.",
+      "documents": "Your plan allows up to {limit} documents.",
+      "geoPlaces": "Your plan allows up to {limit} places.",
+      "mediaImages": "Your plan allows up to {limit} combined photos across Biography, Gallery and Places.",
+      "mediaVideos": "Your plan allows up to {limit} gallery videos.",
+      "memorials": "Your plan allows up to {limit} memorials.",
+      "qrCode": "Your plan includes {limit} free QR Codes.",
+      "tree": "Your plan allows up to {limit} family tree members."
+    },
+    "dismiss": "Maybe later",
+    "suffix": {
+      "extraOnly": "You can purchase an extra one.",
+      "maxedOut": "You've reached the maximum for your current plan.",
+      "upgradeOnly": "Upgrade your plan for a higher limit.",
+      "upgradeOrExtra": "Upgrade your plan for a higher limit, or purchase an extra one."
+    },
+    "title": {
+      "bio": "Biography limit reached",
+      "documents": "Document limit reached",
+      "geoPlaces": "Places limit reached",
+      "mediaImages": "Photo limit reached",
+      "mediaVideos": "Video limit reached",
+      "memorials": "Memorial limit reached",
+      "qrCode": "QR Code limit reached",
+      "tree": "Family tree limit reached"
+    }
   },
   "Memorialized": {
     "actions": {
@@ -1125,9 +1169,7 @@
       "noQrYet": "No QR-Code yet.",
       "purchase": "Purchase QR-Code",
       "subtitle": "For plaques, headstones and digital spaces alike",
-      "title": "QR Code",
-      "unlockDescription": "This memorial is on the free plan. Purchase a QR-Code to print it on plaques, headstones and digital spaces — keep their memory anywhere, scannable forever.",
-      "unlockTitle": "Unlock your QR-Code"
+      "title": "QR Code"
     },
     "scanButton": {
       "aria": "Scan QR Code",

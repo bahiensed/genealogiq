@@ -86,7 +86,7 @@
       "tooManyRequests": "Demasiadas solicitudes. Inténtalo de nuevo más tarde."
     },
     "memorial": {
-      "noQrCodes": "No hay QR Codes disponibles. Compra un QR Code para crear más perfiles.",
+      "limitReached": "Alcanzaste el límite de {max} memoriales de tu plan.",
       "notAuthorized": "No tienes permiso para gestionar este perfil.",
       "notFound": "Perfil no encontrado."
     },
@@ -96,6 +96,7 @@
       "raceRetry": "Este código acaba de ser activado. Inténtalo de nuevo."
     },
     "places": {
+      "imageLimit": "El límite de imágenes es {max} para este plan.",
       "limitReached": "Alcanzaste el límite de {max} geolocalizaciones de tu plan.",
       "notAuthorized": "No tienes permiso para administrar este perfil.",
       "notFound": "Geolocalización no encontrada."
@@ -753,6 +754,15 @@
     "iosStep1": "Toca el botón Compartir en la barra del navegador.",
     "iosStep2": "Desplázate hacia abajo y toca \"Agregar a pantalla de inicio\".",
     "iosStep3": "Toca \"Agregar\" para confirmar.",
+    "neverAskCheckbox": "No preguntarme de nuevo",
+    "page": {
+      "checking": "Verificando tu navegador…",
+      "installedMessage": "Genealogiq ya está instalado en este dispositivo.",
+      "installedTitle": "¡Todo listo!",
+      "openAppButton": "Abrir Genealogiq",
+      "unsupportedMessage": "Tu navegador no admite la instalación con un toque. Intenta abrir esta página en Chrome, Edge o Samsung Internet en Android, o usa el menú de tu navegador para agregar Genealogiq a la pantalla de inicio.",
+      "unsupportedTitle": "Instalación con un toque no disponible aquí"
+    },
     "title": "¡Instala la app de Genealogiq ahora!"
   },
   "Legal": {
@@ -760,6 +770,40 @@
     "comingSoon": "Contenido próximamente.",
     "privacyTitle": "Política de Privacidad",
     "termsTitle": "Términos de Servicio"
+  },
+  "LimitReached": {
+    "cta": {
+      "extraOnly": "Ver opciones",
+      "maxedOut": "Ver mi plan",
+      "upgrade": "Mejorar plan"
+    },
+    "description": {
+      "bio": "Tu plan permite hasta {limit} caracteres en la biografía.",
+      "documents": "Tu plan permite hasta {limit} documentos.",
+      "geoPlaces": "Tu plan permite hasta {limit} geolocalizaciones.",
+      "mediaImages": "Tu plan permite hasta {limit} fotos combinadas entre Biografía, Galería y Geolocalizaciones.",
+      "mediaVideos": "Tu plan permite hasta {limit} videos en la galería.",
+      "memorials": "Tu plan permite hasta {limit} memoriales.",
+      "qrCode": "Tu plan incluye {limit} QR Codes gratuitos.",
+      "tree": "Tu plan permite hasta {limit} personas en el árbol genealógico."
+    },
+    "dismiss": "Tal vez después",
+    "suffix": {
+      "extraOnly": "Puedes comprar una unidad extra.",
+      "maxedOut": "Alcanzaste el máximo de tu plan actual.",
+      "upgradeOnly": "Mejora tu plan para un límite mayor.",
+      "upgradeOrExtra": "Mejora tu plan para un límite mayor, o compra una unidad extra."
+    },
+    "title": {
+      "bio": "Límite de biografía alcanzado",
+      "documents": "Límite de documentos alcanzado",
+      "geoPlaces": "Límite de geolocalizaciones alcanzado",
+      "mediaImages": "Límite de fotos alcanzado",
+      "mediaVideos": "Límite de videos alcanzado",
+      "memorials": "Límite de memoriales alcanzado",
+      "qrCode": "Límite de QR Codes alcanzado",
+      "tree": "Límite del árbol genealógico alcanzado"
+    }
   },
   "Memorialized": {
     "actions": {
@@ -1125,9 +1169,7 @@
       "noQrYet": "Aún no hay QR Code.",
       "purchase": "Adquirir QR Code",
       "subtitle": "Para placas, lápidas y espacios digitales",
-      "title": "QR Code",
-      "unlockDescription": "Este memorial está en el plan gratuito. Adquiere un QR Code para imprimirlo en placas, lápidas y espacios digitales — conserva su memoria en cualquier lugar, escaneable para siempre.",
-      "unlockTitle": "Desbloquea tu QR Code"
+      "title": "QR Code"
     },
     "scanButton": {
       "aria": "Escanear QR Code",

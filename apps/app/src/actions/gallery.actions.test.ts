@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 // Prisma mock must be hoisted so it exists when the vi.mock factory runs.
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
-    galleryItem: { findMany: vi.fn(), deleteMany: vi.fn(), createMany: vi.fn() },
+    galleryItem: { findMany: vi.fn(), deleteMany: vi.fn(), createMany: vi.fn(), count: vi.fn() },
   },
 }))
 
@@ -15,6 +15,7 @@ vi.mock("@/queries/profile", () => ({ getProfileById: vi.fn() }))
 vi.mock("@/lib/profile", () => ({ canManageProfile: vi.fn() }))
 vi.mock("@/lib/blob", () => ({ deleteBlobs: vi.fn() }))
 vi.mock("@/lib/subscription", () => ({ getMemorialFeatures: vi.fn() }))
+vi.mock("@/queries/media-usage", () => ({ getCombinedMediaUsage: vi.fn() }))
 
 import { saveGallery, deleteGallery } from "./gallery.actions"
 import { verifySession } from "@/lib/dal"
@@ -22,6 +23,7 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 
 // A valid image item that satisfies mediaItemSchema (url must be a real URL).
 const img = (n: number) => ({
@@ -44,12 +46,14 @@ beforeEach(() => {
   vi.mocked(getProfileById).mockResolvedValue({ id: "A", guardedBy: [] } as never)
   vi.mocked(canManageProfile).mockReturnValue(true)
   vi.mocked(getMemorialFeatures).mockResolvedValue({
-    galleryMaxImages: 10,
-    galleryMaxVideos: 3,
+    mediaMaxImages: 10,
+    mediaMaxVideos: 3,
   } as never)
+  vi.mocked(getCombinedMediaUsage).mockResolvedValue({ images: 0, videos: 0 })
   prismaMock.galleryItem.findMany.mockResolvedValue([])
   prismaMock.galleryItem.deleteMany.mockResolvedValue({})
   prismaMock.galleryItem.createMany.mockResolvedValue({})
+  prismaMock.galleryItem.count.mockResolvedValue(0)
 })
 
 describe("saveGallery — ownership guard", () => {
@@ -86,10 +90,10 @@ describe("saveGallery — input validation", () => {
 })
 
 describe("saveGallery — max-count quota", () => {
-  it("rejects when image count exceeds galleryMaxImages (no DB write)", async () => {
+  it("rejects when image count exceeds mediaMaxImages (no DB write)", async () => {
     vi.mocked(getMemorialFeatures).mockResolvedValue({
-      galleryMaxImages: 2,
-      galleryMaxVideos: 3,
+      mediaMaxImages: 2,
+      mediaMaxVideos: 3,
     } as never)
 
     const res = await saveGallery("A", { items: [img(0), img(1), img(2)] })
@@ -99,15 +103,26 @@ describe("saveGallery — max-count quota", () => {
     expect(prismaMock.galleryItem.createMany).not.toHaveBeenCalled()
   })
 
-  it("rejects when video count exceeds galleryMaxVideos (no DB write)", async () => {
+  it("rejects when video count exceeds mediaMaxVideos (no DB write)", async () => {
     vi.mocked(getMemorialFeatures).mockResolvedValue({
-      galleryMaxImages: 10,
-      galleryMaxVideos: 1,
+      mediaMaxImages: 10,
+      mediaMaxVideos: 1,
     } as never)
 
     const res = await saveGallery("A", { items: [vid(0), vid(1)] })
 
     expect(res).toEqual({ ok: false, message: "gallery.videoLimit" })
+    expect(prismaMock.galleryItem.createMany).not.toHaveBeenCalled()
+  })
+
+  it("rejects a new image when the combined pool is full from Bio/Places, even with room in gallery's own count", async () => {
+    vi.mocked(getMemorialFeatures).mockResolvedValue({ mediaMaxImages: 10, mediaMaxVideos: 3 } as never)
+    vi.mocked(getCombinedMediaUsage).mockResolvedValue({ images: 10, videos: 0 })
+    prismaMock.galleryItem.count.mockResolvedValue(0)
+
+    const res = await saveGallery("A", { items: [img(0)] })
+
+    expect(res).toEqual({ ok: false, message: "gallery.imageLimit" })
     expect(prismaMock.galleryItem.createMany).not.toHaveBeenCalled()
   })
 })

@@ -98,15 +98,64 @@ return something the caller consumes (e.g. a checkout URL).
   click-vs-open behavior. `ANON_<X>_LIMIT` is a small module-level constant (12 for
   Gallery/Documents/Places, 16 for Tributes) — not configurable, not derived from a feature flag.
 
-## Quota convention (inert until billing)
+## Quota convention (APP-local, always enforced — no more env flags)
 
-A per-plan numeric cap lives on `Subscription` (e.g. `geoPlacesMax`, `documentsMax`),
-threaded through `SubscriptionFeatures`/`getMemorialFeatures()` (`@/lib/subscription`). The
-create action always computes `count` + `max` but only **enforces** the rejection behind
-`process.env.<FEATURE>_ENFORCE_QUOTA === "true"` — infrastructure ships ready, stays inert in
-dev/test until a human flips the flag when billing goes live. Do not add the flag name to
-`.env`/`.env.example` (the precedent, `GEO_PLACES_ENFORCE_QUOTA`, isn't listed there either —
-an unset env var already reads as `undefined !== "true"`, i.e. inert by default).
+**Superseded convention, for history**: quotas used to live as columns on the shared
+`Subscription` table and were only enforced behind a per-feature
+`process.env.<FEATURE>_ENFORCE_QUOTA === "true"` flag (`GEO_PLACES_ENFORCE_QUOTA`,
+`DOCUMENTS_ENFORCE_QUOTA`) — infra shipped ready but stayed inert until a human flipped the
+flag. **Both flags are gone.** Quotas are always enforced now.
+
+- **Numbers live in `src/lib/plan-quotas.ts`**, a plain dependency-free module — `FREE`,
+  `PREMIUM`, `PHYSICAL_QR` objects (`PlanQuotas` interface: `treeMaxMembers`, `bioMaxChars`,
+  `mediaMaxImages`, `mediaMaxVideos`, `documentsMax`, `geoPlacesMax`, `memorialsMax`,
+  `qrCodeMax`, `geolocationFullAccess`). This is deliberate independence from BMS: the shared
+  `Subscription` table's own columns/pricing/naming no longer feed feature numbers at all —
+  BMS can rename or reprice its own plans without this app ever needing a change.
+- **`getMemorialFeatures(profileId)`** (`@/lib/subscription`, `PlanQuotas` return type, `cache()`-wrapped
+  per request) resolves which of the three objects applies: `physicalQrLicense` present →
+  `PHYSICAL_QR`; else, for a living profile, its own live paid `AppSale` (as buyer) → `PREMIUM`;
+  for a memorial (`APP_MEMO`), **any `ACCEPTED` guardian's own live paid sale cascades** →
+  `PREMIUM` (one guardian's subscription covers every memorial they manage), else a legacy
+  `AppSale` assigned directly to the memorial (pre-existing BMS/SEQ bulk-slot sales) → `PREMIUM`;
+  otherwise `FREE`. The DB's role has shrunk to one boolean-ish question — "does a live paid
+  sale exist" — never "what numbers does this Subscription row have."
+- **Combined media pool**: `mediaMaxImages`/`mediaMaxVideos` are ONE shared budget spent across
+  Bio's own image, every Gallery item, and every `GeoPlace.photos` entry — computed live via
+  `getCombinedMediaUsage(profileId)` (`@/queries/media-usage`), no persisted running total.
+  Each contributing action/form fetches the combined usage, subtracts its OWN prior
+  contribution (each of Bio/Gallery/Places replaces its entire sub-collection on every save),
+  and checks the new submission against what's left (`effectiveMaxImages` in each edit form).
+- **Memorial-creation limit**: one shared `getMemorialCreationStatus(guardianId)`
+  (`@/lib/memorial-quota`) — do not reintroduce a hardcoded constant or a bespoke count
+  elsewhere. It is deliberately separate from the pre-existing paid-slot-BINDING logic
+  (`nextSale`/`maxProfiles` in `memorial.actions.ts`, which decides whether a specific new
+  memorial attaches to a legacy bulk sale) — that logic still runs, just no longer gates
+  whether creation is *allowed* at all.
+- **QR Code quota**: no persisted count exists (access was always a per-profile boolean —
+  `physicalQrLicense`/a directly-assigned `appSaleId`). `getQrQuotaStatus(guardianId, profileId)`
+  (`@/lib/qr-quota`) ranks {guardian's own profile} ∪ {their `ACCEPTED` memorials} by
+  `createdAt`; the first `qrCodeMax` are free, EXCEPT a profile with its own dedicated paid
+  slot (`physicalQrLicense` or a live directly-assigned `AppSale` — see `isSaleLive`, exported
+  from `@/lib/subscription`) is always unlocked regardless of rank. Documented as an initial
+  approximation — "which QR counts as free" isn't a sticky/persisted choice yet.
+- **`LimitReachedDialog`** (`@/components/limit-reached-dialog`) is the one reactive UI for
+  "you hit your plan's limit" — an `AlertDialog` (mirrors the pre-existing `GeolocationGate`
+  pattern), controlled via `open`/`onOpenChange` (not `AlertDialogTrigger` — the calling
+  component checks the limit itself, before invoking the mutating action, then opens this).
+  Contexts: `"tree" | "bio" | "documents" | "media-images" | "media-videos" | "geoPlaces" |
+  "memorials" | "qrCode"`. CTA always links to `/subscriptions`; `ALLOWS_EXTRA_PURCHASE`
+  (`plan-quotas.ts`) marks which quota fields (`geoPlacesMax`, `qrCodeMax`, `memorialsMax`)
+  additionally mention an à la carte top-up (the purchase flow itself doesn't exist yet — this
+  only affects copy). A new module hitting a hard, unambiguous "this action definitely creates
+  one new unit" limit (an add-image handler, a create-new-row button) should reach for this
+  dialog rather than a bespoke toast or a hidden button.
+- **`UpgradeHint`** (`@/components/upgrade-hint`) is a DIFFERENT, older, passive text hint
+  (always-visible near a counter, no user interaction to trigger it) — it coexists with
+  `LimitReachedDialog` on purpose, not a duplicate to consolidate. Its top-tier check compares
+  against `"PHYSICAL_QR"` (this and `tree-subtitle.tsx`'s equivalent check used to compare
+  against a stale BMS-era code name, `"CENTURY"` — both fixed; if you find `"CENTURY"`
+  anywhere else, it's the same latent bug).
 
 ## Caching model: no Cache Components, plain `revalidatePath`
 

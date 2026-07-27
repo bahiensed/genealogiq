@@ -24,6 +24,8 @@ import { upload } from "@vercel/blob/client"
 import { saveBio, deleteBio } from "@/actions/bio.actions"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { compressImage } from "@/lib/image-compress"
+import { LimitReachedDialog } from "@/components/limit-reached-dialog"
+import type { PlanTier } from "@/lib/plan-quotas"
 import type { BioRow } from "@/queries/bio"
 
 const MAX_QUOTE = 128
@@ -41,16 +43,25 @@ interface Props {
   initial: BioRow | null
   profileId: string
   maxChars: number
+  // The plan's combined image pool max (shared with Gallery/Geolocalizações),
+  // not a bio-only number.
   maxImages: number
+  // How many of that pool are already used by OTHER modules (Gallery +
+  // Geolocalizações) — subtracted from maxImages to get what's actually left
+  // for this bio specifically.
+  otherImagesUsed: number
+  tier: PlanTier
 }
 
-export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) {
+export function BioEditForm({ initial, profileId, maxChars, maxImages, otherImagesUsed, tier }: Props) {
   const t = useTranslations("Bio")
   const tc = useTranslations("Common")
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const isCreating = !initial
+  const effectiveMaxImages = Math.max(0, maxImages - otherImagesUsed)
+  const [limitDialogOpen, setLimitDialogOpen] = useState(false)
 
   const [quote, setQuote] = useState(initial?.quote ?? "")
   const [text, setText] = useState(initial?.text ?? "")
@@ -70,15 +81,15 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
       toast.warning(t("toastFilesSkipped", { count: all.length - valid.length, formats: IMAGE_FORMATS_LABEL }))
     }
     if (valid.length === 0) return
-    const remaining = maxImages - images.length
-    const upgradeAction = { label: t("upgradePlan"), onClick: () => router.push("/subscriptions") }
+    const remaining = effectiveMaxImages - images.length
     if (remaining <= 0) {
-      toast.warning(t("toastMaxImages", { max: maxImages }), { action: upgradeAction })
+      setLimitDialogOpen(true)
       return
     }
+    const upgradeAction = { label: t("upgradePlan"), onClick: () => router.push("/subscriptions") }
     const toProcess = valid.slice(0, remaining)
     if (valid.length > remaining) {
-      toast.warning(t("toastLimitedAdded", { count: remaining, max: maxImages }), { action: upgradeAction })
+      toast.warning(t("toastLimitedAdded", { count: remaining, max: effectiveMaxImages }), { action: upgradeAction })
     }
 
     const placeholders: ImageEntry[] = toProcess.map((f) => ({
@@ -167,7 +178,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-base">{t("photos")}</Label>
-          <span className="text-xs text-muted-foreground">{images.length}/{maxImages}</span>
+          <span className="text-xs text-muted-foreground">{images.length}/{effectiveMaxImages}</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
@@ -193,7 +204,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
             </div>
           ))}
 
-          {images.length < maxImages && (
+          {images.length < effectiveMaxImages && (
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -294,6 +305,14 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages }: Props) 
           </div>
         )}
       </div>
+
+      <LimitReachedDialog
+        open={limitDialogOpen}
+        onOpenChange={setLimitDialogOpen}
+        context="media-images"
+        limit={maxImages}
+        tier={tier}
+      />
     </div>
   )
 }

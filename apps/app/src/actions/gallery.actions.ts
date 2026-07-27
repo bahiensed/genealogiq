@@ -10,6 +10,7 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 
 export async function saveGallery(profileId: string, data: unknown): Promise<ActionResult> {
   const t = await getTranslations("Actions")
@@ -26,11 +27,20 @@ export async function saveGallery(profileId: string, data: unknown): Promise<Act
   const features = await getMemorialFeatures(profileId)
   const imgCount = items.filter((i) => i.kind === "image").length
   const vidCount = items.filter((i) => i.kind === "video").length
-  if (imgCount > features.galleryMaxImages) {
-    return fail(t("gallery.imageLimit", { max: features.galleryMaxImages }))
+
+  // Images share one combined pool with Bio and Geolocalizações — check
+  // what's used OUTSIDE this gallery plus what this save is about to submit.
+  // Videos have no other source today, so no subtraction is needed there.
+  const [combined, currentGalleryImages] = await Promise.all([
+    getCombinedMediaUsage(profileId),
+    prisma.galleryItem.count({ where: { userId: profileId, kind: "image" } }),
+  ])
+  const otherImages = combined.images - currentGalleryImages
+  if (otherImages + imgCount > features.mediaMaxImages) {
+    return fail(t("gallery.imageLimit", { max: features.mediaMaxImages }))
   }
-  if (vidCount > features.galleryMaxVideos) {
-    return fail(t("gallery.videoLimit", { max: features.galleryMaxVideos }))
+  if (vidCount > features.mediaMaxVideos) {
+    return fail(t("gallery.videoLimit", { max: features.mediaMaxVideos }))
   }
 
   const oldItems = await prisma.galleryItem.findMany({

@@ -21,12 +21,14 @@ vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
 vi.mock("@/queries/profile", () => ({ getProfileById: vi.fn(), getProfileForEdit: vi.fn() }))
 vi.mock("@/lib/profile", () => ({ canManageProfile: vi.fn() }))
 vi.mock("@/lib/blob", () => ({ deleteBlobs: vi.fn() }))
+vi.mock("@/lib/memorial-quota", () => ({ getMemorialCreationStatus: vi.fn() }))
 
 import { createMemorial, deleteMemorial } from "./memorial.actions"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
+import { getMemorialCreationStatus } from "@/lib/memorial-quota"
 
 // A valid create payload (passes getMemorialSchema).
 const validInput = {
@@ -42,38 +44,26 @@ beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(verifySession).mockResolvedValue({ user: { id: "mgr" } } as never)
   vi.mocked(canManageProfile).mockReturnValue(true)
+  // Default: plenty of room under the guardian's memorialsMax.
+  vi.mocked(getMemorialCreationStatus).mockResolvedValue({ count: 0, limit: 2, allowed: true })
   // Default create-path success wiring.
   prismaMock.appUser.create.mockResolvedValue({ id: "memo-1" })
   prismaMock.appUserGuardian.create.mockResolvedValue({})
 })
 
 describe("createMemorial — quota guard", () => {
-  it("fails when the free slot is used and no sale slot is open (never writes)", async () => {
-    // Already created 1 free memorial, and no AppSale has an open slot.
-    prismaMock.appUser.count.mockResolvedValue(1)
+  it("fails when the guardian is at their plan's memorial limit (never writes)", async () => {
+    vi.mocked(getMemorialCreationStatus).mockResolvedValue({ count: 2, limit: 2, allowed: false })
     prismaMock.appSale.findMany.mockResolvedValue([])
 
     const res = await createMemorial(validInput)
 
-    expect(res).toEqual({ ok: false, message: "memorial.noQrCodes" })
+    expect(res).toEqual({ ok: false, message: "memorial.limitReached" })
     expect(prismaMock.appUser.create).not.toHaveBeenCalled()
     expect(prismaMock.appUserGuardian.create).not.toHaveBeenCalled()
   })
 
-  it("fails the quota even when a sale exists but every slot is full", async () => {
-    prismaMock.appUser.count.mockResolvedValue(3)
-    prismaMock.appSale.findMany.mockResolvedValue([
-      { id: "sale-1", subscription: { maxProfiles: 2 }, _count: { assignedTo: 2 } },
-    ])
-
-    const res = await createMemorial(validInput)
-
-    expect(res).toEqual({ ok: false, message: "memorial.noQrCodes" })
-    expect(prismaMock.appUser.create).not.toHaveBeenCalled()
-  })
-
-  it("allows the very first free memorial with no sale (assigns no appSaleId)", async () => {
-    prismaMock.appUser.count.mockResolvedValue(0)
+  it("allows creation with no sale slot bound (assigns no appSaleId)", async () => {
     prismaMock.appSale.findMany.mockResolvedValue([])
 
     const res = await createMemorial(validInput)
@@ -89,8 +79,7 @@ describe("createMemorial — quota guard", () => {
     )
   })
 
-  it("uses an open sale slot when one is available (binds appSaleId)", async () => {
-    prismaMock.appUser.count.mockResolvedValue(2)
+  it("uses an open sale slot when one is available (binds appSaleId) — independent of the memorialsMax check", async () => {
     prismaMock.appSale.findMany.mockResolvedValue([
       { id: "sale-full", subscription: { maxProfiles: 1 }, _count: { assignedTo: 1 } },
       { id: "sale-open", subscription: { maxProfiles: 5 }, _count: { assignedTo: 2 } },
@@ -107,8 +96,6 @@ describe("createMemorial — quota guard", () => {
 
 describe("createMemorial — input validation", () => {
   it("rejects invalid input and never touches the DB write", async () => {
-    // An open sale slot exists, so the quota gate passes and we reach zod.
-    prismaMock.appUser.count.mockResolvedValue(0)
     prismaMock.appSale.findMany.mockResolvedValue([])
 
     const res = await createMemorial({ firstName: "" }) // missing required fields

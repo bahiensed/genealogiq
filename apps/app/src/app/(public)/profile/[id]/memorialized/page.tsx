@@ -8,7 +8,8 @@ import { getProfileGradient } from "@/lib/avatar-color"
 import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
-import { prisma } from "@/lib/prisma"
+import { getMemorialFeatures } from "@/lib/subscription"
+import { getMemorialCreationStatus } from "@/lib/memorial-quota"
 import { UpgradeHint } from "@/components/upgrade-hint"
 import { formatDateShort, formatMonthYear } from "@/lib/format-date"
 import type { MemorialRow } from "@/queries/memorial"
@@ -50,33 +51,18 @@ export default async function MemorializedPage({ params }: Props) {
   const t = await getTranslations("Memorialized")
   const locale = await getLocale()
 
-  const [profile, memorials, sales] = await Promise.all([
+  const isOwn = id === session.user.id
+
+  const [profile, memorials, creationStatus, features] = await Promise.all([
     getProfileById(id),
     getMemorialsByCreatorId(id),
-    prisma.appSale.findMany({
-      where: { appUserId: id },
-      select: {
-        subscription: { select: { code: true, maxProfiles: true } },
-        _count: { select: { assignedTo: true } },
-      },
-    }),
+    isOwn ? getMemorialCreationStatus(id) : Promise.resolve(null),
+    isOwn ? getMemorialFeatures(id) : Promise.resolve(null),
   ])
   if (!profile) notFound()
 
-  const availableSlots = sales.reduce(
-    (sum, s) => sum + Math.max(0, s.subscription.maxProfiles - s._count.assignedTo),
-    0,
-  )
-
-  const isOwn = id === session.user.id
-  // Free tier: every user gets 1 memorial slot for free; beyond that requires a paid sale slot.
-  const canCreate = isOwn && (availableSlots > 0 || memorials.length === 0)
-
-  // Highest tier the user already owns drives the upgrade hint visibility.
-  const ownsCentury = sales.some((s) => s.subscription.code === "CENTURY")
-  const currentTier = ownsCentury ? "CENTURY" : "FREE"
-
-  const atLimit = isOwn && !canCreate
+  const atLimit = isOwn && !!creationStatus && !creationStatus.allowed
+  const currentTier = features?.code ?? "FREE"
 
   const miniProfileCtx: MiniProfileContext = {
     locale,
@@ -107,7 +93,10 @@ export default async function MemorializedPage({ params }: Props) {
         <MemorializedClient
           profiles={memorials.map((m) => toMiniProfile(m, miniProfileCtx))}
           isOwn={isOwn}
-          canCreate={canCreate}
+          showCreate={isOwn}
+          atLimit={atLimit}
+          memorialsMax={creationStatus?.limit ?? 0}
+          tier={currentTier}
           newHref={`/profile/${id}/memorialized/new`}
           upgradeHint={atLimit ? <UpgradeHint context="memorialized" currentTier={currentTier} /> : undefined}
         />

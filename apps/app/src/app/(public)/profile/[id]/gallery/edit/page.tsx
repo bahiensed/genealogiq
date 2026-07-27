@@ -10,6 +10,7 @@ import { getGalleryByUserId } from "@/queries/gallery"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getCombinedMediaUsage } from "@/queries/media-usage"
 import { UpgradeHint } from "@/components/upgrade-hint"
 
 interface Props {
@@ -24,10 +25,11 @@ export default async function GalleryEditPage({ params }: Props) {
     getTranslations("Common"),
   ])
 
-  const [profile, items, features] = await Promise.all([
+  const [profile, items, features, combinedMedia] = await Promise.all([
     getProfileById(id),
     getGalleryByUserId(id),
     getMemorialFeatures(id),
+    getCombinedMediaUsage(id),
   ])
   if (!profile) notFound()
 
@@ -35,7 +37,8 @@ export default async function GalleryEditPage({ params }: Props) {
 
   const imageCount = items.filter((i) => i.kind === "image").length
   const videoCount = items.filter((i) => i.kind === "video").length
-  const atLimit = imageCount >= features.galleryMaxImages || videoCount >= features.galleryMaxVideos
+  const otherImagesUsed = combinedMedia.images - imageCount
+  const atLimit = combinedMedia.images >= features.mediaMaxImages || videoCount >= features.mediaMaxVideos
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -61,8 +64,10 @@ export default async function GalleryEditPage({ params }: Props) {
         <GalleryEditForm
           initial={items}
           profileId={id}
-          maxImages={features.galleryMaxImages}
-          maxVideos={features.galleryMaxVideos}
+          maxImages={features.mediaMaxImages}
+          maxVideos={features.mediaMaxVideos}
+          otherImagesUsed={otherImagesUsed}
+          tier={features.code}
         />
       </main>
     </div>
