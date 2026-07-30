@@ -24,6 +24,7 @@ export function InstallClient() {
               <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
             )}
             {status === "installed" && <CircleCheck className="h-4 w-4 text-primary" />}
+            {status === "already-installed" && <CircleCheck className="h-4 w-4 text-primary" />}
             {status === "native" && <Download className="h-4 w-4 text-primary" />}
             {status === "ios" && <Share className="h-4 w-4 text-primary" />}
             {status === "unsupported" && <Info className="h-4 w-4 text-primary" />}
@@ -38,6 +39,16 @@ export function InstallClient() {
           <>
             <h1 className="text-xl font-semibold tracking-tight">{t("page.installedTitle")}</h1>
             <p className="text-sm text-muted-foreground">{t("page.installedMessage")}</p>
+            <Button asChild className="mt-2 gap-2">
+              <Link href="/home">{t("page.openAppButton")}</Link>
+            </Button>
+          </>
+        )}
+
+        {status === "already-installed" && (
+          <>
+            <h1 className="text-xl font-semibold tracking-tight">{t("page.alreadyInstalledTitle")}</h1>
+            <p className="text-sm text-muted-foreground">{t("page.alreadyInstalledMessage")}</p>
             <Button asChild className="mt-2 gap-2">
               <Link href="/home">{t("page.openAppButton")}</Link>
             </Button>

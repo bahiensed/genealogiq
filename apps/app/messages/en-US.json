@@ -776,11 +776,13 @@
     "iosStep3": "Tap \"Add\" to confirm.",
     "neverAskCheckbox": "Don't ask me again",
     "page": {
+      "alreadyInstalledMessage": "You already have Genealogiq installed on this device. Check your home screen or app list.",
+      "alreadyInstalledTitle": "Already installed",
       "checking": "Checking your browser…",
       "installedMessage": "Genealogiq is already installed on this device.",
       "installedTitle": "You're all set!",
       "openAppButton": "Open Genealogiq",
-      "unsupportedMessage": "Your browser doesn't support one-tap installation. Try opening this page in Chrome, Edge or Samsung Internet on Android, or use your browser's own menu to add Genealogiq to your home screen.",
+      "unsupportedMessage": "We couldn't offer one-tap installation here — this can mean Genealogiq is already installed on this device, or that your browser doesn't support it. Try opening this page in Chrome, Edge or Samsung Internet on Android, or use your browser's own menu to add Genealogiq to your home screen.",
       "unsupportedTitle": "One-tap install isn't available here"
     },
     "title": "Install the Genealogiq App now!"

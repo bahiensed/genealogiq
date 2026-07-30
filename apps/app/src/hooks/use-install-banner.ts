@@ -30,7 +30,16 @@ export function useInstallBanner() {
   const promptEvent = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
-    if (isStandaloneDisplay() || wasInstalled()) return
+    if (isStandaloneDisplay()) {
+      // Self-heal: a launch from the real installed icon is the only moment
+      // we can durably learn "this browser has it installed" — an install
+      // that happened before this flag existed would otherwise never
+      // persist it, and every later ordinary browser-tab visit on /home
+      // would keep showing this banner forever.
+      markInstalled()
+      return
+    }
+    if (wasInstalled()) return
 
     const onBeforeInstallPrompt = (event: Event) => {
       event.preventDefault()

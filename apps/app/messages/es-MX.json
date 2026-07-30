@@ -776,11 +776,13 @@
     "iosStep3": "Toca \"Agregar\" para confirmar.",
     "neverAskCheckbox": "No preguntarme de nuevo",
     "page": {
+      "alreadyInstalledMessage": "Ya tienes Genealogiq instalado en este dispositivo. Revisa tu pantalla de inicio o lista de apps.",
+      "alreadyInstalledTitle": "Ya instalado",
       "checking": "Verificando tu navegador…",
       "installedMessage": "Genealogiq ya está instalado en este dispositivo.",
       "installedTitle": "¡Todo listo!",
       "openAppButton": "Abrir Genealogiq",
-      "unsupportedMessage": "Tu navegador no admite la instalación con un toque. Intenta abrir esta página en Chrome, Edge o Samsung Internet en Android, o usa el menú de tu navegador para agregar Genealogiq a la pantalla de inicio.",
+      "unsupportedMessage": "No pudimos ofrecer la instalación con un toque aquí — esto puede significar que Genealogiq ya está instalado en este dispositivo, o que tu navegador no lo admite. Intenta abrir esta página en Chrome, Edge o Samsung Internet en Android, o usa el menú de tu navegador para agregar Genealogiq a la pantalla de inicio.",
       "unsupportedTitle": "Instalación con un toque no disponible aquí"
     },
     "title": "¡Instala la app de Genealogiq ahora!"

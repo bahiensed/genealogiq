@@ -45,6 +45,13 @@ export function usePwaInstall() {
   const promptEvent = useRef<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
+    // Self-heal: a launch from the real installed icon is the only moment we
+    // can durably learn "this browser has it installed" — an install that
+    // happened before this flag existed would otherwise never persist it,
+    // and every later ordinary browser-tab visit would keep reading as "not
+    // installed" and re-offering the dialog forever.
+    if (isStandaloneDisplay()) markInstalled()
+
     // Whether the dialog may SHOW. The listeners attach regardless: the
     // beforeinstallprompt preventDefault() must run even during the dismissal
     // cooldown, or Chrome falls back to its own mini-infobar — the one UI we

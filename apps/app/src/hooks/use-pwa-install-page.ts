@@ -7,9 +7,16 @@ import {
   isStandaloneDisplay,
   markDismissed,
   markInstalled,
+  wasInstalled,
 } from "@/lib/pwa-install"
 
-export type PwaInstallPageStatus = "checking" | "installed" | "native" | "ios" | "unsupported"
+export type PwaInstallPageStatus =
+  | "checking"
+  | "installed"
+  | "already-installed"
+  | "native"
+  | "ios"
+  | "unsupported"
 
 // How long to wait for beforeinstallprompt before concluding "unsupported".
 // Generous on purpose: on a genuinely first-ever visit (cold HTTP cache),
@@ -42,7 +49,22 @@ export function usePwaInstallPage() {
 
   useEffect(() => {
     if (isStandaloneDisplay()) {
+      // Self-heal: a launch from the real installed icon is the only moment
+      // we can durably learn "this browser has it installed" — an install
+      // that happened before this flag existed (or via a route that never
+      // wrote it) would otherwise never persist it, and every later ordinary
+      // browser-tab visit would keep reading as "not installed" forever.
+      markInstalled()
       setStatus("installed")
+      return
+    }
+
+    if (wasInstalled()) {
+      // Not running standalone right now, but this browser has installed it
+      // before — beforeinstallprompt won't fire again for an already-
+      // installed app, so waiting for SETTLE_MS would wrongly settle on
+      // "unsupported". Short-circuit with a distinct status instead.
+      setStatus("already-installed")
       return
     }
 
