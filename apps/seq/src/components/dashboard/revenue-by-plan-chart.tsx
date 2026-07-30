@@ -70,10 +70,7 @@ export function RevenueByPlanChart({ data }: Props) {
             <Cell key={i} fill={chartData[i].fill} stroke="transparent" />
           ))}
         </Pie>
-        <ChartLegend
-          content={<ChartLegendContent nameKey="name" />}
-          className="flex-wrap gap-y-1"
-        />
+        <ChartLegend content={<ChartLegendContent nameKey="name" className="flex-wrap gap-y-1" />} />
       </PieChart>
     </ChartContainer>
   )
