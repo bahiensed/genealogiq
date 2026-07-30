@@ -66,6 +66,8 @@ function makeGhostIdentity(t: Translator) {
     gender:     z.enum(["MALE", "FEMALE", "OTHER"]).nullable().optional(),
     birthDate:  dateString,
     deathDate:  dateString,
+    birthPlace: z.string().trim().max(100).optional().nullable(),
+    deathPlace: z.string().trim().max(100).optional().nullable(),
   })
 }
 

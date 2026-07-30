@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef } from "react"
 import { useTranslations } from "next-intl"
-import { Search, User, UserPlus, ArrowLeft } from "lucide-react"
+import { Search, User, UserPlus, ArrowLeft, Globe, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -27,9 +27,11 @@ import { addRelation, addGhostRelative } from "@/actions/family-tree.actions"
 import { SPOUSE_SUBTYPES, type SpouseSubtype } from "@/schemas/family-tree.schema"
 import { LimitReachedDialog } from "@/components/limit-reached-dialog"
 import type { PlanTier } from "@/lib/plan-quotas"
+import type { WikiTreeSearchResult, WikiTreeProfile } from "@/lib/wikitree"
+import { mapWikiTreeProfileToGhostPrefill, wikiTreeSearchResultYears } from "@/lib/wikitree-mapper"
 
 type RelationKind = "parent" | "spouse" | "sibling" | "child"
-type Mode = "search" | "create"
+type Mode = "search" | "create" | "wikitree"
 
 interface SearchResult {
   id: string
@@ -97,6 +99,17 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
   const [gender,    setGender]      = useState<"MALE" | "FEMALE" | "OTHER" | "">("")
   const [birthDate, setBirthDate]   = useState("")
   const [deathDate, setDeathDate]   = useState("")
+  const [birthPlace, setBirthPlace] = useState("")
+  const [deathPlace, setDeathPlace] = useState("")
+  const [wikiTreeSource, setWikiTreeSource] = useState<string | null>(null)
+
+  // WikiTree search
+  const [wikitreeQuery, setWikitreeQuery]     = useState("")
+  const [wikitreeResults, setWikitreeResults] = useState<WikiTreeSearchResult[]>([])
+  const [wikitreeLoading, setWikitreeLoading] = useState(false)
+  const [wikitreeError, setWikitreeError]     = useState(false)
+  const [wikitreeProfileLoading, setWikitreeProfileLoading] = useState<string | null>(null)
+  const wikitreeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleSearch = (value: string) => {
     setQuery(value)
@@ -115,6 +128,53 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         setLoading(false)
       }
     }, 300)
+  }
+
+  const handleWikitreeSearch = (value: string) => {
+    setWikitreeQuery(value)
+    setWikitreeError(false)
+    if (wikitreeDebounceRef.current) clearTimeout(wikitreeDebounceRef.current)
+    if (!value.trim()) { setWikitreeResults([]); return }
+    wikitreeDebounceRef.current = setTimeout(async () => {
+      setWikitreeLoading(true)
+      try {
+        const res = await fetch(`/api/wikitree/search?q=${encodeURIComponent(value)}`)
+        if (!res.ok) { setWikitreeResults([]); setWikitreeError(true); return }
+        const data = await res.json() as WikiTreeSearchResult[]
+        setWikitreeResults(data)
+      } catch {
+        setWikitreeResults([])
+        setWikitreeError(true)
+      } finally {
+        setWikitreeLoading(false)
+      }
+    }, 300)
+  }
+
+  const handleSelectWikitreeResult = (result: WikiTreeSearchResult) => {
+    setWikitreeProfileLoading(result.id)
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/wikitree/profile?id=${encodeURIComponent(result.id)}`)
+        if (!res.ok) { toast.error(t("addRelative.wikitree.profileFetchFailed")); return }
+        const profile = await res.json() as WikiTreeProfile
+        const prefill = mapWikiTreeProfileToGhostPrefill(profile)
+        setFirstName(prefill.firstName)
+        setLastName(prefill.lastName)
+        setMaidenName(prefill.maidenName ?? "")
+        setGender(prefill.gender ?? "")
+        setBirthDate(prefill.birthDate ?? "")
+        setDeathDate(prefill.deathDate ?? "")
+        setBirthPlace(prefill.birthPlace ?? "")
+        setDeathPlace(prefill.deathPlace ?? "")
+        setWikiTreeSource(prefill.sourceUrl)
+        setMode("create")
+      } catch {
+        toast.error(t("addRelative.wikitree.profileFetchFailed"))
+      } finally {
+        setWikitreeProfileLoading(null)
+      }
+    })
   }
 
   const handleConfirmExisting = () => {
@@ -160,6 +220,8 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
         gender:     gender || null,
         birthDate:  birthDate || null,
         deathDate:  deathDate || null,
+        birthPlace: birthPlace || null,
+        deathPlace: deathPlace || null,
         anchorId, kind,
         subtype:   kind === "spouse" ? spouseSubtype : null,
         startDate: kind === "spouse" && marriedAt ? marriedAt : null,
@@ -185,6 +247,8 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
     setFirstName(""); setLastName(""); setMaidenName("")
     setNickname("")
     setGender(""); setBirthDate(""); setDeathDate("")
+    setBirthPlace(""); setDeathPlace(""); setWikiTreeSource(null)
+    setWikitreeQuery(""); setWikitreeResults([]); setWikitreeError(false)
   }
 
   const showNoResults = !loading && results.length === 0 && query.length >= 3
@@ -201,7 +265,7 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
     <Dialog open={open && !limitDialogOpen} onOpenChange={(v) => { if (!v && !limitDialogOpen) handleClose() }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="text-xl">
             {mode === "create" ? (
               <span className="inline-flex items-center gap-2">
                 <button
@@ -214,13 +278,25 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                 </button>
                 {t("addRelative.newPersonTitle")}
               </span>
+            ) : mode === "wikitree" ? (
+              <span className="inline-flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMode("search")}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label={t("addRelative.backToSearch")}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                {t("addRelative.wikitree.title")}
+              </span>
             ) : t("addRelative.title")}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="grid grid-cols-2 gap-2 items-end">
-            <div className="space-y-1.5">
+          <div className={cn("gap-2 items-end", mode === "search" ? "flex" : "grid grid-cols-2")}>
+            <div className="space-y-1.5 shrink-0">
               <FieldLabel>{t("addRelative.kindLabel")}</FieldLabel>
               <Select value={kind} onValueChange={(v) => setKind(v as RelationKind)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
@@ -231,7 +307,12 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                 </SelectContent>
               </Select>
             </div>
-            {kind === "spouse" && (
+            {mode === "search" ? (
+              <div className="relative flex-1 min-w-0">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input className="pl-9 w-full" placeholder={t("addRelative.searchPlaceholder")} value={query} onChange={(e) => handleSearch(e.target.value)} />
+              </div>
+            ) : kind === "spouse" && (
               <div className="space-y-1.5">
                 <FieldLabel>{t("addRelative.typeLabel")}</FieldLabel>
                 <Select value={spouseSubtype} onValueChange={(v) => setSpouseSubtype(v as SpouseSubtype)}>
@@ -245,6 +326,20 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
               </div>
             )}
           </div>
+
+          {mode === "search" && kind === "spouse" && (
+            <div className="space-y-1.5">
+              <FieldLabel>{t("addRelative.typeLabel")}</FieldLabel>
+              <Select value={spouseSubtype} onValueChange={(v) => setSpouseSubtype(v as SpouseSubtype)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {SPOUSE_SUBTYPES.map((s) => (
+                    <SelectItem key={s} value={s}>{t(`subtypes.${s}`)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {kind === "spouse" && (
             <div className="grid grid-cols-2 gap-2">
@@ -275,11 +370,6 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
 
           {mode === "search" ? (
             <div className="space-y-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9" placeholder={t("addRelative.searchPlaceholder")} value={query} onChange={(e) => handleSearch(e.target.value)} />
-              </div>
-
               {(results.length > 0 || loading) && (
                 <div className="border border-border/60 rounded-lg overflow-hidden max-h-44 overflow-y-auto">
                   {loading ? (
@@ -321,15 +411,111 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
 
               <button
                 type="button"
-                onClick={() => setMode("create")}
-                className="w-full inline-flex items-center justify-center gap-2 text-sm font-medium text-primary hover:underline pt-1"
+                onClick={() => setMode("wikitree")}
+                className="w-full inline-flex items-center justify-start gap-2 text-sm font-medium text-primary hover:underline pt-4"
               >
-                <UserPlus className="h-4 w-4" />
-                {t("addRelative.addNewPerson")}
+                <Globe className="h-4 w-4 shrink-0" />
+                {t("addRelative.searchWikiTree")}
               </button>
+
+              <button
+                type="button"
+                onClick={() => { setWikiTreeSource(null); setMode("create") }}
+                className="w-full inline-flex items-start justify-start gap-2 text-sm font-medium text-primary hover:underline pt-1"
+              >
+                <UserPlus className="h-4 w-4 shrink-0 mt-0.5" />
+                <span className="text-left">
+                  <span className="block">{t("addRelative.addNewPersonQuestion")}</span>
+                  <span className="block">{t("addRelative.addNewPersonAction")}</span>
+                </span>
+              </button>
+            </div>
+          ) : mode === "wikitree" ? (
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder={t("addRelative.wikitree.placeholder")}
+                  value={wikitreeQuery}
+                  onChange={(e) => handleWikitreeSearch(e.target.value)}
+                />
+              </div>
+
+              {(wikitreeResults.length > 0 || wikitreeLoading) && (
+                <div className="border border-border/60 rounded-lg overflow-hidden max-h-44 overflow-y-auto">
+                  {wikitreeLoading ? (
+                    <div className="py-6 flex items-center justify-center">
+                      <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    </div>
+                  ) : (
+                    wikitreeResults.map((r) => {
+                      const lastName = r.lastNameCurrent || r.lastNameAtBirth
+                      const name = `${r.firstName} ${lastName}`.trim()
+                      const { birthYear, deathYear } = wikiTreeSearchResultYears(r)
+                      const years = [birthYear, deathYear].filter((y): y is number => y !== null).join(" – ")
+                      const isLoadingProfile = wikitreeProfileLoading === r.id
+                      return (
+                        <button
+                          key={r.id}
+                          type="button"
+                          disabled={isLoadingProfile}
+                          onClick={() => handleSelectWikitreeResult(r)}
+                          className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-accent/60 transition-colors disabled:opacity-60"
+                        >
+                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0 ring-2 ring-border/40">
+                            {isLoadingProfile ? (
+                              <div className="h-3.5 w-3.5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                            ) : (
+                              <Globe className="h-4 w-4 text-muted-foreground" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{name}</p>
+                            <p className="text-[10px] text-muted-foreground truncate">
+                              {[years, r.birthLocation].filter(Boolean).join(" · ")}
+                            </p>
+                          </div>
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+              )}
+
+              {wikitreeError && (
+                <p className="text-sm text-center text-muted-foreground py-2">
+                  {t("addRelative.wikitree.unavailable")}{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setWikiTreeSource(null); setMode("create") }}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    {t("addRelative.wikitree.tryManual")}
+                  </button>
+                </p>
+              )}
+
+              {!wikitreeError && !wikitreeLoading && wikitreeResults.length === 0 && wikitreeQuery.length >= 3 && (
+                <p className="text-sm text-center text-muted-foreground py-2">{t("addRelative.wikitree.noResults")}</p>
+              )}
             </div>
           ) : (
             <div className="space-y-3">
+              {wikiTreeSource && (
+                <p className="text-xs text-muted-foreground">
+                  {t("addRelative.wikitree.sourceLabel")}{" — "}
+                  <a
+                    href={wikiTreeSource}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:underline"
+                  >
+                    {t("addRelative.wikitree.viewSource")}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </p>
+              )}
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
                   <FieldLabel htmlFor="g-first" required>{t("fields.firstName")}</FieldLabel>
@@ -371,6 +557,16 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
                   <Input id="g-death" type="date" value={deathDate} onChange={(e) => setDeathDate(e.target.value)} />
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1.5">
+                  <FieldLabel htmlFor="g-birthplace">{t("fields.birthPlace")}</FieldLabel>
+                  <Input id="g-birthplace" value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} maxLength={100} />
+                </div>
+                <div className="space-y-1.5">
+                  <FieldLabel htmlFor="g-deathplace">{t("fields.deathPlace")}</FieldLabel>
+                  <Input id="g-deathplace" value={deathPlace} onChange={(e) => setDeathPlace(e.target.value)} maxLength={100} />
+                </div>
+              </div>
               <p className="text-xs text-muted-foreground">
                 {t("addRelative.ghostHint")}
               </p>
@@ -382,11 +578,11 @@ export function AddRelativeDialog({ open, onClose, anchorId, rootId, initialKind
           <Button variant="outline" onClick={handleClose} disabled={isPending}>{tc("cancel")}</Button>
           {mode === "search" ? (
             <Button onClick={handleConfirmExisting} disabled={!selected || isPending}>{tc("add")}</Button>
-          ) : (
+          ) : mode === "create" ? (
             <Button onClick={handleConfirmGhost} disabled={isPending}>
               {isPending ? tc("saving") : t("addRelative.addToTree")}
             </Button>
-          )}
+          ) : null}
         </DialogFooter>
       </DialogContent>
     </Dialog>

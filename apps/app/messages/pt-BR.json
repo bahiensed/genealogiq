@@ -321,7 +321,8 @@
   },
   "FamilyTree": {
     "addRelative": {
-      "addNewPerson": "Não encontrou um perfil? Adicione uma nova pessoa à árvore.",
+      "addNewPersonAction": "Adicione-o manualmente.",
+      "addNewPersonQuestion": "Não encontrou o perfil que procurava?",
       "addToTree": "Adicionar à árvore",
       "backToSearch": "Voltar à busca",
       "divorced": "Divórcio",
@@ -331,11 +332,22 @@
       "marriedTo": "Casado(a) com <strong>{name}</strong>?",
       "newPersonTitle": "Adicionar uma nova pessoa",
       "noResults": "Nenhum resultado encontrado.",
-      "searchPlaceholder": "Buscar perfil...",
+      "searchPlaceholder": "Buscar perfil em Genealogiq",
+      "searchWikiTree": "Buscar na WikiTree",
       "title": "Adicionar parente",
       "togetherSince": "Juntos desde",
       "typeLabel": "Tipo:",
-      "widowed": "Viuvez"
+      "widowed": "Viuvez",
+      "wikitree": {
+        "noResults": "Nenhum resultado encontrado na WikiTree.",
+        "placeholder": "Buscar na WikiTree...",
+        "profileFetchFailed": "Não foi possível carregar esse perfil — tente novamente ou preencha manualmente.",
+        "sourceLabel": "Preenchido a partir da WikiTree",
+        "title": "Buscar na WikiTree",
+        "tryManual": "Preencher manualmente",
+        "unavailable": "A busca na WikiTree está indisponível no momento.",
+        "viewSource": "Ver fonte"
+      }
     },
     "canvasSearch": {
       "buttonTitle": "Buscar na árvore (/)",
@@ -374,7 +386,9 @@
     },
     "fields": {
       "birthDate": "Data de nascimento",
+      "birthPlace": "Local de nascimento",
       "deathDate": "Data de falecimento",
+      "deathPlace": "Local de falecimento",
       "firstName": "Nome",
       "gender": "Gênero",
       "genderSelect": "Selecione",
@@ -873,7 +887,7 @@
     "list": {
       "emptyGuarded": "Nenhum perfil memorializado sob sua guarda ainda.",
       "emptyOwn": "Nenhum perfil memorializado ainda.",
-      "newProfile": "Novo perfil memorializado",
+      "newProfile": "Novo memorial",
       "sortAria": "Ordenar perfis",
       "sortAsc": "A → Z",
       "sortDesc": "Z → A",

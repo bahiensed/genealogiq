@@ -321,7 +321,8 @@
   },
   "FamilyTree": {
     "addRelative": {
-      "addNewPerson": "Didn't find a profile? Add a new person to the tree.",
+      "addNewPersonAction": "Add them manually.",
+      "addNewPersonQuestion": "Didn't find the profile you were looking for?",
       "addToTree": "Add to tree",
       "backToSearch": "Back to search",
       "divorced": "Divorced",
@@ -331,11 +332,22 @@
       "marriedTo": "Married to <strong>{name}</strong>?",
       "newPersonTitle": "Add a new person",
       "noResults": "No results found.",
-      "searchPlaceholder": "Search profile...",
+      "searchPlaceholder": "Search profile on Genealogiq",
+      "searchWikiTree": "Search WikiTree",
       "title": "Add relative",
       "togetherSince": "Together since",
       "typeLabel": "Type:",
-      "widowed": "Widowed"
+      "widowed": "Widowed",
+      "wikitree": {
+        "noResults": "No WikiTree matches found.",
+        "placeholder": "Search WikiTree...",
+        "profileFetchFailed": "Couldn't load that profile — try again or enter manually.",
+        "sourceLabel": "Prefilled from WikiTree",
+        "title": "Search WikiTree",
+        "tryManual": "Try manual entry instead",
+        "unavailable": "WikiTree search is unavailable right now.",
+        "viewSource": "View source"
+      }
     },
     "canvasSearch": {
       "buttonTitle": "Search the tree (/)",
@@ -374,7 +386,9 @@
     },
     "fields": {
       "birthDate": "Birth date",
+      "birthPlace": "Birthplace",
       "deathDate": "Death date",
+      "deathPlace": "Place of death",
       "firstName": "First name",
       "gender": "Gender",
       "genderSelect": "Select",
@@ -873,7 +887,7 @@
     "list": {
       "emptyGuarded": "No memorial profiles guarded yet.",
       "emptyOwn": "No memorial profiles yet.",
-      "newProfile": "New memorial profile",
+      "newProfile": "New memorial",
       "sortAria": "Sort profiles",
       "sortAsc": "A → Z",
       "sortDesc": "Z → A",
