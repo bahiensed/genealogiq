@@ -66,6 +66,8 @@ export const Y_GEN     = 140
 export const X_TIGHT   = 24   // gap inside a couple
 export const X_SIBLING = 40   // gap between siblings of the same parents
 export const X_FAMILY  = 64   // gap between unrelated family blocks at the same level
+export const PET_GAP_Y = 20   // vertical gap below an owner's card before a pet node
+export const PET_GAP_X = 12   // horizontal gap between two pets stacked under the same owner(s)
 
 // ─── Output types ────────────────────────────────────────────────────────────
 
@@ -121,11 +123,18 @@ export interface SiblingLineGeom {
   relationId: string
 }
 
+export interface PetLineGeom {
+  petId:      string
+  ownerId:    string
+  relationId: string
+}
+
 export interface LayoutResult {
   nodes:        LaidNode[]
   parentLines:  ParentLineGeom[]
   coupleLines:  CoupleLineGeom[]
   siblingLines: SiblingLineGeom[]
+  petLines:     PetLineGeom[]
   bounds:       { minX: number; maxX: number; minY: number; maxY: number }
   generation:   Map<string, number>
 }
@@ -807,6 +816,66 @@ export function computeLayout(
   }
   if (!Number.isFinite(minX)) { minX = 0; maxX = NODE_W; minY = 0; maxY = NODE_H }
 
+  // 4b. Attach pets to their owner(s) — a pure post-layout pass. `PET_OF` is
+  // invisible to buildFamilyGraph (only PARENT_OF/SPOUSE/SIBLING are
+  // recognized there), so pets never entered `combined` above and never
+  // gain ancestors/descendants of their own — exactly the "attached leaf,
+  // not a blood relative" behavior wanted. A pet is placed just below
+  // whichever owner(s) already have a placed occurrence in THIS particular
+  // tree view; a pet with none of its owners present here is simply
+  // omitted (it belongs to a different branch/tree than the one rendered).
+  const petLines: PetLineGeom[] = []
+  const posByPersonId = new Map<string, { x: number; y: number }>()
+  for (const n of nodes) {
+    const existing = posByPersonId.get(n.personId)
+    if (!existing || !n.isDuplicate) posByPersonId.set(n.personId, { x: n.x, y: n.y })
+  }
+
+  const petOwnerRows = new Map<string, { ownerId: string; relationId: string }[]>()
+  for (const r of relations) {
+    if (r.type !== "PET_OF" || r.status === "REJECTED") continue
+    const arr = petOwnerRows.get(r.fromId) ?? []
+    arr.push({ ownerId: r.toId, relationId: r.id })
+    petOwnerRows.set(r.fromId, arr)
+  }
+
+  // Group pets by the exact set of their PRESENT owners so co-owned pets
+  // (and multiple pets of the same owner) stack together under one anchor.
+  const petsByOwnerGroup = new Map<string, { ownerIds: string[]; petIds: string[] }>()
+  for (const [petId, ownerRows] of petOwnerRows.entries()) {
+    if (!persons[petId]) continue
+    const presentOwnerRows = ownerRows.filter((o) => posByPersonId.has(o.ownerId))
+    if (presentOwnerRows.length === 0) continue
+    const presentOwnerIds = presentOwnerRows.map((o) => o.ownerId)
+    const key = [...presentOwnerIds].sort().join("|")
+    const group = petsByOwnerGroup.get(key) ?? { ownerIds: presentOwnerIds, petIds: [] }
+    group.petIds.push(petId)
+    petsByOwnerGroup.set(key, group)
+    for (const o of presentOwnerRows) {
+      petLines.push({ petId, ownerId: o.ownerId, relationId: o.relationId })
+    }
+  }
+
+  for (const { ownerIds, petIds } of petsByOwnerGroup.values()) {
+    const ownerPositions = ownerIds.map((id) => posByPersonId.get(id)!)
+    const anchorX = ownerPositions.reduce((sum, p) => sum + p.x + NODE_W / 2, 0) / ownerPositions.length
+    const anchorY = Math.max(...ownerPositions.map((p) => p.y))
+    const petY = anchorY + NODE_H + PET_GAP_Y
+    const totalWidth = petIds.length * NODE_W + (petIds.length - 1) * PET_GAP_X
+    let petX = anchorX - totalWidth / 2
+    for (const petId of petIds) {
+      nodes.push({
+        id: petId, personId: petId, isDuplicate: false, x: petX, y: petY,
+        hasCollapsible: false, isCollapsed: false, collapseDirection: "down",
+      })
+      if (petX          < minX) minX = petX
+      if (petX + NODE_W  > maxX) maxX = petX + NODE_W
+      if (petY           < minY) minY = petY
+      if (petY + NODE_H  > maxY) maxY = petY + NODE_H
+      petX += NODE_W + PET_GAP_X
+    }
+  }
+
   // 5. Edge geometry — derived from raw relations, same shape as the old layout.
   // PARENT_OF edges consult `dedup.parentEdgeOverrides` so a relation whose
   // parent occurrence was placed as a pedigree-collapse duplicate connects to
@@ -842,6 +911,7 @@ export function computeLayout(
     parentLines,
     coupleLines,
     siblingLines,
+    petLines,
     bounds: { minX, maxX, minY, maxY },
     generation,
   }

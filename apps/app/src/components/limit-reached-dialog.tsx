@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import type { LucideIcon } from "lucide-react"
-import { Network, BookOpenText, FileText, Images, Film, MapPin, BrickWall, QrCode } from "lucide-react"
+import { Network, BookOpenText, FileText, Images, Film, MapPin, BrickWall, QrCode, PawPrint } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,7 @@ export type LimitReachedContext =
   | "media-videos"
   | "geoPlaces"
   | "memorials"
+  | "pets"
   | "qrCode"
 
 interface Props {
@@ -43,6 +44,7 @@ const CONTEXT_ICON: Record<LimitReachedContext, LucideIcon> = {
   "media-videos": Film,
   geoPlaces: MapPin,
   memorials: BrickWall,
+  pets: PawPrint,
   qrCode: QrCode,
 }
 
@@ -56,6 +58,7 @@ const CONTEXT_I18N_KEY: Record<LimitReachedContext, string> = {
   "media-videos": "mediaVideos",
   geoPlaces: "geoPlaces",
   memorials: "memorials",
+  pets: "pets",
   qrCode: "qrCode",
 }
 
@@ -69,6 +72,7 @@ const CONTEXT_QUOTA_KEY: Record<LimitReachedContext, keyof PlanQuotas> = {
   "media-videos": "mediaMaxVideos",
   geoPlaces: "geoPlacesMax",
   memorials: "memorialsMax",
+  pets: "petsMax",
   qrCode: "qrCodeMax",
 }
 

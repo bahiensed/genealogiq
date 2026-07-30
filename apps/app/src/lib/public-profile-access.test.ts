@@ -29,6 +29,11 @@ describe("assertPublicMemorialAccess — anonymous viewer", () => {
       .not.toThrow()
   })
 
+  it("allows a pet regardless of isPublicProfile", () => {
+    expect(() => assertPublicMemorialAccess(profile({ role: "APP_PET", isPublicProfile: false }), undefined, "p1"))
+      .not.toThrow()
+  })
+
   it("allows a living user who has not opted out", () => {
     expect(() => assertPublicMemorialAccess(profile({ role: "APP_USER", isPublicProfile: true }), undefined, "p1"))
       .not.toThrow()

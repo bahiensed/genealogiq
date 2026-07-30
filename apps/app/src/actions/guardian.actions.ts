@@ -15,9 +15,9 @@ import {
 // ─── requestGuardianship ─────────────────────────────────────────────────────
 //
 // A user who is NOT yet a guardian of `profileId` asks to co-manage it.
-// Restricted to APP_GHOST / APP_MEMO profiles (real APP_USERs already manage
-// themselves). The row lands as PENDING and every existing accepted guardian
-// gets notified.
+// Restricted to APP_GHOST / APP_MEMO / APP_PET profiles (real APP_USERs
+// already manage themselves). The row lands as PENDING and every existing
+// accepted guardian gets notified.
 
 export async function requestGuardianship(data: unknown): Promise<ActionResult> {
   const t = await getTranslations("Actions")
@@ -42,9 +42,10 @@ export async function requestGuardianship(data: unknown): Promise<ActionResult> 
   })
   if (!profile) return fail(t("guardian.profileNotFound"))
 
-  // Real APP_USERs manage themselves; co-guardianship requests are for ghosts
-  // and memorials only (people who can't speak for themselves).
-  if (profile.role !== "APP_GHOST" && profile.role !== "APP_MEMO") {
+  // Real APP_USERs manage themselves; co-guardianship requests are for
+  // ghosts, memorials, and pets only (subjects who can't speak for
+  // themselves).
+  if (profile.role !== "APP_GHOST" && profile.role !== "APP_MEMO" && profile.role !== "APP_PET") {
     return fail(t("guardian.coManageUnsupported"))
   }
 

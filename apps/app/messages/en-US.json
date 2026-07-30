@@ -90,6 +90,12 @@
       "notAuthorized": "You are not authorized to manage this profile.",
       "notFound": "Profile not found."
     },
+    "pet": {
+      "limitReached": "You reached the limit of {max} pets on your plan.",
+      "notAuthorized": "You are not authorized to manage this profile.",
+      "notFound": "Profile not found.",
+      "ownerNotInTree": "The selected owner must already be a member of your family tree."
+    },
     "physicalQr": {
       "alreadyActivated": "This code has already been activated.",
       "notFound": "QR Code not found.",
@@ -439,6 +445,7 @@
       "expand": "Expand",
       "memorial": "Memorial",
       "pending": "Pending",
+      "pet": "Pet",
       "you": "You"
     },
     "relation": {
@@ -750,6 +757,7 @@
     "myProfileSubtitle": "View your page",
     "myProfileTitle": "My Profile",
     "noProfilesFound": "No profiles found.",
+    "petBadge": "Pet",
     "recentlyViewedEmpty": "No recently viewed profile.",
     "recentlyViewedShort": "recently viewed",
     "recentlyViewedSubtitle": "Recently viewed profiles appear here",
@@ -806,6 +814,7 @@
       "mediaImages": "Your plan allows up to {limit} combined photos across Biography, Gallery and Places.",
       "mediaVideos": "Your plan allows up to {limit} gallery videos.",
       "memorials": "Your plan allows up to {limit} memorials.",
+      "pets": "Your plan allows up to {limit} pets.",
       "qrCode": "Your plan includes {limit} free QR Codes.",
       "tree": "Your plan allows up to {limit} family tree members."
     },
@@ -823,6 +832,7 @@
       "mediaImages": "Photo limit reached",
       "mediaVideos": "Video limit reached",
       "memorials": "Memorial limit reached",
+      "pets": "Pet limit reached",
       "qrCode": "QR Code limit reached",
       "tree": "Family tree limit reached"
     }
@@ -855,6 +865,7 @@
       "backToProfile": "Back to profile",
       "subtitleLiving": "Update your personal information.",
       "subtitleMemorial": "Update this memorial's information.",
+      "subtitlePet": "Update this pet's information.",
       "title": "Edit Profile"
     },
     "fields": {
@@ -1023,6 +1034,84 @@
     "retry": "Try again",
     "title": "You're offline"
   },
+  "Pets": {
+    "actions": {
+      "createProfile": "Create profile",
+      "reset": "Reset"
+    },
+    "avatar": {
+      "change": "Change image",
+      "unsupportedFile": "Unsupported file. Use {formats}.",
+      "uploadError": "Failed to upload avatar.",
+      "waitUploading": "Please wait for the avatar to finish uploading."
+    },
+    "card": {
+      "born": "Born {date}",
+      "fallbackSubtitle": "Pet profile"
+    },
+    "date": {
+      "clear": "Clear",
+      "pick": "Pick a date"
+    },
+    "delete": {
+      "button": "Delete profile",
+      "description": "This will permanently remove {name}'s profile, biography, gallery, documents and places. This action cannot be undone.",
+      "title": "Delete this profile?"
+    },
+    "errors": {
+      "needOwner": "Select at least one owner for this pet."
+    },
+    "fields": {
+      "birthDate": "Birth date",
+      "breed": "Breed",
+      "deathDate": "Death date",
+      "gender": "Gender",
+      "name": "Name",
+      "species": "Species"
+    },
+    "gender": {
+      "female": "Female",
+      "male": "Male"
+    },
+    "list": {
+      "emptyGuarded": "No pets yet",
+      "emptyOwn": "No pets yet",
+      "newProfile": "New pet",
+      "sortAria": "Sort profiles",
+      "sortAsc": "A to Z",
+      "sortDesc": "Z to A",
+      "tagline": "The companions who shared the journey."
+    },
+    "listPage": {
+      "backToProfile": "Back to profile",
+      "profileCount": "{count, plural, one {# pet} other {# pets}}",
+      "title": "Pets"
+    },
+    "newPage": {
+      "backToPets": "Back to pets",
+      "subtitle": "Register a companion and attach it to your family tree.",
+      "title": "New Pet"
+    },
+    "owners": {
+      "description": "Select which people in your family tree own this pet."
+    },
+    "placeholders": {
+      "breed": "e.g. Golden Retriever",
+      "name": "Pet's name",
+      "notSpecified": "Not specified",
+      "species": "e.g. Dog, Cat, Bird"
+    },
+    "sections": {
+      "owners": "Owners"
+    },
+    "toasts": {
+      "changesReset": "Changes reset.",
+      "created": "Pet profile created.",
+      "deleted": "Pet profile deleted.",
+      "formReset": "Form reset.",
+      "saved": "Changes saved."
+    }
+  },
   "Profile": {
     "addToFavorites": "Add to favorites",
     "bioDescription": "A life told in chapters: moments, places and turning points",
@@ -1066,8 +1155,10 @@
     "guardianTitle": "Memorials",
     "mapAlt": "Map",
     "memorialized": "Memorial",
-    "petsComingSoon": "Coming soon",
+    "petBadge": "Pet",
     "petsDescription": "The companions who shared the journey",
+    "petsEmptyMetric": "No pets yet",
+    "petsMetric": "{count, plural, one {# pet} other {# pets}}",
     "petsTitle": "Pets",
     "placesDescription": "The meaningful places of a life, on the map",
     "placesEmptyMetric": "No places yet",
@@ -1268,6 +1359,7 @@
         "gallery": "Need more images and videos?",
         "geolocation": "Need precise GPS coordinates?",
         "memorialized": "Need more memorial profiles?",
+        "pets": "Need more pet profiles?",
         "tree": "Need a bigger tree?"
       }
     }

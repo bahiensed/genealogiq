@@ -20,7 +20,7 @@ export interface MiniProfile {
   id: string
   name: string
   subtitle: string
-  status: "Memorialized" | "Living"
+  status: "Memorialized" | "Living" | "Pet"
   metric: string
   initials: string
   gradient: AvatarGradient
@@ -38,8 +38,9 @@ interface ProfileMiniCardProps {
 export function ProfileMiniCard({ profile, delay = 0, hideLivingBadge, hideMetric }: ProfileMiniCardProps) {
   const t = useTranslations("Home")
   const isMemorial = profile.status === "Memorialized"
-  const statusLabel = isMemorial ? t("memorializedBadge") : t("livingBadge")
-  const showBadge = isMemorial || !hideLivingBadge
+  const isPet = profile.status === "Pet"
+  const statusLabel = isMemorial ? t("memorializedBadge") : isPet ? t("petBadge") : t("livingBadge")
+  const showBadge = isMemorial || isPet || !hideLivingBadge
   const showMetric = !hideMetric
   const showFooter = showBadge || showMetric
 
@@ -75,7 +76,7 @@ export function ProfileMiniCard({ profile, delay = 0, hideLivingBadge, hideMetri
             <span
               className={cn(
                 "text-[10px] font-medium px-2 py-0.5 rounded-full uppercase tracking-wide",
-                isMemorial
+                isMemorial || isPet
                   ? "bg-[hsl(var(--brand-slate)/0.25)] text-[hsl(var(--brand-indigo-deep))] dark:text-[hsl(var(--brand-slate-soft))]"
                   : "bg-gradient-brand-soft text-[hsl(var(--brand-indigo-deep))] dark:text-[hsl(var(--brand-slate-soft))]",
               )}

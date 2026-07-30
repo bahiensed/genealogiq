@@ -103,7 +103,7 @@ export function CanvasSearch({ persons, nodePositions, onPick }: Props) {
                   )}
                 >
                   <span className={cn("flex-1 truncate", isGhost && "italic text-muted-foreground")}>
-                    {p.firstName} {p.lastName}
+                    {p.role === "APP_PET" ? p.firstName : `${p.firstName} ${p.lastName}`}
                     {p.nickname && <span className="text-muted-foreground italic"> &ldquo;{p.nickname}&rdquo;</span>}
                   </span>
                   {p.birthYear && (

@@ -8,7 +8,7 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
 
 type ClientPayload =
   | { profileId: string }
-  | { scope: "create-memorial" }
+  | { scope: "create-memorial" | "create-pet" }
 
 export async function POST(request: Request): Promise<NextResponse> {
   const body = (await request.json()) as HandleUploadBody
@@ -32,8 +32,9 @@ export async function POST(request: Request): Promise<NextResponse> {
           if (!profile) throw new Error("Profile not found")
           if (!canManageProfile(profile, session.user.id)) throw new Error("Forbidden")
         }
-        // For scope=create-memorial the quota is enforced by createMemorial() itself;
-        // an orphaned avatar blob is bounded by the per-upload size limit below.
+        // For scope=create-memorial/create-pet the quota is enforced by
+        // createMemorial()/createPet() themselves; an orphaned avatar blob is
+        // bounded by the per-upload size limit below.
 
         return {
           allowedContentTypes: ALLOWED_TYPES,
@@ -56,8 +57,8 @@ function parseClientPayload(raw: string | null): ClientPayload {
     if (typeof parsed.profileId === "string" && parsed.profileId) {
       return { profileId: parsed.profileId }
     }
-    if (parsed.scope === "create-memorial") {
-      return { scope: "create-memorial" }
+    if (parsed.scope === "create-memorial" || parsed.scope === "create-pet") {
+      return { scope: parsed.scope }
     }
     throw new Error("Invalid client payload")
   } catch {

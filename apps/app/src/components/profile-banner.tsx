@@ -18,7 +18,7 @@ export interface ProfileData {
   name: string
   initials: string
   avatarColor: string
-  type: "living" | "memorialized"
+  type: "living" | "memorialized" | "pet"
   avatarUrl?: string | null
   birth?: { date: string; place: string; country?: string | null; yearOnly?: boolean } | null
   death?: { date: string; place: string; country?: string | null; yearOnly?: boolean } | null
@@ -45,6 +45,7 @@ export function ProfileBanner({ profile }: Props) {
   const locale = useLocale()
   const t = useTranslations("Profile")
   const isMemorial = profile.type === "memorialized"
+  const isPet = profile.type === "pet"
   const isAuthenticated = profile.isAuthenticated ?? true
   const canEdit = profile.isOwn || profile.isGuardian
   const geo = profile.geo && (profile.geo.lat !== 0 || profile.geo.lon !== 0) ? profile.geo : null
@@ -141,6 +142,11 @@ export function ProfileBanner({ profile }: Props) {
                         {t("memorialized")}
                       </Badge>
                     )}
+                    {isPet && (
+                      <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
+                        {t("petBadge")}
+                      </Badge>
+                    )}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
@@ -150,15 +156,17 @@ export function ProfileBanner({ profile }: Props) {
                       </TooltipTrigger>
                       <TooltipContent>{t("tooltipMedia")}</TooltipContent>
                     </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
-                          <Flower className="h-3 w-3 mr-1" />
-                          {profile.tributes}
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>{t("tooltipTributes")}</TooltipContent>
-                    </Tooltip>
+                    {!isPet && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
+                            <Flower className="h-3 w-3 mr-1" />
+                            {profile.tributes}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>{t("tooltipTributes")}</TooltipContent>
+                      </Tooltip>
+                    )}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
@@ -168,7 +176,7 @@ export function ProfileBanner({ profile }: Props) {
                       </TooltipTrigger>
                       <TooltipContent>{t("tooltipFavorites")}</TooltipContent>
                     </Tooltip>
-                    {!isMemorial && (
+                    {!isMemorial && !isPet && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Badge variant="secondary" className="rounded-full glass border-0 text-xs font-medium">
@@ -209,7 +217,7 @@ export function ProfileBanner({ profile }: Props) {
                       </span>
                     </div>
                   )}
-                  {isMemorial && profile.death && (
+                  {(isMemorial || isPet) && profile.death && (
                     <div className="flex items-center gap-2 text-muted-foreground justify-center lg:justify-start min-w-0">
                       <Feather className="h-4 w-4 text-primary shrink-0" />
                       <span className="truncate min-w-0">
@@ -231,7 +239,7 @@ export function ProfileBanner({ profile }: Props) {
                       </span>
                     </div>
                   )}
-                  {isMemorial && (geo || guardians) && (
+                  {(isMemorial || isPet) && (geo || guardians) && (
                     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 justify-center lg:justify-start min-w-0">
                       {geo && (
                         <div className="flex items-center gap-2 text-muted-foreground min-w-0">

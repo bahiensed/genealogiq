@@ -26,6 +26,10 @@ export interface PlanQuotas {
   geoPlacesMax: number
   // How many memorial profiles a guardian may create.
   memorialsMax: number
+  // How many pet profiles a guardian may create — same numbers as
+  // memorialsMax, kept as a separate counter since pets are a distinct
+  // resource (don't share the memorial pool).
+  petsMax: number
   // How many QR codes (own profile + guarded memorials, combined) are free.
   qrCodeMax: number
   // Unchanged — boolean feature of the singular Geolocation model, out of
@@ -42,6 +46,7 @@ export const FREE: PlanQuotas = {
   documentsMax: 16,
   geoPlacesMax: 4,
   memorialsMax: 2,
+  petsMax: 2,
   qrCodeMax: 2,
   geolocationFullAccess: false,
 }
@@ -55,6 +60,7 @@ export const PREMIUM: PlanQuotas = {
   documentsMax: 64,
   geoPlacesMax: 6,
   memorialsMax: 6,
+  petsMax: 6,
   qrCodeMax: 2,
   geolocationFullAccess: true,
 }
@@ -71,6 +77,7 @@ export const PHYSICAL_QR: PlanQuotas = {
   documentsMax: 128,
   geoPlacesMax: 50,
   memorialsMax: 20,
+  petsMax: 20,
   qrCodeMax: 20,
   geolocationFullAccess: true,
 }
@@ -83,4 +90,5 @@ export const ALLOWS_EXTRA_PURCHASE: Partial<Record<keyof PlanQuotas, true>> = {
   geoPlacesMax: true,
   qrCodeMax: true,
   memorialsMax: true,
+  petsMax: true,
 }

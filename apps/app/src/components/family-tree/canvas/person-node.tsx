@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
-import { User, BookOpen, GitBranch, Plus, Minus } from "lucide-react"
+import { User, BookOpen, GitBranch, Plus, Minus, PawPrint } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { TreePerson } from "@/queries/family-tree"
 import { NODE_W, NODE_H } from "./layout"
@@ -50,6 +50,7 @@ export function PersonNode({
   const { viewport } = useViewport()
   const isGhost = person.role === "APP_GHOST"
   const isMemorial = person.role === "APP_MEMO"
+  const isPet = person.role === "APP_PET"
   const isPending = person.pending && !isRoot
 
   // Edges intentionally do NOT live-follow a drag in progress (see
@@ -112,16 +113,22 @@ export function PersonNode({
       : comparePickIndex === 2 ? "ring-green-500/70 border-green-500/40"
         : "ring-amber-500/70 border-amber-500/40"
 
-  const initials = `${person.firstName[0] ?? ""}${person.lastName[0] ?? ""}`.toUpperCase()
+  // Pets have no lastName (empty string) — avoid a bogus second initial /
+  // trailing space for them.
+  const initials = isPet
+    ? person.firstName.slice(0, 2).toUpperCase()
+    : `${person.firstName[0] ?? ""}${person.lastName[0] ?? ""}`.toUpperCase()
   // Read the always-populated year fields directly (not derived from
   // birthDate/deathDate) so a redacted person still shows a year.
   const birthYear = person.birthYear != null ? String(person.birthYear) : ""
   const deathYear = person.deathYear != null ? String(person.deathYear) : ""
   const yearLabel = deathYear ? `${birthYear || "—"} – ${deathYear}` : birthYear
 
+  const fullName = isPet ? person.firstName : `${person.firstName} ${person.lastName}`
   const displayName = person.maidenName
-    ? t("nameWithMaiden", { name: `${person.firstName} ${person.lastName}`, maidenName: person.maidenName })
-    : `${person.firstName} ${person.lastName}`
+    ? t("nameWithMaiden", { name: fullName, maidenName: person.maidenName })
+    : fullName
+  const petSubtitle = [person.petBreed, person.petSpecies].filter(Boolean).join(", ")
 
   return (
     <div
@@ -189,6 +196,11 @@ export function PersonNode({
             &ldquo;{person.nickname}&rdquo;
           </p>
         )}
+        {isPet && petSubtitle && (
+          <p className="text-[10px] text-muted-foreground/80 leading-tight truncate">
+            {petSubtitle}
+          </p>
+        )}
         {yearLabel && (
           <p className="text-[10px] text-muted-foreground/80 mt-0.5 tabular-nums leading-tight">
             {yearLabel}
@@ -224,7 +236,7 @@ export function PersonNode({
         </button>
       )}
 
-      {(isSessionUser || isMemorial || isPending || isDuplicate) && (
+      {(isSessionUser || isMemorial || isPet || isPending || isDuplicate) && (
         <div className="absolute bottom-1 right-1 flex items-center gap-1">
           {isDuplicate && (
             <span className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-secondary text-foreground/70" title={t("node.duplicateHint")}>
@@ -239,6 +251,11 @@ export function PersonNode({
           {isMemorial && (
             <span className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-secondary text-foreground/70" title={t("node.memorial")}>
               <BookOpen className="h-2 w-2" />
+            </span>
+          )}
+          {isPet && (
+            <span className="inline-flex items-center justify-center h-3.5 w-3.5 rounded-full bg-secondary text-foreground/70" title={t("node.pet")}>
+              <PawPrint className="h-2 w-2" />
             </span>
           )}
           {isSessionUser && (

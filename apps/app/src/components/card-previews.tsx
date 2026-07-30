@@ -511,12 +511,35 @@ export async function DocumentsPreview({ documents }: { documents: { id: string;
   )
 }
 
-export async function PetsPreview() {
-  const t = await getTranslations("Profile")
+export async function PetsPreview({ pets }: { pets: { id: string; firstName: string; avatarUrl: string | null }[] }) {
+  if (pets.length === 0) {
+    const t = await getTranslations("Profile")
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
+        <PawPrint className="h-8 w-8 text-muted-foreground/50" />
+        <p className="text-xs text-muted-foreground">{t("emptyPets")}</p>
+      </div>
+    )
+  }
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-2 py-4">
-      <PawPrint className="h-8 w-8 text-muted-foreground/50" />
-      <p className="text-xs text-muted-foreground">{t("emptyPets")}</p>
+    <div className="space-y-2">
+      {pets.slice(0, 3).map((p) => {
+        const initials = p.firstName.slice(0, 2).toUpperCase()
+        return (
+          <div key={p.id} className="flex items-center gap-2.5">
+            <div className="h-7 w-7 rounded-full bg-gradient-brand flex items-center justify-center text-white text-[10px] font-semibold overflow-hidden shrink-0">
+              {p.avatarUrl
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={p.avatarUrl} alt={initials} className="h-full w-full object-cover" />
+                : initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium truncate">{p.firstName}</p>
+            </div>
+            <PawPrint className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          </div>
+        )
+      })}
     </div>
   )
 }

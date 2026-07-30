@@ -90,6 +90,12 @@
       "notAuthorized": "No tienes permiso para gestionar este perfil.",
       "notFound": "Perfil no encontrado."
     },
+    "pet": {
+      "limitReached": "Alcanzaste el límite de {max} mascotas de tu plan.",
+      "notAuthorized": "No tienes permiso para gestionar este perfil.",
+      "notFound": "Perfil no encontrado.",
+      "ownerNotInTree": "El dueño seleccionado ya debe ser miembro de tu árbol genealógico."
+    },
     "physicalQr": {
       "alreadyActivated": "Este código ya fue activado.",
       "notFound": "QR Code no encontrado.",
@@ -439,6 +445,7 @@
       "expand": "Expandir",
       "memorial": "Memorial",
       "pending": "Pendiente",
+      "pet": "Mascota",
       "you": "Tú"
     },
     "relation": {
@@ -750,6 +757,7 @@
     "myProfileSubtitle": "Ver tu página",
     "myProfileTitle": "Mi perfil",
     "noProfilesFound": "No se encontraron perfiles.",
+    "petBadge": "Mascota",
     "recentlyViewedEmpty": "No hay perfiles vistos recientemente.",
     "recentlyViewedShort": "vistos recientemente",
     "recentlyViewedSubtitle": "Los perfiles vistos recientemente aparecen aquí",
@@ -806,6 +814,7 @@
       "mediaImages": "Tu plan permite hasta {limit} fotos combinadas entre Biografía, Galería y Geolocalizaciones.",
       "mediaVideos": "Tu plan permite hasta {limit} videos en la galería.",
       "memorials": "Tu plan permite hasta {limit} memoriales.",
+      "pets": "Tu plan permite hasta {limit} mascotas.",
       "qrCode": "Tu plan incluye {limit} QR Codes gratuitos.",
       "tree": "Tu plan permite hasta {limit} personas en el árbol genealógico."
     },
@@ -823,6 +832,7 @@
       "mediaImages": "Límite de fotos alcanzado",
       "mediaVideos": "Límite de videos alcanzado",
       "memorials": "Límite de memoriales alcanzado",
+      "pets": "Límite de mascotas alcanzado",
       "qrCode": "Límite de QR Codes alcanzado",
       "tree": "Límite del árbol genealógico alcanzado"
     }
@@ -855,6 +865,7 @@
       "backToProfile": "Volver al perfil",
       "subtitleLiving": "Actualiza tu información personal.",
       "subtitleMemorial": "Actualiza la información de este memorial.",
+      "subtitlePet": "Actualiza la información de esta mascota.",
       "title": "Editar perfil"
     },
     "fields": {
@@ -1023,6 +1034,84 @@
     "retry": "Intentar de nuevo",
     "title": "Estás sin conexión"
   },
+  "Pets": {
+    "actions": {
+      "createProfile": "Crear perfil",
+      "reset": "Restablecer"
+    },
+    "avatar": {
+      "change": "Cambiar imagen",
+      "unsupportedFile": "Archivo no compatible. Usa {formats}.",
+      "uploadError": "No se pudo subir el avatar.",
+      "waitUploading": "Espera a que el avatar termine de subirse."
+    },
+    "card": {
+      "born": "Nació el {date}",
+      "fallbackSubtitle": "Perfil de mascota"
+    },
+    "date": {
+      "clear": "Borrar",
+      "pick": "Elegir una fecha"
+    },
+    "delete": {
+      "button": "Eliminar perfil",
+      "description": "Esto eliminará permanentemente el perfil, biografía, galería, documentos y lugares de {name}. Esta acción no se puede deshacer.",
+      "title": "¿Eliminar este perfil?"
+    },
+    "errors": {
+      "needOwner": "Selecciona al menos un dueño para esta mascota."
+    },
+    "fields": {
+      "birthDate": "Fecha de nacimiento",
+      "breed": "Raza",
+      "deathDate": "Fecha de fallecimiento",
+      "gender": "Género",
+      "name": "Nombre",
+      "species": "Especie"
+    },
+    "gender": {
+      "female": "Hembra",
+      "male": "Macho"
+    },
+    "list": {
+      "emptyGuarded": "Aún no hay mascotas",
+      "emptyOwn": "Aún no hay mascotas",
+      "newProfile": "Nueva mascota",
+      "sortAria": "Ordenar perfiles",
+      "sortAsc": "A a Z",
+      "sortDesc": "Z a A",
+      "tagline": "Los compañeros que compartieron el camino."
+    },
+    "listPage": {
+      "backToProfile": "Volver al perfil",
+      "profileCount": "{count, plural, one {# mascota} other {# mascotas}}",
+      "title": "Mascotas"
+    },
+    "newPage": {
+      "backToPets": "Volver a mascotas",
+      "subtitle": "Registra a un compañero y vincúlalo a tu árbol genealógico.",
+      "title": "Nueva Mascota"
+    },
+    "owners": {
+      "description": "Selecciona qué personas de tu árbol genealógico son dueñas de esta mascota."
+    },
+    "placeholders": {
+      "breed": "ej.: Golden Retriever",
+      "name": "Nombre de la mascota",
+      "notSpecified": "No especificado",
+      "species": "ej.: Perro, Gato, Ave"
+    },
+    "sections": {
+      "owners": "Dueños"
+    },
+    "toasts": {
+      "changesReset": "Cambios restablecidos.",
+      "created": "Perfil de mascota creado.",
+      "deleted": "Perfil de mascota eliminado.",
+      "formReset": "Formulario restablecido.",
+      "saved": "Cambios guardados."
+    }
+  },
   "Profile": {
     "addToFavorites": "Agregar a favoritos",
     "bioDescription": "Una vida contada en capítulos: momentos, lugares y giros decisivos",
@@ -1066,8 +1155,10 @@
     "guardianTitle": "Memoriales",
     "mapAlt": "Mapa",
     "memorialized": "Memorial",
-    "petsComingSoon": "Próximamente",
+    "petBadge": "Mascota",
     "petsDescription": "Los compañeros que compartieron el camino",
+    "petsEmptyMetric": "Aún no hay mascotas",
+    "petsMetric": "{count, plural, one {# mascota} other {# mascotas}}",
     "petsTitle": "Mascotas",
     "placesDescription": "Los lugares importantes de una vida, en el mapa",
     "placesEmptyMetric": "Sin lugares aún",
@@ -1268,6 +1359,7 @@
         "gallery": "¿Necesitas más imágenes y videos?",
         "geolocation": "¿Necesitas coordenadas GPS precisas?",
         "memorialized": "¿Necesitas más perfiles memorializados?",
+        "pets": "¿Necesitas más perfiles de mascotas?",
         "tree": "¿Necesitas un árbol más grande?"
       }
     }
