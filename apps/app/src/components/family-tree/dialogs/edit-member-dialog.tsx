@@ -44,6 +44,8 @@ export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: P
   const [gender,     setGender]     = useState<"MALE" | "FEMALE" | "OTHER" | "">((person.gender as "MALE" | "FEMALE" | "OTHER" | null) ?? "")
   const [birthDate,  setBirthDate]  = useState(toInputDate(person.birthDate))
   const [deathDate,  setDeathDate]  = useState(toInputDate(person.deathDate))
+  const [birthPlace, setBirthPlace] = useState(person.birthPlace ?? "")
+  const [deathPlace, setDeathPlace] = useState(person.deathPlace ?? "")
 
   const handleSave = () => {
     if (!firstName.trim() || !lastName.trim()) {
@@ -58,6 +60,8 @@ export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: P
         gender:     gender || null,
         birthDate:  birthDate || null,
         deathDate:  deathDate || null,
+        birthPlace: birthPlace || null,
+        deathPlace: deathPlace || null,
         avatarUrl:  person.avatarUrl,
       })
       if (!result.ok) { toast.error(result.message); return }
@@ -113,6 +117,16 @@ export function EditMemberDialog({ open, onClose, rootId, person, onSuccess }: P
             <div className="space-y-1.5">
               <FieldLabel htmlFor="e-death">{t("fields.deathDate")}</FieldLabel>
               <Input id="e-death" type="date" value={deathDate} onChange={(e) => setDeathDate(e.target.value)} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <FieldLabel htmlFor="e-birthplace">{t("fields.birthPlace")}</FieldLabel>
+              <Input id="e-birthplace" value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} maxLength={100} />
+            </div>
+            <div className="space-y-1.5">
+              <FieldLabel htmlFor="e-deathplace">{t("fields.deathPlace")}</FieldLabel>
+              <Input id="e-deathplace" value={deathPlace} onChange={(e) => setDeathPlace(e.target.value)} maxLength={100} />
             </div>
           </div>
         </div>

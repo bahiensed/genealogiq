@@ -61,6 +61,12 @@ export function createEdgeAuthConfig(opts: EdgeAuthOptions) {
     },
     pages: {
       signIn: "/sign-in",
+      // A rejected sign-in (`signIn` callback returning false — e.g. Google
+      // OAuth for an unmatched email on BMS/SEQ) throws AccessDenied, which
+      // resolves to error kind "error", not "signIn" (that's only
+      // CredentialsSignin's kind) — so it needs its own `pages.error` entry or
+      // it falls through to next-auth's bare, unstyled default error page.
+      error: "/sign-in",
     },
     providers: [],
     callbacks: {

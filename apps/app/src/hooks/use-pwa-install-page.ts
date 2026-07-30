@@ -7,12 +7,31 @@ import {
   isStandaloneDisplay,
   markDismissed,
   markInstalled,
+  wasInstalled,
 } from "@/lib/pwa-install"
 
-export type PwaInstallPageStatus = "checking" | "installed" | "native" | "ios" | "unsupported"
+export type PwaInstallPageStatus =
+  | "checking"
+  | "installed"
+  | "already-installed"
+  | "native"
+  | "ios"
+  | "unsupported"
 
-/** How long to wait for beforeinstallprompt before concluding "unsupported". */
-const SETTLE_MS = 1500
+// How long to wait for beforeinstallprompt before concluding "unsupported".
+// Generous on purpose: on a genuinely first-ever visit (cold HTTP cache),
+// Chrome only dispatches this event once our service worker reaches
+// "activated" — which itself waits on its install-phase precache (~13 files,
+// including a couple ~140KB images) to finish downloading. 1.5s reliably
+// wasn't enough real-world time for that on a fresh machine/connection,
+// which produced a false "unsupported" moments before the real event
+// arrived (the listener below still upgrades a late event to "native" — see
+// its comment — but showing the wrong terminal state even briefly reads as
+// broken, so the goal here is to not need that rescue in the first place).
+// Bumped from 5s to 10s: production testing showed 5s still wasn't always
+// enough (slower connections/devices need more time for the precache above
+// to finish before Chrome fires the event).
+const SETTLE_MS = 10000
 
 /**
  * Drives the dedicated /install page. Unlike use-pwa-install.ts (the
@@ -30,7 +49,22 @@ export function usePwaInstallPage() {
 
   useEffect(() => {
     if (isStandaloneDisplay()) {
+      // Self-heal: a launch from the real installed icon is the only moment
+      // we can durably learn "this browser has it installed" — an install
+      // that happened before this flag existed (or via a route that never
+      // wrote it) would otherwise never persist it, and every later ordinary
+      // browser-tab visit would keep reading as "not installed" forever.
+      markInstalled()
       setStatus("installed")
+      return
+    }
+
+    if (wasInstalled()) {
+      // Not running standalone right now, but this browser has installed it
+      // before — beforeinstallprompt won't fire again for an already-
+      // installed app, so waiting for SETTLE_MS would wrongly settle on
+      // "unsupported". Short-circuit with a distinct status instead.
+      setStatus("already-installed")
       return
     }
 

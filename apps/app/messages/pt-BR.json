@@ -122,6 +122,7 @@
     "changePasswordTitle": "Alterar senha",
     "changePasswordTrigger": "Alterar senha",
     "changing": "Alterando…",
+    "continueWithGoogle": "Continuar com o Google",
     "createAccount": "Crie uma conta",
     "creatingAccount": "Criando conta…",
     "currentPasswordLabel": "Senha atual:",
@@ -320,7 +321,8 @@
   },
   "FamilyTree": {
     "addRelative": {
-      "addNewPerson": "Não encontrou um perfil? Adicione uma nova pessoa à árvore.",
+      "addNewPersonAction": "Adicione-o manualmente.",
+      "addNewPersonQuestion": "Não encontrou o perfil que procurava?",
       "addToTree": "Adicionar à árvore",
       "backToSearch": "Voltar à busca",
       "divorced": "Divórcio",
@@ -330,11 +332,22 @@
       "marriedTo": "Casado(a) com <strong>{name}</strong>?",
       "newPersonTitle": "Adicionar uma nova pessoa",
       "noResults": "Nenhum resultado encontrado.",
-      "searchPlaceholder": "Buscar perfil...",
+      "searchPlaceholder": "Buscar perfil em Genealogiq",
+      "searchWikiTree": "Buscar na WikiTree",
       "title": "Adicionar parente",
       "togetherSince": "Juntos desde",
       "typeLabel": "Tipo:",
-      "widowed": "Viuvez"
+      "widowed": "Viuvez",
+      "wikitree": {
+        "noResults": "Nenhum resultado encontrado na WikiTree.",
+        "placeholder": "Buscar na WikiTree...",
+        "profileFetchFailed": "Não foi possível carregar esse perfil — tente novamente ou preencha manualmente.",
+        "sourceLabel": "Preenchido a partir da WikiTree",
+        "title": "Buscar na WikiTree",
+        "tryManual": "Preencher manualmente",
+        "unavailable": "A busca na WikiTree está indisponível no momento.",
+        "viewSource": "Ver fonte"
+      }
     },
     "canvasSearch": {
       "buttonTitle": "Buscar na árvore (/)",
@@ -373,7 +386,9 @@
     },
     "fields": {
       "birthDate": "Data de nascimento",
+      "birthPlace": "Local de nascimento",
       "deathDate": "Data de falecimento",
+      "deathPlace": "Local de falecimento",
       "firstName": "Nome",
       "gender": "Gênero",
       "genderSelect": "Selecione",
@@ -761,11 +776,13 @@
     "iosStep3": "Toque em \"Adicionar\" para confirmar.",
     "neverAskCheckbox": "Não me pergunte mais",
     "page": {
+      "alreadyInstalledMessage": "Você já tem o Genealogiq instalado neste dispositivo. Verifique sua tela de início ou lista de apps.",
+      "alreadyInstalledTitle": "Já instalado",
       "checking": "Verificando seu navegador…",
       "installedMessage": "O Genealogiq já está instalado neste dispositivo.",
       "installedTitle": "Tudo pronto!",
       "openAppButton": "Abrir o Genealogiq",
-      "unsupportedMessage": "Seu navegador não é compatível com instalação em 1 toque. Tente abrir esta página no Chrome, Edge ou Samsung Internet no Android, ou use o menu do seu navegador para adicionar o Genealogiq à tela de início.",
+      "unsupportedMessage": "Não conseguimos oferecer a instalação em 1 toque aqui — isso pode significar que o Genealogiq já está instalado neste dispositivo, ou que seu navegador não é compatível. Tente abrir esta página no Chrome, Edge ou Samsung Internet no Android, ou use o menu do seu navegador para adicionar o Genealogiq à tela de início.",
       "unsupportedTitle": "Instalação em 1 toque não disponível aqui"
     },
     "title": "Instale o Genealogiq App agora!"
@@ -872,7 +889,7 @@
     "list": {
       "emptyGuarded": "Nenhum perfil memorializado sob sua guarda ainda.",
       "emptyOwn": "Nenhum perfil memorializado ainda.",
-      "newProfile": "Novo perfil memorializado",
+      "newProfile": "Novo memorial",
       "sortAria": "Ordenar perfis",
       "sortAsc": "A → Z",
       "sortDesc": "Z → A",

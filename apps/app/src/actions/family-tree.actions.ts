@@ -244,7 +244,7 @@ export async function addGhostRelative(rootId: string, data: unknown): Promise<A
 
   const {
     firstName, lastName, maidenName, nickname,
-    gender, birthDate, deathDate,
+    gender, birthDate, deathDate, birthPlace, deathPlace,
     anchorId, kind, subtype, startDate, endDate, linkSpouseId,
   } = parsed.data
 
@@ -281,6 +281,8 @@ export async function addGhostRelative(rootId: string, data: unknown): Promise<A
         role:       "APP_GHOST",
         birthDate:  toDate(birthDate),
         deathDate:  toDate(deathDate),
+        birthPlace: birthPlace ?? null,
+        deathPlace: deathPlace ?? null,
       },
       select: { id: true },
     })
@@ -432,6 +434,8 @@ export async function updateMember(rootId: string, memberId: string, data: unkno
       gender:     d.gender ?? null,
       birthDate:  toDate(d.birthDate),
       deathDate:  toDate(d.deathDate),
+      birthPlace: d.birthPlace ?? null,
+      deathPlace: d.deathPlace ?? null,
       avatarUrl:  d.avatarUrl ?? null,
     },
   })

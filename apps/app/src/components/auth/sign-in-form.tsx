@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FieldLabel } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
+import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
 
 export function SignInForm() {
   const t = useTranslations('Auth')
@@ -46,6 +47,7 @@ export function SignInForm() {
               '"pwLabel forgot"',
               '"pwInput pwInput"',
               '"submit submit"',
+              '"google google"',
               '"divider divider"',
               '"gencode gencode"',
               '"newhere newhere"',
@@ -97,6 +99,10 @@ export function SignInForm() {
           >
             {t('forgotPassword')}
           </Link>
+
+          <div className="mt-2.5" style={{ gridArea: 'google' }}>
+            <GoogleSignInButton callbackUrl={callbackUrl} />
+          </div>
 
           <div className="mt-2.5 flex items-center gap-3" style={{ gridArea: 'divider' }}>
             <Separator className="flex-1" />

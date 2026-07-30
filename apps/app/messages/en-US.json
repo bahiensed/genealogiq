@@ -122,6 +122,7 @@
     "changePasswordTitle": "Change password",
     "changePasswordTrigger": "Change Password",
     "changing": "Changing…",
+    "continueWithGoogle": "Continue with Google",
     "createAccount": "Create an account",
     "creatingAccount": "Creating account…",
     "currentPasswordLabel": "Current password:",
@@ -320,7 +321,8 @@
   },
   "FamilyTree": {
     "addRelative": {
-      "addNewPerson": "Didn't find a profile? Add a new person to the tree.",
+      "addNewPersonAction": "Add them manually.",
+      "addNewPersonQuestion": "Didn't find the profile you were looking for?",
       "addToTree": "Add to tree",
       "backToSearch": "Back to search",
       "divorced": "Divorced",
@@ -330,11 +332,22 @@
       "marriedTo": "Married to <strong>{name}</strong>?",
       "newPersonTitle": "Add a new person",
       "noResults": "No results found.",
-      "searchPlaceholder": "Search profile...",
+      "searchPlaceholder": "Search profile on Genealogiq",
+      "searchWikiTree": "Search WikiTree",
       "title": "Add relative",
       "togetherSince": "Together since",
       "typeLabel": "Type:",
-      "widowed": "Widowed"
+      "widowed": "Widowed",
+      "wikitree": {
+        "noResults": "No WikiTree matches found.",
+        "placeholder": "Search WikiTree...",
+        "profileFetchFailed": "Couldn't load that profile — try again or enter manually.",
+        "sourceLabel": "Prefilled from WikiTree",
+        "title": "Search WikiTree",
+        "tryManual": "Try manual entry instead",
+        "unavailable": "WikiTree search is unavailable right now.",
+        "viewSource": "View source"
+      }
     },
     "canvasSearch": {
       "buttonTitle": "Search the tree (/)",
@@ -373,7 +386,9 @@
     },
     "fields": {
       "birthDate": "Birth date",
+      "birthPlace": "Birthplace",
       "deathDate": "Death date",
+      "deathPlace": "Place of death",
       "firstName": "First name",
       "gender": "Gender",
       "genderSelect": "Select",
@@ -761,11 +776,13 @@
     "iosStep3": "Tap \"Add\" to confirm.",
     "neverAskCheckbox": "Don't ask me again",
     "page": {
+      "alreadyInstalledMessage": "You already have Genealogiq installed on this device. Check your home screen or app list.",
+      "alreadyInstalledTitle": "Already installed",
       "checking": "Checking your browser…",
       "installedMessage": "Genealogiq is already installed on this device.",
       "installedTitle": "You're all set!",
       "openAppButton": "Open Genealogiq",
-      "unsupportedMessage": "Your browser doesn't support one-tap installation. Try opening this page in Chrome, Edge or Samsung Internet on Android, or use your browser's own menu to add Genealogiq to your home screen.",
+      "unsupportedMessage": "We couldn't offer one-tap installation here — this can mean Genealogiq is already installed on this device, or that your browser doesn't support it. Try opening this page in Chrome, Edge or Samsung Internet on Android, or use your browser's own menu to add Genealogiq to your home screen.",
       "unsupportedTitle": "One-tap install isn't available here"
     },
     "title": "Install the Genealogiq App now!"
@@ -872,7 +889,7 @@
     "list": {
       "emptyGuarded": "No memorial profiles guarded yet.",
       "emptyOwn": "No memorial profiles yet.",
-      "newProfile": "New memorial profile",
+      "newProfile": "New memorial",
       "sortAria": "Sort profiles",
       "sortAsc": "A → Z",
       "sortDesc": "Z → A",
