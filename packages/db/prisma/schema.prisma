@@ -333,6 +333,9 @@ model User {
   emailVerified       DateTime?            @map("email_verified")
   failedLoginAttempts Int                  @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime?            @map("locked_until")
+  // Bookkeeping only — never the sign-in lookup key. Google sign-in resolves
+  // the row by verified email, matching Credentials' identity model.
+  googleId            String?              @unique(map: "users_google_id_unique", where: raw("(google_id IS NOT NULL)")) @map("google_id")
   createdAt           DateTime             @default(now()) @map("created_at")
   updatedAt           DateTime             @updatedAt @map("updated_at")
   nationalId          String?              @map("national_id")
@@ -415,6 +418,9 @@ model AppUser {
   emailVerified       DateTime?            @map("email_verified")
   failedLoginAttempts Int                  @default(0) @map("failed_login_attempts")
   lockedUntil         DateTime?            @map("locked_until")
+  // Bookkeeping only — never the sign-in lookup key. Google sign-in resolves
+  // the row by verified email, matching Credentials' identity model.
+  googleId            String?              @unique(map: "app_users_google_id_unique", where: raw("(google_id IS NOT NULL)")) @map("google_id")
   deathCause          String?              @map("death_cause") @db.VarChar
   deathState          String?              @map("death_state") @db.VarChar
   appSaleId           String?              @map("app_sale_id")

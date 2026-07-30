@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FieldLabel } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
+import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
 import { getSignUpSchema, type SignUpFormValues } from '@/schemas/auth.schema'
 
 export function SignUpForm() {
@@ -136,6 +137,8 @@ export function SignUpForm() {
         <Button type="submit" className="w-full" disabled={isPending}>
           {isPending ? t('creatingAccount') : t('createAccount')}
         </Button>
+
+        <GoogleSignInButton callbackUrl={callbackUrl} />
 
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
