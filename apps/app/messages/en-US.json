@@ -815,6 +815,7 @@
       "mediaVideos": "Your plan allows up to {limit} gallery videos.",
       "memorials": "Your plan allows up to {limit} memorials.",
       "pets": "Your plan allows up to {limit} pets.",
+      "petsLocked": "Pets are a Premium-only feature.",
       "qrCode": "Your plan includes {limit} free QR Codes.",
       "tree": "Your plan allows up to {limit} family tree members."
     },
@@ -822,6 +823,7 @@
     "suffix": {
       "extraOnly": "You can purchase an extra one.",
       "maxedOut": "You've reached the maximum for your current plan.",
+      "qrUpgradeOrExtra": "You can purchase an extra one — Premium members pay a lower price.",
       "upgradeOnly": "Upgrade your plan for a higher limit.",
       "upgradeOrExtra": "Upgrade your plan for a higher limit, or purchase an extra one."
     },
@@ -833,6 +835,7 @@
       "mediaVideos": "Video limit reached",
       "memorials": "Memorial limit reached",
       "pets": "Pet limit reached",
+      "petsLocked": "Premium feature required",
       "qrCode": "QR Code limit reached",
       "tree": "Family tree limit reached"
     }
@@ -1163,7 +1166,7 @@
     "placesDescription": "The meaningful places of a life, on the map",
     "placesEmptyMetric": "No places yet",
     "placesMetric": "{count, plural, one {# place} other {# places}}",
-    "placesTitle": "Geolocations",
+    "placesTitle": "Geolocations & QR Codes",
     "qrAlt": "QR Code",
     "qrDescription": "For plaques, headstones and digital spaces alike",
     "qrLockedAlt": "Locked",
@@ -1319,11 +1322,22 @@
     "features": {
       "bioChars": "{count, number} biography characters",
       "bioImages": "{count} biography images",
+      "documents": "{count} documents",
       "galleryPhotos": "{count} gallery photos",
       "galleryVideos": "{count} gallery videos",
+      "geoPlaces": "{count} shared places",
+      "geoPlacesExtra": "Buy extra places individually",
       "gpsAddressOnly": "Address only (no GPS pin)",
       "gpsPrecise": "Precise GPS coordinates",
+      "mediaImages": "{count} combined photos across Biography, Gallery and Places",
+      "mediaVideos": "{count} gallery videos",
       "memorialSlots": "{count, plural, one {# memorial slot per purchase} other {# memorial slots per purchase}}",
+      "memorials": "{count} memorial profiles",
+      "memorialsExtra": "Buy extra memorials individually",
+      "petsCount": "{count} pet profiles",
+      "petsLocked": "Pets available on Premium only",
+      "qrCodeCount": "{count} free QR Codes",
+      "qrExtra": "Buy extra QR Codes individually",
       "qrIncluded": "QR Code for plaques & stones",
       "qrPaidOnly": "QR Code on paid plans",
       "treeMembers": "{count} family tree members"

@@ -48,4 +48,13 @@ describe("getPetCreationStatus", () => {
 
     expect(status.allowed).toBe(false)
   })
+
+  it("blocks FREE guardians outright (petsMax=0 is a premium-only gate, not just a small quota)", async () => {
+    vi.mocked(countPetsByCreatorId).mockResolvedValue(0)
+    vi.mocked(getMemorialFeatures).mockResolvedValue({ petsMax: 0 } as never)
+
+    const status = await getPetCreationStatus("free-guardian")
+
+    expect(status).toEqual({ count: 0, limit: 0, allowed: false })
+  })
 })

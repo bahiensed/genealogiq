@@ -815,6 +815,7 @@
       "mediaVideos": "Tu plan permite hasta {limit} videos en la galería.",
       "memorials": "Tu plan permite hasta {limit} memoriales.",
       "pets": "Tu plan permite hasta {limit} mascotas.",
+      "petsLocked": "Las mascotas son una función exclusiva del plan Premium.",
       "qrCode": "Tu plan incluye {limit} QR Codes gratuitos.",
       "tree": "Tu plan permite hasta {limit} personas en el árbol genealógico."
     },
@@ -822,6 +823,7 @@
     "suffix": {
       "extraOnly": "Puedes comprar una unidad extra.",
       "maxedOut": "Alcanzaste el máximo de tu plan actual.",
+      "qrUpgradeOrExtra": "Puedes comprar una unidad extra — los miembros Premium pagan un precio menor.",
       "upgradeOnly": "Mejora tu plan para un límite mayor.",
       "upgradeOrExtra": "Mejora tu plan para un límite mayor, o compra una unidad extra."
     },
@@ -833,6 +835,7 @@
       "mediaVideos": "Límite de videos alcanzado",
       "memorials": "Límite de memoriales alcanzado",
       "pets": "Límite de mascotas alcanzado",
+      "petsLocked": "Función exclusiva de Premium",
       "qrCode": "Límite de QR Codes alcanzado",
       "tree": "Límite del árbol genealógico alcanzado"
     }
@@ -1163,7 +1166,7 @@
     "placesDescription": "Los lugares importantes de una vida, en el mapa",
     "placesEmptyMetric": "Sin lugares aún",
     "placesMetric": "{count, plural, one {# lugar} other {# lugares}}",
-    "placesTitle": "Geolocalizaciones",
+    "placesTitle": "Geolocalizaciones y códigos QR",
     "qrAlt": "QR Code",
     "qrDescription": "Para placas, lápidas y espacios digitales por igual",
     "qrLockedAlt": "Bloqueado",
@@ -1319,11 +1322,22 @@
     "features": {
       "bioChars": "{count, number} caracteres de biografía",
       "bioImages": "{count} imágenes de biografía",
+      "documents": "{count} documentos",
       "galleryPhotos": "{count} fotos en la galería",
       "galleryVideos": "{count} videos en la galería",
+      "geoPlaces": "{count} geolocalizaciones compartidas",
+      "geoPlacesExtra": "Compra geolocalizaciones extra individualmente",
       "gpsAddressOnly": "Solo dirección (sin marcador GPS)",
       "gpsPrecise": "Coordenadas GPS precisas",
+      "mediaImages": "{count} fotos combinadas entre Biografía, Galería y Geolocalizaciones",
+      "mediaVideos": "{count} videos en la galería",
       "memorialSlots": "{count, plural, one {# espacio de memorial por compra} other {# espacios de memorial por compra}}",
+      "memorials": "{count} perfiles memoriales",
+      "memorialsExtra": "Compra memoriales extra individualmente",
+      "petsCount": "{count} perfiles de mascotas",
+      "petsLocked": "Mascotas disponibles solo en Premium",
+      "qrCodeCount": "{count} QR Codes gratuitos",
+      "qrExtra": "Compra QR Codes extra individualmente",
       "qrIncluded": "QR Code para placas y lápidas",
       "qrPaidOnly": "QR Code en los planes de pago",
       "treeMembers": "{count} miembros en el árbol genealógico"
