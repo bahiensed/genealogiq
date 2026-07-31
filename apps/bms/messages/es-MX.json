@@ -80,7 +80,13 @@
       "created": "Plan creado correctamente.",
       "hasSales": "No se puede eliminar este plan: está vinculado a ventas existentes.",
       "notFound": "Plan no encontrado.",
-      "updated": "Plan actualizado correctamente."
+      "priceRequired": "Establece un precio mayor que cero antes de sincronizar.",
+      "stripeSyncFailed": "Error al sincronizar con Stripe: {message}",
+      "synced": "Sincronizado con Stripe correctamente.",
+      "termLengthRequired": "Establece una duración mayor que cero antes de sincronizar — los planes de por vida (0) no son recurrentes.",
+      "unknownError": "Error desconocido",
+      "updated": "Plan actualizado correctamente.",
+      "updatedStripeCleared": "Plan actualizado — referencias de Stripe eliminadas. Sincroniza con Stripe de nuevo para provisionar nuevos precios."
     },
     "supplier": {
       "created": "Proveedor creado correctamente.",
@@ -646,19 +652,12 @@
     "create": "Crear suscripción",
     "edit": "Editar Suscripción",
     "fields": {
-      "bioMaxChars": "Máximo de Caracteres de la Bio",
-      "bioMaxImages": "Máximo de Imágenes de la Bio",
       "code": "Código",
       "description": "Descripción",
-      "galleryMaxImages": "Máximo de Imágenes de la Galería",
-      "galleryMaxVideos": "Máximo de Videos de la Galería",
-      "geolocationFullAccess": "Acceso Total a la Geolocalización",
       "maxProfiles": "Máximo de Perfiles Memo",
       "name": "Nombre",
       "price": "Precio (US$)",
-      "qrCodeAccess": "Acceso al QR Code",
-      "termLength": "Duración (en meses)",
-      "treeMaxMembers": "Máximo de Miembros del Árbol Genealógico"
+      "termLength": "Duración (en meses)"
     },
     "free": "Gratis",
     "hints": {
@@ -676,19 +675,27 @@
       "active": "Activa",
       "inactive": "Inactiva"
     },
+    "stripe": {
+      "annualPriceId": "precio anual:",
+      "confirmDescription": "Confirma que los datos de este plan son correctos. Esto creará o actualizará el Product y los Prices correspondientes en Stripe. ¿Seguro que deseas sincronizar?",
+      "confirmTitle": "¿Sincronizar con Stripe?",
+      "hint": "Envía el nombre, la descripción y el precio de este plan a Stripe (creando o actualizando el Product y los Prices anual/mensual correspondientes). Guarda tus cambios primero — la sincronización usa los datos guardados. Cambiar el precio o la duración provisiona nuevos Prices en Stripe.",
+      "monthlyPriceId": "precio mensual:",
+      "notSynced": "No sincronizado",
+      "productId": "producto:",
+      "syncButton": "Sincronizar con Stripe",
+      "syncNow": "Sincronizar ahora",
+      "synced": "Sincronizado",
+      "syncing": "Sincronizando…",
+      "title": "Sincronización con Stripe"
+    },
     "table": {
-      "bioMaxChars": "Caracteres Bio",
-      "bioMaxImages": "Imágenes Bio",
       "code": "Código",
       "createdAt": "Creada el",
       "empty": "No se encontraron suscripciones",
-      "galleryMaxImages": "Imágenes Galería",
-      "galleryMaxVideos": "Videos Galería",
-      "geo": "Geo",
       "maxProfiles": "Memo",
       "name": "Nombre",
       "price": "Precio",
-      "qrCode": "QR Code",
       "status": "Estado",
       "term": "Duración"
     },

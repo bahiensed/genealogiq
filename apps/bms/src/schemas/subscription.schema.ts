@@ -17,17 +17,6 @@ export function getSubscriptionSchema(t: Translator) {
     maxProfiles: z.number().int(t('mustBeWholeNumber')).positive(t('mustBePositive')),
     termLength:  z.number().int(t('mustBeWholeNumber')).min(0, t('termLengthMin')),
     price:       z.number().min(0, t('priceMin')),
-
-    // Feature limits
-    treeMaxMembers:   z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
-    bioMaxChars:      z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
-    bioMaxImages:     z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
-    galleryMaxImages: z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
-    galleryMaxVideos: z.number().int(t('mustBeWholeNumber')).min(0, t('mustBeZeroOrGreater')),
-
-    // Feature flags
-    geolocationFullAccess: z.boolean(),
-    qrCodeAccess:          z.boolean(),
   })
 }
 
@@ -42,13 +31,4 @@ export const subscriptionDefaultValues: SubscriptionFormValues = {
   maxProfiles: 1,
   termLength:  12,
   price:       0,
-
-  treeMaxMembers:   5,
-  bioMaxChars:      2000,
-  bioMaxImages:     3,
-  galleryMaxImages: 10,
-  galleryMaxVideos: 2,
-
-  geolocationFullAccess: false,
-  qrCodeAccess:          false,
 }

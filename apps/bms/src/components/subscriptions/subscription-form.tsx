@@ -1,13 +1,13 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller, type Control } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { getSubscriptionSchema, subscriptionDefaultValues, type SubscriptionFormValues } from '@/schemas/subscription.schema'
-import { createSubscription, updateSubscription } from '@/actions/subscription.actions'
+import { createSubscription, updateSubscription, syncSubscriptionWithStripe } from '@/actions/subscription.actions'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
@@ -15,11 +15,25 @@ import { Switch } from '@genealogiq/ui/switch'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Separator } from '@genealogiq/ui/separator'
 import { Field, FieldError, FieldLabel } from '@genealogiq/ui/field'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { CurrencyInput } from '@/components/ui/currency-input'
 
 interface SubscriptionFormProps {
   id?: string
   defaultValues?: SubscriptionFormValues
+  stripeProductId?: string | null
+  stripeAnnualPriceId?: string | null
+  stripeMonthlyPriceId?: string | null
 }
 
 interface IntFieldProps {
@@ -58,34 +72,29 @@ function IntField({ control, name, label, min = 0, helper }: IntFieldProps) {
   )
 }
 
-interface SwitchFieldProps {
-  control: Control<SubscriptionFormValues>
-  name: 'geolocationFullAccess' | 'qrCodeAccess' | 'isActive'
-  label: string
-}
-
-function SwitchField({ control, name, label }: SwitchFieldProps) {
-  return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field }) => (
-        <div className="flex items-center justify-between rounded-lg border border-border/60 px-4 py-3">
-          <label htmlFor={name} className="text-sm cursor-pointer select-none">{label}</label>
-          <Switch id={name} checked={field.value as boolean} onCheckedChange={field.onChange} />
-        </div>
-      )}
-    />
-  )
-}
-
-export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
+export function SubscriptionForm({ id, defaultValues, stripeProductId, stripeAnnualPriceId, stripeMonthlyPriceId }: SubscriptionFormProps) {
   const t  = useTranslations('Subscriptions')
   const tc = useTranslations('Common')
   const tErr = useTranslations('Errors')
   const isEditing = !!id
+  const isSynced = isEditing && !!stripeAnnualPriceId && !!stripeMonthlyPriceId
   const [serverError, setServerError] = useState<string | null>(null)
+  const [syncOpen, setSyncOpen] = useState(false)
+  const [isSyncing, startSync] = useTransition()
   const router = useRouter()
+
+  function handleSync() {
+    if (!id) return
+    startSync(async () => {
+      const result = await syncSubscriptionWithStripe(id)
+      if (!result.ok) {
+        toast.error(result.message)
+      } else {
+        if (result.message) toast.success(result.message)
+        router.refresh()
+      }
+    })
+  }
 
   const form = useForm<SubscriptionFormValues>({
     resolver: useMemo(() => zodResolver(getSubscriptionSchema(tErr)), [tErr]),
@@ -173,28 +182,6 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <IntField control={control} name="maxProfiles" label={t('fields.maxProfiles')} min={1} />
-              <IntField control={control} name="treeMaxMembers" label={t('fields.treeMaxMembers')} />
-              <div />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <IntField control={control} name="bioMaxChars" label={t('fields.bioMaxChars')} />
-              <IntField control={control} name="bioMaxImages" label={t('fields.bioMaxImages')} />
-              <div />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <IntField control={control} name="galleryMaxImages" label={t('fields.galleryMaxImages')} />
-              <IntField control={control} name="galleryMaxVideos" label={t('fields.galleryMaxVideos')} />
-              <div />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <SwitchField control={control} name="geolocationFullAccess" label={t('fields.geolocationFullAccess')} />
-              <SwitchField control={control} name="qrCodeAccess" label={t('fields.qrCodeAccess')} />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <IntField
                 control={control}
                 name="termLength"
@@ -222,7 +209,6 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
                   </Field>
                 )}
               />
-              <div />
             </div>
 
             <Controller
@@ -236,6 +222,46 @@ export function SubscriptionForm({ id, defaultValues }: SubscriptionFormProps) {
                 </Field>
               )}
             />
+
+            {isEditing && (
+              <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground uppercase tracking-wider">{t('stripe.title')}</span>
+                  {isSynced
+                    ? <span className="font-medium text-emerald-600">{t('stripe.synced')}</span>
+                    : <span className="font-medium text-amber-600">{t('stripe.notSynced')}</span>}
+                </div>
+                {isSynced && (
+                  <div className="flex flex-col gap-1 font-mono text-muted-foreground">
+                    <span>{t('stripe.productId')} {stripeProductId}</span>
+                    <span>{t('stripe.annualPriceId')} {stripeAnnualPriceId}</span>
+                    <span>{t('stripe.monthlyPriceId')} {stripeMonthlyPriceId}</span>
+                  </div>
+                )}
+                <p className="text-muted-foreground">
+                  {t('stripe.hint')}
+                </p>
+                <AlertDialog open={syncOpen} onOpenChange={setSyncOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" variant="outline" size="sm" className="self-start" disabled={isSyncing}>
+                      {isSyncing ? t('stripe.syncing') : t('stripe.syncButton')}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('stripe.confirmTitle')}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('stripe.confirmDescription')}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={isSyncing}>{tc('cancel')}</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleSync} disabled={isSyncing}>{t('stripe.syncNow')}</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
 
             {serverError && <FieldError>{serverError}</FieldError>}
             <Field orientation="horizontal">

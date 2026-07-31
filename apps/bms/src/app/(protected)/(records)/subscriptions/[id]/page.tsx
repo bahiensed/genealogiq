@@ -11,21 +11,17 @@ export default async function EditSubscriptionPage({ params }: { params: Promise
     <SubscriptionForm
       id={id}
       defaultValues={{
-        code:                  subscription.code,
-        name:                  subscription.name,
-        description:           subscription.description ?? '',
-        isActive:              subscription.isActive,
-        maxProfiles:           subscription.maxProfiles,
-        termLength:            subscription.termLength,
-        price:                 subscription.price,
-        treeMaxMembers:        subscription.treeMaxMembers,
-        bioMaxChars:           subscription.bioMaxChars,
-        bioMaxImages:          subscription.bioMaxImages,
-        galleryMaxImages:      subscription.galleryMaxImages,
-        galleryMaxVideos:      subscription.galleryMaxVideos,
-        geolocationFullAccess: subscription.geolocationFullAccess,
-        qrCodeAccess:          subscription.qrCodeAccess,
+        code:        subscription.code,
+        name:        subscription.name,
+        description: subscription.description ?? '',
+        isActive:    subscription.isActive,
+        maxProfiles: subscription.maxProfiles,
+        termLength:  subscription.termLength,
+        price:       subscription.price,
       }}
+      stripeProductId={subscription.stripeProductId}
+      stripeAnnualPriceId={subscription.stripeAnnualPriceId}
+      stripeMonthlyPriceId={subscription.stripeMonthlyPriceId}
     />
   )
 }
