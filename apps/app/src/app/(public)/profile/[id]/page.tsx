@@ -5,7 +5,6 @@ import { getProfileById, redactLivingProfile } from "@/queries/profile"
 import { isFavoritedByUser, getFavoriteCount, getFavoritesByUserId } from "@/queries/favorite"
 import { getGeolocationForViewer } from "@/queries/geolocation"
 import { getMemorialsByCreatorId } from "@/queries/memorial"
-import { getPetsByCreatorId } from "@/queries/pet"
 import { countTreeMembers } from "@/queries/family-tree"
 import { getGalleryImageUrls, getGalleryCount, getGalleryHasVideos } from "@/queries/gallery"
 import { getPlacesForMap } from "@/queries/places"
@@ -82,7 +81,6 @@ export default async function ProfileByIdPage({ params }: Props) {
     tributeCount,
     favorites,
     memorials,
-    pets,
     bio,
     treeCount,
     documentsPreview,
@@ -99,7 +97,6 @@ export default async function ProfileByIdPage({ params }: Props) {
     getTributeCountByProfileId(id),
     !isMemorialized && !isPet ? getFavoritesByUserId(id, sessionUserId) : Promise.resolve([]),
     !isMemorialized && !isPet ? getMemorialsByCreatorId(id) : Promise.resolve([]),
-    !isMemorialized && !isPet ? getPetsByCreatorId(id) : Promise.resolve([]),
     getBioByUserId(id),
     countTreeMembers(id),
     // Preview/metric only ever reflect PUBLIC documents unless the viewer can
@@ -265,14 +262,21 @@ export default async function ProfileByIdPage({ params }: Props) {
       ...(isAnon ? {} : { href: `${base}/memorialized` }),
     },
     {
+      // Inert placeholder for now — the Pets module (queries/actions/UI) is
+      // fully built (see pet.actions.ts/pets-client.tsx/etc.) and still
+      // reachable by direct URL, but isn't surfaced from this grid yet
+      // pending a few more polish passes. No href, so BentoGrid renders a
+      // plain non-clickable div (same fallback favorites/guardian use for
+      // anon visitors) instead of a Link. Preview forced to the empty state
+      // regardless of real pet count so the card doesn't leak data that
+      // contradicts its own "coming soon" caption.
       key: "pets",
       title: t("petsTitle"),
       description: t("petsDescription"),
-      metric: pets.length > 0 ? t("petsMetric", { count: pets.length }) : t("petsEmptyMetric"),
+      metric: t("petsComingSoon"),
       icon: PawPrint,
       span: 2,
-      preview: <PetsPreview pets={pets} />,
-      ...(isAnon ? {} : { href: `${base}/pets` }),
+      preview: <PetsPreview pets={[]} />,
     },
   ]
 
