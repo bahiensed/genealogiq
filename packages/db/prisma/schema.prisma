@@ -36,6 +36,7 @@ enum AppRole {
   APP_USER
   APP_MEMO
   APP_GHOST
+  APP_PET
 }
 
 enum Gender {
@@ -428,6 +429,10 @@ model AppUser {
   nickname            String?
   stripeCustomerId    String?              @unique @map("stripe_customer_id")
   preferredLocale     String?              @map("preferred_locale")
+  // Only meaningful for role=APP_PET — same nullable-role-specific-field
+  // pattern already used above for death*/auth-only columns.
+  petSpecies          String?              @map("pet_species")
+  petBreed            String?              @map("pet_breed")
   bio                 Bio?
   familyFrom          FamilyRelation[]     @relation("FamilyFrom")
   familyTo            FamilyRelation[]     @relation("FamilyTo")

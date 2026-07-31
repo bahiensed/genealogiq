@@ -145,11 +145,16 @@ export function PersonInfoSheet({
   const isSelf      = person.id === rootId
   const isGhost     = person.role === "APP_GHOST"
   const isMemorial  = person.role === "APP_MEMO"
+  const isPet       = person.role === "APP_PET"
 
   const userManagesThis = managedIds.includes(person.id)
   const alreadyRequested = requestedIds.includes(person.id)
 
   // Editable = current user is an active guardian of THIS specific person.
+  // Deliberately excludes pets — EditMemberDialog's schema requires a
+  // non-empty lastName (pets have none) and has no species/breed fields;
+  // pet identity is edited on its own profile page (/profile/[id]/edit)
+  // instead.
   const canEditMember = userManagesThis && (isGhost || isMemorial || isSelf)
   // Anyone in the tree (except the root) can be removed by a tree-level manager.
   // Ghosts get deleted entirely; real users/memorials are just disconnected.
@@ -165,8 +170,11 @@ export function PersonInfoSheet({
   // Every relation touching this person, for the Relationships list below.
   // Non-REJECTED (not just ACCEPTED) so a manager can also see — and, via the
   // requester carve-out below, withdraw — their own still-pending invites.
+  // PET_OF is excluded — pets aren't managed through this generic editor
+  // (see displayName/canEditMember below), and the type-to-label mapping
+  // further down only knows PARENT_OF/SPOUSE/SIBLING.
   const personRelations = relations.filter(
-    (r) => (r.fromId === person.id || r.toId === person.id) && r.status !== "REJECTED",
+    (r) => (r.fromId === person.id || r.toId === person.id) && r.status !== "REJECTED" && r.type !== "PET_OF",
   )
   const canEditRelation = (r: TreeRelation) =>
     canManage || (r.status === "PENDING" && r.requestedById === sessionUserId)
@@ -181,10 +189,15 @@ export function PersonInfoSheet({
   }
 
   const label = relationFromRoot(persons, relations, rootId, person.id, t)
+  // Pets have no lastName (empty string) — avoid a trailing space / bogus
+  // second initial for them.
+  const fullName = isPet ? person.firstName : `${person.firstName} ${person.lastName}`
   const displayName = person.maidenName
-    ? t("nameWithMaiden", { name: `${person.firstName} ${person.lastName}`, maidenName: person.maidenName })
-    : `${person.firstName} ${person.lastName}`
-  const initials = `${person.firstName[0] ?? ""}${person.lastName[0] ?? ""}`.toUpperCase()
+    ? t("nameWithMaiden", { name: fullName, maidenName: person.maidenName })
+    : fullName
+  const initials = isPet
+    ? person.firstName.slice(0, 2).toUpperCase()
+    : `${person.firstName[0] ?? ""}${person.lastName[0] ?? ""}`.toUpperCase()
 
   const events = buildEvents(person, persons, relations, locale)
 

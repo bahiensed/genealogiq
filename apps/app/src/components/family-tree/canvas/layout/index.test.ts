@@ -19,6 +19,8 @@ const person = (id: string, overrides: Partial<TreePerson> = {}): TreePerson => 
   deathCountry: null,
   birthYear: null,
   deathYear: null,
+  petSpecies: null,
+  petBreed: null,
   role: "APP_USER",
   pending: false,
   ...overrides,
@@ -49,6 +51,97 @@ const spouseRel = (fromId: string, toId: string): TreeRelation => ({
   endDate: null,
   status: "ACCEPTED",
   requestedById: null,
+})
+
+const petOf = (petId: string, ownerId: string): TreeRelation => ({
+  id: `pet-${petId}-${ownerId}`,
+  type: "PET_OF",
+  subtype: null,
+  fromId: petId,
+  toId: ownerId,
+  startDate: null,
+  endDate: null,
+  status: "ACCEPTED",
+  requestedById: null,
+})
+
+describe("computeLayout — pet attachment", () => {
+  it("attaches a pet below its owner when the owner is present in this tree view", () => {
+    const persons = { ...personsOf("subject"), rex: person("rex", { role: "APP_PET" }) }
+    const relations: TreeRelation[] = [petOf("rex", "subject")]
+
+    const result = computeLayout(persons, relations, "subject")
+
+    const subjectNode = result.nodes.find((n) => n.personId === "subject")!
+    const petNode = result.nodes.find((n) => n.personId === "rex")!
+    expect(petNode).toBeDefined()
+    expect(petNode.y).toBeGreaterThan(subjectNode.y)
+    expect(petNode.isDuplicate).toBe(false)
+    expect(result.petLines).toEqual([
+      { petId: "rex", ownerId: "subject", relationId: "pet-rex-subject" },
+    ])
+  })
+
+  it("never generates ancestors/descendants for a pet — PET_OF is invisible to buildFamilyGraph", () => {
+    const persons = { ...personsOf("subject"), rex: person("rex", { role: "APP_PET" }) }
+    const relations: TreeRelation[] = [petOf("rex", "subject")]
+
+    const result = computeLayout(persons, relations, "subject")
+
+    const petNode = result.nodes.find((n) => n.personId === "rex")!
+    expect(petNode.hasCollapsible).toBe(false)
+    // No parent/spouse/sibling lines were fabricated for the pet.
+    expect(result.parentLines.some((l) => l.parentId === "rex" || l.childId === "rex")).toBe(false)
+    expect(result.coupleLines.some((l) => l.aId === "rex" || l.bId === "rex")).toBe(false)
+  })
+
+  it("omits a pet entirely when none of its owners are present in this tree view", () => {
+    const persons = { ...personsOf("subject"), rex: person("rex", { role: "APP_PET" }) }
+    // Owner "stranger" isn't in `persons` at all — not reachable from this tree.
+    const relations: TreeRelation[] = [petOf("rex", "stranger")]
+
+    const result = computeLayout(persons, relations, "subject")
+
+    expect(result.nodes.find((n) => n.personId === "rex")).toBeUndefined()
+    expect(result.petLines).toEqual([])
+  })
+
+  it("stacks two pets of the same owner side by side without overlapping", () => {
+    const persons = {
+      ...personsOf("subject"),
+      rex: person("rex", { role: "APP_PET" }),
+      fido: person("fido", { role: "APP_PET" }),
+    }
+    const relations: TreeRelation[] = [petOf("rex", "subject"), petOf("fido", "subject")]
+
+    const result = computeLayout(persons, relations, "subject")
+
+    const rexNode = result.nodes.find((n) => n.personId === "rex")!
+    const fidoNode = result.nodes.find((n) => n.personId === "fido")!
+    expect(rexNode).toBeDefined()
+    expect(fidoNode).toBeDefined()
+    expect(rexNode.y).toBe(fidoNode.y)
+    expect(Math.abs(rexNode.x - fidoNode.x)).toBeGreaterThan(0)
+  })
+
+  it("anchors a co-owned pet between both owners when both are present", () => {
+    const persons = {
+      ...personsOf("subject", "spouse"),
+      rex: person("rex", { role: "APP_PET" }),
+    }
+    const relations: TreeRelation[] = [
+      spouseRel("subject", "spouse"),
+      petOf("rex", "subject"),
+      petOf("rex", "spouse"),
+    ]
+
+    const result = computeLayout(persons, relations, "subject")
+
+    const petNode = result.nodes.find((n) => n.personId === "rex")!
+    expect(petNode).toBeDefined()
+    expect(result.petLines).toHaveLength(2)
+    expect(result.petLines.map((l) => l.ownerId).sort()).toEqual(["spouse", "subject"])
+  })
 })
 
 describe("computeLayout — pedigree collapse", () => {

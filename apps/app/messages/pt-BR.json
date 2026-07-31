@@ -90,6 +90,12 @@
       "notAuthorized": "Você não tem permissão para gerenciar este perfil.",
       "notFound": "Perfil não encontrado."
     },
+    "pet": {
+      "limitReached": "Você atingiu o limite de {max} pets do seu plano.",
+      "notAuthorized": "Você não tem permissão para gerenciar este perfil.",
+      "notFound": "Perfil não encontrado.",
+      "ownerNotInTree": "O dono selecionado já precisa fazer parte da sua árvore genealógica."
+    },
     "physicalQr": {
       "alreadyActivated": "Este código já foi ativado.",
       "notFound": "QR Code não encontrado.",
@@ -439,6 +445,7 @@
       "expand": "Expandir",
       "memorial": "Memorial",
       "pending": "Pendente",
+      "pet": "Pet",
       "you": "Você"
     },
     "relation": {
@@ -750,6 +757,7 @@
     "myProfileSubtitle": "Veja sua página",
     "myProfileTitle": "Meu perfil",
     "noProfilesFound": "Nenhum perfil encontrado.",
+    "petBadge": "Pet",
     "recentlyViewedEmpty": "Nenhum perfil visto recentemente.",
     "recentlyViewedShort": "vistos recentemente",
     "recentlyViewedSubtitle": "Os perfis vistos recentemente aparecem aqui",
@@ -806,6 +814,8 @@
       "mediaImages": "Seu plano permite até {limit} fotos combinadas entre Biografia, Galeria e Geolocalizações.",
       "mediaVideos": "Seu plano permite até {limit} vídeos na galeria.",
       "memorials": "Seu plano permite até {limit} memoriais.",
+      "pets": "Seu plano permite até {limit} pets.",
+      "petsLocked": "Pets são um recurso exclusivo do plano Premium.",
       "qrCode": "Seu plano inclui {limit} QR Codes gratuitos.",
       "tree": "Seu plano permite até {limit} pessoas na árvore genealógica."
     },
@@ -813,6 +823,7 @@
     "suffix": {
       "extraOnly": "Você pode adquirir uma unidade extra.",
       "maxedOut": "Você atingiu o máximo do seu plano atual.",
+      "qrUpgradeOrExtra": "Você pode comprar uma unidade extra — membros Premium pagam um preço menor.",
       "upgradeOnly": "Faça upgrade do seu plano para um limite maior.",
       "upgradeOrExtra": "Faça upgrade do seu plano para um limite maior, ou adquira uma unidade extra."
     },
@@ -823,6 +834,8 @@
       "mediaImages": "Limite de fotos atingido",
       "mediaVideos": "Limite de vídeos atingido",
       "memorials": "Limite de memoriais atingido",
+      "pets": "Limite de pets atingido",
+      "petsLocked": "Recurso exclusivo do Premium",
       "qrCode": "Limite de QR Codes atingido",
       "tree": "Limite da árvore genealógica atingido"
     }
@@ -855,6 +868,7 @@
       "backToProfile": "Voltar ao perfil",
       "subtitleLiving": "Atualize suas informações pessoais.",
       "subtitleMemorial": "Atualize as informações deste memorial.",
+      "subtitlePet": "Atualize as informações deste pet.",
       "title": "Editar perfil"
     },
     "fields": {
@@ -1023,6 +1037,84 @@
     "retry": "Tentar novamente",
     "title": "Você está offline"
   },
+  "Pets": {
+    "actions": {
+      "createProfile": "Criar perfil",
+      "reset": "Redefinir"
+    },
+    "avatar": {
+      "change": "Alterar imagem",
+      "unsupportedFile": "Arquivo não suportado. Use {formats}.",
+      "uploadError": "Falha ao enviar o avatar.",
+      "waitUploading": "Aguarde o avatar terminar de enviar."
+    },
+    "card": {
+      "born": "Nascido em {date}",
+      "fallbackSubtitle": "Perfil de pet"
+    },
+    "date": {
+      "clear": "Limpar",
+      "pick": "Escolher uma data"
+    },
+    "delete": {
+      "button": "Excluir perfil",
+      "description": "Isso removerá permanentemente o perfil, biografia, galeria, documentos e lugares de {name}. Esta ação não pode ser desfeita.",
+      "title": "Excluir este perfil?"
+    },
+    "errors": {
+      "needOwner": "Selecione pelo menos um dono para este pet."
+    },
+    "fields": {
+      "birthDate": "Data de nascimento",
+      "breed": "Raça",
+      "deathDate": "Data de falecimento",
+      "gender": "Gênero",
+      "name": "Nome",
+      "species": "Espécie"
+    },
+    "gender": {
+      "female": "Fêmea",
+      "male": "Macho"
+    },
+    "list": {
+      "emptyGuarded": "Nenhum pet ainda",
+      "emptyOwn": "Nenhum pet ainda",
+      "newProfile": "Novo pet",
+      "sortAria": "Ordenar perfis",
+      "sortAsc": "A a Z",
+      "sortDesc": "Z a A",
+      "tagline": "Os companheiros que dividiram a jornada."
+    },
+    "listPage": {
+      "backToProfile": "Voltar ao perfil",
+      "profileCount": "{count, plural, one {# pet} other {# pets}}",
+      "title": "Pets"
+    },
+    "newPage": {
+      "backToPets": "Voltar aos pets",
+      "subtitle": "Registre um companheiro e vincule-o à sua árvore genealógica.",
+      "title": "Novo Pet"
+    },
+    "owners": {
+      "description": "Selecione quais pessoas da sua árvore genealógica são donas deste pet."
+    },
+    "placeholders": {
+      "breed": "ex.: Golden Retriever",
+      "name": "Nome do pet",
+      "notSpecified": "Não especificado",
+      "species": "ex.: Cachorro, Gato, Pássaro"
+    },
+    "sections": {
+      "owners": "Donos"
+    },
+    "toasts": {
+      "changesReset": "Alterações redefinidas.",
+      "created": "Perfil de pet criado.",
+      "deleted": "Perfil de pet excluído.",
+      "formReset": "Formulário redefinido.",
+      "saved": "Alterações salvas."
+    }
+  },
   "Profile": {
     "addToFavorites": "Adicionar aos favoritos",
     "bioDescription": "Uma vida contada em capítulos: momentos, lugares e viradas",
@@ -1066,13 +1158,14 @@
     "guardianTitle": "Memoriais",
     "mapAlt": "Mapa",
     "memorialized": "Memorial",
+    "petBadge": "Pet",
     "petsComingSoon": "Em breve",
     "petsDescription": "Os companheiros que dividiram a jornada",
     "petsTitle": "Pets",
     "placesDescription": "Os lugares marcantes de uma vida, no mapa",
     "placesEmptyMetric": "Nenhum lugar ainda",
     "placesMetric": "{count, plural, one {# lugar} other {# lugares}}",
-    "placesTitle": "Geolocalizações",
+    "placesTitle": "Geolocalizações & QR Codes",
     "qrAlt": "QR Code",
     "qrDescription": "Para placas, lápides e espaços digitais",
     "qrLockedAlt": "Bloqueado",
@@ -1228,11 +1321,22 @@
     "features": {
       "bioChars": "{count, number} caracteres de biografia",
       "bioImages": "{count} imagens de biografia",
+      "documents": "{count} documentos",
       "galleryPhotos": "{count} fotos na galeria",
       "galleryVideos": "{count} vídeos na galeria",
+      "geoPlaces": "{count} geolocalizações compartilhadas",
+      "geoPlacesExtra": "Compre geolocalizações extras individualmente",
       "gpsAddressOnly": "Somente endereço (sem marcador GPS)",
       "gpsPrecise": "Coordenadas GPS precisas",
+      "mediaImages": "{count} fotos combinadas entre Biografia, Galeria e Geolocalizações",
+      "mediaVideos": "{count} vídeos na galeria",
       "memorialSlots": "{count, plural, one {# vaga de memorial por compra} other {# vagas de memorial por compra}}",
+      "memorials": "{count} perfis memorializados",
+      "memorialsExtra": "Compre memoriais extras individualmente",
+      "petsCount": "{count} perfis de pets",
+      "petsLocked": "Pets disponíveis somente no Premium",
+      "qrCodeCount": "{count} QR Codes gratuitos",
+      "qrExtra": "Compre QR Codes extras individualmente",
       "qrIncluded": "QR Code para placas e lápides",
       "qrPaidOnly": "QR Code nos planos pagos",
       "treeMembers": "{count} membros na árvore genealógica"
@@ -1268,6 +1372,7 @@
         "gallery": "Precisa de mais imagens e vídeos?",
         "geolocation": "Precisa de coordenadas GPS precisas?",
         "memorialized": "Precisa de mais perfis memorializados?",
+        "pets": "Precisa de mais perfis de pets?",
         "tree": "Precisa de uma árvore maior?"
       }
     }

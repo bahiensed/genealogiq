@@ -37,6 +37,14 @@ export function siblingStyle(subtype: string): Style {
   return { stroke: muted, width: 1.5 }
 }
 
+/** Connector from an owner's card down to their attached pet node — always
+ *  the same muted dotted line, no subtypes (a pet has exactly one kind of
+ *  relationship to its owner). */
+export function petStyle(): Style {
+  const muted = "color-mix(in srgb, var(--muted-foreground) 50%, transparent)"
+  return { stroke: muted, width: 1.5, dashArray: "1 3" }
+}
+
 /** Overrides any subtype styling for an edge on the relationship-path
  *  compare tool's highlighted path — deliberately ignores dash patterns so
  *  the whole path reads as one continuous, solid line regardless of the

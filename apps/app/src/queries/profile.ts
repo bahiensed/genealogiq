@@ -27,6 +27,9 @@ const PUBLIC_SELECT = {
   deathState: true,
   deathCountry: true,
   deathCause: true,
+  // Pet-only (null for every other role)
+  petSpecies: true,
+  petBreed: true,
   // Social (self-published handles)
   website: true,
   instagram: true,

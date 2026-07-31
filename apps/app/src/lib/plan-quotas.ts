@@ -4,6 +4,23 @@
 // subscription.ts — but the actual feature NUMBERS below no longer come from
 // that table's columns. BMS can rename/reprice/retire its own Subscription
 // rows without ever touching these numbers again.)
+//
+// As of the FREE.petsMax=0/product-table quota alignment, src/queries/
+// subscriptions.ts sources the /subscriptions pricing page's feature bullets
+// from FREE/PREMIUM/PHYSICAL_QR below (keyed by Subscription.code) instead of
+// the DB columns — Subscription's own treeMaxMembers/bioMaxChars/bioMaxImages/
+// galleryMaxImages/galleryMaxVideos/qrCodeAccess columns are now unread
+// anywhere in apps/app (BMS still lets an admin edit them; that's a cross-app
+// cleanup out of scope here).
+//
+// KNOWN PENDING (flagged, not implemented): the product table now prices
+// PREMIUM in both USD and BRL (e.g. $2.99/mo + R$14.90/mo), and the price
+// itself changed from the previous $3.99/mo·$39.99/yr. Neither PlanQuotas nor
+// this file model price at all — checkout price/currency lives entirely on
+// the shared Subscription row (BMS-owned) via Stripe Price objects, and
+// multi-currency checkout is a real structural change (locale-aware Stripe
+// Prices, currency selection at checkout) that hasn't been scoped yet. Do not
+// assume it's covered by anything here — it's a separate future task.
 
 export type PlanTier = "FREE" | "PREMIUM" | "PHYSICAL_QR"
 
@@ -26,6 +43,10 @@ export interface PlanQuotas {
   geoPlacesMax: number
   // How many memorial profiles a guardian may create.
   memorialsMax: number
+  // How many pet profiles a guardian may create — same numbers as
+  // memorialsMax, kept as a separate counter since pets are a distinct
+  // resource (don't share the memorial pool).
+  petsMax: number
   // How many QR codes (own profile + guarded memorials, combined) are free.
   qrCodeMax: number
   // Unchanged — boolean feature of the singular Geolocation model, out of
@@ -40,9 +61,12 @@ export const FREE: PlanQuotas = {
   mediaMaxImages: 32,
   mediaMaxVideos: 8,
   documentsMax: 16,
-  geoPlacesMax: 4,
-  memorialsMax: 2,
-  qrCodeMax: 2,
+  geoPlacesMax: 3,
+  memorialsMax: 1,
+  // Pets are a PREMIUM-only feature (not just a smaller free quota) — 0 blocks
+  // creation entirely via the existing count < limit check, no extra code path.
+  petsMax: 0,
+  qrCodeMax: 1,
   geolocationFullAccess: false,
 }
 
@@ -54,8 +78,9 @@ export const PREMIUM: PlanQuotas = {
   mediaMaxVideos: 32,
   documentsMax: 64,
   geoPlacesMax: 6,
-  memorialsMax: 6,
-  qrCodeMax: 2,
+  memorialsMax: 5,
+  petsMax: 5,
+  qrCodeMax: 1,
   geolocationFullAccess: true,
 }
 
@@ -71,16 +96,24 @@ export const PHYSICAL_QR: PlanQuotas = {
   documentsMax: 128,
   geoPlacesMax: 50,
   memorialsMax: 20,
+  petsMax: 20,
   qrCodeMax: 20,
   geolocationFullAccess: true,
 }
 
-// Which fields allow buying one more unit individually — a property of the
-// MODULE, not of the tier (true regardless of FREE/PREMIUM/PHYSICAL_QR). The
-// actual purchase mechanism doesn't exist yet; LimitReachedDialog only reads
-// this to decide whether to mention it as an option alongside upgrading.
-export const ALLOWS_EXTRA_PURCHASE: Partial<Record<keyof PlanQuotas, true>> = {
-  geoPlacesMax: true,
-  qrCodeMax: true,
-  memorialsMax: true,
+// Whether one more unit of `field` can be purchased individually — a
+// property of the module (geo places/memorials/QR codes are purchasable at
+// EITHER tier, just at a different price per tier, not modeled here; pets
+// and everything else have no purchase concept at all). The actual purchase
+// mechanism doesn't exist yet; LimitReachedDialog only reads this to decide
+// whether to mention it as an option alongside upgrading.
+export function allowsExtraPurchase(field: keyof PlanQuotas): boolean {
+  switch (field) {
+    case "geoPlacesMax":
+    case "memorialsMax":
+    case "qrCodeMax":
+      return true
+    default:
+      return false
+  }
 }

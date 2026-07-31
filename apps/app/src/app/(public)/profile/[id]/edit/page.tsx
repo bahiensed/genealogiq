@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 import { BackButton } from "@/components/back-button"
 import { MemorialEditForm } from "@/components/memorial-edit-form"
+import { PetEditForm } from "@/components/pet-edit-form"
 import { verifySession } from "@/lib/dal"
 import { getProfileForEdit } from "@/queries/profile"
 
@@ -22,10 +23,13 @@ export default async function ProfileEditPage({ params }: Props) {
   if (!profile) notFound()
 
   const isOwn = id === session.user.id
-  const isGuardian = profile.role === "APP_MEMO" && profile.guardedBy.some((g) => g.guardianId === session.user.id)
+  const isGuardian =
+    (profile.role === "APP_MEMO" || profile.role === "APP_PET") &&
+    profile.guardedBy.some((g) => g.guardianId === session.user.id)
   if (!isOwn && !isGuardian) redirect(`/profile/${id}`)
 
   const isMemorialized = profile.role === "APP_MEMO"
+  const isPet = profile.role === "APP_PET"
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -40,7 +44,11 @@ export default async function ProfileEditPage({ params }: Props) {
           <div className="mt-2 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 bg-transparent">
             <div className="flex flex-col gap-1 min-w-0 bg-transparent">
               <p className="text-muted-foreground italic bg-transparent">
-                {isMemorialized ? t("editPage.subtitleMemorial") : t("editPage.subtitleLiving")}
+                {isMemorialized
+                  ? t("editPage.subtitleMemorial")
+                  : isPet
+                    ? t("editPage.subtitlePet")
+                    : t("editPage.subtitleLiving")}
               </p>
             </div>
             <Button variant="ghost" asChild className="shrink-0 self-end lg:self-auto">
@@ -49,7 +57,9 @@ export default async function ProfileEditPage({ params }: Props) {
           </div>
         </div>
 
-        <MemorialEditForm profileId={id} initial={profile} isMemorialized={isMemorialized} />
+        {isPet
+          ? <PetEditForm profileId={id} initial={profile} />
+          : <MemorialEditForm profileId={id} initial={profile} isMemorialized={isMemorialized} />}
       </main>
     </div>
   )

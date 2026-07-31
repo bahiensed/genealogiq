@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { changeSubscription, createCheckoutSession } from "@/actions/billing.actions"
+import { allowsExtraPurchase } from "@/lib/plan-quotas"
 import type { SubscriptionRow } from "@/queries/subscriptions"
 import type { ActivePlan } from "@/queries/billing"
 
@@ -124,16 +125,30 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
     onRequestChange({ plan, cadence, effect })
   }
 
-  const features = [
-    t("features.memorialSlots", { count: plan.maxProfiles }),
-    t("features.treeMembers", { count: plan.treeMaxMembers }),
-    t("features.bioChars", { count: plan.bioMaxChars }),
-    t("features.bioImages", { count: plan.bioMaxImages }),
-    t("features.galleryPhotos", { count: plan.galleryMaxImages }),
-    t("features.galleryVideos", { count: plan.galleryMaxVideos }),
-    plan.geolocationFullAccess ? t("features.gpsPrecise") : t("features.gpsAddressOnly"),
-    plan.qrCodeAccess ? t("features.qrIncluded") : t("features.qrPaidOnly"),
-  ]
+  const q = plan.quotas
+  const features = q
+    ? [
+        t("features.memorialSlots", { count: plan.maxProfiles }),
+        t("features.treeMembers", { count: q.treeMaxMembers }),
+        t("features.bioChars", { count: q.bioMaxChars }),
+        t("features.documents", { count: q.documentsMax }),
+        t("features.mediaImages", { count: q.mediaMaxImages }),
+        t("features.mediaVideos", { count: q.mediaMaxVideos }),
+        q.geolocationFullAccess ? t("features.gpsPrecise") : t("features.gpsAddressOnly"),
+        t("features.geoPlaces", { count: q.geoPlacesMax }),
+        ...(allowsExtraPurchase("geoPlacesMax") ? [t("features.geoPlacesExtra")] : []),
+        t("features.memorials", { count: q.memorialsMax }),
+        ...(allowsExtraPurchase("memorialsMax") ? [t("features.memorialsExtra")] : []),
+        t("features.qrCodeCount", { count: q.qrCodeMax }),
+        ...(allowsExtraPurchase("qrCodeMax") ? [t("features.qrExtra")] : []),
+        q.petsMax > 0 ? t("features.petsCount", { count: q.petsMax }) : t("features.petsLocked"),
+      ]
+    : [
+        // Legacy/custom Subscription row with no matching PlanQuotas (an
+        // admin-typed `code` outside FREE/PREMIUM/PHYSICAL_QR) — only show
+        // what the DB row itself actually guarantees.
+        t("features.memorialSlots", { count: plan.maxProfiles }),
+      ]
 
   return (
     <div className="glass-card no-sheen p-6 flex flex-col gap-5 animate-fade-in" style={{ animationDelay: `${delay}ms` }}>

@@ -19,6 +19,8 @@ const person = (id: string, overrides: Partial<TreePerson> = {}): TreePerson => 
   deathCountry: null,
   birthYear: null,
   deathYear: null,
+  petSpecies: null,
+  petBreed: null,
   role: "APP_USER",
   pending: false,
   ...overrides,

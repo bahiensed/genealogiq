@@ -22,6 +22,8 @@ const livingRow = (over: Partial<ProfileRow> = {}): ProfileRow => ({
   deathState: null,
   deathCountry: null,
   deathCause: null,
+  petSpecies: null,
+  petBreed: null,
   website: null,
   instagram: null,
   linkedin: null,

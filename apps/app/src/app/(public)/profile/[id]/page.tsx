@@ -47,6 +47,7 @@ export default async function ProfileByIdPage({ params }: Props) {
 
   const isOwn = sessionUserId ? rawUser.id === sessionUserId : false
   const isMemorialized = rawUser.role === "APP_MEMO"
+  const isPet = rawUser.role === "APP_PET"
 
   const isGuardian = isMemorialized && sessionUserId
     ? rawUser.guardedBy.some((g) => g.guardianId === sessionUserId)
@@ -63,8 +64,10 @@ export default async function ProfileByIdPage({ params }: Props) {
   const canManageThis = sessionUserId ? canManageProfile(rawUser, sessionUserId) : false
   const user = redactLivingProfile(rawUser, { id: sessionUserId ?? null, canManage: canManageThis })
 
-  const name = `${user.firstName} ${user.lastName}`
-  const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+  // Pets have no lastName (empty string) — avoid a trailing space / bogus
+  // second initial for them.
+  const name = user.lastName ? `${user.firstName} ${user.lastName}` : user.firstName
+  const initials = (user.lastName ? `${user.firstName[0]}${user.lastName[0]}` : user.firstName.slice(0, 2)).toUpperCase()
 
   const [
     favoritedBy,
@@ -92,8 +95,8 @@ export default async function ProfileByIdPage({ params }: Props) {
     getPlacesForMap(id),
     getTributeAuthors(id, 5),
     getTributeCountByProfileId(id),
-    !isMemorialized ? getFavoritesByUserId(id, sessionUserId) : Promise.resolve([]),
-    !isMemorialized ? getMemorialsByCreatorId(id) : Promise.resolve([]),
+    !isMemorialized && !isPet ? getFavoritesByUserId(id, sessionUserId) : Promise.resolve([]),
+    !isMemorialized && !isPet ? getMemorialsByCreatorId(id) : Promise.resolve([]),
     getBioByUserId(id),
     countTreeMembers(id),
     // Preview/metric only ever reflect PUBLIC documents unless the viewer can
@@ -113,7 +116,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     name,
     initials,
     avatarColor: getAvatarColor(user.id),
-    type: isMemorialized ? "memorialized" : "living",
+    type: isMemorialized ? "memorialized" : isPet ? "pet" : "living",
     avatarUrl: user.avatarUrl,
     birth: user.birthDate
       ? { date: formatDateLong(user.birthDate, locale), place: user.birthPlace ?? "", country: user.birthCountry }
@@ -215,6 +218,17 @@ export default async function ProfileByIdPage({ params }: Props) {
     tributesCard,
   ]
 
+  // Pets get the memorial-style modules minus the guestbook — no
+  // tributes/QR for pets in v1 (see plan). Bio/Gallery/Documents/Places
+  // previews are already generic over any profile id.
+  const petCards: SectionCard[] = [
+    treeCard,
+    bioCard,
+    documentsCard,
+    galleryCard,
+    placesCard,
+  ]
+
   const livingCards: SectionCard[] = [
     treeCard,
     bioCard,
@@ -248,13 +262,21 @@ export default async function ProfileByIdPage({ params }: Props) {
       ...(isAnon ? {} : { href: `${base}/memorialized` }),
     },
     {
+      // Inert placeholder for now — the Pets module (queries/actions/UI) is
+      // fully built (see pet.actions.ts/pets-client.tsx/etc.) and still
+      // reachable by direct URL, but isn't surfaced from this grid yet
+      // pending a few more polish passes. No href, so BentoGrid renders a
+      // plain non-clickable div (same fallback favorites/guardian use for
+      // anon visitors) instead of a Link. Preview forced to the empty state
+      // regardless of real pet count so the card doesn't leak data that
+      // contradicts its own "coming soon" caption.
       key: "pets",
       title: t("petsTitle"),
       description: t("petsDescription"),
       metric: t("petsComingSoon"),
       icon: PawPrint,
       span: 2,
-      preview: <PetsPreview />,
+      preview: <PetsPreview pets={[]} />,
     },
   ]
 
@@ -283,7 +305,7 @@ export default async function ProfileByIdPage({ params }: Props) {
       )}
       <main className="relative z-10">
         <ProfileBanner profile={profile} />
-        <BentoGrid cards={isMemorialized ? memorializedCards : livingCards} />
+        <BentoGrid cards={isMemorialized ? memorializedCards : isPet ? petCards : livingCards} />
       </main>
     </div>
   )

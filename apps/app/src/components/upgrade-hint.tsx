@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 
-type Context = "bio" | "gallery" | "memorialized" | "geolocation" | "tree"
+type Context = "bio" | "gallery" | "memorialized" | "geolocation" | "tree" | "pets"
 
 interface Props {
   context:     Context

@@ -206,6 +206,7 @@ export function FamilyTreeCanvas({ persons, relations, rootId, sessionUserId, ca
       parentLines={layout.parentLines}
       coupleLines={layout.coupleLines}
       siblingLines={layout.siblingLines}
+      petLines={layout.petLines}
       highlightedRelationIds={highlightedRelationIds}
     />
   )

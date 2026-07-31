@@ -1,15 +1,16 @@
 "use client"
 
 import { Fragment } from "react"
-import type { LaidNode, ParentLineGeom, CoupleLineGeom, SiblingLineGeom } from "../layout"
+import type { LaidNode, ParentLineGeom, CoupleLineGeom, SiblingLineGeom, PetLineGeom } from "../layout"
 import { NODE_W, NODE_H, Y_GEN } from "../layout"
-import { parentStyle, spouseStyle, siblingStyle, highlightStyle } from "./edge-style"
+import { parentStyle, spouseStyle, siblingStyle, petStyle, highlightStyle } from "./edge-style"
 
 interface Props {
   nodes:        LaidNode[]
   parentLines:  ParentLineGeom[]
   coupleLines:  CoupleLineGeom[]
   siblingLines: SiblingLineGeom[]
+  petLines:     PetLineGeom[]
   /** Relation ids on the compare tool's currently-highlighted path, if any. */
   highlightedRelationIds?: Set<string>
 }
@@ -18,7 +19,7 @@ interface Pos { x: number; y: number }
 
 const TRUNK_OFFSET = 28   // vertical distance below parent card before the horizontal trunk
 
-export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines, highlightedRelationIds }: Props) {
+export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines, petLines, highlightedRelationIds }: Props) {
   const pos = new Map<string, Pos>()
   for (const n of nodes) pos.set(n.id, { x: n.x, y: n.y })
 
@@ -279,6 +280,29 @@ export function FamilyEdges({ nodes, parentLines, coupleLines, siblingLines, hig
             x1={x1} y1={y1} x2={x2} y2={y1}
             stroke={style.stroke} strokeWidth={style.width}
             strokeDasharray={style.dashArray} strokeLinecap="round"
+          />
+        )
+      })}
+
+      {/* ── Pet connectors (owner card → attached pet node) ──────────────── */}
+      {petLines.map((p, i) => {
+        const a = pos.get(p.ownerId)
+        const b = pos.get(p.petId)
+        if (!a || !b) return null
+
+        const ax   = a.x + NODE_W / 2
+        const ay   = a.y + NODE_H
+        const bx   = b.x + NODE_W / 2
+        const by   = b.y
+        const midY = ay + (by - ay) / 2
+        const style = isHighlighted(p.relationId) ? highlightStyle() : petStyle()
+        const d = `M ${ax} ${ay} L ${ax} ${midY} L ${bx} ${midY} L ${bx} ${by}`
+        return (
+          <path
+            key={`pet-${i}`}
+            d={d}
+            stroke={style.stroke} strokeWidth={style.width}
+            strokeDasharray={style.dashArray} strokeLinecap="round" fill="none"
           />
         )
       })}

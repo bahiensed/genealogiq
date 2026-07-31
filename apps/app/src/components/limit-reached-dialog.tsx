@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useTranslations } from "next-intl"
 import type { LucideIcon } from "lucide-react"
-import { Network, BookOpenText, FileText, Images, Film, MapPin, BrickWall, QrCode } from "lucide-react"
+import { Network, BookOpenText, FileText, Images, Film, MapPin, BrickWall, QrCode, PawPrint } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +15,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { ALLOWS_EXTRA_PURCHASE, type PlanQuotas, type PlanTier } from "@/lib/plan-quotas"
+import { allowsExtraPurchase, type PlanQuotas, type PlanTier } from "@/lib/plan-quotas"
 
 export type LimitReachedContext =
   | "tree"
@@ -25,6 +25,7 @@ export type LimitReachedContext =
   | "media-videos"
   | "geoPlaces"
   | "memorials"
+  | "pets"
   | "qrCode"
 
 interface Props {
@@ -43,6 +44,7 @@ const CONTEXT_ICON: Record<LimitReachedContext, LucideIcon> = {
   "media-videos": Film,
   geoPlaces: MapPin,
   memorials: BrickWall,
+  pets: PawPrint,
   qrCode: QrCode,
 }
 
@@ -56,11 +58,12 @@ const CONTEXT_I18N_KEY: Record<LimitReachedContext, string> = {
   "media-videos": "mediaVideos",
   geoPlaces: "geoPlaces",
   memorials: "memorials",
+  pets: "pets",
   qrCode: "qrCode",
 }
 
 // Which PlanQuotas field governs each context — used to look up
-// ALLOWS_EXTRA_PURCHASE, a property of the module, not of the tier.
+// allowsExtraPurchase(field).
 const CONTEXT_QUOTA_KEY: Record<LimitReachedContext, keyof PlanQuotas> = {
   tree: "treeMaxMembers",
   bio: "bioMaxChars",
@@ -69,6 +72,7 @@ const CONTEXT_QUOTA_KEY: Record<LimitReachedContext, keyof PlanQuotas> = {
   "media-videos": "mediaMaxVideos",
   geoPlaces: "geoPlacesMax",
   memorials: "memorialsMax",
+  pets: "petsMax",
   qrCode: "qrCodeMax",
 }
 
@@ -76,7 +80,7 @@ export function LimitReachedDialog({ open, onOpenChange, context, limit, tier }:
   const t = useTranslations("LimitReached")
   const Icon = CONTEXT_ICON[context]
   const i18nKey = CONTEXT_I18N_KEY[context]
-  const allowsExtra = !!ALLOWS_EXTRA_PURCHASE[CONTEXT_QUOTA_KEY[context]]
+  const allowsExtra = allowsExtraPurchase(CONTEXT_QUOTA_KEY[context])
 
   // FREE always has a real higher tier to sell. Already-paying tiers
   // (PREMIUM/PHYSICAL_QR) only get the extra-purchase hint where the module
@@ -91,6 +95,16 @@ export function LimitReachedDialog({ open, onOpenChange, context, limit, tier }:
   const ctaKey: "upgrade" | "extraOnly" | "maxedOut" =
     variant === "extraOnly" || variant === "maxedOut" ? variant : "upgrade"
 
+  // Pets are blocked outright on FREE (petsMax=0) rather than merely capped —
+  // "Your plan allows up to 0 pets" reads as broken, so swap in dedicated copy.
+  const isPetsLocked = context === "pets" && tier === "FREE" && limit === 0
+
+  // qrCodeMax is identical across FREE/PREMIUM (both 1) — upgrading never
+  // raises the count, it's purchasable as an extra at either tier (just
+  // cheaper once PREMIUM). The generic "upgrade for a higher limit" suffix
+  // is factually wrong here, so override it.
+  const suffixKey = context === "qrCode" && variant === "upgradeOrExtra" ? "qrUpgradeOrExtra" : variant
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -98,9 +112,10 @@ export function LimitReachedDialog({ open, onOpenChange, context, limit, tier }:
           <AlertDialogMedia>
             <Icon className="text-primary" />
           </AlertDialogMedia>
-          <AlertDialogTitle>{t(`title.${i18nKey}`)}</AlertDialogTitle>
+          <AlertDialogTitle>{isPetsLocked ? t("title.petsLocked") : t(`title.${i18nKey}`)}</AlertDialogTitle>
           <AlertDialogDescription>
-            {t(`description.${i18nKey}`, { limit })} {t(`suffix.${variant}`)}
+            {isPetsLocked ? t("description.petsLocked") : t(`description.${i18nKey}`, { limit })}{" "}
+            {t(`suffix.${suffixKey}`)}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

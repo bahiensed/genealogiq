@@ -19,6 +19,9 @@ export interface TreePerson {
    *  canonical source for year-only display everywhere in the UI. */
   birthYear:    number | null
   deathYear:    number | null
+  /** Only populated for role="APP_PET". */
+  petSpecies:   string | null
+  petBreed:     string | null
   role:         string
   /** True when at least one relation touching this person is still PENDING and this person isn't the root. */
   pending:      boolean
@@ -95,6 +98,7 @@ export async function getFamilyTree(rootId: string, viewer: TreeViewer): Promise
       gender: true, avatarUrl: true,
       birthDate: true, birthPlace: true, birthCountry: true,
       deathDate: true, deathPlace: true, deathCountry: true,
+      petSpecies: true, petBreed: true,
       role: true,
     },
   })
@@ -180,8 +184,13 @@ export async function getTreeMemberIds(rootId: string): Promise<Set<string>> {
   return discovered
 }
 
+// Excludes APP_PET — pets consume their own separate `petsMax` quota, not
+// `treeMaxMembers`.
 export async function countTreeMembers(rootId: string): Promise<number> {
-  return (await getTreeMemberIds(rootId)).size
+  const ids = await getTreeMemberIds(rootId)
+  return prisma.appUser.count({
+    where: { id: { in: Array.from(ids) }, role: { not: "APP_PET" } },
+  })
 }
 
 /**
