@@ -603,10 +603,8 @@
       }
     },
     "footer": {
-      "cancellationRefund": "Cancelación y Reembolso",
       "copyright": "© Genealogiq Global Ltda, {year}.",
-      "privacy": "Política de Privacidad",
-      "terms": "Términos de Servicio"
+      "terms": "Términos y Privacidad"
     },
     "links": {
       "career": "Carrera",
@@ -786,10 +784,8 @@
     "title": "¡Instala la app de Genealogiq ahora!"
   },
   "Legal": {
-    "cancellationRefundTitle": "Cancelación y Reembolso",
     "comingSoon": "Contenido próximamente.",
-    "privacyTitle": "Política de Privacidad",
-    "termsTitle": "Términos de Servicio"
+    "termsTitle": "Términos y Privacidad"
   },
   "LimitReached": {
     "cta": {
