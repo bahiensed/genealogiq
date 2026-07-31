@@ -10,11 +10,7 @@ interface SubscriptionsDataTableProps {
 }
 
 const INITIAL_COLUMN_VISIBILITY = {
-  bioMaxChars:      false,
-  bioMaxImages:     false,
-  galleryMaxImages: false,
-  galleryMaxVideos: false,
-  createdAt:        false,
+  createdAt: false,
 }
 
 export function SubscriptionsDataTable({ currentUserRole, data }: SubscriptionsDataTableProps) {
@@ -22,19 +18,13 @@ export function SubscriptionsDataTable({ currentUserRole, data }: SubscriptionsD
   const locale = useLocale()
 
   const columnLabels: Record<string, string> = {
-    code:                  t('table.code'),
-    name:                  t('table.name'),
-    maxProfiles:           t('table.maxProfiles'),
-    bioMaxChars:           t('table.bioMaxChars'),
-    bioMaxImages:          t('table.bioMaxImages'),
-    galleryMaxImages:      t('table.galleryMaxImages'),
-    galleryMaxVideos:      t('table.galleryMaxVideos'),
-    geolocationFullAccess: t('table.geo'),
-    qrCodeAccess:          t('table.qrCode'),
-    termLength:            t('table.term'),
-    price:                 t('table.price'),
-    isActive:              t('table.status'),
-    createdAt:             t('table.createdAt'),
+    code:        t('table.code'),
+    name:        t('table.name'),
+    maxProfiles: t('table.maxProfiles'),
+    termLength:  t('table.term'),
+    price:       t('table.price'),
+    isActive:    t('table.status'),
+    createdAt:   t('table.createdAt'),
   }
 
   return (

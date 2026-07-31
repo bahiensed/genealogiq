@@ -4,22 +4,18 @@ import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 
 const subscriptionSelect = {
-  id:                    true,
-  code:                  true,
-  name:                  true,
-  description:           true,
-  maxProfiles:           true,
-  termLength:            true,
-  price:                 true,
-  treeMaxMembers:        true,
-  bioMaxChars:           true,
-  bioMaxImages:          true,
-  galleryMaxImages:      true,
-  galleryMaxVideos:      true,
-  geolocationFullAccess: true,
-  qrCodeAccess:          true,
-  isActive:              true,
-  createdAt:             true,
+  id:                   true,
+  code:                 true,
+  name:                 true,
+  description:          true,
+  maxProfiles:          true,
+  termLength:           true,
+  price:                true,
+  stripeProductId:      true,
+  stripeAnnualPriceId:  true,
+  stripeMonthlyPriceId: true,
+  isActive:             true,
+  createdAt:            true,
 } as const
 
 export async function getSubscriptions() {

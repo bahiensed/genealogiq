@@ -18,13 +18,6 @@ export type SubscriptionRow = {
   maxProfiles: number
   termLength: number
   price: number
-  treeMaxMembers: number
-  bioMaxChars: number
-  bioMaxImages: number
-  galleryMaxImages: number
-  galleryMaxVideos: number
-  geolocationFullAccess: boolean
-  qrCodeAccess: boolean
   isActive: boolean
   createdAt: Date
 }
@@ -75,40 +68,6 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       accessorKey: 'maxProfiles',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.maxProfiles')} className="justify-end" />,
       cell: ({ row }) => <div className="text-right">{row.original.maxProfiles}</div>,
-    },
-    {
-      accessorKey: 'bioMaxChars',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.bioMaxChars')} className="justify-end" />,
-      cell: ({ row }) => <div className="text-right">{row.original.bioMaxChars}</div>,
-    },
-    {
-      accessorKey: 'bioMaxImages',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.bioMaxImages')} className="justify-end" />,
-      cell: ({ row }) => <div className="text-right">{row.original.bioMaxImages}</div>,
-    },
-    {
-      accessorKey: 'galleryMaxImages',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.galleryMaxImages')} className="justify-end" />,
-      cell: ({ row }) => <div className="text-right">{row.original.galleryMaxImages}</div>,
-    },
-    {
-      accessorKey: 'galleryMaxVideos',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.galleryMaxVideos')} className="justify-end" />,
-      cell: ({ row }) => <div className="text-right">{row.original.galleryMaxVideos}</div>,
-    },
-    {
-      accessorKey: 'geolocationFullAccess',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.geo')} />,
-      cell: ({ row }) => (
-        <span className="text-xs">{row.original.geolocationFullAccess ? '✓' : '∅'}</span>
-      ),
-    },
-    {
-      accessorKey: 'qrCodeAccess',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.qrCode')} />,
-      cell: ({ row }) => (
-        <span className="text-xs">{row.original.qrCodeAccess ? '✓' : '∅'}</span>
-      ),
     },
     {
       accessorKey: 'termLength',

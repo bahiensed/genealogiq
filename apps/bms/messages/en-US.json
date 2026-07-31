@@ -80,7 +80,13 @@
       "created": "Subscription created successfully.",
       "hasSales": "Cannot delete this subscription — it is linked to existing sales records.",
       "notFound": "Subscription not found.",
-      "updated": "Subscription updated successfully."
+      "priceRequired": "Set a price greater than zero before syncing.",
+      "stripeSyncFailed": "Stripe sync failed: {message}",
+      "synced": "Synced with Stripe successfully.",
+      "termLengthRequired": "Set a term length greater than zero before syncing — lifetime (0) plans aren't recurring.",
+      "unknownError": "Unknown error",
+      "updated": "Subscription updated successfully.",
+      "updatedStripeCleared": "Subscription updated — Stripe references cleared. Sync with Stripe again to provision fresh prices."
     },
     "supplier": {
       "created": "Supplier created successfully.",
@@ -646,19 +652,12 @@
     "create": "Create subscription",
     "edit": "Edit Subscription",
     "fields": {
-      "bioMaxChars": "Bio Max Characters",
-      "bioMaxImages": "Bio Max Images",
       "code": "Code",
       "description": "Description",
-      "galleryMaxImages": "Gallery Max Images",
-      "galleryMaxVideos": "Gallery Max Videos",
-      "geolocationFullAccess": "Geolocation Full Access",
       "maxProfiles": "Max Memo Profiles",
       "name": "Name",
       "price": "Price (US$)",
-      "qrCodeAccess": "QR Code Access",
-      "termLength": "Term Length (in months)",
-      "treeMaxMembers": "Family Tree Max Members"
+      "termLength": "Term Length (in months)"
     },
     "free": "Free",
     "hints": {
@@ -676,19 +675,27 @@
       "active": "Active",
       "inactive": "Inactive"
     },
+    "stripe": {
+      "annualPriceId": "annual price:",
+      "confirmDescription": "Please confirm that this plan's data is correct. This will create or update the matching Product and Prices in Stripe. Are you sure you want to synchronize?",
+      "confirmTitle": "Sync with Stripe?",
+      "hint": "Pushes this plan's name, description and price to Stripe (creating or updating the matching Product and annual/monthly Prices). Save your changes first — sync uses the saved data. Changing the price or term length provisions fresh Stripe Prices.",
+      "monthlyPriceId": "monthly price:",
+      "notSynced": "Not synced",
+      "productId": "product:",
+      "syncButton": "Sync with Stripe",
+      "syncNow": "Sync now",
+      "synced": "Synced",
+      "syncing": "Syncing…",
+      "title": "Stripe sync"
+    },
     "table": {
-      "bioMaxChars": "Bio Chars",
-      "bioMaxImages": "Bio Images",
       "code": "Code",
       "createdAt": "Created at",
       "empty": "No subscriptions found",
-      "galleryMaxImages": "Gallery Images",
-      "galleryMaxVideos": "Gallery Videos",
-      "geo": "Geo",
       "maxProfiles": "Memo",
       "name": "Name",
       "price": "Price",
-      "qrCode": "QR Code",
       "status": "Status",
       "term": "Term"
     },

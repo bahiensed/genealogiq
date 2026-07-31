@@ -9,9 +9,10 @@
 // subscriptions.ts sources the /subscriptions pricing page's feature bullets
 // from FREE/PREMIUM/PHYSICAL_QR below (keyed by Subscription.code) instead of
 // the DB columns — Subscription's own treeMaxMembers/bioMaxChars/bioMaxImages/
-// galleryMaxImages/galleryMaxVideos/qrCodeAccess columns are now unread
-// anywhere in apps/app (BMS still lets an admin edit them; that's a cross-app
-// cleanup out of scope here).
+// galleryMaxImages/galleryMaxVideos/geolocationFullAccess/qrCodeAccess/
+// geoPlacesMax/documentsMax columns were dropped from the schema entirely
+// (migration 20260731000000_drop_subscription_dead_quota_columns) — BMS's
+// admin form no longer exposes them either.
 //
 // KNOWN PENDING (flagged, not implemented): the product table now prices
 // PREMIUM in both USD and BRL (e.g. $2.99/mo + R$14.90/mo), and the price
