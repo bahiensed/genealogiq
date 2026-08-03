@@ -18,7 +18,7 @@ export async function getActivePlan(userId: string) {
       cancelAtPeriodEnd:    true,
       stripeSubscriptionId: true,
       subscription: {
-        select: { id: true, code: true, name: true, price: true, termLength: true },
+        select: { id: true, code: true, name: true, price: true, monthlyPrice: true, termLength: true },
       },
     },
   })
@@ -29,7 +29,11 @@ export async function getActivePlan(userId: string) {
     ...row,
     currentPeriodEnd: row.currentPeriodEnd,
     status:           row.status,
-    subscription:     { ...row.subscription, price: Number(row.subscription.price) },
+    subscription:     {
+      ...row.subscription,
+      price:        Number(row.subscription.price),
+      monthlyPrice: row.subscription.monthlyPrice ? Number(row.subscription.monthlyPrice) : null,
+    },
   }
 }
 

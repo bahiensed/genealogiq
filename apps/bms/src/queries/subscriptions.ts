@@ -11,6 +11,7 @@ const subscriptionSelect = {
   maxProfiles:          true,
   termLength:           true,
   price:                true,
+  monthlyPrice:         true,
   stripeProductId:      true,
   stripeAnnualPriceId:  true,
   stripeMonthlyPriceId: true,
@@ -26,7 +27,7 @@ export async function getSubscriptions() {
     orderBy: { name: 'asc' },
   })
 
-  return rows.map(r => ({ ...r, price: Number(r.price) }))
+  return rows.map(r => ({ ...r, price: Number(r.price), monthlyPrice: r.monthlyPrice ? Number(r.monthlyPrice) : null }))
 }
 
 export async function getSubscription(id: string) {
@@ -38,5 +39,5 @@ export async function getSubscription(id: string) {
   })
 
   if (!row) return null
-  return { ...row, price: Number(row.price) }
+  return { ...row, price: Number(row.price), monthlyPrice: row.monthlyPrice ? Number(row.monthlyPrice) : null }
 }

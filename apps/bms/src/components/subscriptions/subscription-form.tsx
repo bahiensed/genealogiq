@@ -180,7 +180,7 @@ export function SubscriptionForm({ id, defaultValues, stripeProductId, stripeAnn
               />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               <IntField control={control} name="maxProfiles" label={t('fields.maxProfiles')} min={1} />
               <IntField
                 control={control}
@@ -206,6 +206,27 @@ export function SubscriptionForm({ id, defaultValues, stripeProductId, stripeAnn
                     </div>
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     <p className="text-xs text-muted-foreground">{t('hints.price')}</p>
+                  </Field>
+                )}
+              />
+              <Controller
+                name="monthlyPrice"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t('fields.monthlyPrice')}</FieldLabel>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">$</span>
+                      <CurrencyInput
+                        className="pl-7"
+                        value={field.value}
+                        onChange={field.onChange}
+                        autoComplete="off"
+                        aria-invalid={fieldState.invalid}
+                      />
+                    </div>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    <p className="text-xs text-muted-foreground">{t('hints.monthlyPrice')}</p>
                   </Field>
                 )}
               />

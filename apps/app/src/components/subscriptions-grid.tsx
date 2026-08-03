@@ -36,12 +36,16 @@ type PendingChange = {
   effect:  "upgrade" | "downgrade"
 }
 
-function monthlyEquivalent(price: number, termLength: number) {
-  return termLength > 0 ? price / termLength : 0
+function monthlyEquivalent(plan: { price: number; termLength: number; monthlyPrice?: number | null }) {
+  if (plan.monthlyPrice != null) return plan.monthlyPrice
+  return plan.termLength > 0 ? plan.price / plan.termLength : 0
 }
 
-function compareMonthly(a: { price: number; termLength: number }, b: { price: number; termLength: number }) {
-  return monthlyEquivalent(a.price, a.termLength) - monthlyEquivalent(b.price, b.termLength)
+function compareMonthly(
+  a: { price: number; termLength: number; monthlyPrice?: number | null },
+  b: { price: number; termLength: number; monthlyPrice?: number | null },
+) {
+  return monthlyEquivalent(a) - monthlyEquivalent(b)
 }
 
 export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Props) {
@@ -60,7 +64,7 @@ export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Pr
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
         {subscriptions.map((s, i) => {
           const isActive = activeSubscriptionId
             ? activeSubscriptionId === s.id
@@ -102,7 +106,7 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
   const isFree = plan.code === "FREE"
 
   const annualPrice  = Number(plan.price)
-  const monthlyPrice = monthlyEquivalent(annualPrice, plan.termLength)
+  const monthlyPrice = monthlyEquivalent(plan)
 
   const startFirstSubscription = (cadence: "annual" | "monthly") => {
     startTransition(async () => {
@@ -117,10 +121,7 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
       startFirstSubscription(cadence)
       return
     }
-    const cmp = compareMonthly(
-      { price: annualPrice, termLength: plan.termLength },
-      { price: activePlan.subscription.price, termLength: activePlan.subscription.termLength },
-    )
+    const cmp = compareMonthly(plan, activePlan.subscription)
     const effect: "upgrade" | "downgrade" = cmp >= 0 ? "upgrade" : "downgrade"
     onRequestChange({ plan, cadence, effect })
   }

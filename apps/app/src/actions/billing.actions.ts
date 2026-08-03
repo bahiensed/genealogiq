@@ -74,7 +74,7 @@ export async function changeSubscription(
     orderBy: { currentPeriodEnd: "desc" },
     select: {
       stripeSubscriptionId: true,
-      subscription: { select: { price: true, termLength: true } },
+      subscription: { select: { price: true, monthlyPrice: true, termLength: true } },
     },
   })
   if (!active || !active.stripeSubscriptionId) return fail(t("billing.noActiveSubscription"))
@@ -82,15 +82,15 @@ export async function changeSubscription(
 
   const target = await prisma.subscription.findUnique({
     where:  { id: subscriptionId, isActive: true },
-    select: { id: true, price: true, termLength: true, stripeAnnualPriceId: true, stripeMonthlyPriceId: true },
+    select: { id: true, price: true, monthlyPrice: true, termLength: true, stripeAnnualPriceId: true, stripeMonthlyPriceId: true },
   })
   if (!target) return fail(t("billing.planNotFound"))
   const targetPriceId = cadence === "annual" ? target.stripeAnnualPriceId : target.stripeMonthlyPriceId
   if (!targetPriceId) return fail(t("billing.planNotWired"))
 
   const cmp = compareTier(
-    { price: Number(target.price), termLength: target.termLength },
-    { price: Number(active.subscription.price), termLength: active.subscription.termLength },
+    { price: Number(target.price), monthlyPrice: target.monthlyPrice ? Number(target.monthlyPrice) : null, termLength: target.termLength },
+    { price: Number(active.subscription.price), monthlyPrice: active.subscription.monthlyPrice ? Number(active.subscription.monthlyPrice) : null, termLength: active.subscription.termLength },
   )
 
   const metadata = { userId: session.user.id, subscriptionId: target.id, cadence }

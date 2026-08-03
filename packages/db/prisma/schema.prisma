@@ -115,6 +115,12 @@ model Subscription {
   maxProfiles           Int       @map("max_profiles")
   termLength            Int       @map("term_length")
   price                 Decimal   @db.Decimal(10, 2)
+  // Explicit monthly price, independent of `price / termLength` — lets a plan
+  // offer a real annual discount (not just an even split) instead of a
+  // proportional derivation. Null = fall back to the derived value (legacy
+  // behavior), used by all pricing math in BMS's Stripe sync and the APP's
+  // subscriptions grid/billing comparison.
+  monthlyPrice          Decimal?  @db.Decimal(10, 2) @map("monthly_price")
   code                  String    @unique
   stripeProductId       String?   @unique @map("stripe_product_id")
   stripeAnnualPriceId   String?   @unique @map("stripe_annual_price_id")

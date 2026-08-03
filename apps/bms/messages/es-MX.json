@@ -655,6 +655,7 @@
       "code": "Código",
       "description": "Descripción",
       "maxProfiles": "Máximo de Perfiles Memo",
+      "monthlyPrice": "Precio Mensual (US$)",
       "name": "Nombre",
       "price": "Precio (US$)",
       "termLength": "Duración (en meses)"
@@ -663,6 +664,7 @@
     "hints": {
       "code": "Identificación del plan",
       "freeCodeReserved": "El código del plan FREE está reservado.",
+      "monthlyPrice": "0 = deriva de Precio / Duración. Defínelo para ofrecer un descuento real por pago anual, en vez de una división proporcional.",
       "price": "0 = Gratis",
       "termLength": "0 = De por vida"
     },

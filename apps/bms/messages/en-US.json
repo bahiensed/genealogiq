@@ -655,6 +655,7 @@
       "code": "Code",
       "description": "Description",
       "maxProfiles": "Max Memo Profiles",
+      "monthlyPrice": "Monthly Price (US$)",
       "name": "Name",
       "price": "Price (US$)",
       "termLength": "Term Length (in months)"
@@ -663,6 +664,7 @@
     "hints": {
       "code": "Tier identification",
       "freeCodeReserved": "FREE plan code is reserved.",
+      "monthlyPrice": "0 = derive from Price / Term Length. Set to offer a real discount for paying annually instead of an even split.",
       "price": "0 = Free",
       "termLength": "0 = Lifetime"
     },

@@ -6,17 +6,19 @@ import { prisma } from "@/lib/prisma"
 type PrismaLike = PrismaClient | Prisma.TransactionClient
 
 /**
- * Compares two plans by their normalized monthly price (price / termLength).
+ * Compares two plans by their monthly price — the explicit `monthlyPrice`
+ * when set (a real annual discount doesn't derive proportionally from
+ * `price`), falling back to `price / termLength` otherwise.
  * Positive when `a` is the more expensive tier; 0 when equal.
  * Used to decide whether a plan change is an upgrade (immediate, prorated)
  * or a downgrade (deferred to period end).
  */
 export function compareTier(
-  a: { price: number; termLength: number },
-  b: { price: number; termLength: number },
+  a: { price: number; termLength: number; monthlyPrice?: number | null },
+  b: { price: number; termLength: number; monthlyPrice?: number | null },
 ): number {
-  const aMonthly = a.price / Math.max(a.termLength, 1)
-  const bMonthly = b.price / Math.max(b.termLength, 1)
+  const aMonthly = a.monthlyPrice ?? (a.price / Math.max(a.termLength, 1))
+  const bMonthly = b.monthlyPrice ?? (b.price / Math.max(b.termLength, 1))
   return aMonthly - bMonthly
 }
 

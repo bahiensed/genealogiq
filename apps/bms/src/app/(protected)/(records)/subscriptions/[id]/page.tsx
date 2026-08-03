@@ -15,9 +15,10 @@ export default async function EditSubscriptionPage({ params }: { params: Promise
         name:        subscription.name,
         description: subscription.description ?? '',
         isActive:    subscription.isActive,
-        maxProfiles: subscription.maxProfiles,
-        termLength:  subscription.termLength,
-        price:       subscription.price,
+        maxProfiles:  subscription.maxProfiles,
+        termLength:   subscription.termLength,
+        price:        subscription.price,
+        monthlyPrice: subscription.monthlyPrice ?? 0,
       }}
       stripeProductId={subscription.stripeProductId}
       stripeAnnualPriceId={subscription.stripeAnnualPriceId}

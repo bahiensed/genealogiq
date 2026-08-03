@@ -10,22 +10,27 @@ const PLAN_QUOTAS_BY_CODE: Record<string, PlanQuotas> = { FREE, PREMIUM, PHYSICA
 
 export async function getActiveSubscriptions() {
   const rows = await prisma.subscription.findMany({
-    where:   { isActive: true },
+    // Self-serve checkout only ever offers the plans this app actually sells
+    // this way — a physical-QR license or any other admin-created row is
+    // sold/tracked through a different channel, not this page.
+    where:   { isActive: true, code: { in: ["FREE", "PREMIUM"] } },
     orderBy: { price: "asc" },
     select: {
-      id:          true,
-      code:        true,
-      name:        true,
-      description: true,
-      maxProfiles: true,
-      termLength:  true,
-      price:       true,
+      id:           true,
+      code:         true,
+      name:         true,
+      description:  true,
+      maxProfiles:  true,
+      termLength:   true,
+      price:        true,
+      monthlyPrice: true,
     },
   })
   return rows.map((r) => ({
     ...r,
-    price:  Number(r.price),
-    quotas: PLAN_QUOTAS_BY_CODE[r.code] ?? null,
+    price:        Number(r.price),
+    monthlyPrice: r.monthlyPrice ? Number(r.monthlyPrice) : null,
+    quotas:       PLAN_QUOTAS_BY_CODE[r.code] ?? null,
   }))
 }
 

@@ -17,6 +17,9 @@ export function getSubscriptionSchema(t: Translator) {
     maxProfiles: z.number().int(t('mustBeWholeNumber')).positive(t('mustBePositive')),
     termLength:  z.number().int(t('mustBeWholeNumber')).min(0, t('termLengthMin')),
     price:       z.number().min(0, t('priceMin')),
+    // 0 = not set, derive from price/termLength (same sentinel convention as
+    // price's "0 = Free" and termLength's "0 = Lifetime").
+    monthlyPrice: z.number().min(0, t('priceMin')),
   })
 }
 
@@ -28,7 +31,8 @@ export const subscriptionDefaultValues: SubscriptionFormValues = {
   description: '',
   isActive:    true,
 
-  maxProfiles: 1,
-  termLength:  12,
-  price:       0,
+  maxProfiles:  1,
+  termLength:   12,
+  price:        0,
+  monthlyPrice: 0,
 }

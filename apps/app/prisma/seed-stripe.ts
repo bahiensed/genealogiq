@@ -18,7 +18,9 @@ async function main() {
 
   for (const plan of plans) {
     const priceCents        = Math.round(Number(plan.price) * 100)
-    const monthlyPriceCents = Math.round((Number(plan.price) / plan.termLength) * 100)
+    const monthlyPriceCents = plan.monthlyPrice !== null
+      ? Math.round(Number(plan.monthlyPrice) * 100)
+      : Math.round((Number(plan.price) / plan.termLength) * 100)
 
     let productId = plan.stripeProductId
     if (!productId) {

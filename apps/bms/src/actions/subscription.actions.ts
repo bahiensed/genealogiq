@@ -17,8 +17,14 @@ export async function createSubscription(data: SubscriptionFormValues): Promise<
   const validated = getSubscriptionSchema(identityTranslator).safeParse(data)
   if (!validated.success) return fail(t('common.invalidData'))
 
-  const { price, ...rest } = validated.data
-  await prisma.subscription.create({ data: { ...rest, price: new Prisma.Decimal(price) } })
+  const { price, monthlyPrice, ...rest } = validated.data
+  await prisma.subscription.create({
+    data: {
+      ...rest,
+      price:        new Prisma.Decimal(price),
+      monthlyPrice: monthlyPrice > 0 ? new Prisma.Decimal(monthlyPrice) : null,
+    },
+  })
 
   revalidatePath('/subscriptions')
   return done(t('subscription.created'))
@@ -31,23 +37,28 @@ export async function updateSubscription(id: string, data: SubscriptionFormValue
   const validated = getSubscriptionSchema(identityTranslator).safeParse(data)
   if (!validated.success) return fail(t('common.invalidData'))
 
-  const { price, ...rest } = validated.data
+  const { price, monthlyPrice, ...rest } = validated.data
   const newPrice = new Prisma.Decimal(price)
+  const newMonthlyPrice = monthlyPrice > 0 ? new Prisma.Decimal(monthlyPrice) : null
 
   const current = await prisma.subscription.findUnique({
     where:  { id },
-    select: { price: true, termLength: true, stripeAnnualPriceId: true, stripeMonthlyPriceId: true },
+    select: { price: true, monthlyPrice: true, termLength: true, stripeAnnualPriceId: true, stripeMonthlyPriceId: true },
   })
   if (!current) return fail(t('subscription.notFound'))
 
   // Stripe Prices are immutable. termLength feeds both Prices' math (the
   // annual Price's interval_count IS termLength; the monthly Price's amount
-  // is price/termLength) — so either changing invalidates both, same as a
-  // price change on Package. The Product ref is left alone: name/description
-  // are updated in place by syncSubscriptionWithStripe, no immutability issue there.
+  // is monthlyPrice, or price/termLength if monthlyPrice is unset) — so any
+  // of the three changing invalidates both, same as a price change on
+  // Package. The Product ref is left alone: name/description are updated in
+  // place by syncSubscriptionWithStripe, no immutability issue there.
   const priceChanged = !current.price.equals(newPrice)
   const termChanged = current.termLength !== rest.termLength
-  const clearStripePrices = (priceChanged || termChanged) &&
+  const monthlyPriceChanged = current.monthlyPrice === null
+    ? newMonthlyPrice !== null
+    : newMonthlyPrice === null || !current.monthlyPrice.equals(newMonthlyPrice)
+  const clearStripePrices = (priceChanged || termChanged || monthlyPriceChanged) &&
     (!!current.stripeAnnualPriceId || !!current.stripeMonthlyPriceId)
 
   try {
@@ -55,7 +66,8 @@ export async function updateSubscription(id: string, data: SubscriptionFormValue
       where: { id },
       data:  {
         ...rest,
-        price: newPrice,
+        price:        newPrice,
+        monthlyPrice: newMonthlyPrice,
         ...(clearStripePrices && { stripeAnnualPriceId: null, stripeMonthlyPriceId: null }),
       },
     })
@@ -112,7 +124,7 @@ export async function syncSubscriptionWithStripe(id: string): Promise<ActionResu
   const plan = await prisma.subscription.findUnique({
     where:  { id },
     select: {
-      id: true, code: true, name: true, description: true, price: true, termLength: true,
+      id: true, code: true, name: true, description: true, price: true, monthlyPrice: true, termLength: true,
       stripeProductId: true, stripeAnnualPriceId: true, stripeMonthlyPriceId: true,
     },
   })
@@ -155,7 +167,9 @@ export async function syncSubscriptionWithStripe(id: string): Promise<ActionResu
 
     let monthlyPriceId = plan.stripeMonthlyPriceId
     if (!monthlyPriceId) {
-      const monthlyPriceCents = Math.round((Number(plan.price) / plan.termLength) * 100)
+      const monthlyPriceCents = plan.monthlyPrice !== null
+        ? Math.round(Number(plan.monthlyPrice) * 100)
+        : Math.round((Number(plan.price) / plan.termLength) * 100)
       const mp = await stripe.prices.create({
         product:     productId,
         unit_amount: monthlyPriceCents,
