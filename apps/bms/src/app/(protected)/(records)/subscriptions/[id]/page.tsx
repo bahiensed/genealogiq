@@ -19,6 +19,16 @@ export default async function EditSubscriptionPage({ params }: { params: Promise
         termLength:   subscription.termLength,
         price:        subscription.price,
         monthlyPrice: subscription.monthlyPrice ?? 0,
+        treeMaxMembers:        subscription.treeMaxMembers,
+        bioMaxChars:           subscription.bioMaxChars,
+        mediaMaxImages:        subscription.mediaMaxImages,
+        mediaMaxVideos:        subscription.mediaMaxVideos,
+        documentsMax:          subscription.documentsMax,
+        geoPlacesMax:          subscription.geoPlacesMax,
+        memorialsMax:          subscription.memorialsMax,
+        petsMax:               subscription.petsMax,
+        qrCodeMax:             subscription.qrCodeMax,
+        geolocationFullAccess: subscription.geolocationFullAccess,
       }}
       stripeProductId={subscription.stripeProductId}
       stripeAnnualPriceId={subscription.stripeAnnualPriceId}

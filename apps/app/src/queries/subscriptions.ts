@@ -1,12 +1,6 @@
 import "server-only"
 
 import { prisma } from "@/lib/prisma"
-import { FREE, PREMIUM, PHYSICAL_QR, type PlanQuotas } from "@/lib/plan-quotas"
-
-// Subscription.code is a free-text field admins can edit in BMS (not a closed
-// enum) — most rows resolve to a known tier, but a legacy/custom code falls
-// back to `null` quotas rather than crashing the pricing page.
-const PLAN_QUOTAS_BY_CODE: Record<string, PlanQuotas> = { FREE, PREMIUM, PHYSICAL_QR }
 
 export async function getActiveSubscriptions() {
   const rows = await prisma.subscription.findMany({
@@ -16,21 +10,43 @@ export async function getActiveSubscriptions() {
     where:   { isActive: true, code: { in: ["FREE", "PREMIUM"] } },
     orderBy: { price: "asc" },
     select: {
-      id:           true,
-      code:         true,
-      name:         true,
-      description:  true,
-      maxProfiles:  true,
-      termLength:   true,
-      price:        true,
-      monthlyPrice: true,
+      id:                    true,
+      code:                  true,
+      name:                  true,
+      description:           true,
+      maxProfiles:           true,
+      termLength:            true,
+      price:                 true,
+      monthlyPrice:          true,
+      treeMaxMembers:        true,
+      bioMaxChars:           true,
+      mediaMaxImages:        true,
+      mediaMaxVideos:        true,
+      documentsMax:          true,
+      geoPlacesMax:          true,
+      memorialsMax:          true,
+      petsMax:               true,
+      qrCodeMax:             true,
+      geolocationFullAccess: true,
     },
   })
   return rows.map((r) => ({
     ...r,
     price:        Number(r.price),
     monthlyPrice: r.monthlyPrice ? Number(r.monthlyPrice) : null,
-    quotas:       PLAN_QUOTAS_BY_CODE[r.code] ?? null,
+    quotas: {
+      code:                  r.code,
+      treeMaxMembers:        r.treeMaxMembers,
+      bioMaxChars:           r.bioMaxChars,
+      mediaMaxImages:        r.mediaMaxImages,
+      mediaMaxVideos:        r.mediaMaxVideos,
+      documentsMax:          r.documentsMax,
+      geoPlacesMax:          r.geoPlacesMax,
+      memorialsMax:          r.memorialsMax,
+      petsMax:               r.petsMax,
+      qrCodeMax:             r.qrCodeMax,
+      geolocationFullAccess: r.geolocationFullAccess,
+    },
   }))
 }
 

@@ -652,26 +652,47 @@
     "create": "Crear suscripción",
     "edit": "Editar Suscripción",
     "fields": {
+      "bioMaxChars": "Máximo de Caracteres de la Bio",
       "code": "Código",
       "description": "Descripción",
+      "documentsMax": "Máximo de Documentos",
+      "geoPlacesMax": "Máximo de Geolocalizaciones",
+      "geolocationFullAccess": "Acceso Total a Geolocalización",
       "maxProfiles": "Máximo de Perfiles Memo",
+      "mediaMaxImages": "Máximo de Imágenes Combinadas",
+      "mediaMaxVideos": "Máximo de Videos en la Galería",
+      "memorialsMax": "Máximo de Memoriales",
       "monthlyPrice": "Precio Mensual (US$)",
       "name": "Nombre",
+      "petsMax": "Máximo de Mascotas",
       "price": "Precio (US$)",
-      "termLength": "Duración (en meses)"
+      "qrCodeMax": "Máximo de QR Codes",
+      "termLength": "Duración (en meses)",
+      "treeMaxMembers": "Máximo de Miembros en el Árbol"
     },
     "free": "Gratis",
     "hints": {
+      "bioMaxChars": "Límite de caracteres del texto de la biografía.",
       "code": "Identificación del plan",
       "freeCodeReserved": "El código del plan FREE está reservado.",
+      "geoPlacesMax": "Cantidad de geolocalizaciones — independiente del pool combinado de medios de abajo.",
+      "mediaMaxImages": "Pool combinado: imagen de la Bio + imágenes de la Galería + fotos de Geolocalizaciones comparten este límite.",
+      "mediaMaxVideos": "Solo videos de la galería.",
       "monthlyPrice": "0 = deriva de Precio / Duración. Defínelo para ofrecer un descuento real por pago anual, en vez de una división proporcional.",
       "price": "0 = Gratis",
-      "termLength": "0 = De por vida"
+      "qrCodeMax": "QR Codes gratuitos — perfil propio + memoriales gestionados, combinado.",
+      "termLength": "0 = De por vida",
+      "treeMaxMembers": "Máximo de personas en el árbol genealógico."
     },
     "lifetime": "De por vida",
     "new": "Nueva suscripción",
     "placeholders": {
       "code": "DECADE"
+    },
+    "quotas": {
+      "geolocationFullAccessOff": "Solo dirección (sin marcador GPS)",
+      "geolocationFullAccessOn": "Coordenadas GPS precisas",
+      "title": "Cuotas"
     },
     "status": {
       "active": "Activa",

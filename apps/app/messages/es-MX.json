@@ -1300,6 +1300,7 @@
   "Subscriptions": {
     "activeBadge": "Activo",
     "backToHome": "Volver al inicio",
+    "bestValue": "La mejor relación calidad-precio",
     "cadence": {
       "annual": "anual",
       "monthly": "mensual"
@@ -1316,41 +1317,35 @@
     "currentlyOn": "Actualmente en el plan {plan} hasta el {date}",
     "features": {
       "bioChars": "{count, number} caracteres de biografía",
-      "bioImages": "{count} imágenes de biografía",
       "documents": "{count} documentos",
-      "galleryPhotos": "{count} fotos en la galería",
-      "galleryVideos": "{count} videos en la galería",
       "geoPlaces": "{count} geolocalizaciones compartidas",
       "geoPlacesExtra": "Compra geolocalizaciones extra individualmente",
-      "gpsAddressOnly": "Solo dirección (sin marcador GPS)",
-      "gpsPrecise": "Coordenadas GPS precisas",
       "mediaImages": "{count} fotos combinadas entre Biografía, Galería y Geolocalizaciones",
       "mediaVideos": "{count} videos en la galería",
-      "memorialSlots": "{count, plural, one {# espacio de memorial por compra} other {# espacios de memorial por compra}}",
       "memorials": "{count} perfiles memoriales",
       "memorialsExtra": "Compra memoriales extra individualmente",
       "petsCount": "{count} perfiles de mascotas",
-      "petsLocked": "Mascotas disponibles solo en Premium",
       "qrCodeCount": "{count} QR Codes gratuitos",
       "qrExtra": "Compra QR Codes extra individualmente",
-      "qrIncluded": "QR Code para placas y lápidas",
-      "qrPaidOnly": "QR Code en los planes de pago",
       "treeMembers": "{count} miembros en el árbol genealógico"
     },
     "freePrice": "Gratis",
     "manageSubscription": "Gestionar suscripción",
     "opening": "Abriendo…",
-    "payAnnually": "Pagar anualmente {price}",
-    "payMonthly": "Pagar mensualmente {price}",
     "qrGate": {
       "description": "Este memorial está en el plan gratuito. Compra un QR Code para imprimirlo en placas, lápidas y espacios digitales — conserva su memoria en cualquier lugar, escaneable para siempre.",
       "maybeLater": "Quizás más tarde",
       "purchase": "Comprar QR Code",
       "title": "Desbloquea tu QR Code"
     },
+    "tabs": {
+      "monthly": "Mensual",
+      "yearly": "Anual"
+    },
     "tagline": "La forma perfecta de mantener el vínculo",
     "term": {
       "perLifetime": "/ de por vida",
+      "perMonth": "/ mes",
       "perMonths": "/ {count} meses",
       "perYear": "/ año"
     },

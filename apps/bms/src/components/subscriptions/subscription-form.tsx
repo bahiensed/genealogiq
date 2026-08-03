@@ -244,6 +244,38 @@ export function SubscriptionForm({ id, defaultValues, stripeProductId, stripeAnn
               )}
             />
 
+            <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-4">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">{t('quotas.title')}</span>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <IntField control={control} name="treeMaxMembers" label={t('fields.treeMaxMembers')} helper={t('hints.treeMaxMembers')} />
+                <IntField control={control} name="bioMaxChars" label={t('fields.bioMaxChars')} helper={t('hints.bioMaxChars')} />
+                <IntField control={control} name="mediaMaxImages" label={t('fields.mediaMaxImages')} helper={t('hints.mediaMaxImages')} />
+                <IntField control={control} name="mediaMaxVideos" label={t('fields.mediaMaxVideos')} helper={t('hints.mediaMaxVideos')} />
+                <IntField control={control} name="documentsMax" label={t('fields.documentsMax')} />
+                <IntField control={control} name="geoPlacesMax" label={t('fields.geoPlacesMax')} helper={t('hints.geoPlacesMax')} />
+                <IntField control={control} name="memorialsMax" label={t('fields.memorialsMax')} />
+                <IntField control={control} name="petsMax" label={t('fields.petsMax')} />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <IntField control={control} name="qrCodeMax" label={t('fields.qrCodeMax')} helper={t('hints.qrCodeMax')} />
+                <Controller
+                  name="geolocationFullAccess"
+                  control={control}
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel>{t('fields.geolocationFullAccess')}</FieldLabel>
+                      <div className="flex items-center gap-2 h-9">
+                        <Switch id="geolocationFullAccess" checked={field.value} onCheckedChange={field.onChange} />
+                        <label htmlFor="geolocationFullAccess" className="text-sm cursor-pointer">
+                          {field.value ? t('quotas.geolocationFullAccessOn') : t('quotas.geolocationFullAccessOff')}
+                        </label>
+                      </div>
+                    </Field>
+                  )}
+                />
+              </div>
+            </div>
+
             {isEditing && (
               <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-3 text-xs">
                 <div className="flex items-center justify-between">

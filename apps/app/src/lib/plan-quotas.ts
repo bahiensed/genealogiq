@@ -1,29 +1,14 @@
-// The APP's own quota numbers, independent of the shared Subscription table
-// (BMS/SEQ's Package/Subscription admin still exists and still decides whether
-// a profile is paying at all, via a live AppSale — see getMemorialFeatures in
-// subscription.ts — but the actual feature NUMBERS below no longer come from
-// that table's columns. BMS can rename/reprice/retire its own Subscription
-// rows without ever touching these numbers again.)
-//
-// As of the FREE.petsMax=0/product-table quota alignment, src/queries/
-// subscriptions.ts sources the /subscriptions pricing page's feature bullets
-// from FREE/PREMIUM/PHYSICAL_QR below (keyed by Subscription.code) instead of
-// the DB columns — Subscription's own treeMaxMembers/bioMaxChars/bioMaxImages/
-// galleryMaxImages/galleryMaxVideos/geolocationFullAccess/qrCodeAccess/
-// geoPlacesMax/documentsMax columns were dropped from the schema entirely
-// (migration 20260731000000_drop_subscription_dead_quota_columns) — BMS's
-// admin form no longer exposes them either.
-//
-// KNOWN PENDING (flagged, not implemented): the product table now prices
-// PREMIUM in both USD and BRL (e.g. $2.99/mo + R$14.90/mo), and the price
-// itself changed from the previous $3.99/mo·$39.99/yr. Neither PlanQuotas nor
-// this file model price at all — checkout price/currency lives entirely on
-// the shared Subscription row (BMS-owned) via Stripe Price objects, and
-// multi-currency checkout is a real structural change (locale-aware Stripe
-// Prices, currency selection at checkout) that hasn't been scoped yet. Do not
-// assume it's covered by anything here — it's a separate future task.
+// Per-plan quota numbers now live on the shared Subscription table (BMS can
+// edit every plan attribute manually, no code deploy needed) — see
+// getMemorialFeatures in subscription.ts, which reads them off the live
+// Subscription row instead of a hardcoded constant. This file only keeps
+// what's NOT admin-editable per plan: the PlanQuotas shape itself, the
+// PHYSICAL_QR ceiling (a printed cemetery-marker license, resolved via a
+// separate PhysicalQrLicense→Package link, unrelated to Subscription rows),
+// and the purchase-extra policy.
 
-export type PlanTier = "FREE" | "PREMIUM" | "PHYSICAL_QR"
+// Free-text — Subscription.code is admin-typed in BMS, not a closed enum.
+export type PlanTier = string
 
 export interface PlanQuotas {
   code: PlanTier
@@ -55,39 +40,10 @@ export interface PlanQuotas {
   geolocationFullAccess: boolean
 }
 
-export const FREE: PlanQuotas = {
-  code: "FREE",
-  treeMaxMembers: 32,
-  bioMaxChars: 2048,
-  mediaMaxImages: 32,
-  mediaMaxVideos: 8,
-  documentsMax: 16,
-  geoPlacesMax: 3,
-  memorialsMax: 1,
-  // Pets are a PREMIUM-only feature (not just a smaller free quota) — 0 blocks
-  // creation entirely via the existing count < limit check, no extra code path.
-  petsMax: 0,
-  qrCodeMax: 1,
-  geolocationFullAccess: false,
-}
-
-export const PREMIUM: PlanQuotas = {
-  code: "PREMIUM",
-  treeMaxMembers: 512,
-  bioMaxChars: 8192,
-  mediaMaxImages: 1024,
-  mediaMaxVideos: 32,
-  documentsMax: 64,
-  geoPlacesMax: 6,
-  memorialsMax: 5,
-  petsMax: 5,
-  qrCodeMax: 1,
-  geolocationFullAccess: true,
-}
-
 // The pre-existing "physical QR" product tier (a printed cemetery marker
 // license, sold separately from the monthly/annual subscription) — kept as
-// the ceiling above PREMIUM, same role PHYSICAL_QR_FEATURES played before.
+// the ceiling above PREMIUM. Resolved via PhysicalQrLicense→Package, not a
+// Subscription row, so it stays hardcoded — BMS has nothing to edit here.
 export const PHYSICAL_QR: PlanQuotas = {
   code: "PHYSICAL_QR",
   treeMaxMembers: 1024,

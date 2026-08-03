@@ -125,6 +125,24 @@ model Subscription {
   stripeProductId       String?   @unique @map("stripe_product_id")
   stripeAnnualPriceId   String?   @unique @map("stripe_annual_price_id")
   stripeMonthlyPriceId  String?   @unique @map("stripe_monthly_price_id")
+  // Quota numbers previously hardcoded in the APP's plan-quotas.ts — moved
+  // here so BMS can edit every plan attribute manually, without a code
+  // deploy. Defaults mirror the FREE plan's current numbers.
+  treeMaxMembers        Int       @default(32)   @map("tree_max_members")
+  bioMaxChars           Int       @default(2048) @map("bio_max_chars")
+  // Combined pool: Bio images + Gallery images + GeoPlace photos.
+  mediaMaxImages        Int       @default(32)   @map("media_max_images")
+  mediaMaxVideos        Int       @default(8)    @map("media_max_videos")
+  documentsMax          Int       @default(16)   @map("documents_max")
+  // Row count of GeoPlace — independent of mediaMaxImages.
+  geoPlacesMax          Int       @default(3)    @map("geo_places_max")
+  // How many memorial profiles a guardian may create in total — distinct
+  // from maxProfiles above (how many profiles ONE sale directly covers).
+  memorialsMax          Int       @default(1)    @map("memorials_max")
+  petsMax               Int       @default(0)    @map("pets_max")
+  // Free QR codes (own profile + guarded memorials, combined).
+  qrCodeMax             Int       @default(1)    @map("qr_code_max")
+  geolocationFullAccess Boolean   @default(false) @map("geolocation_full_access")
   appSales              AppSale[]
 
   @@map("subscriptions")

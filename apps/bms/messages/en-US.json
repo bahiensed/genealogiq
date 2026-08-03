@@ -652,26 +652,47 @@
     "create": "Create subscription",
     "edit": "Edit Subscription",
     "fields": {
+      "bioMaxChars": "Bio Max Characters",
       "code": "Code",
       "description": "Description",
+      "documentsMax": "Documents Max",
+      "geoPlacesMax": "Geo Places Max",
+      "geolocationFullAccess": "Geolocation Full Access",
       "maxProfiles": "Max Memo Profiles",
+      "mediaMaxImages": "Combined Media Images Max",
+      "mediaMaxVideos": "Gallery Videos Max",
+      "memorialsMax": "Memorials Max",
       "monthlyPrice": "Monthly Price (US$)",
       "name": "Name",
+      "petsMax": "Pets Max",
       "price": "Price (US$)",
-      "termLength": "Term Length (in months)"
+      "qrCodeMax": "QR Codes Max",
+      "termLength": "Term Length (in months)",
+      "treeMaxMembers": "Tree Max Members"
     },
     "free": "Free",
     "hints": {
+      "bioMaxChars": "Character limit for the biography text.",
       "code": "Tier identification",
       "freeCodeReserved": "FREE plan code is reserved.",
+      "geoPlacesMax": "Row count of shared places — independent of the combined media pool below.",
+      "mediaMaxImages": "Combined pool: Bio image + Gallery images + Places photos share this limit.",
+      "mediaMaxVideos": "Gallery videos only.",
       "monthlyPrice": "0 = derive from Price / Term Length. Set to offer a real discount for paying annually instead of an even split.",
       "price": "0 = Free",
-      "termLength": "0 = Lifetime"
+      "qrCodeMax": "Free QR codes — own profile + guarded memorials, combined.",
+      "termLength": "0 = Lifetime",
+      "treeMaxMembers": "Maximum people in the family tree."
     },
     "lifetime": "Lifetime",
     "new": "New subscription",
     "placeholders": {
       "code": "DECADE"
+    },
+    "quotas": {
+      "geolocationFullAccessOff": "Address only (no GPS pin)",
+      "geolocationFullAccessOn": "Precise GPS coordinates",
+      "title": "Quotas"
     },
     "status": {
       "active": "Active",

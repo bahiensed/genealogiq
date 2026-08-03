@@ -20,6 +20,19 @@ export function getSubscriptionSchema(t: Translator) {
     // 0 = not set, derive from price/termLength (same sentinel convention as
     // price's "0 = Free" and termLength's "0 = Lifetime").
     monthlyPrice: z.number().min(0, t('priceMin')),
+
+    // Quotas — feature limits for this plan, read by the APP at runtime
+    // (getMemorialFeatures in apps/app/src/lib/subscription.ts).
+    treeMaxMembers:        z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
+    bioMaxChars:           z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
+    mediaMaxImages:        z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
+    mediaMaxVideos:        z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
+    documentsMax:          z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
+    geoPlacesMax:          z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
+    memorialsMax:          z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
+    petsMax:               z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
+    qrCodeMax:             z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
+    geolocationFullAccess: z.boolean(),
   })
 }
 
@@ -35,4 +48,17 @@ export const subscriptionDefaultValues: SubscriptionFormValues = {
   termLength:   12,
   price:        0,
   monthlyPrice: 0,
+
+  // Conservative defaults matching the current FREE plan — an admin creating
+  // a brand-new plan starts here and bumps numbers up before saving.
+  treeMaxMembers:        32,
+  bioMaxChars:           2048,
+  mediaMaxImages:        32,
+  mediaMaxVideos:        8,
+  documentsMax:          16,
+  geoPlacesMax:          3,
+  memorialsMax:          1,
+  petsMax:               0,
+  qrCodeMax:             1,
+  geolocationFullAccess: false,
 }

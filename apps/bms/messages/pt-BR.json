@@ -652,26 +652,47 @@
     "create": "Criar assinatura",
     "edit": "Editar Assinatura",
     "fields": {
+      "bioMaxChars": "Máximo de Caracteres da Bio",
       "code": "Código",
       "description": "Descrição",
+      "documentsMax": "Máximo de Documentos",
+      "geoPlacesMax": "Máximo de Geolocalizações",
+      "geolocationFullAccess": "Acesso Total à Geolocalização",
       "maxProfiles": "Máximo de Perfis Memo",
+      "mediaMaxImages": "Máximo de Imagens Combinadas",
+      "mediaMaxVideos": "Máximo de Vídeos na Galeria",
+      "memorialsMax": "Máximo de Memoriais",
       "monthlyPrice": "Preço Mensal (US$)",
       "name": "Nome",
+      "petsMax": "Máximo de Pets",
       "price": "Preço (US$)",
-      "termLength": "Duração (em meses)"
+      "qrCodeMax": "Máximo de QR Codes",
+      "termLength": "Duração (em meses)",
+      "treeMaxMembers": "Máximo de Membros na Árvore"
     },
     "free": "Grátis",
     "hints": {
+      "bioMaxChars": "Limite de caracteres do texto da biografia.",
       "code": "Identificação do plano",
       "freeCodeReserved": "O código do plano FREE é reservado.",
+      "geoPlacesMax": "Quantidade de geolocalizações — independente do pool combinado de mídia abaixo.",
+      "mediaMaxImages": "Pool combinado: imagem da Bio + imagens da Galeria + fotos de Geolocalizações compartilham este limite.",
+      "mediaMaxVideos": "Somente vídeos da galeria.",
       "monthlyPrice": "0 = deriva de Preço / Duração. Defina pra oferecer um desconto real por pagamento anual, em vez de uma divisão proporcional.",
       "price": "0 = Grátis",
-      "termLength": "0 = Vitalícia"
+      "qrCodeMax": "QR Codes grátis — perfil próprio + memoriais geridos, combinado.",
+      "termLength": "0 = Vitalícia",
+      "treeMaxMembers": "Máximo de pessoas na árvore genealógica."
     },
     "lifetime": "Vitalícia",
     "new": "Nova assinatura",
     "placeholders": {
       "code": "DECADE"
+    },
+    "quotas": {
+      "geolocationFullAccessOff": "Somente endereço (sem marcador GPS)",
+      "geolocationFullAccessOn": "Coordenadas GPS precisas",
+      "title": "Quotas"
     },
     "status": {
       "active": "Ativa",

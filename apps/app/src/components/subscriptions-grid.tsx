@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { Check, CalendarDays, Calendar1 } from "lucide-react"
+import { Check } from "lucide-react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { changeSubscription, createCheckoutSession } from "@/actions/billing.actions"
 import { allowsExtraPurchase } from "@/lib/plan-quotas"
 import type { SubscriptionRow } from "@/queries/subscriptions"
@@ -104,9 +105,15 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
   const t = useTranslations("Subscriptions")
   const [isPending, startTransition] = useTransition()
   const isFree = plan.code === "FREE"
+  const [selectedCadence, setSelectedCadence] = useState<"annual" | "monthly">("annual")
 
-  const annualPrice  = Number(plan.price)
+  const annualPrice = Number(plan.price)
   const monthlyPrice = monthlyEquivalent(plan)
+
+  // Active plan shows what the user is actually paying, not the local toggle.
+  const activeCadence = (activePlan?.cadence as "annual" | "monthly" | null) ?? "annual"
+  const displayCadence = isActive ? activeCadence : selectedCadence
+  const displayPrice = displayCadence === "annual" ? annualPrice : monthlyPrice
 
   const startFirstSubscription = (cadence: "annual" | "monthly") => {
     startTransition(async () => {
@@ -127,58 +134,62 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
   }
 
   const q = plan.quotas
-  const features = q
-    ? [
-        t("features.memorialSlots", { count: plan.maxProfiles }),
-        t("features.treeMembers", { count: q.treeMaxMembers }),
-        t("features.bioChars", { count: q.bioMaxChars }),
-        t("features.documents", { count: q.documentsMax }),
-        t("features.mediaImages", { count: q.mediaMaxImages }),
-        t("features.mediaVideos", { count: q.mediaMaxVideos }),
-        q.geolocationFullAccess ? t("features.gpsPrecise") : t("features.gpsAddressOnly"),
-        t("features.geoPlaces", { count: q.geoPlacesMax }),
-        ...(allowsExtraPurchase("geoPlacesMax") ? [t("features.geoPlacesExtra")] : []),
-        t("features.memorials", { count: q.memorialsMax }),
-        ...(allowsExtraPurchase("memorialsMax") ? [t("features.memorialsExtra")] : []),
-        t("features.qrCodeCount", { count: q.qrCodeMax }),
-        ...(allowsExtraPurchase("qrCodeMax") ? [t("features.qrExtra")] : []),
-        q.petsMax > 0 ? t("features.petsCount", { count: q.petsMax }) : t("features.petsLocked"),
-      ]
-    : [
-        // Legacy/custom Subscription row with no matching PlanQuotas (an
-        // admin-typed `code` outside FREE/PREMIUM/PHYSICAL_QR) — only show
-        // what the DB row itself actually guarantees.
-        t("features.memorialSlots", { count: plan.maxProfiles }),
-      ]
+  const features = [
+    t("features.treeMembers", { count: q.treeMaxMembers }),
+    t("features.bioChars", { count: q.bioMaxChars }),
+    t("features.documents", { count: q.documentsMax }),
+    t("features.mediaImages", { count: q.mediaMaxImages }),
+    t("features.mediaVideos", { count: q.mediaMaxVideos }),
+    t("features.geoPlaces", { count: q.geoPlacesMax }),
+    ...(allowsExtraPurchase("geoPlacesMax") ? [t("features.geoPlacesExtra")] : []),
+    t("features.memorials", { count: q.memorialsMax }),
+    ...(allowsExtraPurchase("memorialsMax") ? [t("features.memorialsExtra")] : []),
+    t("features.qrCodeCount", { count: q.qrCodeMax }),
+    ...(allowsExtraPurchase("qrCodeMax") ? [t("features.qrExtra")] : []),
+    ...(q.petsMax > 0 ? [t("features.petsCount", { count: q.petsMax })] : []),
+  ]
 
   return (
     <div className="glass-card no-sheen p-6 flex flex-col gap-5 animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-2">
-          <h3 className="text-2xl font-semibold tracking-tight">{plan.name}</h3>
-          {isActive && (
-            <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-primary text-primary-foreground px-2 py-0.5">
-              {t("activeBadge")}
-            </span>
-          )}
-        </div>
-        {plan.description && (
-          <p className="text-sm text-muted-foreground leading-snug">{plan.description}</p>
+      <div className="flex items-center gap-2">
+        <h3 className="text-2xl font-semibold tracking-tight">{plan.name}</h3>
+        {isActive && (
+          <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-primary text-primary-foreground px-2 py-0.5">
+            {t("activeBadge")}
+          </span>
         )}
       </div>
 
-      {!isFree ? (
-        <div className="flex items-baseline gap-1">
-          <span className="text-4xl font-bold">{usd.format(annualPrice)}</span>
-          <span className="text-sm text-muted-foreground">
-            {plan.termLength === 12 ? t("term.perYear") : plan.termLength === 0 ? t("term.perLifetime") : t("term.perMonths", { count: plan.termLength })}
-          </span>
-        </div>
-      ) : (
-        <div>
-          <span className="text-4xl font-bold">{t("freePrice")}</span>
-        </div>
+      {!isFree && !isActive && (
+        <Tabs value={selectedCadence} onValueChange={(v) => setSelectedCadence(v as "annual" | "monthly")}>
+          <TabsList className="w-full">
+            <TabsTrigger value="monthly" className="flex-1">{t("tabs.monthly")}</TabsTrigger>
+            <TabsTrigger value="annual" className="flex-1">{t("tabs.yearly")}</TabsTrigger>
+          </TabsList>
+        </Tabs>
       )}
+
+      <div className="space-y-1.5">
+        {!isFree ? (
+          <div className="flex items-baseline gap-1">
+            <span className="text-4xl font-bold">{usd.format(displayPrice)}</span>
+            <span className="text-sm text-muted-foreground">
+              {displayCadence === "annual"
+                ? (plan.termLength === 12 ? t("term.perYear") : plan.termLength === 0 ? t("term.perLifetime") : t("term.perMonths", { count: plan.termLength }))
+                : t("term.perMonth")}
+            </span>
+          </div>
+        ) : (
+          <div>
+            <span className="text-4xl font-bold">{t("freePrice")}</span>
+          </div>
+        )}
+        {!isFree && displayCadence === "annual" && (
+          <span className="inline-block text-[10px] font-semibold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 dark:bg-amber-950 dark:text-amber-300">
+            {t("bestValue")}
+          </span>
+        )}
+      </div>
 
       <ul className="space-y-2 flex-1">
         {features.map((f) => (
@@ -190,16 +201,9 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
       </ul>
 
       {!isFree && !isActive && (
-        <div className="grid grid-cols-1 gap-2">
-          <Button onClick={() => requestChange("annual")} disabled={isPending} className="w-full gap-2">
-            <CalendarDays className="h-4 w-4" />
-            {t("payAnnually", { price: usd.format(annualPrice) })}
-          </Button>
-          <Button onClick={() => requestChange("monthly")} disabled={isPending} variant="outline" className="w-full gap-2">
-            <Calendar1 className="h-4 w-4" />
-            {t("payMonthly", { price: usd.format(monthlyPrice) })}
-          </Button>
-        </div>
+        <Button onClick={() => requestChange(selectedCadence)} disabled={isPending} className="w-full">
+          {usd.format(displayPrice)}
+        </Button>
       )}
     </div>
   )

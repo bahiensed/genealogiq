@@ -1300,6 +1300,7 @@
   "Subscriptions": {
     "activeBadge": "Active",
     "backToHome": "Back to home",
+    "bestValue": "Best value",
     "cadence": {
       "annual": "annual",
       "monthly": "monthly"
@@ -1316,41 +1317,35 @@
     "currentlyOn": "Currently on {plan} until {date}",
     "features": {
       "bioChars": "{count, number} biography characters",
-      "bioImages": "{count} biography images",
       "documents": "{count} documents",
-      "galleryPhotos": "{count} gallery photos",
-      "galleryVideos": "{count} gallery videos",
       "geoPlaces": "{count} shared places",
       "geoPlacesExtra": "Buy extra places individually",
-      "gpsAddressOnly": "Address only (no GPS pin)",
-      "gpsPrecise": "Precise GPS coordinates",
       "mediaImages": "{count} combined photos across Biography, Gallery and Places",
       "mediaVideos": "{count} gallery videos",
-      "memorialSlots": "{count, plural, one {# memorial slot per purchase} other {# memorial slots per purchase}}",
       "memorials": "{count} memorial profiles",
       "memorialsExtra": "Buy extra memorials individually",
       "petsCount": "{count} pet profiles",
-      "petsLocked": "Pets available on Premium only",
       "qrCodeCount": "{count} free QR Codes",
       "qrExtra": "Buy extra QR Codes individually",
-      "qrIncluded": "QR Code for plaques & stones",
-      "qrPaidOnly": "QR Code on paid plans",
       "treeMembers": "{count} family tree members"
     },
     "freePrice": "Free",
     "manageSubscription": "Manage subscription",
     "opening": "Opening…",
-    "payAnnually": "Pay annually {price}",
-    "payMonthly": "Pay monthly {price}",
     "qrGate": {
       "description": "This memorial is on the free plan. Purchase a QR-Code to print it on plaques, headstones and digital spaces — keep their memory anywhere, scannable forever.",
       "maybeLater": "Maybe later",
       "purchase": "Purchase QR-Code",
       "title": "Unlock your QR-Code"
     },
+    "tabs": {
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
     "tagline": "The perfect way to stay in touch",
     "term": {
       "perLifetime": "/ lifetime",
+      "perMonth": "/ mo",
       "perMonths": "/ {count} mo",
       "perYear": "/ year"
     },
