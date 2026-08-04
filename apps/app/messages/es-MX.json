@@ -1300,7 +1300,7 @@
   "Subscriptions": {
     "activeBadge": "Activo",
     "backToHome": "Volver al inicio",
-    "bestValue": "La mejor relación calidad-precio",
+    "bestValue": "Mejor Opción",
     "cadence": {
       "annual": "anual",
       "monthly": "mensual"
@@ -1316,17 +1316,17 @@
     },
     "currentlyOn": "Actualmente en el plan {plan} hasta el {date}",
     "features": {
-      "bioChars": "{count, number} caracteres de biografía",
-      "documents": "{count} documentos",
+      "bioChars": "{count, number} tokens de biografía",
+      "documents": "Almacena hasta {count} documentos",
       "geoPlaces": "{count} geolocalizaciones compartidas",
-      "geoPlacesExtra": "Compra geolocalizaciones extra individualmente",
-      "mediaImages": "{count} fotos combinadas entre Biografía, Galería y Geolocalizaciones",
-      "mediaVideos": "{count} videos en la galería",
-      "memorials": "{count} perfiles memoriales",
-      "memorialsExtra": "Compra memoriales extra individualmente",
+      "geoPlacesExtra": "Compra geolocalizaciones extra",
+      "mediaImages": "Sube hasta {count} imágenes",
+      "mediaVideos": "Sube hasta {count} videos en la galería",
+      "memorials": "{count, plural, one {# memorial completo} other {# perfiles memoriales}}",
+      "memorialsExtra": "Compra memoriales extra",
       "petsCount": "{count} perfiles de mascotas",
-      "qrCodeCount": "{count} QR Codes gratuitos",
-      "qrExtra": "Compra QR Codes extra individualmente",
+      "qrCodeCount": "{count, plural, one {# QR Code gratuito} other {# QR Codes gratuitos}}",
+      "qrExtra": "Compra QR Codes extra",
       "treeMembers": "{count} miembros en el árbol genealógico"
     },
     "freePrice": "Gratis",

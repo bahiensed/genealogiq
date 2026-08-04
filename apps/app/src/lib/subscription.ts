@@ -82,11 +82,11 @@ export const getMemorialFeatures = cache(async (profileId: string): Promise<Plan
           status:           { in: ["active", "trialing"] },
           currentPeriodEnd: { gt: new Date() },
         },
-        select: { subscription: { select: { ...QUOTA_SELECT, price: true } } },
+        select: { subscription: { select: { ...QUOTA_SELECT, priceUsd: true } } },
       })
       if (liveSales.length > 0) {
         const richest = liveSales.reduce((best, s) =>
-          Number(s.subscription.price) > Number(best.subscription.price) ? s : best)
+          Number(s.subscription.priceUsd) > Number(best.subscription.priceUsd) ? s : best)
         return {
           code:                  richest.subscription.code,
           treeMaxMembers:        richest.subscription.treeMaxMembers,

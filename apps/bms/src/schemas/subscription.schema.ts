@@ -16,10 +16,18 @@ export function getSubscriptionSchema(t: Translator) {
     // Commercial
     maxProfiles: z.number().int(t('mustBeWholeNumber')).positive(t('mustBePositive')),
     termLength:  z.number().int(t('mustBeWholeNumber')).min(0, t('termLengthMin')),
-    price:       z.number().min(0, t('priceMin')),
-    // 0 = not set, derive from price/termLength (same sentinel convention as
-    // price's "0 = Free" and termLength's "0 = Lifetime").
-    monthlyPrice: z.number().min(0, t('priceMin')),
+    // Independent per-currency prices — no FX conversion, each set manually.
+    // USD: 0 = Free (real product meaning, same plan as the FREE row).
+    priceUsd: z.number().min(0, t('priceMin')),
+    // USD monthly: 0 = derive from priceUsd/termLength (same sentinel
+    // convention as termLength's "0 = Lifetime").
+    monthlyPriceUsd: z.number().min(0, t('priceMin')),
+    // BRL/MXN: 0 = not configured yet for this currency — falls back to USD
+    // at checkout (never blocks, never shows an empty price).
+    priceBrl:        z.number().min(0, t('priceMin')),
+    monthlyPriceBrl: z.number().min(0, t('priceMin')),
+    priceMxn:        z.number().min(0, t('priceMin')),
+    monthlyPriceMxn: z.number().min(0, t('priceMin')),
 
     // Quotas — feature limits for this plan, read by the APP at runtime
     // (getMemorialFeatures in apps/app/src/lib/subscription.ts).
@@ -46,8 +54,12 @@ export const subscriptionDefaultValues: SubscriptionFormValues = {
 
   maxProfiles:  1,
   termLength:   12,
-  price:        0,
-  monthlyPrice: 0,
+  priceUsd:        0,
+  monthlyPriceUsd: 0,
+  priceBrl:        0,
+  monthlyPriceBrl: 0,
+  priceMxn:        0,
+  monthlyPriceMxn: 0,
 
   // Conservative defaults matching the current FREE plan — an admin creating
   // a brand-new plan starts here and bumps numbers up before saving.

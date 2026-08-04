@@ -114,17 +114,29 @@ model Subscription {
   // verifying zero NULL rows, so the earlier app-vs-DB drift is fully resolved.
   maxProfiles           Int       @map("max_profiles")
   termLength            Int       @map("term_length")
-  price                 Decimal   @db.Decimal(10, 2)
+  // Independent per-currency prices — no FX conversion, each admin-set in
+  // BMS. USD is required (the original/canonical currency, always
+  // populated); BRL/MXN are nullable until configured, with callers falling
+  // back to the USD pair when a currency isn't set yet.
+  priceUsd              Decimal   @db.Decimal(10, 2) @map("price_usd")
   // Explicit monthly price, independent of `price / termLength` — lets a plan
   // offer a real annual discount (not just an even split) instead of a
   // proportional derivation. Null = fall back to the derived value (legacy
   // behavior), used by all pricing math in BMS's Stripe sync and the APP's
   // subscriptions grid/billing comparison.
-  monthlyPrice          Decimal?  @db.Decimal(10, 2) @map("monthly_price")
+  monthlyPriceUsd       Decimal?  @db.Decimal(10, 2) @map("monthly_price_usd")
+  priceBrl              Decimal?  @db.Decimal(10, 2) @map("price_brl")
+  monthlyPriceBrl       Decimal?  @db.Decimal(10, 2) @map("monthly_price_brl")
+  priceMxn              Decimal?  @db.Decimal(10, 2) @map("price_mxn")
+  monthlyPriceMxn       Decimal?  @db.Decimal(10, 2) @map("monthly_price_mxn")
   code                  String    @unique
   stripeProductId       String?   @unique @map("stripe_product_id")
-  stripeAnnualPriceId   String?   @unique @map("stripe_annual_price_id")
-  stripeMonthlyPriceId  String?   @unique @map("stripe_monthly_price_id")
+  stripeAnnualPriceIdUsd  String? @unique @map("stripe_annual_price_id_usd")
+  stripeMonthlyPriceIdUsd String? @unique @map("stripe_monthly_price_id_usd")
+  stripeAnnualPriceIdBrl  String? @unique @map("stripe_annual_price_id_brl")
+  stripeMonthlyPriceIdBrl String? @unique @map("stripe_monthly_price_id_brl")
+  stripeAnnualPriceIdMxn  String? @unique @map("stripe_annual_price_id_mxn")
+  stripeMonthlyPriceIdMxn String? @unique @map("stripe_monthly_price_id_mxn")
   // Quota numbers previously hardcoded in the APP's plan-quotas.ts — moved
   // here so BMS can edit every plan attribute manually, without a code
   // deploy. Defaults mirror the FREE plan's current numbers.
@@ -230,6 +242,12 @@ model AppSale {
   updatedAt            DateTime     @updatedAt @map("updated_at")
   stripeSubscriptionId String?      @unique @map("stripe_subscription_id")
   stripePriceId        String?      @map("stripe_price_id")
+  // Captured directly from the real Stripe Price's currency on the webhook
+  // (never re-derived from the buyer's locale) — a Stripe subscription can't
+  // change currency mid-life, so this is the source of truth for which of
+  // Subscription's per-currency price columns applies to this sale. Null for
+  // legacy/SEQ-vendor sales that never touched Stripe.
+  currency             String?
   cadence              String?
   status               String?
   currentPeriodEnd     DateTime?    @map("current_period_end")

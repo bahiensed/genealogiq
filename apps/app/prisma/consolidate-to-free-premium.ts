@@ -51,12 +51,12 @@ async function main() {
 
   const legacyPlans = await prisma.subscription.findMany({
     where:  { code: { in: [...LEGACY_CODES] } },
-    select: { id: true, code: true, stripeProductId: true, stripeAnnualPriceId: true, stripeMonthlyPriceId: true },
+    select: { id: true, code: true, stripeProductId: true, stripeAnnualPriceIdUsd: true, stripeMonthlyPriceIdUsd: true },
   })
 
   console.log("Step 2: archiving legacy Stripe Prices + Products…")
   for (const plan of legacyPlans) {
-    for (const priceId of [plan.stripeAnnualPriceId, plan.stripeMonthlyPriceId]) {
+    for (const priceId of [plan.stripeAnnualPriceIdUsd, plan.stripeMonthlyPriceIdUsd]) {
       if (!priceId) continue
       try {
         await stripe.prices.update(priceId, { active: false })
@@ -99,8 +99,8 @@ async function main() {
         isActive:     true,
         maxProfiles:  PREMIUM_MAX_PROFILES,
         termLength:   PREMIUM_TERM_LENGTH,
-        price:        PREMIUM_PRICE,
-        monthlyPrice: PREMIUM_MONTHLY_PRICE,
+        priceUsd:        PREMIUM_PRICE,
+        monthlyPriceUsd: PREMIUM_MONTHLY_PRICE,
       },
     })
     console.log(`  ✓ created PREMIUM (${premium.id}) — $${PREMIUM_MONTHLY_PRICE}/mo or $${PREMIUM_PRICE}/yr`)

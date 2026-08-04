@@ -2,11 +2,44 @@
 
 import { revalidatePath } from "next/cache"
 import { getTranslations } from "next-intl/server"
+import { resolveLocale } from "@genealogiq/i18n/server"
 import { ok, fail, type ActionResult } from "@genealogiq/core"
 import { verifySession } from "@/lib/dal"
 import { prisma } from "@/lib/prisma"
 import { stripe } from "@/lib/stripe"
 import { ensureStripeCustomer, compareTier, upsertSaleFromSubscription } from "@/lib/billing"
+import { LOCALE_TO_CURRENCY, resolveCurrency, pricesForCurrency, stripeIdsForCurrency, type Currency } from "@/lib/currency"
+
+const STRIPE_ID_SELECT = {
+  stripeAnnualPriceIdUsd:  true,
+  stripeMonthlyPriceIdUsd: true,
+  stripeAnnualPriceIdBrl:  true,
+  stripeMonthlyPriceIdBrl: true,
+  stripeAnnualPriceIdMxn:  true,
+  stripeMonthlyPriceIdMxn: true,
+} as const
+
+const PRICE_SELECT = {
+  priceUsd:        true,
+  monthlyPriceUsd: true,
+  priceBrl:        true,
+  monthlyPriceBrl: true,
+  priceMxn:        true,
+  monthlyPriceMxn: true,
+} as const
+
+function toPriceFields(row: {
+  priceUsd: unknown; monthlyPriceUsd: unknown; priceBrl: unknown; monthlyPriceBrl: unknown; priceMxn: unknown; monthlyPriceMxn: unknown
+}) {
+  return {
+    priceUsd:        Number(row.priceUsd),
+    monthlyPriceUsd: row.monthlyPriceUsd ? Number(row.monthlyPriceUsd) : null,
+    priceBrl:        row.priceBrl ? Number(row.priceBrl) : null,
+    monthlyPriceBrl: row.monthlyPriceBrl ? Number(row.monthlyPriceBrl) : null,
+    priceMxn:        row.priceMxn ? Number(row.priceMxn) : null,
+    monthlyPriceMxn: row.monthlyPriceMxn ? Number(row.monthlyPriceMxn) : null,
+  }
+}
 
 export async function createCheckoutSession(
   subscriptionId: string,
@@ -17,15 +50,17 @@ export async function createCheckoutSession(
 
   const plan = await prisma.subscription.findUnique({
     where:  { id: subscriptionId, isActive: true },
-    select: {
-      id: true, name: true,
-      stripeAnnualPriceId:  true,
-      stripeMonthlyPriceId: true,
-    },
+    select: { id: true, name: true, priceBrl: true, priceMxn: true, ...STRIPE_ID_SELECT },
   })
   if (!plan) return fail(t("billing.planNotFound"))
 
-  const priceId = cadence === "annual" ? plan.stripeAnnualPriceId : plan.stripeMonthlyPriceId
+  const viewerCurrency = LOCALE_TO_CURRENCY[await resolveLocale()]
+  const currency = resolveCurrency(
+    { priceBrl: plan.priceBrl ? Number(plan.priceBrl) : null, priceMxn: plan.priceMxn ? Number(plan.priceMxn) : null },
+    viewerCurrency,
+  )
+  const ids = stripeIdsForCurrency(plan, currency)
+  const priceId = cadence === "annual" ? ids.annual : ids.monthly
   if (!priceId) return fail(t("billing.planNotWiredSeed"))
 
   const customerId = await ensureStripeCustomer(session.user.id)
@@ -74,7 +109,8 @@ export async function changeSubscription(
     orderBy: { currentPeriodEnd: "desc" },
     select: {
       stripeSubscriptionId: true,
-      subscription: { select: { price: true, monthlyPrice: true, termLength: true } },
+      currency:             true,
+      subscription: { select: { termLength: true, ...PRICE_SELECT } },
     },
   })
   if (!active || !active.stripeSubscriptionId) return fail(t("billing.noActiveSubscription"))
@@ -82,15 +118,24 @@ export async function changeSubscription(
 
   const target = await prisma.subscription.findUnique({
     where:  { id: subscriptionId, isActive: true },
-    select: { id: true, price: true, monthlyPrice: true, termLength: true, stripeAnnualPriceId: true, stripeMonthlyPriceId: true },
+    select: { id: true, termLength: true, ...PRICE_SELECT, ...STRIPE_ID_SELECT },
   })
   if (!target) return fail(t("billing.planNotFound"))
-  const targetPriceId = cadence === "annual" ? target.stripeAnnualPriceId : target.stripeMonthlyPriceId
+
+  // A Stripe subscription can't silently change currency mid-life — reuse
+  // whichever currency the active subscription was actually charged in
+  // (never the viewer's current locale, which may have changed since).
+  const targetPriceFields = toPriceFields(target)
+  const currency = resolveCurrency(targetPriceFields, (active.currency as Currency | null) ?? "USD")
+  const targetPriceId = stripeIdsForCurrency(target, currency)[cadence === "annual" ? "annual" : "monthly"]
   if (!targetPriceId) return fail(t("billing.planNotWired"))
 
+  const targetPrices = pricesForCurrency(targetPriceFields, currency)
+  const activePrices = pricesForCurrency(toPriceFields(active.subscription), currency)
+
   const cmp = compareTier(
-    { price: Number(target.price), monthlyPrice: target.monthlyPrice ? Number(target.monthlyPrice) : null, termLength: target.termLength },
-    { price: Number(active.subscription.price), monthlyPrice: active.subscription.monthlyPrice ? Number(active.subscription.monthlyPrice) : null, termLength: active.subscription.termLength },
+    { price: targetPrices.price, monthlyPrice: targetPrices.monthlyPrice, termLength: target.termLength },
+    { price: activePrices.price, monthlyPrice: activePrices.monthlyPrice, termLength: active.subscription.termLength },
   )
 
   const metadata = { userId: session.user.id, subscriptionId: target.id, cadence }

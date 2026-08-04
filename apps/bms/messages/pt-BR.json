@@ -652,6 +652,7 @@
     "create": "Criar assinatura",
     "edit": "Editar Assinatura",
     "fields": {
+      "annual": "Anual",
       "bioMaxChars": "Máximo de Caracteres da Bio",
       "code": "Código",
       "description": "Descrição",
@@ -662,10 +663,9 @@
       "mediaMaxImages": "Máximo de Imagens Combinadas",
       "mediaMaxVideos": "Máximo de Vídeos na Galeria",
       "memorialsMax": "Máximo de Memoriais",
-      "monthlyPrice": "Preço Mensal (US$)",
+      "monthly": "Mensal",
       "name": "Nome",
       "petsMax": "Máximo de Pets",
-      "price": "Preço (US$)",
       "qrCodeMax": "Máximo de QR Codes",
       "termLength": "Duração (em meses)",
       "treeMaxMembers": "Máximo de Membros na Árvore"
@@ -678,8 +678,9 @@
       "geoPlacesMax": "Quantidade de geolocalizações — independente do pool combinado de mídia abaixo.",
       "mediaMaxImages": "Pool combinado: imagem da Bio + imagens da Galeria + fotos de Geolocalizações compartilham este limite.",
       "mediaMaxVideos": "Somente vídeos da galeria.",
-      "monthlyPrice": "0 = deriva de Preço / Duração. Defina pra oferecer um desconto real por pagamento anual, em vez de uma divisão proporcional.",
-      "price": "0 = Grátis",
+      "priceBrl": "0 = ainda não configurado — o checkout cai pro USD nessa moeda. Mensal 0 = deriva do anual / duração.",
+      "priceMxn": "0 = ainda não configurado — o checkout cai pro USD nessa moeda. Mensal 0 = deriva do anual / duração.",
+      "priceUsd": "Anual 0 = plano grátis. Mensal 0 = deriva do preço anual / duração (um desconto real, não só uma divisão proporcional).",
       "qrCodeMax": "QR Codes grátis — perfil próprio + memoriais geridos, combinado.",
       "termLength": "0 = Vitalícia",
       "treeMaxMembers": "Máximo de pessoas na árvore genealógica."
@@ -699,13 +700,11 @@
       "inactive": "Inativa"
     },
     "stripe": {
-      "annualPriceId": "preço anual:",
       "confirmDescription": "Confirme que os dados deste plano estão corretos. Isso criará ou atualizará o Product e os Prices correspondentes no Stripe. Tem certeza de que deseja sincronizar?",
       "confirmTitle": "Sincronizar com o Stripe?",
-      "hint": "Envia o nome, a descrição e o preço deste plano para o Stripe (criando ou atualizando o Product e os Prices anual/mensal correspondentes). Salve suas alterações primeiro — a sincronização usa os dados salvos. Alterar o preço ou a duração provisiona novos Prices no Stripe.",
-      "monthlyPriceId": "preço mensal:",
+      "hint": "Envia o nome, a descrição e o preço deste plano para o Stripe (criando ou atualizando o Product e os Prices anual/mensal de cada moeda). Salve suas alterações primeiro — a sincronização usa os dados salvos. Alterar o preço de uma moeda ou a duração provisiona um Price novo pra essa moeda.",
+      "notConfigured": "Não configurado",
       "notSynced": "Não sincronizado",
-      "productId": "produto:",
       "syncButton": "Sincronizar com Stripe",
       "syncNow": "Sincronizar agora",
       "synced": "Sincronizado",

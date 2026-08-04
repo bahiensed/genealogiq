@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Check } from "lucide-react"
 import { toast } from "sonner"
 import {
@@ -19,10 +19,11 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { changeSubscription, createCheckoutSession } from "@/actions/billing.actions"
 import { allowsExtraPurchase } from "@/lib/plan-quotas"
+import { cn } from "@/lib/utils"
+import type { Currency } from "@/lib/currency"
 import type { SubscriptionRow } from "@/queries/subscriptions"
 import type { ActivePlan } from "@/queries/billing"
 
-const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" })
 const longDate = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })
 
 interface Props {
@@ -103,6 +104,7 @@ interface PlanCardProps {
 function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCardProps) {
   const router = useRouter()
   const t = useTranslations("Subscriptions")
+  const locale = useLocale()
   const [isPending, startTransition] = useTransition()
   const isFree = plan.code === "FREE"
   const [selectedCadence, setSelectedCadence] = useState<"annual" | "monthly">("annual")
@@ -110,10 +112,13 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
   const annualPrice = Number(plan.price)
   const monthlyPrice = monthlyEquivalent(plan)
 
-  // Active plan shows what the user is actually paying, not the local toggle.
+  // Active plan shows what the user is actually paying (real currency +
+  // cadence, from the stored AppSale), never the local toggle/current locale.
   const activeCadence = (activePlan?.cadence as "annual" | "monthly" | null) ?? "annual"
   const displayCadence = isActive ? activeCadence : selectedCadence
   const displayPrice = displayCadence === "annual" ? annualPrice : monthlyPrice
+  const displayCurrency: Currency = isActive ? (activePlan?.currency ?? plan.currency) : plan.currency
+  const format = (amount: number) => new Intl.NumberFormat(locale, { style: "currency", currency: displayCurrency }).format(amount)
 
   const startFirstSubscription = (cadence: "annual" | "monthly") => {
     startTransition(async () => {
@@ -133,20 +138,31 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
     onRequestChange({ plan, cadence, effect })
   }
 
+  const termSuffix = displayCadence === "annual"
+    ? (plan.termLength === 12 ? t("term.perYear") : plan.termLength === 0 ? t("term.perLifetime") : t("term.perMonths", { count: plan.termLength }))
+    : t("term.perMonth")
+
+  // Tabs/badge/button reserve the same row height on every card, real or
+  // not — FREE always renders them invisible, and so does an active paid
+  // card (which hides its own tabs/button) — so both cards line up
+  // regardless of which plan the viewer is currently on.
+  const showTabsAndButton = !isFree && !isActive
+  const showBestValue = !isFree && displayCadence === "annual"
+
   const q = plan.quotas
-  const features = [
-    t("features.treeMembers", { count: q.treeMaxMembers }),
-    t("features.bioChars", { count: q.bioMaxChars }),
-    t("features.documents", { count: q.documentsMax }),
-    t("features.mediaImages", { count: q.mediaMaxImages }),
-    t("features.mediaVideos", { count: q.mediaMaxVideos }),
-    t("features.geoPlaces", { count: q.geoPlacesMax }),
-    ...(allowsExtraPurchase("geoPlacesMax") ? [t("features.geoPlacesExtra")] : []),
-    t("features.memorials", { count: q.memorialsMax }),
-    ...(allowsExtraPurchase("memorialsMax") ? [t("features.memorialsExtra")] : []),
-    t("features.qrCodeCount", { count: q.qrCodeMax }),
-    ...(allowsExtraPurchase("qrCodeMax") ? [t("features.qrExtra")] : []),
-    ...(q.petsMax > 0 ? [t("features.petsCount", { count: q.petsMax })] : []),
+  const featureRows: { key: string; text: string | null }[] = [
+    { key: "tree", text: t("features.treeMembers", { count: q.treeMaxMembers }) },
+    { key: "bio", text: t("features.bioChars", { count: q.bioMaxChars }) },
+    { key: "documents", text: t("features.documents", { count: q.documentsMax }) },
+    { key: "mediaImages", text: t("features.mediaImages", { count: q.mediaMaxImages }) },
+    { key: "mediaVideos", text: t("features.mediaVideos", { count: q.mediaMaxVideos }) },
+    { key: "geoPlaces", text: t("features.geoPlaces", { count: q.geoPlacesMax }) },
+    { key: "geoPlacesExtra", text: allowsExtraPurchase("geoPlacesMax") ? t("features.geoPlacesExtra") : null },
+    { key: "memorials", text: t("features.memorials", { count: q.memorialsMax }) },
+    { key: "memorialsExtra", text: allowsExtraPurchase("memorialsMax") ? t("features.memorialsExtra") : null },
+    { key: "qrCode", text: t("features.qrCodeCount", { count: q.qrCodeMax }) },
+    { key: "qrExtra", text: allowsExtraPurchase("qrCodeMax") ? t("features.qrExtra") : null },
+    { key: "pets", text: q.petsMax > 0 ? t("features.petsCount", { count: q.petsMax }) : null },
   ]
 
   return (
@@ -160,51 +176,48 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
         )}
       </div>
 
-      {!isFree && !isActive && (
+      <div className={cn(!showTabsAndButton && "invisible")}>
         <Tabs value={selectedCadence} onValueChange={(v) => setSelectedCadence(v as "annual" | "monthly")}>
           <TabsList className="w-full">
             <TabsTrigger value="monthly" className="flex-1">{t("tabs.monthly")}</TabsTrigger>
             <TabsTrigger value="annual" className="flex-1">{t("tabs.yearly")}</TabsTrigger>
           </TabsList>
         </Tabs>
-      )}
+      </div>
 
       <div className="space-y-1.5">
-        {!isFree ? (
-          <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-bold">{usd.format(displayPrice)}</span>
-            <span className="text-sm text-muted-foreground">
-              {displayCadence === "annual"
-                ? (plan.termLength === 12 ? t("term.perYear") : plan.termLength === 0 ? t("term.perLifetime") : t("term.perMonths", { count: plan.termLength }))
-                : t("term.perMonth")}
-            </span>
-          </div>
-        ) : (
-          <div>
-            <span className="text-4xl font-bold">{t("freePrice")}</span>
-          </div>
-        )}
-        {!isFree && displayCadence === "annual" && (
-          <span className="inline-block text-[10px] font-semibold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 dark:bg-amber-950 dark:text-amber-300">
-            {t("bestValue")}
-          </span>
-        )}
+        <div className="flex items-baseline gap-1">
+          <span className="text-4xl font-bold">{isFree ? t("freePrice") : format(displayPrice)}</span>
+          {!isFree && <span className="text-sm text-muted-foreground">{termSuffix}</span>}
+        </div>
+        <span
+          className={cn(
+            "inline-block text-[10px] font-semibold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 dark:bg-amber-950 dark:text-amber-300",
+            !showBestValue && "invisible",
+          )}
+        >
+          {t("bestValue")}
+        </span>
       </div>
 
       <ul className="space-y-2 flex-1">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm">
+        {featureRows.map((row) => (
+          <li key={row.key} className={cn("flex items-start gap-2 text-sm", row.text === null && "invisible")}>
             <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-            <span>{f}</span>
+            <span>{row.text ?? " "}</span>
           </li>
         ))}
       </ul>
 
-      {!isFree && !isActive && (
-        <Button onClick={() => requestChange(selectedCadence)} disabled={isPending} className="w-full">
-          {usd.format(displayPrice)}
-        </Button>
-      )}
+      <Button
+        onClick={() => requestChange(selectedCadence)}
+        disabled={isPending || !showTabsAndButton}
+        aria-hidden={!showTabsAndButton}
+        tabIndex={showTabsAndButton ? undefined : -1}
+        className={cn("w-full", !showTabsAndButton && "invisible")}
+      >
+        {isFree ? " " : `${format(displayPrice)} ${termSuffix}`}
+      </Button>
     </div>
   )
 }

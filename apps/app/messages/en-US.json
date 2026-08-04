@@ -1300,7 +1300,7 @@
   "Subscriptions": {
     "activeBadge": "Active",
     "backToHome": "Back to home",
-    "bestValue": "Best value",
+    "bestValue": "Best Option",
     "cadence": {
       "annual": "annual",
       "monthly": "monthly"
@@ -1316,17 +1316,17 @@
     },
     "currentlyOn": "Currently on {plan} until {date}",
     "features": {
-      "bioChars": "{count, number} biography characters",
-      "documents": "{count} documents",
+      "bioChars": "{count, number} biography tokens",
+      "documents": "Store up to {count} documents",
       "geoPlaces": "{count} shared places",
-      "geoPlacesExtra": "Buy extra places individually",
-      "mediaImages": "{count} combined photos across Biography, Gallery and Places",
-      "mediaVideos": "{count} gallery videos",
-      "memorials": "{count} memorial profiles",
-      "memorialsExtra": "Buy extra memorials individually",
+      "geoPlacesExtra": "Buy extra places",
+      "mediaImages": "Upload up to {count} images",
+      "mediaVideos": "Upload up to {count} gallery videos",
+      "memorials": "{count, plural, one {# full memorial profile} other {# memorial profiles}}",
+      "memorialsExtra": "Buy extra memorials",
       "petsCount": "{count} pet profiles",
-      "qrCodeCount": "{count} free QR Codes",
-      "qrExtra": "Buy extra QR Codes individually",
+      "qrCodeCount": "{count, plural, one {# free QR Code} other {# free QR Codes}}",
+      "qrExtra": "Buy extra QR Codes",
       "treeMembers": "{count} family tree members"
     },
     "freePrice": "Free",

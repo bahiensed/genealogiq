@@ -652,6 +652,7 @@
     "create": "Create subscription",
     "edit": "Edit Subscription",
     "fields": {
+      "annual": "Annual",
       "bioMaxChars": "Bio Max Characters",
       "code": "Code",
       "description": "Description",
@@ -662,10 +663,9 @@
       "mediaMaxImages": "Combined Media Images Max",
       "mediaMaxVideos": "Gallery Videos Max",
       "memorialsMax": "Memorials Max",
-      "monthlyPrice": "Monthly Price (US$)",
+      "monthly": "Monthly",
       "name": "Name",
       "petsMax": "Pets Max",
-      "price": "Price (US$)",
       "qrCodeMax": "QR Codes Max",
       "termLength": "Term Length (in months)",
       "treeMaxMembers": "Tree Max Members"
@@ -678,8 +678,9 @@
       "geoPlacesMax": "Row count of shared places — independent of the combined media pool below.",
       "mediaMaxImages": "Combined pool: Bio image + Gallery images + Places photos share this limit.",
       "mediaMaxVideos": "Gallery videos only.",
-      "monthlyPrice": "0 = derive from Price / Term Length. Set to offer a real discount for paying annually instead of an even split.",
-      "price": "0 = Free",
+      "priceBrl": "0 = not configured yet — checkout falls back to USD for this currency. Monthly 0 = derive from annual / term length.",
+      "priceMxn": "0 = not configured yet — checkout falls back to USD for this currency. Monthly 0 = derive from annual / term length.",
+      "priceUsd": "Annual 0 = Free plan. Monthly 0 = derive from annual price / term length (a real discount, not just an even split).",
       "qrCodeMax": "Free QR codes — own profile + guarded memorials, combined.",
       "termLength": "0 = Lifetime",
       "treeMaxMembers": "Maximum people in the family tree."
@@ -699,13 +700,11 @@
       "inactive": "Inactive"
     },
     "stripe": {
-      "annualPriceId": "annual price:",
       "confirmDescription": "Please confirm that this plan's data is correct. This will create or update the matching Product and Prices in Stripe. Are you sure you want to synchronize?",
       "confirmTitle": "Sync with Stripe?",
-      "hint": "Pushes this plan's name, description and price to Stripe (creating or updating the matching Product and annual/monthly Prices). Save your changes first — sync uses the saved data. Changing the price or term length provisions fresh Stripe Prices.",
-      "monthlyPriceId": "monthly price:",
+      "hint": "Pushes this plan's name, description and price to Stripe (creating or updating the matching Product and annual/monthly Prices per currency). Save your changes first — sync uses the saved data. Changing a currency's price or the term length provisions a fresh Stripe Price for that currency.",
+      "notConfigured": "Not configured",
       "notSynced": "Not synced",
-      "productId": "product:",
       "syncButton": "Sync with Stripe",
       "syncNow": "Sync now",
       "synced": "Synced",

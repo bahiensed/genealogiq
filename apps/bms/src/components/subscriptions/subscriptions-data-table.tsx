@@ -22,7 +22,7 @@ export function SubscriptionsDataTable({ currentUserRole, data }: SubscriptionsD
     name:        t('table.name'),
     maxProfiles: t('table.maxProfiles'),
     termLength:  t('table.term'),
-    price:       t('table.price'),
+    priceUsd:    t('table.price'),
     isActive:    t('table.status'),
     createdAt:   t('table.createdAt'),
   }

@@ -17,8 +17,12 @@ export default async function EditSubscriptionPage({ params }: { params: Promise
         isActive:    subscription.isActive,
         maxProfiles:  subscription.maxProfiles,
         termLength:   subscription.termLength,
-        price:        subscription.price,
-        monthlyPrice: subscription.monthlyPrice ?? 0,
+        priceUsd:        subscription.priceUsd,
+        monthlyPriceUsd: subscription.monthlyPriceUsd ?? 0,
+        priceBrl:        subscription.priceBrl ?? 0,
+        monthlyPriceBrl: subscription.monthlyPriceBrl ?? 0,
+        priceMxn:        subscription.priceMxn ?? 0,
+        monthlyPriceMxn: subscription.monthlyPriceMxn ?? 0,
         treeMaxMembers:        subscription.treeMaxMembers,
         bioMaxChars:           subscription.bioMaxChars,
         mediaMaxImages:        subscription.mediaMaxImages,
@@ -31,8 +35,12 @@ export default async function EditSubscriptionPage({ params }: { params: Promise
         geolocationFullAccess: subscription.geolocationFullAccess,
       }}
       stripeProductId={subscription.stripeProductId}
-      stripeAnnualPriceId={subscription.stripeAnnualPriceId}
-      stripeMonthlyPriceId={subscription.stripeMonthlyPriceId}
+      stripeAnnualPriceIdUsd={subscription.stripeAnnualPriceIdUsd}
+      stripeMonthlyPriceIdUsd={subscription.stripeMonthlyPriceIdUsd}
+      stripeAnnualPriceIdBrl={subscription.stripeAnnualPriceIdBrl}
+      stripeMonthlyPriceIdBrl={subscription.stripeMonthlyPriceIdBrl}
+      stripeAnnualPriceIdMxn={subscription.stripeAnnualPriceIdMxn}
+      stripeMonthlyPriceIdMxn={subscription.stripeMonthlyPriceIdMxn}
     />
   )
 }
