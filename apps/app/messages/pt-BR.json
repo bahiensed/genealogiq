@@ -44,6 +44,10 @@
       "notAuthorized": "Você não tem permissão para gerenciar este perfil.",
       "notFound": "Documento não encontrado."
     },
+    "extraUnits": {
+      "notPurchasable": "Isso não está disponível pra compra no seu plano atual.",
+      "notWired": "Isso ainda não está configurado pra checkout."
+    },
     "familyTree": {
       "cannotRelateSelf": "Um perfil não pode ser relacionado a si mesmo.",
       "cannotRemoveRoot": "Você não pode remover a pessoa principal da árvore.",
@@ -798,7 +802,9 @@
     "termsTitle": "Termos & Privacidade"
   },
   "LimitReached": {
+    "buying": "Redirecionando…",
     "cta": {
+      "buyExtra": "Comprar mais 1",
       "extraOnly": "Ver opções",
       "maxedOut": "Ver meu plano",
       "upgrade": "Fazer upgrade do plano"
@@ -806,7 +812,7 @@
     "description": {
       "bio": "Seu plano permite até {limit} caracteres na biografia.",
       "documents": "Seu plano permite até {limit} documentos.",
-      "geoPlaces": "Seu plano permite até {limit} geolocalizações.",
+      "geoPlaces": "Seu plano permite até {limit} geolocalizações somando todos os seus perfis.",
       "mediaImages": "Seu plano permite até {limit} fotos combinadas entre Biografia, Galeria e Geolocalizações.",
       "mediaVideos": "Seu plano permite até {limit} vídeos na galeria.",
       "memorials": "Seu plano permite até {limit} memoriais.",

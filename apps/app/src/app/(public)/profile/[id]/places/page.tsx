@@ -12,6 +12,7 @@ import { getPlacesByUserId, ANON_PLACES_LIMIT } from "@/queries/places"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getGuardianGeoPlacesStatus } from "@/lib/geo-quota"
 import { assertPublicMemorialAccess } from "@/lib/public-profile-access"
 import { QuotaGatedLink } from "@/components/quota-gated-link"
 
@@ -35,11 +36,16 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
   assertPublicMemorialAccess(profile, viewerId, id)
 
   const isOwn = viewerId ? canManageProfile(profile, viewerId) : false
-  const [places, features] = await Promise.all([
+  const [places, features, geoStatus] = await Promise.all([
     getPlacesByUserId(id, isAnon ? ANON_PLACES_LIMIT : undefined),
     getMemorialFeatures(id),
+    // Geo places are a pool shared across everything the guardian manages —
+    // only meaningful (and only computed) for the owner/guardian viewing
+    // their own gate; anon/non-owner viewers never see the Add action.
+    isOwn && viewerId ? getGuardianGeoPlacesStatus(viewerId) : Promise.resolve(null),
   ])
-  const atLimit = places.length >= features.geoPlacesMax
+  const effectiveGeoPlacesMax = geoStatus?.limit ?? features.geoPlacesMax
+  const atLimit = geoStatus ? geoStatus.usage >= geoStatus.limit : false
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">
@@ -65,7 +71,7 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
                 href={`/profile/${id}/places/new`}
                 atLimit={atLimit}
                 limitContext="geoPlaces"
-                limit={features.geoPlacesMax}
+                limit={effectiveGeoPlacesMax}
                 tier={features.code}
                 size="sm"
                 className="gap-1.5"
@@ -86,7 +92,7 @@ export default async function ProfilePlacesPage({ params, searchParams }: Props)
           isOwn={isOwn}
           gated={isAnon}
           atLimit={atLimit}
-          geoPlacesMax={features.geoPlacesMax}
+          geoPlacesMax={effectiveGeoPlacesMax}
           tier={features.code}
         />
       </main>

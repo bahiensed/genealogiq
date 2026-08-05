@@ -2,13 +2,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 
 vi.mock("@/lib/subscription", () => ({ getMemorialFeatures: vi.fn() }))
 vi.mock("@/queries/memorial", () => ({ countMemorialsByCreatorId: vi.fn() }))
+vi.mock("@/lib/extra-units", () => ({ getExtraUnits: vi.fn() }))
 
 import { getMemorialCreationStatus } from "./memorial-quota"
 import { getMemorialFeatures } from "@/lib/subscription"
 import { countMemorialsByCreatorId } from "@/queries/memorial"
+import { getExtraUnits } from "@/lib/extra-units"
 
 beforeEach(() => {
   vi.clearAllMocks()
+  vi.mocked(getExtraUnits).mockResolvedValue(0)
 })
 
 describe("getMemorialCreationStatus", () => {
@@ -47,5 +50,16 @@ describe("getMemorialCreationStatus", () => {
     const status = await getMemorialCreationStatus("guardian-1")
 
     expect(status.allowed).toBe(false)
+  })
+
+  it("adds purchased extra memorial slots on top of the plan's base quota", async () => {
+    vi.mocked(countMemorialsByCreatorId).mockResolvedValue(2)
+    vi.mocked(getMemorialFeatures).mockResolvedValue({ memorialsMax: 1 } as never)
+    vi.mocked(getExtraUnits).mockResolvedValue(2)
+
+    const status = await getMemorialCreationStatus("guardian-1")
+
+    expect(status).toEqual({ count: 2, limit: 3, allowed: true })
+    expect(getExtraUnits).toHaveBeenCalledWith("guardian-1", "MEMORIAL")
   })
 })

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { getMemorialFeatures, isSaleLive } from "@/lib/subscription"
+import { getExtraUnits } from "@/lib/extra-units"
 
 export interface QrQuotaStatus {
   // Is THIS specific profile's QR one of the guardian's free ones — OR does
@@ -20,7 +21,7 @@ export interface QrQuotaStatus {
 // be a deliberate, sticky choice rather than always-oldest-first, that needs
 // a persisted flag (a later migration), not this heuristic.
 export async function getQrQuotaStatus(guardianId: string, profileId: string): Promise<QrQuotaStatus> {
-  const [guardian, memorials, features, target] = await Promise.all([
+  const [guardian, memorials, features, target, extra] = await Promise.all([
     prisma.appUser.findUnique({ where: { id: guardianId }, select: { id: true, createdAt: true } }),
     prisma.appUser.findMany({
       where: { role: "APP_MEMO", guardedBy: { some: { guardianId, status: "ACCEPTED" } } },
@@ -34,6 +35,7 @@ export async function getQrQuotaStatus(guardianId: string, profileId: string): P
         appSale:           { select: { status: true, currentPeriodEnd: true } },
       },
     }),
+    getExtraUnits(guardianId, "QR_CODE"),
   ])
 
   // A profile with its own dedicated paid slot (a physical QR product, or a
@@ -54,5 +56,6 @@ export async function getQrQuotaStatus(guardianId: string, profileId: string): P
   const index = ranked.findIndex((p) => p.id === profileId)
   const rank = index === -1 ? ranked.length + 1 : index + 1
 
-  return { unlocked: hasOwnUnlock || rank <= features.qrCodeMax, rank, limit: features.qrCodeMax }
+  const limit = features.qrCodeMax + extra
+  return { unlocked: hasOwnUnlock || rank <= limit, rank, limit }
 }

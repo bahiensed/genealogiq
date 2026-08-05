@@ -1,7 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter, usePathname } from "next/navigation"
+import { useTransition } from "react"
 import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 import type { LucideIcon } from "lucide-react"
 import { Network, BookOpenText, FileText, Images, Film, MapPin, BrickWall, QrCode, PawPrint } from "lucide-react"
 import {
@@ -15,7 +18,10 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 import { allowsExtraPurchase, type PlanQuotas, type PlanTier } from "@/lib/plan-quotas"
+import { createExtraUnitCheckoutSession } from "@/actions/extra-units.actions"
+import type { ExtraUnitResource } from "@/lib/extra-units"
 
 export type LimitReachedContext =
   | "tree"
@@ -76,11 +82,23 @@ const CONTEXT_QUOTA_KEY: Record<LimitReachedContext, keyof PlanQuotas> = {
   qrCode: "qrCodeMax",
 }
 
+// The 3 contexts with a real one-time purchase behind them (matches exactly
+// the fields allowsExtraPurchase can return true for).
+const CONTEXT_EXTRA_RESOURCE: Partial<Record<LimitReachedContext, ExtraUnitResource>> = {
+  geoPlaces: "GEO_PLACE",
+  qrCode: "QR_CODE",
+  memorials: "MEMORIAL",
+}
+
 export function LimitReachedDialog({ open, onOpenChange, context, limit, tier }: Props) {
   const t = useTranslations("LimitReached")
+  const router = useRouter()
+  const pathname = usePathname()
+  const [isPending, startTransition] = useTransition()
   const Icon = CONTEXT_ICON[context]
   const i18nKey = CONTEXT_I18N_KEY[context]
-  const allowsExtra = allowsExtraPurchase(CONTEXT_QUOTA_KEY[context])
+  const allowsExtra = allowsExtraPurchase(CONTEXT_QUOTA_KEY[context], tier)
+  const extraResource = CONTEXT_EXTRA_RESOURCE[context]
 
   // FREE always has a real higher tier to sell. Already-paying tiers
   // (PREMIUM/PHYSICAL_QR) only get the extra-purchase hint where the module
@@ -105,6 +123,15 @@ export function LimitReachedDialog({ open, onOpenChange, context, limit, tier }:
   // is factually wrong here, so override it.
   const suffixKey = context === "qrCode" && variant === "upgradeOrExtra" ? "qrUpgradeOrExtra" : variant
 
+  const handleBuyExtra = () => {
+    if (!extraResource) return
+    startTransition(async () => {
+      const result = await createExtraUnitCheckoutSession(extraResource, pathname)
+      if (!result.ok) { toast.error(result.message); return }
+      router.push(result.data!.url)
+    })
+  }
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -120,9 +147,16 @@ export function LimitReachedDialog({ open, onOpenChange, context, limit, tier }:
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t("dismiss")}</AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Link href="/subscriptions">{t(`cta.${ctaKey}`)}</Link>
-          </AlertDialogAction>
+          {allowsExtra && extraResource && (
+            <Button onClick={handleBuyExtra} disabled={isPending} variant={variant === "extraOnly" ? "default" : "outline"}>
+              {isPending ? t("buying") : t("cta.buyExtra")}
+            </Button>
+          )}
+          {variant !== "extraOnly" && (
+            <AlertDialogAction asChild>
+              <Link href="/subscriptions">{t(`cta.${ctaKey}`)}</Link>
+            </AlertDialogAction>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

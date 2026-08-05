@@ -58,18 +58,19 @@ export const PHYSICAL_QR: PlanQuotas = {
   geolocationFullAccess: true,
 }
 
-// Whether one more unit of `field` can be purchased individually — a
-// property of the module (geo places/memorials/QR codes are purchasable at
-// EITHER tier, just at a different price per tier, not modeled here; pets
-// and everything else have no purchase concept at all). The actual purchase
-// mechanism doesn't exist yet; LimitReachedDialog only reads this to decide
-// whether to mention it as an option alongside upgrading.
-export function allowsExtraPurchase(field: keyof PlanQuotas): boolean {
+// Whether one more unit of `field` can be purchased individually. Geo places
+// and QR codes are purchasable at either tier (just a different price per
+// tier — see ExtraUnitPrice, packages/db). Memorials are PREMIUM-only: a
+// FREE guardian has no way to buy an extra memorial slot, only to upgrade —
+// deliberate, matches ExtraUnitPrice having no MEMORIAL+FREE row. Pets and
+// everything else have no purchase concept at all.
+export function allowsExtraPurchase(field: keyof PlanQuotas, tier?: PlanTier): boolean {
   switch (field) {
     case "geoPlacesMax":
-    case "memorialsMax":
     case "qrCodeMax":
       return true
+    case "memorialsMax":
+      return tier !== "FREE"
     default:
       return false
   }

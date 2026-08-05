@@ -54,6 +54,15 @@
       "stripeOrphan": "El código \"{code}\" ya está activo en Stripe (residuo de una ejecución anterior fallida). Pide a un administrador que lo elimine.",
       "updateFailed": "No se pudo actualizar el cupón."
     },
+    "extraUnitPrice": {
+      "notFound": "Precio de extra no encontrado.",
+      "priceRequired": "Define un precio mayor que cero en al menos una moneda antes de sincronizar.",
+      "stripeSyncFailed": "Falló la sincronización con Stripe: {message}",
+      "synced": "Sincronizado con Stripe correctamente.",
+      "unknownError": "Error desconocido",
+      "updated": "Precio actualizado correctamente.",
+      "updatedStripeCleared": "Precio actualizado — referencias de Stripe borradas. Sincroniza con Stripe de nuevo para provisionar precios nuevos."
+    },
     "package": {
       "created": "Paquete creado correctamente.",
       "hasSales": "Este paquete tiene ventas asociadas y no se puede eliminar.",
@@ -462,6 +471,27 @@
     "termLengthMin": "Debe ser 0 (vitalicio) o un número positivo de meses",
     "title": "Algo salió mal",
     "wholeNumber": "Debe ser un número entero"
+  },
+  "ExtraUnitPrices": {
+    "resource": {
+      "GEO_PLACE": "Geolocalización",
+      "MEMORIAL": "Memorial",
+      "QR_CODE": "QR Code"
+    },
+    "stripe": {
+      "notConfigured": "No configurado",
+      "notSynced": "No sincronizado",
+      "synced": "Sincronizado",
+      "syncButton": "Sincronizar con Stripe",
+      "syncing": "Sincronizando…",
+      "title": "Sincronización con Stripe"
+    },
+    "subtitle": "Precios de \"comprar 1 extra\" únicos — además de la cuota del plan del guardián, independiente del precio de la suscripción recurrente.",
+    "tier": {
+      "FREE": "Gratis",
+      "PREMIUM": "Premium"
+    },
+    "title": "Precios de Extras"
   },
   "Feedback": {
     "dialog": {

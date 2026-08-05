@@ -12,16 +12,18 @@ import {
   LifeBuoy,
   PackageIcon,
   QrCodeIcon,
+  SquarePlus,
   TagIcon,
   TicketPercent,
 } from 'lucide-react'
 
 export const main = [
-  { name: 'Dashboard',              url: '/dashboard',     icon: LayoutDashboard },
-  { name: 'Physical QR Codes',      url: '/physical-qr',   icon: Fingerprint     },
-  { name: 'Digital QR Codes (B2B)', url: '/packages',      icon: QrCodeIcon      },
-  { name: 'Subscriptions (B2C)',    url: '/subscriptions', icon: Layers          },
-  { name: 'Customers',              url: '/customers',     icon: Building2       },
+  { name: 'Dashboard',              url: '/dashboard',           icon: LayoutDashboard },
+  { name: 'Physical QR Codes',      url: '/physical-qr',         icon: Fingerprint     },
+  { name: 'Digital QR Codes (B2B)', url: '/packages',            icon: QrCodeIcon      },
+  { name: 'Subscriptions (B2C)',    url: '/subscriptions',       icon: Layers          },
+  { name: 'Extra Unit Prices',      url: '/extra-unit-prices',   icon: SquarePlus      },
+  { name: 'Customers',              url: '/customers',           icon: Building2       },
 ]
 
 export const system = [
@@ -30,13 +32,14 @@ export const system = [
 ]
 
 export const records = [
-  { name: 'Physical QR Codes',      url: '/physical-qr',   icon: Fingerprint },
-  { name: 'Digital QR Codes (B2B)', url: '/packages',      icon: QrCodeIcon  },
-  { name: 'Subscriptions (B2C)',    url: '/subscriptions', icon: Layers      },
-  { name: 'Suppliers',              url: '/suppliers',     icon: FactoryIcon },
-  { name: 'Products',               url: '/products',      icon: PackageIcon },
-  { name: 'Services',               url: '/services',      icon: LifeBuoy    },
-  { name: 'Customers',              url: '/customers',     icon: Building2   },
+  { name: 'Physical QR Codes',      url: '/physical-qr',       icon: Fingerprint },
+  { name: 'Digital QR Codes (B2B)', url: '/packages',          icon: QrCodeIcon  },
+  { name: 'Subscriptions (B2C)',    url: '/subscriptions',     icon: Layers      },
+  { name: 'Extra Unit Prices',      url: '/extra-unit-prices', icon: SquarePlus  },
+  { name: 'Suppliers',              url: '/suppliers',         icon: FactoryIcon },
+  { name: 'Products',               url: '/products',          icon: PackageIcon },
+  { name: 'Services',               url: '/services',          icon: LifeBuoy    },
+  { name: 'Customers',              url: '/customers',         icon: Building2   },
 ]
 
 export const categories = [

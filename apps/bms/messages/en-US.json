@@ -54,6 +54,15 @@
       "stripeOrphan": "Code \"{code}\" is already active in Stripe (orphan from a failed previous run). Ask an admin to clean it up.",
       "updateFailed": "Could not update coupon."
     },
+    "extraUnitPrice": {
+      "notFound": "Extra unit price not found.",
+      "priceRequired": "Set a price greater than zero in at least one currency before syncing.",
+      "stripeSyncFailed": "Stripe sync failed: {message}",
+      "synced": "Synced with Stripe successfully.",
+      "unknownError": "Unknown error",
+      "updated": "Price updated successfully.",
+      "updatedStripeCleared": "Price updated — Stripe references cleared. Sync with Stripe again to provision fresh prices."
+    },
     "package": {
       "created": "Package created successfully.",
       "hasSales": "This package has associated sales and cannot be deleted.",
@@ -462,6 +471,27 @@
     "termLengthMin": "Must be 0 (lifetime) or a positive number of months",
     "title": "Something went wrong",
     "wholeNumber": "Must be a whole number"
+  },
+  "ExtraUnitPrices": {
+    "resource": {
+      "GEO_PLACE": "Geolocation",
+      "MEMORIAL": "Memorial",
+      "QR_CODE": "QR Code"
+    },
+    "stripe": {
+      "notConfigured": "Not configured",
+      "notSynced": "Not synced",
+      "synced": "Synced",
+      "syncButton": "Sync with Stripe",
+      "syncing": "Syncing…",
+      "title": "Stripe sync"
+    },
+    "subtitle": "One-time \"buy 1 extra\" prices — on top of a guardian's plan quota, independent of the recurring subscription price.",
+    "tier": {
+      "FREE": "Free",
+      "PREMIUM": "Premium"
+    },
+    "title": "Extra Unit Prices"
   },
   "Feedback": {
     "dialog": {

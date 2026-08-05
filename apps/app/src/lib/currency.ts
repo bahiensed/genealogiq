@@ -58,3 +58,32 @@ export function stripeIdsForCurrency(plan: PlanStripeIdFields, currency: Currenc
   if (currency === "MXN") return { annual: plan.stripeAnnualPriceIdMxn, monthly: plan.stripeMonthlyPriceIdMxn }
   return { annual: plan.stripeAnnualPriceIdUsd, monthly: plan.stripeMonthlyPriceIdUsd }
 }
+
+// A one-time price row's raw per-currency columns (e.g. ExtraUnitPrice) — a
+// single price per currency, no annual/monthly cadence split, so this is a
+// separate shape from PlanCurrencyFields/PlanStripeIdFields above.
+export interface SingleCurrencyPriceFields {
+  priceUsd: number | null
+  priceBrl: number | null
+  priceMxn: number | null
+}
+
+export interface SingleCurrencyStripeIdFields {
+  stripePriceIdUsd: string | null
+  stripePriceIdBrl: string | null
+  stripePriceIdMxn: string | null
+}
+
+/** The raw one-time price for a resolved currency. */
+export function priceForCurrency(row: SingleCurrencyPriceFields, currency: Currency): number | null {
+  if (currency === "BRL") return row.priceBrl
+  if (currency === "MXN") return row.priceMxn
+  return row.priceUsd
+}
+
+/** The Stripe one-time Price id for a resolved currency. */
+export function stripeIdForCurrency(row: SingleCurrencyStripeIdFields, currency: Currency): string | null {
+  if (currency === "BRL") return row.stripePriceIdBrl
+  if (currency === "MXN") return row.stripePriceIdMxn
+  return row.stripePriceIdUsd
+}

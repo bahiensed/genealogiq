@@ -3,6 +3,7 @@ import type Stripe from "stripe"
 import { stripe } from "@/lib/stripe"
 import { prisma } from "@/lib/prisma"
 import { upsertSaleFromSubscription } from "@/lib/billing"
+import { applyExtraUnitPurchase } from "@/lib/extra-units"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -11,6 +12,7 @@ const RELEVANT_EVENTS = new Set<Stripe.Event["type"]>([
   "customer.subscription.created",
   "customer.subscription.updated",
   "customer.subscription.deleted",
+  "checkout.session.completed",
 ])
 
 export async function POST(req: NextRequest) {
@@ -32,6 +34,41 @@ export async function POST(req: NextRequest) {
   }
 
   if (!RELEVANT_EVENTS.has(event.type)) {
+    return NextResponse.json({ received: true })
+  }
+
+  // checkout.session.completed fires for BOTH cadences this app creates:
+  // mode:"subscription" (createCheckoutSession, billing.actions.ts — state
+  // stays driven exclusively by the customer.subscription.* branch below,
+  // never processed here) and mode:"payment" (createExtraUnitCheckoutSession,
+  // one-time extra-unit purchases — handled in this branch).
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session
+    if (session.mode !== "payment") {
+      return NextResponse.json({ received: true, ignored: "non-payment mode" })
+    }
+    if (session.payment_status !== "paid") {
+      return NextResponse.json({ received: true, ignored: "unpaid" })
+    }
+
+    // Fast-path idempotency: skip events already fully processed.
+    const seen = await prisma.stripeEvent.findUnique({ where: { id: event.id }, select: { id: true } })
+    if (seen) return NextResponse.json({ received: true, duplicate: true })
+
+    try {
+      // Process FIRST (idempotent via ExtraUnitPurchase.stripeSessionId
+      // unique), then record the event. Recording only after a successful
+      // apply means a failed apply leaves no StripeEvent row, so Stripe's
+      // retry reprocesses it instead of being skipped as a duplicate.
+      await applyExtraUnitPurchase(session)
+      await prisma.stripeEvent.create({ data: { id: event.id, type: event.type } }).catch((err: unknown) => {
+        if ((err as { code?: string }).code !== "P2002") throw err
+      })
+    } catch (err: unknown) {
+      console.error("[stripe-webhook] applyExtraUnitPurchase failed", err)
+      return NextResponse.json({ error: "internal" }, { status: 500 })
+    }
+
     return NextResponse.json({ received: true })
   }
 

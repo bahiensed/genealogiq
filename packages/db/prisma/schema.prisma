@@ -272,6 +272,44 @@ model StripeEvent {
   @@map("stripe_events")
 }
 
+// One-time "buy 1 extra unit" purchases (geo places / QR codes / memorial
+// slots) on top of a guardian's plan quota — independent of the recurring
+// Subscription pricing above. resource/tier are free-text ("GEO_PLACE" |
+// "QR_CODE" | "MEMORIAL", "FREE" | "PREMIUM") rather than enums, mirroring
+// Subscription.code's own free-text convention.
+model ExtraUnitPrice {
+  id               String   @id @default(cuid())
+  resource         String
+  tier             String
+  priceUsd         Decimal? @db.Decimal(10, 2) @map("price_usd")
+  priceBrl         Decimal? @db.Decimal(10, 2) @map("price_brl")
+  priceMxn         Decimal? @db.Decimal(10, 2) @map("price_mxn")
+  stripeProductId  String?  @unique @map("stripe_product_id")
+  stripePriceIdUsd String?  @unique @map("stripe_price_id_usd")
+  stripePriceIdBrl String?  @unique @map("stripe_price_id_brl")
+  stripePriceIdMxn String?  @unique @map("stripe_price_id_mxn")
+
+  @@unique([resource, tier])
+  @@map("app_extra_unit_prices")
+}
+
+model ExtraUnitPurchase {
+  id              String   @id @default(cuid())
+  buyerId         String   @map("buyer_id")
+  resource        String
+  quantity        Int      @default(1)
+  // Buyer's tier at purchase time — audit only, not read back for quota math.
+  tier            String
+  currency        String
+  amountPaid      Decimal  @db.Decimal(10, 2) @map("amount_paid")
+  stripeSessionId String?  @unique @map("stripe_session_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  buyer           AppUser  @relation(fields: [buyerId], references: [id])
+
+  @@index([buyerId, resource])
+  @@map("app_extra_unit_purchases")
+}
+
 // ─── Auth tokens & rate limiting ─────────────────────────────────────────────
 
 model RateLimitAttempt {
@@ -497,6 +535,7 @@ model AppUser {
   qrCode              QrCode?
   treeNodePositionsAsRoot   TreeNodePosition[] @relation("TreeNodePositionRoot")
   treeNodePositionsAsPerson TreeNodePosition[] @relation("TreeNodePositionPerson")
+  extraUnitPurchases  ExtraUnitPurchase[]
 
   @@index([tenantId])
   @@index([categoryId])

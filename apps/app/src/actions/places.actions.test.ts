@@ -21,6 +21,7 @@ vi.mock("@/lib/profile", () => ({ canManageProfile: vi.fn() }))
 vi.mock("@/lib/blob", () => ({ deleteBlobs: vi.fn() }))
 vi.mock("@/lib/subscription", () => ({ getMemorialFeatures: vi.fn() }))
 vi.mock("@/queries/media-usage", () => ({ getCombinedMediaUsage: vi.fn() }))
+vi.mock("@/lib/geo-quota", () => ({ getGuardianGeoPlacesStatus: vi.fn() }))
 
 import { savePlace, deletePlace } from "./places.actions"
 import { verifySession } from "@/lib/dal"
@@ -28,6 +29,7 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
 import { getCombinedMediaUsage } from "@/queries/media-usage"
+import { getGuardianGeoPlacesStatus } from "@/lib/geo-quota"
 import { deleteBlobs } from "@/lib/blob"
 
 const validData = {
@@ -49,6 +51,7 @@ beforeEach(() => {
   vi.mocked(canManageProfile).mockReturnValue(true)
   vi.mocked(getMemorialFeatures).mockResolvedValue({ geoPlacesMax: 3, mediaMaxImages: 100 } as never)
   vi.mocked(getCombinedMediaUsage).mockResolvedValue({ images: 0, videos: 0 })
+  vi.mocked(getGuardianGeoPlacesStatus).mockResolvedValue({ usage: 0, limit: 3 })
   prismaMock.geoPlace.count.mockResolvedValue(0)
 })
 
@@ -74,16 +77,27 @@ describe("savePlace — guards", () => {
   })
 })
 
-describe("savePlace — row-count quota (always enforced)", () => {
+describe("savePlace — guardian-wide geo quota (always enforced)", () => {
   it("blocks creation at/over the limit", async () => {
-    prismaMock.geoPlace.count.mockResolvedValue(3)
+    vi.mocked(getGuardianGeoPlacesStatus).mockResolvedValue({ usage: 3, limit: 3 })
     const res = await savePlace("A", null, validData)
     expect(res).toEqual({ ok: false, message: "places.limitReached" })
     expect(prismaMock.geoPlace.create).not.toHaveBeenCalled()
   })
 
   it("allows creation under the limit", async () => {
-    prismaMock.geoPlace.count.mockResolvedValue(2)
+    vi.mocked(getGuardianGeoPlacesStatus).mockResolvedValue({ usage: 2, limit: 3 })
+    prismaMock.geoPlace.create.mockResolvedValue({ id: "p1" })
+    const res = await savePlace("A", null, validData)
+    expect(res).toEqual({ ok: true, message: undefined })
+    expect(prismaMock.geoPlace.create).toHaveBeenCalled()
+    expect(getGuardianGeoPlacesStatus).toHaveBeenCalledWith("mgr")
+  })
+
+  it("counts purchased extra slots toward the limit (via getGuardianGeoPlacesStatus)", async () => {
+    // usage is already at the plan's base geoPlacesMax, but 1 purchased extra
+    // raised the guardian-wide limit — creation should still succeed.
+    vi.mocked(getGuardianGeoPlacesStatus).mockResolvedValue({ usage: 3, limit: 4 })
     prismaMock.geoPlace.create.mockResolvedValue({ id: "p1" })
     const res = await savePlace("A", null, validData)
     expect(res).toEqual({ ok: true, message: undefined })
