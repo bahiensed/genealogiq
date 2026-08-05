@@ -157,11 +157,10 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
     { key: "mediaImages", text: t("features.mediaImages", { count: q.mediaMaxImages }) },
     { key: "mediaVideos", text: t("features.mediaVideos", { count: q.mediaMaxVideos }) },
     { key: "geoPlaces", text: t("features.geoPlaces", { count: q.geoPlacesMax }) },
-    { key: "geoPlacesExtra", text: allowsExtraPurchase("geoPlacesMax") ? t("features.geoPlacesExtra") : null },
+    { key: "geoPlacesExtra", text: allowsExtraPurchase("geoPlacesMax") ? t(isFree ? "features.geoPlacesExtra" : "features.geoPlacesExtraCheaper") : null },
     { key: "memorials", text: t("features.memorials", { count: q.memorialsMax }) },
-    { key: "memorialsExtra", text: allowsExtraPurchase("memorialsMax") ? t("features.memorialsExtra") : null },
     { key: "qrCode", text: t("features.qrCodeCount", { count: q.qrCodeMax }) },
-    { key: "qrExtra", text: allowsExtraPurchase("qrCodeMax") ? t("features.qrExtra") : null },
+    { key: "qrExtra", text: allowsExtraPurchase("qrCodeMax") ? t(isFree ? "features.qrExtra" : "features.qrExtraCheaper") : null },
     { key: "pets", text: q.petsMax > 0 ? t("features.petsCount", { count: q.petsMax }) : null },
   ]
 
@@ -187,6 +186,7 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
 
       <div className="space-y-1.5">
         <div className="flex items-baseline gap-1">
+          {!isFree && <span className="text-sm text-muted-foreground">{t("onlyPrefix")}</span>}
           <span className="text-4xl font-bold">{isFree ? t("freePrice") : format(displayPrice)}</span>
           {!isFree && <span className="text-sm text-muted-foreground">{termSuffix}</span>}
         </div>
