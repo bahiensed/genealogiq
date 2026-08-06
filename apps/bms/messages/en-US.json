@@ -54,6 +54,15 @@
       "stripeOrphan": "Code \"{code}\" is already active in Stripe (orphan from a failed previous run). Ask an admin to clean it up.",
       "updateFailed": "Could not update coupon."
     },
+    "extraUnitPrice": {
+      "notFound": "Extra unit price not found.",
+      "priceRequired": "Set a price greater than zero in at least one currency before syncing.",
+      "stripeSyncFailed": "Stripe sync failed: {message}",
+      "synced": "Synced with Stripe successfully.",
+      "unknownError": "Unknown error",
+      "updated": "Price updated successfully.",
+      "updatedStripeCleared": "Price updated — Stripe references cleared. Sync with Stripe again to provision fresh prices."
+    },
     "package": {
       "created": "Package created successfully.",
       "hasSales": "This package has associated sales and cannot be deleted.",
@@ -463,6 +472,27 @@
     "title": "Something went wrong",
     "wholeNumber": "Must be a whole number"
   },
+  "ExtraUnitPrices": {
+    "resource": {
+      "GEO_PLACE": "Geolocation",
+      "MEMORIAL": "Memorial",
+      "QR_CODE": "QR Code"
+    },
+    "stripe": {
+      "notConfigured": "Not configured",
+      "notSynced": "Not synced",
+      "synced": "Synced",
+      "syncButton": "Sync with Stripe",
+      "syncing": "Syncing…",
+      "title": "Stripe sync"
+    },
+    "subtitle": "One-time \"buy 1 extra\" prices — on top of a guardian's plan quota, independent of the recurring subscription price.",
+    "tier": {
+      "FREE": "Free",
+      "PREMIUM": "Premium"
+    },
+    "title": "Extra Unit Prices"
+  },
   "Feedback": {
     "dialog": {
       "bugDescription": "Tell us what went wrong. We'll take a look as soon as possible.",
@@ -652,37 +682,59 @@
     "create": "Create subscription",
     "edit": "Edit Subscription",
     "fields": {
+      "annual": "Annual",
+      "bioMaxChars": "Bio Max Characters",
       "code": "Code",
       "description": "Description",
+      "documentsMax": "Documents Max",
+      "geoPlacesMax": "Geo Places Max",
+      "geolocationFullAccess": "Geolocation Full Access",
       "maxProfiles": "Max Memo Profiles",
+      "mediaMaxImages": "Combined Media Images Max",
+      "mediaMaxVideos": "Gallery Videos Max",
+      "memorialsMax": "Memorials Max",
+      "monthly": "Monthly",
       "name": "Name",
-      "price": "Price (US$)",
-      "termLength": "Term Length (in months)"
+      "petsMax": "Pets Max",
+      "qrCodeMax": "QR Codes Max",
+      "termLength": "Term Length (in months)",
+      "treeMaxMembers": "Tree Max Members"
     },
     "free": "Free",
     "hints": {
+      "bioMaxChars": "Character limit for the biography text.",
       "code": "Tier identification",
       "freeCodeReserved": "FREE plan code is reserved.",
-      "price": "0 = Free",
-      "termLength": "0 = Lifetime"
+      "geoPlacesMax": "Row count of shared places — independent of the combined media pool below.",
+      "mediaMaxImages": "Combined pool: Bio image + Gallery images + Places photos share this limit.",
+      "mediaMaxVideos": "Gallery videos only.",
+      "priceBrl": "0 = not configured yet — checkout falls back to USD for this currency. Monthly 0 = derive from annual / term length.",
+      "priceMxn": "0 = not configured yet — checkout falls back to USD for this currency. Monthly 0 = derive from annual / term length.",
+      "priceUsd": "Annual 0 = Free plan. Monthly 0 = derive from annual price / term length (a real discount, not just an even split).",
+      "qrCodeMax": "Free QR codes — own profile + guarded memorials, combined.",
+      "termLength": "0 = Lifetime",
+      "treeMaxMembers": "Maximum people in the family tree."
     },
     "lifetime": "Lifetime",
     "new": "New subscription",
     "placeholders": {
       "code": "DECADE"
     },
+    "quotas": {
+      "geolocationFullAccessOff": "Address only (no GPS pin)",
+      "geolocationFullAccessOn": "Precise GPS coordinates",
+      "title": "Quotas"
+    },
     "status": {
       "active": "Active",
       "inactive": "Inactive"
     },
     "stripe": {
-      "annualPriceId": "annual price:",
       "confirmDescription": "Please confirm that this plan's data is correct. This will create or update the matching Product and Prices in Stripe. Are you sure you want to synchronize?",
       "confirmTitle": "Sync with Stripe?",
-      "hint": "Pushes this plan's name, description and price to Stripe (creating or updating the matching Product and annual/monthly Prices). Save your changes first — sync uses the saved data. Changing the price or term length provisions fresh Stripe Prices.",
-      "monthlyPriceId": "monthly price:",
+      "hint": "Pushes this plan's name, description and price to Stripe (creating or updating the matching Product and annual/monthly Prices per currency). Save your changes first — sync uses the saved data. Changing a currency's price or the term length provisions a fresh Stripe Price for that currency.",
+      "notConfigured": "Not configured",
       "notSynced": "Not synced",
-      "productId": "product:",
       "syncButton": "Sync with Stripe",
       "syncNow": "Sync now",
       "synced": "Synced",

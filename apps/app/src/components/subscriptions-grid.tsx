@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { useTranslations } from "next-intl"
-import { Check, CalendarDays, Calendar1 } from "lucide-react"
+import { useLocale, useTranslations } from "next-intl"
+import { Check } from "lucide-react"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -16,12 +16,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { changeSubscription, createCheckoutSession } from "@/actions/billing.actions"
 import { allowsExtraPurchase } from "@/lib/plan-quotas"
+import { cn } from "@/lib/utils"
+import type { Currency } from "@/lib/currency"
 import type { SubscriptionRow } from "@/queries/subscriptions"
 import type { ActivePlan } from "@/queries/billing"
 
-const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" })
 const longDate = new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" })
 
 interface Props {
@@ -36,12 +38,16 @@ type PendingChange = {
   effect:  "upgrade" | "downgrade"
 }
 
-function monthlyEquivalent(price: number, termLength: number) {
-  return termLength > 0 ? price / termLength : 0
+function monthlyEquivalent(plan: { price: number; termLength: number; monthlyPrice?: number | null }) {
+  if (plan.monthlyPrice != null) return plan.monthlyPrice
+  return plan.termLength > 0 ? plan.price / plan.termLength : 0
 }
 
-function compareMonthly(a: { price: number; termLength: number }, b: { price: number; termLength: number }) {
-  return monthlyEquivalent(a.price, a.termLength) - monthlyEquivalent(b.price, b.termLength)
+function compareMonthly(
+  a: { price: number; termLength: number; monthlyPrice?: number | null },
+  b: { price: number; termLength: number; monthlyPrice?: number | null },
+) {
+  return monthlyEquivalent(a) - monthlyEquivalent(b)
 }
 
 export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Props) {
@@ -60,7 +66,7 @@ export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Pr
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
         {subscriptions.map((s, i) => {
           const isActive = activeSubscriptionId
             ? activeSubscriptionId === s.id
@@ -98,11 +104,21 @@ interface PlanCardProps {
 function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCardProps) {
   const router = useRouter()
   const t = useTranslations("Subscriptions")
+  const locale = useLocale()
   const [isPending, startTransition] = useTransition()
   const isFree = plan.code === "FREE"
+  const [selectedCadence, setSelectedCadence] = useState<"annual" | "monthly">("annual")
 
-  const annualPrice  = Number(plan.price)
-  const monthlyPrice = monthlyEquivalent(annualPrice, plan.termLength)
+  const annualPrice = Number(plan.price)
+  const monthlyPrice = monthlyEquivalent(plan)
+
+  // Active plan shows what the user is actually paying (real currency +
+  // cadence, from the stored AppSale), never the local toggle/current locale.
+  const activeCadence = (activePlan?.cadence as "annual" | "monthly" | null) ?? "annual"
+  const displayCadence = isActive ? activeCadence : selectedCadence
+  const displayPrice = displayCadence === "annual" ? annualPrice : monthlyPrice
+  const displayCurrency: Currency = isActive ? (activePlan?.currency ?? plan.currency) : plan.currency
+  const format = (amount: number) => new Intl.NumberFormat(locale, { style: "currency", currency: displayCurrency }).format(amount)
 
   const startFirstSubscription = (cadence: "annual" | "monthly") => {
     startTransition(async () => {
@@ -117,89 +133,91 @@ function PlanCard({ plan, delay, isActive, activePlan, onRequestChange }: PlanCa
       startFirstSubscription(cadence)
       return
     }
-    const cmp = compareMonthly(
-      { price: annualPrice, termLength: plan.termLength },
-      { price: activePlan.subscription.price, termLength: activePlan.subscription.termLength },
-    )
+    const cmp = compareMonthly(plan, activePlan.subscription)
     const effect: "upgrade" | "downgrade" = cmp >= 0 ? "upgrade" : "downgrade"
     onRequestChange({ plan, cadence, effect })
   }
 
+  const termSuffix = displayCadence === "annual"
+    ? (plan.termLength === 12 ? t("term.perYear") : plan.termLength === 0 ? t("term.perLifetime") : t("term.perMonths", { count: plan.termLength }))
+    : t("term.perMonth")
+
+  // Tabs/badge/button reserve the same row height on every card, real or
+  // not — FREE always renders them invisible, and so does an active paid
+  // card (which hides its own tabs/button) — so both cards line up
+  // regardless of which plan the viewer is currently on.
+  const showTabsAndButton = !isFree && !isActive
+  const showBestValue = !isFree && displayCadence === "annual"
+
   const q = plan.quotas
-  const features = q
-    ? [
-        t("features.memorialSlots", { count: plan.maxProfiles }),
-        t("features.treeMembers", { count: q.treeMaxMembers }),
-        t("features.bioChars", { count: q.bioMaxChars }),
-        t("features.documents", { count: q.documentsMax }),
-        t("features.mediaImages", { count: q.mediaMaxImages }),
-        t("features.mediaVideos", { count: q.mediaMaxVideos }),
-        q.geolocationFullAccess ? t("features.gpsPrecise") : t("features.gpsAddressOnly"),
-        t("features.geoPlaces", { count: q.geoPlacesMax }),
-        ...(allowsExtraPurchase("geoPlacesMax") ? [t("features.geoPlacesExtra")] : []),
-        t("features.memorials", { count: q.memorialsMax }),
-        ...(allowsExtraPurchase("memorialsMax") ? [t("features.memorialsExtra")] : []),
-        t("features.qrCodeCount", { count: q.qrCodeMax }),
-        ...(allowsExtraPurchase("qrCodeMax") ? [t("features.qrExtra")] : []),
-        q.petsMax > 0 ? t("features.petsCount", { count: q.petsMax }) : t("features.petsLocked"),
-      ]
-    : [
-        // Legacy/custom Subscription row with no matching PlanQuotas (an
-        // admin-typed `code` outside FREE/PREMIUM/PHYSICAL_QR) — only show
-        // what the DB row itself actually guarantees.
-        t("features.memorialSlots", { count: plan.maxProfiles }),
-      ]
+  const featureRows: { key: string; text: string | null }[] = [
+    { key: "tree", text: t("features.treeMembers", { count: q.treeMaxMembers }) },
+    { key: "bio", text: t("features.bioChars", { count: q.bioMaxChars }) },
+    { key: "documents", text: t("features.documents", { count: q.documentsMax }) },
+    { key: "mediaImages", text: t("features.mediaImages", { count: q.mediaMaxImages }) },
+    { key: "mediaVideos", text: t("features.mediaVideos", { count: q.mediaMaxVideos }) },
+    { key: "geoPlaces", text: t("features.geoPlaces", { count: q.geoPlacesMax }) },
+    { key: "geoPlacesExtra", text: allowsExtraPurchase("geoPlacesMax") ? t(isFree ? "features.geoPlacesExtra" : "features.geoPlacesExtraCheaper") : null },
+    { key: "memorials", text: t("features.memorials", { count: q.memorialsMax }) },
+    { key: "qrCode", text: t("features.qrCodeCount", { count: q.qrCodeMax }) },
+    { key: "qrExtra", text: allowsExtraPurchase("qrCodeMax") ? t(isFree ? "features.qrExtra" : "features.qrExtraCheaper") : null },
+    { key: "pets", text: q.petsMax > 0 ? t("features.petsCount", { count: q.petsMax }) : null },
+  ]
 
   return (
     <div className="glass-card no-sheen p-6 flex flex-col gap-5 animate-fade-in" style={{ animationDelay: `${delay}ms` }}>
-      <div className="space-y-1.5">
-        <div className="flex items-center gap-2">
-          <h3 className="text-2xl font-semibold tracking-tight">{plan.name}</h3>
-          {isActive && (
-            <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-primary text-primary-foreground px-2 py-0.5">
-              {t("activeBadge")}
-            </span>
-          )}
-        </div>
-        {plan.description && (
-          <p className="text-sm text-muted-foreground leading-snug">{plan.description}</p>
+      <div className="flex items-center gap-2">
+        <h3 className="text-2xl font-semibold tracking-tight">{plan.name}</h3>
+        {isActive && (
+          <span className="text-[10px] font-semibold uppercase tracking-wider rounded-full bg-primary text-primary-foreground px-2 py-0.5">
+            {t("activeBadge")}
+          </span>
         )}
       </div>
 
-      {!isFree ? (
+      <div className={cn(!showTabsAndButton && "invisible")}>
+        <Tabs value={selectedCadence} onValueChange={(v) => setSelectedCadence(v as "annual" | "monthly")}>
+          <TabsList className="w-full">
+            <TabsTrigger value="monthly" className="flex-1">{t("tabs.monthly")}</TabsTrigger>
+            <TabsTrigger value="annual" className="flex-1">{t("tabs.yearly")}</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div className="space-y-1.5">
         <div className="flex items-baseline gap-1">
-          <span className="text-4xl font-bold">{usd.format(annualPrice)}</span>
-          <span className="text-sm text-muted-foreground">
-            {plan.termLength === 12 ? t("term.perYear") : plan.termLength === 0 ? t("term.perLifetime") : t("term.perMonths", { count: plan.termLength })}
-          </span>
+          {!isFree && <span className="text-sm text-muted-foreground">{t("onlyPrefix")}</span>}
+          <span className="text-4xl font-bold">{isFree ? t("freePrice") : format(displayPrice)}</span>
+          {!isFree && <span className="text-sm text-muted-foreground">{termSuffix}</span>}
         </div>
-      ) : (
-        <div>
-          <span className="text-4xl font-bold">{t("freePrice")}</span>
-        </div>
-      )}
+        <span
+          className={cn(
+            "inline-block text-[10px] font-semibold uppercase tracking-wider rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 dark:bg-amber-950 dark:text-amber-300",
+            !showBestValue && "invisible",
+          )}
+        >
+          {t("bestValue")}
+        </span>
+      </div>
 
       <ul className="space-y-2 flex-1">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm">
+        {featureRows.map((row) => (
+          <li key={row.key} className={cn("flex items-start gap-2 text-sm", row.text === null && "invisible")}>
             <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-            <span>{f}</span>
+            <span>{row.text ?? " "}</span>
           </li>
         ))}
       </ul>
 
-      {!isFree && !isActive && (
-        <div className="grid grid-cols-1 gap-2">
-          <Button onClick={() => requestChange("annual")} disabled={isPending} className="w-full gap-2">
-            <CalendarDays className="h-4 w-4" />
-            {t("payAnnually", { price: usd.format(annualPrice) })}
-          </Button>
-          <Button onClick={() => requestChange("monthly")} disabled={isPending} variant="outline" className="w-full gap-2">
-            <Calendar1 className="h-4 w-4" />
-            {t("payMonthly", { price: usd.format(monthlyPrice) })}
-          </Button>
-        </div>
-      )}
+      <Button
+        onClick={() => requestChange(selectedCadence)}
+        disabled={isPending || !showTabsAndButton}
+        aria-hidden={!showTabsAndButton}
+        tabIndex={showTabsAndButton ? undefined : -1}
+        className={cn("w-full", !showTabsAndButton && "invisible")}
+      >
+        {isFree ? " " : `${format(displayPrice)} ${termSuffix}`}
+      </Button>
     </div>
   )
 }

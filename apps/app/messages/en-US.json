@@ -44,6 +44,10 @@
       "notAuthorized": "You are not allowed to manage this profile.",
       "notFound": "Document not found."
     },
+    "extraUnits": {
+      "notPurchasable": "This isn't available to purchase on your current plan.",
+      "notWired": "This isn't set up for checkout yet."
+    },
     "familyTree": {
       "cannotRelateSelf": "A profile cannot be related to itself.",
       "cannotRemoveRoot": "You cannot remove the tree root.",
@@ -798,7 +802,9 @@
     "termsTitle": "Terms & Privacy"
   },
   "LimitReached": {
+    "buying": "Redirecting…",
     "cta": {
+      "buyExtra": "Buy 1 more",
       "extraOnly": "See options",
       "maxedOut": "See my plan",
       "upgrade": "Upgrade plan"
@@ -806,7 +812,7 @@
     "description": {
       "bio": "Your plan allows up to {limit} biography characters.",
       "documents": "Your plan allows up to {limit} documents.",
-      "geoPlaces": "Your plan allows up to {limit} places.",
+      "geoPlaces": "Your plan allows up to {limit} places across all your profiles.",
       "mediaImages": "Your plan allows up to {limit} combined photos across Biography, Gallery and Places.",
       "mediaVideos": "Your plan allows up to {limit} gallery videos.",
       "memorials": "Your plan allows up to {limit} memorials.",
@@ -1300,6 +1306,7 @@
   "Subscriptions": {
     "activeBadge": "Active",
     "backToHome": "Back to home",
+    "bestValue": "Best Option",
     "cadence": {
       "annual": "annual",
       "monthly": "monthly"
@@ -1315,42 +1322,38 @@
     },
     "currentlyOn": "Currently on {plan} until {date}",
     "features": {
-      "bioChars": "{count, number} biography characters",
-      "bioImages": "{count} biography images",
-      "documents": "{count} documents",
-      "galleryPhotos": "{count} gallery photos",
-      "galleryVideos": "{count} gallery videos",
+      "bioChars": "{count, number} biography tokens",
+      "documents": "Store up to {count} documents",
       "geoPlaces": "{count} shared places",
-      "geoPlacesExtra": "Buy extra places individually",
-      "gpsAddressOnly": "Address only (no GPS pin)",
-      "gpsPrecise": "Precise GPS coordinates",
-      "mediaImages": "{count} combined photos across Biography, Gallery and Places",
-      "mediaVideos": "{count} gallery videos",
-      "memorialSlots": "{count, plural, one {# memorial slot per purchase} other {# memorial slots per purchase}}",
-      "memorials": "{count} memorial profiles",
-      "memorialsExtra": "Buy extra memorials individually",
+      "geoPlacesExtra": "Buy extra places",
+      "geoPlacesExtraCheaper": "Buy extra places for less",
+      "mediaImages": "Upload up to {count} images",
+      "mediaVideos": "Upload up to {count} gallery videos",
+      "memorials": "{count, plural, one {# full memorial profile} other {# memorial profiles}}",
       "petsCount": "{count} pet profiles",
-      "petsLocked": "Pets available on Premium only",
-      "qrCodeCount": "{count} free QR Codes",
-      "qrExtra": "Buy extra QR Codes individually",
-      "qrIncluded": "QR Code for plaques & stones",
-      "qrPaidOnly": "QR Code on paid plans",
+      "qrCodeCount": "{count, plural, one {# free QR Code} other {# free QR Codes}}",
+      "qrExtra": "Buy extra QR Codes",
+      "qrExtraCheaper": "Buy extra QR Codes for less",
       "treeMembers": "{count} family tree members"
     },
     "freePrice": "Free",
     "manageSubscription": "Manage subscription",
+    "onlyPrefix": "only",
     "opening": "Opening…",
-    "payAnnually": "Pay annually {price}",
-    "payMonthly": "Pay monthly {price}",
     "qrGate": {
       "description": "This memorial is on the free plan. Purchase a QR-Code to print it on plaques, headstones and digital spaces — keep their memory anywhere, scannable forever.",
       "maybeLater": "Maybe later",
       "purchase": "Purchase QR-Code",
       "title": "Unlock your QR-Code"
     },
+    "tabs": {
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
     "tagline": "The perfect way to stay in touch",
     "term": {
       "perLifetime": "/ lifetime",
+      "perMonth": "/ mo",
       "perMonths": "/ {count} mo",
       "perYear": "/ year"
     },

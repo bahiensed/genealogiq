@@ -12,9 +12,11 @@ vi.mock("@/lib/subscription", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/subscription")>()
   return { ...actual, getMemorialFeatures: vi.fn() }
 })
+vi.mock("@/lib/extra-units", () => ({ getExtraUnits: vi.fn() }))
 
 import { getQrQuotaStatus } from "./qr-quota"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { getExtraUnits } from "@/lib/extra-units"
 
 const d = (iso: string) => new Date(iso)
 
@@ -31,6 +33,7 @@ function mockUsers(byId: Record<string, unknown>) {
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(getMemorialFeatures).mockResolvedValue({ qrCodeMax: 2 } as never)
+  vi.mocked(getExtraUnits).mockResolvedValue(0)
 })
 
 describe("getQrQuotaStatus — rank heuristic", () => {
@@ -94,6 +97,24 @@ describe("getQrQuotaStatus — rank heuristic", () => {
     // Not found in the ranked set: falls back to rank = length + 1 (3rd),
     // past the qrCodeMax of 2.
     expect(status).toEqual({ unlocked: false, rank: 3, limit: 2 })
+  })
+
+  it("adds purchased extra QR slots on top of the plan's base quota", async () => {
+    mockUsers({
+      g1: { id: "g1", createdAt: d("2024-01-01") },
+      m1: {}, m2: {},
+    })
+    prismaMock.appUser.findMany.mockResolvedValue([
+      { id: "m1", createdAt: d("2024-02-01") },
+      { id: "m2", createdAt: d("2024-03-01") },
+    ])
+    vi.mocked(getExtraUnits).mockResolvedValue(1)
+
+    // m2 is rank 3, past the base qrCodeMax=2, but 1 purchased extra raises the limit to 3.
+    const status = await getQrQuotaStatus("g1", "m2")
+
+    expect(status).toEqual({ unlocked: true, rank: 3, limit: 3 })
+    expect(getExtraUnits).toHaveBeenCalledWith("g1", "QR_CODE")
   })
 })
 

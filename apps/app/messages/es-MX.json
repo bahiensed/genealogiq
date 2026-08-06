@@ -44,6 +44,10 @@
       "notAuthorized": "No tienes permiso para administrar este perfil.",
       "notFound": "Documento no encontrado."
     },
+    "extraUnits": {
+      "notPurchasable": "Esto no está disponible para comprar en tu plan actual.",
+      "notWired": "Esto todavía no está configurado para el checkout."
+    },
     "familyTree": {
       "cannotRelateSelf": "Un perfil no puede relacionarse consigo mismo.",
       "cannotRemoveRoot": "No puedes eliminar a la persona principal del árbol.",
@@ -798,7 +802,9 @@
     "termsTitle": "Términos y Privacidad"
   },
   "LimitReached": {
+    "buying": "Redirigiendo…",
     "cta": {
+      "buyExtra": "Comprar 1 más",
       "extraOnly": "Ver opciones",
       "maxedOut": "Ver mi plan",
       "upgrade": "Mejorar plan"
@@ -806,7 +812,7 @@
     "description": {
       "bio": "Tu plan permite hasta {limit} caracteres en la biografía.",
       "documents": "Tu plan permite hasta {limit} documentos.",
-      "geoPlaces": "Tu plan permite hasta {limit} geolocalizaciones.",
+      "geoPlaces": "Tu plan permite hasta {limit} geolocalizaciones sumando todos tus perfiles.",
       "mediaImages": "Tu plan permite hasta {limit} fotos combinadas entre Biografía, Galería y Geolocalizaciones.",
       "mediaVideos": "Tu plan permite hasta {limit} videos en la galería.",
       "memorials": "Tu plan permite hasta {limit} memoriales.",
@@ -1300,6 +1306,7 @@
   "Subscriptions": {
     "activeBadge": "Activo",
     "backToHome": "Volver al inicio",
+    "bestValue": "Mejor Opción",
     "cadence": {
       "annual": "anual",
       "monthly": "mensual"
@@ -1315,42 +1322,38 @@
     },
     "currentlyOn": "Actualmente en el plan {plan} hasta el {date}",
     "features": {
-      "bioChars": "{count, number} caracteres de biografía",
-      "bioImages": "{count} imágenes de biografía",
-      "documents": "{count} documentos",
-      "galleryPhotos": "{count} fotos en la galería",
-      "galleryVideos": "{count} videos en la galería",
+      "bioChars": "{count, number} tokens de biografía",
+      "documents": "Almacena hasta {count} documentos",
       "geoPlaces": "{count} geolocalizaciones compartidas",
-      "geoPlacesExtra": "Compra geolocalizaciones extra individualmente",
-      "gpsAddressOnly": "Solo dirección (sin marcador GPS)",
-      "gpsPrecise": "Coordenadas GPS precisas",
-      "mediaImages": "{count} fotos combinadas entre Biografía, Galería y Geolocalizaciones",
-      "mediaVideos": "{count} videos en la galería",
-      "memorialSlots": "{count, plural, one {# espacio de memorial por compra} other {# espacios de memorial por compra}}",
-      "memorials": "{count} perfiles memoriales",
-      "memorialsExtra": "Compra memoriales extra individualmente",
+      "geoPlacesExtra": "Compra geolocalizaciones extra",
+      "geoPlacesExtraCheaper": "Compra geolocalizaciones extra más barato",
+      "mediaImages": "Sube hasta {count} imágenes",
+      "mediaVideos": "Sube hasta {count} videos en la galería",
+      "memorials": "{count, plural, one {# memorial completo} other {# perfiles memoriales}}",
       "petsCount": "{count} perfiles de mascotas",
-      "petsLocked": "Mascotas disponibles solo en Premium",
-      "qrCodeCount": "{count} QR Codes gratuitos",
-      "qrExtra": "Compra QR Codes extra individualmente",
-      "qrIncluded": "QR Code para placas y lápidas",
-      "qrPaidOnly": "QR Code en los planes de pago",
+      "qrCodeCount": "{count, plural, one {# QR Code gratuito} other {# QR Codes gratuitos}}",
+      "qrExtra": "Compra QR Codes extra",
+      "qrExtraCheaper": "Compra QR Codes extra más barato",
       "treeMembers": "{count} miembros en el árbol genealógico"
     },
     "freePrice": "Gratis",
     "manageSubscription": "Gestionar suscripción",
+    "onlyPrefix": "solo",
     "opening": "Abriendo…",
-    "payAnnually": "Pagar anualmente {price}",
-    "payMonthly": "Pagar mensualmente {price}",
     "qrGate": {
       "description": "Este memorial está en el plan gratuito. Compra un QR Code para imprimirlo en placas, lápidas y espacios digitales — conserva su memoria en cualquier lugar, escaneable para siempre.",
       "maybeLater": "Quizás más tarde",
       "purchase": "Comprar QR Code",
       "title": "Desbloquea tu QR Code"
     },
+    "tabs": {
+      "monthly": "Mensual",
+      "yearly": "Anual"
+    },
     "tagline": "La forma perfecta de mantener el vínculo",
     "term": {
       "perLifetime": "/ de por vida",
+      "perMonth": "/ mes",
       "perMonths": "/ {count} meses",
       "perYear": "/ año"
     },

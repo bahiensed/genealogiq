@@ -17,7 +17,7 @@ export type SubscriptionRow = {
   description: string | null
   maxProfiles: number
   termLength: number
-  price: number
+  priceUsd: number
   isActive: boolean
   createdAt: Date
 }
@@ -79,11 +79,11 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       ),
     },
     {
-      accessorKey: 'price',
+      accessorKey: 'priceUsd',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.price')} className="justify-end" />,
       cell: ({ row }) => (
         <div className="text-right">
-          {row.original.price === 0 ? t('free') : currency.format(row.original.price)}
+          {row.original.priceUsd === 0 ? t('free') : currency.format(row.original.priceUsd)}
         </div>
       ),
     },

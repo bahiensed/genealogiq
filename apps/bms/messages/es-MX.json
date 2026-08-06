@@ -54,6 +54,15 @@
       "stripeOrphan": "El código \"{code}\" ya está activo en Stripe (residuo de una ejecución anterior fallida). Pide a un administrador que lo elimine.",
       "updateFailed": "No se pudo actualizar el cupón."
     },
+    "extraUnitPrice": {
+      "notFound": "Precio de extra no encontrado.",
+      "priceRequired": "Define un precio mayor que cero en al menos una moneda antes de sincronizar.",
+      "stripeSyncFailed": "Falló la sincronización con Stripe: {message}",
+      "synced": "Sincronizado con Stripe correctamente.",
+      "unknownError": "Error desconocido",
+      "updated": "Precio actualizado correctamente.",
+      "updatedStripeCleared": "Precio actualizado — referencias de Stripe borradas. Sincroniza con Stripe de nuevo para provisionar precios nuevos."
+    },
     "package": {
       "created": "Paquete creado correctamente.",
       "hasSales": "Este paquete tiene ventas asociadas y no se puede eliminar.",
@@ -463,6 +472,27 @@
     "title": "Algo salió mal",
     "wholeNumber": "Debe ser un número entero"
   },
+  "ExtraUnitPrices": {
+    "resource": {
+      "GEO_PLACE": "Geolocalización",
+      "MEMORIAL": "Memorial",
+      "QR_CODE": "QR Code"
+    },
+    "stripe": {
+      "notConfigured": "No configurado",
+      "notSynced": "No sincronizado",
+      "synced": "Sincronizado",
+      "syncButton": "Sincronizar con Stripe",
+      "syncing": "Sincronizando…",
+      "title": "Sincronización con Stripe"
+    },
+    "subtitle": "Precios de \"comprar 1 extra\" únicos — además de la cuota del plan del guardián, independiente del precio de la suscripción recurrente.",
+    "tier": {
+      "FREE": "Gratis",
+      "PREMIUM": "Premium"
+    },
+    "title": "Precios de Extras"
+  },
   "Feedback": {
     "dialog": {
       "bugDescription": "Cuéntanos qué salió mal. Lo revisaremos lo antes posible.",
@@ -652,37 +682,59 @@
     "create": "Crear suscripción",
     "edit": "Editar Suscripción",
     "fields": {
+      "annual": "Anual",
+      "bioMaxChars": "Máximo de Caracteres de la Bio",
       "code": "Código",
       "description": "Descripción",
+      "documentsMax": "Máximo de Documentos",
+      "geoPlacesMax": "Máximo de Geolocalizaciones",
+      "geolocationFullAccess": "Acceso Total a Geolocalización",
       "maxProfiles": "Máximo de Perfiles Memo",
+      "mediaMaxImages": "Máximo de Imágenes Combinadas",
+      "mediaMaxVideos": "Máximo de Videos en la Galería",
+      "memorialsMax": "Máximo de Memoriales",
+      "monthly": "Mensual",
       "name": "Nombre",
-      "price": "Precio (US$)",
-      "termLength": "Duración (en meses)"
+      "petsMax": "Máximo de Mascotas",
+      "qrCodeMax": "Máximo de QR Codes",
+      "termLength": "Duración (en meses)",
+      "treeMaxMembers": "Máximo de Miembros en el Árbol"
     },
     "free": "Gratis",
     "hints": {
+      "bioMaxChars": "Límite de caracteres del texto de la biografía.",
       "code": "Identificación del plan",
       "freeCodeReserved": "El código del plan FREE está reservado.",
-      "price": "0 = Gratis",
-      "termLength": "0 = De por vida"
+      "geoPlacesMax": "Cantidad de geolocalizaciones — independiente del pool combinado de medios de abajo.",
+      "mediaMaxImages": "Pool combinado: imagen de la Bio + imágenes de la Galería + fotos de Geolocalizaciones comparten este límite.",
+      "mediaMaxVideos": "Solo videos de la galería.",
+      "priceBrl": "0 = todavía no configurado — el checkout usa USD para esta moneda. Mensual 0 = deriva del anual / duración.",
+      "priceMxn": "0 = todavía no configurado — el checkout usa USD para esta moneda. Mensual 0 = deriva del anual / duración.",
+      "priceUsd": "Anual 0 = plan gratis. Mensual 0 = deriva del precio anual / duración (un descuento real, no solo una división proporcional).",
+      "qrCodeMax": "QR Codes gratuitos — perfil propio + memoriales gestionados, combinado.",
+      "termLength": "0 = De por vida",
+      "treeMaxMembers": "Máximo de personas en el árbol genealógico."
     },
     "lifetime": "De por vida",
     "new": "Nueva suscripción",
     "placeholders": {
       "code": "DECADE"
     },
+    "quotas": {
+      "geolocationFullAccessOff": "Solo dirección (sin marcador GPS)",
+      "geolocationFullAccessOn": "Coordenadas GPS precisas",
+      "title": "Cuotas"
+    },
     "status": {
       "active": "Activa",
       "inactive": "Inactiva"
     },
     "stripe": {
-      "annualPriceId": "precio anual:",
       "confirmDescription": "Confirma que los datos de este plan son correctos. Esto creará o actualizará el Product y los Prices correspondientes en Stripe. ¿Seguro que deseas sincronizar?",
       "confirmTitle": "¿Sincronizar con Stripe?",
-      "hint": "Envía el nombre, la descripción y el precio de este plan a Stripe (creando o actualizando el Product y los Prices anual/mensual correspondientes). Guarda tus cambios primero — la sincronización usa los datos guardados. Cambiar el precio o la duración provisiona nuevos Prices en Stripe.",
-      "monthlyPriceId": "precio mensual:",
+      "hint": "Envía el nombre, la descripción y el precio de este plan a Stripe (creando o actualizando el Product y los Prices anual/mensual de cada moneda). Guarda tus cambios primero — la sincronización usa los datos guardados. Cambiar el precio de una moneda o la duración provisiona un Price nuevo para esa moneda.",
+      "notConfigured": "No configurado",
       "notSynced": "No sincronizado",
-      "productId": "producto:",
       "syncButton": "Sincronizar con Stripe",
       "syncNow": "Sincronizar ahora",
       "synced": "Sincronizado",

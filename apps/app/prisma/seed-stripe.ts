@@ -11,14 +11,20 @@ if (!process.env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY is requir
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 async function main() {
+  // USD-only seeder — superseded by BMS's per-currency "Sync with Stripe"
+  // action (apps/bms/src/actions/subscription.actions.ts), which also
+  // provisions BRL/MXN. Kept USD-only for compatibility with its original,
+  // narrower scope.
   const plans = await prisma.subscription.findMany({
-    where:   { isActive: true, price: { gt: 0 } },
-    orderBy: { price: "asc" },
+    where:   { isActive: true, priceUsd: { gt: 0 } },
+    orderBy: { priceUsd: "asc" },
   })
 
   for (const plan of plans) {
-    const priceCents        = Math.round(Number(plan.price) * 100)
-    const monthlyPriceCents = Math.round((Number(plan.price) / plan.termLength) * 100)
+    const priceCents        = Math.round(Number(plan.priceUsd) * 100)
+    const monthlyPriceCents = plan.monthlyPriceUsd !== null
+      ? Math.round(Number(plan.monthlyPriceUsd) * 100)
+      : Math.round((Number(plan.priceUsd) / plan.termLength) * 100)
 
     let productId = plan.stripeProductId
     if (!productId) {
@@ -30,7 +36,7 @@ async function main() {
       productId = product.id
     }
 
-    let annualPriceId = plan.stripeAnnualPriceId
+    let annualPriceId = plan.stripeAnnualPriceIdUsd
     if (!annualPriceId) {
       const ap = await stripe.prices.create({
         product:     productId,
@@ -42,7 +48,7 @@ async function main() {
       annualPriceId = ap.id
     }
 
-    let monthlyPriceId = plan.stripeMonthlyPriceId
+    let monthlyPriceId = plan.stripeMonthlyPriceIdUsd
     if (!monthlyPriceId) {
       const mp = await stripe.prices.create({
         product:     productId,
@@ -57,9 +63,9 @@ async function main() {
     await prisma.subscription.update({
       where: { id: plan.id },
       data:  {
-        stripeProductId:      productId,
-        stripeAnnualPriceId:  annualPriceId,
-        stripeMonthlyPriceId: monthlyPriceId,
+        stripeProductId:         productId,
+        stripeAnnualPriceIdUsd:  annualPriceId,
+        stripeMonthlyPriceIdUsd: monthlyPriceId,
       },
     })
 

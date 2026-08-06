@@ -9,8 +9,8 @@ import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
-import { getPlacesCount } from "@/queries/places"
 import { getCombinedMediaUsage } from "@/queries/media-usage"
+import { getGuardianGeoPlacesStatus } from "@/lib/geo-quota"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -25,12 +25,12 @@ export default async function NewPlacePage({ params }: Props) {
   if (!profile) notFound()
   if (!canManageProfile(profile, session.user.id)) redirect(`/profile/${id}/places`)
 
-  const [features, count, combinedMedia] = await Promise.all([
+  const [features, geoStatus, combinedMedia] = await Promise.all([
     getMemorialFeatures(id),
-    getPlacesCount(id),
+    getGuardianGeoPlacesStatus(session.user.id),
     getCombinedMediaUsage(id),
   ])
-  if (count >= features.geoPlacesMax) redirect(`/profile/${id}/places`)
+  if (geoStatus.usage >= geoStatus.limit) redirect(`/profile/${id}/places`)
 
   return (
     <div className="min-h-screen relative overflow-x-hidden">

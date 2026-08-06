@@ -10,7 +10,10 @@ export const mediaItemSchema = z.object({
   kind: z.enum(["image", "video"]),
   url: blobUrl,
   poster: blobUrl.optional(),
-  durationSec: z.number().positive().optional(),
+  // Server-side backstop for the 5-minute cap the upload form already
+  // enforces client-side (MAX_VIDEO_SECONDS, gallery-edit-form.tsx) — closes
+  // the gap for a client that calls this action directly.
+  durationSec: z.number().positive().max(300).optional(),
   takenAt: z.string().optional(),
   location: z.string().trim().max(100).optional(),
   description: z.string().trim().max(280).optional(),

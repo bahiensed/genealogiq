@@ -114,11 +114,47 @@ model Subscription {
   // verifying zero NULL rows, so the earlier app-vs-DB drift is fully resolved.
   maxProfiles           Int       @map("max_profiles")
   termLength            Int       @map("term_length")
-  price                 Decimal   @db.Decimal(10, 2)
+  // Independent per-currency prices — no FX conversion, each admin-set in
+  // BMS. USD is required (the original/canonical currency, always
+  // populated); BRL/MXN are nullable until configured, with callers falling
+  // back to the USD pair when a currency isn't set yet.
+  priceUsd              Decimal   @db.Decimal(10, 2) @map("price_usd")
+  // Explicit monthly price, independent of `price / termLength` — lets a plan
+  // offer a real annual discount (not just an even split) instead of a
+  // proportional derivation. Null = fall back to the derived value (legacy
+  // behavior), used by all pricing math in BMS's Stripe sync and the APP's
+  // subscriptions grid/billing comparison.
+  monthlyPriceUsd       Decimal?  @db.Decimal(10, 2) @map("monthly_price_usd")
+  priceBrl              Decimal?  @db.Decimal(10, 2) @map("price_brl")
+  monthlyPriceBrl       Decimal?  @db.Decimal(10, 2) @map("monthly_price_brl")
+  priceMxn              Decimal?  @db.Decimal(10, 2) @map("price_mxn")
+  monthlyPriceMxn       Decimal?  @db.Decimal(10, 2) @map("monthly_price_mxn")
   code                  String    @unique
   stripeProductId       String?   @unique @map("stripe_product_id")
-  stripeAnnualPriceId   String?   @unique @map("stripe_annual_price_id")
-  stripeMonthlyPriceId  String?   @unique @map("stripe_monthly_price_id")
+  stripeAnnualPriceIdUsd  String? @unique @map("stripe_annual_price_id_usd")
+  stripeMonthlyPriceIdUsd String? @unique @map("stripe_monthly_price_id_usd")
+  stripeAnnualPriceIdBrl  String? @unique @map("stripe_annual_price_id_brl")
+  stripeMonthlyPriceIdBrl String? @unique @map("stripe_monthly_price_id_brl")
+  stripeAnnualPriceIdMxn  String? @unique @map("stripe_annual_price_id_mxn")
+  stripeMonthlyPriceIdMxn String? @unique @map("stripe_monthly_price_id_mxn")
+  // Quota numbers previously hardcoded in the APP's plan-quotas.ts — moved
+  // here so BMS can edit every plan attribute manually, without a code
+  // deploy. Defaults mirror the FREE plan's current numbers.
+  treeMaxMembers        Int       @default(32)   @map("tree_max_members")
+  bioMaxChars           Int       @default(2048) @map("bio_max_chars")
+  // Combined pool: Bio images + Gallery images + GeoPlace photos.
+  mediaMaxImages        Int       @default(32)   @map("media_max_images")
+  mediaMaxVideos        Int       @default(8)    @map("media_max_videos")
+  documentsMax          Int       @default(16)   @map("documents_max")
+  // Row count of GeoPlace — independent of mediaMaxImages.
+  geoPlacesMax          Int       @default(3)    @map("geo_places_max")
+  // How many memorial profiles a guardian may create in total — distinct
+  // from maxProfiles above (how many profiles ONE sale directly covers).
+  memorialsMax          Int       @default(1)    @map("memorials_max")
+  petsMax               Int       @default(0)    @map("pets_max")
+  // Free QR codes (own profile + guarded memorials, combined).
+  qrCodeMax             Int       @default(1)    @map("qr_code_max")
+  geolocationFullAccess Boolean   @default(false) @map("geolocation_full_access")
   appSales              AppSale[]
 
   @@map("subscriptions")
@@ -206,6 +242,12 @@ model AppSale {
   updatedAt            DateTime     @updatedAt @map("updated_at")
   stripeSubscriptionId String?      @unique @map("stripe_subscription_id")
   stripePriceId        String?      @map("stripe_price_id")
+  // Captured directly from the real Stripe Price's currency on the webhook
+  // (never re-derived from the buyer's locale) — a Stripe subscription can't
+  // change currency mid-life, so this is the source of truth for which of
+  // Subscription's per-currency price columns applies to this sale. Null for
+  // legacy/SEQ-vendor sales that never touched Stripe.
+  currency             String?
   cadence              String?
   status               String?
   currentPeriodEnd     DateTime?    @map("current_period_end")
@@ -228,6 +270,44 @@ model StripeEvent {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("stripe_events")
+}
+
+// One-time "buy 1 extra unit" purchases (geo places / QR codes / memorial
+// slots) on top of a guardian's plan quota — independent of the recurring
+// Subscription pricing above. resource/tier are free-text ("GEO_PLACE" |
+// "QR_CODE" | "MEMORIAL", "FREE" | "PREMIUM") rather than enums, mirroring
+// Subscription.code's own free-text convention.
+model ExtraUnitPrice {
+  id               String   @id @default(cuid())
+  resource         String
+  tier             String
+  priceUsd         Decimal? @db.Decimal(10, 2) @map("price_usd")
+  priceBrl         Decimal? @db.Decimal(10, 2) @map("price_brl")
+  priceMxn         Decimal? @db.Decimal(10, 2) @map("price_mxn")
+  stripeProductId  String?  @unique @map("stripe_product_id")
+  stripePriceIdUsd String?  @unique @map("stripe_price_id_usd")
+  stripePriceIdBrl String?  @unique @map("stripe_price_id_brl")
+  stripePriceIdMxn String?  @unique @map("stripe_price_id_mxn")
+
+  @@unique([resource, tier])
+  @@map("app_extra_unit_prices")
+}
+
+model ExtraUnitPurchase {
+  id              String   @id @default(cuid())
+  buyerId         String   @map("buyer_id")
+  resource        String
+  quantity        Int      @default(1)
+  // Buyer's tier at purchase time — audit only, not read back for quota math.
+  tier            String
+  currency        String
+  amountPaid      Decimal  @db.Decimal(10, 2) @map("amount_paid")
+  stripeSessionId String?  @unique @map("stripe_session_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  buyer           AppUser  @relation(fields: [buyerId], references: [id])
+
+  @@index([buyerId, resource])
+  @@map("app_extra_unit_purchases")
 }
 
 // ─── Auth tokens & rate limiting ─────────────────────────────────────────────
@@ -455,6 +535,7 @@ model AppUser {
   qrCode              QrCode?
   treeNodePositionsAsRoot   TreeNodePosition[] @relation("TreeNodePositionRoot")
   treeNodePositionsAsPerson TreeNodePosition[] @relation("TreeNodePositionPerson")
+  extraUnitPurchases  ExtraUnitPurchase[]
 
   @@index([tenantId])
   @@index([categoryId])
