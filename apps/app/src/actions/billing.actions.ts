@@ -74,7 +74,7 @@ export async function createCheckoutSession(
     client_reference_id:   session.user.id,
     metadata,
     subscription_data:     { metadata },
-    success_url:           `${appUrl}/subscriptions?status=success`,
+    success_url:           `${appUrl}/subscriptions?status=success&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url:            `${appUrl}/subscriptions?status=cancel`,
     allow_promotion_codes: true,
   })
