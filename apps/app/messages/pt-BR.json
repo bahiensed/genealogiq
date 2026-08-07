@@ -1360,7 +1360,7 @@
     "title": "Assinaturas",
     "toasts": {
       "checkoutCanceled": "Checkout cancelado.",
-      "paymentReceived": "Pagamento recebido — seu plano está sendo ativado. Atualize em instantes se ele ainda não tiver aparecido.",
+      "paymentReceived": "Pagamento recebido. Sua assinatura será atualizada em instantes.",
       "scheduled": "O {plan} está agendado para começar em {periodEnd}.",
       "switched": "Mudou para {plan}. O Stripe acabou de cobrar o valor proporcional."
     },
