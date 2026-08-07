@@ -88,3 +88,25 @@ export async function upsertSaleFromSubscription(
     update: common,
   })
 }
+
+/**
+ * Mirrors a just-completed Checkout Session into the DB synchronously, on
+ * the very request that renders the success page — the customer.subscription
+ * webhook remains the source of truth (idempotent upsert below), but it's a
+ * separate async HTTP delivery from Stripe that routinely arrives AFTER the
+ * browser is already back on success_url, which left the pricing page
+ * showing the old (FREE) badge until the webhook eventually landed.
+ *
+ * Card payments are guaranteed "complete" by the time the browser is
+ * redirected here, so this closes the race for the common case. Delayed
+ * payment methods (boleto, OXXO — relevant given this app's BRL/MXN support)
+ * are still "open"/pending at redirect time; those fall through to the
+ * webhook as before, same as they always have.
+ */
+export async function applyCheckoutSessionSync(sessionId: string): Promise<void> {
+  const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ["subscription"] })
+  if (session.mode !== "subscription" || session.status !== "complete") return
+  const sub = session.subscription
+  if (!sub || typeof sub === "string") return
+  await upsertSaleFromSubscription(prisma, sub)
+}

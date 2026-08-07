@@ -63,18 +63,17 @@ export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Pr
     }
   }, [flashStatus, t])
 
-  // First-time subscribe (createCheckoutSession) only creates the AppSale
-  // row via the async customer.subscription.created webhook — unlike
-  // changeSubscription, which mirrors synchronously before redirecting.
-  // Stripe's redirect to success_url routinely beats webhook delivery, so
-  // activePlan can still reflect the pre-purchase state on first render.
-  // Poll for a few seconds until it shows up, instead of leaving the badge
-  // stuck on the old plan until the user manually reloads.
+  // The page already mirrors the Checkout Session synchronously before this
+  // component ever renders (see applyCheckoutSessionSync in page.tsx), so
+  // activePlan is correct on first paint for the common case. The one gap
+  // left is a delayed payment method (boleto/OXXO) still pending at redirect
+  // time — a single delayed refresh (not a repeating interval, which was
+  // re-triggering the toast effect above on every tick) gives the webhook a
+  // little more time to land without hammering the route.
   useEffect(() => {
     if (flashStatus !== "success" || activePlan) return
-    const interval = setInterval(() => router.refresh(), 2000)
-    const giveUp = setTimeout(() => clearInterval(interval), 30000)
-    return () => { clearInterval(interval); clearTimeout(giveUp) }
+    const timer = setTimeout(() => router.refresh(), 5000)
+    return () => clearTimeout(timer)
   }, [flashStatus, activePlan, router])
 
   const activeSubscriptionId = activePlan?.subscription.id ?? null

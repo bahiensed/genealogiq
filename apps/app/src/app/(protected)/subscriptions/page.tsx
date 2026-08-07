@@ -4,6 +4,7 @@ import { BackButton } from "@/components/back-button"
 import { ManageSubscriptionButton } from "@/components/manage-subscription-button"
 import { SubscriptionsGrid } from "@/components/subscriptions-grid"
 import { verifySession } from "@/lib/dal"
+import { applyCheckoutSessionSync } from "@/lib/billing"
 import { getActiveSubscriptions } from "@/queries/subscriptions"
 import { getActivePlan } from "@/queries/billing"
 
@@ -12,14 +13,28 @@ const longDate = new Intl.DateTimeFormat("en-US", {
 })
 
 interface Props {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; session_id?: string }>
 }
 
 export default async function SubscriptionsPage({ searchParams }: Props) {
   const session = await verifySession()
   const t = await getTranslations("Subscriptions")
-  const [{ status }, subscriptions, activePlan] = await Promise.all([
-    searchParams,
+  const { status, session_id: checkoutSessionId } = await searchParams
+
+  // Mirror a just-completed Checkout Session into the DB before reading
+  // activePlan below, so the badge reflects the purchase on this very
+  // render instead of waiting for the async Stripe webhook. Best-effort —
+  // the webhook is still the source of truth and stays as the fallback
+  // (e.g. delayed payment methods aren't "complete" yet at redirect time).
+  if (status === "success" && checkoutSessionId) {
+    try {
+      await applyCheckoutSessionSync(checkoutSessionId)
+    } catch (err) {
+      console.error("[subscriptions] applyCheckoutSessionSync failed", err)
+    }
+  }
+
+  const [subscriptions, activePlan] = await Promise.all([
     getActiveSubscriptions(),
     getActivePlan(session.user.id),
   ])
