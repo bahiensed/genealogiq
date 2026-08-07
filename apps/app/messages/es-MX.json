@@ -1360,7 +1360,7 @@
     "title": "Suscripciones",
     "toasts": {
       "checkoutCanceled": "Pago cancelado.",
-      "paymentReceived": "Pago recibido — tu plan se está activando. Actualiza en un momento si aún no aparece.",
+      "paymentReceived": "Pago recibido. Tu suscripción se actualizará en unos instantes.",
       "scheduled": "{plan} está programado para comenzar el {periodEnd}.",
       "switched": "Cambiaste a {plan}. Stripe acaba de cobrar el monto prorrateado."
     },

@@ -52,6 +52,7 @@ function compareMonthly(
 
 export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Props) {
   const t = useTranslations("Subscriptions")
+  const router = useRouter()
   const [pendingChange, setPendingChange] = useState<PendingChange | null>(null)
 
   useEffect(() => {
@@ -61,6 +62,20 @@ export function SubscriptionsGrid({ subscriptions, activePlan, flashStatus }: Pr
       toast.info(t("toasts.checkoutCanceled"))
     }
   }, [flashStatus, t])
+
+  // First-time subscribe (createCheckoutSession) only creates the AppSale
+  // row via the async customer.subscription.created webhook — unlike
+  // changeSubscription, which mirrors synchronously before redirecting.
+  // Stripe's redirect to success_url routinely beats webhook delivery, so
+  // activePlan can still reflect the pre-purchase state on first render.
+  // Poll for a few seconds until it shows up, instead of leaving the badge
+  // stuck on the old plan until the user manually reloads.
+  useEffect(() => {
+    if (flashStatus !== "success" || activePlan) return
+    const interval = setInterval(() => router.refresh(), 2000)
+    const giveUp = setTimeout(() => clearInterval(interval), 30000)
+    return () => { clearInterval(interval); clearTimeout(giveUp) }
+  }, [flashStatus, activePlan, router])
 
   const activeSubscriptionId = activePlan?.subscription.id ?? null
 
