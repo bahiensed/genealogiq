@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
-import { Moon, Sun, Menu, Bell, User, LogOut, Sprout, Search } from "lucide-react"
+import { Moon, Sun, Menu, Bell, User, LogOut, SquareChartGantt, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -126,7 +126,7 @@ export function Header({ userName, userImage, unreadCount = 0 }: HeaderProps) {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/subscriptions" onClick={onAction} className="gap-2 cursor-pointer">
-              <Sprout className="h-4 w-4" />
+              <SquareChartGantt className="h-4 w-4" />
               {t("subscriptions")}
             </Link>
           </DropdownMenuItem>
