@@ -12,6 +12,7 @@ import { compressImage } from "@/lib/image-compress"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { FieldLabel } from "@/components/ui/field"
 import { Textarea } from "@/components/ui/textarea"
 import {
   AlertDialog,
@@ -236,14 +237,14 @@ export function PlaceEditForm({ profileId, existing, mediaMax, otherImagesUsed, 
 
       {/* Title */}
       <div className="space-y-2">
-        <Label htmlFor="place-title" className="text-base">{t("titleLabel")}</Label>
+        <FieldLabel htmlFor="place-title" className="text-base" required>{t("titleLabel")}</FieldLabel>
         <Input id="place-title" maxLength={120} placeholder={t("titlePlaceholder")} {...register("title")} />
         {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
       </div>
 
       {/* Categories */}
       <div className="space-y-2">
-        <Label className="text-base">{t("categoriesLabel")}</Label>
+        <FieldLabel className="text-base" required>{t("categoriesLabel")}</FieldLabel>
         <Controller
           control={control}
           name="categories"
@@ -297,8 +298,9 @@ export function PlaceEditForm({ profileId, existing, mediaMax, otherImagesUsed, 
         <Label className="text-base">{t("datesLabel")}</Label>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 space-y-1">
-            <Label htmlFor="place-start" className="text-xs text-muted-foreground">{t("startDate")}</Label>
+            <FieldLabel htmlFor="place-start" className="text-xs text-muted-foreground" required>{t("startDate")}</FieldLabel>
             <Input id="place-start" type="date" {...register("startDate")} />
+            {errors.startDate && <p className="text-xs text-destructive">{errors.startDate.message}</p>}
           </div>
           <div className="flex-1 space-y-1">
             <Label htmlFor="place-end" className="text-xs text-muted-foreground">{t("endDate")}</Label>
