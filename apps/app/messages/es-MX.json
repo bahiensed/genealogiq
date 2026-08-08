@@ -207,6 +207,7 @@
     "removeImage": "Quitar imagen",
     "reset": "Restablecer",
     "subtitle": "Una vida recordada con palabras e imágenes",
+    "textLabel": "Biografía",
     "textPlaceholder": "Escribe la biografía...",
     "title": "Biografía de {name}",
     "toastDeleted": "Biografía eliminada.",
