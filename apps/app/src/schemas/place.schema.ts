@@ -21,8 +21,11 @@ export function getPlaceSchema(t: Translator) {
       lon: z.number().min(-180).max(180),
       photos: z.array(blobUrl).max(MAX_PHOTOS),
       // ISO date strings from <input type="date">, or null when unset.
-      startDate: z.string().trim().min(1).nullish(),
-      endDate: z.string().trim().min(1).nullish(),
+      // startDate is required (min(1) rejects the empty string an untouched
+      // native date input submits); endDate has no min — an empty string is
+      // a valid "not set" value, normalized to null downstream by toDate().
+      startDate: z.string().trim().min(1, t("required")).nullish(),
+      endDate: z.string().trim().nullish(),
     })
     .refine(
       (v) => !v.startDate || !v.endDate || v.endDate >= v.startDate,
