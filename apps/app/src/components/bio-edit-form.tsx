@@ -247,7 +247,7 @@ export function BioEditForm({ initial, profileId, maxChars, maxImages, otherImag
       {/* Bio text */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="bio-text" className="text-base">{t("title")}</Label>
+          <Label htmlFor="bio-text" className="text-base">{t("textLabel")}</Label>
           <span className="text-xs text-muted-foreground">{text.length}/{maxChars}</span>
         </div>
         <Textarea
