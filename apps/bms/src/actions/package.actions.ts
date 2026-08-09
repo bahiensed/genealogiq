@@ -45,10 +45,13 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
   if (!current) return fail(t('package.notFound'))
 
   // Stripe Prices are immutable. If admin changes price on a synced package,
-  // clear the Stripe refs — checkout action will refuse purchases until the
-  // SEQ seed script re-runs and provisions a fresh Price.
+  // clear the Price ref — checkout action will refuse purchases until
+  // syncPackageWithStripe mints a fresh one. stripeProductId is left alone
+  // and reused (Products ARE mutable) — mirrors Subscription/ExtraUnitPrice's
+  // sync pattern instead of minting a brand-new Product on every price edit.
   const priceChanged = !current.price.equals(newPrice)
-  const clearStripeRefs = priceChanged && !!current.stripePriceId
+  const clearStripeRef = priceChanged && !!current.stripePriceId
+  const staleId = current.stripePriceId
 
   try {
     await prisma.package.update({
@@ -56,7 +59,7 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
       data:  {
         ...rest,
         price: newPrice,
-        ...(clearStripeRefs && { stripeProductId: null, stripePriceId: null }),
+        ...(clearStripeRef && { stripePriceId: null }),
       },
     })
   } catch (e) {
@@ -66,9 +69,15 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
     throw e
   }
 
+  // Best-effort: archive the superseded Stripe Price so it stops being
+  // live/purchasable once orphaned from the DB. Never blocks the save.
+  if (clearStripeRef && staleId) {
+    await stripe.prices.update(staleId, { active: false }).catch(() => {})
+  }
+
   revalidatePath('/packages')
   revalidatePath('/physical-qr')
-  return done(clearStripeRefs ? t('package.updatedStripeCleared') : t('package.updated'))
+  return done(clearStripeRef ? t('package.updatedStripeCleared') : t('package.updated'))
 }
 
 export async function deletePackage(id: string): Promise<ActionResult> {

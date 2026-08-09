@@ -79,30 +79,32 @@ export async function updateSubscription(id: string, data: SubscriptionFormValue
   // also changed.
   const termChanged = current.termLength !== rest.termLength
 
-  const currencyClears: { changed: boolean; hasStripeIds: boolean; clear: Record<string, null> }[] = [
+  const currencyClears: { changed: boolean; oldIds: string[]; clear: Record<string, null> }[] = [
     {
       changed: termChanged || decimalChanged(current.priceUsd, newPrices.priceUsd) || decimalChanged(current.monthlyPriceUsd, newPrices.monthlyPriceUsd),
-      hasStripeIds: !!current.stripeAnnualPriceIdUsd || !!current.stripeMonthlyPriceIdUsd,
+      oldIds: [current.stripeAnnualPriceIdUsd, current.stripeMonthlyPriceIdUsd].filter((v): v is string => !!v),
       clear: { stripeAnnualPriceIdUsd: null, stripeMonthlyPriceIdUsd: null },
     },
     {
       changed: termChanged || decimalChanged(current.priceBrl, newPrices.priceBrl) || decimalChanged(current.monthlyPriceBrl, newPrices.monthlyPriceBrl),
-      hasStripeIds: !!current.stripeAnnualPriceIdBrl || !!current.stripeMonthlyPriceIdBrl,
+      oldIds: [current.stripeAnnualPriceIdBrl, current.stripeMonthlyPriceIdBrl].filter((v): v is string => !!v),
       clear: { stripeAnnualPriceIdBrl: null, stripeMonthlyPriceIdBrl: null },
     },
     {
       changed: termChanged || decimalChanged(current.priceMxn, newPrices.priceMxn) || decimalChanged(current.monthlyPriceMxn, newPrices.monthlyPriceMxn),
-      hasStripeIds: !!current.stripeAnnualPriceIdMxn || !!current.stripeMonthlyPriceIdMxn,
+      oldIds: [current.stripeAnnualPriceIdMxn, current.stripeMonthlyPriceIdMxn].filter((v): v is string => !!v),
       clear: { stripeAnnualPriceIdMxn: null, stripeMonthlyPriceIdMxn: null },
     },
   ]
 
   let clearPatch: Record<string, null> = {}
   let clearedAny = false
+  const staleIds: string[] = []
   for (const c of currencyClears) {
-    if (c.changed && c.hasStripeIds) {
+    if (c.changed && c.oldIds.length > 0) {
       clearPatch = { ...clearPatch, ...c.clear }
       clearedAny = true
+      staleIds.push(...c.oldIds)
     }
   }
 
@@ -120,6 +122,13 @@ export async function updateSubscription(id: string, data: SubscriptionFormValue
       return fail(t('subscription.notFound'))
     }
     throw e
+  }
+
+  // Best-effort: archive the superseded Stripe Prices so they stop being
+  // live/purchasable once orphaned from the DB. Never blocks the save —
+  // a Stripe hiccup here shouldn't prevent the price edit from landing.
+  if (staleIds.length > 0) {
+    await Promise.allSettled(staleIds.map((priceId) => stripe.prices.update(priceId, { active: false })))
   }
 
   revalidatePath('/subscriptions')

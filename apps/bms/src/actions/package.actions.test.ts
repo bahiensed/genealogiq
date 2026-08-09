@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
-const { prismaMock, FakeDecimal, PrismaKnownError } = vi.hoisted(() => {
+const { prismaMock, FakeDecimal, PrismaKnownError, stripeMock } = vi.hoisted(() => {
   // Minimal stand-in for Prisma.Decimal: enough for `new Prisma.Decimal(x)` + `.equals`.
   class FakeDecimal {
     private readonly s: string
@@ -21,7 +21,8 @@ const { prismaMock, FakeDecimal, PrismaKnownError } = vi.hoisted(() => {
   const prismaMock = {
     package: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
   }
-  return { prismaMock, FakeDecimal, PrismaKnownError }
+  const stripeMock = { prices: { update: vi.fn() } }
+  return { prismaMock, FakeDecimal, PrismaKnownError, stripeMock }
 })
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
@@ -35,7 +36,7 @@ vi.mock("@genealogiq/db", () => ({
   Prisma: { Decimal: FakeDecimal, PrismaClientKnownRequestError: PrismaKnownError },
 }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
-vi.mock("@/lib/stripe", () => ({ stripe: {} }))
+vi.mock("@/lib/stripe", () => ({ stripe: stripeMock }))
 vi.mock("@/lib/dal", () => ({ verifyAdmin: vi.fn() }))
 
 import { createPackage, updatePackage, deletePackage } from "./package.actions"
@@ -73,15 +74,17 @@ describe("createPackage", () => {
 })
 
 describe("updatePackage", () => {
-  it("clears the Stripe refs when the price changes on a synced package", async () => {
+  it("clears the Stripe price ref (but keeps the reusable product) when the price changes on a synced package", async () => {
     prismaMock.package.findUnique.mockResolvedValue({ price: new FakeDecimal(40), stripePriceId: "price_1" })
     prismaMock.package.update.mockResolvedValue({})
+    stripeMock.prices.update.mockResolvedValue({})
 
     const res = await updatePackage("p1", validInput) // price 50 ≠ 40
 
     const arg = prismaMock.package.update.mock.calls[0][0] as { data: Record<string, unknown> }
-    expect(arg.data.stripeProductId).toBeNull()
+    expect(arg.data).not.toHaveProperty("stripeProductId")
     expect(arg.data.stripePriceId).toBeNull()
+    expect(stripeMock.prices.update).toHaveBeenCalledWith("price_1", { active: false })
     expect(res).toEqual({ ok: true, message: "package.updatedStripeCleared" })
   })
 
