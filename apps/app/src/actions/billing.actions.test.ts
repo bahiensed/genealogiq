@@ -185,6 +185,7 @@ describe("changeSubscription", () => {
       stripeAnnualPriceIdUsd: "price_annual",
       stripeMonthlyPriceIdUsd: "price_monthly",
     })
+    stripeMock.subscriptions.retrieve.mockResolvedValue({ schedule: null })
     stripeMock.subscriptionSchedules.create.mockResolvedValue({
       id: "sched_1",
       phases: [{ items: [{ price: "price_old", quantity: 1 }], start_date: 100, end_date: 200, metadata: {} }],
@@ -197,6 +198,29 @@ describe("changeSubscription", () => {
     expect(res.ok && res.data).toEqual({ effect: "scheduled" })
     expect(stripeMock.subscriptions.update).not.toHaveBeenCalled()
     expect(upsertSaleFromSubscription).not.toHaveBeenCalled()
+  })
+
+  it("downgrade: rejects with a friendly message when a schedule is already pending", async () => {
+    prismaMock.appSale.findFirst.mockResolvedValue({
+      stripeSubscriptionId: "stripe_sub_1",
+      currency: "USD",
+      subscription: { priceUsd: 30, termLength: 1 },
+    })
+    prismaMock.subscription.findUnique.mockResolvedValue({
+      id: "sub-2",
+      priceUsd: 10,
+      priceBrl: null,
+      priceMxn: null,
+      termLength: 1,
+      stripeAnnualPriceIdUsd: "price_annual",
+      stripeMonthlyPriceIdUsd: "price_monthly",
+    })
+    stripeMock.subscriptions.retrieve.mockResolvedValue({ schedule: "sub_sched_existing" })
+
+    const res = await changeSubscription("sub-2", "monthly")
+
+    expect(res).toEqual({ ok: false, message: "billing.downgradeAlreadyPending" })
+    expect(stripeMock.subscriptionSchedules.create).not.toHaveBeenCalled()
   })
 
   it("returns a failure carrying the Stripe error message when the Stripe call throws", async () => {

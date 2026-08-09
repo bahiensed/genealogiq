@@ -163,7 +163,13 @@ export async function changeSubscription(
       return ok({ effect: "upgraded" })
     }
 
-    // Downgrade: schedule the switch for end of current period.
+    // Downgrade: schedule the switch for end of current period. Stripe
+    // rejects subscriptionSchedules.create when the subscription already has
+    // one attached — check first so a second attempt gets a translated
+    // message instead of a raw Stripe API error surfaced to the user.
+    const currentSub = await stripe.subscriptions.retrieve(stripeSubId)
+    if (currentSub.schedule) return fail(t("billing.downgradeAlreadyPending"))
+
     const schedule = await stripe.subscriptionSchedules.create({
       from_subscription: stripeSubId,
     })
