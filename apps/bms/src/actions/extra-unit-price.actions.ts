@@ -46,20 +46,30 @@ export async function updateExtraUnitPrice(id: string, data: ExtraUnitPriceFormV
   // USD/MXN Price, same pattern as Subscription's updateSubscription.
   let clearPatch: Record<string, null> = {}
   let clearedAny = false
+  const staleIds: string[] = []
   if (decimalChanged(current.priceUsd, newPrices.priceUsd) && current.stripePriceIdUsd) {
     clearPatch = { ...clearPatch, stripePriceIdUsd: null }
     clearedAny = true
+    staleIds.push(current.stripePriceIdUsd)
   }
   if (decimalChanged(current.priceBrl, newPrices.priceBrl) && current.stripePriceIdBrl) {
     clearPatch = { ...clearPatch, stripePriceIdBrl: null }
     clearedAny = true
+    staleIds.push(current.stripePriceIdBrl)
   }
   if (decimalChanged(current.priceMxn, newPrices.priceMxn) && current.stripePriceIdMxn) {
     clearPatch = { ...clearPatch, stripePriceIdMxn: null }
     clearedAny = true
+    staleIds.push(current.stripePriceIdMxn)
   }
 
   await prisma.extraUnitPrice.update({ where: { id }, data: { ...newPrices, ...clearPatch } })
+
+  // Best-effort: archive the superseded Stripe Prices so they stop being
+  // live/purchasable once orphaned from the DB. Never blocks the save.
+  if (staleIds.length > 0) {
+    await Promise.allSettled(staleIds.map((priceId) => stripe.prices.update(priceId, { active: false })))
+  }
 
   revalidatePath('/extra-unit-prices')
   return done(clearedAny ? t('extraUnitPrice.updatedStripeCleared') : t('extraUnitPrice.updated'))
