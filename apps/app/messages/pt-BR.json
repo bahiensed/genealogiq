@@ -20,6 +20,7 @@
       "verifyEmailFirst": "Verifique seu e-mail antes de entrar. Confira sua caixa de entrada."
     },
     "billing": {
+      "downgradeAlreadyPending": "Já existe um downgrade agendado para esta assinatura.",
       "noActiveSubscription": "Nenhuma assinatura ativa para trocar.",
       "noCheckoutUrl": "O Stripe não retornou uma URL de checkout.",
       "noSchedulePhase": "Não foi possível ler a fase atual do agendamento.",
@@ -1312,6 +1313,7 @@
       "annual": "anual",
       "monthly": "mensal"
     },
+    "cancelingOn": "Seu plano {plan} termina em {date} e volta para o Grátis",
     "confirm": {
       "downgradeAction": "Agendar mudança",
       "downgradeDescription": "Seu plano {currentPlan} continua ativo até {periodEnd}. Depois disso, o {plan} ({cadence}) entra em vigor sem cobrança hoje.",

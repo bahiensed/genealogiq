@@ -7,6 +7,7 @@ import { verifySession } from "@/lib/dal"
 import { applyCheckoutSessionSync } from "@/lib/billing"
 import { getActiveSubscriptions } from "@/queries/subscriptions"
 import { getActivePlan } from "@/queries/billing"
+import { cn } from "@/lib/utils"
 
 const longDate = new Intl.DateTimeFormat("en-US", {
   year: "numeric", month: "long", day: "numeric", timeZone: "UTC",
@@ -57,8 +58,13 @@ export default async function SubscriptionsPage({ searchParams }: Props) {
                 {t("tagline")}
               </p>
               {activePlan && (
-                <p className="text-xs text-muted-foreground">
-                  {t("currentlyOn", { plan: activePlan.subscription.name, date: longDate.format(activePlan.currentPeriodEnd) })}
+                <p className={cn(
+                  "text-xs",
+                  activePlan.cancelAtPeriodEnd ? "text-amber-600 dark:text-amber-400 font-medium" : "text-muted-foreground",
+                )}>
+                  {activePlan.cancelAtPeriodEnd
+                    ? t("cancelingOn", { plan: activePlan.subscription.name, date: longDate.format(activePlan.currentPeriodEnd) })
+                    : t("currentlyOn", { plan: activePlan.subscription.name, date: longDate.format(activePlan.currentPeriodEnd) })}
                 </p>
               )}
             </div>

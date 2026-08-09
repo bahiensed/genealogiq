@@ -20,6 +20,7 @@
       "verifyEmailFirst": "Please verify your email before signing in. Check your inbox."
     },
     "billing": {
+      "downgradeAlreadyPending": "A downgrade is already scheduled for this subscription.",
       "noActiveSubscription": "No active subscription to switch from.",
       "noCheckoutUrl": "Stripe did not return a checkout URL.",
       "noSchedulePhase": "Could not read current schedule phase.",
@@ -1312,6 +1313,7 @@
       "annual": "annual",
       "monthly": "monthly"
     },
+    "cancelingOn": "Your {plan} plan ends on {date} and reverts to Free",
     "confirm": {
       "downgradeAction": "Schedule switch",
       "downgradeDescription": "Your {currentPlan} plan stays active until {periodEnd}. After that, {plan} ({cadence}) kicks in with no charge today.",

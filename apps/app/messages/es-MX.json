@@ -20,6 +20,7 @@
       "verifyEmailFirst": "Verifica tu correo antes de iniciar sesión. Revisa tu bandeja de entrada."
     },
     "billing": {
+      "downgradeAlreadyPending": "Ya hay un downgrade programado para esta suscripción.",
       "noActiveSubscription": "No hay ninguna suscripción activa para cambiar.",
       "noCheckoutUrl": "Stripe no devolvió una URL de pago.",
       "noSchedulePhase": "No se pudo leer la fase actual de la programación.",
@@ -1312,6 +1313,7 @@
       "annual": "anual",
       "monthly": "mensual"
     },
+    "cancelingOn": "Tu plan {plan} termina el {date} y vuelve a Gratis",
     "confirm": {
       "downgradeAction": "Programar cambio",
       "downgradeDescription": "Tu plan {currentPlan} sigue activo hasta el {periodEnd}. Después de eso, {plan} ({cadence}) entra en vigor sin cargo hoy.",
