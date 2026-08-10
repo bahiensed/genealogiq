@@ -92,7 +92,7 @@ export default async function ProfileBioPage({ params }: Props) {
               <section className="mb-10 animate-fade-in" style={{ animationDelay: "80ms" }}>
                 <ImageCarousel
                   images={bio.images}
-                  altText={() => t("photoAlt")}
+                  altText={t("photoAlt")}
                   prevLabel={t("carouselPrevious")}
                   nextLabel={t("carouselNext")}
                 />
