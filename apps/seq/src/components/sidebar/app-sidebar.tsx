@@ -28,6 +28,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  useSidebar,
 } from '@genealogiq/ui/sidebar'
 
 type Modules = Record<ModuleKey, boolean>
@@ -42,6 +43,15 @@ function visibleItems(items: MenuItem[], modules: Modules | null): MenuItem[] {
 
 export function AppSidebar({ modules }: AppSidebarProps) {
   const pathname = usePathname()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  // The mobile sidebar is a Sheet overlaying the page — it does NOT close on its own
+  // when a link navigates, so tapping a menu item loads the new page behind a sidebar
+  // that is still covering it. Every navigating <Link> closes it; never the
+  // CollapsibleTrigger, since expanding a group is not navigation. No-op on desktop.
+  const closeOnMobileNav = () => {
+    if (isMobile) setOpenMobile(false)
+  }
   const t = useTranslations('Sidebar')
 
   const recordsItems    = visibleItems(records,    modules)
@@ -88,7 +98,7 @@ export function AppSidebar({ modules }: AppSidebarProps) {
                   {section.map((item) => (
                     <SidebarMenuItem key={item.labelKey}>
                       <SidebarMenuButton asChild isActive={pathname === item.url}>
-                        <Link href={item.url}>
+                        <Link href={item.url} onClick={closeOnMobileNav}>
                           <item.icon />
                           <span>{t(item.labelKey)}</span>
                         </Link>
@@ -120,7 +130,7 @@ export function AppSidebar({ modules }: AppSidebarProps) {
                     {group.items.map((item) => (
                       <SidebarMenuItem key={item.labelKey}>
                         <SidebarMenuButton asChild isActive={pathname === item.url}>
-                          <Link href={item.url}>
+                          <Link href={item.url} onClick={closeOnMobileNav}>
                             <item.icon />
                             <span>{t(item.labelKey)}</span>
                           </Link>

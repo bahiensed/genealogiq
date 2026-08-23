@@ -661,20 +661,18 @@
     "edit": "Edit Subscription",
     "fields": {
       "annual": "Annual",
-      "bioMaxChars": "Bio Max Characters",
+      "bioMaxChars": "Max Bio Characters",
       "code": "Code",
       "description": "Description",
       "documentsMax": "Documents Max",
       "geoPlacesMax": "Geo Places Max",
-      "geolocationFullAccess": "Geolocation Full Access",
-      "maxProfiles": "Max Memo Profiles",
-      "mediaMaxImages": "Combined Media Images Max",
+      "mediaMaxImages": "Max Shared Images",
       "mediaMaxVideos": "Gallery Videos Max",
       "memorialsMax": "Memorials Max",
       "monthly": "Monthly",
       "name": "Name",
       "petsMax": "Pets Max",
-      "qrCodeMax": "QR Codes Max",
+      "qrCodeMax": "Max GenCodes",
       "termLength": "Term Length (in months)",
       "treeMaxMembers": "Tree Max Members"
     },
@@ -698,9 +696,10 @@
     "placeholders": {
       "code": "DECADE"
     },
+    "prices": {
+      "title": "Prices"
+    },
     "quotas": {
-      "geolocationFullAccessOff": "Address only (no GPS pin)",
-      "geolocationFullAccessOn": "Precise GPS coordinates",
       "title": "Quotas"
     },
     "status": {
@@ -723,7 +722,6 @@
       "code": "Code",
       "createdAt": "Created at",
       "empty": "No subscriptions found",
-      "maxProfiles": "Memo",
       "name": "Name",
       "price": "Price",
       "status": "Status",

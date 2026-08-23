@@ -14,7 +14,6 @@ export function getSubscriptionSchema(t: Translator) {
     isActive:    z.boolean(),
 
     // Commercial
-    maxProfiles: z.number().int(t('mustBeWholeNumber')).positive(t('mustBePositive')),
     termLength:  z.number().int(t('mustBeWholeNumber')).min(0, t('termLengthMin')),
     // Independent per-currency prices — no FX conversion, each set manually.
     // USD: 0 = Free (real product meaning, same plan as the FREE row).
@@ -40,7 +39,6 @@ export function getSubscriptionSchema(t: Translator) {
     memorialsMax:          z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
     petsMax:               z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
     qrCodeMax:             z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
-    geolocationFullAccess: z.boolean(),
   })
 }
 
@@ -52,7 +50,6 @@ export const subscriptionDefaultValues: SubscriptionFormValues = {
   description: '',
   isActive:    true,
 
-  maxProfiles:  1,
   termLength:   12,
   priceUsd:        0,
   monthlyPriceUsd: 0,
@@ -72,5 +69,4 @@ export const subscriptionDefaultValues: SubscriptionFormValues = {
   memorialsMax:          1,
   petsMax:               0,
   qrCodeMax:             1,
-  geolocationFullAccess: false,
 }

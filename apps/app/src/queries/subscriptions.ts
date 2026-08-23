@@ -17,7 +17,6 @@ export async function getActiveSubscriptions() {
       code:                  true,
       name:                  true,
       description:           true,
-      maxProfiles:           true,
       termLength:            true,
       priceUsd:              true,
       monthlyPriceUsd:       true,
@@ -34,7 +33,6 @@ export async function getActiveSubscriptions() {
       memorialsMax:          true,
       petsMax:               true,
       qrCodeMax:             true,
-      geolocationFullAccess: true,
     },
   })
 
@@ -55,7 +53,6 @@ export async function getActiveSubscriptions() {
       code:        r.code,
       name:        r.name,
       description: r.description,
-      maxProfiles: r.maxProfiles,
       termLength:  r.termLength,
       price,
       monthlyPrice,
@@ -71,7 +68,6 @@ export async function getActiveSubscriptions() {
         memorialsMax:          r.memorialsMax,
         petsMax:               r.petsMax,
         qrCodeMax:             r.qrCodeMax,
-        geolocationFullAccess: r.geolocationFullAccess,
       },
     }
   })

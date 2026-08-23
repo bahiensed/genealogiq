@@ -19,7 +19,6 @@ const QUOTA_SELECT = {
   memorialsMax:          true,
   petsMax:               true,
   qrCodeMax:             true,
-  geolocationFullAccess: true,
 } as const
 
 // Cached per request — the FREE plan's own quotas, looked up once instead of
@@ -99,7 +98,6 @@ export const getMemorialFeatures = cache(async (profileId: string): Promise<Plan
           memorialsMax:          richest.subscription.memorialsMax,
           petsMax:               richest.subscription.petsMax,
           qrCodeMax:             richest.subscription.qrCodeMax,
-          geolocationFullAccess: richest.subscription.geolocationFullAccess,
         }
       }
     }
