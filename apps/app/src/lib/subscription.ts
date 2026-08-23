@@ -2,7 +2,7 @@ import "server-only"
 
 import { cache } from "react"
 import { prisma } from "@/lib/prisma"
-import { PHYSICAL_QR, type PlanQuotas } from "@/lib/plan-quotas"
+import { type PlanQuotas } from "@/lib/plan-quotas"
 
 export type { PlanQuotas } from "@/lib/plan-quotas"
 
@@ -43,17 +43,21 @@ export function isSaleLive(sale: { status: string | null; currentPeriodEnd: Date
 /**
  * Resolves the plan quotas for a given profile.
  *
- * Living profile (APP_USER): physicalQrLicense > own live paid AppSale > FREE.
+ * Every tier returned here comes from a Subscription row — there is no
+ * hardcoded plan left in the codebase. A redeemed GenCode deliberately grants
+ * NO tier of its own: it delivers a memorial, and that memorial resolves to
+ * whatever plan its guardian holds (FREE for a fresh account). The physical
+ * plaque is the product; the plan is sold separately in the APP.
  *
- * Memorial (APP_MEMO) or pet (APP_PET) profile: physicalQrLicense > any
- * ACCEPTED guardian's own live paid AppSale (cascades — one guardian's
- * subscription covers every memorial/pet they manage; if guardians are on
- * different tiers, the highest-priced plan's quotas win — deterministic
- * tie-break, unreachable today with only FREE/PREMIUM but real once a third
- * paid tier exists) > a legacy AppSale assigned directly to this profile
- * (preserves bulk-slot sales already made through BMS/SEQ) > FREE. Pets have
- * no physicalQrLicense/QR concept of their own in practice, but the branch is
- * role-based so it costs nothing to leave that check in place.
+ * Living profile (APP_USER): own live paid AppSale > FREE.
+ *
+ * Memorial (APP_MEMO) or pet (APP_PET) profile: any ACCEPTED guardian's own
+ * live paid AppSale (cascades — one guardian's subscription covers every
+ * memorial/pet they manage; if guardians are on different tiers, the
+ * highest-priced plan's quotas win — deterministic tie-break, unreachable
+ * today with only FREE/PREMIUM but real once a third paid tier exists) > a
+ * legacy AppSale assigned directly to this profile (preserves bulk-slot sales
+ * already made through BMS/SEQ) > FREE.
  *
  * Cached per (profileId, request) so repeated callers share the same lookups.
  */
@@ -61,13 +65,10 @@ export const getMemorialFeatures = cache(async (profileId: string): Promise<Plan
   const profile = await prisma.appUser.findUnique({
     where: { id: profileId },
     select: {
-      role:              true,
-      physicalQrLicense: { select: { id: true } },
-      appSale:           { select: { status: true, currentPeriodEnd: true, subscription: { select: QUOTA_SELECT } } },
+      role:    true,
+      appSale: { select: { status: true, currentPeriodEnd: true, subscription: { select: QUOTA_SELECT } } },
     },
   })
-
-  if (profile?.physicalQrLicense) return PHYSICAL_QR
 
   if (profile?.role === "APP_MEMO" || profile?.role === "APP_PET") {
     const guardians = await prisma.appUserGuardian.findMany({

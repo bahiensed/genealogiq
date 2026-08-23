@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
-import { Printer, ShoppingCart, Search, X, Undo2, Check, Store } from 'lucide-react'
+import { Printer, ShoppingCart, Undo2, Check, Store } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Button } from '@genealogiq/ui/button'
 import { Badge } from '@genealogiq/ui/badge'
@@ -123,13 +123,17 @@ export function GenCodeActions({ license }: { license: GenCodeDetail }) {
 
           {license.status === 'AVAILABLE' && (
             <>
-              <Button size="sm" disabled={isPending} onClick={() => setPlatformOpen(true)} className="w-full justify-start">
-                <Store className="h-4 w-4 mr-2" />
-                {t('actions.sellViaPlatform')}
-              </Button>
-              <Button size="sm" variant="outline" disabled={isPending} onClick={() => setManualOpen(true)} className="w-full justify-start">
+              {/* Manual write-off leads: the dominant case is a printed plate
+                  sold over the counter, where there is no buyer email to
+                  capture at the time the code is used. Sending by email is the
+                  secondary path. */}
+              <Button size="sm" disabled={isPending} onClick={() => setManualOpen(true)} className="w-full justify-start">
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 {t('actions.manualWriteOff')}
+              </Button>
+              <Button size="sm" variant="outline" disabled={isPending} onClick={() => setPlatformOpen(true)} className="w-full justify-start">
+                <Store className="h-4 w-4 mr-2" />
+                {t('actions.sellViaPlatform')}
               </Button>
             </>
           )}
@@ -216,41 +220,40 @@ function ManualSaleDialog({ genCode, open, onOpenChange, onDone }: {
   )
 }
 
-// ── Platform sale (assign to a consumer + email access) ───────────────────────
-
-interface AppUserResult { id: string; firstName: string; lastName: string; email: string }
+// ── Send by email (creates the buyer if needed + emails access) ───────────────
 
 function PlatformSaleDialog({ genCode, open, onOpenChange, onDone }: {
   genCode: string; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void
 }) {
   const t = useTranslations('GenCode')
   const tc = useTranslations('Common')
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<AppUserResult[]>([])
-  const [listOpen, setListOpen] = useState(false)
-  const [selected, setSelected] = useState<AppUserResult | null>(null)
+  // No customer lookup here on purpose: the buyer does not have to exist yet.
+  // Name + email is everything the action needs to create them and mail the code.
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
   const [value, setValue] = useState('')
   const [isPending, startTransition] = useTransition()
-  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (!query.trim()) { setResults([]); setListOpen(false); return }
-    const timer = setTimeout(async () => {
-      const res = await fetch(`/api/app-users?q=${encodeURIComponent(query)}`)
-      const data: AppUserResult[] = await res.json()
-      setResults(data)
-      setListOpen(data.length > 0)
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [query])
+  const canSubmit = firstName.trim() && lastName.trim() && email.trim()
 
   function submit() {
-    if (!selected) return
+    if (!canSubmit) return
     const v = value.trim() ? Number(value) : undefined
     startTransition(async () => {
-      const res = await sellGenCodeViaPlatform(genCode, selected.id, v)
+      const res = await sellGenCodeViaPlatform(genCode, {
+        firstName: firstName.trim(),
+        lastName:  lastName.trim(),
+        email:     email.trim(),
+        value:     v,
+      })
       if (!res.ok) toast.error(res.message)
-      else { if (res.message) toast.success(res.message); onOpenChange(false); setSelected(null); setQuery(''); setValue(''); onDone() }
+      else {
+        if (res.message) toast.success(res.message)
+        onOpenChange(false)
+        setFirstName(''); setLastName(''); setEmail(''); setValue('')
+        onDone()
+      }
     })
   }
 
@@ -264,32 +267,19 @@ function PlatformSaleDialog({ genCode, open, onOpenChange, onDone }: {
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="pfirst">{t('fields.buyerFirstName')}</Label>
+              <Input id="pfirst" value={firstName} onChange={(e) => setFirstName(e.target.value)} autoComplete="off" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="plast">{t('fields.buyerLastName')}</Label>
+              <Input id="plast" value={lastName} onChange={(e) => setLastName(e.target.value)} autoComplete="off" />
+            </div>
+          </div>
           <div className="flex flex-col gap-1.5">
-            <Label>{t('fields.customer')}</Label>
-            {selected ? (
-              <div className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
-                <span className="flex-1">{selected.firstName} {selected.lastName}<span className="ml-2 text-muted-foreground">{selected.email}</span></span>
-                <button type="button" onClick={() => setSelected(null)} aria-label={t('platformSale.removeCustomer')}>
-                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                </button>
-              </div>
-            ) : (
-              <div className="relative" ref={dropdownRef}>
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input className="pl-9" placeholder={t('placeholders.customerSearch')} value={query} onChange={(e) => setQuery(e.target.value)} autoComplete="off" />
-                {listOpen && (
-                  <div className="absolute z-10 mt-1 w-full rounded-md border bg-popover shadow-md">
-                    {results.map((u) => (
-                      <button key={u.id} type="button" className="flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-accent"
-                        onMouseDown={() => { setSelected(u); setQuery(''); setResults([]); setListOpen(false) }}>
-                        <span className="font-medium">{u.firstName} {u.lastName}</span>
-                        <span className="text-muted-foreground">{u.email}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            <Label htmlFor="pemail">{t('fields.buyerEmail')}</Label>
+            <Input id="pemail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nome@exemplo.com" autoComplete="off" />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="pvalue">{t('fields.saleValue')}</Label>
@@ -298,7 +288,7 @@ function PlatformSaleDialog({ genCode, open, onOpenChange, onDone }: {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>{tc('cancel')}</Button>
-          <Button onClick={submit} disabled={isPending || !selected}>
+          <Button onClick={submit} disabled={isPending || !canSubmit}>
             {isPending ? t('platformSale.submitting') : t('platformSale.submit')}
           </Button>
         </DialogFooter>

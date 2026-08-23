@@ -106,20 +106,25 @@ return something the caller consumes (e.g. a checkout URL).
 `DOCUMENTS_ENFORCE_QUOTA`) — infra shipped ready but stayed inert until a human flipped the
 flag. **Both flags are gone.** Quotas are always enforced now.
 
-- **Numbers live in `src/lib/plan-quotas.ts`**, a plain dependency-free module — `FREE`,
-  `PREMIUM`, `PHYSICAL_QR` objects (`PlanQuotas` interface: `treeMaxMembers`, `bioMaxChars`,
-  `mediaMaxImages`, `mediaMaxVideos`, `documentsMax`, `geoPlacesMax`, `memorialsMax`,
-  `qrCodeMax`, `geolocationFullAccess`). This is deliberate independence from BMS: the shared
-  `Subscription` table's own columns/pricing/naming no longer feed feature numbers at all —
-  BMS can rename or reprice its own plans without this app ever needing a change.
+- **Numbers live on the shared `Subscription` table**, one row per plan, so BMS edits every
+  plan attribute without a deploy. `src/lib/plan-quotas.ts` keeps only what is NOT a per-plan
+  number: the `PlanQuotas` shape (`treeMaxMembers`, `bioMaxChars`, `mediaMaxImages`,
+  `mediaMaxVideos`, `documentsMax`, `geoPlacesMax`, `memorialsMax`, `petsMax`, `qrCodeMax`,
+  `geolocationFullAccess`) and the `allowsExtraPurchase(field, tier)` policy. **There is no
+  hardcoded plan in this app** — do not add one back; a tier only changeable by deploy is the
+  hole this was cleaned up to close. (An earlier revision of this document said the opposite,
+  and a `PHYSICAL_QR` constant used to live here; both are gone.)
 - **`getMemorialFeatures(profileId)`** (`@/lib/subscription`, `PlanQuotas` return type, `cache()`-wrapped
-  per request) resolves which of the three objects applies: `physicalQrLicense` present →
-  `PHYSICAL_QR`; else, for a living profile, its own live paid `AppSale` (as buyer) → `PREMIUM`;
-  for a memorial (`APP_MEMO`), **any `ACCEPTED` guardian's own live paid sale cascades** →
-  `PREMIUM` (one guardian's subscription covers every memorial they manage), else a legacy
-  `AppSale` assigned directly to the memorial (pre-existing BMS/SEQ bulk-slot sales) → `PREMIUM`;
-  otherwise `FREE`. The DB's role has shrunk to one boolean-ish question — "does a live paid
-  sale exist" — never "what numbers does this Subscription row have."
+  per request) resolves the plan: for a living profile, its own live paid `AppSale` (as buyer);
+  for a memorial (`APP_MEMO`) or pet (`APP_PET`), **any `ACCEPTED` guardian's own live paid sale
+  cascades** (one guardian's subscription covers every memorial they manage; richest plan wins
+  when co-guardians differ), else a legacy `AppSale` assigned directly to the profile
+  (pre-existing BMS/SEQ bulk-slot sales); otherwise the `FREE` row, which must exist.
+- **A redeemed GenCode grants no tier.** It delivers a memorial; that memorial then resolves
+  like any other profile — `FREE` for a fresh guardian. The plaque is the product, the plan is
+  sold separately in the APP. Activation still bypasses `memorialsMax` so the memorial sits
+  outside the guardian's quota (nobody pays twice for the same slot). Covered by
+  `src/lib/subscription.test.ts`.
 - **Combined media pool**: `mediaMaxImages`/`mediaMaxVideos` are ONE shared budget spent across
   Bio's own image, every Gallery item, and every `GeoPlace.photos` entry — computed live via
   `getCombinedMediaUsage(profileId)` (`@/queries/media-usage`), no persisted running total.
@@ -133,7 +138,9 @@ flag. **Both flags are gone.** Quotas are always enforced now.
   memorial attaches to a legacy bulk sale) — that logic still runs, just no longer gates
   whether creation is *allowed* at all.
 - **QR Code quota**: no persisted count exists (access was always a per-profile boolean —
-  `physicalQrLicense`/a directly-assigned `appSaleId`). `getQrQuotaStatus(guardianId, profileId)`
+  `physicalQrLicense`/a directly-assigned `appSaleId`). This is now the ONLY place a
+  `physicalQrLicense` affects entitlement, and it is correct: the plaque IS that memorial's QR
+  code, so it cannot be rank-gated. `getQrQuotaStatus(guardianId, profileId)`
   (`@/lib/qr-quota`) ranks {guardian's own profile} ∪ {their `ACCEPTED` memorials} by
   `createdAt`; the first `qrCodeMax` are free, EXCEPT a profile with its own dedicated paid
   slot (`physicalQrLicense` or a live directly-assigned `AppSale` — see `isSaleLive`, exported
@@ -144,18 +151,18 @@ flag. **Both flags are gone.** Quotas are always enforced now.
   pattern), controlled via `open`/`onOpenChange` (not `AlertDialogTrigger` — the calling
   component checks the limit itself, before invoking the mutating action, then opens this).
   Contexts: `"tree" | "bio" | "documents" | "media-images" | "media-videos" | "geoPlaces" |
-  "memorials" | "qrCode"`. CTA always links to `/subscriptions`; `ALLOWS_EXTRA_PURCHASE`
+  "memorials" | "qrCode"`. CTA always links to `/subscriptions`; `allowsExtraPurchase(field, tier)`
   (`plan-quotas.ts`) marks which quota fields (`geoPlacesMax`, `qrCodeMax`, `memorialsMax`)
-  additionally mention an à la carte top-up (the purchase flow itself doesn't exist yet — this
-  only affects copy). A new module hitting a hard, unambiguous "this action definitely creates
+  additionally offer an à la carte top-up. That purchase flow is **live** — Stripe one-time
+  checkout via `@/actions/extra-units.actions`, fulfilled by the webhook into
+  `ExtraUnitPurchase`, and added to the plan limit by each quota helper. A new module hitting a hard, unambiguous "this action definitely creates
   one new unit" limit (an add-image handler, a create-new-row button) should reach for this
   dialog rather than a bespoke toast or a hidden button.
 - **`UpgradeHint`** (`@/components/upgrade-hint`) is a DIFFERENT, older, passive text hint
   (always-visible near a counter, no user interaction to trigger it) — it coexists with
-  `LimitReachedDialog` on purpose, not a duplicate to consolidate. Its top-tier check compares
-  against `"PHYSICAL_QR"` (this and `tree-subtitle.tsx`'s equivalent check used to compare
-  against a stale BMS-era code name, `"CENTURY"` — both fixed; if you find `"CENTURY"`
-  anywhere else, it's the same latent bug).
+  `LimitReachedDialog` on purpose, not a duplicate to consolidate. It used to bail out for a
+  hardcoded top tier; with that tier gone the hint always renders. If a tier above `PREMIUM` is
+  ever added, gate on the plan's price rather than on a code string.
 
 ## Caching model: no Cache Components, plain `revalidatePath`
 

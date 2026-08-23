@@ -580,15 +580,24 @@
     "unitPrice": "Unit price per QR Code"
   },
   "PhysicalQr": {
+    "stats": {
+      "activated": "Activated",
+      "available": "In tenant stock",
+      "sold": "Sold, not redeemed",
+      "total": "Total issued"
+    },
+    "subtitle": "Every GenCode minted by a sale, and where it stands. \"Sold\" means written off by the tenant but not yet redeemed by the buyer.",
     "table": {
       "activated": "Activated",
       "available": "Available",
       "empty": "No physical QR Codes found.",
       "package": "Package",
       "saleDate": "Sale Date",
+      "sold": "Sold",
       "tenant": "Tenant",
       "total": "Total"
-    }
+    },
+    "title": "Issued Licenses"
   },
   "Sales": {
     "actions": {

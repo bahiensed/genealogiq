@@ -6,6 +6,7 @@ import {
   sendPasswordResetEmail as _reset,
   sendAccountDeletionEmail as _delete,
   sendAppConsumerWelcomeEmail as _appWelcome,
+  sendGenCodeDeliveryEmail as _genCodeDelivery,
   sendSequoiaWelcomeEmail as _seqWelcome,
   sendFeedbackEmail as _feedback,
   type FeedbackEmail,
@@ -24,4 +25,7 @@ export const sendPasswordResetEmail  = (to: string, token: string) => _reset({ t
 export const sendAccountDeletionEmail = (to: string) => _delete({ to })
 export const sendWelcomeEmail        = (to: string, token: string, name?: string) => _seqWelcome({ to, token, baseUrl: SEQUOIA(), name })
 export const sendAppWelcomeEmail     = (to: string, token: string, name?: string, callbackUrl?: string) => _appWelcome({ to, token, baseUrl: APP(), name, callbackUrl })
+// For a buyer who already has a password — the welcome email's link sets one,
+// so it can't be reused. Ships the code and links straight to activation.
+export const sendGenCodeDeliveryEmail = (to: string, genCode: string, name?: string) => _genCodeDelivery({ to, baseUrl: APP(), genCode, name })
 export const sendFeedback = (data: Omit<FeedbackEmail, "to">) => _feedback({ ...data, to: FEEDBACK_TO })

@@ -60,8 +60,7 @@
       "relationNotFound": "Vínculo de tutor no encontrado."
     },
     "gencode": {
-      "customerNoEmail": "El cliente no tiene una dirección de correo electrónico.",
-      "customerNotFound": "Cliente no encontrado.",
+      "emailOtherTenant": "Ese correo ya pertenece a un cliente de otra empresa.",
       "invalidValue": "Valor de venta inválido.",
       "notAvailable": "Este código no está disponible para la venta (ya vendido o activado).",
       "notFound": "QR Code no encontrado.",
@@ -636,8 +635,10 @@
       "title": "QR Code Físico"
     },
     "fields": {
+      "buyerEmail": "Correo del comprador",
+      "buyerFirstName": "Nombre del comprador",
+      "buyerLastName": "Apellido del comprador",
       "buyerName": "Nombre / contacto del comprador",
-      "customer": "Cliente",
       "saleValue": "Valor de la venta (opcional)"
     },
     "manualSale": {
@@ -646,15 +647,13 @@
       "title": "Baja manual"
     },
     "placeholders": {
-      "buyerName": "¿Quién lo compró?",
-      "customerSearch": "Escribe nombre o correo…"
+      "buyerName": "¿Quién lo compró?"
     },
     "platformSale": {
-      "description": "Asigna este código a un cliente registrado y envíale el acceso a la aplicación por correo. El código se da de baja.",
-      "removeCustomer": "Quitar cliente",
+      "description": "Envíe este código al comprador por correo. No necesita tener cuenta todavía — la creamos y le enviamos el acceso. El código se da de baja.",
       "submit": "Vender y enviar acceso",
       "submitting": "Vendiendo…",
-      "title": "Vender por la plataforma"
+      "title": "Enviar por correo"
     },
     "soldVia": {
       "MANUAL": "Manual",

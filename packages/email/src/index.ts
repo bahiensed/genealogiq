@@ -210,6 +210,28 @@ export function sendAppConsumerVerificationEmail({
   }))
 }
 
+// Delivers a GenCode to a buyer who ALREADY has a password — the welcome
+// email above can't be reused for them, since its link sets a password. Here
+// the code itself is the payload and the link goes straight to the activation
+// page. Sent by SEQ when a tenant sells a code to an existing consumer.
+export function sendGenCodeDeliveryEmail({
+  to,
+  baseUrl,
+  genCode,
+  name,
+}: { to: string; baseUrl: string; genCode: string; name?: string }): Promise<void> {
+  const greeting = name ? `Olá ${name},` : "Olá,"
+  return send(to, "Genealogiq — o seu código de ativação", `
+    <p>${greeting}</p>
+    <p>Você recebeu um código Genealogiq para criar o memorial de alguém especial.</p>
+    <p><strong>Seu código:</strong> ${genCode}</p>
+    <p>Clique abaixo para ativá-lo — é só entrar na sua conta e preencher os dados da pessoa homenageada:</p>
+    <p><a href="${baseUrl}/qr/${genCode}">Ativar meu código</a></p>
+    <p>Se preferir, entre na sua conta e informe o código manualmente.</p>
+    <p>Equipe Genealogiq®️<br/><em>"As pessoas só morrem quando são esquecidas".</em></p>
+  `)
+}
+
 // Notice sent instead of a verification link when someone attempts to sign up
 // with an email that already has an account. The sign-up action redirects to
 // /verify-email either way (new account or existing one) so the response can't

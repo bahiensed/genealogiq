@@ -24,7 +24,7 @@ vi.mock("@genealogiq/db", () => ({
 }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyTenantSession: vi.fn() }))
-vi.mock("@/lib/email", () => ({ sendAppWelcomeEmail: vi.fn() }))
+vi.mock("@/lib/email", () => ({ sendAppWelcomeEmail: vi.fn(), sendGenCodeDeliveryEmail: vi.fn() }))
 
 import {
   markGenCodePrinted,
@@ -33,7 +33,7 @@ import {
   undoGenCodeSale,
 } from "./gencode.actions"
 import { verifyTenantSession } from "@/lib/dal"
-import { sendAppWelcomeEmail } from "@/lib/email"
+import { sendAppWelcomeEmail, sendGenCodeDeliveryEmail } from "@/lib/email"
 import { Prisma } from "@genealogiq/db"
 
 beforeEach(() => {
@@ -109,89 +109,109 @@ describe("sellGenCodeManually — input validation + atomic sale guard", () => {
   })
 })
 
-describe("sellGenCodeViaPlatform — consumer scoping + transaction branches", () => {
-  it("fails when the consumer is not in the caller's tenant", async () => {
-    prismaMock.appUser.findUnique.mockResolvedValue(null)
+describe("sellGenCodeViaPlatform — sells to a bare email", () => {
+  const BUYER = { firstName: "Bo", lastName: "Silva", email: "buyer@example.com" }
 
-    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1", 100)
-
-    expect(res).toEqual({ ok: false, message: "gencode.customerNotFound" })
-    expect(prismaMock.appUser.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: "app-user-1", tenantId: "c1" } }),
+  // Runs the transaction callback against a stub tx, letting each test drive
+  // updateMany's count and observe whether the consumer row was created.
+  function mockTx(count: number) {
+    const created = vi.fn().mockResolvedValue({ id: "new-user", email: BUYER.email, firstName: "Bo" })
+    prismaMock.$transaction.mockImplementation(async (cb: (tx: unknown) => unknown) =>
+      cb({
+        appUser:            { create: created },
+        physicalQrLicense:  { updateMany: vi.fn().mockResolvedValue({ count }) },
+        passwordResetToken: { create: vi.fn().mockResolvedValue({}) },
+      }),
     )
+    return created
+  }
+
+  it("rejects an invalid email before touching the database", async () => {
+    const res = await sellGenCodeViaPlatform("GEN-1", { ...BUYER, email: "not-an-email" })
+
+    expect(res.ok).toBe(false)
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
-  it("fails when the consumer has no email", async () => {
-    prismaMock.appUser.findUnique.mockResolvedValue({ id: "app-user-1", email: null })
+  it("refuses an email that already belongs to another tenant", async () => {
+    prismaMock.appUser.findUnique.mockResolvedValue({ id: "u9", tenantId: "OTHER", password: "x" })
 
-    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1")
+    const res = await sellGenCodeViaPlatform("GEN-1", BUYER)
 
-    expect(res).toEqual({ ok: false, message: "gencode.customerNoEmail" })
+    expect(res).toEqual({ ok: false, message: "gencode.emailOtherTenant" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
+  })
+
+  it("creates the consumer when the email is unknown, then emails the welcome link", async () => {
+    prismaMock.appUser.findUnique.mockResolvedValue(null)
+    const created = mockTx(1)
+
+    const res = await sellGenCodeViaPlatform("GEN-1", { ...BUYER, value: 100 })
+
+    expect(res).toEqual({ ok: true, message: "gencode.soldViaPlatform" })
+    expect(created).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ email: BUYER.email, tenantId: "c1" }) }),
+    )
+    expect(sendAppWelcomeEmail).toHaveBeenCalledWith(BUYER.email, expect.any(String), "Bo", "/qr/GEN-1")
+    expect(sendGenCodeDeliveryEmail).not.toHaveBeenCalled()
+  })
+
+  it("reuses a password-less consumer already in the tenant instead of creating one", async () => {
+    prismaMock.appUser.findUnique.mockResolvedValue({
+      id: "u1", email: BUYER.email, firstName: "Bo", tenantId: "c1", password: null,
+    })
+    const created = mockTx(1)
+
+    const res = await sellGenCodeViaPlatform("GEN-1", BUYER)
+
+    expect(res.ok).toBe(true)
+    expect(created).not.toHaveBeenCalled()
+    expect(sendAppWelcomeEmail).toHaveBeenCalled()
+  })
+
+  it("delivers the code instead of a password link when the buyer already has a password", async () => {
+    prismaMock.appUser.findUnique.mockResolvedValue({
+      id: "u1", email: BUYER.email, firstName: "Bo", tenantId: "c1", password: "hashed",
+    })
+    mockTx(1)
+
+    const res = await sellGenCodeViaPlatform("GEN-1", BUYER)
+
+    expect(res.ok).toBe(true)
+    expect(sendGenCodeDeliveryEmail).toHaveBeenCalledWith(BUYER.email, "GEN-1", "Bo")
+    expect(sendAppWelcomeEmail).not.toHaveBeenCalled()
   })
 
   it("maps the NOT_AVAILABLE transaction throw to a localized failure", async () => {
-    prismaMock.appUser.findUnique.mockResolvedValue({
-      id: "app-user-1",
-      email: "buyer@example.com",
-      firstName: "Bo",
-    })
-    // Execute the tx callback, where updateMany returns count 0 -> throws NOT_AVAILABLE.
-    prismaMock.$transaction.mockImplementation(async (cb: (tx: typeof prismaMock) => unknown) => {
-      const tx = {
-        physicalQrLicense: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
-        passwordResetToken: { create: vi.fn() },
-      }
-      return cb(tx as never)
-    })
+    prismaMock.appUser.findUnique.mockResolvedValue(null)
+    mockTx(0)
 
-    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1")
+    const res = await sellGenCodeViaPlatform("GEN-1", BUYER)
 
     expect(res).toEqual({ ok: false, message: "gencode.notAvailable" })
     expect(sendAppWelcomeEmail).not.toHaveBeenCalled()
   })
 
   it("maps a Prisma known request error to gencode.saleFailed", async () => {
-    prismaMock.appUser.findUnique.mockResolvedValue({
-      id: "app-user-1",
-      email: "buyer@example.com",
-      firstName: "Bo",
-    })
+    prismaMock.appUser.findUnique.mockResolvedValue(null)
     prismaMock.$transaction.mockRejectedValue(
       new (Prisma.PrismaClientKnownRequestError as unknown as new (message: string) => Error)("P2002"),
     )
 
-    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1")
+    const res = await sellGenCodeViaPlatform("GEN-1", BUYER)
 
     expect(res).toEqual({ ok: false, message: "gencode.saleFailed" })
     expect(sendAppWelcomeEmail).not.toHaveBeenCalled()
   })
 
-  it("commits the sale, emails the buyer, and returns ok (email failure is non-fatal)", async () => {
-    prismaMock.appUser.findUnique.mockResolvedValue({
-      id: "app-user-1",
-      email: "buyer@example.com",
-      firstName: "Bo",
-    })
-    prismaMock.$transaction.mockImplementation(async (cb: (tx: typeof prismaMock) => unknown) => {
-      const tx = {
-        physicalQrLicense: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
-        passwordResetToken: { create: vi.fn().mockResolvedValue({}) },
-      }
-      return cb(tx as never)
-    })
+  it("still reports success when the email fails to send", async () => {
+    prismaMock.appUser.findUnique.mockResolvedValue(null)
+    mockTx(1)
     vi.mocked(sendAppWelcomeEmail).mockRejectedValue(new Error("smtp down"))
 
-    const res = await sellGenCodeViaPlatform("GEN-1", "app-user-1", 100)
-
-    expect(res).toEqual({ ok: true, message: "gencode.soldViaPlatform" })
-    expect(sendAppWelcomeEmail).toHaveBeenCalledWith(
-      "buyer@example.com",
-      expect.any(String),
-      "Bo",
-      "/qr/GEN-1",
-    )
+    await expect(sellGenCodeViaPlatform("GEN-1", BUYER)).resolves.toEqual({
+      ok: true, message: "gencode.soldViaPlatform",
+    })
   })
 })
 

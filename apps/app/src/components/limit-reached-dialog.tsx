@@ -100,8 +100,8 @@ export function LimitReachedDialog({ open, onOpenChange, context, limit, tier }:
   const allowsExtra = allowsExtraPurchase(CONTEXT_QUOTA_KEY[context], tier)
   const extraResource = CONTEXT_EXTRA_RESOURCE[context]
 
-  // FREE always has a real higher tier to sell. Already-paying tiers
-  // (PREMIUM/PHYSICAL_QR) only get the extra-purchase hint where the module
+  // FREE always has a real higher tier to sell. Already-paying tiers (PREMIUM
+  // today) only get the extra-purchase hint where the module
   // actually allows one; otherwise there's nothing further to offer beyond
   // acknowledging the limit — the CTA still points at /subscriptions (where
   // the current plan and its options are visible) rather than disappearing.
