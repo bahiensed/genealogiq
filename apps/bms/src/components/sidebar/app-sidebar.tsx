@@ -6,10 +6,19 @@ import { usePathname } from 'next/navigation'
 import { main, groups } from '@/components/sidebar/menu-items'
 import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@genealogiq/ui/collapsible'
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@genealogiq/ui/sidebar'
+import { useSidebar, Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@genealogiq/ui/sidebar'
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  // The mobile sidebar is a Sheet overlaying the page — it does NOT close on its own
+  // when a link navigates, so tapping a menu item loads the new page behind a sidebar
+  // that is still covering it. Every navigating <Link> closes it; never the
+  // CollapsibleTrigger, since expanding a group is not navigation. No-op on desktop.
+  const closeOnMobileNav = () => {
+    if (isMobile) setOpenMobile(false)
+  }
 
   return (
     <Sidebar>
@@ -38,7 +47,7 @@ export function AppSidebar() {
               {main.map((item) => (
                 <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={closeOnMobileNav}>
                       <item.icon />
                       <span>{item.name}</span>
                     </Link>
@@ -65,7 +74,7 @@ export function AppSidebar() {
                     {group.items.map((item) => (
                       <SidebarMenuItem key={item.name}>
                         <SidebarMenuButton asChild isActive={pathname === item.url}>
-                          <Link href={item.url}>
+                          <Link href={item.url} onClick={closeOnMobileNav}>
                             <item.icon />
                             <span>{item.name}</span>
                           </Link>

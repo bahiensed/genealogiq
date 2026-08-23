@@ -6,11 +6,11 @@ import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { formatGenCode } from "@/lib/gen-code"
 
-interface PhysicalQrLandingProps {
+interface GenCodeLandingProps {
   genCode: string
 }
 
-export function PhysicalQrLanding({ genCode }: PhysicalQrLandingProps) {
+export function GenCodeLanding({ genCode }: GenCodeLandingProps) {
   const t = useTranslations("Qr")
   const callbackUrl = `/qr/${genCode}`
 

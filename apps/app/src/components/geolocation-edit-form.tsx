@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ImagePlus, X, Save, RotateCcw, Trash2, LocateFixed, Lock } from "lucide-react"
+import { ImagePlus, X, Save, RotateCcw, Trash2, LocateFixed } from "lucide-react"
 import { toast } from "sonner"
 import { upload } from "@vercel/blob/client"
 import { compressImage } from "@/lib/image-compress"
@@ -25,7 +25,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { AddressSection } from "@/components/address/address-section"
-import { GeolocationGate } from "@/components/geolocation-gate"
 import { saveGeolocation, deleteGeolocation } from "@/actions/geolocation.actions"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { getGeolocationSchema, type GeolocationFormValues } from "@/schemas/geolocation.schema"
@@ -73,10 +72,9 @@ function buildDefaults(existing: GeolocationRow | null): GeolocationFormValues {
 interface Props {
   profileId: string
   existing: GeolocationRow | null
-  geolocationFullAccess: boolean
 }
 
-export function GeolocationEditForm({ profileId, existing, geolocationFullAccess }: Props) {
+export function GeolocationEditForm({ profileId, existing }: Props) {
   const router = useRouter()
   const t = useTranslations("Geolocation")
   const tc = useTranslations("Common")
@@ -360,26 +358,20 @@ export function GeolocationEditForm({ profileId, existing, geolocationFullAccess
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label className="text-base">{t("coordinates")}</Label>
-          {!geolocationFullAccess && (
-            <GeolocationGate className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
-              <Lock className="h-3.5 w-3.5" />
-              {t("upgradeToUnlock")}
-            </GeolocationGate>
-          )}
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 space-y-1">
             <Label htmlFor="geo-lat" className="text-xs text-muted-foreground">{t("latitude")}</Label>
-            <Input id="geo-lat" type="number" step="any" min={-90} max={90} placeholder="-25.4284" disabled={!geolocationFullAccess} {...register("lat", { valueAsNumber: true })} />
+            <Input id="geo-lat" type="number" step="any" min={-90} max={90} placeholder="-25.4284" {...register("lat", { valueAsNumber: true })} />
             {errors.lat && <p className="text-xs text-destructive">{errors.lat.message}</p>}
           </div>
           <div className="flex-1 space-y-1">
             <Label htmlFor="geo-lon" className="text-xs text-muted-foreground">{t("longitude")}</Label>
-            <Input id="geo-lon" type="number" step="any" min={-180} max={180} placeholder="-49.2733" disabled={!geolocationFullAccess} {...register("lon", { valueAsNumber: true })} />
+            <Input id="geo-lon" type="number" step="any" min={-180} max={180} placeholder="-49.2733" {...register("lon", { valueAsNumber: true })} />
             {errors.lon && <p className="text-xs text-destructive">{errors.lon.message}</p>}
           </div>
           <div className="flex items-end">
-            <Button type="button" variant="outline" onClick={handleUseMyLocation} disabled={!geolocationFullAccess} className="gap-2 w-full sm:w-auto">
+            <Button type="button" variant="outline" onClick={handleUseMyLocation} className="gap-2 w-full sm:w-auto">
               <LocateFixed className="h-4 w-4" />
               {t("useMyLocation")}
             </Button>

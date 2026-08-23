@@ -55,7 +55,7 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
     } : undefined,
   }
 
-  const acquiredQRCodes   = customer._count.physicalQrPurchases
+  const acquiredQRCodes   = customer._count.genCodesBought
   const createdProfiles   = customer._count.guardiansOf
   // Codes bought but not yet turned into a memorial. The customer redeems them
   // themselves at /qr/<genCode>; there is no longer a path for us to do it for

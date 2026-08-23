@@ -8,7 +8,6 @@ const subscriptionSelect = {
   code:                 true,
   name:                 true,
   description:          true,
-  maxProfiles:          true,
   termLength:           true,
   priceUsd:             true,
   monthlyPriceUsd:      true,
@@ -25,7 +24,6 @@ const subscriptionSelect = {
   memorialsMax:          true,
   petsMax:               true,
   qrCodeMax:             true,
-  geolocationFullAccess: true,
   stripeProductId:         true,
   stripeAnnualPriceIdUsd:  true,
   stripeMonthlyPriceIdUsd: true,
@@ -53,7 +51,7 @@ export async function getSubscriptions() {
 
   return rows.map(r => ({
     id: r.id, code: r.code, name: r.name, description: r.description,
-    maxProfiles: r.maxProfiles, termLength: r.termLength, isActive: r.isActive, createdAt: r.createdAt,
+    termLength: r.termLength, isActive: r.isActive, createdAt: r.createdAt,
     priceUsd: Number(r.priceUsd),
   }))
 }

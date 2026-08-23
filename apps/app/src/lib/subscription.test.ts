@@ -51,14 +51,14 @@ describe("getMemorialFeatures — a redeemed GenCode grants no tier of its own",
   // physical plaque delivers a memorial; it does NOT come with a plan. The
   // plan is sold separately in the APP, so a fresh guardian stays FREE.
   //
-  // The mocked row carries `physicalQrLicense` on purpose even though the
+  // The mocked row carries `genCode` on purpose even though the
   // query no longer selects it: that is exactly what the removed
   // short-circuit keyed on, so these two tests fail against the old
   // behaviour (they would resolve to the PHYSICAL_QR constant) and pass
   // against the new one.
   const LICENSED_MEMO = {
     role:              "APP_MEMO",
-    physicalQrLicense: { id: "lic-1" },
+    genCode: { id: "lic-1" },
     appSale:           null,
   }
 

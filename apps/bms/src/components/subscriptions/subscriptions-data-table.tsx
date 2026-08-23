@@ -20,7 +20,6 @@ export function SubscriptionsDataTable({ currentUserRole, data }: SubscriptionsD
   const columnLabels: Record<string, string> = {
     code:        t('table.code'),
     name:        t('table.name'),
-    maxProfiles: t('table.maxProfiles'),
     termLength:  t('table.term'),
     priceUsd:    t('table.price'),
     isActive:    t('table.status'),
@@ -32,7 +31,7 @@ export function SubscriptionsDataTable({ currentUserRole, data }: SubscriptionsD
       columns={getColumns(currentUserRole, t, locale)}
       data={data}
       filterColumn="name"
-      initialSorting={[{ id: 'maxProfiles', desc: false }]}
+      initialSorting={[{ id: 'code', desc: false }]}
       initialColumnVisibility={INITIAL_COLUMN_VISIBILITY}
       emptyMessage={t('table.empty')}
       columnLabels={columnLabels}

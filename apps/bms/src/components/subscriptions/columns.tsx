@@ -15,7 +15,6 @@ export type SubscriptionRow = {
   code: string
   name: string
   description: string | null
-  maxProfiles: number
   termLength: number
   priceUsd: number
   isActive: boolean
@@ -63,11 +62,6 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       accessorKey: 'name',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
       cell: ({ row }) => row.original.name,
-    },
-    {
-      accessorKey: 'maxProfiles',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.maxProfiles')} className="justify-end" />,
-      cell: ({ row }) => <div className="text-right">{row.original.maxProfiles}</div>,
     },
     {
       accessorKey: 'termLength',

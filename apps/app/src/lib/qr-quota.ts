@@ -13,7 +13,7 @@ export interface QrQuotaStatus {
 }
 
 // There's no persisted "is this QR unlocked" flag anywhere today — account-
-// level QR access has always been a binary, per-profile thing (physicalQrLicense/
+// level QR access has always been a binary, per-profile thing (genCode/
 // appSaleId), never a count. This ranks a guardian's own profile plus every
 // memorial they manage (ACCEPTED) by creation order, live, with no schema
 // change: the first `qrCodeMax` of them are free. Documented as an initial
@@ -31,7 +31,7 @@ export async function getQrQuotaStatus(guardianId: string, profileId: string): P
     prisma.appUser.findUnique({
       where: { id: profileId },
       select: {
-        physicalQrLicense: { select: { id: true } },
+        genCode: { select: { id: true } },
         appSale:           { select: { status: true, currentPeriodEnd: true } },
       },
     }),
@@ -44,7 +44,7 @@ export async function getQrQuotaStatus(guardianId: string, profileId: string): P
   // free ranks. For the physical case this is the product working as sold:
   // the plaque IS that memorial's QR code, so it cannot be rank-gated.
   //
-  // This is now the ONLY place a PhysicalQrLicense affects entitlement.
+  // This is now the ONLY place a GenCode affects entitlement.
   // Redeeming a GenCode no longer grants a tier (getMemorialFeatures resolves
   // it like any other profile, i.e. FREE for a fresh account) — so do not
   // read this as "licensed profiles are privileged"; they are unlocked for
@@ -56,7 +56,7 @@ export async function getQrQuotaStatus(guardianId: string, profileId: string): P
   // `limit` below via the VIEWING guardian's own tier); folding that in here
   // too would let every memorial of a paying guardian bypass rank entirely,
   // which defeats the shared 2-free-slots heuristic.
-  const hasOwnUnlock = !!target?.physicalQrLicense || isSaleLive(target?.appSale)
+  const hasOwnUnlock = !!target?.genCode || isSaleLive(target?.appSale)
 
   const ranked = [...(guardian ? [guardian] : []), ...memorials].sort(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),

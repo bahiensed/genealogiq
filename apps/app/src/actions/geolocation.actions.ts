@@ -10,7 +10,6 @@ import { identityTranslator } from "@/schemas/i18n"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
-import { getMemorialFeatures } from "@/lib/subscription"
 
 export async function saveGeolocation(profileId: string, data: unknown): Promise<ActionResult> {
   const t = await getTranslations("Actions")
@@ -33,17 +32,11 @@ export async function saveGeolocation(profileId: string, data: unknown): Promise
     )
   }
 
-  const features = await getMemorialFeatures(profileId)
-
-  // Flatten the nested address object into the DB columns;
-  // when the tier doesn't allow precise coordinates, force lat/lon to 0.
+  // Flatten the nested address object into the DB columns. Coordinates used to
+  // be zeroed for tiers without geolocationFullAccess; precise location is a
+  // free feature now, so they are stored as submitted.
   const { address, ...rest } = parsed.data
-  const flat = {
-    ...rest,
-    ...address,
-    lat: features.geolocationFullAccess ? rest.lat : 0,
-    lon: features.geolocationFullAccess ? rest.lon : 0,
-  }
+  const flat = { ...rest, ...address }
 
   await prisma.geolocation.upsert({
     where: { userId: profileId },

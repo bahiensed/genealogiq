@@ -76,6 +76,11 @@
       "notAuthorized": "Você não tem permissão para gerenciar esta galeria.",
       "videoLimit": "O limite de vídeos é {max} para este plano."
     },
+    "gencode": {
+      "alreadyActivated": "Este código já foi ativado.",
+      "notFound": "QR Code não encontrado.",
+      "raceRetry": "Este código acabou de ser ativado. Tente novamente."
+    },
     "geolocation": {
       "notAuthorized": "Você não tem autorização para gerenciar este perfil."
     },
@@ -100,11 +105,6 @@
       "notAuthorized": "Você não tem permissão para gerenciar este perfil.",
       "notFound": "Perfil não encontrado.",
       "ownerNotInTree": "O dono selecionado já precisa fazer parte da sua árvore genealógica."
-    },
-    "physicalQr": {
-      "alreadyActivated": "Este código já foi ativado.",
-      "notFound": "QR Code não encontrado.",
-      "raceRetry": "Este código acabou de ser ativado. Tente novamente."
     },
     "places": {
       "imageLimit": "O limite de imagens é {max} para este plano.",
@@ -734,7 +734,6 @@
       "uploadFailed": "Falha ao enviar a foto.",
       "waitForUploads": "Aguarde o envio das fotos terminar."
     },
-    "upgradeToUnlock": "Faça upgrade do plano para desbloquear",
     "useMyLocation": "Usar minha localização",
     "viewPhotoAlt": "{place} foto {number}"
   },

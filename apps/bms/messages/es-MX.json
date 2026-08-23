@@ -274,26 +274,20 @@
       "groups": {
         "alwaysActive": "Siempre activo",
         "categories": "Categorías",
-        "finance": "Finanzas",
         "inventory": "Inventario",
         "purchasing": "Compras",
         "records": "Registros"
       },
       "labels": {
-        "buySubscriptions": "Comprar suscripciones",
+        "buySubscriptions": "Comprar GenCodes",
         "customerCat": "Cat. cliente",
         "customers": "Clientes",
         "dashboard": "Panel",
-        "finance": "Finanzas",
-        "productCat": "Cat. producto",
-        "products": "Productos",
         "sales": "Ventas",
-        "serviceCat": "Cat. servicio",
-        "services": "Servicios",
         "supplierCat": "Cat. proveedor",
         "suppliers": "Proveedores",
         "system": "Sistema",
-        "viewSubscriptions": "Ver suscripciones"
+        "viewSubscriptions": "Mis GenCodes"
       }
     },
     "new": "Nuevo cliente",
@@ -631,7 +625,7 @@
     "submit": "Registrar Venta",
     "submitting": "Enviando…",
     "summary": {
-      "gencodes": "GenCodes a generar",
+      "genCodes": "GenCodes a generar",
       "totalPrice": "Precio total",
       "unitPrice": "Precio unitario / código"
     },
@@ -667,20 +661,18 @@
     "edit": "Editar Suscripción",
     "fields": {
       "annual": "Anual",
-      "bioMaxChars": "Máximo de Caracteres de la Bio",
+      "bioMaxChars": "Máximo de Caracteres en la Bio",
       "code": "Código",
       "description": "Descripción",
       "documentsMax": "Máximo de Documentos",
       "geoPlacesMax": "Máximo de Geolocalizaciones",
-      "geolocationFullAccess": "Acceso Total a Geolocalización",
-      "maxProfiles": "Máximo de Perfiles Memo",
-      "mediaMaxImages": "Máximo de Imágenes Combinadas",
+      "mediaMaxImages": "Máximo de Imágenes Compartidas",
       "mediaMaxVideos": "Máximo de Videos en la Galería",
       "memorialsMax": "Máximo de Memoriales",
       "monthly": "Mensual",
       "name": "Nombre",
       "petsMax": "Máximo de Mascotas",
-      "qrCodeMax": "Máximo de QR Codes",
+      "qrCodeMax": "Máximo de GenCodes",
       "termLength": "Duración (en meses)",
       "treeMaxMembers": "Máximo de Miembros en el Árbol"
     },
@@ -704,9 +696,10 @@
     "placeholders": {
       "code": "DECADE"
     },
+    "prices": {
+      "title": "Precios"
+    },
     "quotas": {
-      "geolocationFullAccessOff": "Solo dirección (sin marcador GPS)",
-      "geolocationFullAccessOn": "Coordenadas GPS precisas",
       "title": "Cuotas"
     },
     "status": {
@@ -729,7 +722,6 @@
       "code": "Código",
       "createdAt": "Creada el",
       "empty": "No se encontraron suscripciones",
-      "maxProfiles": "Memo",
       "name": "Nombre",
       "price": "Precio",
       "status": "Estado",

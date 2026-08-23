@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { activatePhysicalQr } from "@/actions/physical-qr.actions"
+import { activateGenCode } from "@/actions/gencode.actions"
 import { formatGenCode } from "@/lib/gen-code"
 import { isAllowedImage, IMAGE_FORMATS_LABEL } from "@/lib/upload-validation"
 import { useLocale, useTranslations } from "next-intl"
@@ -137,7 +137,7 @@ export function ActivateMemorialForm({ genCode }: ActivateMemorialFormProps) {
   const handleSave = () => {
     if (uploading) { toast.warning(t("activateMemorial.waitUpload")); return }
     startTransition(async () => {
-      const result = await activatePhysicalQr(genCode, {
+      const result = await activateGenCode(genCode, {
         firstName:   form.firstName,
         lastName:    form.lastName,
         gender:      form.gender || null,

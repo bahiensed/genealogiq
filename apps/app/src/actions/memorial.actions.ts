@@ -24,21 +24,6 @@ export async function createMemorial(data: unknown): Promise<ActionResult<{ id: 
     return fail(t("memorial.limitReached", { max: creationStatus.limit }))
   }
 
-  // Separately: does this new memorial get bound to a legacy paid AppSale
-  // slot (bulk sales made through BMS/SEQ) — pick the first sale that still
-  // has an open slot (fewer assigned memorials than its subscription's
-  // maxProfiles). Unrelated to the guardian-level cap just checked above.
-  const sales = await prisma.appSale.findMany({
-    where: { appUserId: session.user.id },
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      subscription: { select: { maxProfiles: true } },
-      _count: { select: { assignedTo: true } },
-    },
-  })
-  const nextSale = sales.find((s) => s._count.assignedTo < s.subscription.maxProfiles)
-
   const parsed = getMemorialSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return fail(t("common.invalidData"))
 
@@ -57,7 +42,6 @@ export async function createMemorial(data: unknown): Promise<ActionResult<{ id: 
       deathPlace,
       deathCountry,
       avatarUrl,
-      appSaleId: nextSale?.id ?? null,
     },
   })
 

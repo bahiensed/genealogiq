@@ -1,13 +1,14 @@
 import { notFound } from 'next/navigation'
 import { getCompany } from '@/queries/company'
 import { CompanyForm } from '@/components/company/company-form'
+import { FormShell } from '@genealogiq/ui/form-shell'
 
 export default async function CompanyPage() {
   const company = await getCompany()
   if (!company) notFound()
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <FormShell>
       <CompanyForm
         id={company.id}
         defaultValues={{
@@ -32,6 +33,6 @@ export default async function CompanyPage() {
           } : undefined,
         }}
       />
-    </div>
+    </FormShell>
   )
 }

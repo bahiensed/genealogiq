@@ -36,7 +36,7 @@ export async function getGenCodeSummary(): Promise<GenCodeSaleRow[]> {
       COUNT(CASE WHEN pql.status = 'ACTIVATED' THEN 1 END)     AS activated,
       COUNT(CASE WHEN pql.status = 'SOLD'      THEN 1 END)     AS sold,
       COUNT(CASE WHEN pql.status = 'AVAILABLE' THEN 1 END)     AS available
-    FROM physical_qr_licenses pql
+    FROM gencodes pql
     JOIN sales     s ON pql.sale_id    = s.id
     JOIN packages  p ON pql.package_id = p.id
     JOIN tenants   t ON pql.tenant_id  = t.id
@@ -80,7 +80,7 @@ export async function getGenCodeTotals(): Promise<GenCodeTotals> {
       COUNT(CASE WHEN status = 'ACTIVATED' THEN 1 END)         AS activated,
       COUNT(CASE WHEN status = 'SOLD'      THEN 1 END)         AS sold,
       COUNT(CASE WHEN status = 'AVAILABLE' THEN 1 END)         AS available
-    FROM physical_qr_licenses
+    FROM gencodes
   `
 
   const zero = BigInt(0)

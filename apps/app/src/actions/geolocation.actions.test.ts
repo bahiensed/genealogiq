@@ -92,15 +92,16 @@ describe("saveGeolocation — success path", () => {
     )
   })
 
-  it("forces lat/lon to 0 when the tier lacks full geolocation access", async () => {
-    vi.mocked(getMemorialFeatures).mockResolvedValue({ geolocationFullAccess: false } as never)
-
+  // Coordinates used to be blanked to 0/0 for any tier without
+  // geolocationFullAccess. Precise location is free now, so they must survive
+  // the round trip unchanged — this is the inverse of the test it replaced.
+  it("stores the submitted coordinates as-is, for every tier", async () => {
     const res = await saveGeolocation("A", validInput)
 
     expect(res.ok).toBe(true)
     const arg = prismaMock.geolocation.upsert.mock.calls[0][0]
-    expect(arg.create).toMatchObject({ lat: 0, lon: 0 })
-    expect(arg.update).toMatchObject({ lat: 0, lon: 0 })
+    expect(arg.create).toMatchObject({ lat: validInput.lat, lon: validInput.lon })
+    expect(arg.update).toMatchObject({ lat: validInput.lat, lon: validInput.lon })
   })
 
   it("deletes orphaned photo blobs that are no longer referenced", async () => {

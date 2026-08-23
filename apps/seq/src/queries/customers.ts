@@ -66,7 +66,7 @@ export async function getCustomer(id: string) {
           // GenCodes this customer bought from us. Only codes written off via
           // the platform channel carry the buyer link — a manual write-off
           // records a free-text name and cannot be attributed to a row here.
-          physicalQrPurchases: true,
+          genCodesBought: true,
           guardiansOf:         true,
         },
       },
