@@ -38,6 +38,15 @@ function getColumns(t: Translator, locale: string): ColumnDef<PhysicalQrRow>[] {
       ),
     },
     {
+      accessorKey: 'sold',
+      header: t('table.sold'),
+      // Amber, not green: a code written off but never redeemed is a buyer we
+      // lost somewhere between the counter and the app.
+      cell: ({ row }) => (
+        <span className="font-medium text-amber-600">{row.original.sold}</span>
+      ),
+    },
+    {
       accessorKey: 'available',
       header: t('table.available'),
       cell: ({ row }) => (

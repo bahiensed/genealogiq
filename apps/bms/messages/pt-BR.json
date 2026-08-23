@@ -580,15 +580,24 @@
     "unitPrice": "Preço unitário por QR Code"
   },
   "PhysicalQr": {
+    "stats": {
+      "activated": "Ativados",
+      "available": "Em estoque da empresa",
+      "sold": "Vendidos, não resgatados",
+      "total": "Total emitido"
+    },
+    "subtitle": "Todo GenCode gerado por uma venda e em que pé está. \"Vendidos\" são os que a empresa deu baixa mas o comprador ainda não resgatou.",
     "table": {
       "activated": "Ativados",
       "available": "Disponíveis",
       "empty": "Nenhum QR Code físico encontrado.",
       "package": "Pacote",
       "saleDate": "Data da venda",
+      "sold": "Vendidos",
       "tenant": "Inquilino",
       "total": "Total"
-    }
+    },
+    "title": "Licenças emitidas"
   },
   "Sales": {
     "actions": {

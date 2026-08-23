@@ -50,6 +50,26 @@ src/
 ## CURRENT STATE
 *Atualize esta seção ao final de cada sessão*
 
+> **Correções às entradas antigas abaixo** (23/08/2026). As entradas datadas são
+> preservadas como registro do que se decidiu na época; estes três pontos foram
+> revertidos ou entregues depois e **não valem mais**:
+>
+> 1. **Quotas não são mais locais ao APP.** A entrada de 04/08 diz que
+>    `plan-quotas.ts` é "config 100% local" e que a `Subscription` nunca mais
+>    diria "quais números esse plano tem". Foi o contrário: a migration
+>    `20260803010000` moveu todas as cotas para colunas da `Subscription`, para o
+>    BMS editar sem deploy. `plan-quotas.ts` hoje guarda só o shape e a política
+>    de compra avulsa.
+> 2. **O tier `PHYSICAL_QR` não existe mais.** Resgatar um GenCode não concede
+>    tier nenhum — entrega um memorial, que resolve como qualquer outro perfil
+>    (FREE numa conta nova). Era o último plano hardcoded do código.
+> 3. **A compra avulsa existe.** A pendência que dizia "só o texto que a
+>    antecipa" foi entregue: checkout one-time no Stripe, `ExtraUnitPurchase` no
+>    webhook, somado à cota pelos helpers.
+>
+> Fonte da verdade atual: `apps/app/docs/CONVENTIONS.md` (seção Quota) e
+> `src/lib/subscription.test.ts`.
+
 Last session: 08/08/2026 — **3 fixes pontuais reportados ao vivo por Douglas** (bio label i18n + ícone do menu do avatar + data final de Geolocalizações), cada um em branch própria a partir de `main`, sem plan-mode — pedidos avulsos via chat normal, não uma sessão temática única.
 
 - **Fix 1 — label da textarea de Biografia mostrando `"Biografia de {name}"` literal** (`fix/app-bio-textarea-label-i18n`, PR #150): reportado em `/profile/[id]/bio/edit`. Causa: `bio-edit-form.tsx` chamava `t("title")` sem o param `{name}` — essa chave é do **heading da página de visualização** (`bio/page.tsx`, que passa `{ name: profile.firstName }` corretamente), reaproveitada por engano pro label da textarea do form de edição. Fix: chave nova `Bio.textLabel` (×3 locales, valor simples "Biography"/"Biografia"/"Biografía", sem interpolação) — `Bio.title` continua reservada pro heading.
