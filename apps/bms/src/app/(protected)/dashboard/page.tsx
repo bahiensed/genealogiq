@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
-import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Building2, Factory, IdCard, Layers, QrCode, ArrowUpRight, Trophy, UserPlus } from 'lucide-react'
+import { ShoppingCart, BarChart3, TrendingUp, Banknote, DollarSign, CircleDollarSign, Building2, IdCard, Layers, QrCode, ArrowUpRight, Trophy, UserPlus } from 'lucide-react'
 import { verifySession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
 import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@genealogiq/ui/card'
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Row 4 — Entities */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -154,21 +154,6 @@ export default async function DashboardPage() {
           <CardContent>
             <p className="text-3xl font-bold">{stats.customers}</p>
             <p className="text-sm text-muted-foreground mt-1">Registered customers</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <Link href="/suppliers" className="inline-flex items-center gap-1 hover:underline">
-                Suppliers <ArrowUpRight className="h-4 w-4" />
-              </Link>
-            </CardTitle>
-            <CardAction><Factory className="h-5 w-5 text-muted-foreground" /></CardAction>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats.suppliers}</p>
-            <p className="text-sm text-muted-foreground mt-1">Registered suppliers</p>
           </CardContent>
         </Card>
 

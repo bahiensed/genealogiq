@@ -97,19 +97,6 @@
       "updated": "Plan actualizado correctamente.",
       "updatedStripeCleared": "Plan actualizado — referencias de Stripe eliminadas. Sincroniza con Stripe de nuevo para provisionar nuevos precios."
     },
-    "supplier": {
-      "created": "Proveedor creado correctamente.",
-      "notFound": "Proveedor no encontrado.",
-      "taxIdExists": "Ya existe un proveedor con este RFC",
-      "updated": "Proveedor actualizado correctamente."
-    },
-    "supplierCategory": {
-      "created": "Categoría creada con éxito.",
-      "hasSuppliers": "No se puede eliminar: la categoría está asignada a uno o más proveedores.",
-      "nameExists": "Ya existe una categoría con este nombre.",
-      "notFound": "Categoría no encontrada.",
-      "updated": "Categoría actualizada con éxito."
-    },
     "user": {
       "cannotDeactivateSelf": "No puedes desactivar tu propia cuenta.",
       "cannotDeleteSelf": "No puedes eliminar tu propia cuenta.",
@@ -757,108 +744,6 @@
       "deleteConfirm": "La suscripción \"{name}\" se eliminará permanentemente.",
       "deleted": "Suscripción eliminada correctamente.",
       "reactivated": "Suscripción reactivada."
-    }
-  },
-  "SupplierCategories": {
-    "actions": {
-      "deactivate": "Desactivar",
-      "delete": "Eliminar",
-      "edit": "Editar",
-      "openMenu": "Abrir menú",
-      "reactivate": "Reactivar"
-    },
-    "create": "Crear categoría",
-    "edit": "Editar categoría de proveedor",
-    "fields": {
-      "activeCategory": "Categoría activa",
-      "description": "Descripción",
-      "name": "Nombre"
-    },
-    "new": "Nueva categoría de proveedor",
-    "status": {
-      "active": "Activo",
-      "inactive": "Inactivo"
-    },
-    "table": {
-      "createdAt": "Creado el",
-      "description": "Descripción",
-      "empty": "No se encontraron categorías de proveedores.",
-      "name": "Nombre",
-      "status": "Estado"
-    },
-    "title": "Categorías de proveedores",
-    "toasts": {
-      "deactivated": "Categoría desactivada.",
-      "deleteConfirm": "La categoría \"{name}\" se eliminará permanentemente.",
-      "deleted": "Categoría eliminada con éxito.",
-      "reactivated": "Categoría reactivada."
-    }
-  },
-  "Suppliers": {
-    "actions": {
-      "deactivate": "Desactivar",
-      "delete": "Eliminar",
-      "edit": "Editar",
-      "openMenu": "Abrir menú",
-      "reactivate": "Reactivar"
-    },
-    "active": "¿Activo?",
-    "category": {
-      "add": "Agregar nueva categoría",
-      "create": "Crear categoría",
-      "description": "Descripción:",
-      "name": "Nombre:",
-      "title": "Nueva categoría de proveedor"
-    },
-    "create": "Crear proveedor",
-    "edit": "Editar proveedor",
-    "entityType": {
-      "company": "Persona Moral",
-      "individual": "Persona Física"
-    },
-    "fields": {
-      "birthDate": "Fecha de Nacimiento",
-      "category": "Categoría",
-      "cnpj": "RFC",
-      "companyName": "Razón Social",
-      "countryCode": "Clave",
-      "cpf": "RFC",
-      "email": "Correo electrónico",
-      "firstName": "Nombre",
-      "lastName": "Apellido",
-      "municipalRegistration": "Inscripción Municipal",
-      "notes": "Notas",
-      "phone": "Teléfono",
-      "stateRegistration": "Inscripción Estatal",
-      "tradeName": "Nombre Comercial",
-      "type": "Tipo"
-    },
-    "new": "Nuevo proveedor",
-    "placeholders": {
-      "category": "Selecciona una categoría"
-    },
-    "sections": {
-      "address": "Dirección"
-    },
-    "status": {
-      "active": "Activo",
-      "inactive": "Inactivo"
-    },
-    "table": {
-      "category": "Categoría",
-      "createdAt": "Creado el",
-      "email": "Correo electrónico",
-      "empty": "No se encontraron proveedores.",
-      "name": "Nombre",
-      "status": "Estado",
-      "type": "Tipo"
-    },
-    "title": "Proveedores",
-    "toasts": {
-      "deactivated": "Proveedor desactivado.",
-      "deleteConfirm": "El proveedor \"{name}\" se eliminará permanentemente.",
-      "deleted": "Proveedor eliminado correctamente.",
-      "reactivated": "Proveedor reactivado."
     }
   },
   "Users": {

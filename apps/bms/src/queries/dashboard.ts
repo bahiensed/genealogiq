@@ -41,7 +41,6 @@ export async function getDashboardStats() {
     packages,
     customers,
     systemUsers,
-    suppliers,
     totals,
     chartRows,
     topSellers,
@@ -51,7 +50,6 @@ export async function getDashboardStats() {
     prisma.package.count({ where: { isActive: true } }),
     prisma.tenant.count(),
     prisma.user.count({ where: { tenantId: null } }),
-    prisma.supplier.count(),
     prisma.$queryRaw<SalesTotalsRow[]>`
       SELECT
         COUNT(s.id) FILTER (WHERE s.created_at >= ${startOfMonth})              AS monthly_count,
@@ -163,7 +161,6 @@ export async function getDashboardStats() {
     packages,
     customers,
     systemUsers,
-    suppliers,
     monthlyCount,
     monthlyRevenue,
     yearlyCount,

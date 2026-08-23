@@ -97,19 +97,6 @@
       "updated": "Subscription updated successfully.",
       "updatedStripeCleared": "Subscription updated — Stripe references cleared. Sync with Stripe again to provision fresh prices."
     },
-    "supplier": {
-      "created": "Supplier created successfully.",
-      "notFound": "Supplier not found.",
-      "taxIdExists": "A supplier with this tax ID already exists",
-      "updated": "Supplier updated successfully."
-    },
-    "supplierCategory": {
-      "created": "Category created successfully.",
-      "hasSuppliers": "Cannot delete: category is assigned to one or more suppliers.",
-      "nameExists": "A category with this name already exists.",
-      "notFound": "Category not found.",
-      "updated": "Category updated successfully."
-    },
     "user": {
       "cannotDeactivateSelf": "You cannot deactivate your own account.",
       "cannotDeleteSelf": "You cannot delete your own account.",
@@ -757,108 +744,6 @@
       "deleteConfirm": "The subscription \"{name}\" will be permanently deleted.",
       "deleted": "Subscription deleted successfully.",
       "reactivated": "Subscription reactivated."
-    }
-  },
-  "SupplierCategories": {
-    "actions": {
-      "deactivate": "Deactivate",
-      "delete": "Delete",
-      "edit": "Edit",
-      "openMenu": "Open menu",
-      "reactivate": "Reactivate"
-    },
-    "create": "Create category",
-    "edit": "Edit supplier category",
-    "fields": {
-      "activeCategory": "Active category",
-      "description": "Description",
-      "name": "Name"
-    },
-    "new": "New supplier category",
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "table": {
-      "createdAt": "Created at",
-      "description": "Description",
-      "empty": "No supplier categories found.",
-      "name": "Name",
-      "status": "Status"
-    },
-    "title": "Supplier Categories",
-    "toasts": {
-      "deactivated": "Category deactivated.",
-      "deleteConfirm": "The category \"{name}\" will be permanently deleted.",
-      "deleted": "Category deleted successfully.",
-      "reactivated": "Category reactivated."
-    }
-  },
-  "Suppliers": {
-    "actions": {
-      "deactivate": "Deactivate",
-      "delete": "Delete",
-      "edit": "Edit",
-      "openMenu": "Open menu",
-      "reactivate": "Reactivate"
-    },
-    "active": "Active?",
-    "category": {
-      "add": "Add new category",
-      "create": "Create category",
-      "description": "Description:",
-      "name": "Name:",
-      "title": "New supplier category"
-    },
-    "create": "Create supplier",
-    "edit": "Edit supplier",
-    "entityType": {
-      "company": "Company",
-      "individual": "Individual"
-    },
-    "fields": {
-      "birthDate": "Date of Birth",
-      "category": "Category",
-      "cnpj": "CNPJ",
-      "companyName": "Company Name",
-      "countryCode": "IDD",
-      "cpf": "CPF",
-      "email": "Email",
-      "firstName": "Name",
-      "lastName": "Last Name",
-      "municipalRegistration": "Municipal Registration",
-      "notes": "Notes",
-      "phone": "Phone",
-      "stateRegistration": "State Registration",
-      "tradeName": "Trade Name",
-      "type": "Type"
-    },
-    "new": "New supplier",
-    "placeholders": {
-      "category": "Select a category"
-    },
-    "sections": {
-      "address": "Address"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "table": {
-      "category": "Category",
-      "createdAt": "Created at",
-      "email": "E-mail",
-      "empty": "No suppliers found.",
-      "name": "Name",
-      "status": "Status",
-      "type": "Type"
-    },
-    "title": "Suppliers",
-    "toasts": {
-      "deactivated": "Supplier deactivated.",
-      "deleteConfirm": "The supplier \"{name}\" will be permanently deleted.",
-      "deleted": "Supplier deleted successfully.",
-      "reactivated": "Supplier reactivated."
     }
   },
   "Users": {
