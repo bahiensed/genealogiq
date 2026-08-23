@@ -40,22 +40,6 @@ async function main() {
     select: { id: true, email: true, role: true },
   })
   console.log("[e2e seed] upserted admin:", user)
-
-  // Fixture supplier category so the supplier form's required category Select has
-  // an option. Stable name (no "E2E" prefix) so the category CRUD specs' cleanup
-  // never deletes it.
-  const SUP_CAT = {
-    name: "QA Supplier Cat",
-    description: "Fixture category for e2e supplier tests",
-    isActive: true,
-  }
-  const existing = await prisma.supplierCategory.findFirst({ where: { name: SUP_CAT.name } })
-  if (!existing) {
-    await prisma.supplierCategory.create({ data: SUP_CAT })
-    console.log("[e2e seed] created fixture supplier category:", SUP_CAT.name)
-  } else {
-    console.log("[e2e seed] fixture supplier category already present")
-  }
 }
 
 main()

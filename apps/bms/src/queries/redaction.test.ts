@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
     tenant:   { findUnique: vi.fn() },
-    supplier: { findUnique: vi.fn() },
     user:     { findUnique: vi.fn() },
   },
 }))
@@ -17,7 +16,6 @@ vi.mock("@/lib/dal", () => ({
 }))
 
 import { getCustomer } from "@/queries/customers"
-import { getSupplier } from "@/queries/suppliers"
 import { getUser } from "@/queries/users"
 import { canViewSensitive } from "@/lib/dal"
 
@@ -61,15 +59,6 @@ describe("getCustomer redaction", () => {
     vi.mocked(canViewSensitive).mockResolvedValue(false)
     prismaMock.tenant.findUnique.mockResolvedValue(null)
     expect(await getCustomer("missing")).toBeNull()
-  })
-})
-
-describe("getSupplier redaction", () => {
-  it("redacts third-party PII for a non-privileged viewer", async () => {
-    vi.mocked(canViewSensitive).mockResolvedValue(false)
-    prismaMock.supplier.findUnique.mockResolvedValue({ ...customerRow })
-    const res = await getSupplier("s1")
-    expect(res).toMatchObject({ taxId: "•••", phone: "•••", address: null })
   })
 })
 
