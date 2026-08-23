@@ -40,9 +40,15 @@ Setup:
 1. GitHub → Settings → Secrets and variables → **Actions** → New **repository**
    secret.
 2. Name it `DATABASE_URL_DIRECT`, value = the Neon connection string for the
-   production branch, **without** `-pooler` in the host, and **without**
-   surrounding quotes — GitHub stores the value verbatim, so a stray `"` ends up
-   inside the connection string. The workflow rejects both mistakes up front.
+   production branch, **without** `-pooler` in the host. Paste it unquoted —
+   GitHub stores the value verbatim, quotes included.
+
+Faster than the UI:
+
+```bash
+gh secret set DATABASE_URL_DIRECT --repo bahiensed/genealogiq
+# paste the value at the prompt, then press Ctrl-D
+```
 
 A repository secret rather than an environment secret: environment secrets and
 deployment protection rules require GitHub Pro/Team/Enterprise on a private

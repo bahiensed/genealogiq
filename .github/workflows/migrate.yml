@@ -62,21 +62,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Fail fast if the direct URL is missing or wrong
+      - name: Fail fast if the direct URL is missing or pooled
         run: |
           if [ -z "$DATABASE_URL" ]; then
             echo "::error::Repository secret DATABASE_URL_DIRECT is not set."
             echo "Settings → Secrets and variables → Actions → New repository secret."
-            echo "Value: the NON-POOLED Neon string (host without '-pooler'), unquoted."
+            echo "Value: the NON-POOLED Neon string (host without '-pooler')."
             exit 1
           fi
-          case "$DATABASE_URL" in
-            '"'*|"'"*)
-              echo "::error::DATABASE_URL_DIRECT starts with a quote character."
-              echo "GitHub stores the secret verbatim — paste the URL without surrounding quotes."
-              exit 1
-              ;;
-          esac
           case "$DATABASE_URL" in
             *-pooler.*)
               echo "::error::DATABASE_URL_DIRECT points at the Neon pooler."
