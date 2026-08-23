@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { getMemorialFeatures, isSaleLive } from "@/lib/subscription"
+import { getMemorialFeatures } from "@/lib/subscription"
 import { getExtraUnits } from "@/lib/extra-units"
 
 export interface QrQuotaStatus {
@@ -13,8 +13,8 @@ export interface QrQuotaStatus {
 }
 
 // There's no persisted "is this QR unlocked" flag anywhere today — account-
-// level QR access has always been a binary, per-profile thing (genCode/
-// appSaleId), never a count. This ranks a guardian's own profile plus every
+// level QR access has always been a binary, per-profile thing (a redeemed
+// genCode), never a count. This ranks a guardian's own profile plus every
 // memorial they manage (ACCEPTED) by creation order, live, with no schema
 // change: the first `qrCodeMax` of them are free. Documented as an initial
 // approximation — if "which QR counts as one of the free ones" ever needs to
@@ -30,33 +30,28 @@ export async function getQrQuotaStatus(guardianId: string, profileId: string): P
     getMemorialFeatures(guardianId),
     prisma.appUser.findUnique({
       where: { id: profileId },
-      select: {
-        genCode: { select: { id: true } },
-        appSale:           { select: { status: true, currentPeriodEnd: true } },
-      },
+      select: { genCode: { select: { id: true } } },
     }),
     getExtraUnits(guardianId, "QR_CODE"),
   ])
 
-  // A profile with its own dedicated paid slot (a physical QR product, or a
-  // legacy bulk-package slot assigned directly to it via BMS/SEQ) is unlocked
-  // on its own terms — it never competes for one of the guardian's shared
-  // free ranks. For the physical case this is the product working as sold:
-  // the plaque IS that memorial's QR code, so it cannot be rank-gated.
+  // A memorial that redeemed a GenCode is unlocked on its own terms and never
+  // competes for one of the guardian's shared free ranks. This is the product
+  // working as sold: the plaque IS that memorial's QR code, so it cannot be
+  // rank-gated. It also used to cover a memorial bound to its own AppSale, but
+  // that bulk-slot binding is gone along with the channel that created it.
   //
-  // This is now the ONLY place a GenCode affects entitlement.
-  // Redeeming a GenCode no longer grants a tier (getMemorialFeatures resolves
-  // it like any other profile, i.e. FREE for a fresh account) — so do not
-  // read this as "licensed profiles are privileged"; they are unlocked for
-  // this one binary, and nothing else.
+  // This is now the ONLY place a GenCode affects entitlement. Redeeming one no
+  // longer grants a tier (getMemorialFeatures resolves it like any other
+  // profile, i.e. FREE for a fresh account) — so do not read this as "licensed
+  // profiles are privileged"; they are unlocked for this one binary, nothing else.
   //
-  // This is deliberately NOT "does getMemorialFeatures(profileId)
-  // resolve non-FREE" — that would also be true whenever ANY co-guardian of a
-  // shared memorial pays (a real cascade, but one that already governs
-  // `limit` below via the VIEWING guardian's own tier); folding that in here
-  // too would let every memorial of a paying guardian bypass rank entirely,
-  // which defeats the shared 2-free-slots heuristic.
-  const hasOwnUnlock = !!target?.genCode || isSaleLive(target?.appSale)
+  // Deliberately NOT "does getMemorialFeatures(profileId) resolve non-FREE" —
+  // that would also be true whenever ANY co-guardian of a shared memorial pays
+  // (a real cascade, but one that already governs `limit` below via the VIEWING
+  // guardian's own tier); folding it in here would let every memorial of a
+  // paying guardian bypass rank entirely, defeating the shared-slots heuristic.
+  const hasOwnUnlock = !!target?.genCode
 
   const ranked = [...(guardian ? [guardian] : []), ...memorials].sort(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),

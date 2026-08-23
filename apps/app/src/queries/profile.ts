@@ -40,7 +40,6 @@ const PUBLIC_SELECT = {
   youtube: true,
   otherSocial: true,
   // Relations needed for display + canManageProfile()
-  appSaleId: true,
   genCode: { select: { id: true } },
   guardedBy: {
     where:  { status: "ACCEPTED" as const },

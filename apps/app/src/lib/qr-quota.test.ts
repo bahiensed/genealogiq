@@ -137,7 +137,11 @@ describe("getQrQuotaStatus — direct-unlock bypass", () => {
     expect(status).toEqual({ unlocked: true, rank: 4, limit: 2 })
   })
 
-  it("unlocks a memorial with its own live directly-assigned AppSale (legacy bulk slot) regardless of rank", async () => {
+  // The AppSale half of hasOwnUnlock is gone with the bulk-slot binding: a
+  // memorial no longer holds a sale of its own, so only a redeemed GenCode
+  // bypasses rank. Mocking a live sale and asserting it does NOT unlock is the
+  // guard against that half being restored.
+  it("does not bypass rank for a sale attached to the memorial itself", async () => {
     mockUsers({
       g1: { id: "g1", createdAt: d("2024-01-01") },
       m1: {}, m2: {},
@@ -151,23 +155,7 @@ describe("getQrQuotaStatus — direct-unlock bypass", () => {
 
     const status = await getQrQuotaStatus("g1", "m3")
 
-    expect(status).toEqual({ unlocked: true, rank: 4, limit: 2 })
-  })
-
-  it("does NOT bypass rank for a directly-assigned AppSale that's already expired", async () => {
-    mockUsers({
-      g1: { id: "g1", createdAt: d("2024-01-01") },
-      m1: {}, m2: {},
-      m3: { appSale: { status: "canceled", currentPeriodEnd: d("2020-01-01") } },
-    })
-    prismaMock.appUser.findMany.mockResolvedValue([
-      { id: "m1", createdAt: d("2024-02-01") },
-      { id: "m2", createdAt: d("2024-03-01") },
-      { id: "m3", createdAt: d("2024-04-01") },
-    ])
-
-    const status = await getQrQuotaStatus("g1", "m3")
-
     expect(status).toEqual({ unlocked: false, rank: 4, limit: 2 })
   })
+
 })

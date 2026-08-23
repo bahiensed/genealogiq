@@ -239,7 +239,6 @@ model AppSale {
   soldBy               User?        @relation(fields: [soldById], references: [id], onDelete: Restrict)
   subscription         Subscription @relation(fields: [subscriptionId], references: [id])
   tenant               Tenant?      @relation(fields: [tenantId], references: [id], onDelete: SetNull)
-  assignedTo           AppUser[]    @relation("AppSaleMemorial")
 
   @@index([appUserId])
   @@map("app_sales")
@@ -476,7 +475,6 @@ model AppUser {
   googleId            String?              @unique(map: "app_users_google_id_unique", where: raw("(google_id IS NOT NULL)")) @map("google_id")
   deathCause          String?              @map("death_cause") @db.VarChar
   deathState          String?              @map("death_state") @db.VarChar
-  appSaleId           String?              @map("app_sale_id")
   maidenName          String?              @map("maiden_name")
   nickname            String?
   stripeCustomerId    String?              @unique @map("stripe_customer_id")
@@ -503,7 +501,6 @@ model AppUser {
   guardedBy           AppUserGuardian[]    @relation("GuardedBy")
   guardiansOf         AppUserGuardian[]    @relation("GuardianOf")
   address             Address?             @relation(fields: [addressId], references: [id])
-  appSale             AppSale?             @relation("AppSaleMemorial", fields: [appSaleId], references: [id])
   category            AppUserCategory?     @relation(fields: [categoryId], references: [id])
   createdBy           User?                @relation("app_users_created_by_idTousers", fields: [createdById], references: [id])
   tenant              Tenant?              @relation("AppUserTenant", fields: [tenantId], references: [id], onDelete: Cascade)
