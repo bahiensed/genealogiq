@@ -32,7 +32,6 @@ const livingRow = (over: Partial<ProfileRow> = {}): ProfileRow => ({
   tiktok: null,
   youtube: null,
   otherSocial: null,
-  appSaleId: null,
   genCode: null,
   guardedBy: [],
   ...over,

@@ -94,19 +94,14 @@ describe("getMemorialFeatures — plan resolution", () => {
     await expect(getMemorialFeatures("g1")).resolves.toEqual(FREE)
   })
 
-  it("honours a legacy AppSale assigned directly to a memorial (BMS/SEQ bulk slot)", async () => {
+  // A memorial used to be able to carry its own directly-assigned AppSale from
+  // the bulk-slot model. That binding is gone, so a memorial's plan comes from
+  // its guardians or from FREE — never from a sale of its own. Mocking one and
+  // asserting it is ignored is what stops the branch coming back.
+  it("ignores any sale attached to the memorial itself", async () => {
     prismaMock.appUser.findUnique.mockResolvedValue({
       role:    "APP_MEMO",
       appSale: { status: "active", currentPeriodEnd: future, subscription: PREMIUM },
-    })
-
-    await expect(getMemorialFeatures("memo-1")).resolves.toEqual(PREMIUM)
-  })
-
-  it("ignores a directly-assigned sale whose period has lapsed", async () => {
-    prismaMock.appUser.findUnique.mockResolvedValue({
-      role:    "APP_MEMO",
-      appSale: { status: "active", currentPeriodEnd: past, subscription: PREMIUM },
     })
 
     await expect(getMemorialFeatures("memo-1")).resolves.toEqual(FREE)

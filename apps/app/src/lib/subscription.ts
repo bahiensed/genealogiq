@@ -54,19 +54,17 @@ export function isSaleLive(sale: { status: string | null; currentPeriodEnd: Date
  * live paid AppSale (cascades — one guardian's subscription covers every
  * memorial/pet they manage; if guardians are on different tiers, the
  * highest-priced plan's quotas win — deterministic tie-break, unreachable
- * today with only FREE/PREMIUM but real once a third paid tier exists) > a
- * legacy AppSale assigned directly to this profile (preserves bulk-slot sales
- * already made through BMS/SEQ) > FREE.
+ * today with only FREE/PREMIUM but real once a third paid tier exists) > FREE.
+ *
+ * There is no longer a "sale assigned directly to this memorial" step: the
+ * bulk-slot binding that populated it went with the B2B package channel.
  *
  * Cached per (profileId, request) so repeated callers share the same lookups.
  */
 export const getMemorialFeatures = cache(async (profileId: string): Promise<PlanQuotas> => {
   const profile = await prisma.appUser.findUnique({
     where: { id: profileId },
-    select: {
-      role:    true,
-      appSale: { select: { status: true, currentPeriodEnd: true, subscription: { select: QUOTA_SELECT } } },
-    },
+    select: { role: true },
   })
 
   if (profile?.role === "APP_MEMO" || profile?.role === "APP_PET") {
@@ -101,8 +99,6 @@ export const getMemorialFeatures = cache(async (profileId: string): Promise<Plan
         }
       }
     }
-
-    if (isSaleLive(profile.appSale) && profile.appSale?.subscription) return profile.appSale.subscription
 
     return getFreeQuotas()
   }
