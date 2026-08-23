@@ -52,9 +52,7 @@
       "updated": "Categoria atualizada com sucesso."
     },
     "deceased": {
-      "customerNotFound": "Cliente não encontrado.",
       "guardianAdded": "Responsável adicionado.",
-      "noQrAvailable": "Nenhum QR Code disponível para este cliente.",
       "notFound": "Perfil não encontrado.",
       "relationExists": "Este responsável já está vinculado ao perfil.",
       "relationNotFound": "Vínculo de responsável não encontrado."
@@ -306,7 +304,6 @@
       "addressOptional": "O endereço é opcional e pode ser preenchido depois."
     },
     "memorialized": {
-      "create": "Criar perfil memorializado",
       "acquiredQrCodesLabel": "QR Codes adquiridos\npor esse cliente",
       "availableProfilesLabel": "Perfis memorializados\nainda disponíveis",
       "createdProfilesLabel": "Perfis memorializados\njá criados pelo cliente",
@@ -494,7 +491,6 @@
       "view": "Ver"
     },
     "burialHint": "As informações de sepultamento são opcionais e podem ser preenchidas depois.",
-    "createProfile": "Criar perfil",
     "fields": {
       "birthCity": "Cidade de nascimento:",
       "birthCountry": "País de nascimento:*",
@@ -524,8 +520,6 @@
       "zip": "CEP:"
     },
     "new": "Novo perfil memorializado",
-    "newAvailable": "{count, plural, =0 {Nenhum QR Code disponível} one {# QR Code disponível} other {# QR Codes disponíveis}}",
-    "newCustomerLabel": "Cliente:",
     "qr": {
       "copyLink": "Copiar link",
       "installedOn": "Instalado: {date}",
@@ -577,26 +571,6 @@
       "pending": "Pendente",
       "printed": "Impresso"
     },
-    "stepIndicator": "Etapa {current} de {total}",
-    "stepperLabel": "Etapas do formulário",
-    "steps": {
-      "burial": {
-        "desc": "Local e localização",
-        "title": "Sepultamento"
-      },
-      "death": {
-        "desc": "Data, local e causa",
-        "title": "Falecimento"
-      },
-      "personal": {
-        "desc": "Nome, gênero e nascimento",
-        "title": "Pessoal"
-      },
-      "social": {
-        "desc": "Redes sociais e observações",
-        "title": "Social"
-      }
-    },
     "table": {
       "birthDate": "Data de nascimento",
       "deathDate": "Data do falecimento",
@@ -606,7 +580,6 @@
       "qrCode": "QR Code"
     },
     "toasts": {
-      "created": "Perfil criado com sucesso.",
       "updated": "Perfil atualizado com sucesso."
     }
   },

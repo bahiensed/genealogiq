@@ -63,8 +63,11 @@ export async function getCustomer(id: string) {
       address:         { select: addressSelect },
       _count: {
         select: {
-          appSales:    true,
-          guardiansOf: true,
+          // GenCodes this customer bought from us. Only codes written off via
+          // the platform channel carry the buyer link — a manual write-off
+          // records a free-text name and cannot be attributed to a row here.
+          physicalQrPurchases: true,
+          guardiansOf:         true,
         },
       },
       guardiansOf: {
