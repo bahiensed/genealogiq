@@ -33,12 +33,14 @@ jobs:
   deploy:
     name: prisma migrate deploy
     runs-on: ubuntu-latest
-    # Gate the production credential behind an Environment so it is auditable
-    # and can require a reviewer before it is handed out. Reuses the existing
-    # `Production` environment (created by the Vercel integration, no protection
-    # rules) rather than adding a near-duplicate — GitHub would otherwise show
-    # two environments differing only in case.
-    environment: Production
+    # No `environment:` here on purpose. Environment secrets and deployment
+    # protection rules need GitHub Pro/Team/Enterprise on a PRIVATE repo, and
+    # this one is private on a free account — the reviewer gate simply is not
+    # available. A repository-level Actions secret is, and works on every plan.
+    #
+    # What stands in for the gate: the path filter (this only fires when a
+    # migration is actually added), the pooler guard below, and a `concurrency`
+    # group that never cancels mid-flight.
     env:
       # Migrations need a DIRECT connection. The app's usual DATABASE_URL points
       # at Neon's pooler (-pooler in the host), and DDL over PgBouncer in
@@ -60,13 +62,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Fail fast if the direct URL is missing
+      - name: Fail fast if the direct URL is missing or wrong
         run: |
           if [ -z "$DATABASE_URL" ]; then
-            echo "::error::DATABASE_URL_DIRECT is not set on the 'production' environment."
-            echo "Add the NON-POOLED Neon connection string (host without '-pooler')."
+            echo "::error::Repository secret DATABASE_URL_DIRECT is not set."
+            echo "Settings → Secrets and variables → Actions → New repository secret."
+            echo "Value: the NON-POOLED Neon string (host without '-pooler'), unquoted."
             exit 1
           fi
+          case "$DATABASE_URL" in
+            '"'*|"'"*)
+              echo "::error::DATABASE_URL_DIRECT starts with a quote character."
+              echo "GitHub stores the secret verbatim — paste the URL without surrounding quotes."
+              exit 1
+              ;;
+          esac
           case "$DATABASE_URL" in
             *-pooler.*)
               echo "::error::DATABASE_URL_DIRECT points at the Neon pooler."

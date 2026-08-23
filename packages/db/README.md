@@ -33,16 +33,22 @@ place from the two that look like it:
 | --- | --- | --- |
 | `apps/*/.env` | your machine | **no** — gitignored, never leaves the laptop |
 | Vercel project env vars | Vercel builds and runtime | **no** — the workflow runs on GitHub Actions |
-| **GitHub → Environment `Production` → secret** | GitHub Actions | **yes** |
+| **GitHub → Secrets and variables → Actions** | GitHub Actions | **yes** |
 
 Setup:
 
-1. GitHub → Settings → Environments → **Production** (it already exists, created
-   by the Vercel integration) → Add environment secret.
-   Optionally add yourself as a required reviewer first — the run then waits for
-   approval before it touches the database.
+1. GitHub → Settings → Secrets and variables → **Actions** → New **repository**
+   secret.
 2. Name it `DATABASE_URL_DIRECT`, value = the Neon connection string for the
-   production branch, **without** `-pooler` in the host.
+   production branch, **without** `-pooler` in the host, and **without**
+   surrounding quotes — GitHub stores the value verbatim, so a stray `"` ends up
+   inside the connection string. The workflow rejects both mistakes up front.
+
+A repository secret rather than an environment secret: environment secrets and
+deployment protection rules require GitHub Pro/Team/Enterprise on a private
+repo, and this repo is private on a free account. Repository secrets work on
+every plan. The reviewer gate is therefore unavailable; the path filter, the
+pooler guard and the no-cancel concurrency group carry that weight instead.
 
 That last part matters: the app's normal `DATABASE_URL` points at Neon's
 pooler, and DDL over PgBouncer in transaction mode fails or hangs. The workflow
