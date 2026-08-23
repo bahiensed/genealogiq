@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import { getPackage } from '@/queries/packages'
 import { PackageForm } from '@/components/packages/package-form'
 
-export default async function EditPhysicalPackagePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditGenCodeProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const pkg = await getPackage(id)
   if (!pkg) notFound()

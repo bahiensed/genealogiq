@@ -48,7 +48,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionResult> {
   })
 
   revalidatePath('/sales/manual-sales')
-  revalidatePath('/physical-qr')
+  revalidatePath('/gencodes')
   return done(t('sale.created'))
 }
 
@@ -90,6 +90,6 @@ export async function reverseSale(id: number): Promise<ActionResult> {
   }
 
   revalidatePath('/sales/manual-sales')
-  revalidatePath('/physical-qr')
+  revalidatePath('/gencodes')
   return done()
 }

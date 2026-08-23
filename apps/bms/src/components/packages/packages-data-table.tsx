@@ -9,7 +9,6 @@ interface PackagesDataTableProps {
   data: PackageRow[]
   basePath?: string
   emptyMessage?: string
-  /** Noun used in column headers/labels. 'product' for Physical QR, 'package' for Digital. */
 }
 
 export function PackagesDataTable({ currentUserRole, data, basePath, emptyMessage }: PackagesDataTableProps) {

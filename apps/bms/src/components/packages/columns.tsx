@@ -46,7 +46,7 @@ function ActionsCell({ row, currentUserRole, basePath, t }: { row: { original: P
   )
 }
 
-export function getColumns(currentUserRole: string, t: Translator, locale: string, basePath = '/physical-qr'): ColumnDef<PackageRow>[] {
+export function getColumns(currentUserRole: string, t: Translator, locale: string, basePath = '/gencodes'): ColumnDef<PackageRow>[] {
   const Noun = t('noun.product')
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   return [

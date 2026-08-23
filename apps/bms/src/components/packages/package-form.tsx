@@ -38,7 +38,7 @@ interface PackageFormProps {
   backHref?:        string
 }
 
-export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId, backHref = '/physical-qr' }: PackageFormProps) {
+export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId, backHref = '/gencodes' }: PackageFormProps) {
   const t    = useTranslations('Packages')
   const tc   = useTranslations('Common')
   const tErr = useTranslations('Errors')

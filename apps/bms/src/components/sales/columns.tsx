@@ -35,7 +35,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: SaleRow }; 
       remove={{
         label: t('actions.reverse'),
         run: () => reverseSale(sale.id),
-        confirmDescription: t('reverse.descriptionPhysical', { package: sale.package.name, customer: sale.tenant.name }),
+        confirmDescription: t('reverse.description', { package: sale.package.name, customer: sale.tenant.name }),
         successMessage: t('toasts.reversed'),
       }}
     />

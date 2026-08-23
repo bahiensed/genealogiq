@@ -24,7 +24,7 @@ export async function createPackage(data: PackageFormValues): Promise<ActionResu
   })
 
   revalidatePath('/packages')
-  revalidatePath('/physical-qr')
+  revalidatePath('/gencodes')
   return done(t('package.created'))
 }
 
@@ -76,7 +76,7 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
   }
 
   revalidatePath('/packages')
-  revalidatePath('/physical-qr')
+  revalidatePath('/gencodes')
   return done(clearStripeRef ? t('package.updatedStripeCleared') : t('package.updated'))
 }
 
@@ -97,7 +97,7 @@ export async function deletePackage(id: string): Promise<ActionResult> {
   }
 
   revalidatePath('/packages')
-  revalidatePath('/physical-qr')
+  revalidatePath('/gencodes')
   return done()
 }
 
@@ -110,7 +110,7 @@ export async function togglePackageActive(id: string): Promise<ActionResult> {
 
   await prisma.package.update({ where: { id }, data: { isActive: !pkg.isActive } })
   revalidatePath('/packages')
-  revalidatePath('/physical-qr')
+  revalidatePath('/gencodes')
   return done()
 }
 
@@ -171,6 +171,6 @@ export async function syncPackageWithStripe(id: string): Promise<ActionResult> {
   }
 
   revalidatePath('/packages')
-  revalidatePath('/physical-qr')
+  revalidatePath('/gencodes')
   return done(t('package.synced'))
 }
