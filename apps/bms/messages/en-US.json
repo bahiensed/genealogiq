@@ -631,7 +631,7 @@
     "submit": "Submit Sale",
     "submitting": "Submitting…",
     "summary": {
-      "gencodes": "GenCodes to be generated",
+      "genCodes": "GenCodes to be generated",
       "totalPrice": "Total price",
       "unitPrice": "Unit price / code"
     },

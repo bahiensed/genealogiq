@@ -12,21 +12,21 @@ import { identityTranslator } from "@/schemas/i18n"
 // redeemed physical QR license is itself a standalone purchase, independent
 // of the guardian's own plan's memorial quota. Gating this against
 // memorialsMax would mean charging for the same slot twice.
-export async function activatePhysicalQr(
+export async function activateGenCode(
   genCode: string,
   data: unknown,
 ): Promise<ActionResult<{ id: string }>> {
   const t = await getTranslations("Actions")
   const session = await verifySession()
 
-  const license = await prisma.physicalQrLicense.findUnique({
+  const license = await prisma.genCode.findUnique({
     where: { genCode },
     select: { id: true, status: true },
   })
-  if (!license)                       return fail(t("physicalQr.notFound"))
+  if (!license)                       return fail(t("gencode.notFound"))
   // A code can be activated whether it's still in stock (AVAILABLE) or already
   // sold/written-off (SOLD) — only an already-ACTIVATED code is rejected.
-  if (license.status === "ACTIVATED") return fail(t("physicalQr.alreadyActivated"))
+  if (license.status === "ACTIVATED") return fail(t("gencode.alreadyActivated"))
 
   const parsed = getMemorialSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return fail(parsed.error.issues[0].message)
@@ -53,7 +53,7 @@ export async function activatePhysicalQr(
       await tx.appUserGuardian.create({
         data: { appUserId: memo.id, guardianId: session.user.id },
       })
-      await tx.physicalQrLicense.update({
+      await tx.genCode.update({
         where: { id: license.id },
         data:  { status: "ACTIVATED", appUserId: memo.id, activatedAt: new Date() },
       })
@@ -63,9 +63,9 @@ export async function activatePhysicalQr(
     revalidatePath(`/profile/${session.user.id}/memorialized`)
     return ok({ id: memorial.id })
   } catch (err: unknown) {
-    // P2002 on physicalQrLicense.appUserId unique — race condition
+    // P2002 on genCode.appUserId unique — race condition
     if (err && typeof err === "object" && "code" in err && err.code === "P2002") {
-      return fail(t("physicalQr.raceRetry"))
+      return fail(t("gencode.raceRetry"))
     }
     throw err
   }

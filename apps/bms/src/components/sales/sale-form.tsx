@@ -182,7 +182,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-                        {t('summary.gencodes')}
+                        {t('summary.genCodes')}
                       </p>
                       <p className="text-3xl font-extrabold tabular-nums leading-none">
                         {totalQRCodes.toLocaleString(locale)}

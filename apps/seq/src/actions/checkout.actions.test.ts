@@ -111,7 +111,7 @@ describe("createPackageCheckoutSession", () => {
         }),
       }),
     )
-    // PHYSICAL package routes the buyer back to the gencodes return path.
+    // PHYSICAL package routes the buyer back to the genCodes return path.
     const arg = createSession.mock.calls[0]?.[0]
     expect(arg?.success_url).toContain("/purchasing/gencodes")
   })

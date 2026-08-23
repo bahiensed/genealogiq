@@ -7,7 +7,7 @@ const { prismaMock, txMock } = vi.hoisted(() => ({
   },
   txMock: {
     sale: { create: vi.fn() },
-    physicalQrLicense: { createMany: vi.fn() },
+    genCode: { createMany: vi.fn() },
   },
 }))
 
@@ -25,7 +25,7 @@ beforeEach(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   prismaMock.$transaction.mockImplementation(async (cb: any) => cb(txMock))
   txMock.sale.create.mockResolvedValue({ id: 42 })
-  txMock.physicalQrLicense.createMany.mockResolvedValue({})
+  txMock.genCode.createMany.mockResolvedValue({})
 })
 
 describe("applyCheckoutSession — fulfillment", () => {
@@ -42,8 +42,8 @@ describe("applyCheckoutSession — fulfillment", () => {
     expect(txMock.sale.create).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ stripeSessionId: "cs_1", quantity: 2 }) }),
     )
-    expect(txMock.physicalQrLicense.createMany).toHaveBeenCalledTimes(1)
-    const arg = txMock.physicalQrLicense.createMany.mock.calls[0][0] as { data: unknown[] }
+    expect(txMock.genCode.createMany).toHaveBeenCalledTimes(1)
+    const arg = txMock.genCode.createMany.mock.calls[0][0] as { data: unknown[] }
     expect(arg.data).toHaveLength(6)
   })
 
