@@ -274,26 +274,20 @@
       "groups": {
         "alwaysActive": "Sempre ativo",
         "categories": "Categorias",
-        "finance": "Financeiro",
         "inventory": "Estoque",
         "purchasing": "Compras",
         "records": "Cadastros"
       },
       "labels": {
-        "buySubscriptions": "Comprar assinaturas",
+        "buySubscriptions": "Comprar GenCodes",
         "customerCat": "Cat. cliente",
         "customers": "Clientes",
         "dashboard": "Painel",
-        "finance": "Financeiro",
-        "productCat": "Cat. produto",
-        "products": "Produtos",
         "sales": "Vendas",
-        "serviceCat": "Cat. serviço",
-        "services": "Serviços",
         "supplierCat": "Cat. fornecedor",
         "suppliers": "Fornecedores",
         "system": "Sistema",
-        "viewSubscriptions": "Ver assinaturas"
+        "viewSubscriptions": "Meus GenCodes"
       }
     },
     "new": "Novo cliente",

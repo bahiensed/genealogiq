@@ -52,17 +52,9 @@ interface CustomerFormProps {
 const ALWAYS_ACTIVE = ['dashboard', 'buySubscriptions', 'viewSubscriptions', 'customers', 'sales', 'system'] as const
 const RECORDS_MODULES = [
   { name: 'moduleRecordsSuppliers', labelKey: 'suppliers' },
-  { name: 'moduleRecordsProducts',  labelKey: 'products'  },
-  { name: 'moduleRecordsServices',  labelKey: 'services'  },
 ] as const
 const CATEGORY_MODULES = [
   { name: 'moduleCategoriesSuppliers', labelKey: 'supplierCat' },
-  { name: 'moduleCategoriesProducts',  labelKey: 'productCat'  },
-  { name: 'moduleCategoriesServices',  labelKey: 'serviceCat'  },
-] as const
-const PURCHASING_MODULES = [
-  { name: 'modulePurchasingProducts', labelKey: 'products' },
-  { name: 'modulePurchasingServices', labelKey: 'services' },
 ] as const
 
 export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFormProps) {
@@ -352,14 +344,6 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                           <Checkbox checked disabled />
                           {t('modules.labels.buySubscriptions')}
                         </label>
-                        {PURCHASING_MODULES.map(({ name, labelKey }) => (
-                          <Controller key={name} name={name} control={control} render={({ field }) => (
-                            <label className="flex items-center gap-2 text-sm cursor-pointer">
-                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                              {t(`modules.labels.${labelKey}`)}
-                            </label>
-                          )} />
-                        ))}
                       </div>
                     </div>
 
@@ -370,24 +354,6 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                           <Checkbox checked disabled />
                           {t('modules.labels.viewSubscriptions')}
                         </label>
-                        <Controller name="moduleInventoryProducts" control={control} render={({ field }) => (
-                          <label className="flex items-center gap-2 text-sm cursor-pointer">
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                            {t('modules.labels.products')}
-                          </label>
-                        )} />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-3">
-                      <p className="text-sm font-semibold">{t('modules.groups.finance')}</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Controller name="moduleFinance" control={control} render={({ field }) => (
-                          <label className="flex items-center gap-2 text-sm cursor-pointer">
-                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                            {t('modules.labels.finance')}
-                          </label>
-                        )} />
                       </div>
                     </div>
                   </div>
