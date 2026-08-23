@@ -26,13 +26,22 @@ production. One job, one run.
 
 ### One-time setup (needed before the first automated run)
 
-The workflow needs a repository **Environment** named `production` holding a
-secret `DATABASE_URL_DIRECT`:
+The credential has to live as a **GitHub Actions secret**. This is a different
+place from the two that look like it:
 
-1. GitHub → Settings → Environments → New environment → `production`
-   (optionally add yourself as a required reviewer — the run then waits for
-   approval before it touches the database).
-2. Add secret `DATABASE_URL_DIRECT` = the Neon connection string for the
+| Where | Who reads it | Reaches the migrate workflow? |
+| --- | --- | --- |
+| `apps/*/.env` | your machine | **no** — gitignored, never leaves the laptop |
+| Vercel project env vars | Vercel builds and runtime | **no** — the workflow runs on GitHub Actions |
+| **GitHub → Environment `Production` → secret** | GitHub Actions | **yes** |
+
+Setup:
+
+1. GitHub → Settings → Environments → **Production** (it already exists, created
+   by the Vercel integration) → Add environment secret.
+   Optionally add yourself as a required reviewer first — the run then waits for
+   approval before it touches the database.
+2. Name it `DATABASE_URL_DIRECT`, value = the Neon connection string for the
    production branch, **without** `-pooler` in the host.
 
 That last part matters: the app's normal `DATABASE_URL` points at Neon's
@@ -41,6 +50,10 @@ refuses to run if the URL it is given contains `-pooler`, rather than hanging.
 
 `prisma.config.ts` reads `DATABASE_URL`, so the direct URL is supplied under
 that name in the workflow.
+
+Nothing needs a `DATABASE_URL_DIRECT` in the apps themselves — they connect
+through the pooler and never run DDL. Adding it to `.env` or to Vercel is
+harmless but does not feed the workflow.
 
 ### Running one by hand
 

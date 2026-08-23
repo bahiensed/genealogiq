@@ -34,8 +34,11 @@ jobs:
     name: prisma migrate deploy
     runs-on: ubuntu-latest
     # Gate the production credential behind an Environment so it is auditable
-    # and can require a reviewer before it is handed out.
-    environment: production
+    # and can require a reviewer before it is handed out. Reuses the existing
+    # `Production` environment (created by the Vercel integration, no protection
+    # rules) rather than adding a near-duplicate — GitHub would otherwise show
+    # two environments differing only in case.
+    environment: Production
     env:
       # Migrations need a DIRECT connection. The app's usual DATABASE_URL points
       # at Neon's pooler (-pooler in the host), and DDL over PgBouncer in
