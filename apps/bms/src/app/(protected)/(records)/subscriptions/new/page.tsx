@@ -1,5 +1,10 @@
 import { SubscriptionForm } from '@/components/subscriptions/subscription-form'
+import { FormShell } from '@genealogiq/ui/form-shell'
 
 export default function NewSubscriptionPage() {
-  return <SubscriptionForm />
+  return (
+    <FormShell>
+      <SubscriptionForm />
+    </FormShell>
+  )
 }

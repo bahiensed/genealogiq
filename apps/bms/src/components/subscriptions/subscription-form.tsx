@@ -193,7 +193,7 @@ export function SubscriptionForm({
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <>
       <Card>
         <CardHeader>
           <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
@@ -369,6 +369,6 @@ export function SubscriptionForm({
           </form>
         </CardContent>
       </Card>
-    </div>
+    </>
   )
 }
