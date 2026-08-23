@@ -46,15 +46,16 @@ interface IntFieldProps {
   label: string
   min?: number
   helper?: string
+  className?: string
 }
 
-function IntField({ control, name, label, min = 0, helper }: IntFieldProps) {
+function IntField({ control, name, label, min = 0, helper, className }: IntFieldProps) {
   return (
     <Controller
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
+        <Field data-invalid={fieldState.invalid} className={className}>
           <FieldLabel>{label}</FieldLabel>
           <Input
             type="number"
@@ -93,6 +94,7 @@ function PriceInput({ control, name, label, symbol }: {
   label:   string
   symbol:  string
 }) {
+  const symbolPadding = symbol.length > 2 ? 'pl-12' : symbol.length > 1 ? 'pl-10' : 'pl-8'
   return (
     <Controller
       name={name}
@@ -102,8 +104,10 @@ function PriceInput({ control, name, label, symbol }: {
           <FieldLabel>{label}</FieldLabel>
           <div className="relative">
             <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">{symbol}</span>
+            {/* A fixed pl-8 fits "$" but not "MX$", which collided with the amount.
+                Scale the padding with the symbol so every currency clears it. */}
             <CurrencyInput
-              className="pl-8"
+              className={symbolPadding}
               value={typeof field.value === 'number' ? field.value : 0}
               onChange={field.onChange}
               autoComplete="off"
@@ -122,8 +126,8 @@ function PriceBlock({ control, currencyCode, symbol, annualName, monthlyName, an
     <div className="flex flex-col gap-2">
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{currencyCode}</span>
       <div className="grid grid-cols-2 gap-4">
-        <PriceInput control={control} name={annualName} label={annualLabel} symbol={symbol} />
         <PriceInput control={control} name={monthlyName} label={monthlyLabel} symbol={symbol} />
+        <PriceInput control={control} name={annualName} label={annualLabel} symbol={symbol} />
       </div>
       <p className="text-xs text-muted-foreground">{hint}</p>
     </div>
@@ -216,12 +220,12 @@ export function SubscriptionForm({
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
               <Controller
                 name="code"
                 control={control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
+                  <Field data-invalid={fieldState.invalid} className="lg:col-span-3">
                     <FieldLabel>{t('fields.code')}</FieldLabel>
                     <Input
                       {...field}
@@ -242,43 +246,20 @@ export function SubscriptionForm({
                 name="name"
                 control={control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid} className="lg:col-span-2">
+                  <Field data-invalid={fieldState.invalid} className="lg:col-span-5">
                     <FieldLabel>{t('fields.name')}</FieldLabel>
                     <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
               />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <IntField control={control} name="maxProfiles" label={t('fields.maxProfiles')} min={1} />
+              <IntField control={control} name="maxProfiles" label={t('fields.maxProfiles')} min={1} className="lg:col-span-2" />
               <IntField
                 control={control}
                 name="termLength"
                 label={t('fields.termLength')}
                 helper={t('hints.termLength')}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <PriceBlock
-                control={control} currencyCode="USD" symbol="$"
-                annualName="priceUsd" monthlyName="monthlyPriceUsd"
-                annualLabel={t('fields.annual')} monthlyLabel={t('fields.monthly')}
-                hint={t('hints.priceUsd')}
-              />
-              <PriceBlock
-                control={control} currencyCode="BRL" symbol="R$"
-                annualName="priceBrl" monthlyName="monthlyPriceBrl"
-                annualLabel={t('fields.annual')} monthlyLabel={t('fields.monthly')}
-                hint={t('hints.priceBrl')}
-              />
-              <PriceBlock
-                control={control} currencyCode="MXN" symbol="MX$"
-                annualName="priceMxn" monthlyName="monthlyPriceMxn"
-                annualLabel={t('fields.annual')} monthlyLabel={t('fields.monthly')}
-                hint={t('hints.priceMxn')}
+                className="lg:col-span-2"
               />
             </div>
 
@@ -295,35 +276,59 @@ export function SubscriptionForm({
             />
 
             <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-4">
-              <span className="text-xs text-muted-foreground uppercase tracking-wider">{t('quotas.title')}</span>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <IntField control={control} name="treeMaxMembers" label={t('fields.treeMaxMembers')} helper={t('hints.treeMaxMembers')} />
-                <IntField control={control} name="bioMaxChars" label={t('fields.bioMaxChars')} helper={t('hints.bioMaxChars')} />
-                <IntField control={control} name="mediaMaxImages" label={t('fields.mediaMaxImages')} helper={t('hints.mediaMaxImages')} />
-                <IntField control={control} name="mediaMaxVideos" label={t('fields.mediaMaxVideos')} helper={t('hints.mediaMaxVideos')} />
-                <IntField control={control} name="documentsMax" label={t('fields.documentsMax')} />
-                <IntField control={control} name="geoPlacesMax" label={t('fields.geoPlacesMax')} helper={t('hints.geoPlacesMax')} />
-                <IntField control={control} name="memorialsMax" label={t('fields.memorialsMax')} />
-                <IntField control={control} name="petsMax" label={t('fields.petsMax')} />
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                <IntField control={control} name="qrCodeMax" label={t('fields.qrCodeMax')} helper={t('hints.qrCodeMax')} />
-                <Controller
-                  name="geolocationFullAccess"
-                  control={control}
-                  render={({ field }) => (
-                    <Field>
-                      <FieldLabel>{t('fields.geolocationFullAccess')}</FieldLabel>
-                      <div className="flex items-center gap-2 h-9">
-                        <Switch id="geolocationFullAccess" checked={field.value} onCheckedChange={field.onChange} />
-                        <label htmlFor="geolocationFullAccess" className="text-sm cursor-pointer">
-                          {field.value ? t('quotas.geolocationFullAccessOn') : t('quotas.geolocationFullAccessOff')}
-                        </label>
-                      </div>
-                    </Field>
-                  )}
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">{t('prices.title')}</span>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <PriceBlock
+                  control={control} currencyCode="USD" symbol="$"
+                  annualName="priceUsd" monthlyName="monthlyPriceUsd"
+                  annualLabel={t('fields.annual')} monthlyLabel={t('fields.monthly')}
+                  hint={t('hints.priceUsd')}
+                />
+                <PriceBlock
+                  control={control} currencyCode="MXN" symbol="MX$"
+                  annualName="priceMxn" monthlyName="monthlyPriceMxn"
+                  annualLabel={t('fields.annual')} monthlyLabel={t('fields.monthly')}
+                  hint={t('hints.priceMxn')}
+                />
+                <PriceBlock
+                  control={control} currencyCode="BRL" symbol="R$"
+                  annualName="priceBrl" monthlyName="monthlyPriceBrl"
+                  annualLabel={t('fields.annual')} monthlyLabel={t('fields.monthly')}
+                  hint={t('hints.priceBrl')}
                 />
               </div>
+            </div>
+
+            <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-4">
+              <span className="text-xs text-muted-foreground uppercase tracking-wider">{t('quotas.title')}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <IntField control={control} name="treeMaxMembers" label={t('fields.treeMaxMembers')} helper={t('hints.treeMaxMembers')} />
+                <IntField control={control} name="bioMaxChars"    label={t('fields.bioMaxChars')}    helper={t('hints.bioMaxChars')} />
+                <IntField control={control} name="documentsMax"   label={t('fields.documentsMax')} />
+
+                <IntField control={control} name="mediaMaxImages" label={t('fields.mediaMaxImages')} helper={t('hints.mediaMaxImages')} />
+                <IntField control={control} name="mediaMaxVideos" label={t('fields.mediaMaxVideos')} helper={t('hints.mediaMaxVideos')} />
+                <IntField control={control} name="qrCodeMax"      label={t('fields.qrCodeMax')}      helper={t('hints.qrCodeMax')} />
+
+                <IntField control={control} name="geoPlacesMax"   label={t('fields.geoPlacesMax')}   helper={t('hints.geoPlacesMax')} />
+                <IntField control={control} name="memorialsMax"   label={t('fields.memorialsMax')} />
+                <IntField control={control} name="petsMax"        label={t('fields.petsMax')} />
+              </div>
+              <Controller
+                name="geolocationFullAccess"
+                control={control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{t('fields.geolocationFullAccess')}</FieldLabel>
+                    <div className="flex items-center gap-2 h-9">
+                      <Switch id="geolocationFullAccess" checked={field.value} onCheckedChange={field.onChange} />
+                      <label htmlFor="geolocationFullAccess" className="text-sm cursor-pointer">
+                        {field.value ? t('quotas.geolocationFullAccessOn') : t('quotas.geolocationFullAccessOff')}
+                      </label>
+                    </div>
+                  </Field>
+                )}
+              />
             </div>
 
             {isEditing && (

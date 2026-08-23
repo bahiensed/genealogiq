@@ -661,20 +661,20 @@
     "edit": "Edit Subscription",
     "fields": {
       "annual": "Annual",
-      "bioMaxChars": "Bio Max Characters",
+      "bioMaxChars": "Max Bio Characters",
       "code": "Code",
       "description": "Description",
       "documentsMax": "Documents Max",
       "geoPlacesMax": "Geo Places Max",
       "geolocationFullAccess": "Geolocation Full Access",
-      "maxProfiles": "Max Memo Profiles",
-      "mediaMaxImages": "Combined Media Images Max",
+      "maxProfiles": "Number of Memorials",
+      "mediaMaxImages": "Max Shared Images",
       "mediaMaxVideos": "Gallery Videos Max",
       "memorialsMax": "Memorials Max",
       "monthly": "Monthly",
       "name": "Name",
       "petsMax": "Pets Max",
-      "qrCodeMax": "QR Codes Max",
+      "qrCodeMax": "Max GenCodes",
       "termLength": "Term Length (in months)",
       "treeMaxMembers": "Tree Max Members"
     },
@@ -697,6 +697,9 @@
     "new": "New subscription",
     "placeholders": {
       "code": "DECADE"
+    },
+    "prices": {
+      "title": "Prices"
     },
     "quotas": {
       "geolocationFullAccessOff": "Address only (no GPS pin)",

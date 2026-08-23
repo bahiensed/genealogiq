@@ -661,20 +661,20 @@
     "edit": "Editar Assinatura",
     "fields": {
       "annual": "Anual",
-      "bioMaxChars": "Máximo de Caracteres da Bio",
+      "bioMaxChars": "Máximo de Caracteres na Bio",
       "code": "Código",
       "description": "Descrição",
       "documentsMax": "Máximo de Documentos",
       "geoPlacesMax": "Máximo de Geolocalizações",
       "geolocationFullAccess": "Acesso Total à Geolocalização",
-      "maxProfiles": "Máximo de Perfis Memo",
-      "mediaMaxImages": "Máximo de Imagens Combinadas",
+      "maxProfiles": "Número de Memoriais",
+      "mediaMaxImages": "Máximo de Imagens Compartilhadas",
       "mediaMaxVideos": "Máximo de Vídeos na Galeria",
       "memorialsMax": "Máximo de Memoriais",
       "monthly": "Mensal",
       "name": "Nome",
       "petsMax": "Máximo de Pets",
-      "qrCodeMax": "Máximo de QR Codes",
+      "qrCodeMax": "Máximo de GenCodes",
       "termLength": "Duração (em meses)",
       "treeMaxMembers": "Máximo de Membros na Árvore"
     },
@@ -698,10 +698,13 @@
     "placeholders": {
       "code": "DECADE"
     },
+    "prices": {
+      "title": "Preços"
+    },
     "quotas": {
       "geolocationFullAccessOff": "Somente endereço (sem marcador GPS)",
       "geolocationFullAccessOn": "Coordenadas GPS precisas",
-      "title": "Quotas"
+      "title": "Cotas"
     },
     "status": {
       "active": "Ativa",
