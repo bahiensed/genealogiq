@@ -7,7 +7,6 @@ import {
   IdCardIcon,
   Layers,
   LayoutDashboard,
-  QrCodeIcon,
   SquarePlus,
   TagIcon,
   TicketPercent,
@@ -24,7 +23,6 @@ export const system = [
 
 export const products = [
   { name: 'Physical QR Codes',      url: '/physical-qr',       icon: Fingerprint },
-  { name: 'Digital QR Codes (B2B)', url: '/packages',          icon: QrCodeIcon  },
   { name: 'Subscriptions (B2C)',    url: '/subscriptions',     icon: Layers      },
   { name: 'Extra Units',            url: '/extra-unit-prices', icon: SquarePlus  },
 ]

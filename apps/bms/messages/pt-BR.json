@@ -534,7 +534,6 @@
     "newPackage": "Novo pacote",
     "newProduct": "Novo produto",
     "noun": {
-      "package": "Pacote",
       "product": "Produto"
     },
     "physicalTitle": "QR Codes Físicos",
@@ -559,7 +558,6 @@
     "table": {
       "createdAt": "Criado em",
       "description": "Descrição do {noun}",
-      "empty": "Nenhum pacote encontrado.",
       "emptyProduct": "Nenhum produto de QR físico ainda.",
       "name": "Nome do {noun}",
       "price": "Preço do {noun}",
@@ -572,10 +570,6 @@
       "deleteConfirm": "O pacote \"{name}\" será excluído permanentemente.",
       "deleted": "Pacote excluído com sucesso.",
       "reactivated": "Pacote reativado."
-    },
-    "typeBadge": {
-      "digital": "Digital",
-      "physical": "Físico"
     },
     "unitPrice": "Preço unitário por QR Code"
   },
@@ -620,17 +614,12 @@
     "packageOption": {
       "codes": "{count, plural, one {# código} other {# códigos}}"
     },
-    "packageType": {
-      "digital": "Digital",
-      "physical": "Físico"
-    },
     "placeholders": {
       "customer": "Selecione um cliente",
       "package": "Selecione um pacote"
     },
     "reverse": {
       "confirm": "Estornar venda",
-      "descriptionDigital": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada e os QR Codes serão devolvidos ao estoque. O registro é mantido para fins de auditoria.",
       "descriptionPhysical": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada. Os códigos de licença disponíveis serão invalidados. Os códigos já ativados permanecem vinculados aos seus memoriais. O registro é mantido para fins de auditoria.",
       "reversing": "Estornando…",
       "title": "Confirmar estorno"
@@ -642,7 +631,6 @@
     "submit": "Registrar Venda",
     "submitting": "Enviando…",
     "summary": {
-      "digitalCodes": "QR Codes a serem adicionados ao estoque",
       "physicalCodes": "Códigos de licença físicos a serem gerados",
       "totalPrice": "Preço total",
       "unitPrice": "Preço unitário / código"

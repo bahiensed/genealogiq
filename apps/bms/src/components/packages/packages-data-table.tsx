@@ -10,14 +10,13 @@ interface PackagesDataTableProps {
   basePath?: string
   emptyMessage?: string
   /** Noun used in column headers/labels. 'product' for Physical QR, 'package' for Digital. */
-  noun?: 'package' | 'product'
 }
 
-export function PackagesDataTable({ currentUserRole, data, basePath, emptyMessage, noun = 'package' }: PackagesDataTableProps) {
+export function PackagesDataTable({ currentUserRole, data, basePath, emptyMessage }: PackagesDataTableProps) {
   const t = useTranslations('Packages')
   const locale = useLocale()
 
-  const Noun = noun === 'product' ? t('noun.product') : t('noun.package')
+  const Noun = t('noun.product')
 
   const columnLabels: Record<string, string> = {
     name:        t('table.name', { noun: Noun }),
@@ -30,9 +29,9 @@ export function PackagesDataTable({ currentUserRole, data, basePath, emptyMessag
 
   return (
     <DataTable
-      columns={getColumns(currentUserRole, t, locale, basePath, noun)}
+      columns={getColumns(currentUserRole, t, locale, basePath)}
       data={data}
-      emptyMessage={emptyMessage ?? (noun === 'product' ? t('table.emptyProduct') : t('table.empty'))}
+      emptyMessage={emptyMessage ?? t('table.emptyProduct')}
       initialSorting={[{ id: 'quantity', desc: false }]}
       columnLabels={columnLabels}
     />

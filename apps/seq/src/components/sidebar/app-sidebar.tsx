@@ -11,7 +11,6 @@ import {
   categories,
   purchasing,
   inventory,
-  sales,
   finance,
   type MenuItem,
   type ModuleKey,
@@ -58,7 +57,6 @@ export function AppSidebar({ modules }: AppSidebarProps) {
     { labelKey: 'groups.categories', items: categoriesItems, show: categoriesItems.length > 0 },
     { labelKey: 'groups.purchasing', items: purchasingItems, show: true                       },
     { labelKey: 'groups.inventory',  items: inventoryItems,  show: true                       },
-    { labelKey: 'groups.sales',      items: sales,           show: true                       },
     { labelKey: 'groups.finance',    items: financeItems,    show: financeItems.length > 0    },
   ].filter((g) => g.show)
 

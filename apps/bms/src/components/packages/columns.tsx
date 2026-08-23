@@ -17,7 +17,6 @@ export type PackageRow = {
   price: number
   quantity: number
   isActive: boolean
-  type: 'DIGITAL' | 'PHYSICAL'
   createdAt: Date
 }
 
@@ -47,8 +46,8 @@ function ActionsCell({ row, currentUserRole, basePath, t }: { row: { original: P
   )
 }
 
-export function getColumns(currentUserRole: string, t: Translator, locale: string, basePath = '/packages', noun: 'package' | 'product' = 'package'): ColumnDef<PackageRow>[] {
-  const Noun = noun === 'product' ? t('noun.product') : t('noun.package')
+export function getColumns(currentUserRole: string, t: Translator, locale: string, basePath = '/physical-qr'): ColumnDef<PackageRow>[] {
+  const Noun = t('noun.product')
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   return [
     {

@@ -61,11 +61,6 @@ enum EntityType {
   COMPANY
 }
 
-enum PackageType {
-  DIGITAL
-  PHYSICAL
-}
-
 enum PhysicalQrStatus {
   AVAILABLE
   SOLD
@@ -192,7 +187,6 @@ model Package {
   quantity         Int                 @default(1)
   stripeProductId  String?             @unique @map("stripe_product_id")
   stripePriceId    String?             @unique @map("stripe_price_id")
-  type             PackageType         @default(DIGITAL)
   physicalLicenses PhysicalQrLicense[]
   sales            Sale[]
   coupons          DiscountCoupon[]    @relation("CouponPackages")
@@ -218,17 +212,6 @@ model Sale {
 
   @@index([tenantId, createdAt(sort: Desc)])
   @@map("sales")
-}
-
-model QrInventory {
-  id        String   @id @default(cuid())
-  quantity  Int      @default(0)
-  tenantId  String   @unique @map("tenant_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  @@map("qr_inventory")
 }
 
 model AppSale {
@@ -904,7 +887,6 @@ model Tenant {
   appUserCats               AppUserCategory[]
   appUsers                  AppUser[]           @relation("AppUserTenant")
   physicalLicenses          PhysicalQrLicense[]
-  qrInventory               QrInventory?
   sales                     Sale[]
   supplierCats              SupplierCategory[]  @relation("SupplierCategoryTenant")
   suppliers                 Supplier[]          @relation("SupplierTenant")

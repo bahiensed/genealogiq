@@ -26,16 +26,17 @@ export async function getDashboardStats(customerId: string) {
   const startOf12Months = new Date(now.getFullYear(), now.getMonth() - 11, 1)
 
   const [
-    qrInventory,
+    availableCodes,
     totalCustomers,
     monthlySales,
     chartRows,
     customerGrowth,
     qrConsumption,
   ] = await Promise.all([
-    prisma.qrInventory.findUnique({
-      where:  { tenantId: customerId },
-      select: { quantity: true },
+    // Stock is the count of unsold licences now that the digital counter is
+    // gone — same number the tenant sees on /inventory/gencodes.
+    prisma.physicalQrLicense.count({
+      where: { tenantId: customerId, status: 'AVAILABLE' },
     }),
     prisma.appUser.count({
       where: { tenantId: customerId, role: 'APP_USER' },
@@ -138,7 +139,7 @@ export async function getDashboardStats(customerId: string) {
   const monthlyRevenue = Number(monthlySales._sum.value ?? 0)
 
   return {
-    availableQRCodes: qrInventory?.quantity ?? 0,
+    availableQRCodes: availableCodes,
     totalCustomers,
     monthlyCount,
     monthlyRevenue,

@@ -15,7 +15,7 @@ export type SaleRow = {
   quantity: number
   reversedAt: Date | null
   createdAt: Date
-  package:  { name: string; price: number; quantity: number; type: 'DIGITAL' | 'PHYSICAL' }
+  package:  { name: string; price: number; quantity: number }
   tenant:   { name: string }
   soldBy:   { firstName: string; lastName: string }
 }
@@ -35,10 +35,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: SaleRow }; 
       remove={{
         label: t('actions.reverse'),
         run: () => reverseSale(sale.id),
-        confirmDescription:
-          sale.package.type === 'PHYSICAL'
-            ? t('reverse.descriptionPhysical', { package: sale.package.name, customer: sale.tenant.name })
-            : t('reverse.descriptionDigital', { package: sale.package.name, customer: sale.tenant.name }),
+        confirmDescription: t('reverse.descriptionPhysical', { package: sale.package.name, customer: sale.tenant.name }),
         successMessage: t('toasts.reversed'),
       }}
     />

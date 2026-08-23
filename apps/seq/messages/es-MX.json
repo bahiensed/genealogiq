@@ -755,43 +755,6 @@
       "success": "Compra completada — los QR Codes aparecerán en breve."
     }
   },
-  "Sales": {
-    "actions": {
-      "completeSale": "Completar venta",
-      "registering": "Registrando...",
-      "removeCustomer": "Eliminar cliente"
-    },
-    "buyQrCodes": "Comprar QR Codes",
-    "confirm": {
-      "confirm": "Confirmar",
-      "description": "La venta se registrará y se eliminará un QR Code del inventario. ¿Confirmar?",
-      "title": "Confirmar venta"
-    },
-    "description": "Selecciona el cliente, elige la suscripción de bonificación, ingresa TU precio final y completa la venta.",
-    "emptyInventory": "No hay QR Codes en inventario.",
-    "errors": {
-      "invalidAmount": "Ingresa un monto válido.",
-      "selectCustomer": "Selecciona un cliente.",
-      "selectSubscription": "Selecciona una suscripción."
-    },
-    "fields": {
-      "bonusSubscription": "Suscripción de bonificación",
-      "customer": "Cliente",
-      "totalAmount": "Monto total"
-    },
-    "hints": {
-      "belowSuggested": "Por debajo de lo sugerido {amount} (2× el costo del último paquete) — ¿vendiendo con pérdida?",
-      "bonusSubscription": "La suscripción de la aplicación que el cliente recibirá gratis",
-      "customer": "¿A quién le estás vendiendo?",
-      "suggested": "Sugerido: {amount} (2× el costo del último paquete)",
-      "totalAmount": "El precio total cobrado por los QR Codes."
-    },
-    "placeholders": {
-      "customerSearch": "Escribe el nombre o correo electrónico...",
-      "subscription": "Selecciona una suscripción..."
-    },
-    "title": "Ventas"
-  },
   "Sidebar": {
     "groups": {
       "system": "Sistema",
@@ -799,17 +762,13 @@
       "categories": "Categorías",
       "purchasing": "Compras",
       "inventory": "Inventario",
-      "sales": "Ventas",
       "finance": "Finanzas"
     },
     "items": {
       "dashboard": "Panel",
       "buyGenCodes": "Comprar GenCodes",
       "myGenCodes": "Mis GenCodes",
-      "buyDigitalQr": "Comprar QR Codes Digitales",
-      "myDigitalQr": "Mis QR Codes Digitales",
       "customers": "Clientes",
-      "sales": "Ventas",
       "companyData": "Datos de la Empresa",
       "employees": "Empleados",
       "suppliers": "Proveedores",

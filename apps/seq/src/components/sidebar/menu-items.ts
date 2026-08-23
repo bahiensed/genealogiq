@@ -1,4 +1,4 @@
-import { BarChart2, Barcode, BoxIcon, BuildingIcon, FolderIcon, HandPlatterIcon, IdCardIcon, LayoutDashboard, QrCodeIcon, ScanBarcode, ScanLine, ShoppingCartIcon, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
+import { BarChart2, Barcode, BoxIcon, BuildingIcon, FolderIcon, HandPlatterIcon, IdCardIcon, LayoutDashboard, ScanBarcode, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
 
 export type ModuleKey =
   | 'moduleRecordsSuppliers'
@@ -31,12 +31,7 @@ export const main: MenuItem[][] = [
     { labelKey: 'items.myGenCodes',  url: '/inventory/gencodes',  icon: ScanBarcode },
   ],
   [
-    { labelKey: 'items.buyDigitalQr', url: '/purchasing/digital-qr', icon: ScanLine },
-    { labelKey: 'items.myDigitalQr',  url: '/inventory/digital-qr',  icon: QrCodeIcon },
-  ],
-  [
     { labelKey: 'items.customers', url: '/customers', icon: UsersIcon },
-    { labelKey: 'items.sales',     url: '/sales',     icon: ShoppingCartIcon },
   ],
 ]
 
@@ -69,7 +64,6 @@ export const categories: MenuItem[] = [
 
 export const purchasing: MenuItem[] = [
   { labelKey: 'items.buyGenCodes', url: '/purchasing/gencodes', icon: Barcode     },
-  { labelKey: 'items.buyDigitalQr',  url: '/purchasing/digital-qr',  icon: ScanLine      },
   { labelKey: 'items.products',      url: '/purchasing/products',    icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
   { labelKey: 'items.services',      url: '/purchasing/services',    icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
 ]
@@ -78,14 +72,7 @@ export const purchasing: MenuItem[] = [
 
 export const inventory: MenuItem[] = [
   { labelKey: 'items.myGenCodes', url: '/inventory/gencodes', icon: ScanBarcode },
-  { labelKey: 'items.myDigitalQr',  url: '/inventory/digital-qr',  icon: QrCodeIcon  },
   { labelKey: 'items.products',     url: '/inventory/products',    icon: BoxIcon,     moduleKey: 'moduleInventoryProducts' },
-]
-
-// ─── Sales (always visible) ───────────────────────────────────────────────────
-
-export const sales: MenuItem[] = [
-  { labelKey: 'items.sales', url: '/sales', icon: ShoppingCartIcon },
 ]
 
 // ─── Finance ──────────────────────────────────────────────────────────────────

@@ -21,7 +21,7 @@ export async function createPackageCheckoutSession(
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId, isActive: true },
-    select: { id: true, type: true, stripePriceId: true },
+    select: { id: true, stripePriceId: true },
   })
   if (!pkg) return fail(t('checkout.packageNotFound'))
   if (!pkg.stripePriceId) {
@@ -31,7 +31,7 @@ export async function createPackageCheckoutSession(
   const customer = await ensureTenantStripeCustomer(tenantId)
   const baseUrl  = process.env.SEQUOIA_URL ?? 'http://localhost:3000'
   // Return the buyer to the page they purchased from (digital vs physical).
-  const returnPath = pkg.type === 'PHYSICAL' ? '/purchasing/gencodes' : '/purchasing/digital-qr'
+  const returnPath = '/purchasing/gencodes'
   const metadata = { tenantId, packageId: pkg.id, quantity: String(quantity), soldById }
 
   const checkout = await stripe.checkout.sessions.create({

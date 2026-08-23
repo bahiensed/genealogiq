@@ -755,43 +755,6 @@
       "success": "Purchase complete — QR Codes will appear shortly."
     }
   },
-  "Sales": {
-    "actions": {
-      "completeSale": "Complete Sale",
-      "registering": "Registering...",
-      "removeCustomer": "Remove customer"
-    },
-    "buyQrCodes": "Buy QR Codes",
-    "confirm": {
-      "confirm": "Confirm",
-      "description": "The sale will be registered and a QR Code will be removed from inventory. Confirm?",
-      "title": "Confirm sale"
-    },
-    "description": "Select the customer, choose the bonus subscription, enter YOUR final price and complete the sale.",
-    "emptyInventory": "No QR Codes in inventory.",
-    "errors": {
-      "invalidAmount": "Enter a valid amount.",
-      "selectCustomer": "Select a customer.",
-      "selectSubscription": "Select a subscription."
-    },
-    "fields": {
-      "bonusSubscription": "Bonus subscription",
-      "customer": "Customer",
-      "totalAmount": "Total Amount"
-    },
-    "hints": {
-      "belowSuggested": "Below suggested {amount} (2× last package cost) — selling at a loss?",
-      "bonusSubscription": "The app subscription the customer will receive for free",
-      "customer": "Who are you selling to?",
-      "suggested": "Suggested: {amount} (2× last package cost)",
-      "totalAmount": "The total price charged for the QR Codes."
-    },
-    "placeholders": {
-      "customerSearch": "Type name or email...",
-      "subscription": "Select a subscription..."
-    },
-    "title": "Sales"
-  },
   "Sidebar": {
     "groups": {
       "system": "System",
@@ -799,17 +762,13 @@
       "categories": "Categories",
       "purchasing": "Purchasing",
       "inventory": "Inventory",
-      "sales": "Sales",
       "finance": "Finance"
     },
     "items": {
       "dashboard": "Dashboard",
       "buyGenCodes": "Purchase GenCodes",
       "myGenCodes": "My GenCodes",
-      "buyDigitalQr": "Purchase Digital QR Codes",
-      "myDigitalQr": "My Digital QR Codes",
       "customers": "Customers",
-      "sales": "Sales",
       "companyData": "Company Data",
       "employees": "Employees",
       "suppliers": "Suppliers",

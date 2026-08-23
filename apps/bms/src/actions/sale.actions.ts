@@ -21,7 +21,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionResult> {
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId },
-    select: { quantity: true, type: true },
+    select: { quantity: true },
   })
   if (!pkg) return fail(t('sale.packageNotFound'))
 
@@ -37,22 +37,14 @@ export async function createSale(data: SaleFormValues): Promise<ActionResult> {
       },
     })
 
-    if (pkg.type === 'PHYSICAL') {
-      const licenses = Array.from({ length: totalCodes }, () => ({
-        id:        crypto.randomUUID(),
-        genCode:   generateGenCode(),
-        saleId:    sale.id,
-        packageId,
-        tenantId,
-      }))
-      await tx.physicalQrLicense.createMany({ data: licenses })
-    } else {
-      await tx.qrInventory.upsert({
-        where:  { tenantId },
-        create: { tenantId, quantity: totalCodes },
-        update: { quantity: { increment: totalCodes } },
-      })
-    }
+    const licenses = Array.from({ length: totalCodes }, () => ({
+      id:        crypto.randomUUID(),
+      genCode:   generateGenCode(),
+      saleId:    sale.id,
+      packageId,
+      tenantId,
+    }))
+    await tx.physicalQrLicense.createMany({ data: licenses })
   })
 
   revalidatePath('/sales/manual-sales')
@@ -70,7 +62,7 @@ export async function reverseSale(id: number): Promise<ActionResult> {
       quantity:   true,
       tenantId:   true,
       reversedAt: true,
-      package:    { select: { quantity: true, type: true } },
+      package:    { select: { quantity: true } },
     },
   })
   if (!sale) return fail(t('sale.notFound'))
@@ -83,27 +75,12 @@ export async function reverseSale(id: number): Promise<ActionResult> {
         data:  { reversedAt: new Date() },
       })
 
-      if (sale.package.type === 'PHYSICAL') {
-        // Delete only AVAILABLE licenses — ACTIVATED ones remain linked to memorials
-        await tx.physicalQrLicense.deleteMany({
-          where: { saleId: id, status: 'AVAILABLE' },
-        })
-      } else {
-        const totalQRCodes = sale.package.quantity * sale.quantity
-        const inv = await tx.qrInventory.findUnique({
-          where:  { tenantId: sale.tenantId },
-          select: { id: true, quantity: true },
-        })
-
-        if (inv) {
-          const newQty = inv.quantity - totalQRCodes
-          if (newQty <= 0) {
-            await tx.qrInventory.delete({ where: { id: inv.id } })
-          } else {
-            await tx.qrInventory.update({ where: { id: inv.id }, data: { quantity: newQty } })
-          }
-        }
-      }
+      // Delete only AVAILABLE licenses. SOLD ones were written off by the
+      // tenant and ACTIVATED ones are linked to a memorial — reversing the B2B
+      // sale must not reach into either.
+      await tx.physicalQrLicense.deleteMany({
+        where: { saleId: id, status: 'AVAILABLE' },
+      })
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {

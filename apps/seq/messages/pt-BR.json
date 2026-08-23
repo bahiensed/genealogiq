@@ -755,43 +755,6 @@
       "success": "Compra concluída — os QR Codes aparecerão em instantes."
     }
   },
-  "Sales": {
-    "actions": {
-      "completeSale": "Concluir venda",
-      "registering": "Registrando...",
-      "removeCustomer": "Remover cliente"
-    },
-    "buyQrCodes": "Comprar QR Codes",
-    "confirm": {
-      "confirm": "Confirmar",
-      "description": "A venda será registrada e um QR Code será removido do estoque. Confirmar?",
-      "title": "Confirmar venda"
-    },
-    "description": "Selecione o cliente, escolha a assinatura bônus, insira o SEU preço final e conclua a venda.",
-    "emptyInventory": "Nenhum QR Code em estoque.",
-    "errors": {
-      "invalidAmount": "Informe um valor válido.",
-      "selectCustomer": "Selecione um cliente.",
-      "selectSubscription": "Selecione uma assinatura."
-    },
-    "fields": {
-      "bonusSubscription": "Assinatura bônus",
-      "customer": "Cliente",
-      "totalAmount": "Valor total"
-    },
-    "hints": {
-      "belowSuggested": "Abaixo do sugerido {amount} (2× o custo do último pacote) — vendendo com prejuízo?",
-      "bonusSubscription": "A assinatura do aplicativo que o cliente receberá gratuitamente",
-      "customer": "Para quem você está vendendo?",
-      "suggested": "Sugerido: {amount} (2× o custo do último pacote)",
-      "totalAmount": "O preço total cobrado pelos QR Codes."
-    },
-    "placeholders": {
-      "customerSearch": "Digite o nome ou e-mail...",
-      "subscription": "Selecione uma assinatura..."
-    },
-    "title": "Vendas"
-  },
   "Sidebar": {
     "groups": {
       "system": "Sistema",
@@ -799,17 +762,13 @@
       "categories": "Categorias",
       "purchasing": "Compras",
       "inventory": "Estoque",
-      "sales": "Vendas",
       "finance": "Financeiro"
     },
     "items": {
       "dashboard": "Painel",
       "buyGenCodes": "Comprar GenCodes",
       "myGenCodes": "Meus GenCodes",
-      "buyDigitalQr": "Comprar QR Codes Digitais",
-      "myDigitalQr": "Meus QR Codes Digitais",
       "customers": "Clientes",
-      "sales": "Vendas",
       "companyData": "Dados da Empresa",
       "employees": "Funcionários",
       "suppliers": "Fornecedores",
