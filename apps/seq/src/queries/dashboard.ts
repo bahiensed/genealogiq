@@ -34,7 +34,7 @@ export async function getDashboardStats(customerId: string) {
   ] = await Promise.all([
     // Stock is the count of unsold licences now that the digital counter is
     // gone — same number the tenant sees on /inventory/gencodes.
-    prisma.physicalQrLicense.count({
+    prisma.genCode.count({
       where: { tenantId: customerId, status: 'AVAILABLE' },
     }),
     prisma.appUser.count({
@@ -42,7 +42,7 @@ export async function getDashboardStats(customerId: string) {
     }),
     // "Sold" is soldAt, not status: a code written off this month counts as
     // revenue now even if the buyer activates it next month (or never).
-    prisma.physicalQrLicense.aggregate({
+    prisma.genCode.aggregate({
       where:  { tenantId: customerId, soldAt: { gte: startOfMonth } },
       _count: true,
       _sum:   { soldValue: true },
@@ -53,7 +53,7 @@ export async function getDashboardStats(customerId: string) {
         sold_via                      AS sold_via,
         COALESCE(SUM(sold_value), 0)  AS revenue,
         COUNT(*)                      AS count
-      FROM physical_qr_licenses
+      FROM gencodes
       WHERE tenant_id = ${customerId}
         AND sold_at IS NOT NULL
         AND sold_at >= ${startOf12Months}

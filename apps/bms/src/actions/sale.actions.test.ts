@@ -11,7 +11,7 @@ const { prismaMock, PrismaKnownError } = vi.hoisted(() => {
   const prismaMock = {
     package:           { findUnique: vi.fn() },
     sale:              { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
-    physicalQrLicense: { createMany: vi.fn(), deleteMany: vi.fn() },
+    genCode: { createMany: vi.fn(), deleteMany: vi.fn() },
     $transaction:      vi.fn((cb: (tx: unknown) => Promise<unknown>) => cb(prismaMock)),
   }
   return { prismaMock, PrismaKnownError }
@@ -58,7 +58,7 @@ describe("createSale", () => {
         data: expect.objectContaining({ packageId: "p1", tenantId: "c1", quantity: 2, soldById: "admin-1" }),
       }),
     )
-    const arg = prismaMock.physicalQrLicense.createMany.mock.calls[0][0] as { data: unknown[] }
+    const arg = prismaMock.genCode.createMany.mock.calls[0][0] as { data: unknown[] }
     expect(arg.data).toHaveLength(20)
     expect(arg.data[0]).toEqual(
       expect.objectContaining({ saleId: 99, packageId: "p1", tenantId: "c1", genCode: "GEN-CODE" }),
@@ -92,7 +92,7 @@ describe("reverseSale", () => {
     expect(prismaMock.sale.update).toHaveBeenCalledWith(
       expect.objectContaining({ where: { id: 7 }, data: { reversedAt: expect.any(Date) } }),
     )
-    expect(prismaMock.physicalQrLicense.deleteMany).toHaveBeenCalledWith({
+    expect(prismaMock.genCode.deleteMany).toHaveBeenCalledWith({
       where: { saleId: 7, status: "AVAILABLE" },
     })
     expect(res).toEqual({ ok: true, message: undefined })

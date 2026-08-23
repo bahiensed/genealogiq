@@ -11,7 +11,6 @@ import {
   categories,
   purchasing,
   inventory,
-  finance,
   type MenuItem,
   type ModuleKey,
 } from '@/components/sidebar/menu-items'
@@ -29,6 +28,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  useSidebar,
 } from '@genealogiq/ui/sidebar'
 
 type Modules = Record<ModuleKey, boolean>
@@ -43,13 +43,21 @@ function visibleItems(items: MenuItem[], modules: Modules | null): MenuItem[] {
 
 export function AppSidebar({ modules }: AppSidebarProps) {
   const pathname = usePathname()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  // The mobile sidebar is a Sheet overlaying the page — it does NOT close on its own
+  // when a link navigates, so tapping a menu item loads the new page behind a sidebar
+  // that is still covering it. Every navigating <Link> closes it; never the
+  // CollapsibleTrigger, since expanding a group is not navigation. No-op on desktop.
+  const closeOnMobileNav = () => {
+    if (isMobile) setOpenMobile(false)
+  }
   const t = useTranslations('Sidebar')
 
   const recordsItems    = visibleItems(records,    modules)
   const categoriesItems = visibleItems(categories, modules)
   const purchasingItems = visibleItems(purchasing, modules)
   const inventoryItems  = visibleItems(inventory,  modules)
-  const financeItems    = visibleItems(finance,    modules)
 
   const groups = [
     { labelKey: 'groups.system',     items: system,          show: true                       },
@@ -57,7 +65,6 @@ export function AppSidebar({ modules }: AppSidebarProps) {
     { labelKey: 'groups.categories', items: categoriesItems, show: categoriesItems.length > 0 },
     { labelKey: 'groups.purchasing', items: purchasingItems, show: true                       },
     { labelKey: 'groups.inventory',  items: inventoryItems,  show: true                       },
-    { labelKey: 'groups.finance',    items: financeItems,    show: financeItems.length > 0    },
   ].filter((g) => g.show)
 
   return (
@@ -91,7 +98,7 @@ export function AppSidebar({ modules }: AppSidebarProps) {
                   {section.map((item) => (
                     <SidebarMenuItem key={item.labelKey}>
                       <SidebarMenuButton asChild isActive={pathname === item.url}>
-                        <Link href={item.url}>
+                        <Link href={item.url} onClick={closeOnMobileNav}>
                           <item.icon />
                           <span>{t(item.labelKey)}</span>
                         </Link>
@@ -123,7 +130,7 @@ export function AppSidebar({ modules }: AppSidebarProps) {
                     {group.items.map((item) => (
                       <SidebarMenuItem key={item.labelKey}>
                         <SidebarMenuButton asChild isActive={pathname === item.url}>
-                          <Link href={item.url}>
+                          <Link href={item.url} onClick={closeOnMobileNav}>
                             <item.icon />
                             <span>{t(item.labelKey)}</span>
                           </Link>

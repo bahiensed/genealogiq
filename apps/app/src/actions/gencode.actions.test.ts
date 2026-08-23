@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const { prismaMock, txMock, safeParseMock } = vi.hoisted(() => ({
   prismaMock: {
-    physicalQrLicense: { findUnique: vi.fn() },
+    genCode: { findUnique: vi.fn() },
     $transaction: vi.fn(),
   },
   txMock: {
     appUser: { create: vi.fn() },
     appUserGuardian: { create: vi.fn() },
-    physicalQrLicense: { update: vi.fn() },
+    genCode: { update: vi.fn() },
   },
   safeParseMock: vi.fn(),
 }))
@@ -25,7 +25,7 @@ vi.mock("next-intl/server", () => ({
 // factory so it always hands back an object whose safeParse we control per-test.
 vi.mock("@/schemas/memorial.schema", () => ({ getMemorialSchema: () => ({ safeParse: safeParseMock }) }))
 
-import { activatePhysicalQr } from "./physical-qr.actions"
+import { activateGenCode } from "./gencode.actions"
 import { verifySession } from "@/lib/dal"
 
 const MEMORIAL = { firstName: "Ana", lastName: "Silva" }
@@ -38,42 +38,42 @@ beforeEach(() => {
   prismaMock.$transaction.mockImplementation(async (cb: any) => cb(txMock))
   txMock.appUser.create.mockResolvedValue({ id: "memo-1" })
   txMock.appUserGuardian.create.mockResolvedValue({})
-  txMock.physicalQrLicense.update.mockResolvedValue({})
+  txMock.genCode.update.mockResolvedValue({})
 })
 
-describe("activatePhysicalQr", () => {
+describe("activateGenCode", () => {
   it("rejects an unknown gen code", async () => {
-    prismaMock.physicalQrLicense.findUnique.mockResolvedValue(null)
-    expect(await activatePhysicalQr("NOPE", MEMORIAL)).toEqual({ ok: false, message: "physicalQr.notFound" })
+    prismaMock.genCode.findUnique.mockResolvedValue(null)
+    expect(await activateGenCode("NOPE", MEMORIAL)).toEqual({ ok: false, message: "gencode.notFound" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
   it("rejects a code that is no longer AVAILABLE (double-activation guard)", async () => {
-    prismaMock.physicalQrLicense.findUnique.mockResolvedValue({ id: "lic-1", status: "ACTIVATED" })
-    expect(await activatePhysicalQr("GENCODE", MEMORIAL)).toEqual({
+    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "ACTIVATED" })
+    expect(await activateGenCode("GENCODE", MEMORIAL)).toEqual({
       ok: false,
-      message: "physicalQr.alreadyActivated",
+      message: "gencode.alreadyActivated",
     })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
   it("rejects invalid memorial data before mutating", async () => {
-    prismaMock.physicalQrLicense.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
+    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
     safeParseMock.mockReturnValue({ success: false, error: { issues: [{ message: "First name required" }] } })
-    expect(await activatePhysicalQr("GENCODE", MEMORIAL)).toEqual({ ok: false, message: "First name required" })
+    expect(await activateGenCode("GENCODE", MEMORIAL)).toEqual({ ok: false, message: "First name required" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
   it("activates: creates the memorial + guardian link and marks the license ACTIVATED", async () => {
-    prismaMock.physicalQrLicense.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
+    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
 
-    const res = await activatePhysicalQr("GENCODE", MEMORIAL)
+    const res = await activateGenCode("GENCODE", MEMORIAL)
 
     expect(res).toEqual({ ok: true, data: { id: "memo-1" }, message: undefined })
     expect(txMock.appUserGuardian.create).toHaveBeenCalledWith({
       data: { appUserId: "memo-1", guardianId: "guardian-1" },
     })
-    expect(txMock.physicalQrLicense.update).toHaveBeenCalledWith(
+    expect(txMock.genCode.update).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { id: "lic-1" },
         data: expect.objectContaining({ status: "ACTIVATED", appUserId: "memo-1" }),
@@ -82,12 +82,12 @@ describe("activatePhysicalQr", () => {
   })
 
   it("handles the activation race: a concurrent winner (P2002) yields a friendly retry error", async () => {
-    prismaMock.physicalQrLicense.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
+    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
     prismaMock.$transaction.mockRejectedValue({ code: "P2002" })
 
-    expect(await activatePhysicalQr("GENCODE", MEMORIAL)).toEqual({
+    expect(await activateGenCode("GENCODE", MEMORIAL)).toEqual({
       ok: false,
-      message: "physicalQr.raceRetry",
+      message: "gencode.raceRetry",
     })
   })
 })

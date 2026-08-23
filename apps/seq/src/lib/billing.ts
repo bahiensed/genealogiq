@@ -87,7 +87,7 @@ export async function applyCheckoutSession(
         packageId: ctx.packageId,
         tenantId:  ctx.tenantId,
       }))
-      await tx.physicalQrLicense.createMany({ data: licenses })
+      await tx.genCode.createMany({ data: licenses })
     })
   } catch (err: unknown) {
     if ((err as { code?: string }).code === "P2002") {

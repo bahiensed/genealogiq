@@ -1,16 +1,13 @@
-import { BarChart2, Barcode, BoxIcon, BuildingIcon, FolderIcon, HandPlatterIcon, IdCardIcon, LayoutDashboard, ScanBarcode, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
+import { Barcode, BuildingIcon, IdCardIcon, LayoutDashboard, ScanBarcode, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
 
+// Suppliers is the only optional module left. The products/services/finance/
+// inventory family was removed: those pages rendered a title over nothing —
+// there is no Product or Service model in the schema at all — and two of them
+// (/purchasing/products, /purchasing/services) were menu entries with no page
+// behind them, so enabling the flag 404'd the tenant.
 export type ModuleKey =
   | 'moduleRecordsSuppliers'
-  | 'moduleRecordsProducts'
-  | 'moduleRecordsServices'
   | 'moduleCategoriesSuppliers'
-  | 'moduleCategoriesProducts'
-  | 'moduleCategoriesServices'
-  | 'modulePurchasingProducts'
-  | 'modulePurchasingServices'
-  | 'moduleInventoryProducts'
-  | 'moduleFinance'
 
 export interface MenuItem {
   /** i18n key under the `Sidebar.items` namespace (translated in app-sidebar). */
@@ -45,38 +42,25 @@ export const system: MenuItem[] = [
 // ─── Records (Customers always-on) ───────────────────────────────────────────
 
 export const records: MenuItem[] = [
-  { labelKey: 'items.suppliers', url: '/suppliers', icon: StoreIcon,       moduleKey: 'moduleRecordsSuppliers' },
-  { labelKey: 'items.products',  url: '/products',  icon: BoxIcon,         moduleKey: 'moduleRecordsProducts'  },
-  { labelKey: 'items.services',  url: '/services',  icon: HandPlatterIcon, moduleKey: 'moduleRecordsServices'  },
-  { labelKey: 'items.customers', url: '/customers', icon: UsersIcon        }, // always-on
+  { labelKey: 'items.suppliers', url: '/suppliers', icon: StoreIcon, moduleKey: 'moduleRecordsSuppliers' },
+  { labelKey: 'items.customers', url: '/customers', icon: UsersIcon }, // always-on
 ]
 
 // ─── Categories (Customer Categories always-on) ───────────────────────────────
 
 export const categories: MenuItem[] = [
-  { labelKey: 'items.supplierCategories', url: '/categories/suppliers', icon: TagIcon,    moduleKey: 'moduleCategoriesSuppliers' },
-  { labelKey: 'items.productCategories',  url: '/categories/products',  icon: FolderIcon, moduleKey: 'moduleCategoriesProducts'  },
-  { labelKey: 'items.serviceCategories',  url: '/categories/services',  icon: FolderIcon, moduleKey: 'moduleCategoriesServices'  },
-  { labelKey: 'items.customerCategories', url: '/categories/customers', icon: TagIcon     }, // always-on
+  { labelKey: 'items.supplierCategories', url: '/categories/suppliers', icon: TagIcon, moduleKey: 'moduleCategoriesSuppliers' },
+  { labelKey: 'items.customerCategories', url: '/categories/customers', icon: TagIcon }, // always-on
 ]
 
-// ─── Purchasing (QR always-on) ───────────────────────────────────────────────
+// ─── Purchasing ──────────────────────────────────────────────────────────────
 
 export const purchasing: MenuItem[] = [
-  { labelKey: 'items.buyGenCodes', url: '/purchasing/gencodes', icon: Barcode     },
-  { labelKey: 'items.products',      url: '/purchasing/products',    icon: BoxIcon,         moduleKey: 'modulePurchasingProducts' },
-  { labelKey: 'items.services',      url: '/purchasing/services',    icon: HandPlatterIcon, moduleKey: 'modulePurchasingServices' },
+  { labelKey: 'items.buyGenCodes', url: '/purchasing/gencodes', icon: Barcode },
 ]
 
-// ─── Inventory (QR always-on) ────────────────────────────────────────────────
+// ─── Inventory ───────────────────────────────────────────────────────────────
 
 export const inventory: MenuItem[] = [
   { labelKey: 'items.myGenCodes', url: '/inventory/gencodes', icon: ScanBarcode },
-  { labelKey: 'items.products',     url: '/inventory/products',    icon: BoxIcon,     moduleKey: 'moduleInventoryProducts' },
-]
-
-// ─── Finance ──────────────────────────────────────────────────────────────────
-
-export const finance: MenuItem[] = [
-  { labelKey: 'items.finance', url: '/finance', icon: BarChart2, moduleKey: 'moduleFinance' },
 ]

@@ -44,7 +44,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionResult> {
       packageId,
       tenantId,
     }))
-    await tx.physicalQrLicense.createMany({ data: licenses })
+    await tx.genCode.createMany({ data: licenses })
   })
 
   revalidatePath('/sales/manual-sales')
@@ -78,7 +78,7 @@ export async function reverseSale(id: number): Promise<ActionResult> {
       // Delete only AVAILABLE licenses. SOLD ones were written off by the
       // tenant and ACTIVATED ones are linked to a memorial — reversing the B2B
       // sale must not reach into either.
-      await tx.physicalQrLicense.deleteMany({
+      await tx.genCode.deleteMany({
         where: { saleId: id, status: 'AVAILABLE' },
       })
     })

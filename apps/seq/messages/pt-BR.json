@@ -734,8 +734,7 @@
       "records": "Cadastros",
       "categories": "Categorias",
       "purchasing": "Compras",
-      "inventory": "Estoque",
-      "finance": "Financeiro"
+      "inventory": "Estoque"
     },
     "items": {
       "dashboard": "Painel",
@@ -745,13 +744,8 @@
       "companyData": "Dados da Empresa",
       "employees": "Funcionários",
       "suppliers": "Fornecedores",
-      "products": "Produtos",
-      "services": "Serviços",
       "supplierCategories": "Categorias de Fornecedores",
-      "productCategories": "Categorias de Produtos",
-      "serviceCategories": "Categorias de Serviços",
-      "customerCategories": "Categorias de Clientes",
-      "finance": "Financeiro"
+      "customerCategories": "Categorias de Clientes"
     }
   },
   "SupplierCategories": {

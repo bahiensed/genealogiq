@@ -34,9 +34,6 @@ export interface PlanQuotas {
   petsMax: number
   // How many QR codes (own profile + guarded memorials, combined) are free.
   qrCodeMax: number
-  // Unchanged — boolean feature of the singular Geolocation model, out of
-  // scope for this redesign.
-  geolocationFullAccess: boolean
 }
 
 // Whether one more unit of `field` can be purchased individually. Geo places

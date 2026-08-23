@@ -35,15 +35,7 @@ function makeCustomerBaseSchema(t: Translator) {
     categoryId:            z.string().min(1, t('categoryRequired')),
     isActive:              z.boolean(),
     moduleRecordsSuppliers:    z.boolean().default(false),
-    moduleRecordsProducts:     z.boolean().default(false),
-    moduleRecordsServices:     z.boolean().default(false),
     moduleCategoriesSuppliers: z.boolean().default(false),
-    moduleCategoriesProducts:  z.boolean().default(false),
-    moduleCategoriesServices:  z.boolean().default(false),
-    modulePurchasingProducts:  z.boolean().default(false),
-    modulePurchasingServices:  z.boolean().default(false),
-    moduleInventoryProducts:   z.boolean().default(false),
-    moduleFinance:             z.boolean().default(false),
     address:               addressSchema.optional(),
   })
 }
@@ -98,15 +90,7 @@ export const customerDefaultValues: CustomerFormValues = {
   categoryId:            '',
   isActive:              true,
   moduleRecordsSuppliers:    false,
-  moduleRecordsProducts:     false,
-  moduleRecordsServices:     false,
   moduleCategoriesSuppliers: false,
-  moduleCategoriesProducts:  false,
-  moduleCategoriesServices:  false,
-  modulePurchasingProducts:  false,
-  modulePurchasingServices:  false,
-  moduleInventoryProducts:   false,
-  moduleFinance:             false,
   address:               addressDefaultValues,
 }
 

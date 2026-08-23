@@ -8,7 +8,7 @@ export type LicenseStatus = 'AVAILABLE' | 'SOLD' | 'ACTIVATED'
 export async function getLicenses(status?: LicenseStatus) {
   const { customerId } = await verifyTenantSession()
 
-  return prisma.physicalQrLicense.findMany({
+  return prisma.genCode.findMany({
     where: {
       tenantId: customerId,
       ...(status ? { status } : {}),
@@ -36,11 +36,11 @@ export async function getLicenseSummary() {
   const where = { tenantId: customerId }
 
   const [total, available, sold, activated, printed] = await Promise.all([
-    prisma.physicalQrLicense.count({ where }),
-    prisma.physicalQrLicense.count({ where: { ...where, status: 'AVAILABLE' } }),
-    prisma.physicalQrLicense.count({ where: { ...where, status: 'SOLD' } }),
-    prisma.physicalQrLicense.count({ where: { ...where, status: 'ACTIVATED' } }),
-    prisma.physicalQrLicense.count({ where: { ...where, printedAt: { not: null } } }),
+    prisma.genCode.count({ where }),
+    prisma.genCode.count({ where: { ...where, status: 'AVAILABLE' } }),
+    prisma.genCode.count({ where: { ...where, status: 'SOLD' } }),
+    prisma.genCode.count({ where: { ...where, status: 'ACTIVATED' } }),
+    prisma.genCode.count({ where: { ...where, printedAt: { not: null } } }),
   ])
 
   return { total, available, sold, activated, printed }
@@ -50,7 +50,7 @@ export async function getLicenseSummary() {
 export async function getLicenseByGenCode(genCode: string) {
   const { customerId } = await verifyTenantSession()
 
-  return prisma.physicalQrLicense.findFirst({
+  return prisma.genCode.findFirst({
     where:  { genCode, tenantId: customerId },
     select: {
       id:          true,
