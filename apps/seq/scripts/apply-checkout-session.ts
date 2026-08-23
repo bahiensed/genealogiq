@@ -64,7 +64,7 @@ async function main() {
   const existing = await prisma.sale.findFirst({ where: { stripeSessionId: session.id } })
   if (existing) {
     console.log(`\nAlready applied: Sale ${existing.id} exists for this session.`)
-    const available = await prisma.physicalQrLicense.count({
+    const available = await prisma.genCode.count({
       where: { tenantId: ctx.tenantId, status: 'AVAILABLE' },
     })
     console.log(`Unsold licenses for tenant: ${available}`)
@@ -117,7 +117,7 @@ async function main() {
       packageId: ctx.packageId!,
       tenantId:  ctx.tenantId!,
     }))
-    await tx.physicalQrLicense.createMany({ data: licenses })
+    await tx.genCode.createMany({ data: licenses })
     console.log(`Licenses        : ${totalUnits} license(s) created`)
   })
 

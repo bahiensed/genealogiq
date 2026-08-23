@@ -41,7 +41,7 @@ const PUBLIC_SELECT = {
   otherSocial: true,
   // Relations needed for display + canManageProfile()
   appSaleId: true,
-  physicalQrLicense: { select: { id: true } },
+  genCode: { select: { id: true } },
   guardedBy: {
     where:  { status: "ACCEPTED" as const },
     select: { guardianId: true, status: true, guardian: { select: { firstName: true } } },

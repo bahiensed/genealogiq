@@ -1,8 +1,8 @@
 import { notFound, redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 import { auth } from "@/auth"
-import { getLicenseByGenCode } from "@/queries/physical-qr"
-import { PhysicalQrLanding } from "@/components/qr/physical-qr-landing"
+import { getLicenseByGenCode } from "@/queries/gencode"
+import { GenCodeLanding } from "@/components/qr/gencode-landing"
 import { ActivateMemorialForm } from "@/components/qr/activate-memorial-form"
 import { AuroraBackdrop } from "@/components/aurora-backdrop"
 
@@ -10,7 +10,7 @@ interface Props {
   params: Promise<{ genCode: string }>
 }
 
-export default async function PhysicalQrPage({ params }: Props) {
+export default async function GenCodePage({ params }: Props) {
   const { genCode: rawGenCode } = await params
   const normalized = rawGenCode.toUpperCase().replace(/-/g, "")
 
@@ -42,7 +42,7 @@ export default async function PhysicalQrPage({ params }: Props) {
             <ActivateMemorialForm genCode={normalized} />
           </div>
         ) : (
-          <PhysicalQrLanding genCode={normalized} />
+          <GenCodeLanding genCode={normalized} />
         )}
       </main>
     </div>

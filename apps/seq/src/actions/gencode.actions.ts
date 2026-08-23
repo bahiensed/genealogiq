@@ -31,13 +31,13 @@ export async function markGenCodePrinted(genCode: string, printed: boolean): Pro
   const t = await getTranslations('Actions')
   const { customerId } = await verifyTenantSession()
 
-  const lic = await prisma.physicalQrLicense.findFirst({
+  const lic = await prisma.genCode.findFirst({
     where:  { genCode, tenantId: customerId },
     select: { id: true },
   })
   if (!lic) return fail(t('gencode.notFound'))
 
-  await prisma.physicalQrLicense.update({
+  await prisma.genCode.update({
     where: { id: lic.id },
     data:  { printedAt: printed ? new Date() : null },
   })
@@ -64,7 +64,7 @@ export async function sellGenCodeManually(
   }
 
   // Atomic guard: only an AVAILABLE code can be sold — prevents double-selling.
-  const res = await prisma.physicalQrLicense.updateMany({
+  const res = await prisma.genCode.updateMany({
     where: { genCode, tenantId: customerId, status: 'AVAILABLE' },
     data:  {
       status:     'SOLD',
@@ -135,7 +135,7 @@ export async function sellGenCodeViaPlatform(
         })
       }
 
-      const updated = await tx.physicalQrLicense.updateMany({
+      const updated = await tx.genCode.updateMany({
         where: { genCode, tenantId: customerId, status: 'AVAILABLE' },
         data:  {
           status:          'SOLD',
@@ -189,7 +189,7 @@ export async function undoGenCodeSale(genCode: string): Promise<ActionResult> {
   const t = await getTranslations('Actions')
   const { customerId } = await verifyTenantSession()
 
-  const res = await prisma.physicalQrLicense.updateMany({
+  const res = await prisma.genCode.updateMany({
     where: { genCode, tenantId: customerId, status: 'SOLD' },
     data:  {
       status:          'AVAILABLE',

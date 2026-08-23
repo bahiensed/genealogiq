@@ -300,7 +300,7 @@ export default async function ProfileByIdPage({ params }: Props) {
     <div className="relative overflow-x-hidden mt-16">
       <AuroraBackdrop variant="page" intensity="bold" />
       <ProfileViewTracker profile={recentProfile} />
-      {isMemorialized && (user.appSaleId != null || user.physicalQrLicense != null) && (
+      {isMemorialized && (user.appSaleId != null || user.genCode != null) && (
         <QrScanTracker profileId={id} />
       )}
       <main className="relative z-10">

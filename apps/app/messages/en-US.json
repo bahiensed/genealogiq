@@ -76,6 +76,11 @@
       "notAuthorized": "You are not authorized to manage this gallery.",
       "videoLimit": "Video limit is {max} for this plan."
     },
+    "gencode": {
+      "alreadyActivated": "This code has already been activated.",
+      "notFound": "QR Code not found.",
+      "raceRetry": "This code was just activated. Please try again."
+    },
     "geolocation": {
       "notAuthorized": "You are not authorized to manage this profile."
     },
@@ -100,11 +105,6 @@
       "notAuthorized": "You are not authorized to manage this profile.",
       "notFound": "Profile not found.",
       "ownerNotInTree": "The selected owner must already be a member of your family tree."
-    },
-    "physicalQr": {
-      "alreadyActivated": "This code has already been activated.",
-      "notFound": "QR Code not found.",
-      "raceRetry": "This code was just activated. Please try again."
     },
     "places": {
       "imageLimit": "Image limit is {max} for this plan.",

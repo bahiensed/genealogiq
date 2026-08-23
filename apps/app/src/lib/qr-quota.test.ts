@@ -22,7 +22,7 @@ const d = (iso: string) => new Date(iso)
 
 // findUnique is called twice per getQrQuotaStatus call — once for the
 // guardian (id/createdAt only) and once for the target profile
-// (physicalQrLicense/appSale only). Keying by where.id lets each get its own
+// (genCode/appSale only). Keying by where.id lets each get its own
 // shape instead of sharing a single mockResolvedValue.
 function mockUsers(byId: Record<string, unknown>) {
   prismaMock.appUser.findUnique.mockImplementation(({ where }: { where: { id: string } }) =>
@@ -119,10 +119,10 @@ describe("getQrQuotaStatus — rank heuristic", () => {
 })
 
 describe("getQrQuotaStatus — direct-unlock bypass", () => {
-  it("unlocks a memorial with its own physicalQrLicense regardless of rank", async () => {
+  it("unlocks a memorial with its own genCode regardless of rank", async () => {
     mockUsers({
       g1: { id: "g1", createdAt: d("2024-01-01") },
-      m1: {}, m2: {}, m3: { physicalQrLicense: { id: "lic-1" } },
+      m1: {}, m2: {}, m3: { genCode: { id: "lic-1" } },
     })
     prismaMock.appUser.findMany.mockResolvedValue([
       { id: "m1", createdAt: d("2024-02-01") },

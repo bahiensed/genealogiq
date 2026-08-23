@@ -631,7 +631,7 @@
     "submit": "Registrar Venta",
     "submitting": "Enviando…",
     "summary": {
-      "gencodes": "GenCodes a generar",
+      "genCodes": "GenCodes a generar",
       "totalPrice": "Precio total",
       "unitPrice": "Precio unitario / código"
     },
