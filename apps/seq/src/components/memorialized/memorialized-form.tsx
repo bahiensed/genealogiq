@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { MapPin } from 'lucide-react'
 import { getDeceasedSchema, deceasedDefaultValues, type DeceasedFormValues } from '@/schemas/deceased.schema'
-import { createDeceased, updateDeceased } from '@/actions/deceased.actions'
+import { updateDeceased } from '@/actions/deceased.actions'
 import { GenderSelect } from '@/components/ui/gender-select'
 import { CountrySelect } from '@/components/ui/country-select'
 import { Button } from '@genealogiq/ui/button'
@@ -27,11 +27,10 @@ import {
   AccordionTrigger,
 } from '@genealogiq/ui/accordion'
 
+// Edit only. Memorials are created by the consumer when they redeem a GenCode
+// at /qr/<genCode> — SEQ no longer has a path to create one on their behalf.
 interface MemorializedFormProps {
-  /** Create mode: appUserId to link the new deceased to */
-  appUserId?: string
-  /** Edit mode: deceased record ID */
-  id?: string
+  id: string
   defaultValues?: DeceasedFormValues
 }
 
@@ -45,11 +44,10 @@ function socialLabel(key: SocialKey, otherLabel: string): string {
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
-export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedFormProps) {
+export function MemorializedForm({ id, defaultValues }: MemorializedFormProps) {
   const t  = useTranslations('Memorialized')
   const tc = useTranslations('Common')
   const tErr = useTranslations('Errors')
-  const isEditing = !!id
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
@@ -62,15 +60,12 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
   async function onSubmit(data: DeceasedFormValues) {
     setServerError(null)
-    const result = isEditing
-      ? await updateDeceased(id!, data)
-      : await createDeceased(appUserId!, data)
+    const result = await updateDeceased(id, data)
 
     if (!result.ok) {
       setServerError(result.message)
     } else {
-      toast.success(isEditing ? t('toasts.updated') : t('toasts.created'))
-      if (!isEditing) router.push(`/customers/${appUserId}`)
+      toast.success(t('toasts.updated'))
     }
   }
 
@@ -446,13 +441,11 @@ export function MemorializedForm({ appUserId, id, defaultValues }: MemorializedF
 
       <Field orientation="horizontal">
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? tc('saving') : isEditing ? t('saveChanges') : t('createProfile')}
+          {isSubmitting ? tc('saving') : t('saveChanges')}
         </Button>
-        {isEditing && (
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
-            {tc('reset')}
-          </Button>
-        )}
+        <Button type="button" variant="outline" onClick={() => form.reset()}>
+          {tc('reset')}
+        </Button>
       </Field>
     </form>
   )

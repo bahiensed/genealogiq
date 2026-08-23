@@ -52,9 +52,7 @@
       "updated": "Category updated successfully."
     },
     "deceased": {
-      "customerNotFound": "Customer not found.",
       "guardianAdded": "Guardian added.",
-      "noQrAvailable": "No QR Codes available for this customer.",
       "notFound": "Profile not found.",
       "relationExists": "This guardian is already linked to the profile.",
       "relationNotFound": "Guardian link not found."
@@ -306,7 +304,6 @@
       "addressOptional": "Address is optional and can be filled in later."
     },
     "memorialized": {
-      "create": "Create memorialized profile",
       "acquiredQrCodesLabel": "QR Codes acquired\nby this customer",
       "availableProfilesLabel": "Memorialized profiles\nstill available",
       "createdProfilesLabel": "Memorialized profiles\nalready created by the customer",
@@ -494,7 +491,6 @@
       "view": "View"
     },
     "burialHint": "Burial information is optional and can be filled in later.",
-    "createProfile": "Create profile",
     "fields": {
       "birthCity": "Birth city:",
       "birthCountry": "Birth country:*",
@@ -524,8 +520,6 @@
       "zip": "ZIP:"
     },
     "new": "New memorialized profile",
-    "newAvailable": "{count, plural, =0 {No QR Codes available} one {# QR Code available} other {# QR Codes available}}",
-    "newCustomerLabel": "Customer:",
     "qr": {
       "copyLink": "Copy link",
       "installedOn": "Installed: {date}",
@@ -577,26 +571,6 @@
       "pending": "Pending",
       "printed": "Printed"
     },
-    "stepIndicator": "Step {current} of {total}",
-    "stepperLabel": "Form steps",
-    "steps": {
-      "burial": {
-        "desc": "Site & location",
-        "title": "Burial"
-      },
-      "death": {
-        "desc": "Date, place & cause",
-        "title": "Death"
-      },
-      "personal": {
-        "desc": "Name, gender & birth",
-        "title": "Personal"
-      },
-      "social": {
-        "desc": "Social media & notes",
-        "title": "Social"
-      }
-    },
     "table": {
       "birthDate": "Birth date",
       "deathDate": "Death date",
@@ -606,7 +580,6 @@
       "qrCode": "QR Code"
     },
     "toasts": {
-      "created": "Profile created successfully.",
       "updated": "Profile updated successfully."
     }
   },

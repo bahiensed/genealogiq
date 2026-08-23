@@ -55,8 +55,11 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
     } : undefined,
   }
 
-  const acquiredQRCodes   = customer._count.appSales
+  const acquiredQRCodes   = customer._count.physicalQrPurchases
   const createdProfiles   = customer._count.guardiansOf
+  // Codes bought but not yet turned into a memorial. The customer redeems them
+  // themselves at /qr/<genCode>; there is no longer a path for us to do it for
+  // them, so this is a follow-up prompt, not a to-do list.
   const availableProfiles = Math.max(0, acquiredQRCodes - createdProfiles)
 
   const memorializedProfiles = customer.guardiansOf.map(({ appUser }) => appUser)
@@ -76,13 +79,6 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
       <section id="memorialized-profiles" className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">{t('memorialized.title')}</h2>
-          {availableProfiles > 0 && (
-            <Button asChild>
-              <Link href={`/customers/${id}/memorialized/new`}>
-                {t('memorialized.create')}
-              </Link>
-            </Button>
-          )}
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-3xl">

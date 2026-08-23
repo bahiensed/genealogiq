@@ -23,7 +23,7 @@ interface Props {
   data: { name: string; revenue: number }[]
 }
 
-export function RevenueByPlanChart({ data }: Props) {
+export function RevenueByChannelChart({ data }: Props) {
   const locale = useLocale()
   const chartConfig = Object.fromEntries(
     data.map((d, i) => [

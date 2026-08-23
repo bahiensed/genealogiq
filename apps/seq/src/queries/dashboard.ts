@@ -4,18 +4,18 @@ import { prisma } from '@/lib/prisma'
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+// One row per (month, write-off channel). Three of the four charts and the
+// three money KPIs all come from this single grouping — the tenant's revenue
+// is recorded on the licence itself when they write it off, so there is
+// nothing else to join.
 type ChartRow = {
-  month:           Date
-  subscription_id: string
-  revenue:         string | null
+  month:    Date
+  sold_via: string | null
+  revenue:  string | null
+  count:    bigint
 }
 
 type CustomerGrowthRow = {
-  month: Date
-  count: bigint
-}
-
-type QrConsumptionRow = {
   month: Date
   count: bigint
 }
@@ -31,7 +31,6 @@ export async function getDashboardStats(customerId: string) {
     monthlySales,
     chartRows,
     customerGrowth,
-    qrConsumption,
   ] = await Promise.all([
     // Stock is the count of unsold licences now that the digital counter is
     // gone — same number the tenant sees on /inventory/gencodes.
@@ -41,19 +40,23 @@ export async function getDashboardStats(customerId: string) {
     prisma.appUser.count({
       where: { tenantId: customerId, role: 'APP_USER' },
     }),
-    prisma.appSale.aggregate({
-      where:  { tenantId: customerId, createdAt: { gte: startOfMonth } },
+    // "Sold" is soldAt, not status: a code written off this month counts as
+    // revenue now even if the buyer activates it next month (or never).
+    prisma.physicalQrLicense.aggregate({
+      where:  { tenantId: customerId, soldAt: { gte: startOfMonth } },
       _count: true,
-      _sum:   { value: true },
+      _sum:   { soldValue: true },
     }),
     prisma.$queryRaw<ChartRow[]>`
       SELECT
-        DATE_TRUNC('month', created_at) AS month,
-        subscription_id                 AS subscription_id,
-        SUM(value)                      AS revenue
-      FROM app_sales
+        DATE_TRUNC('month', sold_at)  AS month,
+        sold_via                      AS sold_via,
+        COALESCE(SUM(sold_value), 0)  AS revenue,
+        COUNT(*)                      AS count
+      FROM physical_qr_licenses
       WHERE tenant_id = ${customerId}
-        AND created_at >= ${startOf12Months}
+        AND sold_at IS NOT NULL
+        AND sold_at >= ${startOf12Months}
       GROUP BY 1, 2
     `,
     prisma.$queryRaw<CustomerGrowthRow[]>`
@@ -66,26 +69,7 @@ export async function getDashboardStats(customerId: string) {
         AND created_at >= ${startOf12Months}
       GROUP BY 1
     `,
-    prisma.$queryRaw<QrConsumptionRow[]>`
-      SELECT
-        DATE_TRUNC('month', created_at) AS month,
-        COUNT(*)                        AS count
-      FROM app_sales
-      WHERE tenant_id = ${customerId}
-        AND created_at >= ${startOf12Months}
-      GROUP BY 1
-    `,
   ])
-
-  // Subscription name lookup for revenue-by-plan chart
-  const subIds = Array.from(new Set(chartRows.map((r) => r.subscription_id)))
-  const subscriptions = subIds.length
-    ? await prisma.subscription.findMany({
-        where:  { id: { in: subIds } },
-        select: { id: true, name: true },
-      })
-    : []
-  const subNameMap = new Map(subscriptions.map((s) => [s.id, s.name]))
 
   // Month spine
   const monthKeys: string[] = []
@@ -94,14 +78,20 @@ export async function getDashboardStats(customerId: string) {
     monthKeys.push(`${d.getFullYear()}-${d.getMonth()}`)
   }
 
+  // One pass over the grouping feeds revenue-per-month, revenue-per-channel
+  // and codes-sold-per-month.
   const monthlyRevenueMap = new Map<string, number>(monthKeys.map((k) => [k, 0]))
-  const planRevenueMap    = new Map<string, number>()
+  const channelRevenueMap = new Map<string, number>()
+  const soldPerMonthMap   = new Map<string, number>(monthKeys.map((k) => [k, 0]))
   for (const r of chartRows) {
-    const key = `${r.month.getFullYear()}-${r.month.getMonth()}`
+    const key   = `${r.month.getFullYear()}-${r.month.getMonth()}`
     const value = Number(r.revenue ?? 0)
     monthlyRevenueMap.set(key, (monthlyRevenueMap.get(key) ?? 0) + value)
-    const planName = subNameMap.get(r.subscription_id) ?? 'Unknown'
-    planRevenueMap.set(planName, (planRevenueMap.get(planName) ?? 0) + value)
+    soldPerMonthMap.set(key, (soldPerMonthMap.get(key) ?? 0) + Number(r.count ?? 0))
+    // Null soldVia predates the write-off lifecycle; group it with the manual
+    // channel rather than inventing a third bucket for two legacy rows.
+    const channel = r.sold_via === 'PLATFORM' ? 'PLATFORM' : 'MANUAL'
+    channelRevenueMap.set(channel, (channelRevenueMap.get(channel) ?? 0) + value)
   }
 
   const monthlyRevenueChart = monthKeys.map((key) => {
@@ -109,7 +99,7 @@ export async function getDashboardStats(customerId: string) {
     return { month: MONTH_LABELS[month], revenue: Math.round((monthlyRevenueMap.get(key) ?? 0) * 100) / 100 }
   })
 
-  const revenueByPlanChart = Array.from(planRevenueMap.entries())
+  const revenueByChannelChart = Array.from(channelRevenueMap.entries())
     .map(([name, revenue]) => ({ name, revenue: Math.round(revenue * 100) / 100 }))
     .sort((a, b) => b.revenue - a.revenue)
 
@@ -124,19 +114,13 @@ export async function getDashboardStats(customerId: string) {
     return { month: MONTH_LABELS[month], count: customerGrowthMap.get(key) ?? 0 }
   })
 
-  // QR consumption chart with month spine
-  const qrConsumptionMap = new Map<string, number>(monthKeys.map((k) => [k, 0]))
-  for (const r of qrConsumption) {
-    const key = `${r.month.getFullYear()}-${r.month.getMonth()}`
-    qrConsumptionMap.set(key, Number(r.count ?? 0))
-  }
   const qrConsumptionChart = monthKeys.map((key) => {
     const [, month] = key.split('-').map(Number)
-    return { month: MONTH_LABELS[month], count: qrConsumptionMap.get(key) ?? 0 }
+    return { month: MONTH_LABELS[month], count: soldPerMonthMap.get(key) ?? 0 }
   })
 
   const monthlyCount   = monthlySales._count
-  const monthlyRevenue = Number(monthlySales._sum.value ?? 0)
+  const monthlyRevenue = Number(monthlySales._sum.soldValue ?? 0)
 
   return {
     availableQRCodes: availableCodes,
@@ -145,7 +129,7 @@ export async function getDashboardStats(customerId: string) {
     monthlyRevenue,
     averageTicket: monthlyCount > 0 ? monthlyRevenue / monthlyCount : 0,
     monthlyRevenueChart,
-    revenueByPlanChart,
+    revenueByChannelChart,
     customerGrowthChart,
     qrConsumptionChart,
   }

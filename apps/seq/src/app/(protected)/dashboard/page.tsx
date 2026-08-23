@@ -4,7 +4,7 @@ import { verifyTenantSession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
 import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@genealogiq/ui/card'
 import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart'
-import { RevenueByPlanChart } from '@/components/dashboard/revenue-by-plan-chart'
+import { RevenueByChannelChart } from '@/components/dashboard/revenue-by-channel-chart'
 import { CustomerGrowthChart } from '@/components/dashboard/customer-growth-chart'
 import { QrConsumptionChart } from '@/components/dashboard/qr-consumption-chart'
 
@@ -96,11 +96,11 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Revenue by Plan</CardTitle>
-            <CardDescription>Last 12 months</CardDescription>
+            <CardTitle>Revenue by Channel</CardTitle>
+            <CardDescription>Counter sale vs. sent by email · last 12 months</CardDescription>
           </CardHeader>
           <CardContent>
-            <RevenueByPlanChart data={stats.revenueByPlanChart} />
+            <RevenueByChannelChart data={stats.revenueByChannelChart} />
           </CardContent>
         </Card>
       </div>
