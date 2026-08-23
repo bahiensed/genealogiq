@@ -2,21 +2,21 @@ import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { verifySession } from '@/lib/dal'
 import { getPackages } from '@/queries/packages'
-import { getPhysicalQrSummary, getPhysicalQrTotals } from '@/queries/physical-qr'
+import { getGenCodeSummary, getGenCodeTotals } from '@/queries/gencodes'
 import { PackagesDataTable } from '@/components/packages/packages-data-table'
-import { PhysicalQrDataTable } from '@/components/physical-qr/physical-qr-data-table'
+import { GenCodesDataTable } from '@/components/gencodes/gencodes-data-table'
 import { Button } from '@genealogiq/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
 
-export default async function PhysicalQrPage() {
+export default async function GenCodesPage() {
   const session = await verifySession()
   const t = await getTranslations('Packages')
-  const tq = await getTranslations('PhysicalQr')
+  const tq = await getTranslations('GenCodes')
 
   const [packages, licenses, totals] = await Promise.all([
     getPackages(),
-    getPhysicalQrSummary(),
-    getPhysicalQrTotals(),
+    getGenCodeSummary(),
+    getGenCodeTotals(),
   ])
 
   const stats = [
@@ -29,21 +29,21 @@ export default async function PhysicalQrPage() {
   return (
     <div className="flex flex-col gap-10">
 
-      {/* ── Physical QR Codes ─────────────────────────────────────────── */}
+      {/* ── GenCodes ──────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-            {t('physicalTitle')}
+            {t('gencodesTitle')}
           </h1>
           <Button asChild>
-            <Link href="/physical-qr/new">{t('newProduct')}</Link>
+            <Link href="/gencodes/new">{t('newProduct')}</Link>
           </Button>
         </div>
 
         <PackagesDataTable
           currentUserRole={session.user.role}
           data={packages}
-          basePath="/physical-qr"
+          basePath="/gencodes"
         />
       </div>
 
@@ -70,7 +70,7 @@ export default async function PhysicalQrPage() {
           ))}
         </div>
 
-        <PhysicalQrDataTable data={licenses} />
+        <GenCodesDataTable data={licenses} />
       </div>
 
     </div>

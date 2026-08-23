@@ -3,7 +3,7 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 
-export interface PhysicalQrRow {
+export interface GenCodeSaleRow {
   saleId:      number
   tenantName:  string
   packageName: string
@@ -14,7 +14,7 @@ export interface PhysicalQrRow {
   available:   number
 }
 
-export async function getPhysicalQrSummary(): Promise<PhysicalQrRow[]> {
+export async function getGenCodeSummary(): Promise<GenCodeSaleRow[]> {
   await verifySession()
 
   const rows = await prisma.$queryRaw<{
@@ -56,7 +56,7 @@ export async function getPhysicalQrSummary(): Promise<PhysicalQrRow[]> {
   }))
 }
 
-export interface PhysicalQrTotals {
+export interface GenCodeTotals {
   total:     number
   activated: number
   // Written off by the tenant but not yet redeemed by the consumer. This is
@@ -66,7 +66,7 @@ export interface PhysicalQrTotals {
   available: number
 }
 
-export async function getPhysicalQrTotals(): Promise<PhysicalQrTotals> {
+export async function getGenCodeTotals(): Promise<GenCodeTotals> {
   await verifySession()
 
   const result = await prisma.$queryRaw<{

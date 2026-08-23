@@ -501,6 +501,26 @@
       "feedbackSent": "Feedback sent. Thank you!"
     }
   },
+  "GenCodes": {
+    "stats": {
+      "activated": "Activated",
+      "available": "In tenant stock",
+      "sold": "Sold, not redeemed",
+      "total": "Total issued"
+    },
+    "subtitle": "Every GenCode minted by a sale, and where it stands. \"Sold\" means written off by the tenant but not yet redeemed by the buyer.",
+    "table": {
+      "activated": "Activated",
+      "available": "Available",
+      "empty": "No GenCodes issued yet.",
+      "package": "Package",
+      "saleDate": "Sale Date",
+      "sold": "Sold",
+      "tenant": "Tenant",
+      "total": "Total"
+    },
+    "title": "Issued Licenses"
+  },
   "Nav": {
     "language": "Language",
     "profile": "Profile",
@@ -530,13 +550,13 @@
       "price": "Price (US$)",
       "quantity": "QR-Code Quantity"
     },
+    "gencodesTitle": "GenCodes",
     "new": "New {noun}",
     "newPackage": "New package",
     "newProduct": "New product",
     "noun": {
       "product": "Product"
     },
-    "physicalTitle": "Physical QR Codes",
     "saveChanges": "Save changes",
     "status": {
       "active": "Active",
@@ -573,26 +593,6 @@
     },
     "unitPrice": "Unit price per QR Code"
   },
-  "PhysicalQr": {
-    "stats": {
-      "activated": "Activated",
-      "available": "In tenant stock",
-      "sold": "Sold, not redeemed",
-      "total": "Total issued"
-    },
-    "subtitle": "Every GenCode minted by a sale, and where it stands. \"Sold\" means written off by the tenant but not yet redeemed by the buyer.",
-    "table": {
-      "activated": "Activated",
-      "available": "Available",
-      "empty": "No physical QR Codes found.",
-      "package": "Package",
-      "saleDate": "Sale Date",
-      "sold": "Sold",
-      "tenant": "Tenant",
-      "total": "Total"
-    },
-    "title": "Issued Licenses"
-  },
   "Sales": {
     "actions": {
       "cancel": "Cancel",
@@ -620,7 +620,7 @@
     },
     "reverse": {
       "confirm": "Reverse sale",
-      "descriptionPhysical": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed. Available license codes will be invalidated. Activated codes remain linked to their memorials. The record is kept for audit purposes.",
+      "description": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed. Available license codes will be invalidated. Activated codes remain linked to their memorials. The record is kept for audit purposes.",
       "reversing": "Reversing…",
       "title": "Confirm reversal"
     },
@@ -631,7 +631,7 @@
     "submit": "Submit Sale",
     "submitting": "Submitting…",
     "summary": {
-      "physicalCodes": "Physical license codes to be generated",
+      "gencodes": "GenCodes to be generated",
       "totalPrice": "Total price",
       "unitPrice": "Unit price / code"
     },

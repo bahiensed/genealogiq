@@ -3,12 +3,12 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { useTranslations, useLocale } from 'next-intl'
 import { DataTable } from '@genealogiq/ui/data-table'
-import type { PhysicalQrRow } from '@/queries/physical-qr'
+import type { GenCodeSaleRow } from '@/queries/gencodes'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
 type Translator = (key: string, values?: Record<string, string | number | Date>) => string
 
-function getColumns(t: Translator, locale: string): ColumnDef<PhysicalQrRow>[] {
+function getColumns(t: Translator, locale: string): ColumnDef<GenCodeSaleRow>[] {
   return [
     {
       accessorKey: 'tenantName',
@@ -56,12 +56,12 @@ function getColumns(t: Translator, locale: string): ColumnDef<PhysicalQrRow>[] {
   ]
 }
 
-interface PhysicalQrDataTableProps {
-  data: PhysicalQrRow[]
+interface GenCodesDataTableProps {
+  data: GenCodeSaleRow[]
 }
 
-export function PhysicalQrDataTable({ data }: PhysicalQrDataTableProps) {
-  const t = useTranslations('PhysicalQr')
+export function GenCodesDataTable({ data }: GenCodesDataTableProps) {
+  const t = useTranslations('GenCodes')
   const locale = useLocale()
 
   const columnLabels: Record<string, string> = {

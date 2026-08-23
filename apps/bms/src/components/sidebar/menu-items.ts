@@ -22,7 +22,7 @@ export const system = [
 ]
 
 export const products = [
-  { name: 'Physical QR Codes',      url: '/physical-qr',       icon: Fingerprint },
+  { name: 'GenCodes',               url: '/gencodes',          icon: Fingerprint },
   { name: 'Subscriptions (B2C)',    url: '/subscriptions',     icon: Layers      },
   { name: 'Extra Units',            url: '/extra-unit-prices', icon: SquarePlus  },
 ]
