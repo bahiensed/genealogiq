@@ -4,9 +4,9 @@ export const authConfig = createEdgeAuthConfig({
   cookieName: "bms.session-token",
   routes: {
     protected: [
-      "/profile", "/dashboard", "/system", "/categories",
-      "/suppliers", "/subscriptions", "/products", "/services", "/customers",
-      "/purchasing", "/inventory", "/sales", "/finance",
+      "/profile", "/dashboard", "/system",
+      "/physical-qr", "/packages", "/subscriptions", "/extra-unit-prices",
+      "/categories", "/customers", "/sales",
     ],
     auth: ["/sign-in", "/setup", "/forgot-password"],
     afterLogin: "/dashboard",
