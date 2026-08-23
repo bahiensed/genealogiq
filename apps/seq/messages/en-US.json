@@ -734,8 +734,7 @@
       "records": "Records",
       "categories": "Categories",
       "purchasing": "Purchasing",
-      "inventory": "Inventory",
-      "finance": "Finance"
+      "inventory": "Inventory"
     },
     "items": {
       "dashboard": "Dashboard",
@@ -745,13 +744,8 @@
       "companyData": "Company Data",
       "employees": "Employees",
       "suppliers": "Suppliers",
-      "products": "Products",
-      "services": "Services",
       "supplierCategories": "Supplier Categories",
-      "productCategories": "Product Categories",
-      "serviceCategories": "Service Categories",
-      "customerCategories": "Customer Categories",
-      "finance": "Finance"
+      "customerCategories": "Customer Categories"
     }
   },
   "SupplierCategories": {
