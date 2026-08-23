@@ -534,7 +534,6 @@
     "newPackage": "New package",
     "newProduct": "New product",
     "noun": {
-      "package": "Package",
       "product": "Product"
     },
     "physicalTitle": "Physical QR Codes",
@@ -559,7 +558,6 @@
     "table": {
       "createdAt": "Created at",
       "description": "{noun} Description",
-      "empty": "No packages found.",
       "emptyProduct": "No physical QR products yet.",
       "name": "{noun} Name",
       "price": "{noun} Price",
@@ -572,9 +570,6 @@
       "deleteConfirm": "The package \"{name}\" will be permanently deleted.",
       "deleted": "Package deleted successfully.",
       "reactivated": "Package reactivated."
-    },
-    "typeBadge": {
-      "physical": "Physical"
     },
     "unitPrice": "Unit price per QR Code"
   },
@@ -619,17 +614,12 @@
     "packageOption": {
       "codes": "{count, plural, one {# code} other {# codes}}"
     },
-    "packageType": {
-      "digital": "Digital",
-      "physical": "Physical"
-    },
     "placeholders": {
       "customer": "Select a customer",
       "package": "Select a package"
     },
     "reverse": {
       "confirm": "Reverse sale",
-      "descriptionDigital": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed and the QR Codes will be returned to inventory. The record is kept for audit purposes.",
       "descriptionPhysical": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed. Available license codes will be invalidated. Activated codes remain linked to their memorials. The record is kept for audit purposes.",
       "reversing": "Reversing…",
       "title": "Confirm reversal"
@@ -641,7 +631,6 @@
     "submit": "Submit Sale",
     "submitting": "Submitting…",
     "summary": {
-      "digitalCodes": "QR Codes to be added to inventory",
       "physicalCodes": "Physical license codes to be generated",
       "totalPrice": "Total price",
       "unitPrice": "Unit price / code"

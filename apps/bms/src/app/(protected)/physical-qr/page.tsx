@@ -14,7 +14,7 @@ export default async function PhysicalQrPage() {
   const tq = await getTranslations('PhysicalQr')
 
   const [packages, licenses, totals] = await Promise.all([
-    getPackages('PHYSICAL'),
+    getPackages(),
     getPhysicalQrSummary(),
     getPhysicalQrTotals(),
   ])
@@ -44,7 +44,6 @@ export default async function PhysicalQrPage() {
           currentUserRole={session.user.role}
           data={packages}
           basePath="/physical-qr"
-          noun="product"
         />
       </div>
 

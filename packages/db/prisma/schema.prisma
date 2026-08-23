@@ -61,11 +61,6 @@ enum EntityType {
   COMPANY
 }
 
-enum PackageType {
-  DIGITAL
-  PHYSICAL
-}
-
 enum PhysicalQrStatus {
   AVAILABLE
   SOLD
@@ -192,7 +187,6 @@ model Package {
   quantity         Int                 @default(1)
   stripeProductId  String?             @unique @map("stripe_product_id")
   stripePriceId    String?             @unique @map("stripe_price_id")
-  type             PackageType         @default(DIGITAL)
   physicalLicenses PhysicalQrLicense[]
   sales            Sale[]
   coupons          DiscountCoupon[]    @relation("CouponPackages")

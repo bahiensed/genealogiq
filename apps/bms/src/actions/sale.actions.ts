@@ -21,7 +21,7 @@ export async function createSale(data: SaleFormValues): Promise<ActionResult> {
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId },
-    select: { quantity: true, type: true },
+    select: { quantity: true },
   })
   if (!pkg) return fail(t('sale.packageNotFound'))
 
@@ -62,7 +62,7 @@ export async function reverseSale(id: number): Promise<ActionResult> {
       quantity:   true,
       tenantId:   true,
       reversedAt: true,
-      package:    { select: { quantity: true, type: true } },
+      package:    { select: { quantity: true } },
     },
   })
   if (!sale) return fail(t('sale.notFound'))

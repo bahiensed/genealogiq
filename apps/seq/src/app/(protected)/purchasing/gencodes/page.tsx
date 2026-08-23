@@ -11,7 +11,7 @@ export default async function PurchasingGenCodePage() {
   const t = await getTranslations('Purchasing')
 
   const packages = await prisma.package.findMany({
-    where: { isActive: true, type: 'PHYSICAL' },
+    where: { isActive: true },
     select: {
       id:          true,
       name:        true,

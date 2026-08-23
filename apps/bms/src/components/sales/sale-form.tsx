@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
-import { Fingerprint, QrCode } from 'lucide-react'
+import { Fingerprint } from 'lucide-react'
 import { getSaleSchema, saleDefaultValues, type SaleFormValues } from '@/schemas/sale.schema'
 import { createSale } from '@/actions/sale.actions'
 import { Button } from '@genealogiq/ui/button'
@@ -37,7 +37,6 @@ interface Package {
   name:     string
   price:    number
   quantity: number
-  type:     'DIGITAL' | 'PHYSICAL'
 }
 
 interface Customer {
@@ -72,7 +71,6 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   const selectedQty       = watch('quantity') || 0
   const selectedPkg       = packages.find(p => p.id === selectedPackageId)
 
-  const isPhysical     = selectedPkg?.type === 'PHYSICAL'
   const totalQRCodes   = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.quantity : 0
   const totalPrice     = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.price : 0
   const unitPrice      = selectedPkg && selectedPkg.quantity > 0 ? selectedPkg.price / selectedPkg.quantity : 0
@@ -122,7 +120,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                         <SelectContent>
                           {packages.map((p) => (
                             <SelectItem key={p.id} value={p.id}>
-                              {p.name} · {p.type === 'DIGITAL' ? t('packageType.digital') : t('packageType.physical')} · {t('packageOption.codes', { count: p.quantity })} · {usd.format(p.price)}
+                              {p.name} · {t('packageOption.codes', { count: p.quantity })} · {usd.format(p.price)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -175,18 +173,16 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                 />
               </FieldGroup>
 
-              {/* Summary card — adapts by package type */}
+              {/* Summary card */}
               {totalQRCodes > 0 && (
                 <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5 flex flex-col gap-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      {isPhysical
-                        ? <Fingerprint className="h-5 w-5 text-primary" />
-                        : <QrCode      className="h-5 w-5 text-primary" />}
+                      <Fingerprint className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-                        {isPhysical ? t('summary.physicalCodes') : t('summary.digitalCodes')}
+                        {t('summary.physicalCodes')}
                       </p>
                       <p className="text-3xl font-extrabold tabular-nums leading-none">
                         {totalQRCodes.toLocaleString(locale)}

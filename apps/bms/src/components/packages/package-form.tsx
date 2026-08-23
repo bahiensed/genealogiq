@@ -12,7 +12,7 @@ import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
 import { Switch } from '@genealogiq/ui/switch'
-import { Badge } from '@genealogiq/ui/badge'
+
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Separator } from '@genealogiq/ui/separator'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
@@ -34,13 +34,11 @@ interface PackageFormProps {
   defaultValues?:   PackageFormValues
   stripeProductId?: string | null
   stripePriceId?:   string | null
-  /** When provided the type field is hidden and this value is injected automatically. */
-  fixedType?:       'PHYSICAL'
-  /** Where to navigate after creating a new package. Defaults to '/packages'. */
+  /** Where to navigate after creating a new package. */
   backHref?:        string
 }
 
-export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId, fixedType, backHref = '/packages' }: PackageFormProps) {
+export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId, backHref = '/physical-qr' }: PackageFormProps) {
   const t    = useTranslations('Packages')
   const tc   = useTranslations('Common')
   const tErr = useTranslations('Errors')
@@ -48,8 +46,7 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   const isEditing  = !!id
   const isSynced   = isEditing && !!stripePriceId
-  const isPhysical = fixedType === 'PHYSICAL'
-  const noun       = isPhysical ? t('noun.product') : t('noun.package')
+  const noun = t('noun.product')
   const [serverError, setServerError] = useState<string | null>(null)
   const [syncOpen, setSyncOpen]       = useState(false)
   const [isSyncing, startSync]        = useTransition()
@@ -68,13 +65,9 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
     })
   }
 
-  const resolvedDefaults: PackageFormValues = defaultValues
-    ? { ...defaultValues, ...(fixedType ? { type: fixedType } : {}) }
-    : { ...packageDefaultValues, ...(fixedType ? { type: fixedType } : {}) }
-
   const form = useForm<PackageFormValues>({
     resolver: useMemo(() => zodResolver(getPackageSchema(tErr)), [tErr]),
-    defaultValues: resolvedDefaults,
+    defaultValues: defaultValues ?? packageDefaultValues,
   })
 
   const { control, handleSubmit, watch, formState: { isSubmitting } } = form
@@ -84,10 +77,9 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
 
   async function onSubmit(data: PackageFormValues) {
     setServerError(null)
-    const payload = fixedType ? { ...data, type: fixedType } : data
     const result = isEditing
-      ? await updatePackage(id, payload)
-      : await createPackage(payload)
+      ? await updatePackage(id, data)
+      : await createPackage(data)
     if (!result.ok) {
       setServerError(result.message)
     } else {
@@ -103,14 +95,9 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
           <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
             {isEditing ? t('edit', { noun }) : t('new', { noun })}
           </CardTitle>
-          {(fixedType || isEditing) && (
+          {isEditing && (
             <CardAction>
               <div className="flex items-center gap-3">
-                {fixedType && (
-                  <Badge variant="outline" className="text-xs">
-                    {t('typeBadge.physical')}
-                  </Badge>
-                )}
                 {isEditing && (
                   <Controller
                     name="isActive"

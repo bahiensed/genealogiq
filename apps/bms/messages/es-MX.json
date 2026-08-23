@@ -534,7 +534,6 @@
     "newPackage": "Nuevo paquete",
     "newProduct": "Nuevo producto",
     "noun": {
-      "package": "Paquete",
       "product": "Producto"
     },
     "physicalTitle": "QR Codes Físicos",
@@ -559,7 +558,6 @@
     "table": {
       "createdAt": "Creado el",
       "description": "Descripción del {noun}",
-      "empty": "No se encontraron paquetes.",
       "emptyProduct": "Aún no hay productos de QR físico.",
       "name": "Nombre del {noun}",
       "price": "Precio del {noun}",
@@ -572,9 +570,6 @@
       "deleteConfirm": "El paquete \"{name}\" se eliminará permanentemente.",
       "deleted": "Paquete eliminado correctamente.",
       "reactivated": "Paquete reactivado."
-    },
-    "typeBadge": {
-      "physical": "Físico"
     },
     "unitPrice": "Precio unitario por QR Code"
   },
@@ -619,17 +614,12 @@
     "packageOption": {
       "codes": "{count, plural, one {# código} other {# códigos}}"
     },
-    "packageType": {
-      "digital": "Digital",
-      "physical": "Físico"
-    },
     "placeholders": {
       "customer": "Selecciona un cliente",
       "package": "Selecciona un paquete"
     },
     "reverse": {
       "confirm": "Revertir venta",
-      "descriptionDigital": "La venta del paquete \"{package}\" a \"{customer}\" se marcará como revertida y los QR Codes se devolverán al inventario. El registro se conserva con fines de auditoría.",
       "descriptionPhysical": "La venta del paquete \"{package}\" a \"{customer}\" se marcará como revertida. Los códigos de licencia disponibles se invalidarán. Los códigos ya activados permanecen vinculados a sus memoriales. El registro se conserva con fines de auditoría.",
       "reversing": "Revirtiendo…",
       "title": "Confirmar reversión"
@@ -641,7 +631,6 @@
     "submit": "Registrar Venta",
     "submitting": "Enviando…",
     "summary": {
-      "digitalCodes": "QR Codes a agregar al inventario",
       "physicalCodes": "Códigos de licencia físicos a generar",
       "totalPrice": "Precio total",
       "unitPrice": "Precio unitario / código"

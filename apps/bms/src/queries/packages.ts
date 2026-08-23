@@ -3,11 +3,10 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
 
-export async function getPackages(type?: 'PHYSICAL') {
+export async function getPackages() {
   await verifySession()
 
   const rows = await prisma.package.findMany({
-    where:   type ? { type } : undefined,
     select: {
       id:          true,
       name:        true,
@@ -15,7 +14,6 @@ export async function getPackages(type?: 'PHYSICAL') {
       price:       true,
       quantity:    true,
       isActive:    true,
-      type:        true,
       createdAt:   true,
     },
     orderBy: { name: 'asc' },
@@ -29,7 +27,7 @@ export async function getActivePackages() {
 
   const rows = await prisma.package.findMany({
     where:   { isActive: true },
-    select:  { id: true, name: true, price: true, quantity: true, type: true },
+    select:  { id: true, name: true, price: true, quantity: true },
     orderBy: { name: 'asc' },
   })
 
@@ -48,7 +46,6 @@ export async function getPackage(id: string) {
       price:           true,
       quantity:        true,
       isActive:        true,
-      type:            true,
       stripeProductId: true,
       stripePriceId:   true,
     },

@@ -12,7 +12,6 @@ export function getPackageSchema(t: Translator) {
       .max(256, t('maxChars', { count: 256 })),
     price:       z.number().positive(t('greaterThanZero')),
     isActive:    z.boolean(),
-    type:        z.enum(['DIGITAL', 'PHYSICAL']),
   })
 }
 
@@ -24,5 +23,4 @@ export const packageDefaultValues: PackageFormValues = {
   description: '',
   price:       0,
   isActive:    true,
-  type:        'PHYSICAL',
 }
