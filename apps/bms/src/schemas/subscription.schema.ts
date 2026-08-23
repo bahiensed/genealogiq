@@ -14,7 +14,6 @@ export function getSubscriptionSchema(t: Translator) {
     isActive:    z.boolean(),
 
     // Commercial
-    maxProfiles: z.number().int(t('mustBeWholeNumber')).positive(t('mustBePositive')),
     termLength:  z.number().int(t('mustBeWholeNumber')).min(0, t('termLengthMin')),
     // Independent per-currency prices — no FX conversion, each set manually.
     // USD: 0 = Free (real product meaning, same plan as the FREE row).
@@ -51,7 +50,6 @@ export const subscriptionDefaultValues: SubscriptionFormValues = {
   description: '',
   isActive:    true,
 
-  maxProfiles:  1,
   termLength:   12,
   priceUsd:        0,
   monthlyPriceUsd: 0,

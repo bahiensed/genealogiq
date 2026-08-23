@@ -71,7 +71,7 @@ describe("createMemorial — quota guard", () => {
     expect(res.ok).toBe(true)
     expect(res.ok && res.data).toEqual({ id: "memo-1" })
     expect(prismaMock.appUser.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ role: "APP_MEMO", appSaleId: null }) }),
+      expect.objectContaining({ data: expect.objectContaining({ role: "APP_MEMO" }) }),
     )
     // Guardian link is created so the caller can manage the new memorial.
     expect(prismaMock.appUserGuardian.create).toHaveBeenCalledWith(
@@ -79,18 +79,22 @@ describe("createMemorial — quota guard", () => {
     )
   })
 
-  it("uses an open sale slot when one is available (binds appSaleId) — independent of the memorialsMax check", async () => {
+  // The bulk-slot model is gone: a new memorial is never bound to an AppSale,
+  // and the guardian's memorialsMax is the only cap. Asserting the absence
+  // matters more than asserting the old binding did — without it, someone
+  // reintroducing appSaleId here would silently restore the extra free QR code
+  // that binding used to grant through qr-quota's hasOwnUnlock.
+  it("never binds the new memorial to a sale, whatever sales the guardian holds", async () => {
     prismaMock.appSale.findMany.mockResolvedValue([
-      { id: "sale-full", subscription: { maxProfiles: 1 }, _count: { assignedTo: 1 } },
-      { id: "sale-open", subscription: { maxProfiles: 5 }, _count: { assignedTo: 2 } },
+      { id: "sale-open", _count: { assignedTo: 0 } },
     ])
 
     const res = await createMemorial(validInput)
 
     expect(res.ok).toBe(true)
-    expect(prismaMock.appUser.create).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ appSaleId: "sale-open" }) }),
-    )
+    const arg = prismaMock.appUser.create.mock.calls[0][0] as { data: Record<string, unknown> }
+    expect(arg.data).not.toHaveProperty("appSaleId")
+    expect(prismaMock.appSale.findMany).not.toHaveBeenCalled()
   })
 })
 

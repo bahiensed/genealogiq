@@ -246,20 +246,19 @@ export function SubscriptionForm({
                 name="name"
                 control={control}
                 render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid} className="lg:col-span-5">
+                  <Field data-invalid={fieldState.invalid} className="lg:col-span-6">
                     <FieldLabel>{t('fields.name')}</FieldLabel>
                     <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}
               />
-              <IntField control={control} name="maxProfiles" label={t('fields.maxProfiles')} min={1} className="lg:col-span-2" />
               <IntField
                 control={control}
                 name="termLength"
                 label={t('fields.termLength')}
                 helper={t('hints.termLength')}
-                className="lg:col-span-2"
+                className="lg:col-span-3"
               />
             </div>
 

@@ -107,7 +107,6 @@ model Subscription {
   // These three are required in both the schema and the DB: migration
   // 20260607010000_reconcile_schema_drift added the NOT NULL constraints after
   // verifying zero NULL rows, so the earlier app-vs-DB drift is fully resolved.
-  maxProfiles           Int       @map("max_profiles")
   termLength            Int       @map("term_length")
   // Independent per-currency prices — no FX conversion, each admin-set in
   // BMS. USD is required (the original/canonical currency, always
@@ -143,8 +142,8 @@ model Subscription {
   documentsMax          Int       @default(16)   @map("documents_max")
   // Row count of GeoPlace — independent of mediaMaxImages.
   geoPlacesMax          Int       @default(3)    @map("geo_places_max")
-  // How many memorial profiles a guardian may create in total — distinct
-  // from maxProfiles above (how many profiles ONE sale directly covers).
+  // How many memorial profiles a guardian may create in total. The only
+  // memorial cap since the per-sale bulk-slot binding was removed.
   memorialsMax          Int       @default(1)    @map("memorials_max")
   petsMax               Int       @default(0)    @map("pets_max")
   // Free QR codes (own profile + guarded memorials, combined).
