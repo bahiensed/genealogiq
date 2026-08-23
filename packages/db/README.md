@@ -67,6 +67,22 @@ Nothing needs a `DATABASE_URL_DIRECT` in the apps themselves — they connect
 through the pooler and never run DDL. Adding it to `.env` or to Vercel is
 harmless but does not feed the workflow.
 
+### Known drift: seven records with no local file
+
+`_prisma_migrations` lists seven migrations from before the three-repo
+consolidation (`20260324…` through `20260415…`) that were squashed into
+`0_init`. They are applied in the database and have no local counterpart, so
+**`prisma migrate status` exits non-zero permanently** and says "The migrations
+from the database are not found locally".
+
+That is expected and harmless: `migrate deploy` only cares about the other
+direction (local files not yet applied). It does mean a bare `migrate status`
+cannot be used as a success check — the workflow greps for "have not yet been
+applied" instead of trusting the exit code.
+
+Clearing the seven rows would make status clean, but it rewrites migration
+bookkeeping in production for cosmetic gain, so it has been left alone.
+
 ### Running one by hand
 
 Rarely needed — `workflow_dispatch` replays the workflow without an empty
