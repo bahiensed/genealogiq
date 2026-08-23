@@ -32,7 +32,6 @@ export default async function EditSubscriptionPage({ params }: { params: Promise
         memorialsMax:          subscription.memorialsMax,
         petsMax:               subscription.petsMax,
         qrCodeMax:             subscription.qrCodeMax,
-        geolocationFullAccess: subscription.geolocationFullAccess,
       }}
       stripeProductId={subscription.stripeProductId}
       stripeAnnualPriceIdUsd={subscription.stripeAnnualPriceIdUsd}

@@ -666,7 +666,6 @@
       "description": "Description",
       "documentsMax": "Documents Max",
       "geoPlacesMax": "Geo Places Max",
-      "geolocationFullAccess": "Geolocation Full Access",
       "maxProfiles": "Number of Memorials",
       "mediaMaxImages": "Max Shared Images",
       "mediaMaxVideos": "Gallery Videos Max",
@@ -702,8 +701,6 @@
       "title": "Prices"
     },
     "quotas": {
-      "geolocationFullAccessOff": "Address only (no GPS pin)",
-      "geolocationFullAccessOn": "Precise GPS coordinates",
       "title": "Quotas"
     },
     "status": {

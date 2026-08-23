@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma"
-import { getMemorialFeatures } from "@/lib/subscription"
 
 /**
  * Raw geolocation row — exact coordinates as stored. Manager/edit paths only.
@@ -16,14 +15,9 @@ export async function getGeolocationByUserId(userId: string) {
  * are never exposed. (Security M2.)
  */
 export async function getGeolocationForViewer(userId: string) {
-  const geo = await prisma.geolocation.findUnique({ where: { userId } })
-  if (!geo) return null
-
-  const { geolocationFullAccess } = await getMemorialFeatures(userId)
-  if (!geolocationFullAccess) {
-    return { ...geo, lat: 0, lon: 0 }
-  }
-  return geo
+  // Coordinates were blanked for tiers without geolocationFullAccess. Precise
+  // location is free now, so the row is returned as stored.
+  return prisma.geolocation.findUnique({ where: { userId } })
 }
 
 export type GeolocationRow = NonNullable<Awaited<ReturnType<typeof getGeolocationByUserId>>>

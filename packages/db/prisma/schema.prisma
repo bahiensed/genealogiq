@@ -149,7 +149,6 @@ model Subscription {
   petsMax               Int       @default(0)    @map("pets_max")
   // Free QR codes (own profile + guarded memorials, combined).
   qrCodeMax             Int       @default(1)    @map("qr_code_max")
-  geolocationFullAccess Boolean   @default(false) @map("geolocation_full_access")
   appSales              AppSale[]
 
   @@map("subscriptions")

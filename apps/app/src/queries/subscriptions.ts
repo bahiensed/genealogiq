@@ -34,7 +34,6 @@ export async function getActiveSubscriptions() {
       memorialsMax:          true,
       petsMax:               true,
       qrCodeMax:             true,
-      geolocationFullAccess: true,
     },
   })
 
@@ -71,7 +70,6 @@ export async function getActiveSubscriptions() {
         memorialsMax:          r.memorialsMax,
         petsMax:               r.petsMax,
         qrCodeMax:             r.qrCodeMax,
-        geolocationFullAccess: r.geolocationFullAccess,
       },
     }
   })

@@ -25,7 +25,6 @@ const subscriptionSelect = {
   memorialsMax:          true,
   petsMax:               true,
   qrCodeMax:             true,
-  geolocationFullAccess: true,
   stripeProductId:         true,
   stripeAnnualPriceIdUsd:  true,
   stripeMonthlyPriceIdUsd: true,

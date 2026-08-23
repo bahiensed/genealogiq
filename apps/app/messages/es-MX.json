@@ -734,7 +734,6 @@
       "uploadFailed": "No se pudo subir la foto.",
       "waitForUploads": "Espera a que terminen de subirse las fotos."
     },
-    "upgradeToUnlock": "Mejora tu plan para desbloquear",
     "useMyLocation": "Usar mi ubicación",
     "viewPhotoAlt": "{place} foto {number}"
   },

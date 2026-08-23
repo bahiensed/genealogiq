@@ -40,7 +40,6 @@ export function getSubscriptionSchema(t: Translator) {
     memorialsMax:          z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
     petsMax:               z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
     qrCodeMax:             z.number().int(t('mustBeWholeNumber')).nonnegative(t('mustBeZeroOrGreater')),
-    geolocationFullAccess: z.boolean(),
   })
 }
 
@@ -72,5 +71,4 @@ export const subscriptionDefaultValues: SubscriptionFormValues = {
   memorialsMax:          1,
   petsMax:               0,
   qrCodeMax:             1,
-  geolocationFullAccess: false,
 }

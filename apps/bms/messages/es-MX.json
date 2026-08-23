@@ -666,7 +666,6 @@
       "description": "Descripción",
       "documentsMax": "Máximo de Documentos",
       "geoPlacesMax": "Máximo de Geolocalizaciones",
-      "geolocationFullAccess": "Acceso Total a Geolocalización",
       "maxProfiles": "Número de Memoriales",
       "mediaMaxImages": "Máximo de Imágenes Compartidas",
       "mediaMaxVideos": "Máximo de Videos en la Galería",
@@ -702,8 +701,6 @@
       "title": "Precios"
     },
     "quotas": {
-      "geolocationFullAccessOff": "Solo dirección (sin marcador GPS)",
-      "geolocationFullAccessOn": "Coordenadas GPS precisas",
       "title": "Cuotas"
     },
     "status": {

@@ -314,21 +314,6 @@ export function SubscriptionForm({
                 <IntField control={control} name="memorialsMax"   label={t('fields.memorialsMax')} />
                 <IntField control={control} name="petsMax"        label={t('fields.petsMax')} />
               </div>
-              <Controller
-                name="geolocationFullAccess"
-                control={control}
-                render={({ field }) => (
-                  <Field>
-                    <FieldLabel>{t('fields.geolocationFullAccess')}</FieldLabel>
-                    <div className="flex items-center gap-2 h-9">
-                      <Switch id="geolocationFullAccess" checked={field.value} onCheckedChange={field.onChange} />
-                      <label htmlFor="geolocationFullAccess" className="text-sm cursor-pointer">
-                        {field.value ? t('quotas.geolocationFullAccessOn') : t('quotas.geolocationFullAccessOff')}
-                      </label>
-                    </div>
-                  </Field>
-                )}
-              />
             </div>
 
             {isEditing && (

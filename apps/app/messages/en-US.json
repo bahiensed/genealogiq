@@ -734,7 +734,6 @@
       "uploadFailed": "Failed to upload photo.",
       "waitForUploads": "Please wait for photos to finish uploading."
     },
-    "upgradeToUnlock": "Upgrade plan to unlock",
     "useMyLocation": "Use my location",
     "viewPhotoAlt": "{place} photo {number}"
   },
