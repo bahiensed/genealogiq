@@ -14,8 +14,11 @@ interface Props {
 export function UpgradeHint({ context, currentTier, inline = false }: Props) {
   const t = useTranslations("Subscriptions")
 
-  // Top tier — nothing to upsell.
-  if (currentTier === "PHYSICAL_QR") return null
+  // NOTE: there used to be a "top tier — nothing to upsell" bail-out here for
+  // the hardcoded PHYSICAL_QR tier, which no longer exists. With FREE/PREMIUM
+  // the hint is always shown, exactly as it already behaved for both of them.
+  // If a tier above PREMIUM is ever added, gate on the plan's price rather
+  // than on a code string.
 
   const content = (
     <>

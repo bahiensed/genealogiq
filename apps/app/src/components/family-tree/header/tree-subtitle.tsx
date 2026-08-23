@@ -36,7 +36,7 @@ export function TreeSubtitle({ persons, generations, memberLimit, currentTier }:
   return (
     <p className={cn("mt-2 italic tabular-nums", tone)}>
       {t("stats.summary", { count, gens, word })}
-      {atLimit && currentTier !== "PHYSICAL_QR" && (
+      {atLimit && (
         <>
           <span className="mx-1.5 text-muted-foreground/50">·</span>
           <UpgradeHint context="tree" currentTier={currentTier} inline />

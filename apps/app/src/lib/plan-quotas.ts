@@ -1,11 +1,10 @@
-// Per-plan quota numbers now live on the shared Subscription table (BMS can
-// edit every plan attribute manually, no code deploy needed) — see
+// Per-plan quota numbers live on the shared Subscription table (BMS can edit
+// every plan attribute manually, no code deploy needed) — see
 // getMemorialFeatures in subscription.ts, which reads them off the live
-// Subscription row instead of a hardcoded constant. This file only keeps
-// what's NOT admin-editable per plan: the PlanQuotas shape itself, the
-// PHYSICAL_QR ceiling (a printed cemetery-marker license, resolved via a
-// separate PhysicalQrLicense→Package link, unrelated to Subscription rows),
-// and the purchase-extra policy.
+// Subscription row. There is NO hardcoded plan in this file, and adding one
+// back would re-open the hole this file was cleaned up to close: a tier only
+// changeable by deploy. What stays here is what isn't a per-plan number — the
+// PlanQuotas shape itself and the purchase-extra policy.
 
 // Free-text — Subscription.code is admin-typed in BMS, not a closed enum.
 export type PlanTier = string
@@ -38,24 +37,6 @@ export interface PlanQuotas {
   // Unchanged — boolean feature of the singular Geolocation model, out of
   // scope for this redesign.
   geolocationFullAccess: boolean
-}
-
-// The pre-existing "physical QR" product tier (a printed cemetery marker
-// license, sold separately from the monthly/annual subscription) — kept as
-// the ceiling above PREMIUM. Resolved via PhysicalQrLicense→Package, not a
-// Subscription row, so it stays hardcoded — BMS has nothing to edit here.
-export const PHYSICAL_QR: PlanQuotas = {
-  code: "PHYSICAL_QR",
-  treeMaxMembers: 1024,
-  bioMaxChars: 20000,
-  mediaMaxImages: 2048,
-  mediaMaxVideos: 64,
-  documentsMax: 128,
-  geoPlacesMax: 50,
-  memorialsMax: 20,
-  petsMax: 20,
-  qrCodeMax: 20,
-  geolocationFullAccess: true,
 }
 
 // Whether one more unit of `field` can be purchased individually. Geo places

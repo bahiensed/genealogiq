@@ -41,7 +41,16 @@ export async function getQrQuotaStatus(guardianId: string, profileId: string): P
   // A profile with its own dedicated paid slot (a physical QR product, or a
   // legacy bulk-package slot assigned directly to it via BMS/SEQ) is unlocked
   // on its own terms — it never competes for one of the guardian's shared
-  // free ranks. This is deliberately NOT "does getMemorialFeatures(profileId)
+  // free ranks. For the physical case this is the product working as sold:
+  // the plaque IS that memorial's QR code, so it cannot be rank-gated.
+  //
+  // This is now the ONLY place a PhysicalQrLicense affects entitlement.
+  // Redeeming a GenCode no longer grants a tier (getMemorialFeatures resolves
+  // it like any other profile, i.e. FREE for a fresh account) — so do not
+  // read this as "licensed profiles are privileged"; they are unlocked for
+  // this one binary, and nothing else.
+  //
+  // This is deliberately NOT "does getMemorialFeatures(profileId)
   // resolve non-FREE" — that would also be true whenever ANY co-guardian of a
   // shared memorial pays (a real cascade, but one that already governs
   // `limit` below via the VIEWING guardian's own tier); folding that in here

@@ -12,10 +12,9 @@ import { LOCALE_TO_CURRENCY, resolveCurrency, priceForCurrency, stripeIdForCurre
 import type { ExtraUnitResource } from "@/lib/extra-units"
 
 // A guardian's own tier picks which (resource, tier) price row applies.
-// Falls back to PREMIUM when the exact tier has no row of its own (e.g. a
-// PHYSICAL_QR-licensed guardian) — never falls back to FREE, since FREE not
-// having a row (MEMORIAL) means "not purchasable at this tier," not "missing
-// data."
+// Falls back to PREMIUM when a paid tier has no row of its own — never falls
+// back to FREE, since FREE not having a row (MEMORIAL) means "not purchasable
+// at this tier," not "missing data."
 async function findExtraUnitPrice(resource: ExtraUnitResource, tier: string) {
   const exact = await prisma.extraUnitPrice.findUnique({ where: { resource_tier: { resource, tier } } })
   if (exact) return exact
