@@ -35,7 +35,7 @@ interface PackageFormProps {
   stripeProductId?: string | null
   stripePriceId?:   string | null
   /** When provided the type field is hidden and this value is injected automatically. */
-  fixedType?:       'DIGITAL' | 'PHYSICAL'
+  fixedType?:       'PHYSICAL'
   /** Where to navigate after creating a new package. Defaults to '/packages'. */
   backHref?:        string
 }
@@ -107,8 +107,8 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
             <CardAction>
               <div className="flex items-center gap-3">
                 {fixedType && (
-                  <Badge variant={fixedType === 'PHYSICAL' ? 'outline' : 'secondary'} className="text-xs">
-                    {fixedType === 'DIGITAL' ? t('typeBadge.digital') : t('typeBadge.physical')}
+                  <Badge variant="outline" className="text-xs">
+                    {t('typeBadge.physical')}
                   </Badge>
                 )}
                 {isEditing && (

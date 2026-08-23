@@ -24,5 +24,5 @@ export const packageDefaultValues: PackageFormValues = {
   description: '',
   price:       0,
   isActive:    true,
-  type:        'DIGITAL',
+  type:        'PHYSICAL',
 }

@@ -8,7 +8,6 @@ const { prismaMock, txMock } = vi.hoisted(() => ({
   txMock: {
     sale: { create: vi.fn() },
     physicalQrLicense: { createMany: vi.fn() },
-    qrInventory: { upsert: vi.fn() },
   },
 }))
 
@@ -27,7 +26,6 @@ beforeEach(() => {
   prismaMock.$transaction.mockImplementation(async (cb: any) => cb(txMock))
   txMock.sale.create.mockResolvedValue({ id: 42 })
   txMock.physicalQrLicense.createMany.mockResolvedValue({})
-  txMock.qrInventory.upsert.mockResolvedValue({})
 })
 
 describe("applyCheckoutSession — fulfillment", () => {
@@ -36,8 +34,8 @@ describe("applyCheckoutSession — fulfillment", () => {
     await expect(applyCheckoutSession(session, ctx)).rejects.toThrow(/not found/)
   })
 
-  it("PHYSICAL: creates one license per unit (pkg.quantity × order quantity) and no inventory", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ quantity: 3, type: "PHYSICAL" })
+  it("creates one license per unit (pkg.quantity × order quantity)", async () => {
+    prismaMock.package.findUnique.mockResolvedValue({ quantity: 3 })
 
     await applyCheckoutSession(session, ctx) // 3 × 2 = 6 units
 
@@ -47,31 +45,17 @@ describe("applyCheckoutSession — fulfillment", () => {
     expect(txMock.physicalQrLicense.createMany).toHaveBeenCalledTimes(1)
     const arg = txMock.physicalQrLicense.createMany.mock.calls[0][0] as { data: unknown[] }
     expect(arg.data).toHaveLength(6)
-    expect(txMock.qrInventory.upsert).not.toHaveBeenCalled()
-  })
-
-  it("DIGITAL: increments the tenant inventory by the total units and issues no licenses", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ quantity: 5, type: "DIGITAL" })
-
-    await applyCheckoutSession(session, ctx) // 5 × 2 = 10 units
-
-    expect(txMock.qrInventory.upsert).toHaveBeenCalledWith({
-      where:  { tenantId: "t1" },
-      create: { tenantId: "t1", quantity: 10 },
-      update: { quantity: { increment: 10 } },
-    })
-    expect(txMock.physicalQrLicense.createMany).not.toHaveBeenCalled()
   })
 
   it("is idempotent: a duplicate session (P2002) is swallowed without throwing", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ quantity: 1, type: "DIGITAL" })
+    prismaMock.package.findUnique.mockResolvedValue({ quantity: 1 })
     prismaMock.$transaction.mockRejectedValue({ code: "P2002" })
 
     await expect(applyCheckoutSession(session, ctx)).resolves.toBeUndefined()
   })
 
   it("re-throws non-idempotency errors", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ quantity: 1, type: "DIGITAL" })
+    prismaMock.package.findUnique.mockResolvedValue({ quantity: 1 })
     prismaMock.$transaction.mockRejectedValue(new Error("db down"))
 
     await expect(applyCheckoutSession(session, ctx)).rejects.toThrow("db down")

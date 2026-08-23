@@ -220,17 +220,6 @@ model Sale {
   @@map("sales")
 }
 
-model QrInventory {
-  id        String   @id @default(cuid())
-  quantity  Int      @default(0)
-  tenantId  String   @unique @map("tenant_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  @@map("qr_inventory")
-}
-
 model AppSale {
   id                   String       @id @default(cuid())
   value                Decimal?     @db.Decimal(10, 2)
@@ -904,7 +893,6 @@ model Tenant {
   appUserCats               AppUserCategory[]
   appUsers                  AppUser[]           @relation("AppUserTenant")
   physicalLicenses          PhysicalQrLicense[]
-  qrInventory               QrInventory?
   sales                     Sale[]
   supplierCats              SupplierCategory[]  @relation("SupplierCategoryTenant")
   suppliers                 Supplier[]          @relation("SupplierTenant")

@@ -12,7 +12,6 @@ const { prismaMock, PrismaKnownError } = vi.hoisted(() => {
     package:           { findUnique: vi.fn() },
     sale:              { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
     physicalQrLicense: { createMany: vi.fn(), deleteMany: vi.fn() },
-    qrInventory:       { upsert: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
     $transaction:      vi.fn((cb: (tx: unknown) => Promise<unknown>) => cb(prismaMock)),
   }
   return { prismaMock, PrismaKnownError }
@@ -64,24 +63,6 @@ describe("createSale", () => {
     expect(arg.data[0]).toEqual(
       expect.objectContaining({ saleId: 99, packageId: "p1", tenantId: "c1", genCode: "GEN-CODE" }),
     )
-    expect(prismaMock.qrInventory.upsert).not.toHaveBeenCalled()
-    expect(res).toEqual({ ok: true, message: "sale.created" })
-  })
-
-  it("DIGITAL: increments QR inventory by quantity × pkg.quantity", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ quantity: 5, type: "DIGITAL" })
-    prismaMock.sale.create.mockResolvedValue({ id: 100 })
-
-    const res = await createSale({ packageId: "p1", tenantId: "c1", quantity: 3 })
-
-    expect(prismaMock.qrInventory.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where:  { tenantId: "c1" },
-        create: { tenantId: "c1", quantity: 15 },
-        update: { quantity: { increment: 15 } },
-      }),
-    )
-    expect(prismaMock.physicalQrLicense.createMany).not.toHaveBeenCalled()
     expect(res).toEqual({ ok: true, message: "sale.created" })
   })
 })

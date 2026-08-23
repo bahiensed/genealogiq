@@ -64,15 +64,17 @@ async function main() {
   const existing = await prisma.sale.findFirst({ where: { stripeSessionId: session.id } })
   if (existing) {
     console.log(`\nAlready applied: Sale ${existing.id} exists for this session.`)
-    const inv = await prisma.qrInventory.findUnique({ where: { tenantId: ctx.tenantId } })
-    console.log(`QR Inventory for tenant: ${inv?.quantity ?? 0} QR code(s)`)
+    const available = await prisma.physicalQrLicense.count({
+      where: { tenantId: ctx.tenantId, status: 'AVAILABLE' },
+    })
+    console.log(`Unsold licenses for tenant: ${available}`)
     return
   }
 
   // 3. Resolve package
   const pkg = await prisma.package.findUnique({
     where:  { id: ctx.packageId },
-    select: { quantity: true, name: true, type: true },
+    select: { quantity: true, name: true },
   })
   if (!pkg) {
     console.error(`\nPackage ${ctx.packageId} not found in DB — abort.`)
@@ -84,7 +86,7 @@ async function main() {
     ? session.payment_intent
     : (session.payment_intent as { id: string } | null)?.id ?? null
 
-  console.log(`\nPackage     : ${pkg.name} (${pkg.type})`)
+  console.log(`\nPackage     : ${pkg.name}`)
   console.log(`Units       : ${pkg.quantity} × ${ctx.quantity} = ${totalUnits}`)
   console.log(`Payment PI  : ${paymentIntentId ?? '(none)'}`)
   console.log(`Tenant ID   : ${ctx.tenantId}`)
@@ -109,23 +111,14 @@ async function main() {
     })
     console.log(`\nCreated Sale    : ${sale.id}`)
 
-    if (pkg.type === 'PHYSICAL') {
-      const licenses = Array.from({ length: totalUnits }, () => ({
-        genCode:   generateGenCode(),
-        saleId:    sale.id,
-        packageId: ctx.packageId!,
-        tenantId:  ctx.tenantId!,
-      }))
-      await tx.physicalQrLicense.createMany({ data: licenses })
-      console.log(`Licenses        : ${totalUnits} physical QR license(s) created`)
-    } else {
-      const inv = await tx.qrInventory.upsert({
-        where:  { tenantId: ctx.tenantId! },
-        create: { tenantId: ctx.tenantId!, quantity: totalUnits },
-        update: { quantity: { increment: totalUnits } },
-      })
-      console.log(`QR Inventory    : ${inv.quantity} code(s) (tenant ${ctx.tenantId})`)
-    }
+    const licenses = Array.from({ length: totalUnits }, () => ({
+      genCode:   generateGenCode(),
+      saleId:    sale.id,
+      packageId: ctx.packageId!,
+      tenantId:  ctx.tenantId!,
+    }))
+    await tx.physicalQrLicense.createMany({ data: licenses })
+    console.log(`Licenses        : ${totalUnits} license(s) created`)
   })
 
   // Sale.stripeSessionId unique constraint ensures future webhook replays are idempotent.

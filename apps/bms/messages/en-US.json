@@ -574,7 +574,6 @@
       "reactivated": "Package reactivated."
     },
     "typeBadge": {
-      "digital": "Digital",
       "physical": "Physical"
     },
     "unitPrice": "Unit price per QR Code"
