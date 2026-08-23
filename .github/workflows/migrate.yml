@@ -1,0 +1,84 @@
+name: Migrate
+
+# Applies pending Prisma migrations to production, once, on merge to main.
+#
+# Why here and not in the Vercel build: the three apps (app, bms, seq) are three
+# Vercel projects that build in PARALLEL from this repo against ONE database. A
+# `migrate deploy` in each build command would run three concurrent migrations
+# on every deploy — Prisma's advisory lock would serialise them, but two of the
+# three would be pure waste and a lock timeout would fail a deploy for no
+# reason. Preview builds would also migrate production. One job, one run.
+#
+# Path filter: this only fires when a migration is actually added, so ordinary
+# merges do not touch the database at all.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/db/prisma/migrations/**"
+      - ".github/workflows/migrate.yml"
+  # Lets a failed or skipped run be replayed without an empty commit, and covers
+  # the case where a migration is applied out of band.
+  workflow_dispatch:
+
+# Never run two migrations at once, and never cancel one midway: an interrupted
+# `migrate deploy` leaves the _prisma_migrations table claiming a migration is
+# in progress, which blocks every later run until someone resolves it by hand.
+concurrency:
+  group: migrate-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: prisma migrate deploy
+    runs-on: ubuntu-latest
+    # Gate the production credential behind an Environment so it is auditable
+    # and can require a reviewer before it is handed out.
+    environment: production
+    env:
+      # Migrations need a DIRECT connection. The app's usual DATABASE_URL points
+      # at Neon's pooler (-pooler in the host), and DDL over PgBouncer in
+      # transaction mode fails or hangs. prisma.config.ts reads DATABASE_URL, so
+      # the direct URL is supplied under that name here.
+      DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # pnpm version comes from the root package.json "packageManager" field —
+      # do NOT also set "version" here, or action-setup errors on the mismatch.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fail fast if the direct URL is missing
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL_DIRECT is not set on the 'production' environment."
+            echo "Add the NON-POOLED Neon connection string (host without '-pooler')."
+            exit 1
+          fi
+          case "$DATABASE_URL" in
+            *-pooler.*)
+              echo "::error::DATABASE_URL_DIRECT points at the Neon pooler."
+              echo "Migrations need a direct connection — use the host without '-pooler'."
+              exit 1
+              ;;
+          esac
+
+      # `migrate status` exits non-zero precisely WHEN there is something to
+      # apply, which is the normal case here — so this is a log, not a gate.
+      - name: Show what is pending
+        run: pnpm db:migrate:status || true
+
+      - name: Apply migrations
+        run: pnpm db:migrate:deploy
+
+      - name: Confirm the database is up to date
+        run: pnpm db:migrate:status

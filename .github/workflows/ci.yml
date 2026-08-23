@@ -41,6 +41,11 @@ jobs:
       - name: Single-schema guard (blocking)
         run: pnpm check:schema-parity
 
+      # Structure only — no DB credential in PR CI. Applying migrations is the
+      # Migrate workflow's job, gated behind the production environment.
+      - name: Migration structure guard (blocking)
+        run: pnpm check:migrations
+
       - name: i18n parity guard (blocking)
         run: pnpm check:i18n-parity
 
