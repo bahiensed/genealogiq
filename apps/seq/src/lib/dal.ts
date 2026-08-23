@@ -16,17 +16,12 @@ export const getCustomerModules = cache(async () => {
   const session = await verifyTenantSession()
   return prisma.tenant.findUnique({
     where: { id: session.customerId },
+    // Only the two that still gate a real screen. The other eight columns
+    // survive on Tenant and are still editable in BMS, but nothing in SEQ
+    // reads them any more — see the note on ModuleKey in menu-items.ts.
     select: {
       moduleRecordsSuppliers:    true,
-      moduleRecordsProducts:     true,
-      moduleRecordsServices:     true,
       moduleCategoriesSuppliers: true,
-      moduleCategoriesProducts:  true,
-      moduleCategoriesServices:  true,
-      modulePurchasingProducts:  true,
-      modulePurchasingServices:  true,
-      moduleInventoryProducts:   true,
-      moduleFinance:             true,
     },
   })
 })

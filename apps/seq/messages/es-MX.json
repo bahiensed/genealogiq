@@ -734,8 +734,7 @@
       "records": "Registros",
       "categories": "Categorías",
       "purchasing": "Compras",
-      "inventory": "Inventario",
-      "finance": "Finanzas"
+      "inventory": "Inventario"
     },
     "items": {
       "dashboard": "Panel",
@@ -745,13 +744,8 @@
       "companyData": "Datos de la Empresa",
       "employees": "Empleados",
       "suppliers": "Proveedores",
-      "products": "Productos",
-      "services": "Servicios",
       "supplierCategories": "Categorías de Proveedores",
-      "productCategories": "Categorías de Productos",
-      "serviceCategories": "Categorías de Servicios",
-      "customerCategories": "Categorías de Clientes",
-      "finance": "Finanzas"
+      "customerCategories": "Categorías de Clientes"
     }
   },
   "SupplierCategories": {
