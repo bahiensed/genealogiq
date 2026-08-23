@@ -647,6 +647,48 @@
       "reversed": "Venda estornada com sucesso."
     }
   },
+  "SalesReports": {
+    "channels": {
+      "title": "Por canal de baixa",
+      "subtitle": "Venda no balcão versus envio do código por e-mail.",
+      "MANUAL": "Baixa manual",
+      "PLATFORM": "Enviado por e-mail"
+    },
+    "empty": "Nada a relatar ainda.",
+    "funnel": {
+      "issued": "Emitidos",
+      "sold": "Vendidos pelas empresas",
+      "activated": "Resgatados pelos compradores",
+      "available": "Em estoque das empresas"
+    },
+    "resellers": {
+      "title": "Por empresa",
+      "subtitle": "Quem está girando estoque e quem está parado.",
+      "tenant": "Empresa",
+      "issued": "Emitidos",
+      "sold": "Vendidos",
+      "activated": "Resgatados",
+      "rate": "Resgate",
+      "stale": "Parados",
+      "resaleValue": "Receita dela",
+      "valueMissing": "{count} sem valor registrado"
+    },
+    "revenue": {
+      "title": "Nossa receita B2B",
+      "subtitle": "O que faturamos das empresas pelos pacotes que compraram.",
+      "package": "Pacote",
+      "sales": "Vendas",
+      "units": "Códigos",
+      "total": "Receita",
+      "caveat": "Calculado como quantidade × preço ATUAL do pacote — a venda não guarda o preço da época, então editar o preço de um pacote muda estes números retroativamente. Vendas estornadas ficam de fora."
+    },
+    "stale": {
+      "title": "Vendidos e nunca resgatados",
+      "description": "Baixados há mais de {days} dias e ainda não ativados. Cada um é um comprador com um código na mão que nunca chegou ao app."
+    },
+    "subtitle": "Onde cada GenCode que emitimos realmente foi parar.",
+    "title": "Relatórios de Vendas"
+  },
   "Subscriptions": {
     "actions": {
       "deactivate": "Desativar",

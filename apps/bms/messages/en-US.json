@@ -647,6 +647,48 @@
       "reversed": "Sale reversed successfully."
     }
   },
+  "SalesReports": {
+    "channels": {
+      "title": "By write-off channel",
+      "subtitle": "Counter sale versus sending the code by email.",
+      "MANUAL": "Manual write-off",
+      "PLATFORM": "Sent by email"
+    },
+    "empty": "Nothing to report yet.",
+    "funnel": {
+      "issued": "Issued",
+      "sold": "Sold by resellers",
+      "activated": "Redeemed by buyers",
+      "available": "In reseller stock"
+    },
+    "resellers": {
+      "title": "By reseller",
+      "subtitle": "Who is moving stock, and who is sitting on it.",
+      "tenant": "Reseller",
+      "issued": "Issued",
+      "sold": "Sold",
+      "activated": "Redeemed",
+      "rate": "Redemption",
+      "stale": "Stale",
+      "resaleValue": "Their resale value",
+      "valueMissing": "{count} without a recorded value"
+    },
+    "revenue": {
+      "title": "Our B2B revenue",
+      "subtitle": "What we billed resellers for the packages they bought.",
+      "package": "Package",
+      "sales": "Sales",
+      "units": "Codes",
+      "total": "Revenue",
+      "caveat": "Derived as quantity × the package’s CURRENT price — Sale stores no price snapshot, so editing a package price changes these figures retroactively. Reversed sales are excluded."
+    },
+    "stale": {
+      "title": "Sold but never redeemed",
+      "description": "Written off more than {days} days ago and still not activated. Each one is a buyer holding a code who never reached the app."
+    },
+    "subtitle": "Where every GenCode we issued actually ended up.",
+    "title": "Sales Reports"
+  },
   "Subscriptions": {
     "actions": {
       "deactivate": "Deactivate",

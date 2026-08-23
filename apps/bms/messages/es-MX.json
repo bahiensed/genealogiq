@@ -647,6 +647,48 @@
       "reversed": "Venta revertida correctamente."
     }
   },
+  "SalesReports": {
+    "channels": {
+      "title": "Por canal de baja",
+      "subtitle": "Venta en mostrador frente al envío del código por correo.",
+      "MANUAL": "Baja manual",
+      "PLATFORM": "Enviado por correo"
+    },
+    "empty": "Nada que informar todavía.",
+    "funnel": {
+      "issued": "Emitidos",
+      "sold": "Vendidos por las empresas",
+      "activated": "Canjeados por los compradores",
+      "available": "En stock de las empresas"
+    },
+    "resellers": {
+      "title": "Por empresa",
+      "subtitle": "Quién mueve inventario y quién lo tiene detenido.",
+      "tenant": "Empresa",
+      "issued": "Emitidos",
+      "sold": "Vendidos",
+      "activated": "Canjeados",
+      "rate": "Canje",
+      "stale": "Detenidos",
+      "resaleValue": "Su ingreso",
+      "valueMissing": "{count} sin valor registrado"
+    },
+    "revenue": {
+      "title": "Nuestro ingreso B2B",
+      "subtitle": "Lo que facturamos a las empresas por los paquetes que compraron.",
+      "package": "Paquete",
+      "sales": "Ventas",
+      "units": "Códigos",
+      "total": "Ingreso",
+      "caveat": "Calculado como cantidad × precio ACTUAL del paquete — la venta no guarda el precio de entonces, así que editarlo cambia estas cifras retroactivamente. Las ventas revertidas quedan fuera."
+    },
+    "stale": {
+      "title": "Vendidos y nunca canjeados",
+      "description": "Dados de baja hace más de {days} días y aún sin activar. Cada uno es un comprador con un código que nunca llegó a la app."
+    },
+    "subtitle": "Dónde terminó realmente cada GenCode que emitimos.",
+    "title": "Informes de Ventas"
+  },
   "Subscriptions": {
     "actions": {
       "deactivate": "Desactivar",
