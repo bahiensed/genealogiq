@@ -457,7 +457,7 @@
     "resource": {
       "GEO_PLACE": "Geolocation",
       "MEMORIAL": "Memorial",
-      "QR_CODE": "QR Code"
+      "QR_CODE": "GenCode"
     },
     "stripe": {
       "notConfigured": "Not configured",
@@ -467,7 +467,6 @@
       "syncing": "Syncing…",
       "title": "Stripe sync"
     },
-    "subtitle": "One-time \"buy 1 extra\" prices — on top of a guardian's plan quota, independent of the recurring subscription price.",
     "tier": {
       "FREE": "Free",
       "PREMIUM": "Premium"
