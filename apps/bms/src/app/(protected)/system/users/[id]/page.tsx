@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getUser } from '@/queries/users'
+import { FormShell } from '@genealogiq/ui/form-shell'
 import { UserForm } from '@/components/users/user-form'
 
 export default async function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
@@ -8,7 +9,8 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   if (!user) notFound()
 
   return (
-    <UserForm
+    <FormShell>
+      <UserForm
         id={id}
         defaultValues={{
           firstName:        user.firstName,
@@ -32,5 +34,6 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
           } : undefined,
         }}
       />
+    </FormShell>
   )
 }

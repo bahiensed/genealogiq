@@ -1,5 +1,6 @@
 import { verifySession } from '@/lib/dal'
 import { prisma } from '@/lib/prisma'
+import { FormShell } from '@genealogiq/ui/form-shell'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Input } from '@genealogiq/ui/input'
 import { Field, FieldDescription, FieldLabel } from '@genealogiq/ui/field'
@@ -51,7 +52,7 @@ export default async function ProfilePage() {
     : profileDefaultValues
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <FormShell className="space-y-6">
       <div className="flex items-center gap-4">
         <AvatarUpload defaultUrl={image} fullName={fullName} />
         <div className="min-w-0">
@@ -97,6 +98,6 @@ export default async function ProfilePage() {
           <DeleteAccountDialog />
         </CardContent>
       </Card>
-    </div>
+    </FormShell>
   )
 }

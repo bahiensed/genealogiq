@@ -3,13 +3,14 @@ import { DiscountCouponForm } from '@/components/discount-coupons/discount-coupo
 import { getActivePackagesForSelect } from '@/queries/discount-coupons'
 import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Separator } from '@genealogiq/ui/separator'
+import { FormShell } from '@genealogiq/ui/form-shell'
 
 export default async function NewDiscountCouponPage() {
   const packages = await getActivePackagesForSelect()
   const t = await getTranslations('DiscountCoupons')
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <FormShell>
       <Card>
         <CardHeader>
           <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
@@ -28,6 +29,6 @@ export default async function NewDiscountCouponPage() {
           />
         </CardContent>
       </Card>
-    </div>
+    </FormShell>
   )
 }

@@ -89,7 +89,6 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
   }
 
   return (
-    <div className="mx-auto max-w-lg">
       <Card>
         <CardHeader>
           <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
@@ -252,6 +251,5 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId,
           </form>
         </CardContent>
       </Card>
-    </div>
   )
 }
