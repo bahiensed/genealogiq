@@ -4,6 +4,7 @@ import { getDiscountCoupon } from '@/queries/discount-coupons'
 import { DiscountCouponEditForm } from '@/components/discount-coupons/discount-coupon-edit-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Separator } from '@genealogiq/ui/separator'
+import { FormShell } from '@genealogiq/ui/form-shell'
 
 export default async function EditDiscountCouponPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -12,7 +13,7 @@ export default async function EditDiscountCouponPage({ params }: { params: Promi
   const t = await getTranslations('DiscountCoupons')
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <FormShell>
       <Card>
         <CardHeader>
           <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
@@ -28,6 +29,6 @@ export default async function EditDiscountCouponPage({ params }: { params: Promi
           />
         </CardContent>
       </Card>
-    </div>
+    </FormShell>
   )
 }

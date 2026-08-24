@@ -50,7 +50,6 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
   }
 
   return (
-    <div className="mx-auto max-w-lg">
       <Card>
         <CardHeader>
           <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
@@ -115,6 +114,5 @@ export function CustomerCategoryForm({ id, defaultValues }: CustomerCategoryForm
           </form>
         </CardContent>
       </Card>
-    </div>
   )
 }

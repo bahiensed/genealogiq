@@ -86,7 +86,6 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
       <Card>
         <CardHeader>
           <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
@@ -374,6 +373,5 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
           </form>
         </CardContent>
       </Card>
-    </div>
   )
 }

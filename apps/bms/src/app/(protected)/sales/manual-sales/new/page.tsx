@@ -1,6 +1,7 @@
 import { getActivePackages } from '@/queries/packages'
 import { getActiveCustomers } from '@/queries/customers'
 import { SaleForm } from '@/components/sales/sale-form'
+import { FormShell } from '@genealogiq/ui/form-shell'
 
 export default async function NewManualSalePage() {
   const [packages, rawCustomers] = await Promise.all([
@@ -15,5 +16,9 @@ export default async function NewManualSalePage() {
       : c.name,
   }))
 
-  return <SaleForm packages={packages} customers={customers} />
+  return (
+    <FormShell>
+      <SaleForm packages={packages} customers={customers} />
+    </FormShell>
+  )
 }

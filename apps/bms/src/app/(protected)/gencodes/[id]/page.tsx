@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getPackage } from '@/queries/packages'
 import { PackageForm } from '@/components/packages/package-form'
+import { FormShell } from '@genealogiq/ui/form-shell'
 
 export default async function EditGenCodeProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -8,7 +9,8 @@ export default async function EditGenCodeProductPage({ params }: { params: Promi
   if (!pkg) notFound()
 
   return (
-    <PackageForm
+    <FormShell>
+      <PackageForm
       id={id}
       defaultValues={{
         name:        pkg.name,
@@ -19,6 +21,7 @@ export default async function EditGenCodeProductPage({ params }: { params: Promi
       }}
       stripeProductId={pkg.stripeProductId}
       stripePriceId={pkg.stripePriceId}
-    />
+      />
+    </FormShell>
   )
 }

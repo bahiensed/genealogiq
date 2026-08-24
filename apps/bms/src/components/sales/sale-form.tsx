@@ -95,126 +95,124 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
 
   return (
     <>
-      <div className="mx-auto max-w-lg">
-        <Card>
-          <CardHeader>
-            <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
-              {t('new')}
-            </CardTitle>
-          </CardHeader>
-          <Separator />
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">
+            {t('new')}
+          </CardTitle>
+        </CardHeader>
+        <Separator />
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-8">
 
-              <FieldGroup>
-                <Controller
-                  name="packageId"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>{t('fields.package')}</FieldLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger aria-invalid={fieldState.invalid}>
-                          <SelectValue placeholder={t('placeholders.package')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {packages.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>
-                              {p.name} · {t('packageOption.codes', { count: p.quantity })} · {usd.format(p.price)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
+            <FieldGroup>
+              <Controller
+                name="packageId"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t('fields.package')}</FieldLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger aria-invalid={fieldState.invalid}>
+                        <SelectValue placeholder={t('placeholders.package')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {packages.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            {p.name} · {t('packageOption.codes', { count: p.quantity })} · {usd.format(p.price)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
 
-                <Controller
-                  name="tenantId"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>{t('fields.customer')}</FieldLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger aria-invalid={fieldState.invalid}>
-                          <SelectValue placeholder={t('placeholders.customer')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {customers.map((c) => (
-                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
+              <Controller
+                name="tenantId"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t('fields.customer')}</FieldLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger aria-invalid={fieldState.invalid}>
+                        <SelectValue placeholder={t('placeholders.customer')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customers.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
 
-                <Controller
-                  name="quantity"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>{t('fields.quantity')}</FieldLabel>
-                      <Input
-                        type="number"
-                        step="1"
-                        min="1"
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) => field.onChange(isNaN(e.target.valueAsNumber) ? '' : e.target.valueAsNumber)}
-                        autoComplete="off"
-                        aria-invalid={fieldState.invalid}
-                      />
-                      {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                    </Field>
-                  )}
-                />
-              </FieldGroup>
+              <Controller
+                name="quantity"
+                control={control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel>{t('fields.quantity')}</FieldLabel>
+                    <Input
+                      type="number"
+                      step="1"
+                      min="1"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(isNaN(e.target.valueAsNumber) ? '' : e.target.valueAsNumber)}
+                      autoComplete="off"
+                      aria-invalid={fieldState.invalid}
+                    />
+                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+            </FieldGroup>
 
-              {/* Summary card */}
-              {totalQRCodes > 0 && (
-                <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5 flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                      <Fingerprint className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
-                        {t('summary.genCodes')}
-                      </p>
-                      <p className="text-3xl font-extrabold tabular-nums leading-none">
-                        {totalQRCodes.toLocaleString(locale)}
-                      </p>
-                    </div>
+            {/* Summary card */}
+            {totalQRCodes > 0 && (
+              <div className="rounded-xl border-2 border-primary/20 bg-primary/5 p-5 flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <Fingerprint className="h-5 w-5 text-primary" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3 pt-1 border-t border-primary/10">
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('summary.totalPrice')}</p>
-                      <p className="text-lg font-bold tabular-nums">{usd.format(totalPrice)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">{t('summary.unitPrice')}</p>
-                      <p className="text-lg font-bold tabular-nums">{usd.format(unitPrice)}</p>
-                    </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+                      {t('summary.genCodes')}
+                    </p>
+                    <p className="text-3xl font-extrabold tabular-nums leading-none">
+                      {totalQRCodes.toLocaleString(locale)}
+                    </p>
                   </div>
                 </div>
-              )}
+                <div className="grid grid-cols-2 gap-3 pt-1 border-t border-primary/10">
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t('summary.totalPrice')}</p>
+                    <p className="text-lg font-bold tabular-nums">{usd.format(totalPrice)}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">{t('summary.unitPrice')}</p>
+                    <p className="text-lg font-bold tabular-nums">{usd.format(unitPrice)}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
-              {serverError && <FieldError>{serverError}</FieldError>}
-              <Field orientation="horizontal">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? t('submitting') : t('submit')}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => form.reset(saleDefaultValues)}>
-                  {tc('reset')}
-                </Button>
-              </Field>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+            {serverError && <FieldError>{serverError}</FieldError>}
+            <Field orientation="horizontal">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? t('submitting') : t('submit')}
+              </Button>
+              <Button type="button" variant="outline" onClick={() => form.reset(saleDefaultValues)}>
+                {tc('reset')}
+              </Button>
+            </Field>
+          </form>
+        </CardContent>
+      </Card>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
