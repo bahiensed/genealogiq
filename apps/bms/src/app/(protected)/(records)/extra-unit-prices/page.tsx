@@ -14,7 +14,6 @@ export default async function ExtraUnitPricesPage() {
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
           {t('title')}
         </h1>
-        <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -22,7 +21,7 @@ export default async function ExtraUnitPricesPage() {
           <ExtraUnitPriceCard
             key={row.id}
             row={row}
-            title={`${t(`resource.${row.resource}`)} — ${t(`tier.${row.tier}`)}`}
+            title={`${t(`resource.${row.resource}`)} - ${t(`tier.${row.tier}`)}`}
           />
         ))}
       </div>

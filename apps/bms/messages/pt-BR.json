@@ -457,7 +457,7 @@
     "resource": {
       "GEO_PLACE": "Geolocalização",
       "MEMORIAL": "Memorial",
-      "QR_CODE": "QR Code"
+      "QR_CODE": "GenCode"
     },
     "stripe": {
       "notConfigured": "Não configurado",
@@ -467,9 +467,8 @@
       "syncing": "Sincronizando…",
       "title": "Sincronização com Stripe"
     },
-    "subtitle": "Preços de \"comprar 1 extra\" avulsos — além da cota do plano do guardião, independente do preço da assinatura recorrente.",
     "tier": {
-      "FREE": "Grátis",
+      "FREE": "Free",
       "PREMIUM": "Premium"
     },
     "title": "Preços de Extras"
