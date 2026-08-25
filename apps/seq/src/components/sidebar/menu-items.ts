@@ -39,18 +39,18 @@ export const system: MenuItem[] = [
   { labelKey: 'items.employees',   url: '/system/users',   icon: IdCardIcon   },
 ]
 
-// ─── Records (Customers always-on) ───────────────────────────────────────────
+// ─── Records ─────────────────────────────────────────────────────────────────
+//
+// One group, not two. Categories used to have a group of its own, but with the
+// suppliers modules off — their default — each group held exactly one item, so
+// the split bought two headings over one entry each. Entities and their
+// categories now sit together, always-on first.
 
 export const records: MenuItem[] = [
-  { labelKey: 'items.suppliers', url: '/suppliers', icon: StoreIcon, moduleKey: 'moduleRecordsSuppliers' },
-  { labelKey: 'items.customers', url: '/customers', icon: UsersIcon }, // always-on
-]
-
-// ─── Categories (Customer Categories always-on) ───────────────────────────────
-
-export const categories: MenuItem[] = [
-  { labelKey: 'items.supplierCategories', url: '/categories/suppliers', icon: TagIcon, moduleKey: 'moduleCategoriesSuppliers' },
-  { labelKey: 'items.customerCategories', url: '/categories/customers', icon: TagIcon }, // always-on
+  { labelKey: 'items.customerCategories', url: '/categories/customers', icon: TagIcon   }, // always-on
+  { labelKey: 'items.customers',          url: '/customers',            icon: UsersIcon }, // always-on
+  { labelKey: 'items.supplierCategories', url: '/categories/suppliers', icon: TagIcon,   moduleKey: 'moduleCategoriesSuppliers' },
+  { labelKey: 'items.suppliers',          url: '/suppliers',            icon: StoreIcon, moduleKey: 'moduleRecordsSuppliers'    },
 ]
 
 // ─── Purchasing ──────────────────────────────────────────────────────────────

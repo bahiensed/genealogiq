@@ -8,7 +8,6 @@ import {
   main,
   system,
   records,
-  categories,
   purchasing,
   inventory,
   type MenuItem,
@@ -55,14 +54,12 @@ export function AppSidebar({ modules }: AppSidebarProps) {
   const t = useTranslations('Sidebar')
 
   const recordsItems    = visibleItems(records,    modules)
-  const categoriesItems = visibleItems(categories, modules)
   const purchasingItems = visibleItems(purchasing, modules)
   const inventoryItems  = visibleItems(inventory,  modules)
 
   const groups = [
     { labelKey: 'groups.system',     items: system,          show: true                       },
     { labelKey: 'groups.records',    items: recordsItems,    show: recordsItems.length > 0    },
-    { labelKey: 'groups.categories', items: categoriesItems, show: categoriesItems.length > 0 },
     { labelKey: 'groups.purchasing', items: purchasingItems, show: true                       },
     { labelKey: 'groups.inventory',  items: inventoryItems,  show: true                       },
   ].filter((g) => g.show)
