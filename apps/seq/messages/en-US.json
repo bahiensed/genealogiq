@@ -24,7 +24,7 @@
     "checkout": {
       "invalidQuantity": "Invalid quantity.",
       "noCheckoutUrl": "Stripe did not return a checkout URL.",
-      "notSynced": "This package is not synced with Stripe. Run prisma/seed-stripe-packages.ts.",
+      "notSynced": "This product is not available for purchase right now. Contact GenealogiQ.",
       "packageNotFound": "Package not found or unavailable."
     },
     "common": {

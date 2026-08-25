@@ -13,6 +13,10 @@ import { verifySession } from '@/lib/dal'
  * - **Only settled sales count as revenue.** A sale now exists from the moment
  *   a payment link is generated, so `reversed_at IS NULL` no longer means paid;
  *   every money query also requires `paid_at`.
+ * - **Revenue is grouped by currency, never summed across them.** The catalogue
+ *   is priced in three, and adding 100 BRL to 100 USD produces 200 of nothing.
+ *   Every money query returns one row per currency and the page prints them
+ *   side by side rather than inventing a conversion rate to maintain.
  * - **Revenue is the amount Stripe reported**, snapshotted on the sale in cents.
  *   Rows that predate that column fall back to `quantity × package.price`, and
  *   for those — only those — editing a package's price still rewrites history.
@@ -56,6 +60,8 @@ export interface ChannelRow {
 
 export interface PackageRevenueRow {
   packageName: string
+  /** Uppercase ISO code. One row per product PER CURRENCY. */
+  currency:    string
   sales:       number
   units:       number
   revenue:     number
@@ -171,24 +177,27 @@ export async function getRevenueByPackage(): Promise<PackageRevenueRow[]> {
 
   const rows = await prisma.$queryRaw<{
     package_name: string
+    currency:     string | null
     sales:        bigint
     units:        bigint
     revenue:      string | null
   }[]>`
     SELECT
-      p.name                                  AS package_name,
-      COUNT(s.id)                             AS sales,
+      p.name                                    AS package_name,
+      COALESCE(s.currency, 'usd')               AS currency,
+      COUNT(s.id)                               AS sales,
       COALESCE(SUM(s.quantity * p.quantity), 0) AS units,
-      COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)), 0)  AS revenue
+      COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)), 0) AS revenue
     FROM sales s
     JOIN packages p ON s.package_id = p.id
     WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
-    GROUP BY p.name
-    ORDER BY 4 DESC
+    GROUP BY p.name, COALESCE(s.currency, 'usd')
+    ORDER BY 1, 5 DESC
   `
 
   return rows.map((r) => ({
     packageName: r.package_name,
+    currency:    (r.currency ?? 'usd').toUpperCase(),
     sales:       Number(r.sales),
     units:       Number(r.units),
     revenue:     Number(r.revenue ?? 0),

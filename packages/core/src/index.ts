@@ -26,4 +26,5 @@ export {
   validateCnpj,
 } from "./masks"
 export { type Translator, identityTranslator } from "./translator"
+export { APP_CURRENCIES, type AppCurrency, currencyForLocale, currencyCode } from "./currency"
 export { addressSchema, addressDefaultValues, type AddressFormValues } from "./address"

@@ -1,3 +1,5 @@
+import { getLocale } from 'next-intl/server'
+import { currencyForLocale } from '@genealogiq/core'
 import { getActivePackages } from '@/queries/packages'
 import { getActiveCustomers } from '@/queries/customers'
 import { getSelectableCoupons } from '@/queries/discount-coupons'
@@ -5,8 +7,10 @@ import { SaleForm } from '@/components/sales/sale-form'
 import { FormShell } from '@genealogiq/ui/form-shell'
 
 export default async function NewManualSalePage() {
+  const currency = currencyForLocale(await getLocale())
+
   const [packages, rawCustomers, coupons] = await Promise.all([
-    getActivePackages(),
+    getActivePackages(currency),
     getActiveCustomers(),
     getSelectableCoupons(),
   ])

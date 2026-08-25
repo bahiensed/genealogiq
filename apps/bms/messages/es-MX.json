@@ -104,12 +104,14 @@
       "alreadyReversed": "Esta venta ya fue revertida.",
       "couponNotApplicable": "Este cupón no es válido para este producto.",
       "linkFailed": "No se pudo generar el enlace de pago: {message}",
+      "linkRegenerated": "Se generó un nuevo enlace y se envió a {email}.",
+      "linkResent": "Enlace reenviado a {email}.",
       "linkSent": "Enlace de pago enviado a {email}.",
       "markedPaid": "Pago registrado. GenCodes generados.",
       "notFound": "Venta no encontrada.",
       "packageInactive": "Este producto está inactivo.",
       "packageNotFound": "Producto no encontrado.",
-      "packageNotSynced": "Este producto aún no se ha sincronizado con Stripe. Sincronízalo antes de vender.",
+      "packageNotSyncedInCurrency": "Este producto no tiene precio sincronizado en {currency}. Configúralo y sincroniza antes de vender.",
       "tenantInactive": "Este cliente está inactivo.",
       "tenantNotFound": "Cliente no encontrado.",
       "unknownError": "Error desconocido"
@@ -480,6 +482,7 @@
     }
   },
   "Errors": {
+    "atLeastOnePrice": "Indica al menos un precio",
     "codeFormat": "Usa solo letras mayúsculas, números y guiones bajos",
     "countryCodeRequired": "El código de país es obligatorio",
     "couponCodeFormat": "Solo letras mayúsculas, números, guiones y guiones bajos",
@@ -654,6 +657,7 @@
       "copyLink": "Copiar enlace de pago",
       "markPaid": "Registrar pago recibido",
       "openMenu": "Abrir menú",
+      "resendCharge": "Reenviar cobro",
       "reverse": "Revertir"
     },
     "confirm": {
@@ -709,7 +713,6 @@
       "date": "Fecha",
       "empty": "No se encontraron ventas.",
       "product": "Producto",
-      "productPrice": "Precio del Producto",
       "quantity": "Cantidad",
       "seller": "Vendedor",
       "status": "Estado",
@@ -756,7 +759,8 @@
       "sales": "Ventas",
       "units": "Unidades",
       "total": "Ingreso",
-      "caveat": "Cuenta solo ventas con pago confirmado, por el monto que cobró Stripe. Las ventas antiguas sin ese monto usan cantidad × precio ACTUAL del producto — en esas, editar el precio cambia los números retroactivamente. Las ventas revertidas quedan fuera."
+      "caveat": "Cuenta solo ventas con pago confirmado, por el monto que cobró Stripe. Las ventas antiguas sin ese monto usan cantidad × precio ACTUAL del producto — en esas, editar el precio cambia los números retroactivamente. Las ventas revertidas quedan fuera.",
+      "currency": "Moneda"
     },
     "stale": {
       "title": "Vendidos y nunca canjeados",

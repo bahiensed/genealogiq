@@ -27,7 +27,11 @@ vi.mock("@genealogiq/core", async (importOriginal) => ({
   done: (message?: string) => ({ ok: true, message }),
   fail: (message: string) => ({ ok: false, message }),
 }))
-vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async () => (key: string) => key),
+  // The locale picks the currency, so every action that touches money reads it.
+  getLocale: vi.fn(async () => "en-US"),
+}))
 
 import { createUser, deleteUser, toggleUserActive } from "./user.actions"
 import { verifyAdmin } from "@/lib/dal"

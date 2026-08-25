@@ -179,13 +179,20 @@ model Package {
   id               String              @id @default(cuid())
   name             String
   description      String?
-  price            Decimal             @map("price") @db.Decimal(10, 2)
+  /// One slot per currency, all optional: a product is sellable in the
+  /// currencies it has a price for and invisible in the rest. Mirrors
+  /// ExtraUnitPrice, the closest model (a one-time purchase).
+  priceUsd         Decimal?            @map("price_usd") @db.Decimal(10, 2)
+  priceBrl         Decimal?            @map("price_brl") @db.Decimal(10, 2)
+  priceMxn         Decimal?            @map("price_mxn") @db.Decimal(10, 2)
   isActive         Boolean             @default(true) @map("is_active")
   createdAt        DateTime            @default(now()) @map("created_at")
   updatedAt        DateTime            @updatedAt @map("updated_at")
   quantity         Int                 @default(1)
   stripeProductId  String?             @unique @map("stripe_product_id")
-  stripePriceId    String?             @unique @map("stripe_price_id")
+  stripePriceIdUsd String?             @unique @map("stripe_price_id_usd")
+  stripePriceIdBrl String?             @unique @map("stripe_price_id_brl")
+  stripePriceIdMxn String?             @unique @map("stripe_price_id_mxn")
   genCodes         GenCode[]
   sales            Sale[]
   coupons          DiscountCoupon[]    @relation("CouponPackages")

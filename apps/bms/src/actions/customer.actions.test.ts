@@ -18,7 +18,11 @@ const { prismaMock, PrismaKnownError } = vi.hoisted(() => {
 })
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
-vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async () => (key: string) => key),
+  // The locale picks the currency, so every action that touches money reads it.
+  getLocale: vi.fn(async () => "en-US"),
+}))
 vi.mock("@genealogiq/db", () => ({ Prisma: { PrismaClientKnownRequestError: PrismaKnownError } }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyAdmin: vi.fn() }))

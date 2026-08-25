@@ -18,7 +18,7 @@ const { prismaMock, stripeMock, emailMock, ensureCustomerMock, settleMock, Prism
   }
   return {
     prismaMock,
-    stripeMock: { checkout: { sessions: { create: vi.fn() } } },
+    stripeMock: { checkout: { sessions: { create: vi.fn(), expire: vi.fn() } } },
     emailMock: vi.fn(),
     ensureCustomerMock: vi.fn(),
     settleMock: vi.fn(),
@@ -34,9 +34,13 @@ vi.mock("@/lib/dal", () => ({ verifyAdmin: vi.fn(), requireRole: vi.fn() }))
 vi.mock("@/lib/email", () => ({ sendSalePaymentLinkEmail: emailMock }))
 vi.mock("@/lib/billing", () => ({ BMS_ORIGIN: "bms", settleSaleManually: settleMock }))
 vi.mock("@genealogiq/services/stripe-customer", () => ({ ensureTenantStripeCustomer: ensureCustomerMock }))
-vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async () => (key: string) => key),
+  // The locale picks the currency, so every action that touches money reads it.
+  getLocale: vi.fn(async () => "en-US"),
+}))
 
-import { createSalePaymentLink, reverseSale, markSalePaidManually } from "./sale.actions"
+import { createSalePaymentLink, reverseSale, markSalePaidManually, resendSaleCharge } from "./sale.actions"
 import { verifyAdmin, requireRole } from "@/lib/dal"
 
 const input = { packageId: "p1", tenantId: "c1", quantity: 2, discountCouponId: "" }
@@ -47,13 +51,21 @@ beforeEach(() => {
   vi.mocked(requireRole).mockResolvedValue({ user: { id: "admin-1", role: "OWNER" } } as never)
   settleMock.mockResolvedValue(undefined)
   prismaMock.package.findUnique.mockResolvedValue({
-    name: "GenCode", quantity: 10, price: 29.99, isActive: true, stripePriceId: "price_1",
+    isActive: true, stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null,
   })
-  prismaMock.tenant.findUnique.mockResolvedValue({
-    email: "funeraria@example.com", name: "Funerária X", tradeName: "X", isActive: true,
-  })
+  prismaMock.tenant.findUnique.mockResolvedValue({ isActive: true })
   prismaMock.sale.create.mockResolvedValue({ id: 99 })
   prismaMock.sale.update.mockResolvedValue({})
+  // openCheckoutForSale re-reads the row it is opening a session for.
+  prismaMock.sale.findUnique.mockResolvedValue({
+    quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
+    package: {
+      name: "GenCode",
+      priceUsd: 29.99, priceBrl: null, priceMxn: null,
+      stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null,
+    },
+    tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
+  })
   prismaMock.sale.delete.mockResolvedValue({})
   ensureCustomerMock.mockResolvedValue("cus_1")
   stripeMock.checkout.sessions.create.mockResolvedValue({
@@ -61,6 +73,7 @@ beforeEach(() => {
     amount_subtotal: 5998, amount_total: 5998, currency: "usd",
   })
   emailMock.mockResolvedValue(undefined)
+  stripeMock.checkout.sessions.expire.mockResolvedValue({})
   process.env.BMS_URL = "https://bms.example.com"
 })
 
@@ -83,17 +96,15 @@ describe("createSalePaymentLink — guards", () => {
   // this could not bite, because no money ever changed hands.
   it("refuses a product with no Stripe price", async () => {
     prismaMock.package.findUnique.mockResolvedValue({
-      name: "GenCode", quantity: 10, price: 29.99, isActive: true, stripePriceId: null,
+      isActive: true, stripePriceIdUsd: null, stripePriceIdBrl: null, stripePriceIdMxn: null,
     })
     const res = await createSalePaymentLink(input)
-    expect(res).toEqual({ ok: false, message: "sale.packageNotSynced" })
+    expect(res).toEqual({ ok: false, message: "sale.packageNotSyncedInCurrency" })
     expect(prismaMock.sale.create).not.toHaveBeenCalled()
   })
 
   it("refuses an inactive customer", async () => {
-    prismaMock.tenant.findUnique.mockResolvedValue({
-      email: "x@y.com", name: "X", tradeName: "X", isActive: false,
-    })
+    prismaMock.tenant.findUnique.mockResolvedValue({ isActive: false })
     expect(await createSalePaymentLink(input)).toEqual({ ok: false, message: "sale.tenantInactive" })
   })
 
@@ -141,7 +152,19 @@ describe("createSalePaymentLink — the session", () => {
   })
 
   it("applies the chosen coupon and does NOT also allow promotion codes", async () => {
-    prismaMock.discountCoupon.findFirst.mockResolvedValue({ stripePromotionCodeId: "promo_1" })
+    prismaMock.discountCoupon.findFirst.mockResolvedValue({ id: "coupon-1", stripePromotionCodeId: "promo_1" })
+    // The coupon reaches Stripe through the sale row, not a local variable —
+    // which is what lets a resend re-resolve it later instead of carrying a
+    // stale promotion code forward.
+    prismaMock.sale.findUnique.mockResolvedValue({
+      quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: "coupon-1", soldById: "admin-1",
+      package: {
+        name: "GenCode",
+        priceUsd: 29.99, priceBrl: null, priceMxn: null,
+        stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null,
+      },
+      tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
+    })
 
     await createSalePaymentLink({ ...input, discountCouponId: "coupon-1" })
 
@@ -262,5 +285,101 @@ describe("markSalePaidManually", () => {
 
     expect(settleMock).toHaveBeenCalledWith(7, "admin-1")
     expect(res).toEqual({ ok: true, message: "sale.markedPaid" })
+  })
+})
+
+const liveSale = {
+  paidAt: null, reversedAt: null, expiredAt: null, failedAt: null,
+  stripeSessionId: "cs_old", checkoutUrl: "https://checkout.stripe.com/cs_old",
+  tenant: { email: "funeraria@example.com" },
+  // fields sendSaleLinkAgain reads
+  quantity: 2, amountTotal: 5998, currency: "usd",
+  package: { name: "GenCode" },
+}
+
+describe("resendSaleCharge", () => {
+  it("refuses a paid sale", async () => {
+    prismaMock.sale.findUnique.mockResolvedValue({ ...liveSale, paidAt: new Date() })
+    expect(await resendSaleCharge(7)).toEqual({ ok: false, message: "sale.alreadyPaid" })
+  })
+
+  it("refuses a reversed sale", async () => {
+    prismaMock.sale.findUnique.mockResolvedValue({ ...liveSale, reversedAt: new Date() })
+    expect(await resendSaleCharge(7)).toEqual({ ok: false, message: "sale.alreadyReversed" })
+  })
+
+  // A live link is re-sent unchanged. Opening a second session would leave two
+  // payable links for one order, and the customer could be charged twice.
+  it("re-sends a live link without opening a new session", async () => {
+    prismaMock.sale.findUnique.mockResolvedValue(liveSale)
+
+    const res = await resendSaleCharge(7)
+
+    expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled()
+    expect(stripeMock.checkout.sessions.expire).not.toHaveBeenCalled()
+    expect(emailMock).toHaveBeenCalledWith(
+      expect.objectContaining({ url: "https://checkout.stripe.com/cs_old" }),
+    )
+    expect(res).toEqual({ ok: true, message: "sale.linkResent" })
+  })
+
+  // An unexpired link forgotten in an old email could otherwise be paid after
+  // the replacement already was — two charges for one order.
+  it("expires the dead session in Stripe before opening a replacement", async () => {
+    const order: string[] = []
+    stripeMock.checkout.sessions.expire.mockImplementation(async () => { order.push("expire"); return {} })
+    stripeMock.checkout.sessions.create.mockImplementation(async () => {
+      order.push("create")
+      return { id: "cs_new", url: "https://checkout.stripe.com/cs_new",
+               amount_subtotal: 5998, amount_total: 5998, currency: "usd" }
+    })
+    prismaMock.sale.findUnique
+      .mockResolvedValueOnce({ ...liveSale, expiredAt: new Date() })
+      .mockResolvedValue({
+        quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
+        package: { name: "GenCode", priceUsd: 29.99, priceBrl: null, priceMxn: null,
+                   stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null },
+        tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
+      })
+
+    const res = await resendSaleCharge(7)
+
+    expect(order).toEqual(["expire", "create"])
+    expect(res).toEqual({ ok: true, message: "sale.linkRegenerated" })
+  })
+
+  // Same treatment for a bounced boleto: the session is spent either way.
+  it("regenerates after an async payment failure", async () => {
+    prismaMock.sale.findUnique
+      .mockResolvedValueOnce({ ...liveSale, failedAt: new Date() })
+      .mockResolvedValue({
+        quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
+        package: { name: "GenCode", priceUsd: 29.99, priceBrl: null, priceMxn: null,
+                   stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null },
+        tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
+      })
+
+    const res = await resendSaleCharge(7)
+
+    expect(stripeMock.checkout.sessions.create).toHaveBeenCalledTimes(1)
+    expect(res.ok).toBe(true)
+  })
+
+  // A fresh link revives the row — whatever killed the last one no longer holds.
+  it("clears expiredAt and failedAt on the new session", async () => {
+    prismaMock.sale.findUnique
+      .mockResolvedValueOnce({ ...liveSale, expiredAt: new Date() })
+      .mockResolvedValue({
+        quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
+        package: { name: "GenCode", priceUsd: 29.99, priceBrl: null, priceMxn: null,
+                   stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null },
+        tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
+      })
+
+    await resendSaleCharge(7)
+
+    const data = prismaMock.sale.update.mock.calls.at(-1)![0].data
+    expect(data.expiredAt).toBeNull()
+    expect(data.failedAt).toBeNull()
   })
 })

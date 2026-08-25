@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@genealogiq/ui/badge'
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { RowActions } from '@genealogiq/ui/row-actions'
-import { reverseSale, markSalePaidManually } from '@/actions/sale.actions'
+import { reverseSale, markSalePaidManually, resendSaleCharge } from '@/actions/sale.actions'
 import { saleState, isSaleDimmed } from '@/lib/sale-state'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
@@ -23,7 +23,7 @@ export type SaleRow = {
   currency: string | null
   checkoutUrl: string | null
   discountCoupon: { code: string } | null
-  package:  { name: string; price: number; quantity: number }
+  package:  { name: string; quantity: number }
   tenant:   { name: string }
   soldBy:   { firstName: string; lastName: string }
 }
@@ -50,6 +50,16 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: SaleRow }; 
         await navigator.clipboard.writeText(sale.checkoutUrl!)
         return { ok: true, message: t('toasts.linkCopied') }
       },
+    })
+  }
+
+  // One action for "the customer has not paid, chase them" — it re-sends a live
+  // link and replaces a dead one, so the operator never has to know which it is.
+  if (state !== 'paid' && state !== 'reversed') {
+    items.push({
+      kind: 'action' as const,
+      label: t('actions.resendCharge'),
+      run: () => resendSaleCharge(sale.id),
     })
   }
 
@@ -81,8 +91,16 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: SaleRow }; 
   return <RowActions menuLabel={t('actions.openMenu')} items={items} remove={remove} />
 }
 
+/** Cents in the currency Stripe charged. Null until a session exists. */
+function money(cents: number | null, currency: string | null, locale: string): string {
+  if (cents === null) return '—'
+  return new Intl.NumberFormat(locale, {
+    style:    'currency',
+    currency: (currency ?? 'usd').toUpperCase(),
+  }).format(cents / 100)
+}
+
 export function getColumns(currentUserRole: string, t: Translator, locale: string): ColumnDef<SaleRow>[] {
-  const currency = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   const date     = new Intl.DateTimeFormat(locale, { dateStyle: 'short' })
 
   return [
@@ -156,34 +174,37 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       ),
     },
     {
-      id: 'productPrice',
-      accessorFn: (row) => row.package.price,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.productPrice')} />,
+      id: 'totalPrice',
+      // The amount Stripe actually charged, in the currency it charged. Not
+      // derived from the catalogue: the product now has three prices, the sale
+      // has one, and a coupon means they differ on purpose.
+      accessorFn: (row) => row.amountTotal ?? 0,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.totalPrice')} />,
       cell: ({ row }) => (
-        <div className={`text-right ${isSaleDimmed(row.original) ? 'opacity-40' : ''}`}>
-          {currency.format(row.original.package.price)}
+        <div className={`text-right tabular-nums ${isSaleDimmed(row.original) ? 'opacity-40' : ''}`}>
+          {money(row.original.amountTotal, row.original.currency, locale)}
+          {row.original.discountCoupon && (
+            <span className="block text-xs text-emerald-600">{row.original.discountCoupon.code}</span>
+          )}
         </div>
       ),
     },
     {
       id: 'unitPrice',
-      accessorFn: (row) => row.package.price / row.package.quantity,
+      accessorFn: (row) =>
+        row.amountTotal === null ? 0 : row.amountTotal / (row.quantity * row.package.quantity),
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.unitPrice')} />,
-      cell: ({ row }) => (
-        <div className={`text-right ${isSaleDimmed(row.original) ? 'opacity-40' : ''}`}>
-          {currency.format(row.original.package.price / row.original.package.quantity)}
-        </div>
-      ),
-    },
-    {
-      id: 'totalPrice',
-      accessorFn: (row) => row.quantity * row.package.price,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.totalPrice')} />,
-      cell: ({ row }) => (
-        <div className={`text-right ${isSaleDimmed(row.original) ? 'opacity-40' : ''}`}>
-          {currency.format(row.original.quantity * row.original.package.price)}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const units = row.original.quantity * row.original.package.quantity
+        const per   = row.original.amountTotal === null || units === 0
+          ? null
+          : row.original.amountTotal / units
+        return (
+          <div className={`text-right tabular-nums ${isSaleDimmed(row.original) ? 'opacity-40' : ''}`}>
+            {money(per, row.original.currency, locale)}
+          </div>
+        )
+      },
     },
     {
       id: 'seller',

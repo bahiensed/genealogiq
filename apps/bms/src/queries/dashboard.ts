@@ -64,9 +64,9 @@ export async function getDashboardStats() {
         COUNT(s.id) FILTER (WHERE s.created_at >= ${startOfMonth})              AS monthly_count,
         COUNT(s.id) FILTER (WHERE s.created_at >= ${startOfYear})               AS yearly_count,
         COUNT(s.id)                                                             AS total_count,
-        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)) FILTER (WHERE s.created_at >= ${startOfMonth}), 0) AS monthly_revenue,
-        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)) FILTER (WHERE s.created_at >= ${startOfYear}), 0)  AS yearly_revenue,
-        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)), 0) AS total_revenue
+        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)) FILTER (WHERE s.created_at >= ${startOfMonth}), 0) AS monthly_revenue,
+        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)) FILTER (WHERE s.created_at >= ${startOfYear}), 0)  AS yearly_revenue,
+        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)), 0) AS total_revenue
       FROM sales s
       JOIN packages p ON s.package_id = p.id
       WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
@@ -75,7 +75,7 @@ export async function getDashboardStats() {
       SELECT
         DATE_TRUNC('month', s.created_at) AS month,
         p.name                            AS name,
-        SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)) AS revenue
+        SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)) AS revenue
       FROM sales s
       JOIN packages p ON s.package_id = p.id
       WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
@@ -86,7 +86,7 @@ export async function getDashboardStats() {
       SELECT
         s.sold_by_id              AS seller_id,
         COUNT(s.id)               AS count,
-        SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)) AS revenue
+        SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)) AS revenue
       FROM sales s
       JOIN packages p ON s.package_id = p.id
       WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL

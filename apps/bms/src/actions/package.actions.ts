@@ -10,6 +10,17 @@ import { verifyAdmin } from '@/lib/dal'
 import { getPackageSchema, type PackageFormValues } from '@/schemas/package.schema'
 import { identityTranslator } from '@/schemas/i18n'
 
+const CURRENCIES = [
+  { key: 'usd', price: 'priceUsd', id: 'stripePriceIdUsd' },
+  { key: 'brl', price: 'priceBrl', id: 'stripePriceIdBrl' },
+  { key: 'mxn', price: 'priceMxn', id: 'stripePriceIdMxn' },
+] as const
+
+/** Zero in the form means "not priced in this currency"; the column holds null. */
+function toDecimal(value: number): Prisma.Decimal | null {
+  return value > 0 ? new Prisma.Decimal(value) : null
+}
+
 export async function createPackage(data: PackageFormValues): Promise<ActionResult> {
   await verifyAdmin()
   const t = await getTranslations('Actions')
@@ -17,10 +28,15 @@ export async function createPackage(data: PackageFormValues): Promise<ActionResu
   const validated = getPackageSchema(identityTranslator).safeParse(data)
   if (!validated.success) return fail(t('common.invalidData'))
 
-  const { price, ...rest } = validated.data
+  const { priceUsd, priceBrl, priceMxn, ...rest } = validated.data
 
   await prisma.package.create({
-    data: { ...rest, price: new Prisma.Decimal(price) },
+    data: {
+      ...rest,
+      priceUsd: toDecimal(priceUsd),
+      priceBrl: toDecimal(priceBrl),
+      priceMxn: toDecimal(priceMxn),
+    },
   })
 
   revalidatePath('/gencodes')
@@ -34,32 +50,41 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
   const validated = getPackageSchema(identityTranslator).safeParse(data)
   if (!validated.success) return fail(t('common.invalidData'))
 
-  const { price, ...rest } = validated.data
-  const newPrice = new Prisma.Decimal(price)
+  const { priceUsd, priceBrl, priceMxn, ...rest } = validated.data
+  const next = { priceUsd: toDecimal(priceUsd), priceBrl: toDecimal(priceBrl), priceMxn: toDecimal(priceMxn) }
 
   const current = await prisma.package.findUnique({
     where:  { id },
-    select: { price: true, stripePriceId: true },
+    select: {
+      priceUsd: true, priceBrl: true, priceMxn: true,
+      stripePriceIdUsd: true, stripePriceIdBrl: true, stripePriceIdMxn: true,
+    },
   })
   if (!current) return fail(t('package.notFound'))
 
-  // Stripe Prices are immutable. If admin changes price on a synced package,
-  // clear the Price ref — checkout action will refuse purchases until
-  // syncPackageWithStripe mints a fresh one. stripeProductId is left alone
-  // and reused (Products ARE mutable) — mirrors Subscription/ExtraUnitPrice's
-  // sync pattern instead of minting a brand-new Product on every price edit.
-  const priceChanged = !current.price.equals(newPrice)
-  const clearStripeRef = priceChanged && !!current.stripePriceId
-  const staleId = current.stripePriceId
+  // Stripe Prices are immutable, so a changed price means the synced Price id is
+  // stale and must be dropped — syncPackageWithStripe mints a fresh one, and
+  // until it does, that currency is not sellable. Per currency now: editing the
+  // real price must not unsync the dollar one. stripeProductId is left alone and
+  // reused, since Products ARE mutable.
+  const cleared: Record<string, null> = {}
+  const stale:   string[] = []
+  for (const c of CURRENCIES) {
+    const before = current[c.price]
+    const after  = next[c.price]
+    const changed = before === null ? after !== null
+                  : after === null  ? true
+                  : !before.equals(after)
+    if (changed && current[c.id]) {
+      cleared[c.id] = null
+      stale.push(current[c.id]!)
+    }
+  }
 
   try {
     await prisma.package.update({
       where: { id },
-      data:  {
-        ...rest,
-        price: newPrice,
-        ...(clearStripeRef && { stripePriceId: null }),
-      },
+      data:  { ...rest, ...next, ...cleared },
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
@@ -68,14 +93,14 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
     throw e
   }
 
-  // Best-effort: archive the superseded Stripe Price so it stops being
+  // Best-effort: archive the superseded Stripe Prices so they stop being
   // live/purchasable once orphaned from the DB. Never blocks the save.
-  if (clearStripeRef && staleId) {
-    await stripe.prices.update(staleId, { active: false }).catch(() => {})
+  for (const id of stale) {
+    await stripe.prices.update(id, { active: false }).catch(() => {})
   }
 
   revalidatePath('/gencodes')
-  return done(clearStripeRef ? t('package.updatedStripeCleared') : t('package.updated'))
+  return done(stale.length > 0 ? t('package.updatedStripeCleared') : t('package.updated'))
 }
 
 export async function deletePackage(id: string): Promise<ActionResult> {
@@ -110,10 +135,15 @@ export async function togglePackageActive(id: string): Promise<ActionResult> {
   return done()
 }
 
-// Push the saved package's data to Stripe: create/update the Product and, if missing,
-// create the Price. Mirrors apps/seq/prisma/seed-stripe.ts but runs on demand from BMS.
-// Stripe Prices are immutable — updatePackage() clears stripePriceId on a price change,
-// so a fresh Price is minted here on the next sync.
+/**
+ * Pushes the saved product to Stripe: one Product, and one Price per currency
+ * that has one.
+ *
+ * A currency with no price is skipped rather than failing — a product sold only
+ * in reais is a legitimate product. An existing Price id is reused untouched,
+ * because Stripe Prices are immutable; updatePackage is what clears the id when
+ * the number changes, and this mints the replacement.
+ */
 export async function syncPackageWithStripe(id: string): Promise<ActionResult> {
   await verifyAdmin()
   const t = await getTranslations('Actions')
@@ -121,14 +151,16 @@ export async function syncPackageWithStripe(id: string): Promise<ActionResult> {
   const pkg = await prisma.package.findUnique({
     where:  { id },
     select: {
-      id: true, name: true, description: true, price: true, quantity: true,
-      stripeProductId: true, stripePriceId: true,
+      id: true, name: true, description: true, quantity: true, stripeProductId: true,
+      priceUsd: true, priceBrl: true, priceMxn: true,
+      stripePriceIdUsd: true, stripePriceIdBrl: true, stripePriceIdMxn: true,
     },
   })
   if (!pkg) return fail(t('package.notFound'))
 
-  const priceCents = Math.round(Number(pkg.price) * 100)
-  if (priceCents <= 0) return fail(t('package.priceRequired'))
+  if (CURRENCIES.every((c) => !pkg[c.price] || Number(pkg[c.price]) <= 0)) {
+    return fail(t('package.priceRequired'))
+  }
 
   try {
     let productId = pkg.stripeProductId
@@ -141,25 +173,28 @@ export async function syncPackageWithStripe(id: string): Promise<ActionResult> {
       const product = await stripe.products.create({
         name:        pkg.name,
         description: pkg.description ?? undefined,
-        metadata:    { packageId: pkg.id, qrPerPackage: String(pkg.quantity) },
+        metadata:    { packageId: pkg.id, unitsPerProduct: String(pkg.quantity) },
       })
       productId = product.id
     }
 
-    let priceId = pkg.stripePriceId
-    if (!priceId) {
-      const price = await stripe.prices.create({
+    const ids: Record<string, string> = {}
+    for (const c of CURRENCIES) {
+      const price = pkg[c.price]
+      if (!price || Number(price) <= 0) continue
+      if (pkg[c.id]) continue
+      const created = await stripe.prices.create({
         product:     productId,
-        unit_amount: priceCents,
-        currency:    'usd',
-        nickname:    `${pkg.name} — ${pkg.quantity} QR`,
+        unit_amount: Math.round(Number(price) * 100),
+        currency:    c.key,
+        nickname:    `${pkg.name} — ${pkg.quantity} × ${c.key.toUpperCase()}`,
       })
-      priceId = price.id
+      ids[c.id] = created.id
     }
 
     await prisma.package.update({
       where: { id: pkg.id },
-      data:  { stripeProductId: productId, stripePriceId: priceId },
+      data:  { stripeProductId: productId, ...ids },
     })
   } catch (e) {
     const message = e instanceof Error ? e.message : t('package.unknownError')

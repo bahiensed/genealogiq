@@ -104,12 +104,14 @@
       "alreadyReversed": "Esta venda já foi estornada.",
       "couponNotApplicable": "Este cupom não é válido para este produto.",
       "linkFailed": "Não foi possível gerar o link de pagamento: {message}",
+      "linkRegenerated": "Novo link gerado e enviado para {email}.",
+      "linkResent": "Link reenviado para {email}.",
       "linkSent": "Link de pagamento enviado para {email}.",
       "markedPaid": "Pagamento registrado. GenCodes gerados.",
       "notFound": "Venda não encontrada.",
       "packageInactive": "Este produto está inativo.",
       "packageNotFound": "Produto não encontrado.",
-      "packageNotSynced": "Este produto ainda não foi sincronizado com o Stripe. Sincronize-o antes de vender.",
+      "packageNotSyncedInCurrency": "Este produto não tem preço sincronizado em {currency}. Configure e sincronize antes de vender.",
       "tenantInactive": "Este cliente está inativo.",
       "tenantNotFound": "Cliente não encontrado.",
       "unknownError": "Erro desconhecido"
@@ -480,6 +482,7 @@
     }
   },
   "Errors": {
+    "atLeastOnePrice": "Informe ao menos um preço",
     "codeFormat": "Use apenas letras maiúsculas, números e sublinhados",
     "countryCodeRequired": "O código do país é obrigatório",
     "couponCodeFormat": "Apenas letras maiúsculas, números, hifens e sublinhados",
@@ -654,6 +657,7 @@
       "copyLink": "Copiar link de pagamento",
       "markPaid": "Registrar pagamento recebido",
       "openMenu": "Abrir menu",
+      "resendCharge": "Reenviar cobrança",
       "reverse": "Estornar"
     },
     "confirm": {
@@ -709,7 +713,6 @@
       "date": "Data",
       "empty": "Nenhuma venda encontrada.",
       "product": "Produto",
-      "productPrice": "Preço do Produto",
       "quantity": "Quantidade",
       "seller": "Vendedor",
       "status": "Status",
@@ -756,7 +759,8 @@
       "sales": "Vendas",
       "units": "Unidades",
       "total": "Receita",
-      "caveat": "Conta apenas vendas com pagamento confirmado, pelo valor que o Stripe cobrou. Vendas antigas, sem esse valor gravado, usam quantidade × preço ATUAL do produto — nessas, editar o preço muda os números retroativamente. Vendas estornadas ficam de fora."
+      "caveat": "Conta apenas vendas com pagamento confirmado, pelo valor que o Stripe cobrou. Vendas antigas, sem esse valor gravado, usam quantidade × preço ATUAL do produto — nessas, editar o preço muda os números retroativamente. Vendas estornadas ficam de fora.",
+      "currency": "Moeda"
     },
     "stale": {
       "title": "Vendidos e nunca resgatados",

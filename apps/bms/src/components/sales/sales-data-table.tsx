@@ -25,7 +25,6 @@ export function SalesDataTable({ currentUserRole, data }: SalesDataTableProps) {
     product:      t('table.product'),
     quantity:     t('table.quantity'),
     totalUnits:   t('table.totalUnits'),
-    productPrice: t('table.productPrice'),
     unitPrice:    t('table.unitPrice'),
     totalPrice:   t('table.totalPrice'),
     seller:       t('table.seller'),

@@ -104,12 +104,14 @@
       "alreadyReversed": "This sale has already been reversed.",
       "couponNotApplicable": "This coupon is not valid for this product.",
       "linkFailed": "Could not generate the payment link: {message}",
+      "linkRegenerated": "A new link was generated and sent to {email}.",
+      "linkResent": "Link resent to {email}.",
       "linkSent": "Payment link sent to {email}.",
       "markedPaid": "Payment recorded. GenCodes minted.",
       "notFound": "Sale not found.",
       "packageInactive": "This product is inactive.",
       "packageNotFound": "Product not found.",
-      "packageNotSynced": "This product has not been synced with Stripe yet. Sync it before selling.",
+      "packageNotSyncedInCurrency": "This product has no synced price in {currency}. Set one and sync before selling.",
       "tenantInactive": "This customer is inactive.",
       "tenantNotFound": "Customer not found.",
       "unknownError": "Unknown error"
@@ -480,6 +482,7 @@
     }
   },
   "Errors": {
+    "atLeastOnePrice": "Set at least one price",
     "codeFormat": "Use uppercase letters, numbers and underscores only",
     "countryCodeRequired": "Country code is required",
     "couponCodeFormat": "Only uppercase letters, numbers, hyphens and underscores",
@@ -654,6 +657,7 @@
       "copyLink": "Copy payment link",
       "markPaid": "Record payment received",
       "openMenu": "Open menu",
+      "resendCharge": "Resend charge",
       "reverse": "Reverse"
     },
     "confirm": {
@@ -709,7 +713,6 @@
       "date": "Date",
       "empty": "No sales found.",
       "product": "Product",
-      "productPrice": "Product Price",
       "quantity": "Quantity",
       "seller": "Seller",
       "status": "Status",
@@ -756,7 +759,8 @@
       "sales": "Sales",
       "units": "Units",
       "total": "Revenue",
-      "caveat": "Counts only settled sales, at the amount Stripe charged. Older sales with no recorded amount fall back to quantity × the product's CURRENT price — for those, editing the price rewrites the numbers retroactively. Reversed sales are excluded."
+      "caveat": "Counts only settled sales, at the amount Stripe charged. Older sales with no recorded amount fall back to quantity × the product's CURRENT price — for those, editing the price rewrites the numbers retroactively. Reversed sales are excluded.",
+      "currency": "Currency"
     },
     "stale": {
       "title": "Sold but never redeemed",

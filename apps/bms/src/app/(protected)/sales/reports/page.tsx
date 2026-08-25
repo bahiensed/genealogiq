@@ -160,6 +160,7 @@ export default async function SalesReportsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('revenue.package')}</TableHead>
+                <TableHead>{t('revenue.currency')}</TableHead>
                 <TableHead className="text-right">{t('revenue.sales')}</TableHead>
                 <TableHead className="text-right">{t('revenue.units')}</TableHead>
                 <TableHead className="text-right">{t('revenue.total')}</TableHead>
@@ -168,14 +169,17 @@ export default async function SalesReportsPage() {
             <TableBody>
               {packages.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">{t('empty')}</TableCell>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">{t('empty')}</TableCell>
                 </TableRow>
               ) : packages.map((p) => (
-                <TableRow key={p.packageName}>
+                <TableRow key={`${p.packageName}-${p.currency}`}>
                   <TableCell className="font-medium">{p.packageName}</TableCell>
+                  <TableCell className="text-muted-foreground tabular-nums">{p.currency}</TableCell>
                   <TableCell className="text-right tabular-nums">{p.sales}</TableCell>
                   <TableCell className="text-right tabular-nums">{p.units}</TableCell>
-                  <TableCell className="text-right tabular-nums">{usd.format(p.revenue)}</TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {new Intl.NumberFormat(locale, { style: 'currency', currency: p.currency }).format(p.revenue)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

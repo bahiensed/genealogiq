@@ -20,7 +20,7 @@ export async function getSales() {
       checkoutUrl:    true,
       discountCoupon: { select: { code: true } },
       package: {
-        select: { name: true, price: true, quantity: true },
+        select: { name: true, quantity: true },
       },
       tenant: {
         select: { name: true },
@@ -31,6 +31,5 @@ export async function getSales() {
     },
     orderBy: { createdAt: 'desc' },
   })
-
-  return rows.map(r => ({ ...r, package: { ...r.package, price: Number(r.package.price) } }))
+  return rows
 }

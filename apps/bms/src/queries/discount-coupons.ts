@@ -2,6 +2,7 @@ import 'server-only'
 
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
+import type { AppCurrency } from '@genealogiq/core'
 
 export async function getDiscountCoupons() {
   await verifySession()
@@ -49,14 +50,32 @@ export async function getDiscountCoupon(id: string) {
   return coupon
 }
 
-export async function getActivePackagesForSelect() {
+const PRICE_BY_CURRENCY = { usd: 'priceUsd', brl: 'priceBrl', mxn: 'priceMxn' } as const
+
+/**
+ * Products a coupon can be restricted to, priced in the operator's currency.
+ *
+ * Restriction is by Stripe PRODUCT, which is one object across all currencies —
+ * so a coupon limited to GenCode covers it in every currency it sells in. The
+ * price shown here is only a label to help the operator recognise the row.
+ */
+export async function getActivePackagesForSelect(currency: AppCurrency) {
   await verifySession()
 
-  return prisma.package.findMany({
-    where:   { isActive: true, price: { gt: 0 } },
-    orderBy: { price: 'asc' },
-    select:  { id: true, name: true, price: true, quantity: true, stripeProductId: true },
+  const rows = await prisma.package.findMany({
+    where:   { isActive: true, [PRICE_BY_CURRENCY[currency]]: { gt: 0 } },
+    orderBy: { [PRICE_BY_CURRENCY[currency]]: 'asc' },
+    select:  { id: true, name: true, quantity: true, stripeProductId: true,
+               priceUsd: true, priceBrl: true, priceMxn: true },
   })
+
+  return rows.map((r) => ({
+    id:              r.id,
+    name:            r.name,
+    quantity:        r.quantity,
+    stripeProductId: r.stripeProductId,
+    price:           Number(r[PRICE_BY_CURRENCY[currency]]),
+  }))
 }
 
 /**

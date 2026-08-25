@@ -14,7 +14,9 @@ export type PackageRow = {
   id: string
   name: string
   description: string | null
-  price: number
+  priceUsd: number | null
+  priceBrl: number | null
+  priceMxn: number | null
   quantity: number
   isActive: boolean
   createdAt: Date
@@ -48,7 +50,6 @@ function ActionsCell({ row, currentUserRole, basePath, t }: { row: { original: P
 
 export function getColumns(currentUserRole: string, t: Translator, locale: string, basePath = '/gencodes'): ColumnDef<PackageRow>[] {
   const Noun = t('noun.product')
-  const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
   return [
     {
       accessorKey: 'name',
@@ -61,9 +62,28 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       cell: ({ row }) => <div className="text-right">{row.original.quantity}</div>,
     },
     {
-      accessorKey: 'price',
+      id: 'price',
+      // Sorted by the dollar price, which every product historically had; the
+      // cell shows every currency the product is actually sold in.
+      accessorFn: (row) => row.priceUsd ?? 0,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.price', { noun: Noun })} className="justify-end" />,
-      cell: ({ row }) => <div className="text-right">{usd.format(row.original.price)}</div>,
+      cell: ({ row }) => {
+        const priced = ([
+          ['USD', row.original.priceUsd],
+          ['BRL', row.original.priceBrl],
+          ['MXN', row.original.priceMxn],
+        ] as const).filter(([, v]) => v !== null && v > 0)
+        if (priced.length === 0) return <div className="text-right text-muted-foreground">—</div>
+        return (
+          <div className="text-right tabular-nums">
+            {priced.map(([code, value]) => (
+              <div key={code}>
+                {new Intl.NumberFormat(locale, { style: 'currency', currency: code }).format(value!)}
+              </div>
+            ))}
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'description',

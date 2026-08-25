@@ -30,17 +30,28 @@ interface PackageFormProps {
   id:               string
   defaultValues:    PackageFormValues
   stripeProductId?: string | null
-  stripePriceId?:   string | null
+  stripePriceIds?:  { usd: string | null; brl: string | null; mxn: string | null }
 }
 
 // Edit only. Creating a product is a dialog on the list (new-product-dialog),
 // because it is four fields with nothing to load first; this form exists as a
 // page because it carries the Stripe panel and addresses a specific record.
-export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId }: PackageFormProps) {
+export function PackageForm({ id, defaultValues, stripeProductId, stripePriceIds }: PackageFormProps) {
   const t    = useTranslations('Packages')
   const tc   = useTranslations('Common')
   const tErr = useTranslations('Errors')
-  const isSynced = !!stripePriceId
+  // Sync is per currency now: a product can be live in reais and unsynced in
+  // dollars, and the panel has to say which is which rather than one badge for
+  // the whole row.
+  const currencies = [
+    { code: 'USD', price: defaultValues.priceUsd, id: stripePriceIds?.usd ?? null },
+    { code: 'BRL', price: defaultValues.priceBrl, id: stripePriceIds?.brl ?? null },
+    { code: 'MXN', price: defaultValues.priceMxn, id: stripePriceIds?.mxn ?? null },
+  ]
+  // Only priced currencies can be out of sync; an unpriced one is not missing
+  // anything.
+  const pending  = currencies.filter((c) => c.price > 0 && !c.id)
+  const isSynced = pending.length === 0
   const noun = t('noun.product')
   const [serverError, setServerError] = useState<string | null>(null)
   const [syncOpen, setSyncOpen]       = useState(false)
@@ -111,12 +122,14 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceId 
                   ? <span className="font-medium text-emerald-600">{t('stripe.synced')}</span>
                   : <span className="font-medium text-amber-600">{t('stripe.notSynced')}</span>}
               </div>
-              {isSynced && (
-                <div className="flex flex-col gap-1 font-mono text-muted-foreground">
-                  <span>{t('stripe.productId')} {stripeProductId}</span>
-                  <span>{t('stripe.priceId')} {stripePriceId}</span>
-                </div>
-              )}
+              <div className="flex flex-col gap-1 font-mono text-muted-foreground">
+                <span>{t('stripe.productId')} {stripeProductId ?? '—'}</span>
+                {currencies.filter((c) => c.price > 0).map((c) => (
+                  <span key={c.code}>
+                    {c.code}: {c.id ?? t('stripe.notSynced')}
+                  </span>
+                ))}
+              </div>
               <p className="text-muted-foreground">
                 {t('stripe.hint', { noun })}
               </p>

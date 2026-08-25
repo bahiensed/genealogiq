@@ -4,7 +4,10 @@ const { prismaMock } = vi.hoisted(() => ({
   prismaMock: { package: { findUnique: vi.fn() } },
 }))
 
-vi.mock("next-intl/server", () => ({ getTranslations: async () => (key: string) => key }))
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async () => (key: string) => key),
+  getLocale: vi.fn(async () => "en-US"),
+}))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyTenantSession: vi.fn() }))
 vi.mock("@/lib/stripe", () => ({
@@ -58,8 +61,7 @@ describe("createPackageCheckoutSession", () => {
   it("guards against a package not synced to Stripe (missing stripePriceId)", async () => {
     prismaMock.package.findUnique.mockResolvedValue({
       id: "pkg-1",
-      type: "DIGITAL",
-      stripePriceId: null,
+      stripePriceIdUsd: null, stripePriceIdBrl: null, stripePriceIdMxn: null,
     })
 
     const res = await createPackageCheckoutSession("pkg-1", 1)
@@ -72,8 +74,7 @@ describe("createPackageCheckoutSession", () => {
   it("fails when Stripe returns a session without a url", async () => {
     prismaMock.package.findUnique.mockResolvedValue({
       id: "pkg-1",
-      type: "DIGITAL",
-      stripePriceId: "price_abc",
+      stripePriceIdUsd: "price_abc", stripePriceIdBrl: null, stripePriceIdMxn: null,
     })
     createSession.mockResolvedValue({ url: null } as never)
 
@@ -85,8 +86,7 @@ describe("createPackageCheckoutSession", () => {
   it("returns ok({ url }) on the success path and forwards the tenant-scoped line item", async () => {
     prismaMock.package.findUnique.mockResolvedValue({
       id: "pkg-1",
-      type: "PHYSICAL",
-      stripePriceId: "price_abc",
+      stripePriceIdUsd: "price_abc", stripePriceIdBrl: null, stripePriceIdMxn: null,
     })
     createSession.mockResolvedValue({ url: "https://checkout.stripe.com/c/pay/abc" } as never)
 
