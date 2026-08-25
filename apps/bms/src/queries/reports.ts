@@ -10,10 +10,14 @@ import { verifySession } from '@/lib/dal'
  * report can be trusted against the database rather than describing an
  * intention. Two properties of the data shape what can honestly be reported:
  *
- * - **Our B2B revenue is derived, not snapshotted.** `Sale` stores quantity and
- *   a package reference but no price, so revenue is recomputed as
- *   `quantity × package.price`. Editing a package's price therefore rewrites
- *   history. The page says so rather than presenting it as booked revenue.
+ * - **Only settled sales count as revenue.** A sale now exists from the moment
+ *   a payment link is generated, so `reversed_at IS NULL` no longer means paid;
+ *   every money query also requires `paid_at`.
+ * - **Revenue is the amount Stripe reported**, snapshotted on the sale in cents.
+ *   Rows that predate that column fall back to `quantity × package.price`, and
+ *   for those — only those — editing a package's price still rewrites history.
+ *   The fallback is what keeps a discounted sale honest: recomputing from the
+ *   current price would silently bill the coupon back.
  * - **Reseller revenue is only known when they record it.** `soldValue` is
  *   optional on a manual write-off, so the resale total is a floor, never a
  *   total.
@@ -175,10 +179,10 @@ export async function getRevenueByPackage(): Promise<PackageRevenueRow[]> {
       p.name                                  AS package_name,
       COUNT(s.id)                             AS sales,
       COALESCE(SUM(s.quantity * p.quantity), 0) AS units,
-      COALESCE(SUM(s.quantity * p.price), 0)  AS revenue
+      COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)), 0)  AS revenue
     FROM sales s
     JOIN packages p ON s.package_id = p.id
-    WHERE s.reversed_at IS NULL
+    WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
     GROUP BY p.name
     ORDER BY 4 DESC
   `

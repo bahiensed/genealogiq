@@ -100,9 +100,16 @@
     },
     "sale": {
       "alreadyReversed": "Esta venta ya fue revertida.",
-      "created": "Venta registrada correctamente.",
+      "couponNotApplicable": "Este cupón no es válido para este producto.",
+      "linkFailed": "No se pudo generar el enlace de pago: {message}",
+      "linkSent": "Enlace de pago enviado a {email}.",
       "notFound": "Venta no encontrada.",
-      "packageNotFound": "Producto no encontrado."
+      "packageInactive": "Este producto está inactivo.",
+      "packageNotFound": "Producto no encontrado.",
+      "packageNotSynced": "Este producto aún no se ha sincronizado con Stripe. Sincronízalo antes de vender.",
+      "tenantInactive": "Este cliente está inactivo.",
+      "tenantNotFound": "Cliente no encontrado.",
+      "unknownError": "Error desconocido"
     },
     "subscription": {
       "created": "Plan creado correctamente.",
@@ -481,6 +488,7 @@
     "invalidEmail": "Correo electrónico inválido",
     "invalidRole": "Rol inválido",
     "maxChars": "Debe tener como máximo {count} caracteres",
+    "maxQuantity": "Debe ser como máximo {count}",
     "minChars": "Debe tener al menos {count} caracteres",
     "mustBePositive": "Debe ser mayor que cero",
     "mustBeWholeNumber": "Debe ser un número entero",
@@ -640,15 +648,17 @@
   "Sales": {
     "actions": {
       "cancel": "Cancelar",
+      "copyLink": "Copiar enlace de pago",
       "openMenu": "Abrir menú",
       "reverse": "Revertir"
     },
     "confirm": {
-      "confirm": "Confirmar",
-      "description": "Antes de completar esta venta, verifica que el pago ya se haya recibido.",
-      "title": "Confirmar venta"
+      "confirm": "Generar y enviar",
+      "description": "El enlace se enviará al correo del cliente y es válido por 7 días. Los GenCodes solo se generan tras confirmarse el pago.",
+      "title": "¿Generar enlace de pago?"
     },
     "fields": {
+      "coupon": "Cupón de Descuento",
       "customer": "Cliente",
       "package": "Producto",
       "quantity": "Cantidad"
@@ -659,9 +669,12 @@
       "units": "{count, plural, one {# unidad} other {# unidades}}"
     },
     "placeholders": {
+      "couponEmpty": "No hay cupón disponible para este producto.",
+      "couponSearch": "Buscar cupón…",
       "customer": "Selecciona un cliente",
       "customerEmpty": "No se encontró ningún cliente.",
       "customerSearch": "Buscar cliente…",
+      "noCoupon": "Sin cupón",
       "package": "Selecciona un producto"
     },
     "reverse": {
@@ -672,12 +685,18 @@
     },
     "status": {
       "active": "Activa",
+      "awaitingPayment": "Esperando pago",
+      "expired": "Enlace expirado",
+      "failed": "Pago no concluido",
       "reversed": "Revertida"
     },
-    "submit": "Registrar Venta",
-    "submitting": "Enviando…",
+    "submit": "Generar enlace de pago",
+    "submitting": "Generando…",
     "summary": {
+      "discount": "Descuento ({code})",
       "genCodes": "GenCodes a generar",
+      "stripeAuthority": "Vista previa. Stripe calcula el monto final en el checkout.",
+      "subtotal": "Subtotal",
       "totalPrice": "Precio total",
       "unitPrice": "Precio por unidad"
     },
@@ -696,6 +715,7 @@
     },
     "title": "Ventas Manuales",
     "toasts": {
+      "linkCopied": "Enlace copiado.",
       "reversed": "Venta revertida correctamente."
     }
   },
@@ -732,7 +752,7 @@
       "sales": "Ventas",
       "units": "Unidades",
       "total": "Ingreso",
-      "caveat": "Calculado como cantidad × precio ACTUAL del producto — la venta no guarda el precio de entonces, así que editar el precio de un producto cambia estos números retroactivamente. Las ventas revertidas quedan fuera."
+      "caveat": "Cuenta solo ventas con pago confirmado, por el monto que cobró Stripe. Las ventas antiguas sin ese monto usan cantidad × precio ACTUAL del producto — en esas, editar el precio cambia los números retroactivamente. Las ventas revertidas quedan fuera."
     },
     "stale": {
       "title": "Vendidos y nunca canjeados",

@@ -3,6 +3,15 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+// Revenue counts a sale only once Stripe has settled it. Before payment links
+// a Sale row WAS the payment, so `reversed_at IS NULL` was the whole filter;
+// now an order can sit unpaid for a week and must not be booked as income.
+//
+// The amount is the snapshot Stripe reported, in cents, falling back to
+// quantity x price for rows that predate it. The fallback is what makes a
+// discounted sale honest: recomputing from the current package price would
+// silently bill back the coupon.
+
 
 type SalesTotalsRow = {
   monthly_count:   bigint
@@ -55,21 +64,21 @@ export async function getDashboardStats() {
         COUNT(s.id) FILTER (WHERE s.created_at >= ${startOfMonth})              AS monthly_count,
         COUNT(s.id) FILTER (WHERE s.created_at >= ${startOfYear})               AS yearly_count,
         COUNT(s.id)                                                             AS total_count,
-        COALESCE(SUM(s.quantity * p.price) FILTER (WHERE s.created_at >= ${startOfMonth}), 0) AS monthly_revenue,
-        COALESCE(SUM(s.quantity * p.price) FILTER (WHERE s.created_at >= ${startOfYear}), 0)  AS yearly_revenue,
-        COALESCE(SUM(s.quantity * p.price), 0)                                                AS total_revenue
+        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)) FILTER (WHERE s.created_at >= ${startOfMonth}), 0) AS monthly_revenue,
+        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)) FILTER (WHERE s.created_at >= ${startOfYear}), 0)  AS yearly_revenue,
+        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)), 0) AS total_revenue
       FROM sales s
       JOIN packages p ON s.package_id = p.id
-      WHERE s.reversed_at IS NULL
+      WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
     `,
     prisma.$queryRaw<ChartRow[]>`
       SELECT
         DATE_TRUNC('month', s.created_at) AS month,
         p.name                            AS name,
-        SUM(s.quantity * p.price)         AS revenue
+        SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)) AS revenue
       FROM sales s
       JOIN packages p ON s.package_id = p.id
-      WHERE s.reversed_at IS NULL
+      WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
         AND s.created_at >= ${startOf12Months}
       GROUP BY 1, 2
     `,
@@ -77,10 +86,10 @@ export async function getDashboardStats() {
       SELECT
         s.sold_by_id              AS seller_id,
         COUNT(s.id)               AS count,
-        SUM(s.quantity * p.price) AS revenue
+        SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price)) AS revenue
       FROM sales s
       JOIN packages p ON s.package_id = p.id
-      WHERE s.reversed_at IS NULL
+      WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
         AND s.created_at >= ${startOf12Months}
       GROUP BY s.sold_by_id
       ORDER BY revenue DESC NULLS LAST

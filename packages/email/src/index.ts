@@ -293,3 +293,45 @@ export function sendSequoiaWelcomeEmail({
     <p>Equipe Sequoia | Genealogiq<br/><em>"Transformando o luto em legado"</em></p>
   `)
 }
+
+// The Stripe payment link for a B2B sale a GenealogiQ operator opened in BMS.
+// Everything here is a value the operator or Stripe produced, not free text from
+// a form — but tenantName and productName come from rows an admin typed, so they
+// are escaped like any other interpolated string.
+//
+// The amount arrives already formatted: only the caller knows the currency and
+// the viewer's locale, and a discount means the number is Stripe's, not
+// quantity × price.
+export function sendSalePaymentLinkEmail({
+  to,
+  url,
+  tenantName,
+  productName,
+  quantity,
+  amount,
+  expiresAt,
+}: {
+  to:          string
+  url:         string
+  tenantName:  string
+  productName: string
+  quantity:    number
+  amount:      string
+  expiresAt:   Date
+}): Promise<void> {
+  const deadline = expiresAt.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+  const units    = quantity === 1 ? "1 unidade" : `${quantity} unidades`
+
+  return send(to, "Genealogiq — link para pagamento do seu pedido", `
+    <p>Olá ${escapeHtml(tenantName)},</p>
+    <p>Seu pedido está pronto para pagamento:</p>
+    <p>
+      <strong>${escapeHtml(productName)}</strong> — ${units}<br/>
+      <strong>Total: ${escapeHtml(amount)}</strong>
+    </p>
+    <p><a href="${url}">Pagar agora</a></p>
+    <p>O link é válido até <strong>${deadline}</strong>. Depois disso ele deixa de funcionar e nós geramos um novo para você.</p>
+    <p>Assim que o pagamento for confirmado, seus GenCodes ficam disponíveis no Sequoia e você recebe as instruções de acesso.</p>
+    <p>Equipe Genealogiq®️<br/><em>"As pessoas só morrem quando são esquecidas".</em></p>
+  `)
+}

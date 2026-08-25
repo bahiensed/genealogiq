@@ -214,6 +214,10 @@ model Sale {
   /// Only set when an operator recorded an off-Stripe payment. Null on a sale Stripe settled.
   paidById              String?             @map("paid_by_id")
   expiredAt             DateTime?           @map("expired_at")
+  /// An async payment (boleto, Pix, ACH) that completed checkout and then bounced.
+  /// Distinct from expiredAt on purpose: both dead-end the link, but one is the
+  /// customer running out of time and the other is the money not arriving.
+  failedAt              DateTime?           @map("failed_at")
   reversedAt            DateTime?           @map("reversed_at")
   checkoutUrl           String?             @map("checkout_url")
   /// Cents, as Stripe reports them.

@@ -100,9 +100,16 @@
     },
     "sale": {
       "alreadyReversed": "This sale has already been reversed.",
-      "created": "Sale recorded successfully.",
+      "couponNotApplicable": "This coupon is not valid for this product.",
+      "linkFailed": "Could not generate the payment link: {message}",
+      "linkSent": "Payment link sent to {email}.",
       "notFound": "Sale not found.",
-      "packageNotFound": "Product not found."
+      "packageInactive": "This product is inactive.",
+      "packageNotFound": "Product not found.",
+      "packageNotSynced": "This product has not been synced with Stripe yet. Sync it before selling.",
+      "tenantInactive": "This customer is inactive.",
+      "tenantNotFound": "Customer not found.",
+      "unknownError": "Unknown error"
     },
     "subscription": {
       "created": "Subscription created successfully.",
@@ -481,6 +488,7 @@
     "invalidEmail": "Invalid email address",
     "invalidRole": "Invalid role",
     "maxChars": "Must be at most {count} characters",
+    "maxQuantity": "Must be at most {count}",
     "minChars": "Must be at least {count} characters",
     "mustBePositive": "Must be greater than zero",
     "mustBeWholeNumber": "Must be a whole number",
@@ -640,15 +648,17 @@
   "Sales": {
     "actions": {
       "cancel": "Cancel",
+      "copyLink": "Copy payment link",
       "openMenu": "Open menu",
       "reverse": "Reverse"
     },
     "confirm": {
-      "confirm": "Confirm",
-      "description": "Before completing this sale, please verify that payment has already been received.",
-      "title": "Confirm sale"
+      "confirm": "Generate and send",
+      "description": "The link will be emailed to the customer and is valid for 7 days. GenCodes are only minted once payment is confirmed.",
+      "title": "Generate payment link?"
     },
     "fields": {
+      "coupon": "Discount Coupon",
       "customer": "Customer",
       "package": "Product",
       "quantity": "Quantity"
@@ -659,9 +669,12 @@
       "units": "{count, plural, one {# unit} other {# units}}"
     },
     "placeholders": {
+      "couponEmpty": "No coupon available for this product.",
+      "couponSearch": "Search coupons…",
       "customer": "Select a customer",
       "customerEmpty": "No customer found.",
       "customerSearch": "Search customers…",
+      "noCoupon": "No coupon",
       "package": "Select a product"
     },
     "reverse": {
@@ -672,12 +685,18 @@
     },
     "status": {
       "active": "Active",
+      "awaitingPayment": "Awaiting payment",
+      "expired": "Link expired",
+      "failed": "Payment failed",
       "reversed": "Reversed"
     },
-    "submit": "Submit Sale",
-    "submitting": "Submitting…",
+    "submit": "Generate payment link",
+    "submitting": "Generating…",
     "summary": {
+      "discount": "Discount ({code})",
       "genCodes": "GenCodes to be generated",
+      "stripeAuthority": "A preview. Stripe computes the final amount at checkout.",
+      "subtotal": "Subtotal",
       "totalPrice": "Total price",
       "unitPrice": "Price per unit"
     },
@@ -696,6 +715,7 @@
     },
     "title": "Manual Sales",
     "toasts": {
+      "linkCopied": "Link copied.",
       "reversed": "Sale reversed successfully."
     }
   },
@@ -732,7 +752,7 @@
       "sales": "Sales",
       "units": "Units",
       "total": "Revenue",
-      "caveat": "Computed as quantity × the product's CURRENT price — a sale does not store the price at the time, so editing a product's price rewrites these numbers retroactively. Reversed sales are excluded."
+      "caveat": "Counts only settled sales, at the amount Stripe charged. Older sales with no recorded amount fall back to quantity × the product's CURRENT price — for those, editing the price rewrites the numbers retroactively. Reversed sales are excluded."
     },
     "stale": {
       "title": "Sold but never redeemed",

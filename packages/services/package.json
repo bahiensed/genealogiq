@@ -4,7 +4,8 @@
   "private": true,
   "exports": {
     "./rate-limit": "./src/rate-limit.ts",
-    "./stripe": "./src/stripe.ts"
+    "./stripe": "./src/stripe.ts",
+    "./stripe-customer": "./src/stripe-customer.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"

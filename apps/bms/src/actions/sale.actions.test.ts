@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
-const { prismaMock, PrismaKnownError } = vi.hoisted(() => {
+const { prismaMock, stripeMock, emailMock, ensureCustomerMock, PrismaKnownError } = vi.hoisted(() => {
   class PrismaKnownError extends Error {
     code: string
     constructor(message: string, code: string) {
@@ -9,61 +9,180 @@ const { prismaMock, PrismaKnownError } = vi.hoisted(() => {
     }
   }
   const prismaMock = {
-    package:           { findUnique: vi.fn() },
-    sale:              { create: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
-    genCode: { createMany: vi.fn(), deleteMany: vi.fn() },
-    $transaction:      vi.fn((cb: (tx: unknown) => Promise<unknown>) => cb(prismaMock)),
+    package:        { findUnique: vi.fn() },
+    tenant:         { findUnique: vi.fn() },
+    discountCoupon: { findFirst: vi.fn() },
+    sale:           { create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    genCode:        { createMany: vi.fn(), deleteMany: vi.fn() },
+    $transaction:   vi.fn((cb: (tx: unknown) => Promise<unknown>) => cb(prismaMock)),
   }
-  return { prismaMock, PrismaKnownError }
+  return {
+    prismaMock,
+    stripeMock: { checkout: { sessions: { create: vi.fn() } } },
+    emailMock: vi.fn(),
+    ensureCustomerMock: vi.fn(),
+    PrismaKnownError,
+  }
 })
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("@genealogiq/db", () => ({ Prisma: { PrismaClientKnownRequestError: PrismaKnownError } }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
+vi.mock("@/lib/stripe", () => ({ stripe: stripeMock }))
 vi.mock("@/lib/dal", () => ({ verifyAdmin: vi.fn() }))
-vi.mock("@/lib/gen-code", () => ({ generateGenCode: vi.fn(() => "GEN-CODE") }))
+vi.mock("@/lib/email", () => ({ sendSalePaymentLinkEmail: emailMock }))
+vi.mock("@genealogiq/services/stripe-customer", () => ({ ensureTenantStripeCustomer: ensureCustomerMock }))
 vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
 
-import { createSale, reverseSale } from "./sale.actions"
+import { createSalePaymentLink, reverseSale } from "./sale.actions"
 import { verifyAdmin } from "@/lib/dal"
+
+const input = { packageId: "p1", tenantId: "c1", quantity: 2, discountCouponId: "" }
 
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(verifyAdmin).mockResolvedValue({ user: { id: "admin-1" } } as never)
+  prismaMock.package.findUnique.mockResolvedValue({
+    name: "GenCode", quantity: 10, price: 29.99, isActive: true, stripePriceId: "price_1",
+  })
+  prismaMock.tenant.findUnique.mockResolvedValue({
+    email: "funeraria@example.com", name: "Funerária X", tradeName: "X", isActive: true,
+  })
+  prismaMock.sale.create.mockResolvedValue({ id: 99 })
+  prismaMock.sale.update.mockResolvedValue({})
+  prismaMock.sale.delete.mockResolvedValue({})
+  ensureCustomerMock.mockResolvedValue("cus_1")
+  stripeMock.checkout.sessions.create.mockResolvedValue({
+    id: "cs_1", url: "https://checkout.stripe.com/cs_1",
+    amount_subtotal: 5998, amount_total: 5998, currency: "usd",
+  })
+  emailMock.mockResolvedValue(undefined)
+  process.env.BMS_URL = "https://bms.example.com"
 })
 
-describe("createSale", () => {
+describe("createSalePaymentLink — guards", () => {
   it("rejects invalid input before touching the DB", async () => {
-    const res = await createSale({ packageId: "", tenantId: "", quantity: 0 } as never)
+    const res = await createSalePaymentLink({ packageId: "", tenantId: "", quantity: 0 } as never)
     expect(res).toEqual({ ok: false, message: "common.invalidData" })
     expect(prismaMock.package.findUnique).not.toHaveBeenCalled()
   })
 
-  it("rejects when the package does not exist", async () => {
-    prismaMock.package.findUnique.mockResolvedValue(null)
-    const res = await createSale({ packageId: "p1", tenantId: "c1", quantity: 2 })
-    expect(res).toEqual({ ok: false, message: "sale.packageNotFound" })
-    expect(prismaMock.$transaction).not.toHaveBeenCalled()
+  // A quantity cap is a typo guard, not a business rule: 50000 would mint half a
+  // million GenCode rows AND charge for them.
+  it("rejects a quantity above the cap", async () => {
+    const res = await createSalePaymentLink({ ...input, quantity: 5000 })
+    expect(res).toEqual({ ok: false, message: "common.invalidData" })
+    expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled()
   })
 
-  it("mints quantity × pkg.quantity GenCodes inside one transaction", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ quantity: 10 })
-    prismaMock.sale.create.mockResolvedValue({ id: 99 })
+  // Without a synced Price there is nothing to charge for. Before payment links
+  // this could not bite, because no money ever changed hands.
+  it("refuses a product with no Stripe price", async () => {
+    prismaMock.package.findUnique.mockResolvedValue({
+      name: "GenCode", quantity: 10, price: 29.99, isActive: true, stripePriceId: null,
+    })
+    const res = await createSalePaymentLink(input)
+    expect(res).toEqual({ ok: false, message: "sale.packageNotSynced" })
+    expect(prismaMock.sale.create).not.toHaveBeenCalled()
+  })
 
-    const res = await createSale({ packageId: "p1", tenantId: "c1", quantity: 2 })
+  it("refuses an inactive customer", async () => {
+    prismaMock.tenant.findUnique.mockResolvedValue({
+      email: "x@y.com", name: "X", tradeName: "X", isActive: false,
+    })
+    expect(await createSalePaymentLink(input)).toEqual({ ok: false, message: "sale.tenantInactive" })
+  })
 
-    expect(prismaMock.$transaction).toHaveBeenCalledTimes(1)
+  // The select is a convenience; a page left open can offer a coupon that has
+  // since expired or been restricted away from this product.
+  it("re-resolves the coupon server-side and refuses one that no longer applies", async () => {
+    prismaMock.discountCoupon.findFirst.mockResolvedValue(null)
+    const res = await createSalePaymentLink({ ...input, discountCouponId: "coupon-1" })
+    expect(res).toEqual({ ok: false, message: "sale.couponNotApplicable" })
+    expect(stripeMock.checkout.sessions.create).not.toHaveBeenCalled()
+  })
+})
+
+describe("createSalePaymentLink — the session", () => {
+  it("creates the sale unpaid and mints NO GenCodes", async () => {
+    await createSalePaymentLink(input)
+
     expect(prismaMock.sale.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ packageId: "p1", tenantId: "c1", quantity: 2, soldById: "admin-1" }),
       }),
     )
-    const arg = prismaMock.genCode.createMany.mock.calls[0][0] as { data: unknown[] }
-    expect(arg.data).toHaveLength(20)
-    expect(arg.data[0]).toEqual(
-      expect.objectContaining({ saleId: 99, packageId: "p1", tenantId: "c1", genCode: "GEN-CODE" }),
+    const created = prismaMock.sale.create.mock.calls[0][0].data
+    expect(created.paidAt).toBeUndefined()
+    // Codes are what payment buys. A link nobody pays must leave nothing behind.
+    expect(prismaMock.genCode.createMany).not.toHaveBeenCalled()
+  })
+
+  it("stamps origin and saleId so both webhooks can tell whose session it is", async () => {
+    await createSalePaymentLink(input)
+
+    const arg = stripeMock.checkout.sessions.create.mock.calls[0][0]
+    expect(arg.metadata).toMatchObject({ origin: "bms", saleId: "99", tenantId: "c1", packageId: "p1" })
+    expect(arg.payment_intent_data.metadata).toMatchObject({ origin: "bms", saleId: "99" })
+  })
+
+  // `discounts` and `allow_promotion_codes` are mutually exclusive in the Stripe
+  // API — sending both is a 400.
+  it("allows the buyer to type a code when no coupon was chosen", async () => {
+    await createSalePaymentLink(input)
+
+    const arg = stripeMock.checkout.sessions.create.mock.calls[0][0]
+    expect(arg.allow_promotion_codes).toBe(true)
+    expect(arg.discounts).toBeUndefined()
+  })
+
+  it("applies the chosen coupon and does NOT also allow promotion codes", async () => {
+    prismaMock.discountCoupon.findFirst.mockResolvedValue({ stripePromotionCodeId: "promo_1" })
+
+    await createSalePaymentLink({ ...input, discountCouponId: "coupon-1" })
+
+    const arg = stripeMock.checkout.sessions.create.mock.calls[0][0]
+    expect(arg.discounts).toEqual([{ promotion_code: "promo_1" }])
+    expect(arg.allow_promotion_codes).toBeUndefined()
+  })
+
+  it("stores the session id and url on the sale, and emails the tenant", async () => {
+    const res = await createSalePaymentLink(input)
+
+    expect(prismaMock.sale.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 99 },
+        data: expect.objectContaining({
+          stripeSessionId: "cs_1",
+          checkoutUrl:     "https://checkout.stripe.com/cs_1",
+          amountTotal:     5998,
+        }),
+      }),
     )
-    expect(res).toEqual({ ok: true, message: "sale.created" })
+    expect(emailMock).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "funeraria@example.com", url: "https://checkout.stripe.com/cs_1" }),
+    )
+    expect(res.ok).toBe(true)
+  })
+
+  // A sale with no link is an order nobody can pay and nobody can see the state
+  // of — it must not linger as a permanent "awaiting payment".
+  it("deletes the sale when Stripe fails", async () => {
+    stripeMock.checkout.sessions.create.mockRejectedValue(new Error("card_declined"))
+
+    const res = await createSalePaymentLink(input)
+
+    expect(prismaMock.sale.delete).toHaveBeenCalledWith({ where: { id: 99 } })
+    expect(res.ok).toBe(false)
+  })
+
+  it("deletes the sale when the email fails, rather than leaving a link nobody received", async () => {
+    emailMock.mockRejectedValue(new Error("resend down"))
+
+    const res = await createSalePaymentLink(input)
+
+    expect(prismaMock.sale.delete).toHaveBeenCalledWith({ where: { id: 99 } })
+    expect(res.ok).toBe(false)
   })
 })
 
@@ -85,7 +204,6 @@ describe("reverseSale", () => {
     prismaMock.sale.findUnique.mockResolvedValue({
       quantity: 1, tenantId: "c1", reversedAt: null, package: { quantity: 1 },
     })
-    prismaMock.sale.update.mockResolvedValue({})
 
     const res = await reverseSale(7)
 
