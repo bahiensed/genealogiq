@@ -46,8 +46,8 @@ describe("createSale", () => {
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
-  it("PHYSICAL: mints quantity × pkg.quantity licenses inside one transaction", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ quantity: 10, type: "PHYSICAL" })
+  it("mints quantity × pkg.quantity GenCodes inside one transaction", async () => {
+    prismaMock.package.findUnique.mockResolvedValue({ quantity: 10 })
     prismaMock.sale.create.mockResolvedValue({ id: 99 })
 
     const res = await createSale({ packageId: "p1", tenantId: "c1", quantity: 2 })
@@ -76,14 +76,14 @@ describe("reverseSale", () => {
 
   it("rejects a sale that was already reversed", async () => {
     prismaMock.sale.findUnique.mockResolvedValue({
-      quantity: 1, tenantId: "c1", reversedAt: new Date(), package: { quantity: 1, type: "PHYSICAL" },
+      quantity: 1, tenantId: "c1", reversedAt: new Date(), package: { quantity: 1 },
     })
     expect(await reverseSale(1)).toEqual({ ok: false, message: "sale.alreadyReversed" })
   })
 
-  it("PHYSICAL: marks reversed and deletes only AVAILABLE licenses", async () => {
+  it("marks reversed and deletes only AVAILABLE GenCodes", async () => {
     prismaMock.sale.findUnique.mockResolvedValue({
-      quantity: 1, tenantId: "c1", reversedAt: null, package: { quantity: 1, type: "PHYSICAL" },
+      quantity: 1, tenantId: "c1", reversedAt: null, package: { quantity: 1 },
     })
     prismaMock.sale.update.mockResolvedValue({})
 
@@ -100,7 +100,7 @@ describe("reverseSale", () => {
 
   it("maps a P2025 race to 'Sale not found.'", async () => {
     prismaMock.sale.findUnique.mockResolvedValue({
-      quantity: 1, tenantId: "c1", reversedAt: null, package: { quantity: 1, type: "PHYSICAL" },
+      quantity: 1, tenantId: "c1", reversedAt: null, package: { quantity: 1 },
     })
     prismaMock.sale.update.mockRejectedValue(new PrismaKnownError("gone", "P2025"))
     expect(await reverseSale(7)).toEqual({ ok: false, message: "sale.notFound" })

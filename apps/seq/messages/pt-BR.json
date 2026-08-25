@@ -732,7 +732,6 @@
     "groups": {
       "system": "Sistema",
       "records": "Cadastros",
-      "categories": "Categorias",
       "purchasing": "Compras",
       "inventory": "Estoque"
     },

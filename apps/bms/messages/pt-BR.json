@@ -58,15 +58,15 @@
       "updatedStripeCleared": "Preço atualizado — referências do Stripe zeradas. Sincronize com o Stripe de novo pra provisionar preços novos."
     },
     "package": {
-      "created": "Pacote criado com sucesso.",
-      "hasSales": "Este pacote possui vendas associadas e não pode ser excluído.",
-      "notFound": "Pacote não encontrado.",
+      "created": "Produto criado com sucesso.",
+      "hasSales": "Este produto possui vendas associadas e não pode ser excluído.",
+      "notFound": "Produto não encontrado.",
       "priceRequired": "Defina um preço maior que zero antes de sincronizar.",
       "stripeSyncFailed": "Falha na sincronização com o Stripe: {message}",
       "synced": "Sincronizado com o Stripe com sucesso.",
       "unknownError": "Erro desconhecido",
-      "updated": "Pacote atualizado com sucesso.",
-      "updatedStripeCleared": "Pacote atualizado — referências do Stripe removidas. Execute novamente prisma/seed-stripe-packages.ts no SEQ."
+      "updated": "Produto atualizado com sucesso.",
+      "updatedStripeCleared": "Produto atualizado — referências do Stripe removidas. Use \"Sincronizar com Stripe\" para provisionar o novo Price."
     },
     "profile": {
       "avatarUpdated": "Avatar atualizado.",
@@ -77,7 +77,7 @@
       "alreadyReversed": "Esta venda já foi estornada.",
       "created": "Venda registrada com sucesso.",
       "notFound": "Venda não encontrada.",
-      "packageNotFound": "Pacote não encontrado."
+      "packageNotFound": "Produto não encontrado."
     },
     "subscription": {
       "created": "Plano criado com sucesso.",
@@ -331,7 +331,7 @@
     "edit": "Editar cupom de desconto",
     "fields": {
       "amount": "Valor ($)",
-      "appliesTo": "Aplica-se a pacotes específicos (opcional)",
+      "appliesTo": "Aplica-se a produtos específicos (opcional)",
       "code": "Código",
       "description": "Descrição",
       "discountType": "Tipo de desconto",
@@ -342,12 +342,12 @@
       "percent": "Percentual (0-100)"
     },
     "hints": {
-      "appliesTo": "Deixe tudo desmarcado para aplicar a todos os pacotes.",
+      "appliesTo": "Deixe tudo desmarcado para aplicar a todos os produtos.",
       "codeImmutable": "O código promocional é imutável. Para alterar os termos, desative este cupom e crie um novo."
     },
     "loadError": "Não foi possível carregar os cupons: {message}. Verifique os logs das funções na Vercel para mais detalhes.",
     "new": "Novo cupom",
-    "packageMeta": "{quantity} QR Codes · {price}",
+    "packageMeta": "{quantity, plural, one {# unidade} other {# unidades}} · {price}",
     "placeholders": {
       "code": "WELCOME10",
       "descriptionCreate": "Observação interna opcional",
@@ -464,18 +464,17 @@
       "openMenu": "Abrir menu",
       "reactivate": "Reativar"
     },
-    "active": "Ativo?",
     "createButton": "Criar {noun}",
     "edit": "Editar {noun}",
     "fields": {
       "description": "Descrição",
       "name": "Nome do {noun}",
       "price": "Preço (US$)",
-      "quantity": "Quantidade de QR Codes"
+      "quantity": "Unidades por Produto"
     },
     "gencodesTitle": "GenCodes",
     "new": "Novo {noun}",
-    "newPackage": "Novo pacote",
+    "newDialogDescription": "Um produto agrupa GenCodes para venda B2B: defina quantas unidades ele entrega e por quanto.",
     "newProduct": "Novo produto",
     "noun": {
       "product": "Produto"
@@ -501,20 +500,19 @@
     "table": {
       "createdAt": "Criado em",
       "description": "Descrição do {noun}",
-      "emptyProduct": "Nenhum produto de QR físico ainda.",
+      "emptyProduct": "Nenhum produto ainda.",
       "name": "Nome do {noun}",
       "price": "Preço do {noun}",
-      "quantity": "QR Codes / Pacote",
+      "quantity": "Unidades / Produto",
       "status": "Status"
     },
-    "title": "QR Codes Digitais (B2B)",
     "toasts": {
-      "deactivated": "Pacote desativado.",
-      "deleteConfirm": "O pacote \"{name}\" será excluído permanentemente.",
-      "deleted": "Pacote excluído com sucesso.",
-      "reactivated": "Pacote reativado."
+      "deactivated": "Produto desativado.",
+      "deleteConfirm": "O produto \"{name}\" será excluído permanentemente.",
+      "deleted": "Produto excluído com sucesso.",
+      "reactivated": "Produto reativado."
     },
-    "unitPrice": "Preço unitário por QR Code"
+    "unitPrice": "Preço por unidade"
   },
   "Sales": {
     "actions": {
@@ -529,21 +527,23 @@
     },
     "fields": {
       "customer": "Cliente",
-      "package": "Pacote",
-      "quantity": "Quantidade de Pacotes"
+      "package": "Produto",
+      "quantity": "Quantidade"
     },
-    "new": "Nova Venda de Pacote de QR Codes",
+    "new": "Nova Venda de GenCodes",
     "newButton": "Nova venda",
     "packageOption": {
-      "codes": "{count, plural, one {# código} other {# códigos}}"
+      "units": "{count, plural, one {# unidade} other {# unidades}}"
     },
     "placeholders": {
       "customer": "Selecione um cliente",
-      "package": "Selecione um pacote"
+      "customerEmpty": "Nenhum cliente encontrado.",
+      "customerSearch": "Buscar cliente…",
+      "package": "Selecione um produto"
     },
     "reverse": {
       "confirm": "Estornar venda",
-      "description": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada. Os códigos de licença disponíveis serão invalidados. Os códigos já ativados permanecem vinculados aos seus memoriais. O registro é mantido para fins de auditoria.",
+      "description": "A venda do produto \"{product}\" para \"{customer}\" será marcada como estornada. Os GenCodes disponíveis serão invalidados. Os GenCodes já ativados permanecem vinculados aos seus memoriais. O registro é mantido para fins de auditoria.",
       "reversing": "Estornando…",
       "title": "Confirmar estorno"
     },
@@ -556,20 +556,20 @@
     "summary": {
       "genCodes": "GenCodes a serem gerados",
       "totalPrice": "Preço total",
-      "unitPrice": "Preço unitário / código"
+      "unitPrice": "Preço por unidade"
     },
     "table": {
       "customer": "Cliente",
       "date": "Data",
       "empty": "Nenhuma venda encontrada.",
-      "package": "Pacote",
-      "packagePrice": "Preço do Pacote",
-      "quantity": "Qtd. de Pacotes",
+      "product": "Produto",
+      "productPrice": "Preço do Produto",
+      "quantity": "Quantidade",
       "seller": "Vendedor",
       "status": "Status",
-      "subscriptionUnitPrice": "Preço Un. QR-Code",
       "totalPrice": "Preço Total do Pedido",
-      "totalSubscriptions": "QR-Codes / Pacote"
+      "totalUnits": "Total de Unidades",
+      "unitPrice": "Preço Unitário"
     },
     "title": "Vendas Manuais",
     "toasts": {
@@ -604,12 +604,12 @@
     },
     "revenue": {
       "title": "Nossa receita B2B",
-      "subtitle": "O que faturamos das empresas pelos pacotes que compraram.",
-      "package": "Pacote",
+      "subtitle": "O que faturamos das empresas pelos produtos que compraram.",
+      "package": "Produto",
       "sales": "Vendas",
-      "units": "Códigos",
+      "units": "Unidades",
       "total": "Receita",
-      "caveat": "Calculado como quantidade × preço ATUAL do pacote — a venda não guarda o preço da época, então editar o preço de um pacote muda estes números retroativamente. Vendas estornadas ficam de fora."
+      "caveat": "Calculado como quantidade × preço ATUAL do produto — a venda não guarda o preço da época, então editar o preço de um produto muda estes números retroativamente. Vendas estornadas ficam de fora."
     },
     "stale": {
       "title": "Vendidos e nunca resgatados",
@@ -658,7 +658,7 @@
       "priceBrl": "0 = ainda não configurado — o checkout cai pro USD nessa moeda. Mensal 0 = deriva do anual / duração.",
       "priceMxn": "0 = ainda não configurado — o checkout cai pro USD nessa moeda. Mensal 0 = deriva do anual / duração.",
       "priceUsd": "Anual 0 = plano grátis. Mensal 0 = deriva do preço anual / duração (um desconto real, não só uma divisão proporcional).",
-      "qrCodeMax": "QR Codes grátis — perfil próprio + memoriais geridos, combinado.",
+      "qrCodeMax": "GenCodes grátis — perfil próprio + memoriais geridos, combinado.",
       "termLength": "0 = Vitalícia",
       "treeMaxMembers": "Máximo de pessoas na árvore genealógica."
     },

@@ -732,7 +732,6 @@
     "groups": {
       "system": "System",
       "records": "Records",
-      "categories": "Categories",
       "purchasing": "Purchasing",
       "inventory": "Inventory"
     },

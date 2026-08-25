@@ -1,4 +1,4 @@
-// Run with: npx tsx prisma/seed-stripe-packages.ts
+// Run with: npx tsx prisma/seed-stripe.ts
 // Requires STRIPE_SECRET_KEY and DATABASE_URL in the environment.
 //
 // Idempotent: a Package already linked to Stripe is skipped. When the admin

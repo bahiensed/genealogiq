@@ -35,7 +35,7 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: SaleRow }; 
       remove={{
         label: t('actions.reverse'),
         run: () => reverseSale(sale.id),
-        confirmDescription: t('reverse.description', { package: sale.package.name, customer: sale.tenant.name }),
+        confirmDescription: t('reverse.description', { product: sale.package.name, customer: sale.tenant.name }),
         successMessage: t('toasts.reversed'),
       }}
     />
@@ -79,9 +79,9 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       ),
     },
     {
-      id: 'package',
+      id: 'product',
       accessorFn: (row) => row.package.name,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.package')} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.product')} />,
       cell: ({ row }) => (
         <span className={row.original.reversedAt ? 'opacity-40' : ''}>
           {row.original.package.name}
@@ -98,9 +98,9 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       ),
     },
     {
-      id: 'totalSubscriptions',
+      id: 'totalUnits',
       accessorFn: (row) => row.quantity * row.package.quantity,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.totalSubscriptions')} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.totalUnits')} />,
       cell: ({ row }) => (
         <div className={`text-right ${row.original.reversedAt ? 'opacity-40' : ''}`}>
           {(row.original.quantity * row.original.package.quantity).toLocaleString(locale)}
@@ -108,9 +108,9 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       ),
     },
     {
-      id: 'packagePrice',
+      id: 'productPrice',
       accessorFn: (row) => row.package.price,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.packagePrice')} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.productPrice')} />,
       cell: ({ row }) => (
         <div className={`text-right ${row.original.reversedAt ? 'opacity-40' : ''}`}>
           {currency.format(row.original.package.price)}
@@ -118,9 +118,9 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       ),
     },
     {
-      id: 'subscriptionUnitPrice',
+      id: 'unitPrice',
       accessorFn: (row) => row.package.price / row.package.quantity,
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.subscriptionUnitPrice')} />,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.unitPrice')} />,
       cell: ({ row }) => (
         <div className={`text-right ${row.original.reversedAt ? 'opacity-40' : ''}`}>
           {currency.format(row.original.package.price / row.original.package.quantity)}

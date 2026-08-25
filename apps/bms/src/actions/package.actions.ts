@@ -23,7 +23,6 @@ export async function createPackage(data: PackageFormValues): Promise<ActionResu
     data: { ...rest, price: new Prisma.Decimal(price) },
   })
 
-  revalidatePath('/packages')
   revalidatePath('/gencodes')
   return done(t('package.created'))
 }
@@ -75,7 +74,6 @@ export async function updatePackage(id: string, data: PackageFormValues): Promis
     await stripe.prices.update(staleId, { active: false }).catch(() => {})
   }
 
-  revalidatePath('/packages')
   revalidatePath('/gencodes')
   return done(clearStripeRef ? t('package.updatedStripeCleared') : t('package.updated'))
 }
@@ -96,7 +94,6 @@ export async function deletePackage(id: string): Promise<ActionResult> {
     throw e
   }
 
-  revalidatePath('/packages')
   revalidatePath('/gencodes')
   return done()
 }
@@ -109,7 +106,6 @@ export async function togglePackageActive(id: string): Promise<ActionResult> {
   if (!pkg) return fail(t('package.notFound'))
 
   await prisma.package.update({ where: { id }, data: { isActive: !pkg.isActive } })
-  revalidatePath('/packages')
   revalidatePath('/gencodes')
   return done()
 }
@@ -170,7 +166,6 @@ export async function syncPackageWithStripe(id: string): Promise<ActionResult> {
     return fail(t('package.stripeSyncFailed', { message }))
   }
 
-  revalidatePath('/packages')
   revalidatePath('/gencodes')
   return done(t('package.synced'))
 }
