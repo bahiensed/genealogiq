@@ -67,6 +67,38 @@ describe("POST /api/stripe/webhook (SEQ)", () => {
     expect(res.status).toBe(400)
   })
 
+  // Stripe fans every subscribed event out to EVERY endpoint on the account, so
+  // this route sees the sessions BMS opens for its payment links. Letting one
+  // through is not a harmless duplicate: BMS pre-creates the Sale carrying the
+  // session id, so applyCheckoutSession would hit the stripeSessionId unique,
+  // read it as "already processed" and mint nothing at all.
+  it("ignores a session BMS owns, before touching fulfilment", async () => {
+    stripeMock.webhooks.constructEvent.mockReturnValue(
+      event({
+        data: {
+          object: {
+            ...paidSession,
+            metadata: { ...paidSession.metadata, origin: "bms", saleId: "7" },
+          },
+        },
+      }),
+    )
+
+    const res = (await POST(makeReq("sig"))) as unknown as Res
+
+    expect(res.status).toBe(200)
+    expect(res.body).toMatchObject({ ignored: "bms-owned session" })
+    expect(applyMock).not.toHaveBeenCalled()
+    expect(prismaMock.stripeEvent.create).not.toHaveBeenCalled()
+  })
+
+  it("still fulfils a session with no origin (SEQ's own self-serve checkout)", async () => {
+    const res = (await POST(makeReq("sig"))) as unknown as Res
+
+    expect(res.status).toBe(200)
+    expect(applyMock).toHaveBeenCalledTimes(1)
+  })
+
   it("ignores irrelevant event types", async () => {
     stripeMock.webhooks.constructEvent.mockReturnValue(event({ type: "customer.subscription.updated" }))
     const res = (await POST(makeReq("sig"))) as unknown as Res

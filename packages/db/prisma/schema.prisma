@@ -170,6 +170,7 @@ model DiscountCoupon {
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
   appliesTo             Package[] @relation("CouponPackages")
+  sales                 Sale[]
 
   @@map("discount_coupons")
 }
@@ -192,6 +193,15 @@ model Package {
   @@map("packages")
 }
 
+// A sale is created the moment a payment link is generated and carries no
+// GenCodes until the money lands. Lifecycle, read in this order:
+//   reversedAt -> reversed | paidAt -> active | expiredAt -> link expired
+//   otherwise  -> awaiting payment
+//
+// The amount columns are a snapshot from the Checkout Session, not a
+// derivation. Revenue used to be recomputed as quantity x Package.price, which
+// a discount coupon makes plainly wrong — the discount would exist nowhere in
+// our database.
 model Sale {
   id                    Int                 @id @default(autoincrement())
   quantity              Int                 @default(1)
@@ -200,15 +210,29 @@ model Sale {
   soldById              String              @map("sold_by_id")
   createdAt             DateTime            @default(now()) @map("created_at")
   updatedAt             DateTime            @updatedAt @map("updated_at")
+  paidAt                DateTime?           @map("paid_at")
+  /// Only set when an operator recorded an off-Stripe payment. Null on a sale Stripe settled.
+  paidById              String?             @map("paid_by_id")
+  expiredAt             DateTime?           @map("expired_at")
   reversedAt            DateTime?           @map("reversed_at")
+  checkoutUrl           String?             @map("checkout_url")
+  /// Cents, as Stripe reports them.
+  amountSubtotal        Int?                @map("amount_subtotal")
+  amountTotal           Int?                @map("amount_total")
+  currency              String?
+  discountCouponId      String?             @map("discount_coupon_id")
   stripeSessionId       String?             @unique @map("stripe_session_id")
   stripePaymentIntentId String?             @map("stripe_payment_intent_id")
   genCodes              GenCode[]
   tenant                Tenant              @relation(fields: [tenantId], references: [id], map: "sales_customer_id_fkey")
   package               Package             @relation(fields: [packageId], references: [id])
-  soldBy                User                @relation(fields: [soldById], references: [id])
+  soldBy                User                @relation("SaleSoldBy", fields: [soldById], references: [id])
+  paidBy                User?               @relation("SalePaidBy", fields: [paidById], references: [id])
+  discountCoupon        DiscountCoupon?     @relation(fields: [discountCouponId], references: [id])
 
   @@index([tenantId, createdAt(sort: Desc)])
+  @@index([paidById])
+  @@index([discountCouponId])
   @@map("sales")
 }
 
@@ -411,7 +435,8 @@ model User {
   updatedAppUsers     AppUser[]            @relation("app_users_updated_by_idTousers")
   emailTokens         EmailToken[]
   passwordResetTokens PasswordResetToken[]
-  sales               Sale[]
+  sales               Sale[]               @relation("SaleSoldBy")
+  salesPaid           Sale[]               @relation("SalePaidBy")
   genCodesSold        GenCode[]
   createdSupplierCats SupplierCategory[]   @relation("supplier_categories_created_by_idTousers")
   updatedSupplierCats SupplierCategory[]   @relation("supplier_categories_updated_by_idTousers")

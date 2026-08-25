@@ -47,6 +47,29 @@ describe("applyCheckoutSession — fulfillment", () => {
     expect(arg.data).toHaveLength(6)
   })
 
+  // This path only runs on a settled payment, so the row must be born paid.
+  // Sale gained an unpaid state for the BMS payment-link flow; if this forgot to
+  // stamp paidAt, every self-serve purchase would sit in BMS as "awaiting
+  // payment" forever while the money was already in the account.
+  it("marks the sale paid and snapshots the amounts from the session", async () => {
+    prismaMock.package.findUnique.mockResolvedValue({ quantity: 1 })
+    const priced = {
+      id: "cs_1",
+      payment_intent: "pi_1",
+      amount_subtotal: 5998,
+      amount_total: 5398,
+      currency: "usd",
+    } as never
+
+    await applyCheckoutSession(priced, ctx)
+
+    const data = txMock.sale.create.mock.calls[0][0].data
+    expect(data.paidAt).toBeInstanceOf(Date)
+    expect(data.amountSubtotal).toBe(5998)
+    expect(data.amountTotal).toBe(5398)
+    expect(data.currency).toBe("usd")
+  })
+
   it("is idempotent: a duplicate session (P2002) is swallowed without throwing", async () => {
     prismaMock.package.findUnique.mockResolvedValue({ quantity: 1 })
     prismaMock.$transaction.mockRejectedValue({ code: "P2002" })

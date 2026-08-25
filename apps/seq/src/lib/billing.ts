@@ -66,6 +66,14 @@ export async function applyCheckoutSession(
           tenantId:              ctx.tenantId,
           soldById:              ctx.soldById,
           quantity:              ctx.quantity,
+          // This path only ever runs on a settled payment, so the sale is born
+          // paid. Saying so explicitly matters now that Sale has an unpaid
+          // state: without it every self-serve purchase would show up in BMS as
+          // "awaiting payment" forever.
+          paidAt:                new Date(),
+          amountSubtotal:        session.amount_subtotal,
+          amountTotal:           session.amount_total,
+          currency:              session.currency,
           stripeSessionId:       session.id,
           stripePaymentIntentId: paymentIntentId,
         },
