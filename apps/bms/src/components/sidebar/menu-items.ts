@@ -1,7 +1,6 @@
 import {
   Building2,
   BuildingIcon,
-  Coins,
   Fingerprint,
   HandCoinsIcon,
   IdCardIcon,
@@ -30,10 +29,11 @@ export const customers = [
   { name: 'Customers', url: '/customers', icon: Building2 },
 ]
 
+// Sales Reports is deliberately absent, not deleted: /sales/reports and its
+// queries stay in the tree and go back on this list once the report is ready.
 export const sales = [
-  { name: 'Discount Coupons',   url: '/sales/discount-coupons',   icon: TicketPercent  },
-  { name: 'Manual Sales',       url: '/sales/manual-sales',       icon: HandCoinsIcon  },
-  { name: 'Sales Reports',      url: '/sales/reports',            icon: Coins          },
+  { name: 'Discount Coupons', url: '/sales/discount-coupons', icon: TicketPercent },
+  { name: 'Manual Sales',     url: '/sales/manual-sales',     icon: HandCoinsIcon },
 ]
 
 export const groups = [

@@ -474,6 +474,7 @@
     },
     "gencodesTitle": "GenCodes",
     "new": "New {noun}",
+    "newDialogDescription": "A product bundles GenCodes for B2B sale: set how many units it delivers and for how much.",
     "newProduct": "New product",
     "noun": {
       "product": "Product"

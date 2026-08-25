@@ -474,6 +474,7 @@
     },
     "gencodesTitle": "GenCodes",
     "new": "Nuevo {noun}",
+    "newDialogDescription": "Un producto agrupa GenCodes para venta B2B: define cuántas unidades entrega y por cuánto.",
     "newProduct": "Nuevo producto",
     "noun": {
       "product": "Producto"
