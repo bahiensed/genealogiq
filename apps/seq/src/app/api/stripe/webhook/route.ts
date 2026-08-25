@@ -38,6 +38,16 @@ export async function POST(req: NextRequest) {
 
   const session = event.data.object as Stripe.Checkout.Session
 
+  // Stripe fans every subscribed event out to EVERY endpoint on the account, so
+  // this route also receives the sessions BMS opens for its payment-link sales.
+  // Those arrive with a Sale row that already exists, carrying the session id —
+  // applyCheckoutSession would hit the stripeSessionId unique, read it as
+  // "already processed" and return without minting a single GenCode. BMS owns
+  // its own endpoint and its own fulfilment; leave them alone.
+  if ((session.metadata ?? {}).origin === "bms") {
+    return NextResponse.json({ received: true, ignored: "bms-owned session" })
+  }
+
   // Only one-time payment checkouts produced by createPackageCheckoutSession.
   if (session.mode !== "payment") {
     return NextResponse.json({ received: true, ignored: "non-payment mode" })
