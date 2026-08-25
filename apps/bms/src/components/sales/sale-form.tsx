@@ -34,10 +34,12 @@ import { Separator } from '@genealogiq/ui/separator'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
 
 interface Package {
-  id:       string
-  name:     string
-  price:    number
-  quantity: number
+  id:           string
+  name:         string
+  price:        number
+  monthlyPrice: number | null
+  termLength:   number
+  quantity:     number
 }
 
 interface Customer {
@@ -91,7 +93,17 @@ export function SaleForm({ packages = [], customers = [], coupons = [] }: SaleFo
   const selectedPackageId = watch('packageId')
   const selectedQty       = watch('quantity') || 0
   const selectedCouponId  = watch('discountCouponId')
+  const cadence           = watch('cadence')
   const selectedPkg       = packages.find(p => p.id === selectedPackageId)
+
+  // A product with no instalment price can only be sold up front; if the
+  // operator switches product after choosing monthly, put them back on annual
+  // rather than letting the form submit something the checkout will refuse.
+  useEffect(() => {
+    if (cadence === 'monthly' && selectedPkg && !selectedPkg.monthlyPrice) {
+      setValue('cadence', 'annual')
+    }
+  }, [cadence, selectedPkg, setValue])
 
   // A coupon with no packageIds applies to everything.
   const availableCoupons = useMemo(
@@ -107,7 +119,10 @@ export function SaleForm({ packages = [], customers = [], coupons = [] }: SaleFo
   }, [availableCoupons, selectedCouponId, setValue])
 
   const totalQRCodes = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.quantity : 0
-  const subtotal     = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.price : 0
+  // What the customer is charged NOW: one instalment on a monthly plan, the
+  // whole term up front on an annual one.
+  const unitAmount   = cadence === 'monthly' ? (selectedPkg?.monthlyPrice ?? 0) : (selectedPkg?.price ?? 0)
+  const subtotal     = selectedPkg && selectedQty > 0 ? selectedQty * unitAmount : 0
   const unitPrice    = selectedPkg && selectedPkg.quantity > 0 ? selectedPkg.price / selectedPkg.quantity : 0
 
   // A preview, not the price. Stripe computes what is actually charged, and it
@@ -174,6 +189,31 @@ export function SaleForm({ packages = [], customers = [], coupons = [] }: SaleFo
                       </SelectContent>
                     </Select>
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  </Field>
+                )}
+              />
+
+              <Controller
+                name="cadence"
+                control={control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{t('fields.cadence')}</FieldLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="annual">{t('cadence.annual')}</SelectItem>
+                        <SelectItem
+                          value="monthly"
+                          disabled={!selectedPkg?.monthlyPrice}
+                        >
+                          {t('cadence.monthly')}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {selectedPkg && !selectedPkg.monthlyPrice && (
+                      <p className="text-xs text-muted-foreground">{t('cadence.annualOnly')}</p>
+                    )}
                   </Field>
                 )}
               />
@@ -275,7 +315,9 @@ export function SaleForm({ packages = [], customers = [], coupons = [] }: SaleFo
                     </div>
                   )}
                   <div className="flex items-baseline justify-between pt-1">
-                    <span className="font-medium">{t('summary.totalPrice')}</span>
+                    <span className="font-medium">
+                      {cadence === 'monthly' ? t('summary.perMonth') : t('summary.totalPrice')}
+                    </span>
                     <span className="text-lg font-bold tabular-nums">{usd.format(total)}</span>
                   </div>
                   <div className="flex items-baseline justify-between text-xs text-muted-foreground">
@@ -283,6 +325,11 @@ export function SaleForm({ packages = [], customers = [], coupons = [] }: SaleFo
                     <span className="tabular-nums">{usd.format(unitPrice)}</span>
                   </div>
                 </div>
+                {cadence === 'monthly' && selectedPkg && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('summary.instalments', { count: selectedPkg.termLength })}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">{t('summary.stripeAuthority')}</p>
               </div>
             )}

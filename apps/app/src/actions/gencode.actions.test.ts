@@ -41,6 +41,10 @@ beforeEach(() => {
   txMock.genCode.update.mockResolvedValue({})
 })
 
+// A paid, non-reversed sale with no term and no subscription — the window is
+// open, so these tests stay about activation rather than the batch's shelf life.
+const OPEN_SALE = { paidAt: new Date(), reversedAt: null, status: null, accessEndsAt: null }
+
 describe("activateGenCode", () => {
   it("rejects an unknown gen code", async () => {
     prismaMock.genCode.findUnique.mockResolvedValue(null)
@@ -49,7 +53,7 @@ describe("activateGenCode", () => {
   })
 
   it("rejects a code that is no longer AVAILABLE (double-activation guard)", async () => {
-    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "ACTIVATED" })
+    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "ACTIVATED", sale: OPEN_SALE })
     expect(await activateGenCode("GENCODE", MEMORIAL)).toEqual({
       ok: false,
       message: "gencode.alreadyActivated",
@@ -58,14 +62,14 @@ describe("activateGenCode", () => {
   })
 
   it("rejects invalid memorial data before mutating", async () => {
-    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
+    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE", sale: OPEN_SALE })
     safeParseMock.mockReturnValue({ success: false, error: { issues: [{ message: "First name required" }] } })
     expect(await activateGenCode("GENCODE", MEMORIAL)).toEqual({ ok: false, message: "First name required" })
     expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 
   it("activates: creates the memorial + guardian link and marks the license ACTIVATED", async () => {
-    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
+    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE", sale: OPEN_SALE })
 
     const res = await activateGenCode("GENCODE", MEMORIAL)
 
@@ -81,8 +85,59 @@ describe("activateGenCode", () => {
     )
   })
 
+  // The window gates ACTIVATION ONLY. These four cases are the whole product
+  // decision: unused stock has a shelf life and freezes with the tenant's
+  // billing, while a memorial that already redeemed a code is never revisited.
+  it("refuses a code whose batch term has ended", async () => {
+    prismaMock.genCode.findUnique.mockResolvedValue({
+      id: "lic-1", status: "AVAILABLE",
+      sale: { ...OPEN_SALE, accessEndsAt: new Date(Date.now() - 60_000) },
+    })
+
+    const res = await activateGenCode("GENCODE", MEMORIAL)
+
+    expect(res).toEqual({ ok: false, message: "gencode.expired" })
+    expect(prismaMock.$transaction).not.toHaveBeenCalled()
+  })
+
+  it("refuses a code whose tenant is behind on an instalment", async () => {
+    prismaMock.genCode.findUnique.mockResolvedValue({
+      id: "lic-1", status: "AVAILABLE",
+      sale: { ...OPEN_SALE, status: "past_due", accessEndsAt: new Date(Date.now() + 60_000) },
+    })
+
+    const res = await activateGenCode("GENCODE", MEMORIAL)
+
+    expect(res).toEqual({ ok: false, message: "gencode.expired" })
+    expect(prismaMock.$transaction).not.toHaveBeenCalled()
+  })
+
+  it("accepts once the tenant is paying again — same row, no intervention", async () => {
+    prismaMock.genCode.findUnique.mockResolvedValue({
+      id: "lic-1", status: "AVAILABLE",
+      sale: { ...OPEN_SALE, status: "active", accessEndsAt: new Date(Date.now() + 60_000) },
+    })
+
+    const res = await activateGenCode("GENCODE", MEMORIAL)
+
+    expect(res.ok).toBe(true)
+  })
+
+  // An already-ACTIVATED code short-circuits before the window is consulted, so
+  // a lapsed tenant can never take a memorial down. The family bought a plaque.
+  it("reports an already-activated code as such, never as expired", async () => {
+    prismaMock.genCode.findUnique.mockResolvedValue({
+      id: "lic-1", status: "ACTIVATED",
+      sale: { ...OPEN_SALE, status: "canceled", accessEndsAt: new Date(Date.now() - 60_000) },
+    })
+
+    const res = await activateGenCode("GENCODE", MEMORIAL)
+
+    expect(res).toEqual({ ok: false, message: "gencode.alreadyActivated" })
+  })
+
   it("handles the activation race: a concurrent winner (P2002) yields a friendly retry error", async () => {
-    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE" })
+    prismaMock.genCode.findUnique.mockResolvedValue({ id: "lic-1", status: "AVAILABLE", sale: OPEN_SALE })
     prismaMock.$transaction.mockRejectedValue({ code: "P2002" })
 
     expect(await activateGenCode("GENCODE", MEMORIAL)).toEqual({

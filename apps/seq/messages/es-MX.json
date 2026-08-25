@@ -25,7 +25,8 @@
       "invalidQuantity": "Cantidad no válida.",
       "noCheckoutUrl": "Stripe no devolvió una URL de pago.",
       "notSynced": "Este producto no está disponible para compra en este momento. Contacta a GenealogiQ.",
-      "packageNotFound": "Paquete no encontrado o no disponible."
+      "packageNotFound": "Paquete no encontrado o no disponible.",
+      "selfServePaused": "La compra directa está temporalmente no disponible mientras actualizamos los planes de pago. Contacta a GenealogiQ para adquirir GenCodes."
     },
     "common": {
       "duplicate": "Datos duplicados detectados",
@@ -58,6 +59,7 @@
       "relationNotFound": "Vínculo de tutor no encontrado."
     },
     "gencode": {
+      "batchClosed": "Este lote ya no está disponible para venta — su período terminó o la suscripción está suspendida.",
       "emailOtherTenant": "Ese correo ya pertenece a un cliente de otra empresa.",
       "invalidValue": "Valor de venta inválido.",
       "notAvailable": "Este código no está disponible para la venta (ya vendido o activado).",

@@ -16,13 +16,21 @@ export default async function EditGenCodeProductPage({ params }: { params: Promi
         name:        pkg.name,
         quantity:    pkg.quantity,
         description: pkg.description ?? '',
-        priceUsd:    Number(pkg.priceUsd ?? 0),
-        priceBrl:    Number(pkg.priceBrl ?? 0),
-        priceMxn:    Number(pkg.priceMxn ?? 0),
+        termLength:      pkg.termLength,
+        priceUsd:        Number(pkg.priceUsd ?? 0),
+        monthlyPriceUsd: Number(pkg.monthlyPriceUsd ?? 0),
+        priceBrl:        Number(pkg.priceBrl ?? 0),
+        monthlyPriceBrl: Number(pkg.monthlyPriceBrl ?? 0),
+        priceMxn:        Number(pkg.priceMxn ?? 0),
+        monthlyPriceMxn: Number(pkg.monthlyPriceMxn ?? 0),
         isActive:    pkg.isActive,
       }}
       stripeProductId={pkg.stripeProductId}
-      stripePriceIds={{ usd: pkg.stripePriceIdUsd, brl: pkg.stripePriceIdBrl, mxn: pkg.stripePriceIdMxn }}
+      stripePriceIds={{
+        usd: { annual: pkg.stripeAnnualPriceIdUsd, monthly: pkg.stripeMonthlyPriceIdUsd },
+        brl: { annual: pkg.stripeAnnualPriceIdBrl, monthly: pkg.stripeMonthlyPriceIdBrl },
+        mxn: { annual: pkg.stripeAnnualPriceIdMxn, monthly: pkg.stripeMonthlyPriceIdMxn },
+      }}
       />
     </FormShell>
   )

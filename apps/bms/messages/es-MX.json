@@ -90,6 +90,7 @@
       "priceRequired": "Establece un precio mayor que cero antes de sincronizar.",
       "stripeSyncFailed": "Error al sincronizar con Stripe: {message}",
       "synced": "Sincronizado con Stripe correctamente.",
+      "termLengthRequired": "La duración en meses debe ser mayor que cero.",
       "unknownError": "Error desconocido",
       "updated": "Producto actualizado correctamente.",
       "updatedStripeCleared": "Producto actualizado — referencias de Stripe eliminadas. Usa \"Sincronizar con Stripe\" para provisionar el nuevo Price."
@@ -497,6 +498,7 @@
     "maxChars": "Debe tener como máximo {count} caracteres",
     "maxQuantity": "Debe ser como máximo {count}",
     "minChars": "Debe tener al menos {count} caracteres",
+    "monthlyNeedsAnnual": "Indica el precio anual de esta moneda antes del mensual",
     "mustBePositive": "Debe ser mayor que cero",
     "mustBeWholeNumber": "Debe ser un número entero",
     "mustBeZeroOrGreater": "Debe ser 0 o mayor",
@@ -578,12 +580,18 @@
     "createButton": "Crear {noun}",
     "edit": "Editar {noun}",
     "fields": {
+      "annual": "Anual",
       "description": "Descripción",
+      "monthly": "Mensual",
       "name": "Nombre del {noun}",
       "price": "Precio (US$)",
-      "quantity": "Unidades por Producto"
+      "quantity": "Unidades por Producto",
+      "termLength": "Duración (meses)"
     },
     "gencodesTitle": "GenCodes",
+    "hints": {
+      "cadence": "Deja el mensual en cero para vender solo anual. El mensual no tiene que ser el anual ÷ 12."
+    },
     "new": "Nuevo {noun}",
     "newDialogDescription": "Un producto agrupa GenCodes para venta B2B: define cuántas unidades entrega y por cuánto.",
     "newProduct": "Nuevo producto",
@@ -661,12 +669,18 @@
       "resendCharge": "Reenviar cobro",
       "reverse": "Revertir"
     },
+    "cadence": {
+      "annual": "De contado (anual)",
+      "annualOnly": "Este producto no tiene precio mensual configurado.",
+      "monthly": "Mensual"
+    },
     "confirm": {
       "confirm": "Generar y enviar",
       "description": "El enlace se enviará al correo del cliente y es válido por 7 días. Los GenCodes solo se generan tras confirmarse el pago.",
       "title": "¿Generar enlace de pago?"
     },
     "fields": {
+      "cadence": "Forma de pago",
       "coupon": "Cupón de Descuento",
       "customer": "Cliente",
       "package": "Producto",
@@ -704,6 +718,8 @@
     "summary": {
       "discount": "Descuento ({code})",
       "genCodes": "GenCodes a generar",
+      "instalments": "Cobrado mensualmente por {count} meses. Los GenCodes se liberan con el primer pago.",
+      "perMonth": "Por mes",
       "stripeAuthority": "Vista previa. Stripe calcula el monto final en el checkout.",
       "subtotal": "Subtotal",
       "totalPrice": "Precio total",

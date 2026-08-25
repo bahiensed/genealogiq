@@ -5,9 +5,9 @@ import { verifySession } from '@/lib/dal'
 import type { AppCurrency } from '@genealogiq/core'
 
 const PRICE_ID_BY_CURRENCY = {
-  usd: 'stripePriceIdUsd',
-  brl: 'stripePriceIdBrl',
-  mxn: 'stripePriceIdMxn',
+  usd: 'stripeAnnualPriceIdUsd',
+  brl: 'stripeAnnualPriceIdBrl',
+  mxn: 'stripeAnnualPriceIdMxn',
 } as const
 
 const PRICE_BY_CURRENCY = {
@@ -17,8 +17,13 @@ const PRICE_BY_CURRENCY = {
 } as const
 
 const PRICE_SELECT = {
-  priceUsd: true, priceBrl: true, priceMxn: true,
-  stripePriceIdUsd: true, stripePriceIdBrl: true, stripePriceIdMxn: true,
+  termLength: true,
+  priceUsd: true, monthlyPriceUsd: true,
+  priceBrl: true, monthlyPriceBrl: true,
+  priceMxn: true, monthlyPriceMxn: true,
+  stripeAnnualPriceIdUsd:  true, stripeMonthlyPriceIdUsd: true,
+  stripeAnnualPriceIdBrl:  true, stripeMonthlyPriceIdBrl: true,
+  stripeAnnualPriceIdMxn:  true, stripeMonthlyPriceIdMxn: true,
 } as const
 
 export async function getPackages() {
@@ -42,6 +47,9 @@ export async function getPackages() {
     priceUsd: r.priceUsd === null ? null : Number(r.priceUsd),
     priceBrl: r.priceBrl === null ? null : Number(r.priceBrl),
     priceMxn: r.priceMxn === null ? null : Number(r.priceMxn),
+    monthlyPriceUsd: r.monthlyPriceUsd === null ? null : Number(r.monthlyPriceUsd),
+    monthlyPriceBrl: r.monthlyPriceBrl === null ? null : Number(r.monthlyPriceBrl),
+    monthlyPriceMxn: r.monthlyPriceMxn === null ? null : Number(r.monthlyPriceMxn),
   }))
 }
 
@@ -63,11 +71,20 @@ export async function getActivePackages(currency: AppCurrency) {
     orderBy: { name: 'asc' },
   })
 
+  const MONTHLY_BY_CURRENCY = { usd: 'monthlyPriceUsd', brl: 'monthlyPriceBrl', mxn: 'monthlyPriceMxn' } as const
+  const MONTHLY_ID_BY_CURRENCY = { usd: 'stripeMonthlyPriceIdUsd', brl: 'stripeMonthlyPriceIdBrl', mxn: 'stripeMonthlyPriceIdMxn' } as const
+
   return rows.map((r) => ({
-    id:       r.id,
-    name:     r.name,
-    quantity: r.quantity,
-    price:    Number(r[PRICE_BY_CURRENCY[currency]]),
+    id:         r.id,
+    name:       r.name,
+    quantity:   r.quantity,
+    termLength: r.termLength,
+    price:      Number(r[PRICE_BY_CURRENCY[currency]]),
+    // Only offered as an instalment plan when the amount AND its Stripe Price
+    // both exist — offering one we cannot charge would fail at checkout.
+    monthlyPrice: r[MONTHLY_BY_CURRENCY[currency]] !== null && r[MONTHLY_ID_BY_CURRENCY[currency]]
+      ? Number(r[MONTHLY_BY_CURRENCY[currency]])
+      : null,
   }))
 }
 

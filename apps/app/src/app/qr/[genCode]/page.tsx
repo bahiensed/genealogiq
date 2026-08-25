@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
+import { isSaleWindowOpen } from "@genealogiq/core"
 import { auth } from "@/auth"
 import { getLicenseByGenCode } from "@/queries/gencode"
 import { GenCodeLanding } from "@/components/qr/gencode-landing"
@@ -24,6 +25,22 @@ export default async function GenCodePage({ params }: Props) {
 
   if (license.status === "ACTIVATED") {
     redirect(`/profile/${license.appUserId}`)
+  }
+
+  // The batch has a term, and may be frozen while the funeral home is behind on
+  // an instalment. Checked here as well as in the action so the buyer gets a
+  // page that explains itself instead of a form that fails on submit — they are
+  // holding a physical plaque and did nothing wrong.
+  if (!isSaleWindowOpen(license.sale)) {
+    return (
+      <div className="min-h-screen relative overflow-x-hidden">
+        <AuroraBackdrop variant="page" intensity="bold" />
+        <main className="container relative z-10 pt-24 pb-32">
+          <h1 className="text-4xl font-extrabold tracking-tight">{t("expired.title")}</h1>
+          <p className="text-muted-foreground mt-2 max-w-prose">{t("expired.body")}</p>
+        </main>
+      </div>
+    )
   }
 
   // AVAILABLE

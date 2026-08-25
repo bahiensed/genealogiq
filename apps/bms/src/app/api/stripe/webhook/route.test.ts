@@ -17,16 +17,18 @@ vi.mock("next/server", () => {
   return { NextResponse: FakeNextResponse, NextRequest: class {} }
 })
 
-const { stripeMock, prismaMock, applyMock, unpayableMock } = vi.hoisted(() => ({
+const { stripeMock, prismaMock, applyMock, applySubMock, unpayableMock } = vi.hoisted(() => ({
   stripeMock:    { webhooks: { constructEvent: vi.fn() } },
-  prismaMock:    { stripeEvent: { findUnique: vi.fn(), create: vi.fn() } },
+  prismaMock:    { stripeEvent: { findUnique: vi.fn(), create: vi.fn() }, $transaction: vi.fn() },
   applyMock:     vi.fn(),
+  applySubMock:  vi.fn(),
   unpayableMock: vi.fn(),
 }))
 vi.mock("@/lib/stripe", () => ({ stripe: stripeMock }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/billing", () => ({
   applySalePayment:  applyMock,
+  applySubscriptionToSale: applySubMock,
   markSaleUnpayable: unpayableMock,
   BMS_ORIGIN:        "bms",
 }))
@@ -60,6 +62,9 @@ beforeEach(() => {
   prismaMock.stripeEvent.findUnique.mockResolvedValue(null)
   prismaMock.stripeEvent.create.mockResolvedValue({})
   applyMock.mockResolvedValue(undefined)
+  applySubMock.mockResolvedValue(undefined)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock))
   unpayableMock.mockResolvedValue(undefined)
 })
 
@@ -168,11 +173,75 @@ describe("POST /api/stripe/webhook (BMS)", () => {
   })
 
   it("ignores event types it does not subscribe to", async () => {
-    stripeMock.webhooks.constructEvent.mockReturnValue(event({ type: "customer.subscription.updated" }))
+    stripeMock.webhooks.constructEvent.mockReturnValue(event({ type: "invoice.payment_succeeded" }))
 
     const res = (await POST(makeReq("sig"))) as unknown as Res
 
     expect(res.body).toEqual({ received: true })
+    expect(applyMock).not.toHaveBeenCalled()
+  })
+})
+
+const subEvent = (over: Record<string, unknown> = {}) => ({
+  id: "evt_sub",
+  type: "customer.subscription.updated",
+  data: { object: { id: "sub_1", metadata: { origin: "bms", saleId: "7" }, ...(over.object as object ?? {}) } },
+  ...over,
+})
+
+describe("POST /api/stripe/webhook (BMS) — subscriptions", () => {
+  it("applies a subscription event that is ours", async () => {
+    stripeMock.webhooks.constructEvent.mockReturnValue(subEvent())
+
+    const res = (await POST(makeReq("sig"))) as unknown as Res
+
+    expect(res.status).toBe(200)
+    expect(applySubMock).toHaveBeenCalledTimes(1)
+    expect(applyMock).not.toHaveBeenCalled()
+  })
+
+  it("ignores a subscription belonging to another app", async () => {
+    stripeMock.webhooks.constructEvent.mockReturnValue(
+      subEvent({ object: { id: "sub_1", metadata: { userId: "u1" } } }),
+    )
+
+    const res = (await POST(makeReq("sig"))) as unknown as Res
+
+    expect(res.body).toMatchObject({ ignored: "not a bms subscription" })
+    expect(applySubMock).not.toHaveBeenCalled()
+  })
+
+  // Ledger and apply share one transaction here, unlike the one-time path: a
+  // duplicate delivery hits the PK, and a failed apply rolls the ledger row back
+  // so Stripe's retry can reprocess.
+  it("treats a duplicate delivery as such", async () => {
+    stripeMock.webhooks.constructEvent.mockReturnValue(subEvent())
+    prismaMock.$transaction.mockRejectedValue({ code: "P2002" })
+
+    const res = (await POST(makeReq("sig"))) as unknown as Res
+
+    expect(res.body).toMatchObject({ duplicate: true })
+  })
+
+  it("returns 500 when applying fails, so Stripe retries", async () => {
+    stripeMock.webhooks.constructEvent.mockReturnValue(subEvent())
+    prismaMock.$transaction.mockRejectedValue(new Error("db down"))
+
+    const res = (await POST(makeReq("sig"))) as unknown as Res
+
+    expect(res.status).toBe(500)
+  })
+
+  // A subscription checkout also emits completed; settling it here as a
+  // one-time payment would mint the batch twice.
+  it("ignores a subscription-mode checkout session", async () => {
+    stripeMock.webhooks.constructEvent.mockReturnValue(
+      event({ data: { object: { ...bmsSession, mode: "subscription" } } }),
+    )
+
+    const res = (await POST(makeReq("sig"))) as unknown as Res
+
+    expect(res.body).toMatchObject({ ignored: "subscription mode" })
     expect(applyMock).not.toHaveBeenCalled()
   })
 })

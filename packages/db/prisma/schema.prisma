@@ -185,20 +185,34 @@ model Package {
   id               String              @id @default(cuid())
   name             String
   description      String?
-  /// One slot per currency, all optional: a product is sellable in the
-  /// currencies it has a price for and invisible in the rest. Mirrors
-  /// ExtraUnitPrice, the closest model (a one-time purchase).
+  /// Months the buyer may activate this batch's GenCodes for. Doubles as the
+  /// annual Price's interval_count, so a 6- or 18-month product needs no
+  /// special case.
+  termLength       Int                 @default(12) @map("term_length")
+  /// One slot per currency per cadence, all optional: a product is sellable in
+  /// the currencies it has a price for and invisible in the rest.
+  ///
+  /// The unprefixed `price*` is the ANNUAL amount; `monthlyPrice*` is the
+  /// instalment. Deliberately independent rather than price/termLength — the
+  /// whole point is a real annual discount (29.90 x 12 against 299.00), not an
+  /// even split. Same naming and same reasoning as Subscription.
   priceUsd         Decimal?            @map("price_usd") @db.Decimal(10, 2)
+  monthlyPriceUsd  Decimal?            @map("monthly_price_usd") @db.Decimal(10, 2)
   priceBrl         Decimal?            @map("price_brl") @db.Decimal(10, 2)
+  monthlyPriceBrl  Decimal?            @map("monthly_price_brl") @db.Decimal(10, 2)
   priceMxn         Decimal?            @map("price_mxn") @db.Decimal(10, 2)
+  monthlyPriceMxn  Decimal?            @map("monthly_price_mxn") @db.Decimal(10, 2)
   isActive         Boolean             @default(true) @map("is_active")
   createdAt        DateTime            @default(now()) @map("created_at")
   updatedAt        DateTime            @updatedAt @map("updated_at")
   quantity         Int                 @default(1)
   stripeProductId  String?             @unique @map("stripe_product_id")
-  stripePriceIdUsd String?             @unique @map("stripe_price_id_usd")
-  stripePriceIdBrl String?             @unique @map("stripe_price_id_brl")
-  stripePriceIdMxn String?             @unique @map("stripe_price_id_mxn")
+  stripeAnnualPriceIdUsd  String?      @unique @map("stripe_annual_price_id_usd")
+  stripeMonthlyPriceIdUsd String?      @unique @map("stripe_monthly_price_id_usd")
+  stripeAnnualPriceIdBrl  String?      @unique @map("stripe_annual_price_id_brl")
+  stripeMonthlyPriceIdBrl String?      @unique @map("stripe_monthly_price_id_brl")
+  stripeAnnualPriceIdMxn  String?      @unique @map("stripe_annual_price_id_mxn")
+  stripeMonthlyPriceIdMxn String?      @unique @map("stripe_monthly_price_id_mxn")
   genCodes         GenCode[]
   sales            Sale[]
   coupons          DiscountCoupon[]    @relation("CouponPackages")
@@ -238,7 +252,18 @@ model Sale {
   amountTotal           Int?                @map("amount_total")
   currency              String?
   discountCouponId      String?             @map("discount_coupon_id")
+  /// 'annual' | 'monthly'. Free text, matching AppSale.cadence's convention.
+  cadence               String?
+  /// Raw Stripe subscription status, stored exactly as reported and never
+  /// interpreted on write. Null for a sale that never involved a subscription.
+  status                String?
+  /// End of the period in which this sale's GenCodes may still be activated.
+  /// Null means no term — which is what keeps a sale made before cadence
+  /// existed redeemable forever. Lives here rather than on GenCode because the
+  /// whole batch moves together: one field, not 200 rows rewritten monthly.
+  accessEndsAt          DateTime?           @map("access_ends_at")
   stripeSessionId       String?             @unique @map("stripe_session_id")
+  stripeSubscriptionId  String?             @unique @map("stripe_subscription_id")
   stripePaymentIntentId String?             @map("stripe_payment_intent_id")
   genCodes              GenCode[]
   tenant                Tenant              @relation(fields: [tenantId], references: [id], map: "sales_customer_id_fkey")

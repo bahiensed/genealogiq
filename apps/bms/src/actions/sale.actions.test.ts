@@ -43,7 +43,15 @@ vi.mock("next-intl/server", () => ({
 import { createSalePaymentLink, reverseSale, markSalePaidManually, resendSaleCharge } from "./sale.actions"
 import { verifyAdmin, requireRole } from "@/lib/dal"
 
-const input = { packageId: "p1", tenantId: "c1", quantity: 2, discountCouponId: "" }
+const PKG = {
+  name: "GenCode", termLength: 12,
+  priceUsd: 29.99, priceBrl: null, priceMxn: null,
+  monthlyPriceUsd: 2.99, monthlyPriceBrl: null, monthlyPriceMxn: null,
+  stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
+  stripeMonthlyPriceIdUsd: "price_m1", stripeMonthlyPriceIdBrl: null, stripeMonthlyPriceIdMxn: null,
+}
+
+const input = { packageId: "p1", tenantId: "c1", quantity: 2, discountCouponId: "", cadence: "annual" as const }
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -51,19 +59,17 @@ beforeEach(() => {
   vi.mocked(requireRole).mockResolvedValue({ user: { id: "admin-1", role: "OWNER" } } as never)
   settleMock.mockResolvedValue(undefined)
   prismaMock.package.findUnique.mockResolvedValue({
-    isActive: true, stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null,
+    isActive: true,
+    stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
+    stripeMonthlyPriceIdUsd: "price_m1", stripeMonthlyPriceIdBrl: null, stripeMonthlyPriceIdMxn: null,
   })
   prismaMock.tenant.findUnique.mockResolvedValue({ isActive: true })
   prismaMock.sale.create.mockResolvedValue({ id: 99 })
   prismaMock.sale.update.mockResolvedValue({})
   // openCheckoutForSale re-reads the row it is opening a session for.
   prismaMock.sale.findUnique.mockResolvedValue({
-    quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
-    package: {
-      name: "GenCode",
-      priceUsd: 29.99, priceBrl: null, priceMxn: null,
-      stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null,
-    },
+    quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1", cadence: "annual",
+    package: PKG,
     tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
   })
   prismaMock.sale.delete.mockResolvedValue({})
@@ -96,7 +102,9 @@ describe("createSalePaymentLink — guards", () => {
   // this could not bite, because no money ever changed hands.
   it("refuses a product with no Stripe price", async () => {
     prismaMock.package.findUnique.mockResolvedValue({
-      isActive: true, stripePriceIdUsd: null, stripePriceIdBrl: null, stripePriceIdMxn: null,
+      isActive: true,
+      stripeAnnualPriceIdUsd: null, stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
+      stripeMonthlyPriceIdUsd: null, stripeMonthlyPriceIdBrl: null, stripeMonthlyPriceIdMxn: null,
     })
     const res = await createSalePaymentLink(input)
     expect(res).toEqual({ ok: false, message: "sale.packageNotSyncedInCurrency" })
@@ -133,12 +141,49 @@ describe("createSalePaymentLink — the session", () => {
     expect(prismaMock.genCode.createMany).not.toHaveBeenCalled()
   })
 
-  it("stamps origin and saleId so both webhooks can tell whose session it is", async () => {
+  // subscription_data is the one that matters: it stamps the metadata onto the
+  // Stripe Subscription, and the webhook reads it from there and nowhere else.
+  // Omit it and every customer.subscription.* event silently no-ops — the
+  // failure this flow is most likely to hit and least likely to notice.
+  it("stamps origin and saleId on the SUBSCRIPTION, not just the session", async () => {
     await createSalePaymentLink(input)
 
     const arg = stripeMock.checkout.sessions.create.mock.calls[0][0]
+    expect(arg.mode).toBe("subscription")
     expect(arg.metadata).toMatchObject({ origin: "bms", saleId: "99", tenantId: "c1", packageId: "p1" })
-    expect(arg.payment_intent_data.metadata).toMatchObject({ origin: "bms", saleId: "99" })
+    expect(arg.subscription_data.metadata).toMatchObject({
+      origin: "bms", saleId: "99", cadence: "annual", termLength: "12",
+    })
+  })
+
+  it("charges the instalment price on a monthly plan, and the annual one otherwise", async () => {
+    await createSalePaymentLink(input)
+    expect(stripeMock.checkout.sessions.create.mock.calls[0][0].line_items[0].price).toBe("price_1")
+
+    vi.clearAllMocks()
+    prismaMock.sale.create.mockResolvedValue({ id: 99 })
+    prismaMock.sale.update.mockResolvedValue({})
+    prismaMock.package.findUnique.mockResolvedValue({
+      isActive: true,
+      stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
+      stripeMonthlyPriceIdUsd: "price_m1", stripeMonthlyPriceIdBrl: null, stripeMonthlyPriceIdMxn: null,
+    })
+    prismaMock.tenant.findUnique.mockResolvedValue({ isActive: true })
+    prismaMock.sale.findUnique.mockResolvedValue({
+      quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
+      cadence: "monthly", package: PKG,
+      tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
+    })
+    ensureCustomerMock.mockResolvedValue("cus_1")
+    emailMock.mockResolvedValue(undefined)
+    stripeMock.checkout.sessions.create.mockResolvedValue({
+      id: "cs_2", url: "https://checkout.stripe.com/cs_2",
+      amount_subtotal: 598, amount_total: 598, currency: "usd",
+    })
+
+    await createSalePaymentLink({ ...input, cadence: "monthly" })
+
+    expect(stripeMock.checkout.sessions.create.mock.calls[0][0].line_items[0].price).toBe("price_m1")
   })
 
   // `discounts` and `allow_promotion_codes` are mutually exclusive in the Stripe
@@ -157,11 +202,11 @@ describe("createSalePaymentLink — the session", () => {
     // which is what lets a resend re-resolve it later instead of carrying a
     // stale promotion code forward.
     prismaMock.sale.findUnique.mockResolvedValue({
-      quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: "coupon-1", soldById: "admin-1",
+      quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: "coupon-1", soldById: "admin-1", cadence: "annual",
       package: {
         name: "GenCode",
         priceUsd: 29.99, priceBrl: null, priceMxn: null,
-        stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null,
+        stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
       },
       tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
     })
@@ -336,9 +381,9 @@ describe("resendSaleCharge", () => {
     prismaMock.sale.findUnique
       .mockResolvedValueOnce({ ...liveSale, expiredAt: new Date() })
       .mockResolvedValue({
-        quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
+        quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1", cadence: "annual",
         package: { name: "GenCode", priceUsd: 29.99, priceBrl: null, priceMxn: null,
-                   stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null },
+                   stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null },
         tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
       })
 
@@ -353,9 +398,9 @@ describe("resendSaleCharge", () => {
     prismaMock.sale.findUnique
       .mockResolvedValueOnce({ ...liveSale, failedAt: new Date() })
       .mockResolvedValue({
-        quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
+        quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1", cadence: "annual",
         package: { name: "GenCode", priceUsd: 29.99, priceBrl: null, priceMxn: null,
-                   stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null },
+                   stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null },
         tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
       })
 
@@ -370,9 +415,9 @@ describe("resendSaleCharge", () => {
     prismaMock.sale.findUnique
       .mockResolvedValueOnce({ ...liveSale, expiredAt: new Date() })
       .mockResolvedValue({
-        quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
+        quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1", cadence: "annual",
         package: { name: "GenCode", priceUsd: 29.99, priceBrl: null, priceMxn: null,
-                   stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null },
+                   stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null },
         tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
       })
 

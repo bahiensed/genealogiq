@@ -10,6 +10,9 @@ export async function getLicenseByGenCode(genCode: string) {
       genCode:   true,
       status:    true,
       appUserId: true,
+      sale: {
+        select: { paidAt: true, reversedAt: true, status: true, accessEndsAt: true },
+      },
     },
   })
 }

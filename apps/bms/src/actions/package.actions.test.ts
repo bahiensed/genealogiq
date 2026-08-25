@@ -43,17 +43,30 @@ import { createPackage, updatePackage, deletePackage } from "./package.actions"
 import { verifyAdmin } from "@/lib/dal"
 
 const validInput = {
-  name:        "GenCode",
-  quantity:    10,
-  description: "Produto com 10 GenCodes",
-  priceUsd:    50,
-  priceBrl:    0,
-  priceMxn:    0,
-  isActive:    true,
+  name:            "GenCode",
+  quantity:        10,
+  description:     "Produto com 10 GenCodes",
+  termLength:      12,
+  priceUsd:        50,
+  monthlyPriceUsd: 0,
+  priceBrl:        0,
+  monthlyPriceBrl: 0,
+  priceMxn:        0,
+  monthlyPriceMxn: 0,
+  isActive:        true,
 }
 
-const noIds = { stripePriceIdUsd: null, stripePriceIdBrl: null, stripePriceIdMxn: null }
-const noPrices = { priceUsd: null, priceBrl: null, priceMxn: null }
+const noIds = {
+  stripeAnnualPriceIdUsd: null, stripeMonthlyPriceIdUsd: null,
+  stripeAnnualPriceIdBrl: null, stripeMonthlyPriceIdBrl: null,
+  stripeAnnualPriceIdMxn: null, stripeMonthlyPriceIdMxn: null,
+}
+const noPrices = {
+  termLength: 12,
+  priceUsd: null, monthlyPriceUsd: null,
+  priceBrl: null, monthlyPriceBrl: null,
+  priceMxn: null, monthlyPriceMxn: null,
+}
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -90,54 +103,77 @@ describe("createPackage", () => {
 })
 
 describe("updatePackage", () => {
-  // Stripe Prices are immutable, so a changed number invalidates the synced id —
-  // but only for that currency. Editing the real price must not unsync dollars.
-  it("clears only the changed currency's price ref", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({
-      priceUsd: new FakeDecimal(50), priceBrl: new FakeDecimal(200), priceMxn: null,
-      stripePriceIdUsd: "price_usd", stripePriceIdBrl: "price_brl", stripePriceIdMxn: null,
-    })
+  const synced = (over: Record<string, unknown> = {}) => ({
+    termLength: 12,
+    priceUsd: new FakeDecimal(50), monthlyPriceUsd: new FakeDecimal(5),
+    priceBrl: new FakeDecimal(200), monthlyPriceBrl: null,
+    priceMxn: null, monthlyPriceMxn: null,
+    stripeAnnualPriceIdUsd: "annual_usd", stripeMonthlyPriceIdUsd: "monthly_usd",
+    stripeAnnualPriceIdBrl: "annual_brl", stripeMonthlyPriceIdBrl: null,
+    stripeAnnualPriceIdMxn: null,         stripeMonthlyPriceIdMxn: null,
+    ...over,
+  })
+
+  // Stripe Prices are immutable, so a changed number invalidates its synced id —
+  // but only that one. Editing the real price must not unsync dollars, and
+  // editing an amount must not unsync the other cadence.
+  it("clears only the cadence and currency whose amount changed", async () => {
+    prismaMock.package.findUnique.mockResolvedValue(synced())
     prismaMock.package.update.mockResolvedValue({})
     stripeMock.prices.update.mockResolvedValue({})
 
-    // USD unchanged at 50, BRL moves 200 -> 250
-    const res = await updatePackage("p1", { ...validInput, priceUsd: 50, priceBrl: 250 })
+    // BRL annual 200 -> 250; everything else untouched
+    const res = await updatePackage("p1", {
+      ...validInput, priceUsd: 50, monthlyPriceUsd: 5, priceBrl: 250, monthlyPriceBrl: 0,
+    })
 
     const data = prismaMock.package.update.mock.calls[0][0].data
-    expect(data).not.toHaveProperty("stripePriceIdUsd")
-    expect(data.stripePriceIdBrl).toBeNull()
-    expect(data).not.toHaveProperty("stripeProductId")
-    expect(stripeMock.prices.update).toHaveBeenCalledWith("price_brl", { active: false })
-    expect(stripeMock.prices.update).not.toHaveBeenCalledWith("price_usd", expect.anything())
+    expect(data.stripeAnnualPriceIdBrl).toBeNull()
+    expect(data).not.toHaveProperty("stripeAnnualPriceIdUsd")
+    expect(data).not.toHaveProperty("stripeMonthlyPriceIdUsd")
+    expect(stripeMock.prices.update).toHaveBeenCalledWith("annual_brl", { active: false })
+    expect(stripeMock.prices.update).not.toHaveBeenCalledWith("annual_usd", expect.anything())
     expect(res).toEqual({ ok: true, message: "package.updatedStripeCleared" })
   })
 
-  // Removing a price is as much a change as editing one — the synced Price must
-  // not stay live for a currency the product is no longer sold in.
-  it("clears the ref when a price is removed entirely", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({
-      priceUsd: new FakeDecimal(50), priceBrl: new FakeDecimal(200), priceMxn: null,
-      stripePriceIdUsd: "price_usd", stripePriceIdBrl: "price_brl", stripePriceIdMxn: null,
-    })
+  it("clears only the monthly id when only the instalment changed", async () => {
+    prismaMock.package.findUnique.mockResolvedValue(synced())
     prismaMock.package.update.mockResolvedValue({})
     stripeMock.prices.update.mockResolvedValue({})
 
-    await updatePackage("p1", { ...validInput, priceUsd: 50, priceBrl: 0 })
+    await updatePackage("p1", { ...validInput, priceUsd: 50, monthlyPriceUsd: 6, priceBrl: 200 })
 
-    expect(prismaMock.package.update.mock.calls[0][0].data.stripePriceIdBrl).toBeNull()
+    const data = prismaMock.package.update.mock.calls[0][0].data
+    expect(data.stripeMonthlyPriceIdUsd).toBeNull()
+    expect(data).not.toHaveProperty("stripeAnnualPriceIdUsd")
+  })
+
+  // termLength is every annual Price's interval_count, so moving it invalidates
+  // all of them at once — and none of the monthly ones, whose interval_count is
+  // always 1.
+  it("clears every annual id when the term changes, and no monthly one", async () => {
+    prismaMock.package.findUnique.mockResolvedValue(synced())
+    prismaMock.package.update.mockResolvedValue({})
+    stripeMock.prices.update.mockResolvedValue({})
+
+    await updatePackage("p1", {
+      ...validInput, termLength: 24, priceUsd: 50, monthlyPriceUsd: 5, priceBrl: 200,
+    })
+
+    const data = prismaMock.package.update.mock.calls[0][0].data
+    expect(data.stripeAnnualPriceIdUsd).toBeNull()
+    expect(data.stripeAnnualPriceIdBrl).toBeNull()
+    expect(data).not.toHaveProperty("stripeMonthlyPriceIdUsd")
   })
 
   it("keeps every ref when nothing changed", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({
-      priceUsd: new FakeDecimal(50), priceBrl: null, priceMxn: null,
-      stripePriceIdUsd: "price_usd", stripePriceIdBrl: null, stripePriceIdMxn: null,
-    })
+    prismaMock.package.findUnique.mockResolvedValue(synced())
     prismaMock.package.update.mockResolvedValue({})
 
-    const res = await updatePackage("p1", validInput)
+    const res = await updatePackage("p1", {
+      ...validInput, priceUsd: 50, monthlyPriceUsd: 5, priceBrl: 200,
+    })
 
-    const data = prismaMock.package.update.mock.calls[0][0].data
-    expect(data).not.toHaveProperty("stripePriceIdUsd")
     expect(stripeMock.prices.update).not.toHaveBeenCalled()
     expect(res).toEqual({ ok: true, message: "package.updated" })
   })

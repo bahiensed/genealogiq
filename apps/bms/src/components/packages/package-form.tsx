@@ -30,7 +30,7 @@ interface PackageFormProps {
   id:               string
   defaultValues:    PackageFormValues
   stripeProductId?: string | null
-  stripePriceIds?:  { usd: string | null; brl: string | null; mxn: string | null }
+  stripePriceIds?:  Record<'usd' | 'brl' | 'mxn', { annual: string | null; monthly: string | null }>
 }
 
 // Edit only. Creating a product is a dialog on the list (new-product-dialog),
@@ -43,15 +43,21 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceIds
   // Sync is per currency now: a product can be live in reais and unsynced in
   // dollars, and the panel has to say which is which rather than one badge for
   // the whole row.
-  const currencies = [
-    { code: 'USD', price: defaultValues.priceUsd, id: stripePriceIds?.usd ?? null },
-    { code: 'BRL', price: defaultValues.priceBrl, id: stripePriceIds?.brl ?? null },
-    { code: 'MXN', price: defaultValues.priceMxn, id: stripePriceIds?.mxn ?? null },
-  ]
-  // Only priced currencies can be out of sync; an unpriced one is not missing
-  // anything.
-  const pending  = currencies.filter((c) => c.price > 0 && !c.id)
-  const isSynced = pending.length === 0
+  // Sync is per currency AND per cadence: a product can be live annually in
+  // reais and still missing its monthly Price. Only what is priced can be out of
+  // sync — an unpriced cadence is not missing anything.
+  const currencies = (['usd', 'brl', 'mxn'] as const).map((k) => {
+    const annualPrice  = defaultValues[`price${k[0].toUpperCase()}${k.slice(1)}` as 'priceUsd']
+    const monthlyPrice = defaultValues[`monthlyPrice${k[0].toUpperCase()}${k.slice(1)}` as 'monthlyPriceUsd']
+    const ids = stripePriceIds?.[k] ?? { annual: null, monthly: null }
+    return {
+      code:    k.toUpperCase(),
+      pending: (annualPrice > 0 && !ids.annual) || (monthlyPrice > 0 && !ids.monthly),
+      priced:  annualPrice > 0 || monthlyPrice > 0,
+      ids,
+    }
+  })
+  const isSynced = currencies.every((c) => !c.pending)
   const noun = t('noun.product')
   const [serverError, setServerError] = useState<string | null>(null)
   const [syncOpen, setSyncOpen]       = useState(false)
@@ -124,9 +130,9 @@ export function PackageForm({ id, defaultValues, stripeProductId, stripePriceIds
               </div>
               <div className="flex flex-col gap-1 font-mono text-muted-foreground">
                 <span>{t('stripe.productId')} {stripeProductId ?? '—'}</span>
-                {currencies.filter((c) => c.price > 0).map((c) => (
+                {currencies.filter((c) => c.priced).map((c) => (
                   <span key={c.code}>
-                    {c.code}: {c.id ?? t('stripe.notSynced')}
+                    {c.code}: {c.ids.annual ?? '—'} / {c.ids.monthly ?? '—'}
                   </span>
                 ))}
               </div>

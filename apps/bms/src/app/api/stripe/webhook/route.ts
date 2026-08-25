@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
-import { applySalePayment, markSaleUnpayable, BMS_ORIGIN } from '@/lib/billing'
+import { applySalePayment, applySubscriptionToSale, markSaleUnpayable, BMS_ORIGIN } from '@/lib/billing'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -21,6 +21,9 @@ const RELEVANT_EVENTS = new Set<Stripe.Event['type']>([
   'checkout.session.async_payment_succeeded',
   'checkout.session.async_payment_failed',
   'checkout.session.expired',
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
 ])
 
 export async function POST(req: NextRequest) {
@@ -46,6 +49,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
+  // GenCode products are sold as subscriptions in both cadences, so the sale's
+  // state comes from these events and the checkout session is ignored — the
+  // same split the APP webhook already documents. deleted runs the same path as
+  // created/updated: it does not remove anything, it lands `canceled`, which
+  // closes the window on its own.
+  if (event.type.startsWith('customer.subscription.')) {
+    const sub = event.data.object as Stripe.Subscription
+    if ((sub.metadata ?? {}).origin !== BMS_ORIGIN) {
+      return NextResponse.json({ received: true, ignored: 'not a bms subscription' })
+    }
+    try {
+      // Ledger and apply in ONE transaction, the ordering the APP uses for
+      // subscriptions: a duplicate delivery hits the PK and a failed apply rolls
+      // the ledger row back so Stripe's retry can reprocess.
+      await prisma.$transaction(async (tx) => {
+        await tx.stripeEvent.create({ data: { id: event.id, type: event.type } })
+        await applySubscriptionToSale(sub)
+      })
+    } catch (err: unknown) {
+      if ((err as { code?: string }).code === 'P2002') {
+        return NextResponse.json({ received: true, duplicate: true })
+      }
+      console.error('[bms-stripe-webhook] applySubscriptionToSale failed', err)
+      return NextResponse.json({ error: 'internal' }, { status: 500 })
+    }
+    return NextResponse.json({ received: true })
+  }
+
   const session = event.data.object as Stripe.Checkout.Session
 
   // Stripe fans every subscribed event out to EVERY endpoint on the account, so
@@ -64,6 +95,12 @@ export async function POST(req: NextRequest) {
   if (event.type === 'checkout.session.async_payment_failed') {
     await markSaleUnpayable(session.id, 'failed')
     return NextResponse.json({ received: true })
+  }
+
+  // A subscription checkout also emits completed; its state is owned by the
+  // customer.subscription.* branch above and must not be settled twice here.
+  if (session.mode === 'subscription') {
+    return NextResponse.json({ received: true, ignored: 'subscription mode' })
   }
 
   if (session.payment_status !== 'paid') {

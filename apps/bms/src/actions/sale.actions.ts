@@ -16,16 +16,21 @@ import { BMS_ORIGIN, settleSaleManually } from '@/lib/billing'
 /** Stripe's ceiling for a Checkout Session is 30 days; a week is long enough to chase. */
 const LINK_TTL_DAYS = 7
 
-const PRICE_ID_BY_CURRENCY = {
-  usd: 'stripePriceIdUsd',
-  brl: 'stripePriceIdBrl',
-  mxn: 'stripePriceIdMxn',
+const PRICE_ID_BY_CADENCE = {
+  annual:  { usd: 'stripeAnnualPriceIdUsd',  brl: 'stripeAnnualPriceIdBrl',  mxn: 'stripeAnnualPriceIdMxn'  },
+  monthly: { usd: 'stripeMonthlyPriceIdUsd', brl: 'stripeMonthlyPriceIdBrl', mxn: 'stripeMonthlyPriceIdMxn' },
 } as const
 
 const PRICE_BY_CURRENCY = {
   usd: 'priceUsd',
   brl: 'priceBrl',
   mxn: 'priceMxn',
+} as const
+
+const MONTHLY_PRICE_BY_CURRENCY = {
+  usd: 'monthlyPriceUsd',
+  brl: 'monthlyPriceBrl',
+  mxn: 'monthlyPriceMxn',
 } as const
 
 /**
@@ -47,19 +52,25 @@ async function openCheckoutForSale(
     where:  { id: saleId },
     select: {
       quantity: true, tenantId: true, packageId: true, discountCouponId: true, soldById: true,
+      cadence: true,
       package: { select: {
-        name: true,
+        name: true, termLength: true,
         priceUsd: true, priceBrl: true, priceMxn: true,
-        stripePriceIdUsd: true, stripePriceIdBrl: true, stripePriceIdMxn: true,
+        monthlyPriceUsd: true, monthlyPriceBrl: true, monthlyPriceMxn: true,
+        stripeAnnualPriceIdUsd:  true, stripeAnnualPriceIdBrl:  true, stripeAnnualPriceIdMxn:  true,
+        stripeMonthlyPriceIdUsd: true, stripeMonthlyPriceIdBrl: true, stripeMonthlyPriceIdMxn: true,
       } },
       tenant:  { select: { email: true, name: true, tradeName: true } },
     },
   })
   if (!sale) throw new Error(`Sale ${saleId} not found`)
 
-  const priceId = sale.package[PRICE_ID_BY_CURRENCY[currency]]
-  const price   = sale.package[PRICE_BY_CURRENCY[currency]]
-  if (!priceId) throw new Error(`Package ${sale.packageId} has no ${currency} price synced`)
+  const cadence = sale.cadence === 'monthly' ? 'monthly' : 'annual'
+  const priceId = sale.package[PRICE_ID_BY_CADENCE[cadence][currency]]
+  const price   = cadence === 'monthly'
+    ? sale.package[MONTHLY_PRICE_BY_CURRENCY[currency]]
+    : sale.package[PRICE_BY_CURRENCY[currency]]
+  if (!priceId) throw new Error(`Package ${sale.packageId} has no ${cadence} ${currency} price synced`)
 
   // Re-resolved on every open, not carried over: a coupon valid when the first
   // link was sent can be expired by the time someone asks for a second one.
@@ -78,21 +89,30 @@ async function openCheckoutForSale(
   const expiresAt = new Date(Date.now() + LINK_TTL_DAYS * 24 * 60 * 60 * 1000)
 
   const metadata = {
-    origin:    BMS_ORIGIN,
-    saleId:    String(saleId),
-    tenantId:  sale.tenantId,
-    packageId: sale.packageId,
-    quantity:  String(sale.quantity),
-    soldById:  sale.soldById,
+    origin:     BMS_ORIGIN,
+    saleId:     String(saleId),
+    tenantId:   sale.tenantId,
+    packageId:  sale.packageId,
+    quantity:   String(sale.quantity),
+    soldById:   sale.soldById,
+    cadence,
+    // The webhook needs the term to know when to stop a monthly plan, and the
+    // product's termLength may be edited between the link going out and the
+    // customer paying.
+    termLength: String(sale.package.termLength),
   }
 
   const checkout = await stripe.checkout.sessions.create({
-    mode:                'payment',
+    mode:                'subscription',
     customer,
     line_items:          [{ price: priceId, quantity: sale.quantity }],
     client_reference_id: sale.tenantId,
     metadata,
-    payment_intent_data: { metadata },
+    // Stamped on the SUBSCRIPTION, not just the session. The webhook reads it
+    // from there and nowhere else — omit this and every customer.subscription.*
+    // event silently no-ops, which is the failure mode this whole flow is most
+    // likely to hit and least likely to notice.
+    subscription_data:   { metadata },
     expires_at:          Math.floor(expiresAt.getTime() / 1000),
     success_url:         `${baseUrl}/sales/manual-sales?status=success`,
     cancel_url:          `${baseUrl}/sales/manual-sales?status=cancel`,
@@ -153,17 +173,21 @@ export async function createSalePaymentLink(data: SaleFormValues): Promise<Actio
   const validated = getSaleSchema(identityTranslator).safeParse(data)
   if (!validated.success) return fail(t('common.invalidData'))
 
-  const { packageId, tenantId, quantity, discountCouponId } = validated.data
+  const { packageId, tenantId, quantity, discountCouponId, cadence } = validated.data
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId },
-    select: { isActive: true, stripePriceIdUsd: true, stripePriceIdBrl: true, stripePriceIdMxn: true },
+    select: {
+      isActive: true,
+      stripeAnnualPriceIdUsd:  true, stripeAnnualPriceIdBrl:  true, stripeAnnualPriceIdMxn:  true,
+      stripeMonthlyPriceIdUsd: true, stripeMonthlyPriceIdBrl: true, stripeMonthlyPriceIdMxn: true,
+    },
   })
   if (!pkg) return fail(t('sale.packageNotFound'))
   if (!pkg.isActive) return fail(t('sale.packageInactive'))
   // The synced-price guard is now per currency: a product priced only in dollars
   // is simply not sellable from the Portuguese interface.
-  if (!pkg[PRICE_ID_BY_CURRENCY[currency]]) {
+  if (!pkg[PRICE_ID_BY_CADENCE[cadence][currency]]) {
     return fail(t('sale.packageNotSyncedInCurrency', { currency: currencyCode(currency) }))
   }
 
@@ -197,6 +221,7 @@ export async function createSalePaymentLink(data: SaleFormValues): Promise<Actio
       quantity,
       soldById: session.user!.id,
       discountCouponId: discountCouponId || null,
+      cadence,
     },
     select: { id: true },
   })

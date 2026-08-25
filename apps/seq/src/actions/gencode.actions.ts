@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
+import { isSaleWindowOpen } from '@genealogiq/core'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail, sendGenCodeDeliveryEmail } from '@/lib/email'
 import { hashToken, done, fail, type ActionResult } from '@genealogiq/core'
@@ -27,6 +28,25 @@ function paths(genCode: string) {
 }
 
 /** Toggle the operator-set "printed" flag. */
+/**
+ * Refuses to write off a code whose batch can no longer be activated.
+ *
+ * Selling one would hand a consumer a plaque that fails the moment they scan
+ * it — the worst possible place to discover the term ran out or the tenant is
+ * behind on an instalment. Cheaper to stop here.
+ *
+ * Deliberately NOT applied to undoGenCodeSale: undoing a sale must keep working
+ * whatever the window says, or a mistake made just before a lapse becomes
+ * permanent.
+ */
+async function saleWindowClosed(genCode: string): Promise<boolean> {
+  const row = await prisma.genCode.findUnique({
+    where:  { genCode },
+    select: { sale: { select: { paidAt: true, reversedAt: true, status: true, accessEndsAt: true } } },
+  })
+  return !isSaleWindowOpen(row?.sale)
+}
+
 export async function markGenCodePrinted(genCode: string, printed: boolean): Promise<ActionResult> {
   const t = await getTranslations('Actions')
   const { customerId } = await verifyTenantSession()
@@ -62,6 +82,8 @@ export async function sellGenCodeManually(
     if (!v.success) return fail(t('gencode.invalidValue'))
     soldValue = v.data
   }
+
+  if (await saleWindowClosed(genCode)) return fail(t('gencode.batchClosed'))
 
   // Atomic guard: only an AVAILABLE code can be sold — prevents double-selling.
   const res = await prisma.genCode.updateMany({
@@ -111,6 +133,8 @@ export async function sellGenCodeViaPlatform(
     if (!v.success) return fail(t('gencode.invalidValue'))
     soldValue = v.data
   }
+
+  if (await saleWindowClosed(genCode)) return fail(t('gencode.batchClosed'))
 
   const existing = await prisma.appUser.findUnique({
     where:  { email },

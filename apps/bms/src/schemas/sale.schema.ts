@@ -18,6 +18,8 @@ export function getSaleSchema(t: Translator) {
       .max(MAX_SALE_QUANTITY, t('maxQuantity', { count: MAX_SALE_QUANTITY })),
     // Empty string is "no coupon" — a Select cannot hold undefined.
     discountCouponId: z.string().optional(),
+    /// How the tenant pays for the term: once up front, or in instalments.
+    cadence:          z.enum(['annual', 'monthly']),
   })
 }
 
@@ -28,4 +30,5 @@ export const saleDefaultValues: SaleFormValues = {
   tenantId:         '',
   quantity:         1,
   discountCouponId: '',
+  cadence:          'annual',
 }
