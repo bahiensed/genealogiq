@@ -1,3 +1,4 @@
+
 import 'server-only'
 
 import { prisma } from '@/lib/prisma'
@@ -13,7 +14,10 @@ export async function getDiscountCoupons() {
       code:           true,
       description:    true,
       discountType:   true,
-      discountValue:  true,
+      percentOff:     true,
+      amountOffUsd:   true,
+      amountOffBrl:   true,
+      amountOffMxn:   true,
       duration:       true,
       durationInMonths: true,
       maxRedemptions: true,
@@ -35,7 +39,10 @@ export async function getDiscountCoupon(id: string) {
       code:                  true,
       description:           true,
       discountType:          true,
-      discountValue:         true,
+      percentOff:            true,
+      amountOffUsd:          true,
+      amountOffBrl:          true,
+      amountOffMxn:          true,
       duration:              true,
       durationInMonths:      true,
       maxRedemptions:        true,
@@ -84,7 +91,7 @@ export async function getActivePackagesForSelect(currency: AppCurrency) {
  * the whole set is a handful of rows, so a round trip per product change would
  * buy a spinner and nothing else.
  *
- * Three filters, and only the first is obvious:
+ * Four filters, and only the first is obvious:
  *
  * - `isActive` — the operator's own on/off switch.
  * - `stripePromotionCodeId` present — the discount is enforced by Stripe, not by
@@ -95,6 +102,12 @@ export async function getActivePackagesForSelect(currency: AppCurrency) {
  *   never reconciles it against the expiry date, so an expired coupon looks
  *   perfectly usable there. Stripe would reject it at checkout.
  *
+ * - the currency the sale is being made in. A percentage has none and always
+ *   qualifies; a fixed amount only appears where it has a value, because Stripe
+ *   would refuse it otherwise. This is Douglas's rule — a coupon in Portuguese
+ *   is a coupon in reais — falling out of the data rather than being enforced
+ *   separately.
+ *
  * An empty `packageIds` means every product — that is how createDiscountCoupon
  * writes it, sending Stripe an `applies_to` only when the list is non-empty.
  *
@@ -102,30 +115,46 @@ export async function getActivePackagesForSelect(currency: AppCurrency) {
  * re-resolves the coupon server-side, because a page left open can offer one
  * that has since expired.
  */
-export async function getSelectableCoupons() {
+export async function getSelectableCoupons(currency: AppCurrency) {
   await verifySession()
+
+  const AMOUNT_BY_CURRENCY = { usd: 'amountOffUsd', brl: 'amountOffBrl', mxn: 'amountOffMxn' } as const
 
   const rows = await prisma.discountCoupon.findMany({
     where: {
       isActive:              true,
       stripePromotionCodeId: { not: null },
       OR: [{ redeemBy: null }, { redeemBy: { gt: new Date() } }],
+      // Douglas's rule: a coupon in Portuguese is a coupon in reais. A
+      // percentage has no currency and is always eligible; a fixed amount is
+      // only offered where it has a value, because Stripe would refuse it.
+      AND: [{ OR: [
+        { discountType: 'percent' },
+        { [AMOUNT_BY_CURRENCY[currency]]: { gt: 0 } },
+      ] }],
     },
     select: {
       id:            true,
       code:          true,
       discountType:  true,
-      discountValue: true,
+      percentOff:    true,
+      amountOffUsd:  true,
+      amountOffBrl:  true,
+      amountOffMxn:  true,
       appliesTo:     { select: { id: true } },
     },
     orderBy: { code: 'asc' },
   })
 
   return rows.map((c) => ({
-    id:            c.id,
-    code:          c.code,
-    discountType:  c.discountType,
-    discountValue: Number(c.discountValue),
-    packageIds:    c.appliesTo.map((p) => p.id),
+    id:           c.id,
+    code:         c.code,
+    discountType: c.discountType,
+    // One number, already resolved for this currency — the form never has to
+    // know which of the four columns applies.
+    value: c.discountType === 'percent'
+      ? Number(c.percentOff ?? 0)
+      : Number(c[AMOUNT_BY_CURRENCY[currency]] ?? 0),
+    packageIds: c.appliesTo.map((p) => p.id),
   }))
 }

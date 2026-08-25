@@ -482,6 +482,7 @@
     }
   },
   "Errors": {
+    "atLeastOneAmount": "Set at least one amount",
     "atLeastOnePrice": "Set at least one price",
     "codeFormat": "Use uppercase letters, numbers and underscores only",
     "countryCodeRequired": "Country code is required",

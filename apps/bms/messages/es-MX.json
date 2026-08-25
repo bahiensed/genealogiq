@@ -482,6 +482,7 @@
     }
   },
   "Errors": {
+    "atLeastOneAmount": "Indica al menos un monto",
     "atLeastOnePrice": "Indica al menos un precio",
     "codeFormat": "Usa solo letras mayúsculas, números y guiones bajos",
     "countryCodeRequired": "El código de país es obligatorio",

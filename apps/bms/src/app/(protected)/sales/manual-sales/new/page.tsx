@@ -12,7 +12,7 @@ export default async function NewManualSalePage() {
   const [packages, rawCustomers, coupons] = await Promise.all([
     getActivePackages(currency),
     getActiveCustomers(),
-    getSelectableCoupons(),
+    getSelectableCoupons(currency),
   ])
 
   const customers = rawCustomers.map((c) => ({

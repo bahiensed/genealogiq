@@ -46,12 +46,13 @@ interface Customer {
 }
 
 interface Coupon {
-  id:            string
-  code:          string
-  discountType:  string
-  discountValue: number
+  id:           string
+  code:         string
+  discountType: string
+  /** Already resolved for the sale's currency by getSelectableCoupons. */
+  value:        number
   /** Empty means every product. */
-  packageIds:    string[]
+  packageIds:   string[]
 }
 
 interface SaleFormProps {
@@ -114,8 +115,8 @@ export function SaleForm({ packages = [], customers = [], coupons = [] }: SaleFo
   const coupon   = availableCoupons.find(c => c.id === selectedCouponId)
   const discount = !coupon ? 0
     : coupon.discountType === 'percent'
-      ? subtotal * (coupon.discountValue / 100)
-      : Math.min(coupon.discountValue, subtotal)
+      ? subtotal * (coupon.value / 100)
+      : Math.min(coupon.value, subtotal)
   const total = subtotal - discount
 
   function onSubmit(data: SaleFormValues) {
@@ -230,8 +231,8 @@ export function SaleForm({ packages = [], customers = [], coupons = [] }: SaleFo
                         ...availableCoupons.map((c) => ({
                           value: c.id,
                           label: c.discountType === 'percent'
-                            ? `${c.code} — ${c.discountValue}%`
-                            : `${c.code} — ${usd.format(c.discountValue)}`,
+                            ? `${c.code} — ${c.value}%`
+                            : `${c.code} — ${usd.format(c.value)}`,
                         })),
                       ]}
                       value={field.value ?? ''}

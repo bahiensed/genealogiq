@@ -158,7 +158,13 @@ model DiscountCoupon {
   code                  String    @unique
   description           String?
   discountType          String    @map("discount_type")
-  discountValue         Decimal   @map("discount_value") @db.Decimal(10, 2)
+  /// Exactly one of these two shapes is populated, per discountType.
+  /// A percentage has no currency and stays a single number; a fixed amount is
+  /// money, so it needs one slot per currency like every other price here.
+  percentOff            Decimal?  @map("percent_off") @db.Decimal(10, 2)
+  amountOffUsd          Decimal?  @map("amount_off_usd") @db.Decimal(10, 2)
+  amountOffBrl          Decimal?  @map("amount_off_brl") @db.Decimal(10, 2)
+  amountOffMxn          Decimal?  @map("amount_off_mxn") @db.Decimal(10, 2)
   duration              String
   durationInMonths      Int?      @map("duration_in_months")
   maxRedemptions        Int?      @map("max_redemptions")
