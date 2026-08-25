@@ -23,7 +23,7 @@ const customerRow = {
   id: "t1", entityType: "COMPANY", name: "Funerária X", tradeName: "X",
   taxId: "11222333000181", stateRegistration: "SR-1", municipalRegistration: "MR-1",
   birthDate: null, email: "x@y.com", phoneCountryCode: "55", phone: "11999998888",
-  notes: "internal note", categoryId: "cat1", isActive: true,
+  notes: "internal note", isActive: true,
   address: { zip: "12345-678", street: "Rua A" },
 }
 

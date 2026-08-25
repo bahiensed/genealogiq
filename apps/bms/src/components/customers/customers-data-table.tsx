@@ -16,7 +16,6 @@ export function CustomersDataTable({ currentUserRole, data }: CustomersDataTable
   const columnLabels: Record<string, string> = {
     name:       t('table.name'),
     entityType: t('table.type'),
-    category:   t('table.category'),
     email:      t('table.email'),
     isActive:   t('table.status'),
     createdAt:  t('table.createdAt'),

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/dal'
 
-const ENTITY_TYPES = ['users', 'customers', 'subscriptions', 'packages', 'customer-categories'] as const
+const ENTITY_TYPES = ['users', 'customers', 'subscriptions', 'packages'] as const
 type EntityType = (typeof ENTITY_TYPES)[number]
 
 async function resolveName(type: EntityType, id: string): Promise<string | null> {
@@ -21,10 +21,6 @@ async function resolveName(type: EntityType, id: string): Promise<string | null>
   }
   if (type === 'packages') {
     const record = await prisma.package.findUnique({ where: { id }, select: { name: true } })
-    return record?.name ?? null
-  }
-  if (type === 'customer-categories') {
-    const record = await prisma.tenantCategory.findUnique({ where: { id }, select: { name: true } })
     return record?.name ?? null
   }
   return null

@@ -29,12 +29,8 @@ import {
   SelectValue,
 } from '@genealogiq/ui/select'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
-import { AddCustomerCategoryDialog } from '@/components/customers/add-customer-category-dialog'
 import { Checkbox } from '@genealogiq/ui/checkbox'
 import { cn } from '@/lib/utils'
-
-interface Category { id: string; name: string }
-interface Props { categories?: Category[] }
 
 // Step titles/descriptions resolve from the Customers namespace at render time.
 const STEP_KEYS = [
@@ -49,7 +45,7 @@ type StepIndex = 0 | 1 | 2 | 3 | 4
 
 const STEP_FIELDS: Record<StepIndex, (keyof CustomerCreateFormValues | string)[]> = {
   0: ['entityType', 'name', 'tradeName', 'taxId', 'stateRegistration', 'municipalRegistration', 'birthDate'],
-  1: ['email', 'phoneCountryCode', 'phone', 'categoryId'],
+  1: ['email', 'phoneCountryCode', 'phone'],
   2: [],
   3: ['owner.firstName', 'owner.lastName', 'owner.email'],
   4: [],
@@ -63,12 +59,11 @@ const CATEGORY_MODULES = [
   { name: 'moduleCategoriesSuppliers', labelKey: 'supplierCat' },
 ] as const
 
-export function CustomerNewForm({ categories = [] }: Props) {
+export function CustomerNewForm() {
   const t   = useTranslations('Customers')
   const tc  = useTranslations('Common')
   const tErr = useTranslations('Errors')
   const [step, setStep]                 = useState<StepIndex>(0)
-  const [localCategories, setLocalCats] = useState(categories)
   const [serverError, setServerError]   = useState<string | null>(null)
   const router = useRouter()
 
@@ -297,29 +292,6 @@ export function CustomerNewForm({ categories = [] }: Props) {
               )} />
             </div>
 
-            <Controller name="categoryId" control={control} render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <div className="flex items-center justify-between">
-                  <FieldLabel>{t('fields.category')}</FieldLabel>
-                  <AddCustomerCategoryDialog onCreated={(cat) => {
-                    setLocalCats(prev => [...prev, cat])
-                    field.onChange(cat.id)
-                  }} />
-                </div>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger aria-invalid={fieldState.invalid}>
-                    <SelectValue placeholder={t('placeholders.category')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {localCategories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )} />
-
             <Controller name="notes" control={control} render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel>{t('fields.notes')}</FieldLabel>
@@ -427,10 +399,6 @@ export function CustomerNewForm({ categories = [] }: Props) {
                       </label>
                     )} />
                   ))}
-                  <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
-                    <Checkbox checked disabled />
-                    {t('modules.labels.customerCat')}
-                  </label>
                 </div>
               </div>
 

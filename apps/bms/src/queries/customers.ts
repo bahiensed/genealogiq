@@ -26,7 +26,6 @@ export async function getCustomers() {
       email:      true,
       isActive:   true,
       createdAt:  true,
-      category:   { select: { id: true, name: true } },
     },
     orderBy: { createdAt: 'asc' },
   })
@@ -50,7 +49,6 @@ export async function getCustomer(id: string) {
       phoneCountryCode:      true,
       phone:                 true,
       notes:                 true,
-      categoryId:            true,
       isActive:              true,
       moduleRecordsSuppliers:    true,
       moduleCategoriesSuppliers: true,

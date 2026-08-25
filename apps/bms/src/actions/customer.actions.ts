@@ -33,7 +33,7 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
   const validated = getCustomerCreateSchema(identityTranslator).safeParse(data)
   if (!validated.success) return fail(t('common.invalidData'))
 
-  const { address, birthDate, categoryId, owner, ...rest } = validated.data
+  const { address, birthDate, owner, ...rest } = validated.data
 
   const dupTax = await prisma.tenant.findFirst({ where: { taxId: rest.taxId }, select: { id: true } })
   if (dupTax) return fail(t('customer.taxIdExists'))
@@ -48,7 +48,6 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
         data: {
           ...rest,
           birthDate: birthDate ? new Date(birthDate) : null,
-          category:  categoryId ? { connect: { id: categoryId } } : undefined,
           address:   buildAddressWrite(address, 'create'),
         },
         select: { id: true },
@@ -94,7 +93,7 @@ export async function updateCustomer(id: string, data: CustomerFormValues): Prom
   const validated = getCustomerSchema(identityTranslator).safeParse(data)
   if (!validated.success) return fail(t('common.invalidData'))
 
-  const { address, birthDate, categoryId, ...rest } = validated.data
+  const { address, birthDate, ...rest } = validated.data
 
   const dupTax = await prisma.tenant.findFirst({ where: { taxId: rest.taxId, NOT: { id } }, select: { id: true } })
   if (dupTax) return fail(t('customer.taxIdExists'))
@@ -105,7 +104,6 @@ export async function updateCustomer(id: string, data: CustomerFormValues): Prom
       data: {
         ...rest,
         birthDate: birthDate ? new Date(birthDate) : null,
-        category:  categoryId ? { connect: { id: categoryId } } : { disconnect: true },
         address:   buildAddressWrite(address, 'update'),
       },
     })

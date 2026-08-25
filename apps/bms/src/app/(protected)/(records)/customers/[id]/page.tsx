@@ -1,19 +1,17 @@
 import { notFound } from 'next/navigation'
 import { getCustomer } from '@/queries/customers'
-import { getCustomerCategories } from '@/queries/customer-categories'
 import { CustomerForm } from '@/components/customers/customer-form'
 import { FormShell } from '@genealogiq/ui/form-shell'
 
 export default async function EditCustomerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [customer, categories] = await Promise.all([getCustomer(id), getCustomerCategories()])
+  const customer = await getCustomer(id)
   if (!customer) notFound()
 
   return (
     <FormShell>
       <CustomerForm
       id={id}
-      categories={categories}
       defaultValues={{
         entityType:            customer.entityType as 'INDIVIDUAL' | 'COMPANY',
         name:                  customer.name,
@@ -26,7 +24,6 @@ export default async function EditCustomerPage({ params }: { params: Promise<{ i
         phoneCountryCode:      customer.phoneCountryCode,
         phone:                 customer.phone,
         notes:                 customer.notes                 ?? '',
-        categoryId:            customer.categoryId            ?? '',
         isActive:              customer.isActive,
         moduleRecordsSuppliers:    customer.moduleRecordsSuppliers,
         moduleCategoriesSuppliers: customer.moduleCategoriesSuppliers,

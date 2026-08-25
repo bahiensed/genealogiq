@@ -30,7 +30,6 @@ import {
   SelectValue,
 } from '@genealogiq/ui/select'
 import { Field, FieldError, FieldGroup, FieldLabel } from '@genealogiq/ui/field'
-import { AddCustomerCategoryDialog } from '@/components/customers/add-customer-category-dialog'
 import { Checkbox } from '@genealogiq/ui/checkbox'
 import {
   Accordion,
@@ -41,12 +40,9 @@ import {
 
 const COUNTRY_CODE_OPTIONS = ['1', '52', '55'] as const
 
-interface Category { id: string; name: string }
-
 interface CustomerFormProps {
   id: string
   defaultValues?: CustomerFormValues
-  categories?: Category[]
 }
 
 const ALWAYS_ACTIVE = ['dashboard', 'buySubscriptions', 'viewSubscriptions', 'customers', 'sales', 'system'] as const
@@ -57,12 +53,11 @@ const CATEGORY_MODULES = [
   { name: 'moduleCategoriesSuppliers', labelKey: 'supplierCat' },
 ] as const
 
-export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFormProps) {
+export function CustomerForm({ id, defaultValues }: CustomerFormProps) {
   const t   = useTranslations('Customers')
   const tc  = useTranslations('Common')
   const tErr = useTranslations('Errors')
-  const [serverError, setServerError]   = useState<string | null>(null)
-  const [localCategories, setLocalCats] = useState(categories)
+  const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
 
   const form = useForm<CustomerFormInput, unknown, CustomerFormValues>({
@@ -235,29 +230,6 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                       )} />
                     </div>
 
-                    <Controller name="categoryId" control={control} render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <div className="flex items-center justify-between">
-                          <FieldLabel>{t('fields.category')}</FieldLabel>
-                          <AddCustomerCategoryDialog onCreated={(cat) => {
-                            setLocalCats(prev => [...prev, cat])
-                            field.onChange(cat.id)
-                          }} />
-                        </div>
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger aria-invalid={fieldState.invalid}>
-                            <SelectValue placeholder={t('placeholders.category')} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {localCategories.map((cat) => (
-                              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-                      </Field>
-                    )} />
-
                     <Controller name="notes" control={control} render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid}>
                         <FieldLabel>{t('fields.notes')}</FieldLabel>
@@ -329,10 +301,6 @@ export function CustomerForm({ id, defaultValues, categories = [] }: CustomerFor
                             </label>
                           )} />
                         ))}
-                        <label className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed select-none">
-                          <Checkbox checked disabled />
-                          {t('modules.labels.customerCat')}
-                        </label>
                       </div>
                     </div>
 

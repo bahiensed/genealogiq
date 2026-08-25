@@ -13,7 +13,7 @@ import {
   BreadcrumbSeparator,
 } from '@genealogiq/ui/breadcrumb'
 
-const RESOLVABLE = ['users', 'customers', 'subscriptions', 'packages', 'customer-categories'] as const
+const RESOLVABLE = ['users', 'customers', 'subscriptions', 'packages'] as const
 type ResolvableType = (typeof RESOLVABLE)[number]
 
 function formatSegment(segment: string): string {
