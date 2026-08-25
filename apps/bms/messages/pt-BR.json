@@ -669,12 +669,18 @@
       "resendCharge": "Reenviar cobrança",
       "reverse": "Estornar"
     },
+    "cadence": {
+      "annual": "À vista (anual)",
+      "annualOnly": "Este produto não tem preço mensal configurado.",
+      "monthly": "Mensal"
+    },
     "confirm": {
       "confirm": "Gerar e enviar",
       "description": "O link será enviado para o e-mail do cliente e vale 7 dias. Os GenCodes só são gerados após a confirmação do pagamento.",
       "title": "Gerar link de pagamento?"
     },
     "fields": {
+      "cadence": "Forma de pagamento",
       "coupon": "Cupom de Desconto",
       "customer": "Cliente",
       "package": "Produto",
@@ -712,6 +718,8 @@
     "summary": {
       "discount": "Desconto ({code})",
       "genCodes": "GenCodes a serem gerados",
+      "instalments": "Cobrado mensalmente por {count} meses. Os GenCodes são liberados no primeiro pagamento.",
+      "perMonth": "Por mês",
       "stripeAuthority": "Prévia. O valor final é calculado pelo Stripe no checkout.",
       "subtotal": "Subtotal",
       "totalPrice": "Preço total",

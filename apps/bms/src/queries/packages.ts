@@ -71,11 +71,20 @@ export async function getActivePackages(currency: AppCurrency) {
     orderBy: { name: 'asc' },
   })
 
+  const MONTHLY_BY_CURRENCY = { usd: 'monthlyPriceUsd', brl: 'monthlyPriceBrl', mxn: 'monthlyPriceMxn' } as const
+  const MONTHLY_ID_BY_CURRENCY = { usd: 'stripeMonthlyPriceIdUsd', brl: 'stripeMonthlyPriceIdBrl', mxn: 'stripeMonthlyPriceIdMxn' } as const
+
   return rows.map((r) => ({
-    id:       r.id,
-    name:     r.name,
-    quantity: r.quantity,
-    price:    Number(r[PRICE_BY_CURRENCY[currency]]),
+    id:         r.id,
+    name:       r.name,
+    quantity:   r.quantity,
+    termLength: r.termLength,
+    price:      Number(r[PRICE_BY_CURRENCY[currency]]),
+    // Only offered as an instalment plan when the amount AND its Stripe Price
+    // both exist — offering one we cannot charge would fail at checkout.
+    monthlyPrice: r[MONTHLY_BY_CURRENCY[currency]] !== null && r[MONTHLY_ID_BY_CURRENCY[currency]]
+      ? Number(r[MONTHLY_BY_CURRENCY[currency]])
+      : null,
   }))
 }
 

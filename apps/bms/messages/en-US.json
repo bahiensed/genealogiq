@@ -669,12 +669,18 @@
       "resendCharge": "Resend charge",
       "reverse": "Reverse"
     },
+    "cadence": {
+      "annual": "Up front (annual)",
+      "annualOnly": "This product has no monthly price configured.",
+      "monthly": "Monthly"
+    },
     "confirm": {
       "confirm": "Generate and send",
       "description": "The link will be emailed to the customer and is valid for 7 days. GenCodes are only minted once payment is confirmed.",
       "title": "Generate payment link?"
     },
     "fields": {
+      "cadence": "Payment plan",
       "coupon": "Discount Coupon",
       "customer": "Customer",
       "package": "Product",
@@ -712,6 +718,8 @@
     "summary": {
       "discount": "Discount ({code})",
       "genCodes": "GenCodes to be generated",
+      "instalments": "Billed monthly for {count} months. GenCodes are released on the first payment.",
+      "perMonth": "Per month",
       "stripeAuthority": "A preview. Stripe computes the final amount at checkout.",
       "subtotal": "Subtotal",
       "totalPrice": "Total price",
