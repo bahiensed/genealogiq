@@ -37,12 +37,6 @@
       "taxIdExists": "A customer with this tax ID already exists",
       "updated": "Customer updated successfully."
     },
-    "customerCategory": {
-      "created": "Category created successfully.",
-      "inUse": "Cannot delete: category is assigned to one or more customers.",
-      "notFound": "Category not found.",
-      "updated": "Category updated successfully."
-    },
     "discountCoupon": {
       "codeExists": "A coupon with this code already exists.",
       "createFailed": "Could not create coupon.",
@@ -193,43 +187,6 @@
       "updated": "Data updated successfully."
     }
   },
-  "CustomerCategories": {
-    "actions": {
-      "deactivate": "Deactivate",
-      "delete": "Delete",
-      "edit": "Edit",
-      "openMenu": "Open menu",
-      "reactivate": "Reactivate"
-    },
-    "create": "Create category",
-    "editPage": "Edit customer category",
-    "fields": {
-      "active": "Active category",
-      "description": "Description",
-      "name": "Name"
-    },
-    "new": "New category",
-    "newPage": "New customer category",
-    "saveChanges": "Save changes",
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "table": {
-      "createdAt": "Created at",
-      "description": "Description",
-      "empty": "No customer categories found.",
-      "name": "Name",
-      "status": "Status"
-    },
-    "title": "Customer Categories",
-    "toasts": {
-      "deactivated": "Category deactivated.",
-      "deleteConfirm": "The category \"{name}\" will be permanently deleted.",
-      "deleted": "Category deleted successfully.",
-      "reactivated": "Category reactivated."
-    }
-  },
   "Customers": {
     "actions": {
       "deactivate": "Deactivate",
@@ -248,7 +205,6 @@
     },
     "fields": {
       "birthDate": "Date of Birth",
-      "category": "Category",
       "cnpj": "CNPJ",
       "companyName": "Company Name",
       "countryCode": "IDD",
@@ -280,7 +236,6 @@
       },
       "labels": {
         "buySubscriptions": "Buy GenCodes",
-        "customerCat": "Customer Cat.",
         "customers": "Customers",
         "dashboard": "Dashboard",
         "sales": "Sales",
@@ -295,9 +250,6 @@
       "email": "Email:",
       "firstName": "First Name:",
       "lastName": "Last Name:"
-    },
-    "placeholders": {
-      "category": "Select a category"
     },
     "sections": {
       "address": "Address",
@@ -319,7 +271,6 @@
       "modulesDesc": "Sequoia access permissions"
     },
     "table": {
-      "category": "Category",
       "createdAt": "Created at",
       "email": "E-mail",
       "empty": "No customers found.",
@@ -429,7 +380,6 @@
     }
   },
   "Errors": {
-    "categoryRequired": "Category is required",
     "codeFormat": "Use uppercase letters, numbers and underscores only",
     "countryCodeRequired": "Country code is required",
     "couponCodeFormat": "Only uppercase letters, numbers, hyphens and underscores",

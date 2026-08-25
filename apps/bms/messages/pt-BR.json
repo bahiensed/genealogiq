@@ -37,12 +37,6 @@
       "taxIdExists": "Já existe um cliente com este CNPJ/CPF",
       "updated": "Cliente atualizado com sucesso."
     },
-    "customerCategory": {
-      "created": "Categoria criada com sucesso.",
-      "inUse": "Não é possível excluir: a categoria está atribuída a um ou mais clientes.",
-      "notFound": "Categoria não encontrada.",
-      "updated": "Categoria atualizada com sucesso."
-    },
     "discountCoupon": {
       "codeExists": "Já existe um cupom com este código.",
       "createFailed": "Não foi possível criar o cupom.",
@@ -193,43 +187,6 @@
       "updated": "Dados atualizados com sucesso."
     }
   },
-  "CustomerCategories": {
-    "actions": {
-      "deactivate": "Desativar",
-      "delete": "Excluir",
-      "edit": "Editar",
-      "openMenu": "Abrir menu",
-      "reactivate": "Reativar"
-    },
-    "create": "Criar categoria",
-    "editPage": "Editar categoria de cliente",
-    "fields": {
-      "active": "Categoria ativa",
-      "description": "Descrição",
-      "name": "Nome"
-    },
-    "new": "Nova categoria",
-    "newPage": "Nova categoria de cliente",
-    "saveChanges": "Salvar alterações",
-    "status": {
-      "active": "Ativa",
-      "inactive": "Inativa"
-    },
-    "table": {
-      "createdAt": "Criada em",
-      "description": "Descrição",
-      "empty": "Nenhuma categoria de cliente encontrada.",
-      "name": "Nome",
-      "status": "Status"
-    },
-    "title": "Categorias de Clientes",
-    "toasts": {
-      "deactivated": "Categoria desativada.",
-      "deleteConfirm": "A categoria \"{name}\" será excluída permanentemente.",
-      "deleted": "Categoria excluída com sucesso.",
-      "reactivated": "Categoria reativada."
-    }
-  },
   "Customers": {
     "actions": {
       "deactivate": "Desativar",
@@ -243,12 +200,11 @@
     "create": "Criar cliente",
     "edit": "Editar cliente",
     "entityType": {
-      "company": "Empresa",
+      "company": "Pessoa jurídica",
       "individual": "Pessoa física"
     },
     "fields": {
       "birthDate": "Data de nascimento",
-      "category": "Categoria",
       "cnpj": "CNPJ",
       "companyName": "Razão social",
       "countryCode": "DDI",
@@ -280,7 +236,6 @@
       },
       "labels": {
         "buySubscriptions": "Comprar GenCodes",
-        "customerCat": "Cat. cliente",
         "customers": "Clientes",
         "dashboard": "Painel",
         "sales": "Vendas",
@@ -295,9 +250,6 @@
       "email": "E-mail:",
       "firstName": "Nome:",
       "lastName": "Sobrenome:"
-    },
-    "placeholders": {
-      "category": "Selecione uma categoria"
     },
     "sections": {
       "address": "Endereço",
@@ -319,7 +271,6 @@
       "modulesDesc": "Permissões de acesso ao Sequoia"
     },
     "table": {
-      "category": "Categoria",
       "createdAt": "Criado em",
       "email": "E-mail",
       "empty": "Nenhum cliente encontrado.",
@@ -429,7 +380,6 @@
     }
   },
   "Errors": {
-    "categoryRequired": "A categoria é obrigatória",
     "codeFormat": "Use apenas letras maiúsculas, números e sublinhados",
     "countryCodeRequired": "O código do país é obrigatório",
     "couponCodeFormat": "Apenas letras maiúsculas, números, hifens e sublinhados",

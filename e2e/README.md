@@ -38,7 +38,7 @@ The `setup` project (`auth.setup.ts`) signs the seeded admin in once and writes
 
 ## Adding a CRUD spec
 
-Copy `customer-categories.crud.spec.ts`. Reuse `helpers.ts`
+Copy `packages.crud.spec.ts`. Reuse `helpers.ts`
 (`openRowMenu`, `confirmDelete`, and `t` = the real en-US message strings). Keep
 each spec **self-cleaning** (delete what it creates) so reruns stay green even
 though the dev branch persists between runs.

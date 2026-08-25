@@ -18,7 +18,6 @@ export type CustomerRow = {
   email: string
   isActive: boolean
   createdAt: Date
-  category: { id: string; name: string } | null
 }
 
 function ActionsCell({ row, currentUserRole, t }: { row: { original: CustomerRow }; currentUserRole: string; t: Translator }) {
@@ -72,12 +71,6 @@ export function getColumns(currentUserRole: string, t: Translator, locale: strin
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.type')} />,
       cell: ({ row }) =>
         row.original.entityType === 'INDIVIDUAL' ? t('entityType.individual') : t('entityType.company'),
-    },
-    {
-      id: 'category',
-      accessorFn: (row) => row.category?.name ?? '',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.category')} />,
-      cell: ({ row }) => row.original.category?.name ?? '—',
     },
     {
       accessorKey: 'email',

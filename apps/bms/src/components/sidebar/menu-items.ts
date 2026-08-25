@@ -8,7 +8,6 @@ import {
   Layers,
   LayoutDashboard,
   SquarePlus,
-  TagIcon,
   TicketPercent,
 } from 'lucide-react'
 
@@ -22,14 +21,13 @@ export const system = [
 ]
 
 export const products = [
-  { name: 'GenCodes',               url: '/gencodes',          icon: Fingerprint },
+  { name: 'GenCodes (B2B)',         url: '/gencodes',          icon: Fingerprint },
   { name: 'Subscriptions (B2C)',    url: '/subscriptions',     icon: Layers      },
   { name: 'Extra Units',            url: '/extra-unit-prices', icon: SquarePlus  },
 ]
 
 export const customers = [
-  { name: 'Customer Categories', url: '/categories/customers', icon: TagIcon   },
-  { name: 'Customers',           url: '/customers',            icon: Building2 },
+  { name: 'Customers', url: '/customers', icon: Building2 },
 ]
 
 export const sales = [

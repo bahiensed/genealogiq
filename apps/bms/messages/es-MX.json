@@ -37,12 +37,6 @@
       "taxIdExists": "Ya existe un cliente con este identificador fiscal",
       "updated": "Cliente actualizado con éxito."
     },
-    "customerCategory": {
-      "created": "Categoría creada con éxito.",
-      "inUse": "No se puede eliminar: la categoría está asignada a uno o más clientes.",
-      "notFound": "Categoría no encontrada.",
-      "updated": "Categoría actualizada con éxito."
-    },
     "discountCoupon": {
       "codeExists": "Ya existe un cupón con este código.",
       "createFailed": "No se pudo crear el cupón.",
@@ -193,43 +187,6 @@
       "updated": "Datos actualizados correctamente."
     }
   },
-  "CustomerCategories": {
-    "actions": {
-      "deactivate": "Desactivar",
-      "delete": "Eliminar",
-      "edit": "Editar",
-      "openMenu": "Abrir menú",
-      "reactivate": "Reactivar"
-    },
-    "create": "Crear categoría",
-    "editPage": "Editar categoría de cliente",
-    "fields": {
-      "active": "Categoría activa",
-      "description": "Descripción",
-      "name": "Nombre"
-    },
-    "new": "Nueva categoría",
-    "newPage": "Nueva categoría de cliente",
-    "saveChanges": "Guardar cambios",
-    "status": {
-      "active": "Activa",
-      "inactive": "Inactiva"
-    },
-    "table": {
-      "createdAt": "Creada el",
-      "description": "Descripción",
-      "empty": "No se encontraron categorías de clientes.",
-      "name": "Nombre",
-      "status": "Estado"
-    },
-    "title": "Categorías de Clientes",
-    "toasts": {
-      "deactivated": "Categoría desactivada.",
-      "deleteConfirm": "La categoría \"{name}\" se eliminará permanentemente.",
-      "deleted": "Categoría eliminada correctamente.",
-      "reactivated": "Categoría reactivada."
-    }
-  },
   "Customers": {
     "actions": {
       "deactivate": "Desactivar",
@@ -243,12 +200,11 @@
     "create": "Crear cliente",
     "edit": "Editar cliente",
     "entityType": {
-      "company": "Empresa",
+      "company": "Persona moral",
       "individual": "Persona física"
     },
     "fields": {
       "birthDate": "Fecha de nacimiento",
-      "category": "Categoría",
       "cnpj": "RFC",
       "companyName": "Razón social",
       "countryCode": "Clave",
@@ -280,7 +236,6 @@
       },
       "labels": {
         "buySubscriptions": "Comprar GenCodes",
-        "customerCat": "Cat. cliente",
         "customers": "Clientes",
         "dashboard": "Panel",
         "sales": "Ventas",
@@ -295,9 +250,6 @@
       "email": "Correo:",
       "firstName": "Nombre:",
       "lastName": "Apellido:"
-    },
-    "placeholders": {
-      "category": "Selecciona una categoría"
     },
     "sections": {
       "address": "Dirección",
@@ -319,7 +271,6 @@
       "modulesDesc": "Permisos de acceso a Sequoia"
     },
     "table": {
-      "category": "Categoría",
       "createdAt": "Creado el",
       "email": "Correo",
       "empty": "No se encontraron clientes.",
@@ -429,7 +380,6 @@
     }
   },
   "Errors": {
-    "categoryRequired": "La categoría es obligatoria",
     "codeFormat": "Usa solo letras mayúsculas, números y guiones bajos",
     "countryCodeRequired": "El código de país es obligatorio",
     "couponCodeFormat": "Solo letras mayúsculas, números, guiones y guiones bajos",
