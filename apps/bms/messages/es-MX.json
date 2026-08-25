@@ -545,7 +545,7 @@
     },
     "reverse": {
       "confirm": "Revertir venta",
-      "description": "La venta del paquete \"{package}\" a \"{customer}\" se marcará como revertida. Los códigos de licencia disponibles se invalidarán. Los códigos ya activados permanecen vinculados a sus memoriales. El registro se conserva con fines de auditoría.",
+      "description": "La venta del producto \"{product}\" a \"{customer}\" se marcará como revertida. Los GenCodes disponibles se invalidarán. Los GenCodes ya activados permanecen vinculados a sus memoriales. El registro se conserva con fines de auditoría.",
       "reversing": "Revirtiendo…",
       "title": "Confirmar reversión"
     },
@@ -558,20 +558,20 @@
     "summary": {
       "genCodes": "GenCodes a generar",
       "totalPrice": "Precio total",
-      "unitPrice": "Precio unitario / código"
+      "unitPrice": "Precio por unidad"
     },
     "table": {
       "customer": "Cliente",
       "date": "Fecha",
       "empty": "No se encontraron ventas.",
-      "package": "Paquete",
-      "packagePrice": "Precio del Paquete",
-      "quantity": "Cant. de Paquetes",
+      "product": "Producto",
+      "productPrice": "Precio del Producto",
+      "quantity": "Cantidad",
       "seller": "Vendedor",
       "status": "Estado",
-      "subscriptionUnitPrice": "Precio Un. QR Code",
       "totalPrice": "Precio Total del Pedido",
-      "totalSubscriptions": "QR Codes / Paquete"
+      "totalUnits": "Total de Unidades",
+      "unitPrice": "Precio Unitario"
     },
     "title": "Ventas Manuales",
     "toasts": {
@@ -606,12 +606,12 @@
     },
     "revenue": {
       "title": "Nuestro ingreso B2B",
-      "subtitle": "Lo que facturamos a las empresas por los paquetes que compraron.",
-      "package": "Paquete",
+      "subtitle": "Lo que facturamos a las empresas por los productos que compraron.",
+      "package": "Producto",
       "sales": "Ventas",
-      "units": "Códigos",
+      "units": "Unidades",
       "total": "Ingreso",
-      "caveat": "Calculado como cantidad × precio ACTUAL del paquete — la venta no guarda el precio de entonces, así que editarlo cambia estas cifras retroactivamente. Las ventas revertidas quedan fuera."
+      "caveat": "Calculado como cantidad × precio ACTUAL del producto — la venta no guarda el precio de entonces, así que editar el precio de un producto cambia estos números retroactivamente. Las ventas revertidas quedan fuera."
     },
     "stale": {
       "title": "Vendidos y nunca canjeados",

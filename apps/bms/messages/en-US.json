@@ -545,7 +545,7 @@
     },
     "reverse": {
       "confirm": "Reverse sale",
-      "description": "The sale of package \"{package}\" to \"{customer}\" will be marked as reversed. Available license codes will be invalidated. Activated codes remain linked to their memorials. The record is kept for audit purposes.",
+      "description": "The sale of product \"{product}\" to \"{customer}\" will be marked as reversed. Available GenCodes will be invalidated. Activated GenCodes remain linked to their memorials. The record is kept for audit purposes.",
       "reversing": "Reversing…",
       "title": "Confirm reversal"
     },
@@ -558,20 +558,20 @@
     "summary": {
       "genCodes": "GenCodes to be generated",
       "totalPrice": "Total price",
-      "unitPrice": "Unit price / code"
+      "unitPrice": "Price per unit"
     },
     "table": {
       "customer": "Customer",
       "date": "Date",
       "empty": "No sales found.",
-      "package": "Package",
-      "packagePrice": "Package Price",
-      "quantity": "Package Qtd.",
+      "product": "Product",
+      "productPrice": "Product Price",
+      "quantity": "Quantity",
       "seller": "Seller",
       "status": "Status",
-      "subscriptionUnitPrice": "QR-Code Un. Price",
       "totalPrice": "Total Order Price",
-      "totalSubscriptions": "QR-Codes / Package"
+      "totalUnits": "Total Units",
+      "unitPrice": "Unit Price"
     },
     "title": "Manual Sales",
     "toasts": {
@@ -606,12 +606,12 @@
     },
     "revenue": {
       "title": "Our B2B revenue",
-      "subtitle": "What we billed resellers for the packages they bought.",
-      "package": "Package",
+      "subtitle": "What we billed companies for the products they bought.",
+      "package": "Product",
       "sales": "Sales",
-      "units": "Codes",
+      "units": "Units",
       "total": "Revenue",
-      "caveat": "Derived as quantity × the package’s CURRENT price — Sale stores no price snapshot, so editing a package price changes these figures retroactively. Reversed sales are excluded."
+      "caveat": "Computed as quantity × the product's CURRENT price — a sale does not store the price at the time, so editing a product's price rewrites these numbers retroactively. Reversed sales are excluded."
     },
     "stale": {
       "title": "Sold but never redeemed",

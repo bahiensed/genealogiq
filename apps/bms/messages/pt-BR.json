@@ -545,7 +545,7 @@
     },
     "reverse": {
       "confirm": "Estornar venda",
-      "description": "A venda do pacote \"{package}\" para \"{customer}\" será marcada como estornada. Os códigos de licença disponíveis serão invalidados. Os códigos já ativados permanecem vinculados aos seus memoriais. O registro é mantido para fins de auditoria.",
+      "description": "A venda do produto \"{product}\" para \"{customer}\" será marcada como estornada. Os GenCodes disponíveis serão invalidados. Os GenCodes já ativados permanecem vinculados aos seus memoriais. O registro é mantido para fins de auditoria.",
       "reversing": "Estornando…",
       "title": "Confirmar estorno"
     },
@@ -558,20 +558,20 @@
     "summary": {
       "genCodes": "GenCodes a serem gerados",
       "totalPrice": "Preço total",
-      "unitPrice": "Preço unitário / código"
+      "unitPrice": "Preço por unidade"
     },
     "table": {
       "customer": "Cliente",
       "date": "Data",
       "empty": "Nenhuma venda encontrada.",
-      "package": "Pacote",
-      "packagePrice": "Preço do Pacote",
-      "quantity": "Qtd. de Pacotes",
+      "product": "Produto",
+      "productPrice": "Preço do Produto",
+      "quantity": "Quantidade",
       "seller": "Vendedor",
       "status": "Status",
-      "subscriptionUnitPrice": "Preço Un. QR-Code",
       "totalPrice": "Preço Total do Pedido",
-      "totalSubscriptions": "QR-Codes / Pacote"
+      "totalUnits": "Total de Unidades",
+      "unitPrice": "Preço Unitário"
     },
     "title": "Vendas Manuais",
     "toasts": {
@@ -606,12 +606,12 @@
     },
     "revenue": {
       "title": "Nossa receita B2B",
-      "subtitle": "O que faturamos das empresas pelos pacotes que compraram.",
-      "package": "Pacote",
+      "subtitle": "O que faturamos das empresas pelos produtos que compraram.",
+      "package": "Produto",
       "sales": "Vendas",
-      "units": "Códigos",
+      "units": "Unidades",
       "total": "Receita",
-      "caveat": "Calculado como quantidade × preço ATUAL do pacote — a venda não guarda o preço da época, então editar o preço de um pacote muda estes números retroativamente. Vendas estornadas ficam de fora."
+      "caveat": "Calculado como quantidade × preço ATUAL do produto — a venda não guarda o preço da época, então editar o preço de um produto muda estes números retroativamente. Vendas estornadas ficam de fora."
     },
     "stale": {
       "title": "Vendidos e nunca resgatados",

@@ -10,8 +10,8 @@ interface SalesDataTableProps {
 }
 
 const INITIAL_VISIBILITY = {
-  totalSubscriptions:    false,
-  subscriptionUnitPrice: false,
+  totalUnits: false,
+  unitPrice:  false,
 }
 
 export function SalesDataTable({ currentUserRole, data }: SalesDataTableProps) {
@@ -19,16 +19,16 @@ export function SalesDataTable({ currentUserRole, data }: SalesDataTableProps) {
   const locale = useLocale()
 
   const columnLabels: Record<string, string> = {
-    createdAt:             t('table.date'),
-    status:                t('table.status'),
-    customer:              t('table.customer'),
-    package:               t('table.package'),
-    quantity:              t('table.quantity'),
-    totalSubscriptions:    t('table.totalSubscriptions'),
-    packagePrice:          t('table.packagePrice'),
-    subscriptionUnitPrice: t('table.subscriptionUnitPrice'),
-    totalPrice:            t('table.totalPrice'),
-    seller:                t('table.seller'),
+    createdAt:    t('table.date'),
+    status:       t('table.status'),
+    customer:     t('table.customer'),
+    product:      t('table.product'),
+    quantity:     t('table.quantity'),
+    totalUnits:   t('table.totalUnits'),
+    productPrice: t('table.productPrice'),
+    unitPrice:    t('table.unitPrice'),
+    totalPrice:   t('table.totalPrice'),
+    seller:       t('table.seller'),
   }
 
   return (
