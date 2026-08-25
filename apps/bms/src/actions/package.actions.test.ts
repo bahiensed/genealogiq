@@ -43,12 +43,11 @@ import { createPackage, updatePackage, deletePackage } from "./package.actions"
 import { verifyAdmin } from "@/lib/dal"
 
 const validInput = {
-  name:        "Pacote QR",
+  name:        "GenCode",
   quantity:    10,
-  description: "Pacote com 10 QR codes",
+  description: "Produto com 10 GenCodes",
   price:       50,
   isActive:    true,
-  type:        "PHYSICAL" as const,
 }
 
 beforeEach(() => {

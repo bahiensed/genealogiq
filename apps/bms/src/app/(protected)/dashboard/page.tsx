@@ -108,7 +108,7 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Revenue by Package</CardTitle>
+            <CardTitle>Revenue by Product</CardTitle>
             <CardDescription>Last 12 months · active sales only</CardDescription>
           </CardHeader>
           <CardContent>
@@ -193,15 +193,15 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>
-              <Link href="/packages" className="inline-flex items-center gap-1 hover:underline">
-                QR Code Packages <ArrowUpRight className="h-4 w-4" />
+              <Link href="/gencodes" className="inline-flex items-center gap-1 hover:underline">
+                GenCodes (B2B) <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
             <CardAction><QrCode className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.packages}</p>
-            <p className="text-sm text-muted-foreground mt-1">Active packages</p>
+            <p className="text-sm text-muted-foreground mt-1">Active products</p>
           </CardContent>
         </Card>
       </div>

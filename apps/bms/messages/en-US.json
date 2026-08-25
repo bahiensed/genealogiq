@@ -58,15 +58,15 @@
       "updatedStripeCleared": "Price updated — Stripe references cleared. Sync with Stripe again to provision fresh prices."
     },
     "package": {
-      "created": "Package created successfully.",
-      "hasSales": "This package has associated sales and cannot be deleted.",
-      "notFound": "Package not found.",
+      "created": "Product created successfully.",
+      "hasSales": "This product has associated sales and cannot be deleted.",
+      "notFound": "Product not found.",
       "priceRequired": "Set a price greater than zero before syncing.",
       "stripeSyncFailed": "Stripe sync failed: {message}",
       "synced": "Synced with Stripe successfully.",
       "unknownError": "Unknown error",
-      "updated": "Package updated successfully.",
-      "updatedStripeCleared": "Package updated — Stripe references cleared. Re-run prisma/seed-stripe-packages.ts in SEQ."
+      "updated": "Product updated successfully.",
+      "updatedStripeCleared": "Product updated — Stripe references cleared. Use \"Sync with Stripe\" to provision the new Price."
     },
     "profile": {
       "avatarUpdated": "Avatar updated.",
@@ -77,7 +77,7 @@
       "alreadyReversed": "This sale has already been reversed.",
       "created": "Sale recorded successfully.",
       "notFound": "Sale not found.",
-      "packageNotFound": "Package not found."
+      "packageNotFound": "Product not found."
     },
     "subscription": {
       "created": "Subscription created successfully.",
@@ -331,7 +331,7 @@
     "edit": "Edit discount coupon",
     "fields": {
       "amount": "Amount ($)",
-      "appliesTo": "Applies to specific packages (optional)",
+      "appliesTo": "Applies to specific products (optional)",
       "code": "Code",
       "description": "Description",
       "discountType": "Discount type",
@@ -342,12 +342,12 @@
       "percent": "Percent (0-100)"
     },
     "hints": {
-      "appliesTo": "Leave all unchecked to apply to every package.",
+      "appliesTo": "Leave all unchecked to apply to every product.",
       "codeImmutable": "The promotion code is immutable. To change terms, deactivate this coupon and create a new one."
     },
     "loadError": "Could not load coupons: {message}. Check Vercel function logs for details.",
     "new": "New coupon",
-    "packageMeta": "{quantity} QR Codes · {price}",
+    "packageMeta": "{quantity, plural, one {# unit} other {# units}} · {price}",
     "placeholders": {
       "code": "WELCOME10",
       "descriptionCreate": "Optional internal note",
@@ -464,18 +464,16 @@
       "openMenu": "Open menu",
       "reactivate": "Reactivate"
     },
-    "active": "Active?",
     "createButton": "Create {noun}",
     "edit": "Edit {noun}",
     "fields": {
       "description": "Description",
       "name": "{noun} Name",
       "price": "Price (US$)",
-      "quantity": "QR-Code Quantity"
+      "quantity": "Units per Product"
     },
     "gencodesTitle": "GenCodes",
     "new": "New {noun}",
-    "newPackage": "New package",
     "newProduct": "New product",
     "noun": {
       "product": "Product"
@@ -501,20 +499,19 @@
     "table": {
       "createdAt": "Created at",
       "description": "{noun} Description",
-      "emptyProduct": "No physical QR products yet.",
+      "emptyProduct": "No products yet.",
       "name": "{noun} Name",
       "price": "{noun} Price",
-      "quantity": "QR-Codes / Package",
+      "quantity": "Units / Product",
       "status": "Status"
     },
-    "title": "Digital QR Codes (B2B)",
     "toasts": {
-      "deactivated": "Package deactivated.",
-      "deleteConfirm": "The package \"{name}\" will be permanently deleted.",
-      "deleted": "Package deleted successfully.",
-      "reactivated": "Package reactivated."
+      "deactivated": "Product deactivated.",
+      "deleteConfirm": "The product \"{name}\" will be permanently deleted.",
+      "deleted": "Product deleted successfully.",
+      "reactivated": "Product reactivated."
     },
-    "unitPrice": "Unit price per QR Code"
+    "unitPrice": "Price per unit"
   },
   "Sales": {
     "actions": {
@@ -660,7 +657,7 @@
       "priceBrl": "0 = not configured yet — checkout falls back to USD for this currency. Monthly 0 = derive from annual / term length.",
       "priceMxn": "0 = not configured yet — checkout falls back to USD for this currency. Monthly 0 = derive from annual / term length.",
       "priceUsd": "Annual 0 = Free plan. Monthly 0 = derive from annual price / term length (a real discount, not just an even split).",
-      "qrCodeMax": "Free QR codes — own profile + guarded memorials, combined.",
+      "qrCodeMax": "Free GenCodes — own profile + guarded memorials, combined.",
       "termLength": "0 = Lifetime",
       "treeMaxMembers": "Maximum people in the family tree."
     },
