@@ -1,6 +1,6 @@
 'use client'
 
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Pie, PieChart, Cell } from 'recharts'
 import {
   ChartContainer,
@@ -25,6 +25,7 @@ interface Props {
 
 export function RevenueByPackageChart({ data }: Props) {
   const locale = useLocale()
+  const t = useTranslations('Dashboard')
   const chartConfig = Object.fromEntries(
     data.map((d, i) => [
       d.name,
@@ -40,7 +41,7 @@ export function RevenueByPackageChart({ data }: Props) {
   if (!data.length) {
     return (
       <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
-        No sales data yet.
+        {t('charts.noSalesData')}
       </div>
     )
   }

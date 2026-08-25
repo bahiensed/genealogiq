@@ -1,4 +1,29 @@
 {
+  "Account": {
+    "changeEmail": {
+      "trigger": "Alterar e-mail",
+      "title": "Alterar e-mail",
+      "description": "Um link de confirmação será enviado para o novo endereço",
+      "newEmail": "Novo e-mail:",
+      "newEmailPlaceholder": "novo@email.com",
+      "submitting": "Alterando…"
+    },
+    "changePassword": {
+      "trigger": "Alterar senha",
+      "title": "Alterar senha",
+      "description": "Digite sua senha atual e escolha uma nova.",
+      "submitting": "Salvando…"
+    },
+    "currentPassword": "Senha atual:",
+    "deleteAccount": {
+      "trigger": "Excluir conta",
+      "title": "Excluir conta",
+      "description": "Esta ação é irreversível. Todos os seus dados serão excluídos permanentemente.",
+      "submit": "Excluir minha conta",
+      "submitting": "Excluindo…"
+    },
+    "newPassword": "Nova senha:"
+  },
   "Actions": {
     "auth": {
       "accountLocked": "Conta temporariamente bloqueada. Tente novamente em {minutes} minuto(s).",
@@ -105,13 +130,47 @@
     "description": "Digite seu e-mail e senha para acessar sua conta.",
     "email": "E-mail:",
     "emailPlaceholder": "seu@email.com",
+    "forgot": {
+      "title": "Esqueceu sua senha?",
+      "description": "Digite seu e-mail e enviaremos um link para redefinir sua senha.",
+      "submit": "Enviar link",
+      "submitting": "Enviando…",
+      "remembered": "Lembrou a senha?"
+    },
     "forgotPassword": "Esqueceu a senha?",
     "hidePassword": "Ocultar senha",
     "password": "Senha:",
+    "reset": {
+      "title": "Redefinir senha",
+      "description": "Digite sua nova senha abaixo",
+      "submit": "Salvar nova senha",
+      "submitting": "Salvando…"
+    },
+    "sent": {
+      "title": "E-mail enviado",
+      "description": "Se este e-mail estiver cadastrado, você receberá um link em instantes.",
+      "body": "Confira sua caixa de entrada. O link expira em uma hora.",
+      "backToSignIn": "Voltar para entrar"
+    },
     "showPassword": "Mostrar senha",
     "signIn": "Entrar",
     "signingIn": "Entrando…",
-    "title": "Entrar"
+    "title": "Entrar",
+    "verify": {
+      "goToSignIn": "Ir para entrar",
+      "checkTitle": "Confira seu e-mail",
+      "checkDescription": "E-mail de confirmação enviado.",
+      "checkBody": "Clique no link que enviamos para confirmar seu e-mail. O link expira em 1 hora.",
+      "invalidTitle": "Link inválido ou expirado",
+      "invalidDescription": "Este link de verificação é inválido ou já expirou.",
+      "invalidBody": "Solicite um novo link na sua página de perfil.",
+      "changedTitle": "E-mail alterado!",
+      "changedDescription": "Seu e-mail foi atualizado com sucesso.",
+      "changedBody": "Entre novamente com seu novo endereço de e-mail.",
+      "confirmedTitle": "E-mail confirmado!",
+      "confirmedDescription": "Sua conta foi verificada com sucesso.",
+      "confirmedBody": "Agora você pode entrar com seu e-mail e senha."
+    }
   },
   "Common": {
     "address": {
@@ -186,6 +245,15 @@
     "toasts": {
       "updated": "Dados atualizados com sucesso."
     }
+  },
+  "Cookies": {
+    "acceptAll": "OK, aceito todo esse juridiquês",
+    "essential": "Tudo bem, mas me rastreie o mínimo possível",
+    "l1": "Ai, não. Lá vamos nós de novo…",
+    "l2": "Mais um aviso de consentimento cansativo, juridicamente complexo, de conformidade duvidosa, extravagantemente caro e implacavelmente intrusivo.",
+    "l3": "Desculpe, mas precisamos cumprir as regulamentações globais de privacidade, formalizar como acompanhamos seu comportamento online e manter nossos advogados felizes.",
+    "linkTail": "para saber mais sobre nossa Política de Privacidade.",
+    "linkText": "Clique aqui"
   },
   "Customers": {
     "actions": {
@@ -270,6 +338,7 @@
       "contactDesc": "Detalhes de contato e categoria",
       "modulesDesc": "Permissões de acesso ao Sequoia"
     },
+    "stepsNav": "Etapas do formulário",
     "table": {
       "createdAt": "Criado em",
       "email": "E-mail",
@@ -292,6 +361,27 @@
     "allTimeSales": "Vendas de todo o período",
     "annualRevenue": "Receita do ano",
     "annualSales": "Vendas no ano",
+    "charts": {
+      "monthlyRevenue": "Receita mensal",
+      "last12ActiveSales": "Últimos 12 meses · apenas vendas ativas",
+      "revenueByProduct": "Receita por produto",
+      "newCustomers": "Novos clientes",
+      "newCustomersDesc": "Novos clientes por mês · últimos 12 meses",
+      "topSellers": "Melhores vendedores",
+      "topSellersDesc": "Por receita · últimos 12 meses",
+      "noSalesData": "Ainda não há dados de venda.",
+      "noSalesLast12": "Nenhuma venda nos últimos 12 meses."
+    },
+    "entities": {
+      "customers": "Clientes",
+      "customersDesc": "Clientes cadastrados",
+      "systemUsers": "Usuários do sistema",
+      "systemUsersDesc": "Operadores do BMS",
+      "subscriptions": "Assinaturas (B2C)",
+      "subscriptionsDesc": "Assinaturas ativas",
+      "products": "GenCodes (B2B)",
+      "productsDesc": "Produtos ativos"
+    },
     "monthlyRevenue": "Receita do mês",
     "monthlySales": "Vendas no mês",
     "revenueThisMonth": "Receita neste mês",
@@ -444,6 +534,12 @@
       "feedbackSent": "Feedback enviado. Obrigado!"
     }
   },
+  "Landing": {
+    "dashboard": "Painel",
+    "privacy": "Política de Privacidade",
+    "signIn": "Entrar",
+    "terms": "Termos de Uso"
+  },
   "Nav": {
     "language": "Idioma",
     "profile": "Perfil",
@@ -513,6 +609,33 @@
       "reactivated": "Produto reativado."
     },
     "unitPrice": "Preço por unidade"
+  },
+  "Profile": {
+    "changeAvatar": "Alterar foto",
+    "danger": {
+      "title": "Zona de perigo",
+      "description": "Exclua permanentemente sua conta e todos os dados relacionados."
+    },
+    "fields": {
+      "firstName": "Nome",
+      "lastName": "Sobrenome",
+      "cpf": "CPF",
+      "birthDate": "Data de nascimento",
+      "countryCode": "Código do país",
+      "phone": "Telefone",
+      "address": "Endereço"
+    },
+    "personal": {
+      "title": "Informações pessoais",
+      "description": "Atualize seu nome, documento e dados de contato."
+    },
+    "security": {
+      "title": "Conta e segurança",
+      "description": "Gerencie o e-mail de acesso e a senha.",
+      "email": "E-mail",
+      "emailHint": "Para trocar o e-mail, use o botão abaixo — um link de confirmação é enviado para o novo endereço."
+    },
+    "title": "Perfil"
   },
   "Sales": {
     "actions": {
@@ -617,6 +740,54 @@
     },
     "subtitle": "Onde cada GenCode que emitimos realmente foi parar.",
     "title": "Relatórios de Vendas"
+  },
+  "Setup": {
+    "back": "← Voltar",
+    "fields": {
+      "legalName": "Razão social:",
+      "tradeName": "Nome fantasia:",
+      "cnpj": "CNPJ:",
+      "stateRegistration": "Inscrição estadual:",
+      "municipalRegistration": "Inscrição municipal:",
+      "companyEmail": "E-mail da empresa:",
+      "countryCode": "Código do país:",
+      "phone": "Telefone:",
+      "firstName": "Nome:",
+      "lastName": "Sobrenome:",
+      "adminEmail": "E-mail do administrador:",
+      "password": "Senha:"
+    },
+    "finish": "Concluir",
+    "finishing": "Configurando…",
+    "next": "Avançar →",
+    "skip": "Pular",
+    "stepOf": "Etapa {step} de {total} | {label}",
+    "steps": {
+      "company": "Dados da empresa",
+      "address": "Endereço da empresa",
+      "admin": "Dados do administrador",
+      "access": "Acesso ao sistema"
+    },
+    "title": "Configuração inicial"
+  },
+  "Sidebar": {
+    "groups": {
+      "system": "Sistema",
+      "products": "Produtos",
+      "customers": "Clientes",
+      "sales": "Vendas"
+    },
+    "items": {
+      "dashboard": "Painel",
+      "companyData": "Dados da Empresa",
+      "systemUsers": "Usuários do Sistema",
+      "gencodes": "GenCodes (B2B)",
+      "subscriptions": "Assinaturas (B2C)",
+      "extraUnits": "Unidades Extras",
+      "customers": "Clientes",
+      "discountCoupons": "Cupons de Desconto",
+      "manualSales": "Vendas Manuais"
+    }
   },
   "Subscriptions": {
     "actions": {

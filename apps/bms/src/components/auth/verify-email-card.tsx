@@ -26,7 +26,7 @@ export function VerifyEmailCard({
         <Link href="/" className="relative block h-full w-full">
           <Image
             src="/logo/logo-dark.png"
-            alt="Logo"
+            alt="Genealogiq"
             fill
             sizes="(max-width: 400px) 100vw, 400px"
             className="object-contain dark:hidden"
@@ -34,7 +34,7 @@ export function VerifyEmailCard({
           />
           <Image
             src="/logo/logo-light.png"
-            alt="Logo"
+            alt="Genealogiq"
             fill
             sizes="(max-width: 400px) 100vw, 400px"
             className="hidden object-contain dark:block"

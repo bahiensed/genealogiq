@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import { Label } from '@genealogiq/ui/label'
@@ -11,6 +12,7 @@ import { forgotPassword } from '@/actions/auth'
 
 export function ForgotPasswordForm() {
   const [state, dispatch, isPending] = useActionState(forgotPassword, undefined)
+  const t = useTranslations('Auth')
 
   return (
     <div className="flex flex-col w-full max-w-sm">
@@ -18,7 +20,7 @@ export function ForgotPasswordForm() {
         <Link href="/" className="relative block h-full w-full">
           <Image
             src="/logo/logo-dark.png"
-            alt="Logo"
+            alt="Genealogiq"
             fill
             sizes="(max-width: 400px) 100vw, 400px"
             className="object-contain dark:hidden"
@@ -26,7 +28,7 @@ export function ForgotPasswordForm() {
           />
           <Image
             src="/logo/logo-light.png"
-            alt="Logo"
+            alt="Genealogiq"
             fill
             sizes="(max-width: 400px) 100vw, 400px"
             className="hidden object-contain dark:block"
@@ -37,9 +39,9 @@ export function ForgotPasswordForm() {
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Forgot your password?</CardTitle>
+          <CardTitle>{t('forgot.title')}</CardTitle>
           <CardDescription>
-            Enter your email and we'll send you a link to reset your password.
+            {t('forgot.description')}
           </CardDescription>
         </CardHeader>
 
@@ -50,12 +52,12 @@ export function ForgotPasswordForm() {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">E-mail:</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder="seu@email.com"
+                placeholder={t('emailPlaceholder')}
                 autoComplete="email"
               />
             </div>
@@ -63,15 +65,15 @@ export function ForgotPasswordForm() {
 
           <CardFooter className="mt-6 flex flex-col gap-3">
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Sending…" : "Send reset link"}
+              {isPending ? t('forgot.submitting') : t('forgot.submit')}
             </Button>
             <p className="text-sm text-muted-foreground text-center">
-              Remember your password?{" "}
+              {t('forgot.remembered')}{" "}
               <Link
                 href="/sign-in"
                 className="text-foreground underline underline-offset-4 hover:no-underline"
               >
-                Sign in
+                {t('signIn')}
               </Link>
             </p>
           </CardFooter>

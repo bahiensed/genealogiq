@@ -1,4 +1,29 @@
 {
+  "Account": {
+    "changeEmail": {
+      "trigger": "Change email",
+      "title": "Change email",
+      "description": "A confirmation link will be sent to the new address",
+      "newEmail": "New email:",
+      "newEmailPlaceholder": "new@email.com",
+      "submitting": "Changing…"
+    },
+    "changePassword": {
+      "trigger": "Change password",
+      "title": "Change password",
+      "description": "Enter your current password and choose a new one.",
+      "submitting": "Saving…"
+    },
+    "currentPassword": "Current password:",
+    "deleteAccount": {
+      "trigger": "Delete account",
+      "title": "Delete account",
+      "description": "This action is irreversible. All your data will be permanently deleted.",
+      "submit": "Delete my account",
+      "submitting": "Deleting…"
+    },
+    "newPassword": "New password:"
+  },
   "Actions": {
     "auth": {
       "accountLocked": "Account temporarily locked. Try again in {minutes} minute(s).",
@@ -105,13 +130,47 @@
     "description": "Enter your email and password to access your account.",
     "email": "E-mail:",
     "emailPlaceholder": "you@email.com",
+    "forgot": {
+      "title": "Forgot your password?",
+      "description": "Enter your email and we'll send you a link to reset your password.",
+      "submit": "Send reset link",
+      "submitting": "Sending…",
+      "remembered": "Remember your password?"
+    },
     "forgotPassword": "Forgot password?",
     "hidePassword": "Hide password",
     "password": "Password:",
+    "reset": {
+      "title": "Reset password",
+      "description": "Enter your new password below",
+      "submit": "Save new password",
+      "submitting": "Saving…"
+    },
+    "sent": {
+      "title": "Email sent",
+      "description": "If this email is registered, you will receive a link shortly.",
+      "body": "Check your inbox. The link expires in one hour.",
+      "backToSignIn": "Back to sign in"
+    },
     "showPassword": "Show password",
     "signIn": "Sign in",
     "signingIn": "Signing in…",
-    "title": "Sign in"
+    "title": "Sign in",
+    "verify": {
+      "goToSignIn": "Go to sign in",
+      "checkTitle": "Check your email",
+      "checkDescription": "Confirmation email sent.",
+      "checkBody": "Click the link we sent to confirm your email. The link expires in 1 hour.",
+      "invalidTitle": "Invalid or expired link",
+      "invalidDescription": "This verification link is invalid or has already expired.",
+      "invalidBody": "Request a new link from your profile page.",
+      "changedTitle": "Email changed!",
+      "changedDescription": "Your email has been updated successfully.",
+      "changedBody": "Sign in again with your new email address.",
+      "confirmedTitle": "Email confirmed!",
+      "confirmedDescription": "Your account has been verified successfully.",
+      "confirmedBody": "You can now sign in with your email and password."
+    }
   },
   "Common": {
     "address": {
@@ -186,6 +245,15 @@
     "toasts": {
       "updated": "Data updated successfully."
     }
+  },
+  "Cookies": {
+    "acceptAll": "OK, I accept all this legal nonsense",
+    "essential": "Fine, but track me as little as possible",
+    "l1": "Oh dear! Here we go again...",
+    "l2": "Yet another tiresome, legally complex, dubiously compliant, extravagantly expensive and relentlessly intrusive consent banner.",
+    "l3": "Sorry for that, but we need to comply with global privacy regulations, formalize how we track your online behavior and keep our lawyers happy.",
+    "linkTail": "to learn more about our Privacy Policy.",
+    "linkText": "Click here"
   },
   "Customers": {
     "actions": {
@@ -270,6 +338,7 @@
       "contactDesc": "Contact details & category",
       "modulesDesc": "Sequoia access permissions"
     },
+    "stepsNav": "Form steps",
     "table": {
       "createdAt": "Created at",
       "email": "E-mail",
@@ -292,6 +361,27 @@
     "allTimeSales": "All-time sales",
     "annualRevenue": "Annual Revenue",
     "annualSales": "Annual Sales",
+    "charts": {
+      "monthlyRevenue": "Monthly Revenue",
+      "last12ActiveSales": "Last 12 months · active sales only",
+      "revenueByProduct": "Revenue by Product",
+      "newCustomers": "New Customers",
+      "newCustomersDesc": "New customers per month · last 12 months",
+      "topSellers": "Top Sellers",
+      "topSellersDesc": "By revenue · last 12 months",
+      "noSalesData": "No sales data yet.",
+      "noSalesLast12": "No sales in the last 12 months."
+    },
+    "entities": {
+      "customers": "Customers",
+      "customersDesc": "Registered customers",
+      "systemUsers": "System Users",
+      "systemUsersDesc": "BMS operators",
+      "subscriptions": "Subscriptions (B2C)",
+      "subscriptionsDesc": "Active subscriptions",
+      "products": "GenCodes (B2B)",
+      "productsDesc": "Active products"
+    },
     "monthlyRevenue": "Monthly Revenue",
     "monthlySales": "Monthly Sales",
     "revenueThisMonth": "Revenue this month",
@@ -444,6 +534,12 @@
       "feedbackSent": "Feedback sent. Thank you!"
     }
   },
+  "Landing": {
+    "dashboard": "Dashboard",
+    "privacy": "Privacy Policy",
+    "signIn": "Sign in",
+    "terms": "Terms of Use"
+  },
   "Nav": {
     "language": "Language",
     "profile": "Profile",
@@ -513,6 +609,33 @@
       "reactivated": "Product reactivated."
     },
     "unitPrice": "Price per unit"
+  },
+  "Profile": {
+    "changeAvatar": "Change avatar",
+    "danger": {
+      "title": "Danger zone",
+      "description": "Permanently delete your account and all related data."
+    },
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "cpf": "CPF",
+      "birthDate": "Date of birth",
+      "countryCode": "Country code",
+      "phone": "Phone",
+      "address": "Address"
+    },
+    "personal": {
+      "title": "Personal information",
+      "description": "Update your name, document, and contact details."
+    },
+    "security": {
+      "title": "Account & security",
+      "description": "Manage your sign-in email and password.",
+      "email": "Email",
+      "emailHint": "To change your email, use the button below — a confirmation link is sent to the new address."
+    },
+    "title": "Profile"
   },
   "Sales": {
     "actions": {
@@ -617,6 +740,54 @@
     },
     "subtitle": "Where every GenCode we issued actually ended up.",
     "title": "Sales Reports"
+  },
+  "Setup": {
+    "back": "← Back",
+    "fields": {
+      "legalName": "Legal Name:",
+      "tradeName": "Trade Name:",
+      "cnpj": "CNPJ:",
+      "stateRegistration": "State Registration:",
+      "municipalRegistration": "Municipal Registration:",
+      "companyEmail": "Company email:",
+      "countryCode": "Country code:",
+      "phone": "Phone:",
+      "firstName": "First name:",
+      "lastName": "Last name:",
+      "adminEmail": "Administrator email:",
+      "password": "Password:"
+    },
+    "finish": "Finish",
+    "finishing": "Setting up…",
+    "next": "Next →",
+    "skip": "Skip",
+    "stepOf": "Step {step} of {total} | {label}",
+    "steps": {
+      "company": "Company details",
+      "address": "Company address",
+      "admin": "Administrator details",
+      "access": "System access"
+    },
+    "title": "Initial setup"
+  },
+  "Sidebar": {
+    "groups": {
+      "system": "System",
+      "products": "Products",
+      "customers": "Customers",
+      "sales": "Sales"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "companyData": "Company Data",
+      "systemUsers": "System Users",
+      "gencodes": "GenCodes (B2B)",
+      "subscriptions": "Subscriptions (B2C)",
+      "extraUnits": "Extra Units",
+      "customers": "Customers",
+      "discountCoupons": "Discount Coupons",
+      "manualSales": "Manual Sales"
+    }
   },
   "Subscriptions": {
     "actions": {

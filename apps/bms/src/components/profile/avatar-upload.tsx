@@ -3,6 +3,7 @@
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { useTranslations } from 'next-intl'
 import { upload } from '@vercel/blob/client'
 import { Camera, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -22,6 +23,7 @@ export function AvatarUpload({ defaultUrl, fullName }: AvatarUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const router   = useRouter()
   const { update } = useSession()
+  const t = useTranslations('Profile')
 
   async function handleFile(file: File) {
     if (!file.type.startsWith('image/')) {
@@ -66,7 +68,7 @@ export function AvatarUpload({ defaultUrl, fullName }: AvatarUploadProps) {
       onClick={() => inputRef.current?.click()}
       disabled={busy}
       className="relative size-20 rounded-full overflow-hidden group focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed"
-      aria-label="Change avatar"
+      aria-label={t('changeAvatar')}
     >
       <Avatar className="size-20 text-xl">
         <AvatarImage src={url} alt={fullName} />
