@@ -5,13 +5,13 @@ import { getTranslations } from 'next-intl/server'
 import { Prisma } from '@genealogiq/db'
 import { done, fail, type ActionResult } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
-import { verifyAdmin } from '@/lib/dal'
+import { verifyAdmin, requireRole } from '@/lib/dal'
 import { getSaleSchema, type SaleFormValues } from '@/schemas/sale.schema'
 import { identityTranslator } from '@/schemas/i18n'
 import { stripe } from '@/lib/stripe'
 import { ensureTenantStripeCustomer } from '@genealogiq/services/stripe-customer'
 import { sendSalePaymentLinkEmail } from '@/lib/email'
-import { BMS_ORIGIN } from '@/lib/billing'
+import { BMS_ORIGIN, settleSaleManually } from '@/lib/billing'
 
 /** Stripe's ceiling for a Checkout Session is 30 days; a week is long enough to chase. */
 const LINK_TTL_DAYS = 7
@@ -163,6 +163,41 @@ function formatAmount(
     style:    'currency',
     currency: (currency ?? 'usd').toUpperCase(),
   }).format(value)
+}
+
+/**
+ * Records a sale paid outside Stripe — a transfer, a PIX, a deposit.
+ *
+ * The escape hatch for the case the old flow was built entirely around: before
+ * payment links, EVERY sale was recorded on the operator's word that money had
+ * arrived. That is now the exception rather than the rule, and unlike before it
+ * leaves a trace — paidById records who vouched for it, and a sale Stripe
+ * settled leaves that column null.
+ *
+ * Narrower than verifyAdmin: an ADMIN can generate links all day, but asserting
+ * that money arrived when Stripe never saw it is an owner's call.
+ */
+export async function markSalePaidManually(id: number): Promise<ActionResult> {
+  // requireRole, not verifyAdmin: ADMIN may generate links all day, but
+  // asserting money arrived when Stripe never saw it is an owner's call. It
+  // 403s rather than returning a failure, which is right — the row action is
+  // only rendered for those two roles, so reaching here means a forged request.
+  const session = await requireRole('SUPER_ADMIN', 'OWNER')
+  const t = await getTranslations('Actions')
+
+  const sale = await prisma.sale.findUnique({
+    where:  { id },
+    select: { paidAt: true, reversedAt: true },
+  })
+  if (!sale) return fail(t('sale.notFound'))
+  if (sale.reversedAt) return fail(t('sale.alreadyReversed'))
+  if (sale.paidAt) return fail(t('sale.alreadyPaid'))
+
+  await settleSaleManually(id, session.user!.id)
+
+  revalidatePath('/sales/manual-sales')
+  revalidatePath('/gencodes')
+  return done(t('sale.markedPaid'))
 }
 
 export async function reverseSale(id: number): Promise<ActionResult> {

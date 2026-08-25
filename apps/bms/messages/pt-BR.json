@@ -51,11 +51,12 @@
       "invalidData": "Dados inválidos"
     },
     "customer": {
+      "accessNotProvisioned": "Este cliente ainda não tem acesso liberado — ele é criado com o primeiro pagamento.",
       "adminEmailInUse": "Este e-mail de administrador já está em uso",
-      "created": "Cliente criado com sucesso.",
+      "createdAwaitingPayment": "Cliente cadastrado. O acesso ao Sequoia é liberado após o primeiro pagamento.",
+      "hasAppData": "Não é possível excluir: esta funerária ainda tem {count} memorial(is)/assinatura(s) no app que seriam destruídos.",
       "hasDependents": "Não é possível excluir: o cliente tem registros dependentes.",
       "hasSales": "Não é possível excluir um cliente com registros de vendas.",
-      "hasAppData": "Não é possível excluir: esta funerária ainda tem {count} memorial(is)/assinatura(s) no app que seriam destruídos.",
       "noOwner": "Nenhum usuário proprietário encontrado para este cliente.",
       "notFound": "Cliente não encontrado.",
       "passwordAlreadySet": "Este usuário já definiu sua senha.",
@@ -99,10 +100,12 @@
       "updated": "Perfil atualizado com sucesso."
     },
     "sale": {
+      "alreadyPaid": "Esta venda já está paga.",
       "alreadyReversed": "Esta venda já foi estornada.",
       "couponNotApplicable": "Este cupom não é válido para este produto.",
       "linkFailed": "Não foi possível gerar o link de pagamento: {message}",
       "linkSent": "Link de pagamento enviado para {email}.",
+      "markedPaid": "Pagamento registrado. GenCodes gerados.",
       "notFound": "Venda não encontrada.",
       "packageInactive": "Este produto está inativo.",
       "packageNotFound": "Produto não encontrado.",
@@ -649,6 +652,7 @@
     "actions": {
       "cancel": "Cancelar",
       "copyLink": "Copiar link de pagamento",
+      "markPaid": "Registrar pagamento recebido",
       "openMenu": "Abrir menu",
       "reverse": "Estornar"
     },

@@ -4,7 +4,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@genealogiq/ui/badge'
 import { DataTableColumnHeader } from '@genealogiq/ui/data-table-column-header'
 import { RowActions } from '@genealogiq/ui/row-actions'
-import { reverseSale } from '@/actions/sale.actions'
+import { reverseSale, markSalePaidManually } from '@/actions/sale.actions'
 import { saleState, isSaleDimmed } from '@/lib/sale-state'
 
 // Loose translator type so getColumns can stay a plain function (not a hook).
@@ -38,18 +38,31 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: SaleRow }; 
   // What you can do depends on where the money is. Copying the link is the one
   // thing worth offering while it is still live — reversing an unpaid sale would
   // mean unwinding nothing, and reversing a dead one even less.
-  const items = state === 'awaiting' && sale.checkoutUrl
-    ? [{
-        kind: 'action' as const,
-        label: t('actions.copyLink'),
-        // RowActions toasts whatever this resolves to, so the copy reports
-        // itself the same way a server action would.
-        run: async () => {
-          await navigator.clipboard.writeText(sale.checkoutUrl!)
-          return { ok: true, message: t('toasts.linkCopied') }
-        },
-      }]
-    : []
+  const items = []
+
+  if (state === 'awaiting' && sale.checkoutUrl) {
+    items.push({
+      kind: 'action' as const,
+      label: t('actions.copyLink'),
+      // RowActions toasts whatever this resolves to, so the copy reports itself
+      // the same way a server action would.
+      run: async () => {
+        await navigator.clipboard.writeText(sale.checkoutUrl!)
+        return { ok: true, message: t('toasts.linkCopied') }
+      },
+    })
+  }
+
+  // The escape hatch for money that arrived outside Stripe — a transfer, a PIX.
+  // Offered on any unsettled sale, including a dead link: a customer who paid by
+  // transfer after the link expired still bought the thing.
+  if (state !== 'paid' && state !== 'reversed') {
+    items.push({
+      kind: 'action' as const,
+      label: t('actions.markPaid'),
+      run: () => markSalePaidManually(sale.id),
+    })
+  }
 
   // Reversal exists to undo a settled sale: mark it reversed and destroy the
   // unsold codes. Before payment there are no codes and no money, so the menu

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
-const { prismaMock, stripeMock, emailMock, ensureCustomerMock, PrismaKnownError } = vi.hoisted(() => {
+const { prismaMock, stripeMock, emailMock, ensureCustomerMock, settleMock, PrismaKnownError } = vi.hoisted(() => {
   class PrismaKnownError extends Error {
     code: string
     constructor(message: string, code: string) {
@@ -21,6 +21,7 @@ const { prismaMock, stripeMock, emailMock, ensureCustomerMock, PrismaKnownError 
     stripeMock: { checkout: { sessions: { create: vi.fn() } } },
     emailMock: vi.fn(),
     ensureCustomerMock: vi.fn(),
+    settleMock: vi.fn(),
     PrismaKnownError,
   }
 })
@@ -29,19 +30,22 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("@genealogiq/db", () => ({ Prisma: { PrismaClientKnownRequestError: PrismaKnownError } }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/stripe", () => ({ stripe: stripeMock }))
-vi.mock("@/lib/dal", () => ({ verifyAdmin: vi.fn() }))
+vi.mock("@/lib/dal", () => ({ verifyAdmin: vi.fn(), requireRole: vi.fn() }))
 vi.mock("@/lib/email", () => ({ sendSalePaymentLinkEmail: emailMock }))
+vi.mock("@/lib/billing", () => ({ BMS_ORIGIN: "bms", settleSaleManually: settleMock }))
 vi.mock("@genealogiq/services/stripe-customer", () => ({ ensureTenantStripeCustomer: ensureCustomerMock }))
 vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
 
-import { createSalePaymentLink, reverseSale } from "./sale.actions"
-import { verifyAdmin } from "@/lib/dal"
+import { createSalePaymentLink, reverseSale, markSalePaidManually } from "./sale.actions"
+import { verifyAdmin, requireRole } from "@/lib/dal"
 
 const input = { packageId: "p1", tenantId: "c1", quantity: 2, discountCouponId: "" }
 
 beforeEach(() => {
   vi.clearAllMocks()
   vi.mocked(verifyAdmin).mockResolvedValue({ user: { id: "admin-1" } } as never)
+  vi.mocked(requireRole).mockResolvedValue({ user: { id: "admin-1", role: "OWNER" } } as never)
+  settleMock.mockResolvedValue(undefined)
   prismaMock.package.findUnique.mockResolvedValue({
     name: "GenCode", quantity: 10, price: 29.99, isActive: true, stripePriceId: "price_1",
   })
@@ -222,5 +226,41 @@ describe("reverseSale", () => {
     })
     prismaMock.sale.update.mockRejectedValue(new PrismaKnownError("gone", "P2025"))
     expect(await reverseSale(7)).toEqual({ ok: false, message: "sale.notFound" })
+  })
+})
+
+describe("markSalePaidManually", () => {
+  // The escape hatch for money that arrived outside Stripe. Gated harder than
+  // link generation: an ADMIN may open links all day, but asserting that money
+  // arrived when Stripe never saw it is an owner's call.
+  it("goes through requireRole, not verifyAdmin", async () => {
+    prismaMock.sale.findUnique.mockResolvedValue({ paidAt: null, reversedAt: null })
+
+    await markSalePaidManually(7)
+
+    expect(requireRole).toHaveBeenCalledWith("SUPER_ADMIN", "OWNER")
+  })
+
+  it("refuses a sale that is already paid", async () => {
+    prismaMock.sale.findUnique.mockResolvedValue({ paidAt: new Date(), reversedAt: null })
+
+    expect(await markSalePaidManually(7)).toEqual({ ok: false, message: "sale.alreadyPaid" })
+    expect(settleMock).not.toHaveBeenCalled()
+  })
+
+  it("refuses a reversed sale", async () => {
+    prismaMock.sale.findUnique.mockResolvedValue({ paidAt: null, reversedAt: new Date() })
+
+    expect(await markSalePaidManually(7)).toEqual({ ok: false, message: "sale.alreadyReversed" })
+    expect(settleMock).not.toHaveBeenCalled()
+  })
+
+  it("records who vouched for the payment", async () => {
+    prismaMock.sale.findUnique.mockResolvedValue({ paidAt: null, reversedAt: null })
+
+    const res = await markSalePaidManually(7)
+
+    expect(settleMock).toHaveBeenCalledWith(7, "admin-1")
+    expect(res).toEqual({ ok: true, message: "sale.markedPaid" })
   })
 })

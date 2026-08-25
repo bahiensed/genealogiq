@@ -41,9 +41,13 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
   const existingOwner = await prisma.user.findUnique({ where: { email: owner.email }, select: { id: true } })
   if (existingOwner) return fail(t('customer.adminEmailInUse'))
 
-  let token: string
+  // The owner row is written here because this is where the wizard collects the
+  // owner's details and there is nowhere else to keep them — but it is born
+  // INACTIVE, with no reset token and no welcome email. Sequoia access is what
+  // the first payment buys; provisionTenantAccess flips it when the money lands.
+  // Registering a customer who never buys must not hand out a login.
   try {
-    ;({ token } = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const customer = await tx.tenant.create({
         data: {
           ...rest,
@@ -53,7 +57,7 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
         select: { id: true },
       })
 
-      const user = await tx.user.create({
+      await tx.user.create({
         data: {
           firstName:     owner.firstName,
           lastName:      owner.lastName,
@@ -62,17 +66,11 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
           tenantId:      customer.id,
           password:      null,
           emailVerified: new Date(),
+          isActive:      false,
         },
         select: { id: true },
       })
-
-      const t = randomBytes(32).toString('hex')
-      await tx.passwordResetToken.create({
-        data: { token: hashToken(t), userId: user.id, expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000) },
-      })
-
-      return { token: t }
-    }))
+    })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
       return fail(t('common.duplicate'))
@@ -80,10 +78,8 @@ export async function createCustomer(data: CustomerCreateFormValues): Promise<Ac
     throw e
   }
 
-  await sendSequoiaWelcomeEmail(owner.email, token)
-
   revalidatePath('/customers')
-  return done(t('customer.created'))
+  return done(t('customer.createdAwaitingPayment'))
 }
 
 export async function updateCustomer(id: string, data: CustomerFormValues): Promise<ActionResult> {
@@ -162,10 +158,13 @@ export async function resendCustomerEmail(tenantId: string): Promise<ActionResul
 
   const owner = await prisma.user.findFirst({
     where:  { tenantId, role: 'OWNER' },
-    select: { id: true, email: true, password: true },
+    select: { id: true, email: true, password: true, isActive: true },
   })
   if (!owner) return fail(t('customer.noOwner'))
   if (owner.password) return fail(t('customer.passwordAlreadySet'))
+  // Resending is for an owner who lost their link, not a back door around the
+  // payment gate: an inactive owner has not paid for anything yet.
+  if (!owner.isActive) return fail(t('customer.accessNotProvisioned'))
 
   await prisma.passwordResetToken.deleteMany({ where: { userId: owner.id } })
 

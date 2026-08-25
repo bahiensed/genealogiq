@@ -51,11 +51,12 @@
       "invalidData": "Invalid data"
     },
     "customer": {
+      "accessNotProvisioned": "This customer has no access yet — it is created with the first payment.",
       "adminEmailInUse": "This administrator email is already in use",
-      "created": "Customer created successfully.",
+      "createdAwaitingPayment": "Customer registered. Sequoia access is granted after the first payment.",
+      "hasAppData": "Cannot delete: this funeral home still has {count} app memorial(s)/subscription(s) that would be destroyed.",
       "hasDependents": "Cannot delete: customer has dependent records.",
       "hasSales": "Cannot delete a customer with existing sales records.",
-      "hasAppData": "Cannot delete: this funeral home still has {count} app memorial(s)/subscription(s) that would be destroyed.",
       "noOwner": "No owner user found for this customer.",
       "notFound": "Customer not found.",
       "passwordAlreadySet": "This user has already set their password.",
@@ -99,10 +100,12 @@
       "updated": "Profile updated successfully."
     },
     "sale": {
+      "alreadyPaid": "This sale is already paid.",
       "alreadyReversed": "This sale has already been reversed.",
       "couponNotApplicable": "This coupon is not valid for this product.",
       "linkFailed": "Could not generate the payment link: {message}",
       "linkSent": "Payment link sent to {email}.",
+      "markedPaid": "Payment recorded. GenCodes minted.",
       "notFound": "Sale not found.",
       "packageInactive": "This product is inactive.",
       "packageNotFound": "Product not found.",
@@ -649,6 +652,7 @@
     "actions": {
       "cancel": "Cancel",
       "copyLink": "Copy payment link",
+      "markPaid": "Record payment received",
       "openMenu": "Open menu",
       "reverse": "Reverse"
     },
