@@ -23,6 +23,9 @@ export interface QRPackage {
   name: string
   description: string | null
   price: number
+  /** Null when this product is not offered in instalments. */
+  monthlyPrice: number | null
+  termLength: number
   quantity: number
 }
 
@@ -53,13 +56,14 @@ function PackageCard({ pkg, variant }: { pkg: QRPackage; variant: QRStoreVariant
   const t = useTranslations('Purchasing')
   const locale = useLocale()
   const [qty, setQty] = useState(1)
+  const [cadence, setCadence] = useState<'annual' | 'monthly'>('annual')
   const [isPending, startTransition] = useTransition()
 
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
 
   function handleBuy() {
     startTransition(async () => {
-      const result = await createPackageCheckoutSession(pkg.id, qty)
+      const result = await createPackageCheckoutSession(pkg.id, qty, cadence)
       if (!result.ok) {
         toast.error(result.message)
         return

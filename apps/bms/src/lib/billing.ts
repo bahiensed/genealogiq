@@ -6,14 +6,13 @@ import { hashToken } from '@genealogiq/core'
 import { prisma } from '@/lib/prisma'
 import { generateGenCode } from '@/lib/gen-code'
 import { sendSequoiaWelcomeEmail } from '@/lib/email'
-import { stripe } from '@/lib/stripe'
-import { isStripeStatusLive } from '@genealogiq/core'
+import { applyGenCodeSubscription, CHECKOUT_ORIGINS } from '@genealogiq/services/gencode-fulfilment'
 
 /** Matches the window createCustomer used to mint before access was payment-gated. */
 const RESET_TOKEN_TTL_MS = 72 * 60 * 60 * 1000
 
 /** Checkout Sessions BMS opens carry this, so both webhooks know whose they are. */
-export const BMS_ORIGIN = 'bms'
+export const BMS_ORIGIN = CHECKOUT_ORIGINS.bms
 
 function paymentIntentIdOf(session: Stripe.Checkout.Session): string | null {
   return typeof session.payment_intent === 'string'
@@ -119,120 +118,22 @@ export async function settleSaleManually(saleId: number, paidById: string): Prom
 }
 
 /**
- * Applies a Stripe Subscription to the sale it belongs to.
+ * BMS's half of the shared fulfilment: mint the batch, then open Sequoia.
  *
- * Replaces the one-time path for GenCode products: both cadences are
- * subscriptions now, so state comes from customer.subscription.* and the
- * checkout session is ignored — the same split the APP already documents.
- *
- * Three jobs, in one place because they must agree:
- *
- * 1. Mirror the subscription onto the sale — status raw and uninterpreted,
- *    accessEndsAt from the current period. Keeping accessEndsAt at the PERIOD
- *    end rather than the term end is what makes the freeze work: a monthly
- *    plan's window is pushed forward by each payment, so falling behind closes
- *    it without anything having to notice.
- * 2. Mint the GenCodes, exactly once, and only once money has actually arrived.
- * 3. Stop a monthly plan after its term.
+ * The minting itself lives in @genealogiq/services because SEQ sells the same
+ * product and must not get a second chance to fumble the "mint once" rule. What
+ * stays here is the part only BMS does — a tenant buying through a payment link
+ * may never have signed in, so the first settled sale is what grants access.
+ * (A tenant buying inside SEQ is already signed in, which is why SEQ has no
+ * equivalent step.)
  */
 export async function applySubscriptionToSale(sub: Stripe.Subscription): Promise<void> {
-  const meta = sub.metadata ?? {}
-  if (meta.origin !== BMS_ORIGIN) return
+  const applied = await applyGenCodeSubscription(sub, CHECKOUT_ORIGINS.bms)
+  if (!applied?.firstPayment) return
 
-  const saleId = Number(meta.saleId)
-  if (!Number.isInteger(saleId)) {
-    console.error('[bms-billing] subscription carries no usable saleId', { sub: sub.id, meta })
-    return
-  }
-
-  const item = sub.items.data[0]
-  // In Stripe SDK v18+, current_period_end moved from the Subscription onto
-  // each item.
-  const periodEnd = item?.current_period_end
-    ? new Date(item.current_period_end * 1000)
-    : null
-
-  const sale = await prisma.sale.findUnique({
-    where:  { id: saleId },
-    select: { id: true, paidAt: true, quantity: true, packageId: true, tenantId: true,
-              package: { select: { quantity: true } } },
-  })
-  if (!sale) {
-    console.error('[bms-billing] subscription points at a sale that is gone', { sub: sub.id, saleId })
-    return
-  }
-
-  // `customer.subscription.created` can arrive as `incomplete` — the
-  // subscription exists but the first invoice has not been paid. Minting there
-  // would hand over a whole batch for nothing. Wait for a status that means
-  // money actually arrived; the follow-up `updated` carries it.
-  const live      = isStripeStatusLive(sub.status)
-  const firstPaid = live && !sale.paidAt
-
-  await prisma.$transaction(async (tx) => {
-    await tx.sale.update({
-      where: { id: sale.id },
-      data: {
-        status:               sub.status,
-        accessEndsAt:         periodEnd,
-        stripeSubscriptionId: sub.id,
-        currency:             item?.price.currency ?? undefined,
-        amountTotal:          item?.price.unit_amount != null
-          ? item.price.unit_amount * sale.quantity
-          : undefined,
-        ...(firstPaid && { paidAt: new Date(), expiredAt: null, failedAt: null }),
-      },
-    })
-
-    if (!firstPaid) return
-
-    // `id` omitted so Prisma fills it via @default(cuid()) — see the scar
-    // documented in apps/seq/src/lib/billing.ts.
-    const codes = Array.from({ length: sale.package.quantity * sale.quantity }, () => ({
-      genCode:   generateGenCode(),
-      saleId:    sale.id,
-      packageId: sale.packageId,
-      tenantId:  sale.tenantId,
-    }))
-    await tx.genCode.createMany({ data: codes })
-  })
-
-  if (firstPaid) {
-    // Outside the transaction: this sends an email, and an email cannot be
-    // rolled back.
-    await provisionTenantAccess(sale.tenantId)
-    await scheduleMonthlyPlanEnd(sub, meta)
-  }
-}
-
-/**
- * A monthly plan is twelve instalments, not an open-ended subscription.
- *
- * Stripe has no notion of "charge N times and stop", so the end is set as a
- * cancel_at on the subscription itself. Applied here rather than at checkout
- * because Checkout's subscription_data does not accept it — and applied once,
- * guarded on cancel_at already being set, since every later event re-enters
- * this path.
- */
-async function scheduleMonthlyPlanEnd(
-  sub:  Stripe.Subscription,
-  meta: Record<string, string>,
-): Promise<void> {
-  if (meta.cadence !== 'monthly') return
-  if (sub.cancel_at) return
-
-  const months = Number(meta.termLength)
-  if (!Number.isInteger(months) || months <= 0) return
-
-  const end = new Date(sub.start_date * 1000)
-  end.setMonth(end.getMonth() + months)
-
-  // Best-effort: the codes are already minted and the money is arriving. A
-  // failure here means the plan runs long, which is a billing conversation, not
-  // a reason to make Stripe retry a fulfilment that succeeded.
-  await stripe.subscriptions
-    .update(sub.id, { cancel_at: Math.floor(end.getTime() / 1000) })
-    .catch((err: unknown) => console.error('[bms-billing] could not schedule plan end', { sub: sub.id, err }))
+  // Outside the fulfilment transaction: this sends an email, and an email
+  // cannot be rolled back.
+  await provisionTenantAccess(applied.tenantId)
 }
 
 /**

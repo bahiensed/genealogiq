@@ -25,8 +25,8 @@
       "invalidQuantity": "Invalid quantity.",
       "noCheckoutUrl": "Stripe did not return a checkout URL.",
       "notSynced": "This product is not available for purchase right now. Contact GenealogiQ.",
-      "packageNotFound": "Package not found or unavailable.",
-      "selfServePaused": "Direct purchase is temporarily unavailable while we update the payment plans. Contact GenealogiQ to buy GenCodes."
+      "notSyncedInCurrency": "This product is not available in {currency}. Contact GenealogiQ.",
+      "packageNotFound": "Package not found or unavailable."
     },
     "common": {
       "duplicate": "Duplicate data detected",
@@ -698,6 +698,12 @@
     "title": "Profile"
   },
   "Purchasing": {
+    "cadence": {
+      "annual": "Up front",
+      "annualHint": "One payment, valid for {count} months.",
+      "monthly": "Monthly",
+      "monthlyHint": "{price} a month for {count} months. Your GenCodes are available from the first payment."
+    },
     "card": {
       "amount": "Amount:",
       "buyDigital": "Start Earning Now",
