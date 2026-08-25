@@ -529,17 +529,19 @@
     },
     "fields": {
       "customer": "Cliente",
-      "package": "Paquete",
-      "quantity": "Cantidad de Paquetes"
+      "package": "Producto",
+      "quantity": "Cantidad"
     },
-    "new": "Nueva Venta de Paquete de QR Codes",
+    "new": "Nueva Venta de GenCodes",
     "newButton": "Nueva venta",
     "packageOption": {
-      "codes": "{count, plural, one {# código} other {# códigos}}"
+      "units": "{count, plural, one {# unidad} other {# unidades}}"
     },
     "placeholders": {
       "customer": "Selecciona un cliente",
-      "package": "Selecciona un paquete"
+      "customerEmpty": "No se encontró ningún cliente.",
+      "customerSearch": "Buscar cliente…",
+      "package": "Selecciona un producto"
     },
     "reverse": {
       "confirm": "Revertir venta",

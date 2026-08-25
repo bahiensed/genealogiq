@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@genealogiq/ui/select'
+import { SearchableSelect } from '@genealogiq/ui/searchable-select'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,6 +67,11 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   })
 
   const { control, handleSubmit, watch, formState: { isSubmitting } } = form
+
+  const customerOptions = useMemo(
+    () => customers.map((c) => ({ value: c.id, label: c.name })),
+    [customers],
+  )
 
   const selectedPackageId = watch('packageId')
   const selectedQty       = watch('quantity') || 0
@@ -119,7 +125,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                       <SelectContent>
                         {packages.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
-                            {p.name} · {t('packageOption.codes', { count: p.quantity })} · {usd.format(p.price)}
+                            {p.name} | {t('packageOption.units', { count: p.quantity })} | {usd.format(p.price)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -135,16 +141,15 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
                     <FieldLabel>{t('fields.customer')}</FieldLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger aria-invalid={fieldState.invalid}>
-                        <SelectValue placeholder={t('placeholders.customer')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {customers.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <SearchableSelect
+                      options={customerOptions}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder={t('placeholders.customer')}
+                      searchPlaceholder={t('placeholders.customerSearch')}
+                      emptyMessage={t('placeholders.customerEmpty')}
+                      aria-invalid={fieldState.invalid}
+                    />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
                 )}

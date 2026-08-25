@@ -529,17 +529,19 @@
     },
     "fields": {
       "customer": "Customer",
-      "package": "Package",
-      "quantity": "Package Quantity"
+      "package": "Product",
+      "quantity": "Quantity"
     },
-    "new": "New QR Code Package Sale",
+    "new": "New GenCode Sale",
     "newButton": "New sale",
     "packageOption": {
-      "codes": "{count, plural, one {# code} other {# codes}}"
+      "units": "{count, plural, one {# unit} other {# units}}"
     },
     "placeholders": {
       "customer": "Select a customer",
-      "package": "Select a package"
+      "customerEmpty": "No customer found.",
+      "customerSearch": "Search customers…",
+      "package": "Select a product"
     },
     "reverse": {
       "confirm": "Reverse sale",
