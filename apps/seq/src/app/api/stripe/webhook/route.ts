@@ -2,16 +2,20 @@ import { NextRequest, NextResponse } from "next/server"
 import type Stripe from "stripe"
 import { stripe } from "@/lib/stripe"
 import { prisma } from "@/lib/prisma"
-import { applyCheckoutSession, type CheckoutContext } from "@/lib/billing"
+import { applyGenCodeSubscription, CHECKOUT_ORIGINS } from "@genealogiq/services/gencode-fulfilment"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-// Only checkout-session events for the QR Package one-time flow. Subscription
-// events are handled by the APP webhook on a separate endpoint.
+// GenCode packages are sold as subscriptions in both cadences, so the sale's
+// state comes from these events. Consumer subscription plans belong to the APP
+// endpoint, and BMS's payment-link sales to BMS's — the origin marker on the
+// metadata is what separates the three, since Stripe delivers every subscribed
+// event to every endpoint on the account.
 const RELEVANT_EVENTS = new Set<Stripe.Event["type"]>([
-  "checkout.session.completed",
-  "checkout.session.async_payment_succeeded",
+  "customer.subscription.created",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
 ])
 
 export async function POST(req: NextRequest) {
@@ -36,57 +40,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
-  const session = event.data.object as Stripe.Checkout.Session
-
-  // Stripe fans every subscribed event out to EVERY endpoint on the account, so
-  // this route also receives the sessions BMS opens for its payment-link sales.
-  // Those arrive with a Sale row that already exists, carrying the session id —
-  // applyCheckoutSession would hit the stripeSessionId unique, read it as
-  // "already processed" and return without minting a single GenCode. BMS owns
-  // its own endpoint and its own fulfilment; leave them alone.
-  if ((session.metadata ?? {}).origin === "bms") {
-    return NextResponse.json({ received: true, ignored: "bms-owned session" })
+  const sub = event.data.object as Stripe.Subscription
+  if ((sub.metadata ?? {}).origin !== CHECKOUT_ORIGINS.seq) {
+    return NextResponse.json({ received: true, ignored: "not a seq subscription" })
   }
-
-  // Only one-time payment checkouts produced by createPackageCheckoutSession.
-  if (session.mode !== "payment") {
-    return NextResponse.json({ received: true, ignored: "non-payment mode" })
-  }
-  if (session.payment_status !== "paid") {
-    // checkout.session.completed for ACH/async fires before payment settles;
-    // ignore here and wait for async_payment_succeeded.
-    return NextResponse.json({ received: true, ignored: "unpaid" })
-  }
-
-  const meta = session.metadata ?? {}
-  const ctx: Partial<CheckoutContext> = {
-    tenantId:  meta.tenantId,
-    packageId: meta.packageId,
-    quantity:  meta.quantity ? Number(meta.quantity) : undefined,
-    soldById:  meta.soldById,
-  }
-  if (!ctx.tenantId || !ctx.packageId || !ctx.soldById || !ctx.quantity || !Number.isInteger(ctx.quantity)) {
-    console.error("[seq-stripe-webhook] missing/invalid metadata", { sessionId: session.id, meta })
-    return NextResponse.json({ received: true, ignored: "bad metadata" })
-  }
-
-  // Fast-path idempotency: skip events we've already fully processed.
-  const seen = await prisma.stripeEvent.findUnique({ where: { id: event.id }, select: { id: true } })
-  if (seen) return NextResponse.json({ received: true, duplicate: true })
 
   try {
-    // Process FIRST (idempotent via Sale.stripeSessionId unique), then record the
-    // event. Recording only after a successful apply means a failed apply leaves
-    // no StripeEvent row, so Stripe's retry reprocesses it instead of being
-    // skipped as a duplicate — closing the "event seen but sale missing" gap.
-    await applyCheckoutSession(session, ctx as CheckoutContext)
-    await prisma.stripeEvent.create({ data: { id: event.id, type: event.type } }).catch((err: unknown) => {
-      // A concurrent delivery may have recorded it first — harmless, since the
-      // apply above is idempotent. Re-throw anything that isn't a unique-violation.
-      if ((err as { code?: string }).code !== "P2002") throw err
+    // Ledger and apply in ONE transaction: a duplicate delivery hits the PK, and
+    // a failed apply rolls the ledger row back so Stripe's retry can reprocess.
+    await prisma.$transaction(async (tx) => {
+      await tx.stripeEvent.create({ data: { id: event.id, type: event.type } })
+      // No post-payment step here, unlike BMS: a tenant buying inside Sequoia is
+      // already signed in, so there is no access to grant.
+      await applyGenCodeSubscription(sub, CHECKOUT_ORIGINS.seq)
     })
   } catch (err: unknown) {
-    console.error("[seq-stripe-webhook] applyCheckoutSession failed", err)
+    if ((err as { code?: string }).code === "P2002") {
+      return NextResponse.json({ received: true, duplicate: true })
+    }
+    console.error("[seq-stripe-webhook] applyGenCodeSubscription failed", err)
     return NextResponse.json({ error: "internal" }, { status: 500 })
   }
 

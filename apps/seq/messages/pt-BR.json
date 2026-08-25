@@ -25,8 +25,8 @@
       "invalidQuantity": "Quantidade inválida.",
       "noCheckoutUrl": "O Stripe não retornou uma URL de checkout.",
       "notSynced": "Este produto não está disponível para compra no momento. Fale com a GenealogiQ.",
-      "packageNotFound": "Pacote não encontrado ou indisponível.",
-      "selfServePaused": "A compra direta está temporariamente indisponível enquanto atualizamos os planos de pagamento. Fale com a GenealogiQ para adquirir GenCodes."
+      "notSyncedInCurrency": "Este produto não está disponível em {currency}. Fale com a GenealogiQ.",
+      "packageNotFound": "Pacote não encontrado ou indisponível."
     },
     "common": {
       "duplicate": "Dados duplicados detectados",
@@ -698,6 +698,12 @@
     "title": "Perfil"
   },
   "Purchasing": {
+    "cadence": {
+      "annual": "À vista",
+      "annualHint": "Pagamento único, válido por {count} meses.",
+      "monthly": "Mensal",
+      "monthlyHint": "{price} por mês, por {count} meses. Os GenCodes ficam disponíveis já no primeiro pagamento."
+    },
     "card": {
       "amount": "Quantidade:",
       "buyDigital": "Comece a Faturar Agora",

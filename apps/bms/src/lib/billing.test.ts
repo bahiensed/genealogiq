@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
-const { prismaMock, txMock, emailMock, stripeMock } = vi.hoisted(() => ({
+const { prismaMock, txMock, emailMock, stripeMock, applyGenCodeSubscriptionMock } = vi.hoisted(() => ({
   prismaMock: {
     sale: { findUnique: vi.fn(), update: vi.fn() },
     user: { findFirst: vi.fn() },
@@ -14,12 +14,17 @@ const { prismaMock, txMock, emailMock, stripeMock } = vi.hoisted(() => ({
   },
   emailMock: vi.fn(),
   stripeMock: { subscriptions: { update: vi.fn() } },
+  applyGenCodeSubscriptionMock: vi.fn(),
 }))
 
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/gen-code", () => ({ generateGenCode: () => "GQL7K2P9MNRX4FT2" }))
 vi.mock("@/lib/email", () => ({ sendSequoiaWelcomeEmail: emailMock }))
 vi.mock("@/lib/stripe", () => ({ stripe: stripeMock }))
+vi.mock("@genealogiq/services/gencode-fulfilment", () => ({
+  applyGenCodeSubscription: applyGenCodeSubscriptionMock,
+  CHECKOUT_ORIGINS: { bms: "bms", seq: "seq" },
+}))
 vi.mock("@genealogiq/core", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@genealogiq/core")>()),
   hashToken: (t: string) => `hashed:${t}`,
@@ -192,95 +197,34 @@ describe("applySalePayment — Sequoia access", () => {
   })
 })
 
-const sub = (over: Record<string, unknown> = {}) => ({
-  id: "sub_1",
-  status: "active",
-  start_date: Math.floor(Date.now() / 1000),
-  cancel_at: null,
-  metadata: { origin: "bms", saleId: "7", cadence: "annual", termLength: "12" },
-  items: { data: [{ current_period_end: Math.floor(Date.now() / 1000) + 86_400 * 365,
-                    price: { currency: "usd", unit_amount: 2999 } }] },
-  ...over,
-}) as never
-
-describe("applySubscriptionToSale", () => {
-  it("ignores a subscription that is not ours", async () => {
-    await applySubscriptionToSale(sub({ metadata: { saleId: "7" } }))
-    expect(prismaMock.sale.findUnique).not.toHaveBeenCalled()
-  })
-
-  // customer.subscription.created arrives before the first invoice is paid.
-  // Minting there would hand over a whole batch for nothing.
-  it("does NOT mint on an incomplete subscription, but does record its status", async () => {
-    prismaMock.sale.findUnique.mockResolvedValue(pending)
-
-    await applySubscriptionToSale(sub({ status: "incomplete" }))
-
-    expect(txMock.genCode.createMany).not.toHaveBeenCalled()
-    const data = txMock.sale.update.mock.calls[0][0].data
-    expect(data.status).toBe("incomplete")
-    expect(data.paidAt).toBeUndefined()
-  })
-
-  it("mints once the subscription reports a paying status, and opens Sequoia", async () => {
-    prismaMock.sale.findUnique.mockResolvedValue(pending)
+describe("applySubscriptionToSale — what BMS still owns", () => {
+  // The minting moved to @genealogiq/services (SEQ sells the same product and
+  // must not get a second chance at the "mint once" rule). What stays here is
+  // the step only BMS does: a tenant who bought through a payment link may never
+  // have signed in, so the first settled sale is what grants access.
+  it("opens Sequoia on the first payment", async () => {
+    applyGenCodeSubscriptionMock.mockResolvedValue({ tenantId: "t1", firstPayment: true })
     prismaMock.user.findFirst.mockResolvedValue({ id: "u1", email: "o@x.com", isActive: false })
 
-    await applySubscriptionToSale(sub())
+    await applySubscriptionToSale({ id: "sub_1" } as never)
 
-    const arg = txMock.genCode.createMany.mock.calls[0][0] as { data: unknown[] }
-    expect(arg.data).toHaveLength(6) // 3 × 2
-    expect(txMock.sale.update.mock.calls[0][0].data.paidAt).toBeInstanceOf(Date)
     expect(emailMock).toHaveBeenCalledTimes(1)
   })
 
-  // Every renewal re-enters this path. A second batch would double the stock
-  // the tenant paid for once.
-  it("never mints twice — a renewal only moves the window", async () => {
-    prismaMock.sale.findUnique.mockResolvedValue({ ...pending, paidAt: new Date() })
+  it("does nothing more on a renewal", async () => {
+    applyGenCodeSubscriptionMock.mockResolvedValue({ tenantId: "t1", firstPayment: false })
 
-    await applySubscriptionToSale(sub())
+    await applySubscriptionToSale({ id: "sub_1" } as never)
 
-    expect(txMock.genCode.createMany).not.toHaveBeenCalled()
-    expect(txMock.sale.update.mock.calls[0][0].data.accessEndsAt).toBeInstanceOf(Date)
+    expect(prismaMock.user.findFirst).not.toHaveBeenCalled()
+    expect(emailMock).not.toHaveBeenCalled()
   })
 
-  // The freeze: status is stored raw and the window closes as a consequence of
-  // reading it, with nothing to sweep.
-  it("records a lapsed status without touching the codes", async () => {
-    prismaMock.sale.findUnique.mockResolvedValue({ ...pending, paidAt: new Date() })
+  it("does nothing when the subscription is not ours", async () => {
+    applyGenCodeSubscriptionMock.mockResolvedValue(null)
 
-    await applySubscriptionToSale(sub({ status: "past_due" }))
+    await applySubscriptionToSale({ id: "sub_1" } as never)
 
-    expect(txMock.sale.update.mock.calls[0][0].data.status).toBe("past_due")
-    expect(txMock.genCode.createMany).not.toHaveBeenCalled()
-  })
-
-  // Stripe has no "charge N times and stop", so the end is a cancel_at set once.
-  it("schedules the end of a monthly plan, once", async () => {
-    prismaMock.sale.findUnique.mockResolvedValue(pending)
-
-    await applySubscriptionToSale(sub({ metadata: { origin: "bms", saleId: "7", cadence: "monthly", termLength: "12" } }))
-
-    expect(stripeMock.subscriptions.update).toHaveBeenCalledWith("sub_1", { cancel_at: expect.any(Number) })
-  })
-
-  it("does not schedule an end for an annual plan, which renews", async () => {
-    prismaMock.sale.findUnique.mockResolvedValue(pending)
-
-    await applySubscriptionToSale(sub())
-
-    expect(stripeMock.subscriptions.update).not.toHaveBeenCalled()
-  })
-
-  it("does not re-schedule an end that is already set", async () => {
-    prismaMock.sale.findUnique.mockResolvedValue(pending)
-
-    await applySubscriptionToSale(sub({
-      cancel_at: Math.floor(Date.now() / 1000) + 100,
-      metadata: { origin: "bms", saleId: "7", cadence: "monthly", termLength: "12" },
-    }))
-
-    expect(stripeMock.subscriptions.update).not.toHaveBeenCalled()
+    expect(emailMock).not.toHaveBeenCalled()
   })
 })

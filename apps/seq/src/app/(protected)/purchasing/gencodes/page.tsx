@@ -15,8 +15,10 @@ export default async function PurchasingGenCodePage() {
   // a price there — offering a product we cannot charge for would fail at
   // checkout with nothing to bill.
   const currency = currencyForLocale(await getLocale())
-  const PRICE    = { usd: 'priceUsd', brl: 'priceBrl', mxn: 'priceMxn' } as const
-  const PRICE_ID = { usd: 'stripeAnnualPriceIdUsd', brl: 'stripeAnnualPriceIdBrl', mxn: 'stripeAnnualPriceIdMxn' } as const
+  const PRICE      = { usd: 'priceUsd', brl: 'priceBrl', mxn: 'priceMxn' } as const
+  const PRICE_ID   = { usd: 'stripeAnnualPriceIdUsd', brl: 'stripeAnnualPriceIdBrl', mxn: 'stripeAnnualPriceIdMxn' } as const
+  const MONTHLY    = { usd: 'monthlyPriceUsd', brl: 'monthlyPriceBrl', mxn: 'monthlyPriceMxn' } as const
+  const MONTHLY_ID = { usd: 'stripeMonthlyPriceIdUsd', brl: 'stripeMonthlyPriceIdBrl', mxn: 'stripeMonthlyPriceIdMxn' } as const
 
   const packages = await prisma.package.findMany({
     where: {
@@ -29,9 +31,13 @@ export default async function PurchasingGenCodePage() {
       name:        true,
       description: true,
       quantity:    true,
-      priceUsd:    true,
-      priceBrl:    true,
-      priceMxn:    true,
+      termLength:  true,
+      priceUsd:    true, monthlyPriceUsd: true,
+      priceBrl:    true, monthlyPriceBrl: true,
+      priceMxn:    true, monthlyPriceMxn: true,
+      stripeMonthlyPriceIdUsd: true,
+      stripeMonthlyPriceIdBrl: true,
+      stripeMonthlyPriceIdMxn: true,
     },
     orderBy: { quantity: 'asc' },
   })
@@ -41,7 +47,13 @@ export default async function PurchasingGenCodePage() {
     name:        p.name,
     description: p.description,
     quantity:    p.quantity,
+    termLength:  p.termLength,
     price:       Number(p[PRICE[currency]]),
+    // Instalments are offered only where the amount AND its Stripe Price both
+    // exist — showing the option otherwise would fail at checkout.
+    monthlyPrice: p[MONTHLY[currency]] !== null && p[MONTHLY_ID[currency]]
+      ? Number(p[MONTHLY[currency]])
+      : null,
   }))
 
   return (
