@@ -17,9 +17,9 @@ import { BMS_ORIGIN, settleSaleManually } from '@/lib/billing'
 const LINK_TTL_DAYS = 7
 
 const PRICE_ID_BY_CURRENCY = {
-  usd: 'stripePriceIdUsd',
-  brl: 'stripePriceIdBrl',
-  mxn: 'stripePriceIdMxn',
+  usd: 'stripeAnnualPriceIdUsd',
+  brl: 'stripeAnnualPriceIdBrl',
+  mxn: 'stripeAnnualPriceIdMxn',
 } as const
 
 const PRICE_BY_CURRENCY = {
@@ -50,7 +50,7 @@ async function openCheckoutForSale(
       package: { select: {
         name: true,
         priceUsd: true, priceBrl: true, priceMxn: true,
-        stripePriceIdUsd: true, stripePriceIdBrl: true, stripePriceIdMxn: true,
+        stripeAnnualPriceIdUsd: true, stripeAnnualPriceIdBrl: true, stripeAnnualPriceIdMxn: true,
       } },
       tenant:  { select: { email: true, name: true, tradeName: true } },
     },
@@ -157,7 +157,7 @@ export async function createSalePaymentLink(data: SaleFormValues): Promise<Actio
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId },
-    select: { isActive: true, stripePriceIdUsd: true, stripePriceIdBrl: true, stripePriceIdMxn: true },
+    select: { isActive: true, stripeAnnualPriceIdUsd: true, stripeAnnualPriceIdBrl: true, stripeAnnualPriceIdMxn: true },
   })
   if (!pkg) return fail(t('sale.packageNotFound'))
   if (!pkg.isActive) return fail(t('sale.packageInactive'))

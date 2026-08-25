@@ -90,6 +90,7 @@
       "priceRequired": "Defina um preço maior que zero antes de sincronizar.",
       "stripeSyncFailed": "Falha na sincronização com o Stripe: {message}",
       "synced": "Sincronizado com o Stripe com sucesso.",
+      "termLengthRequired": "A duração em meses precisa ser maior que zero.",
       "unknownError": "Erro desconhecido",
       "updated": "Produto atualizado com sucesso.",
       "updatedStripeCleared": "Produto atualizado — referências do Stripe removidas. Use \"Sincronizar com Stripe\" para provisionar o novo Price."
@@ -497,6 +498,7 @@
     "maxChars": "Deve ter no máximo {count} caracteres",
     "maxQuantity": "Deve ser no máximo {count}",
     "minChars": "Deve ter pelo menos {count} caracteres",
+    "monthlyNeedsAnnual": "Informe o preço anual desta moeda antes do mensal",
     "mustBePositive": "Deve ser maior que zero",
     "mustBeWholeNumber": "Deve ser um número inteiro",
     "mustBeZeroOrGreater": "Deve ser 0 ou maior",
@@ -578,12 +580,18 @@
     "createButton": "Criar {noun}",
     "edit": "Editar {noun}",
     "fields": {
+      "annual": "Anual",
       "description": "Descrição",
+      "monthly": "Mensal",
       "name": "Nome do {noun}",
       "price": "Preço (US$)",
-      "quantity": "Unidades por Produto"
+      "quantity": "Unidades por Produto",
+      "termLength": "Duração (meses)"
     },
     "gencodesTitle": "GenCodes",
+    "hints": {
+      "cadence": "Deixe o mensal em zero para vender só à vista. O mensal não precisa ser o anual ÷ 12."
+    },
     "new": "Novo {noun}",
     "newDialogDescription": "Um produto agrupa GenCodes para venda B2B: defina quantas unidades ele entrega e por quanto.",
     "newProduct": "Novo produto",

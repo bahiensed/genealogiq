@@ -90,6 +90,7 @@
       "priceRequired": "Set a price greater than zero before syncing.",
       "stripeSyncFailed": "Stripe sync failed: {message}",
       "synced": "Synced with Stripe successfully.",
+      "termLengthRequired": "The term in months must be greater than zero.",
       "unknownError": "Unknown error",
       "updated": "Product updated successfully.",
       "updatedStripeCleared": "Product updated — Stripe references cleared. Use \"Sync with Stripe\" to provision the new Price."
@@ -497,6 +498,7 @@
     "maxChars": "Must be at most {count} characters",
     "maxQuantity": "Must be at most {count}",
     "minChars": "Must be at least {count} characters",
+    "monthlyNeedsAnnual": "Set this currency’s annual price before the monthly one",
     "mustBePositive": "Must be greater than zero",
     "mustBeWholeNumber": "Must be a whole number",
     "mustBeZeroOrGreater": "Must be 0 or greater",
@@ -578,12 +580,18 @@
     "createButton": "Create {noun}",
     "edit": "Edit {noun}",
     "fields": {
+      "annual": "Annual",
       "description": "Description",
+      "monthly": "Monthly",
       "name": "{noun} Name",
       "price": "Price (US$)",
-      "quantity": "Units per Product"
+      "quantity": "Units per Product",
+      "termLength": "Term (months)"
     },
     "gencodesTitle": "GenCodes",
+    "hints": {
+      "cadence": "Leave monthly at zero to sell annually only. Monthly need not be annual ÷ 12."
+    },
     "new": "New {noun}",
     "newDialogDescription": "A product bundles GenCodes for B2B sale: set how many units it delivers and for how much.",
     "newProduct": "New product",

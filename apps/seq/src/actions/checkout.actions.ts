@@ -23,11 +23,13 @@ export async function createPackageCheckoutSession(
   // The catalogue is priced per currency and the tenant's interface language
   // picks one — the same rule BMS follows when it generates a payment link.
   const currency = currencyForLocale(await getLocale())
-  const PRICE_ID = { usd: 'stripePriceIdUsd', brl: 'stripePriceIdBrl', mxn: 'stripePriceIdMxn' } as const
+  // Annual only until cadence selection lands; the monthly ids exist but are
+  // not offered here yet.
+  const PRICE_ID = { usd: 'stripeAnnualPriceIdUsd', brl: 'stripeAnnualPriceIdBrl', mxn: 'stripeAnnualPriceIdMxn' } as const
 
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId, isActive: true },
-    select: { id: true, stripePriceIdUsd: true, stripePriceIdBrl: true, stripePriceIdMxn: true },
+    select: { id: true, stripeAnnualPriceIdUsd: true, stripeAnnualPriceIdBrl: true, stripeAnnualPriceIdMxn: true },
   })
   if (!pkg) return fail(t('checkout.packageNotFound'))
 

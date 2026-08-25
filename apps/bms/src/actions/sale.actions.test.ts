@@ -51,7 +51,7 @@ beforeEach(() => {
   vi.mocked(requireRole).mockResolvedValue({ user: { id: "admin-1", role: "OWNER" } } as never)
   settleMock.mockResolvedValue(undefined)
   prismaMock.package.findUnique.mockResolvedValue({
-    isActive: true, stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null,
+    isActive: true, stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
   })
   prismaMock.tenant.findUnique.mockResolvedValue({ isActive: true })
   prismaMock.sale.create.mockResolvedValue({ id: 99 })
@@ -62,7 +62,7 @@ beforeEach(() => {
     package: {
       name: "GenCode",
       priceUsd: 29.99, priceBrl: null, priceMxn: null,
-      stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null,
+      stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
     },
     tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
   })
@@ -96,7 +96,7 @@ describe("createSalePaymentLink — guards", () => {
   // this could not bite, because no money ever changed hands.
   it("refuses a product with no Stripe price", async () => {
     prismaMock.package.findUnique.mockResolvedValue({
-      isActive: true, stripePriceIdUsd: null, stripePriceIdBrl: null, stripePriceIdMxn: null,
+      isActive: true, stripeAnnualPriceIdUsd: null, stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
     })
     const res = await createSalePaymentLink(input)
     expect(res).toEqual({ ok: false, message: "sale.packageNotSyncedInCurrency" })
@@ -161,7 +161,7 @@ describe("createSalePaymentLink — the session", () => {
       package: {
         name: "GenCode",
         priceUsd: 29.99, priceBrl: null, priceMxn: null,
-        stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null,
+        stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
       },
       tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
     })
@@ -338,7 +338,7 @@ describe("resendSaleCharge", () => {
       .mockResolvedValue({
         quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
         package: { name: "GenCode", priceUsd: 29.99, priceBrl: null, priceMxn: null,
-                   stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null },
+                   stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null },
         tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
       })
 
@@ -355,7 +355,7 @@ describe("resendSaleCharge", () => {
       .mockResolvedValue({
         quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
         package: { name: "GenCode", priceUsd: 29.99, priceBrl: null, priceMxn: null,
-                   stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null },
+                   stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null },
         tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
       })
 
@@ -372,7 +372,7 @@ describe("resendSaleCharge", () => {
       .mockResolvedValue({
         quantity: 2, tenantId: "c1", packageId: "p1", discountCouponId: null, soldById: "admin-1",
         package: { name: "GenCode", priceUsd: 29.99, priceBrl: null, priceMxn: null,
-                   stripePriceIdUsd: "price_1", stripePriceIdBrl: null, stripePriceIdMxn: null },
+                   stripeAnnualPriceIdUsd: "price_1", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null },
         tenant: { email: "funeraria@example.com", name: "Funerária X", tradeName: "X" },
       })
 

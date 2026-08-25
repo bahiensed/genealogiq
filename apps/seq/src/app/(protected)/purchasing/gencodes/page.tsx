@@ -16,7 +16,7 @@ export default async function PurchasingGenCodePage() {
   // checkout with nothing to bill.
   const currency = currencyForLocale(await getLocale())
   const PRICE    = { usd: 'priceUsd', brl: 'priceBrl', mxn: 'priceMxn' } as const
-  const PRICE_ID = { usd: 'stripePriceIdUsd', brl: 'stripePriceIdBrl', mxn: 'stripePriceIdMxn' } as const
+  const PRICE_ID = { usd: 'stripeAnnualPriceIdUsd', brl: 'stripeAnnualPriceIdBrl', mxn: 'stripeAnnualPriceIdMxn' } as const
 
   const packages = await prisma.package.findMany({
     where: {

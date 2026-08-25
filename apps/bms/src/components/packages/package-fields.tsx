@@ -11,11 +11,14 @@ import { CurrencyInput } from '@/components/ui/currency-input'
 // The four fields a product is made of, shared by the create dialog and the
 // edit page so the two cannot drift. Everything that exists on only one of
 // them — the active switch, the Stripe panel — stays with the edit form.
+type PriceName = 'priceUsd' | 'priceBrl' | 'priceMxn'
+  | 'monthlyPriceUsd' | 'monthlyPriceBrl' | 'monthlyPriceMxn'
+
 function PriceField({
   control, name, label, symbol,
 }: {
   control: Control<PackageFormValues>
-  name:    'priceUsd' | 'priceBrl' | 'priceMxn'
+  name:    PriceName
   label:   string
   symbol:  string
 }) {
@@ -45,6 +48,33 @@ function PriceField({
   )
 }
 
+/**
+ * One currency, both ways to pay for it. Monthly first, matching
+ * subscription-form's layout — the instalment is the number a buyer compares
+ * against, so it reads left to right as "29.90 a month, or 299.00 up front".
+ */
+function CurrencyBlock({
+  control, code, symbol, annualName, monthlyName, annualLabel, monthlyLabel,
+}: {
+  control:      Control<PackageFormValues>
+  code:         string
+  symbol:       string
+  annualName:   PriceName
+  monthlyName:  PriceName
+  annualLabel:  string
+  monthlyLabel: string
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{code}</span>
+      <div className="grid grid-cols-2 gap-3">
+        <PriceField control={control} name={monthlyName} label={monthlyLabel} symbol={symbol} />
+        <PriceField control={control} name={annualName}  label={annualLabel}  symbol={symbol} />
+      </div>
+    </div>
+  )
+}
+
 export function PackageFields({ control }: { control: Control<PackageFormValues> }) {
   const t      = useTranslations('Packages')
   const locale = useLocale()
@@ -56,6 +86,8 @@ export function PackageFields({ control }: { control: Control<PackageFormValues>
   const priceBrl = useWatch({ control, name: 'priceBrl' }) || 0
   const priceMxn = useWatch({ control, name: 'priceMxn' }) || 0
 
+  // Unit price is quoted off the annual amount — the price of the batch, not of
+  // one instalment.
   const priced = [
     { code: 'USD', value: priceUsd },
     { code: 'BRL', value: priceBrl },
@@ -97,13 +129,43 @@ export function PackageFields({ control }: { control: Control<PackageFormValues>
         )}
       />
 
-      {/* One slot per currency. Leaving one at zero is a decision, not an
-          omission: the product simply is not sold in that currency, and the
-          interfaces using it will not offer it. */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <PriceField control={control} name="priceUsd" label="USD" symbol="$" />
-        <PriceField control={control} name="priceBrl" label="BRL" symbol="R$" />
-        <PriceField control={control} name="priceMxn" label="MXN" symbol="MX$" />
+      <Controller
+        name="termLength"
+        control={control}
+        render={({ field, fieldState }) => (
+          <Field data-invalid={fieldState.invalid}>
+            <FieldLabel>{t('fields.termLength')}</FieldLabel>
+            <Input
+              type="number"
+              step="1"
+              min="1"
+              {...field}
+              value={field.value === 0 || Number.isNaN(field.value) ? '' : field.value}
+              onChange={(e) => field.onChange(e.target.valueAsNumber)}
+              autoComplete="off"
+              aria-invalid={fieldState.invalid}
+            />
+            {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          </Field>
+        )}
+      />
+
+      {/* Three currencies, two ways to pay each. Zero is a decision, not an
+          omission: no annual price means the product is not sold in that
+          currency at all, and no monthly price means it is sold up front only. */}
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <CurrencyBlock control={control} code="USD" symbol="$"
+            annualName="priceUsd" monthlyName="monthlyPriceUsd"
+            annualLabel={t('fields.annual')} monthlyLabel={t('fields.monthly')} />
+          <CurrencyBlock control={control} code="BRL" symbol="R$"
+            annualName="priceBrl" monthlyName="monthlyPriceBrl"
+            annualLabel={t('fields.annual')} monthlyLabel={t('fields.monthly')} />
+          <CurrencyBlock control={control} code="MXN" symbol="MX$"
+            annualName="priceMxn" monthlyName="monthlyPriceMxn"
+            annualLabel={t('fields.annual')} monthlyLabel={t('fields.monthly')} />
+        </div>
+        <p className="text-xs text-muted-foreground">{t('hints.cadence')}</p>
       </div>
 
       {quantity > 0 && priced.length > 0 && (

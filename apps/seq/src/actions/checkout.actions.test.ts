@@ -61,7 +61,7 @@ describe("createPackageCheckoutSession", () => {
   it("guards against a package not synced to Stripe (missing stripePriceId)", async () => {
     prismaMock.package.findUnique.mockResolvedValue({
       id: "pkg-1",
-      stripePriceIdUsd: null, stripePriceIdBrl: null, stripePriceIdMxn: null,
+      stripeAnnualPriceIdUsd: null, stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
     })
 
     const res = await createPackageCheckoutSession("pkg-1", 1)
@@ -74,7 +74,7 @@ describe("createPackageCheckoutSession", () => {
   it("fails when Stripe returns a session without a url", async () => {
     prismaMock.package.findUnique.mockResolvedValue({
       id: "pkg-1",
-      stripePriceIdUsd: "price_abc", stripePriceIdBrl: null, stripePriceIdMxn: null,
+      stripeAnnualPriceIdUsd: "price_abc", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
     })
     createSession.mockResolvedValue({ url: null } as never)
 
@@ -86,7 +86,7 @@ describe("createPackageCheckoutSession", () => {
   it("returns ok({ url }) on the success path and forwards the tenant-scoped line item", async () => {
     prismaMock.package.findUnique.mockResolvedValue({
       id: "pkg-1",
-      stripePriceIdUsd: "price_abc", stripePriceIdBrl: null, stripePriceIdMxn: null,
+      stripeAnnualPriceIdUsd: "price_abc", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
     })
     createSession.mockResolvedValue({ url: "https://checkout.stripe.com/c/pay/abc" } as never)
 
