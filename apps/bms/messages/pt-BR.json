@@ -243,7 +243,7 @@
     "create": "Criar cliente",
     "edit": "Editar cliente",
     "entityType": {
-      "company": "Empresa",
+      "company": "Pessoa jurídica",
       "individual": "Pessoa física"
     },
     "fields": {
