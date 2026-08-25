@@ -16,11 +16,13 @@ export default async function EditGenCodeProductPage({ params }: { params: Promi
         name:        pkg.name,
         quantity:    pkg.quantity,
         description: pkg.description ?? '',
-        price:       Number(pkg.price),
+        priceUsd:    Number(pkg.priceUsd ?? 0),
+        priceBrl:    Number(pkg.priceBrl ?? 0),
+        priceMxn:    Number(pkg.priceMxn ?? 0),
         isActive:    pkg.isActive,
       }}
       stripeProductId={pkg.stripeProductId}
-      stripePriceId={pkg.stripePriceId}
+      stripePriceIds={{ usd: pkg.stripePriceIdUsd, brl: pkg.stripePriceIdBrl, mxn: pkg.stripePriceIdMxn }}
       />
     </FormShell>
   )

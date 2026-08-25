@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, type Control } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
@@ -28,6 +28,42 @@ interface PackageOption {
 
 interface DiscountCouponFormProps {
   packages: PackageOption[]
+}
+
+function AmountField({
+  control, name, label, symbol,
+}: {
+  control: Control<DiscountCouponFormValues>
+  name:    'amountOffUsd' | 'amountOffBrl' | 'amountOffMxn'
+  label:   string
+  symbol:  string
+}) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState }) => (
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel>{label}</FieldLabel>
+          <div className="relative">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 select-none text-muted-foreground">
+              {symbol}
+            </span>
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              className="pl-10"
+              value={field.value ?? ''}
+              onChange={(e) => field.onChange(e.target.value === '' ? 0 : Number(e.target.value))}
+              aria-invalid={fieldState.invalid}
+            />
+          </div>
+          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+        </Field>
+      )}
+    />
+  )
 }
 
 export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
@@ -100,6 +136,17 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
           )}
         />
 
+        {/* A percentage has no currency; a fixed amount is money and needs one
+            slot per currency, like every other price in this catalogue. Leaving
+            one at zero means the coupon is simply not offered there. */}
+        {discountType === 'amount' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <AmountField control={control} name="amountOffUsd" label="USD" symbol="$" />
+            <AmountField control={control} name="amountOffBrl" label="BRL" symbol="R$" />
+            <AmountField control={control} name="amountOffMxn" label="MXN" symbol="MX$" />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Controller
             name="discountType"
@@ -118,24 +165,27 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
             )}
           />
 
-          <Controller
-            name="discountValue"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>{discountType === 'percent' ? t('fields.percent') : t('fields.amount')}</FieldLabel>
-                <Input
-                  type="number"
-                  step={discountType === 'percent' ? '1' : '0.01'}
-                  min="0"
-                  value={field.value ?? ''}
-                  onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-              </Field>
-            )}
-          />
+          {discountType === 'percent' && (
+            <Controller
+              name="percentOff"
+              control={control}
+              render={({ field, fieldState }) => (
+                <Field data-invalid={fieldState.invalid}>
+                  <FieldLabel>{t('fields.percent')}</FieldLabel>
+                  <Input
+                    type="number"
+                    step="1"
+                    min="0"
+                    max="100"
+                    value={field.value ?? ''}
+                    onChange={(e) => field.onChange(e.target.value === '' ? 0 : Number(e.target.value))}
+                    aria-invalid={fieldState.invalid}
+                  />
+                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                </Field>
+              )}
+            />
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

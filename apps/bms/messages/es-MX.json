@@ -51,11 +51,12 @@
       "invalidData": "Datos inválidos"
     },
     "customer": {
+      "accessNotProvisioned": "Este cliente aún no tiene acceso — se crea con el primer pago.",
       "adminEmailInUse": "Este correo de administrador ya está en uso",
-      "created": "Cliente creado con éxito.",
+      "createdAwaitingPayment": "Cliente registrado. El acceso a Sequoia se libera tras el primer pago.",
+      "hasAppData": "No se puede eliminar: esta funeraria todavía tiene {count} memorial(es)/suscripción(es) en la app que se destruirían.",
       "hasDependents": "No se puede eliminar: el cliente tiene registros dependientes.",
       "hasSales": "No se puede eliminar un cliente con registros de ventas.",
-      "hasAppData": "No se puede eliminar: esta funeraria todavía tiene {count} memorial(es)/suscripción(es) en la app que se destruirían.",
       "noOwner": "No se encontró usuario propietario para este cliente.",
       "notFound": "Cliente no encontrado.",
       "passwordAlreadySet": "Este usuario ya estableció su contraseña.",
@@ -99,10 +100,21 @@
       "updated": "Perfil actualizado correctamente."
     },
     "sale": {
+      "alreadyPaid": "Esta venta ya está pagada.",
       "alreadyReversed": "Esta venta ya fue revertida.",
-      "created": "Venta registrada correctamente.",
+      "couponNotApplicable": "Este cupón no es válido para este producto.",
+      "linkFailed": "No se pudo generar el enlace de pago: {message}",
+      "linkRegenerated": "Se generó un nuevo enlace y se envió a {email}.",
+      "linkResent": "Enlace reenviado a {email}.",
+      "linkSent": "Enlace de pago enviado a {email}.",
+      "markedPaid": "Pago registrado. GenCodes generados.",
       "notFound": "Venta no encontrada.",
-      "packageNotFound": "Producto no encontrado."
+      "packageInactive": "Este producto está inactivo.",
+      "packageNotFound": "Producto no encontrado.",
+      "packageNotSyncedInCurrency": "Este producto no tiene precio sincronizado en {currency}. Configúralo y sincroniza antes de vender.",
+      "tenantInactive": "Este cliente está inactivo.",
+      "tenantNotFound": "Cliente no encontrado.",
+      "unknownError": "Error desconocido"
     },
     "subscription": {
       "created": "Plan creado correctamente.",
@@ -470,6 +482,8 @@
     }
   },
   "Errors": {
+    "atLeastOneAmount": "Indica al menos un monto",
+    "atLeastOnePrice": "Indica al menos un precio",
     "codeFormat": "Usa solo letras mayúsculas, números y guiones bajos",
     "countryCodeRequired": "El código de país es obligatorio",
     "couponCodeFormat": "Solo letras mayúsculas, números, guiones y guiones bajos",
@@ -481,6 +495,7 @@
     "invalidEmail": "Correo electrónico inválido",
     "invalidRole": "Rol inválido",
     "maxChars": "Debe tener como máximo {count} caracteres",
+    "maxQuantity": "Debe ser como máximo {count}",
     "minChars": "Debe tener al menos {count} caracteres",
     "mustBePositive": "Debe ser mayor que cero",
     "mustBeWholeNumber": "Debe ser un número entero",
@@ -640,15 +655,19 @@
   "Sales": {
     "actions": {
       "cancel": "Cancelar",
+      "copyLink": "Copiar enlace de pago",
+      "markPaid": "Registrar pago recibido",
       "openMenu": "Abrir menú",
+      "resendCharge": "Reenviar cobro",
       "reverse": "Revertir"
     },
     "confirm": {
-      "confirm": "Confirmar",
-      "description": "Antes de completar esta venta, verifica que el pago ya se haya recibido.",
-      "title": "Confirmar venta"
+      "confirm": "Generar y enviar",
+      "description": "El enlace se enviará al correo del cliente y es válido por 7 días. Los GenCodes solo se generan tras confirmarse el pago.",
+      "title": "¿Generar enlace de pago?"
     },
     "fields": {
+      "coupon": "Cupón de Descuento",
       "customer": "Cliente",
       "package": "Producto",
       "quantity": "Cantidad"
@@ -659,9 +678,12 @@
       "units": "{count, plural, one {# unidad} other {# unidades}}"
     },
     "placeholders": {
+      "couponEmpty": "No hay cupón disponible para este producto.",
+      "couponSearch": "Buscar cupón…",
       "customer": "Selecciona un cliente",
       "customerEmpty": "No se encontró ningún cliente.",
       "customerSearch": "Buscar cliente…",
+      "noCoupon": "Sin cupón",
       "package": "Selecciona un producto"
     },
     "reverse": {
@@ -672,12 +694,18 @@
     },
     "status": {
       "active": "Activa",
+      "awaitingPayment": "Esperando pago",
+      "expired": "Enlace expirado",
+      "failed": "Pago no concluido",
       "reversed": "Revertida"
     },
-    "submit": "Registrar Venta",
-    "submitting": "Enviando…",
+    "submit": "Generar enlace de pago",
+    "submitting": "Generando…",
     "summary": {
+      "discount": "Descuento ({code})",
       "genCodes": "GenCodes a generar",
+      "stripeAuthority": "Vista previa. Stripe calcula el monto final en el checkout.",
+      "subtotal": "Subtotal",
       "totalPrice": "Precio total",
       "unitPrice": "Precio por unidad"
     },
@@ -686,7 +714,6 @@
       "date": "Fecha",
       "empty": "No se encontraron ventas.",
       "product": "Producto",
-      "productPrice": "Precio del Producto",
       "quantity": "Cantidad",
       "seller": "Vendedor",
       "status": "Estado",
@@ -696,6 +723,7 @@
     },
     "title": "Ventas Manuales",
     "toasts": {
+      "linkCopied": "Enlace copiado.",
       "reversed": "Venta revertida correctamente."
     }
   },
@@ -732,7 +760,8 @@
       "sales": "Ventas",
       "units": "Unidades",
       "total": "Ingreso",
-      "caveat": "Calculado como cantidad × precio ACTUAL del producto — la venta no guarda el precio de entonces, así que editar el precio de un producto cambia estos números retroactivamente. Las ventas revertidas quedan fuera."
+      "caveat": "Cuenta solo ventas con pago confirmado, por el monto que cobró Stripe. Las ventas antiguas sin ese monto usan cantidad × precio ACTUAL del producto — en esas, editar el precio cambia los números retroactivamente. Las ventas revertidas quedan fuera.",
+      "currency": "Moneda"
     },
     "stale": {
       "title": "Vendidos y nunca canjeados",

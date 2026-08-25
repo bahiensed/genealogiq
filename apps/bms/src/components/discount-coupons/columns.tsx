@@ -15,7 +15,10 @@ export type DiscountCouponRow = {
   code:             string
   description:      string | null
   discountType:     string
-  discountValue:    number
+  percentOff:       number | null
+  amountOffUsd:     number | null
+  amountOffBrl:     number | null
+  amountOffMxn:     number | null
   duration:         string
   durationInMonths: number | null
   maxRedemptions:   number | null
@@ -24,12 +27,23 @@ export type DiscountCouponRow = {
   createdAt:        Date
 }
 
+// A percentage is one number. A fixed amount is one per currency, and the list
+// shows every currency the coupon is actually good in — an operator scanning
+// this needs to see that FIXED50 works in reais but not in pesos.
 function formatDiscount(row: DiscountCouponRow, t: Translator, locale: string) {
-  return row.discountType === 'percent'
-    ? t('discount.percent', { value: row.discountValue })
-    : t('discount.amount', {
-        value: new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(row.discountValue),
-      })
+  if (row.discountType === 'percent') {
+    return t('discount.percent', { value: row.percentOff ?? 0 })
+  }
+  const amounts = ([
+    ['USD', row.amountOffUsd],
+    ['BRL', row.amountOffBrl],
+    ['MXN', row.amountOffMxn],
+  ] as const).filter(([, v]) => v !== null && v > 0)
+
+  if (amounts.length === 0) return '—'
+  return amounts
+    .map(([code, v]) => new Intl.NumberFormat(locale, { style: 'currency', currency: code }).format(v!))
+    .join(' · ')
 }
 
 function formatDuration(row: DiscountCouponRow, t: Translator) {

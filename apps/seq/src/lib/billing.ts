@@ -1,33 +1,10 @@
 import type Stripe from "stripe"
-import { stripe } from "@/lib/stripe"
 import { prisma } from "@/lib/prisma"
 import { generateGenCode } from "@/lib/gen-code"
 
-/**
- * One Stripe Customer per Tenant — billing/invoices are consolidated across
- * employees buying QR packages for the same funeral home.
- */
-export async function ensureTenantStripeCustomer(tenantId: string): Promise<string> {
-  const tenant = await prisma.tenant.findUnique({
-    where:  { id: tenantId },
-    select: { stripeCustomerId: true, email: true, tradeName: true, name: true },
-  })
-  if (!tenant) throw new Error("Tenant not found")
-  if (tenant.stripeCustomerId) return tenant.stripeCustomerId
-
-  const customer = await stripe.customers.create({
-    email:    tenant.email,
-    name:     tenant.tradeName || tenant.name,
-    metadata: { tenantId },
-  })
-
-  await prisma.tenant.update({
-    where: { id: tenantId },
-    data:  { stripeCustomerId: customer.id },
-  })
-
-  return customer.id
-}
+// Moved to @genealogiq/services so BMS resolves the same Customer per Tenant.
+// Re-exported here so existing `@/lib/billing` imports keep working unchanged.
+export { ensureTenantStripeCustomer } from "@genealogiq/services/stripe-customer"
 
 export interface CheckoutContext {
   tenantId:  string

@@ -46,9 +46,14 @@ const validInput = {
   name:        "GenCode",
   quantity:    10,
   description: "Produto com 10 GenCodes",
-  price:       50,
+  priceUsd:    50,
+  priceBrl:    0,
+  priceMxn:    0,
   isActive:    true,
 }
+
+const noIds = { stripePriceIdUsd: null, stripePriceIdBrl: null, stripePriceIdMxn: null }
+const noPrices = { priceUsd: null, priceBrl: null, priceMxn: null }
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -62,40 +67,78 @@ describe("createPackage", () => {
     expect(prismaMock.package.create).not.toHaveBeenCalled()
   })
 
-  it("stores price as a Prisma.Decimal", async () => {
-    prismaMock.package.create.mockResolvedValue({ id: "p1" })
-    const res = await createPackage(validInput)
+  // A product nobody can buy in any currency is a draft, not a product.
+  it("rejects a product with no price in any currency", async () => {
+    const res = await createPackage({ ...validInput, priceUsd: 0, priceBrl: 0, priceMxn: 0 })
+    expect(res).toEqual({ ok: false, message: "common.invalidData" })
+    expect(prismaMock.package.create).not.toHaveBeenCalled()
+  })
 
-    const arg = prismaMock.package.create.mock.calls[0][0] as { data: { price: unknown } }
-    expect(arg.data.price).toBeInstanceOf(FakeDecimal)
+  // Zero in the form means "not sold in this currency" — the column must hold
+  // null, not 0, or the sellable-in-this-currency filters would match it.
+  it("stores priced currencies as Decimal and unpriced ones as null", async () => {
+    prismaMock.package.create.mockResolvedValue({ id: "p1" })
+
+    const res = await createPackage({ ...validInput, priceUsd: 50, priceBrl: 250, priceMxn: 0 })
+
+    const data = prismaMock.package.create.mock.calls[0][0].data
+    expect(data.priceUsd).toBeInstanceOf(FakeDecimal)
+    expect(data.priceBrl).toBeInstanceOf(FakeDecimal)
+    expect(data.priceMxn).toBeNull()
     expect(res).toEqual({ ok: true, message: "package.created" })
   })
 })
 
 describe("updatePackage", () => {
-  it("clears the Stripe price ref (but keeps the reusable product) when the price changes on a synced package", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ price: new FakeDecimal(40), stripePriceId: "price_1" })
+  // Stripe Prices are immutable, so a changed number invalidates the synced id —
+  // but only for that currency. Editing the real price must not unsync dollars.
+  it("clears only the changed currency's price ref", async () => {
+    prismaMock.package.findUnique.mockResolvedValue({
+      priceUsd: new FakeDecimal(50), priceBrl: new FakeDecimal(200), priceMxn: null,
+      stripePriceIdUsd: "price_usd", stripePriceIdBrl: "price_brl", stripePriceIdMxn: null,
+    })
     prismaMock.package.update.mockResolvedValue({})
     stripeMock.prices.update.mockResolvedValue({})
 
-    const res = await updatePackage("p1", validInput) // price 50 ≠ 40
+    // USD unchanged at 50, BRL moves 200 -> 250
+    const res = await updatePackage("p1", { ...validInput, priceUsd: 50, priceBrl: 250 })
 
-    const arg = prismaMock.package.update.mock.calls[0][0] as { data: Record<string, unknown> }
-    expect(arg.data).not.toHaveProperty("stripeProductId")
-    expect(arg.data.stripePriceId).toBeNull()
-    expect(stripeMock.prices.update).toHaveBeenCalledWith("price_1", { active: false })
+    const data = prismaMock.package.update.mock.calls[0][0].data
+    expect(data).not.toHaveProperty("stripePriceIdUsd")
+    expect(data.stripePriceIdBrl).toBeNull()
+    expect(data).not.toHaveProperty("stripeProductId")
+    expect(stripeMock.prices.update).toHaveBeenCalledWith("price_brl", { active: false })
+    expect(stripeMock.prices.update).not.toHaveBeenCalledWith("price_usd", expect.anything())
     expect(res).toEqual({ ok: true, message: "package.updatedStripeCleared" })
   })
 
-  it("keeps the Stripe refs when the price is unchanged", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ price: new FakeDecimal(50), stripePriceId: "price_1" })
+  // Removing a price is as much a change as editing one — the synced Price must
+  // not stay live for a currency the product is no longer sold in.
+  it("clears the ref when a price is removed entirely", async () => {
+    prismaMock.package.findUnique.mockResolvedValue({
+      priceUsd: new FakeDecimal(50), priceBrl: new FakeDecimal(200), priceMxn: null,
+      stripePriceIdUsd: "price_usd", stripePriceIdBrl: "price_brl", stripePriceIdMxn: null,
+    })
+    prismaMock.package.update.mockResolvedValue({})
+    stripeMock.prices.update.mockResolvedValue({})
+
+    await updatePackage("p1", { ...validInput, priceUsd: 50, priceBrl: 0 })
+
+    expect(prismaMock.package.update.mock.calls[0][0].data.stripePriceIdBrl).toBeNull()
+  })
+
+  it("keeps every ref when nothing changed", async () => {
+    prismaMock.package.findUnique.mockResolvedValue({
+      priceUsd: new FakeDecimal(50), priceBrl: null, priceMxn: null,
+      stripePriceIdUsd: "price_usd", stripePriceIdBrl: null, stripePriceIdMxn: null,
+    })
     prismaMock.package.update.mockResolvedValue({})
 
-    const res = await updatePackage("p1", validInput) // price 50 === 50
+    const res = await updatePackage("p1", validInput)
 
-    const arg = prismaMock.package.update.mock.calls[0][0] as { data: Record<string, unknown> }
-    expect(arg.data).not.toHaveProperty("stripeProductId")
-    expect(arg.data).not.toHaveProperty("stripePriceId")
+    const data = prismaMock.package.update.mock.calls[0][0].data
+    expect(data).not.toHaveProperty("stripePriceIdUsd")
+    expect(stripeMock.prices.update).not.toHaveBeenCalled()
     expect(res).toEqual({ ok: true, message: "package.updated" })
   })
 
@@ -105,7 +148,7 @@ describe("updatePackage", () => {
   })
 
   it("maps a P2025 race to 'Package not found.'", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({ price: new FakeDecimal(40), stripePriceId: null })
+    prismaMock.package.findUnique.mockResolvedValue({ ...noPrices, ...noIds })
     prismaMock.package.update.mockRejectedValue(new PrismaKnownError("gone", "P2025"))
     expect(await updatePackage("p1", validInput)).toEqual({ ok: false, message: "package.notFound" })
   })

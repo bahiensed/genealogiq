@@ -1,11 +1,12 @@
 'use server'
 
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { ok, fail, type ActionResult } from '@genealogiq/core'
 import { verifyTenantSession } from '@/lib/dal'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { ensureTenantStripeCustomer } from '@/lib/billing'
+import { currencyForLocale } from '@genealogiq/core'
 
 export async function createPackageCheckoutSession(
   packageId: string,
@@ -19,12 +20,19 @@ export async function createPackageCheckoutSession(
 
   if (!Number.isInteger(quantity) || quantity < 1) return fail(t('checkout.invalidQuantity'))
 
+  // The catalogue is priced per currency and the tenant's interface language
+  // picks one — the same rule BMS follows when it generates a payment link.
+  const currency = currencyForLocale(await getLocale())
+  const PRICE_ID = { usd: 'stripePriceIdUsd', brl: 'stripePriceIdBrl', mxn: 'stripePriceIdMxn' } as const
+
   const pkg = await prisma.package.findUnique({
     where:  { id: packageId, isActive: true },
-    select: { id: true, stripePriceId: true },
+    select: { id: true, stripePriceIdUsd: true, stripePriceIdBrl: true, stripePriceIdMxn: true },
   })
   if (!pkg) return fail(t('checkout.packageNotFound'))
-  if (!pkg.stripePriceId) {
+
+  const priceId = pkg[PRICE_ID[currency]]
+  if (!priceId) {
     return fail(t('checkout.notSynced'))
   }
 
@@ -37,7 +45,7 @@ export async function createPackageCheckoutSession(
   const checkout = await stripe.checkout.sessions.create({
     mode:                  'payment',
     customer,
-    line_items:            [{ price: pkg.stripePriceId, quantity }],
+    line_items:            [{ price: priceId, quantity }],
     client_reference_id:   tenantId,
     metadata,
     payment_intent_data:   { metadata },

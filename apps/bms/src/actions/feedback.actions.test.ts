@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const { sendFeedbackMock } = vi.hoisted(() => ({ sendFeedbackMock: vi.fn() }))
 
-vi.mock("next-intl/server", () => ({ getTranslations: vi.fn(async () => (key: string) => key) }))
+vi.mock("next-intl/server", () => ({
+  getTranslations: vi.fn(async () => (key: string) => key),
+  // The locale picks the currency, so every action that touches money reads it.
+  getLocale: vi.fn(async () => "en-US"),
+}))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
 vi.mock("@/lib/email", () => ({ sendFeedback: sendFeedbackMock }))
 

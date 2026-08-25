@@ -158,7 +158,13 @@ model DiscountCoupon {
   code                  String    @unique
   description           String?
   discountType          String    @map("discount_type")
-  discountValue         Decimal   @map("discount_value") @db.Decimal(10, 2)
+  /// Exactly one of these two shapes is populated, per discountType.
+  /// A percentage has no currency and stays a single number; a fixed amount is
+  /// money, so it needs one slot per currency like every other price here.
+  percentOff            Decimal?  @map("percent_off") @db.Decimal(10, 2)
+  amountOffUsd          Decimal?  @map("amount_off_usd") @db.Decimal(10, 2)
+  amountOffBrl          Decimal?  @map("amount_off_brl") @db.Decimal(10, 2)
+  amountOffMxn          Decimal?  @map("amount_off_mxn") @db.Decimal(10, 2)
   duration              String
   durationInMonths      Int?      @map("duration_in_months")
   maxRedemptions        Int?      @map("max_redemptions")
@@ -179,13 +185,20 @@ model Package {
   id               String              @id @default(cuid())
   name             String
   description      String?
-  price            Decimal             @map("price") @db.Decimal(10, 2)
+  /// One slot per currency, all optional: a product is sellable in the
+  /// currencies it has a price for and invisible in the rest. Mirrors
+  /// ExtraUnitPrice, the closest model (a one-time purchase).
+  priceUsd         Decimal?            @map("price_usd") @db.Decimal(10, 2)
+  priceBrl         Decimal?            @map("price_brl") @db.Decimal(10, 2)
+  priceMxn         Decimal?            @map("price_mxn") @db.Decimal(10, 2)
   isActive         Boolean             @default(true) @map("is_active")
   createdAt        DateTime            @default(now()) @map("created_at")
   updatedAt        DateTime            @updatedAt @map("updated_at")
   quantity         Int                 @default(1)
   stripeProductId  String?             @unique @map("stripe_product_id")
-  stripePriceId    String?             @unique @map("stripe_price_id")
+  stripePriceIdUsd String?             @unique @map("stripe_price_id_usd")
+  stripePriceIdBrl String?             @unique @map("stripe_price_id_brl")
+  stripePriceIdMxn String?             @unique @map("stripe_price_id_mxn")
   genCodes         GenCode[]
   sales            Sale[]
   coupons          DiscountCoupon[]    @relation("CouponPackages")
@@ -214,6 +227,10 @@ model Sale {
   /// Only set when an operator recorded an off-Stripe payment. Null on a sale Stripe settled.
   paidById              String?             @map("paid_by_id")
   expiredAt             DateTime?           @map("expired_at")
+  /// An async payment (boleto, Pix, ACH) that completed checkout and then bounced.
+  /// Distinct from expiredAt on purpose: both dead-end the link, but one is the
+  /// customer running out of time and the other is the money not arriving.
+  failedAt              DateTime?           @map("failed_at")
   reversedAt            DateTime?           @map("reversed_at")
   checkoutUrl           String?             @map("checkout_url")
   /// Cents, as Stripe reports them.

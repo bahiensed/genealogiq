@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -8,7 +8,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { toast } from 'sonner'
 import { Fingerprint } from 'lucide-react'
 import { getSaleSchema, saleDefaultValues, type SaleFormValues } from '@/schemas/sale.schema'
-import { createSale } from '@/actions/sale.actions'
+import { createSalePaymentLink } from '@/actions/sale.actions'
 import { Button } from '@genealogiq/ui/button'
 import { Input } from '@genealogiq/ui/input'
 import {
@@ -45,12 +45,23 @@ interface Customer {
   name: string
 }
 
+interface Coupon {
+  id:           string
+  code:         string
+  discountType: string
+  /** Already resolved for the sale's currency by getSelectableCoupons. */
+  value:        number
+  /** Empty means every product. */
+  packageIds:   string[]
+}
+
 interface SaleFormProps {
   packages?:  Package[]
   customers?: Customer[]
+  coupons?:   Coupon[]
 }
 
-export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
+export function SaleForm({ packages = [], customers = [], coupons = [] }: SaleFormProps) {
   const t    = useTranslations('Sales')
   const tc   = useTranslations('Common')
   const tErr = useTranslations('Errors')
@@ -59,6 +70,10 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   const [serverError, setServerError] = useState<string | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pendingData, setPendingData] = useState<SaleFormValues | null>(null)
+  // react-hook-form's isSubmitting resolves the moment onSubmit opens the dialog,
+  // so it says nothing about the action that runs on confirm. Two clicks on
+  // Confirm used to create two sales; now they would create two CHARGES.
+  const [isSending, setIsSending] = useState(false)
   const router = useRouter()
 
   const form = useForm<SaleFormValues>({
@@ -66,7 +81,7 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
     defaultValues: saleDefaultValues,
   })
 
-  const { control, handleSubmit, watch, formState: { isSubmitting } } = form
+  const { control, handleSubmit, watch, setValue } = form
 
   const customerOptions = useMemo(
     () => customers.map((c) => ({ value: c.id, label: c.name })),
@@ -75,11 +90,34 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
 
   const selectedPackageId = watch('packageId')
   const selectedQty       = watch('quantity') || 0
+  const selectedCouponId  = watch('discountCouponId')
   const selectedPkg       = packages.find(p => p.id === selectedPackageId)
 
-  const totalQRCodes   = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.quantity : 0
-  const totalPrice     = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.price : 0
-  const unitPrice      = selectedPkg && selectedPkg.quantity > 0 ? selectedPkg.price / selectedPkg.quantity : 0
+  // A coupon with no packageIds applies to everything.
+  const availableCoupons = useMemo(
+    () => coupons.filter(c => c.packageIds.length === 0 || c.packageIds.includes(selectedPackageId)),
+    [coupons, selectedPackageId],
+  )
+
+  // Changing the product can strand a coupon that does not apply to the new one.
+  useEffect(() => {
+    if (selectedCouponId && !availableCoupons.some(c => c.id === selectedCouponId)) {
+      setValue('discountCouponId', '')
+    }
+  }, [availableCoupons, selectedCouponId, setValue])
+
+  const totalQRCodes = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.quantity : 0
+  const subtotal     = selectedPkg && selectedQty > 0 ? selectedQty * selectedPkg.price : 0
+  const unitPrice    = selectedPkg && selectedPkg.quantity > 0 ? selectedPkg.price / selectedPkg.quantity : 0
+
+  // A preview, not the price. Stripe computes what is actually charged, and it
+  // is the authority — this only spares the operator a surprise on the invoice.
+  const coupon   = availableCoupons.find(c => c.id === selectedCouponId)
+  const discount = !coupon ? 0
+    : coupon.discountType === 'percent'
+      ? subtotal * (coupon.value / 100)
+      : Math.min(coupon.value, subtotal)
+  const total = subtotal - discount
 
   function onSubmit(data: SaleFormValues) {
     setPendingData(data)
@@ -87,15 +125,20 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
   }
 
   async function handleConfirm() {
-    if (!pendingData) return
+    if (!pendingData || isSending) return
     setConfirmOpen(false)
     setServerError(null)
-    const result = await createSale(pendingData)
-    if (!result.ok) {
-      setServerError(result.message)
-    } else {
+    setIsSending(true)
+    try {
+      const result = await createSalePaymentLink(pendingData)
+      if (!result.ok) {
+        setServerError(result.message)
+        return
+      }
       if (result.message) toast.success(result.message)
       router.push('/sales/manual-sales')
+    } finally {
+      setIsSending(false)
     }
   }
 
@@ -175,6 +218,33 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                   </Field>
                 )}
               />
+
+              <Controller
+                name="discountCouponId"
+                control={control}
+                render={({ field }) => (
+                  <Field>
+                    <FieldLabel>{t('fields.coupon')}</FieldLabel>
+                    <SearchableSelect
+                      options={[
+                        { value: '', label: t('placeholders.noCoupon') },
+                        ...availableCoupons.map((c) => ({
+                          value: c.id,
+                          label: c.discountType === 'percent'
+                            ? `${c.code} — ${c.value}%`
+                            : `${c.code} — ${usd.format(c.value)}`,
+                        })),
+                      ]}
+                      value={field.value ?? ''}
+                      onValueChange={field.onChange}
+                      placeholder={t('placeholders.noCoupon')}
+                      searchPlaceholder={t('placeholders.couponSearch')}
+                      emptyMessage={t('placeholders.couponEmpty')}
+                      disabled={!selectedPackageId}
+                    />
+                  </Field>
+                )}
+              />
             </FieldGroup>
 
             {/* Summary card */}
@@ -193,23 +263,34 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
                     </p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 pt-1 border-t border-primary/10">
-                  <div>
-                    <p className="text-xs text-muted-foreground">{t('summary.totalPrice')}</p>
-                    <p className="text-lg font-bold tabular-nums">{usd.format(totalPrice)}</p>
+                <div className="flex flex-col gap-1 pt-1 border-t border-primary/10 text-sm">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-muted-foreground">{t('summary.subtotal')}</span>
+                    <span className="tabular-nums">{usd.format(subtotal)}</span>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">{t('summary.unitPrice')}</p>
-                    <p className="text-lg font-bold tabular-nums">{usd.format(unitPrice)}</p>
+                  {discount > 0 && (
+                    <div className="flex items-baseline justify-between text-emerald-600">
+                      <span>{t('summary.discount', { code: coupon!.code })}</span>
+                      <span className="tabular-nums">−{usd.format(discount)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-baseline justify-between pt-1">
+                    <span className="font-medium">{t('summary.totalPrice')}</span>
+                    <span className="text-lg font-bold tabular-nums">{usd.format(total)}</span>
+                  </div>
+                  <div className="flex items-baseline justify-between text-xs text-muted-foreground">
+                    <span>{t('summary.unitPrice')}</span>
+                    <span className="tabular-nums">{usd.format(unitPrice)}</span>
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground">{t('summary.stripeAuthority')}</p>
               </div>
             )}
 
             {serverError && <FieldError>{serverError}</FieldError>}
             <Field orientation="horizontal">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? t('submitting') : t('submit')}
+              <Button type="submit" disabled={isSending}>
+                {isSending ? t('submitting') : t('submit')}
               </Button>
               <Button type="button" variant="outline" onClick={() => form.reset(saleDefaultValues)}>
                 {tc('reset')}
@@ -228,8 +309,8 @@ export function SaleForm({ packages = [], customers = [] }: SaleFormProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm}>{t('confirm.confirm')}</AlertDialogAction>
+            <AlertDialogCancel disabled={isSending}>{t('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirm} disabled={isSending}>{t('confirm.confirm')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -10,6 +10,32 @@ import { getDiscountCouponSchema, type DiscountCouponFormValues } from '@/schema
 import { identityTranslator } from '@/schemas/i18n'
 // NOTE: stripe is imported lazily inside each action below — see comment in createDiscountCoupon.
 
+const AMOUNT_FIELDS = [
+  { currency: 'usd', field: 'amountOffUsd' },
+  { currency: 'brl', field: 'amountOffBrl' },
+  { currency: 'mxn', field: 'amountOffMxn' },
+] as const
+
+/**
+ * Stripe wants one base currency plus the rest in currency_options, so the
+ * first currency the operator priced becomes the base. Which one it is has no
+ * effect on the buyer — Stripe picks by the session's currency either way.
+ */
+function amountOffPayload(input: DiscountCouponFormValues) {
+  const priced = AMOUNT_FIELDS
+    .map((f) => ({ currency: f.currency, cents: Math.round(input[f.field] * 100) }))
+    .filter((f) => f.cents > 0)
+
+  const [base, ...rest] = priced
+  return {
+    amount_off: base.cents,
+    currency:   base.currency,
+    ...(rest.length > 0 && {
+      currency_options: Object.fromEntries(rest.map((r) => [r.currency, { amount_off: r.cents }])),
+    }),
+  }
+}
+
 export async function createDiscountCoupon(
   data: DiscountCouponFormValues,
 ): Promise<ActionResult<{ id: string; code: string }>> {
@@ -53,11 +79,17 @@ export async function createDiscountCoupon(
   let promo:        Awaited<ReturnType<typeof stripe.promotionCodes.create>> | null = null
 
   try {
-    // 1. Create Stripe Coupon
+    // 1. Create Stripe Coupon.
+    //
+    // A percentage needs no currency at all. A fixed amount does, and Stripe
+    // models multi-currency on ONE coupon rather than three: a base
+    // amount_off + currency, plus currency_options for the rest. So a coupon
+    // valid in reais and dollars is a single object with a single promotion
+    // code — the customer types one string whatever they are billed in.
     stripeCoupon = await stripe.coupons.create({
-      percent_off:        input.discountType === 'percent' ? input.discountValue : undefined,
-      amount_off:         input.discountType === 'amount'  ? Math.round(input.discountValue * 100) : undefined,
-      currency:           input.discountType === 'amount'  ? 'usd' : undefined,
+      ...(input.discountType === 'percent'
+        ? { percent_off: input.percentOff }
+        : amountOffPayload(input)),
       duration:           input.duration,
       duration_in_months: input.duration === 'repeating' ? (input.durationInMonths ?? undefined) : undefined,
       applies_to:         stripeProductIds.length > 0 ? { products: stripeProductIds } : undefined,
@@ -77,7 +109,10 @@ export async function createDiscountCoupon(
         code:                  input.code,
         description:           input.description ?? null,
         discountType:          input.discountType,
-        discountValue:         input.discountValue,
+        percentOff:            input.discountType === 'percent' ? input.percentOff : null,
+        amountOffUsd:          input.discountType === 'amount' && input.amountOffUsd > 0 ? input.amountOffUsd : null,
+        amountOffBrl:          input.discountType === 'amount' && input.amountOffBrl > 0 ? input.amountOffBrl : null,
+        amountOffMxn:          input.discountType === 'amount' && input.amountOffMxn > 0 ? input.amountOffMxn : null,
         duration:              input.duration,
         durationInMonths:      input.duration === 'repeating' ? input.durationInMonths : null,
         maxRedemptions:        input.maxRedemptions ?? null,

@@ -8,12 +8,19 @@ export async function getSales() {
 
   const rows = await prisma.sale.findMany({
     select: {
-      id:         true,
-      quantity:   true,
-      reversedAt: true,
-      createdAt:  true,
+      id:             true,
+      quantity:       true,
+      paidAt:         true,
+      expiredAt:      true,
+      failedAt:       true,
+      reversedAt:     true,
+      createdAt:      true,
+      amountTotal:    true,
+      currency:       true,
+      checkoutUrl:    true,
+      discountCoupon: { select: { code: true } },
       package: {
-        select: { name: true, price: true, quantity: true },
+        select: { name: true, quantity: true },
       },
       tenant: {
         select: { name: true },
@@ -24,6 +31,5 @@ export async function getSales() {
     },
     orderBy: { createdAt: 'desc' },
   })
-
-  return rows.map(r => ({ ...r, package: { ...r.package, price: Number(r.package.price) } }))
+  return rows
 }

@@ -17,7 +17,10 @@ export default async function DiscountCouponsPage() {
   let loadError: string | null = null
   try {
     const raw = await getDiscountCoupons()
-    coupons = raw.map((c) => ({ ...c, discountValue: Number(c.discountValue) }))
+    coupons = raw.map((c) => ({ ...c, percentOff:   c.percentOff   === null ? null : Number(c.percentOff),
+    amountOffUsd: c.amountOffUsd === null ? null : Number(c.amountOffUsd),
+    amountOffBrl: c.amountOffBrl === null ? null : Number(c.amountOffBrl),
+    amountOffMxn: c.amountOffMxn === null ? null : Number(c.amountOffMxn) }))
   } catch (err) {
     console.error('[discount-coupons] page load failed', err)
     loadError = err instanceof Error ? err.message : 'Could not load coupons.'

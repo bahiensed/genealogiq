@@ -1,21 +1,44 @@
 import { z } from 'zod'
 import type { Translator } from './i18n'
 
+/**
+ * A coupon is one of two shapes, and discountType says which.
+ *
+ * A percentage has no currency — 10% off is 10% off in every currency — so it
+ * stays a single number. A fixed amount is money, and money needs a slot per
+ * currency like every other price in this catalogue. Zero means "not offered in
+ * this currency"; the column holds null.
+ */
 function makeDiscountCouponRefine(t: Translator) {
-  return (data: { duration: string; durationInMonths?: number | null; discountType: string; discountValue: number }, ctx: z.RefinementCtx) => {
+  return (
+    data: {
+      duration: string
+      durationInMonths?: number | null
+      discountType: string
+      percentOff: number
+      amountOffUsd: number
+      amountOffBrl: number
+      amountOffMxn: number
+    },
+    ctx: z.RefinementCtx,
+  ) => {
     if (data.duration === 'repeating' && !data.durationInMonths) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['durationInMonths'],
-        message: t('durationInMonthsRequired'),
-      })
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['durationInMonths'], message: t('durationInMonthsRequired') })
     }
-    if (data.discountType === 'percent' && data.discountValue > 100) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['discountValue'],
-        message: t('percentMax'),
-      })
+
+    if (data.discountType === 'percent') {
+      if (data.percentOff <= 0) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['percentOff'], message: t('greaterThanZero') })
+      }
+      if (data.percentOff > 100) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['percentOff'], message: t('percentMax') })
+      }
+      return
+    }
+
+    // A fixed-amount coupon with no amount anywhere discounts nothing.
+    if (data.amountOffUsd <= 0 && data.amountOffBrl <= 0 && data.amountOffMxn <= 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['amountOffUsd'], message: t('atLeastOneAmount') })
     }
   }
 }
@@ -28,7 +51,10 @@ export function getDiscountCouponSchema(t: Translator) {
       .regex(/^[A-Z0-9_-]+$/, t('couponCodeFormat')),
     description:      z.string().max(255).optional().nullable(),
     discountType:     z.enum(['percent', 'amount']),
-    discountValue:    z.number().positive(t('greaterThanZero')),
+    percentOff:       z.number().min(0, t('mustBeZeroOrGreater')),
+    amountOffUsd:     z.number().min(0, t('mustBeZeroOrGreater')),
+    amountOffBrl:     z.number().min(0, t('mustBeZeroOrGreater')),
+    amountOffMxn:     z.number().min(0, t('mustBeZeroOrGreater')),
     duration:         z.enum(['once', 'forever', 'repeating']),
     durationInMonths: z.number().int().positive().optional().nullable(),
     maxRedemptions:   z.number().int().positive().optional().nullable(),
@@ -43,7 +69,10 @@ export const discountCouponDefaultValues: DiscountCouponFormValues = {
   code:             '',
   description:      '',
   discountType:     'percent',
-  discountValue:    10,
+  percentOff:       10,
+  amountOffUsd:     0,
+  amountOffBrl:     0,
+  amountOffMxn:     0,
   duration:         'once',
   durationInMonths: null,
   maxRedemptions:   null,

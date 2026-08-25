@@ -1,4 +1,5 @@
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
+import { currencyForLocale } from '@genealogiq/core'
 import { DiscountCouponForm } from '@/components/discount-coupons/discount-coupon-form'
 import { getActivePackagesForSelect } from '@/queries/discount-coupons'
 import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
@@ -6,7 +7,7 @@ import { Separator } from '@genealogiq/ui/separator'
 import { FormShell } from '@genealogiq/ui/form-shell'
 
 export default async function NewDiscountCouponPage() {
-  const packages = await getActivePackagesForSelect()
+  const packages = await getActivePackagesForSelect(currencyForLocale(await getLocale()))
   const t = await getTranslations('DiscountCoupons')
 
   return (
@@ -20,12 +21,7 @@ export default async function NewDiscountCouponPage() {
         <Separator />
         <CardContent>
           <DiscountCouponForm
-            packages={packages.map(({ id, name, price, quantity }) => ({
-              id,
-              name,
-              price: Number(price),
-              quantity,
-            }))}
+            packages={packages}
           />
         </CardContent>
       </Card>
