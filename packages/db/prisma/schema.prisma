@@ -238,7 +238,18 @@ model Sale {
   amountTotal           Int?                @map("amount_total")
   currency              String?
   discountCouponId      String?             @map("discount_coupon_id")
+  /// 'annual' | 'monthly'. Free text, matching AppSale.cadence's convention.
+  cadence               String?
+  /// Raw Stripe subscription status, stored exactly as reported and never
+  /// interpreted on write. Null for a sale that never involved a subscription.
+  status                String?
+  /// End of the period in which this sale's GenCodes may still be activated.
+  /// Null means no term — which is what keeps a sale made before cadence
+  /// existed redeemable forever. Lives here rather than on GenCode because the
+  /// whole batch moves together: one field, not 200 rows rewritten monthly.
+  accessEndsAt          DateTime?           @map("access_ends_at")
   stripeSessionId       String?             @unique @map("stripe_session_id")
+  stripeSubscriptionId  String?             @unique @map("stripe_subscription_id")
   stripePaymentIntentId String?             @map("stripe_payment_intent_id")
   genCodes              GenCode[]
   tenant                Tenant              @relation(fields: [tenantId], references: [id], map: "sales_customer_id_fkey")

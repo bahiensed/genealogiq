@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { getTranslations } from "next-intl/server"
-import { ok, fail, type ActionResult } from "@genealogiq/core"
+import { ok, fail, isSaleWindowOpen, type ActionResult } from "@genealogiq/core"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { getMemorialSchema } from "@/schemas/memorial.schema"
@@ -21,12 +21,21 @@ export async function activateGenCode(
 
   const license = await prisma.genCode.findUnique({
     where: { genCode },
-    select: { id: true, status: true },
+    select: {
+      id: true, status: true,
+      sale: { select: { paidAt: true, reversedAt: true, status: true, accessEndsAt: true } },
+    },
   })
   if (!license)                       return fail(t("gencode.notFound"))
   // A code can be activated whether it's still in stock (AVAILABLE) or already
   // sold/written-off (SOLD) — only an already-ACTIVATED code is rejected.
   if (license.status === "ACTIVATED") return fail(t("gencode.alreadyActivated"))
+  // The batch this code came from has a term, and may be frozen while the
+  // funeral home is behind on an instalment. This gates ACTIVATION only —
+  // a memorial that already redeemed a code is never revisited, because the
+  // family bought a physical plaque and it must not go dark over someone
+  // else's billing.
+  if (!isSaleWindowOpen(license.sale)) return fail(t("gencode.expired"))
 
   const parsed = getMemorialSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return fail(parsed.error.issues[0].message)

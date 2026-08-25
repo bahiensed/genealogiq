@@ -78,6 +78,7 @@
     },
     "gencode": {
       "alreadyActivated": "This code has already been activated.",
+      "expired": "This code can no longer be activated. Please contact the company you bought it from.",
       "notFound": "QR Code not found.",
       "raceRetry": "This code was just activated. Please try again."
     },
@@ -1249,6 +1250,10 @@
       "linkCopied": "Profile link copied.",
       "pngDownloaded": "PNG downloaded.",
       "svgDownloaded": "SVG downloaded."
+    },
+    "expired": {
+      "body": "This code's usage period has ended, or the company that issued it has a suspended subscription. Please contact the company you bought the plaque from — once it is sorted out, the code works again. Memorials already created stay online as normal.",
+      "title": "This code is no longer valid"
     },
     "landing": {
       "createAccount": "Create account",

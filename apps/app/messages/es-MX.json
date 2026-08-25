@@ -78,6 +78,7 @@
     },
     "gencode": {
       "alreadyActivated": "Este código ya fue activado.",
+      "expired": "Este código ya no puede activarse. Contacta a la empresa donde lo adquiriste.",
       "notFound": "QR Code no encontrado.",
       "raceRetry": "Este código acaba de ser activado. Inténtalo de nuevo."
     },
@@ -1249,6 +1250,10 @@
       "linkCopied": "Enlace del perfil copiado.",
       "pngDownloaded": "PNG descargado.",
       "svgDownloaded": "SVG descargado."
+    },
+    "expired": {
+      "body": "El período de uso de este código terminó, o la empresa que lo emitió tiene la suscripción suspendida. Contacta a la empresa donde adquiriste la placa — en cuanto se regularice, el código vuelve a funcionar. Los memoriales ya creados siguen en línea con normalidad.",
+      "title": "Este código ya no es válido"
     },
     "landing": {
       "createAccount": "Crear cuenta",

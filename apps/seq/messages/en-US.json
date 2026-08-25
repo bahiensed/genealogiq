@@ -58,6 +58,7 @@
       "relationNotFound": "Guardian link not found."
     },
     "gencode": {
+      "batchClosed": "This batch is no longer available for sale — its term has ended or the subscription is suspended.",
       "emailOtherTenant": "That email already belongs to a customer of another company.",
       "invalidValue": "Invalid sale value.",
       "notAvailable": "This code is not available for sale (already sold or activated).",

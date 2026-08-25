@@ -58,6 +58,7 @@
       "relationNotFound": "Vínculo de tutor no encontrado."
     },
     "gencode": {
+      "batchClosed": "Este lote ya no está disponible para venta — su período terminó o la suscripción está suspendida.",
       "emailOtherTenant": "Ese correo ya pertenece a un cliente de otra empresa.",
       "invalidValue": "Valor de venta inválido.",
       "notAvailable": "Este código no está disponible para la venta (ya vendido o activado).",

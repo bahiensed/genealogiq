@@ -78,6 +78,7 @@
     },
     "gencode": {
       "alreadyActivated": "Este código já foi ativado.",
+      "expired": "Este código não está mais válido para ativação. Fale com a empresa onde você o adquiriu.",
       "notFound": "QR Code não encontrado.",
       "raceRetry": "Este código acabou de ser ativado. Tente novamente."
     },
@@ -1249,6 +1250,10 @@
       "linkCopied": "Link do perfil copiado.",
       "pngDownloaded": "PNG baixado.",
       "svgDownloaded": "SVG baixado."
+    },
+    "expired": {
+      "body": "O período de uso deste código terminou, ou a empresa que o emitiu está com a assinatura suspensa. Fale com a empresa onde você adquiriu a placa — assim que a situação for regularizada, o código volta a funcionar. Memoriais já criados continuam no ar normalmente.",
+      "title": "Este código não está mais válido"
     },
     "landing": {
       "createAccount": "Criar conta",

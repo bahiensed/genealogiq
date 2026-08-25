@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
-    genCode: { findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
+    genCode: { findFirst: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
     appUser: { findUnique: vi.fn() },
     passwordResetToken: { create: vi.fn() },
     $transaction: vi.fn(),
@@ -38,6 +38,11 @@ import { Prisma } from "@genealogiq/db"
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // The sale window is open by default — these tests are about the sale guards,
+  // not the batch term.
+  prismaMock.genCode.findUnique.mockResolvedValue({
+    sale: { paidAt: new Date(), reversedAt: null, status: null, accessEndsAt: null },
+  })
   vi.mocked(verifyTenantSession).mockResolvedValue({
     customerId: "c1",
     user: { id: "u1" },
