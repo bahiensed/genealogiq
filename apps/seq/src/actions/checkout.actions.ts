@@ -1,61 +1,31 @@
 'use server'
 
-import { getLocale, getTranslations } from 'next-intl/server'
-import { ok, fail, type ActionResult } from '@genealogiq/core'
+import { getTranslations } from 'next-intl/server'
+import { fail, type ActionResult } from '@genealogiq/core'
 import { verifyTenantSession } from '@/lib/dal'
-import { prisma } from '@/lib/prisma'
-import { stripe } from '@/lib/stripe'
-import { ensureTenantStripeCustomer } from '@/lib/billing'
-import { currencyForLocale } from '@genealogiq/core'
 
+/**
+ * Self-serve GenCode purchase — paused.
+ *
+ * GenCode products became subscriptions: annual renews yearly, monthly ends
+ * after its term. Their Stripe Prices now carry a `recurring` block, and Stripe
+ * refuses a recurring Price in a `mode: 'payment'` session — which is all this
+ * ever created.
+ *
+ * Reopening it means giving the tenant a cadence to choose and a subscription
+ * webhook to settle it, the same pair BMS just grew. Until then this fails with
+ * a message a funeral-home employee can act on, rather than a raw Stripe error
+ * at the till, and GenealogiQ can still sell to them by payment link.
+ *
+ * The session guard stays: an unauthenticated caller gets 403, not an
+ * explanation of a feature they cannot reach.
+ */
 export async function createPackageCheckoutSession(
-  packageId: string,
-  quantity:  number,
+  _packageId: string,
+  _quantity:  number,
 ): Promise<ActionResult<{ url: string }>> {
+  await verifyTenantSession()
   const t = await getTranslations('Actions')
 
-  const session    = await verifyTenantSession()
-  const { customerId: tenantId } = session
-  const soldById   = session.user.id
-
-  if (!Number.isInteger(quantity) || quantity < 1) return fail(t('checkout.invalidQuantity'))
-
-  // The catalogue is priced per currency and the tenant's interface language
-  // picks one — the same rule BMS follows when it generates a payment link.
-  const currency = currencyForLocale(await getLocale())
-  // Annual only until cadence selection lands; the monthly ids exist but are
-  // not offered here yet.
-  const PRICE_ID = { usd: 'stripeAnnualPriceIdUsd', brl: 'stripeAnnualPriceIdBrl', mxn: 'stripeAnnualPriceIdMxn' } as const
-
-  const pkg = await prisma.package.findUnique({
-    where:  { id: packageId, isActive: true },
-    select: { id: true, stripeAnnualPriceIdUsd: true, stripeAnnualPriceIdBrl: true, stripeAnnualPriceIdMxn: true },
-  })
-  if (!pkg) return fail(t('checkout.packageNotFound'))
-
-  const priceId = pkg[PRICE_ID[currency]]
-  if (!priceId) {
-    return fail(t('checkout.notSynced'))
-  }
-
-  const customer = await ensureTenantStripeCustomer(tenantId)
-  const baseUrl  = process.env.SEQUOIA_URL ?? 'http://localhost:3000'
-  // Return the buyer to the page they purchased from (digital vs physical).
-  const returnPath = '/purchasing/gencodes'
-  const metadata = { tenantId, packageId: pkg.id, quantity: String(quantity), soldById }
-
-  const checkout = await stripe.checkout.sessions.create({
-    mode:                  'payment',
-    customer,
-    line_items:            [{ price: priceId, quantity }],
-    client_reference_id:   tenantId,
-    metadata,
-    payment_intent_data:   { metadata },
-    success_url:           `${baseUrl}${returnPath}?status=success`,
-    cancel_url:            `${baseUrl}${returnPath}?status=cancel`,
-    allow_promotion_codes: true,
-  })
-
-  if (!checkout.url) return fail(t('checkout.noCheckoutUrl'))
-  return ok({ url: checkout.url })
+  return fail(t('checkout.selfServePaused'))
 }

@@ -25,7 +25,8 @@
       "invalidQuantity": "Invalid quantity.",
       "noCheckoutUrl": "Stripe did not return a checkout URL.",
       "notSynced": "This product is not available for purchase right now. Contact GenealogiQ.",
-      "packageNotFound": "Package not found or unavailable."
+      "packageNotFound": "Package not found or unavailable.",
+      "selfServePaused": "Direct purchase is temporarily unavailable while we update the payment plans. Contact GenealogiQ to buy GenCodes."
     },
     "common": {
       "duplicate": "Duplicate data detected",

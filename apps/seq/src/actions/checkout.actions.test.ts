@@ -31,88 +31,23 @@ beforeEach(() => {
   vi.mocked(ensureTenantStripeCustomer).mockResolvedValue("cus_123")
 })
 
-describe("createPackageCheckoutSession", () => {
-  it.each([
-    ["zero", 0],
-    ["negative", -1],
-    ["fractional", 1.5],
-    ["NaN", Number.NaN],
-  ])("rejects a %s quantity before touching the DB", async (_label, qty) => {
-    const res = await createPackageCheckoutSession("pkg-1", qty as number)
-
-    expect(res).toEqual({ ok: false, message: "checkout.invalidQuantity" })
-    expect(prismaMock.package.findUnique).not.toHaveBeenCalled()
-    expect(createSession).not.toHaveBeenCalled()
-  })
-
-  it("fails when the package is not found (or inactive)", async () => {
-    prismaMock.package.findUnique.mockResolvedValue(null)
-
-    const res = await createPackageCheckoutSession("pkg-missing", 1)
-
-    expect(res).toEqual({ ok: false, message: "checkout.packageNotFound" })
-    expect(prismaMock.package.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: "pkg-missing", isActive: true } }),
-    )
-    expect(ensureTenantStripeCustomer).not.toHaveBeenCalled()
-    expect(createSession).not.toHaveBeenCalled()
-  })
-
-  it("guards against a package not synced to Stripe (missing stripePriceId)", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({
-      id: "pkg-1",
-      stripeAnnualPriceIdUsd: null, stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
-    })
-
+describe("createPackageCheckoutSession — paused", () => {
+  // GenCode Prices are recurring now, and Stripe refuses a recurring Price in a
+  // mode:'payment' session. Rather than fail at the till, self-serve buying is
+  // closed until it can offer a cadence and settle through subscription events.
+  it("refuses with an actionable message instead of reaching Stripe", async () => {
     const res = await createPackageCheckoutSession("pkg-1", 1)
 
-    expect(res).toEqual({ ok: false, message: "checkout.notSynced" })
-    expect(ensureTenantStripeCustomer).not.toHaveBeenCalled()
+    expect(res).toEqual({ ok: false, message: "checkout.selfServePaused" })
     expect(createSession).not.toHaveBeenCalled()
   })
 
-  it("fails when Stripe returns a session without a url", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({
-      id: "pkg-1",
-      stripeAnnualPriceIdUsd: "price_abc", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
-    })
-    createSession.mockResolvedValue({ url: null } as never)
+  // The pause is not an open door: an unauthenticated caller still gets the
+  // session error, not an explanation of a feature they cannot reach.
+  it("still requires a tenant session", async () => {
+    vi.mocked(verifyTenantSession).mockRejectedValue(new Error("no session"))
 
-    const res = await createPackageCheckoutSession("pkg-1", 1)
-
-    expect(res).toEqual({ ok: false, message: "checkout.noCheckoutUrl" })
-  })
-
-  it("returns ok({ url }) on the success path and forwards the tenant-scoped line item", async () => {
-    prismaMock.package.findUnique.mockResolvedValue({
-      id: "pkg-1",
-      stripeAnnualPriceIdUsd: "price_abc", stripeAnnualPriceIdBrl: null, stripeAnnualPriceIdMxn: null,
-    })
-    createSession.mockResolvedValue({ url: "https://checkout.stripe.com/c/pay/abc" } as never)
-
-    const res = await createPackageCheckoutSession("pkg-1", 3)
-
-    expect(res.ok).toBe(true)
-    if (!res.ok) throw new Error("expected ok result")
-    expect(res.data?.url).toBe("https://checkout.stripe.com/c/pay/abc")
-
-    expect(ensureTenantStripeCustomer).toHaveBeenCalledWith("tenant-1")
-    expect(createSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        mode: "payment",
-        customer: "cus_123",
-        client_reference_id: "tenant-1",
-        line_items: [{ price: "price_abc", quantity: 3 }],
-        metadata: expect.objectContaining({
-          tenantId: "tenant-1",
-          packageId: "pkg-1",
-          quantity: "3",
-          soldById: "seller-1",
-        }),
-      }),
-    )
-    // PHYSICAL package routes the buyer back to the genCodes return path.
-    const arg = createSession.mock.calls[0]?.[0]
-    expect(arg?.success_url).toContain("/purchasing/gencodes")
+    await expect(createPackageCheckoutSession("pkg-1", 1)).rejects.toThrow("no session")
+    expect(createSession).not.toHaveBeenCalled()
   })
 })
