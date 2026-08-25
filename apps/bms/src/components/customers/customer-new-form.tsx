@@ -127,7 +127,7 @@ export function CustomerNewForm() {
       <CardContent className="flex flex-col gap-6">
 
         {/* Stepper */}
-        <nav aria-label="Form steps">
+        <nav aria-label={t('stepsNav')}>
           {/* Mobile: compact numbered steps */}
           <div className="flex items-center gap-2 md:hidden">
             {STEPS.map((s, i) => (

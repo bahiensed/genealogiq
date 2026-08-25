@@ -3,6 +3,7 @@
 import { useState, useActionState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { resetPassword } from '@/actions/auth'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@genealogiq/ui/button'
@@ -17,6 +18,8 @@ interface Props {
 export function ResetPasswordForm({ token }: Props) {
   const [state, dispatch, isPending] = useActionState(resetPassword, undefined)
   const [showPassword, setShowPassword] = useState(false)
+  const t = useTranslations('Auth')
+  const ta = useTranslations('Account')
 
   return (
     <div className="flex flex-col w-full max-w-sm">
@@ -24,7 +27,7 @@ export function ResetPasswordForm({ token }: Props) {
         <Link href="/" className="relative block h-full w-full">
           <Image
             src="/logo/logo-dark.png"
-            alt="Logo"
+            alt="Genealogiq"
             fill
             sizes="(max-width: 400px) 100vw, 400px"
             className="object-contain dark:hidden"
@@ -32,7 +35,7 @@ export function ResetPasswordForm({ token }: Props) {
           />
           <Image
             src="/logo/logo-light.png"
-            alt="Logo"
+            alt="Genealogiq"
             fill
             sizes="(max-width: 400px) 100vw, 400px"
             className="hidden object-contain dark:block"
@@ -43,8 +46,8 @@ export function ResetPasswordForm({ token }: Props) {
 
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Reset password</CardTitle>
-          <CardDescription>Enter your new password below</CardDescription>
+          <CardTitle>{t('reset.title')}</CardTitle>
+          <CardDescription>{t('reset.description')}</CardDescription>
         </CardHeader>
 
         <form action={dispatch}>
@@ -56,7 +59,7 @@ export function ResetPasswordForm({ token }: Props) {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">New password:</Label>
+              <Label htmlFor="password">{ta('newPassword')}</Label>
               <InputGroup aria-invalid={!!state?.fieldErrors?.password}>
                 <InputGroupInput
                   id="password"
@@ -68,7 +71,7 @@ export function ResetPasswordForm({ token }: Props) {
                 <InputGroupAddon align="inline-end">
                   <InputGroupButton
                     onClick={() => setShowPassword((v) => !v)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                   >
                     {showPassword ? <EyeOff /> : <Eye />}
                   </InputGroupButton>
@@ -82,7 +85,7 @@ export function ResetPasswordForm({ token }: Props) {
 
           <CardFooter className="mt-6">
             <Button type="submit" className="w-full" disabled={isPending}>
-              {isPending ? "Saving…" : "Save new password"}
+              {isPending ? t('reset.submitting') : t('reset.submit')}
             </Button>
           </CardFooter>
         </form>

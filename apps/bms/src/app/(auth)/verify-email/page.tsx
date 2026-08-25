@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import { hashToken } from '@genealogiq/core'
 import { VerifyEmailCard } from '@/components/auth/verify-email-card'
@@ -8,14 +9,15 @@ interface Props {
 
 export default async function VerifyEmailPage({ searchParams }: Props) {
   const { token } = await searchParams
+  const t = await getTranslations('Auth')
 
   if (!token) {
     return (
       <VerifyEmailCard
-        title="Check your email"
-        description="Confirmation email sent."
-        body="Click the link we sent to confirm your email. The link expires in 1 hour."
-        buttonText="Go to sign in"
+        title={t('verify.checkTitle')}
+        description={t('verify.checkDescription')}
+        body={t('verify.checkBody')}
+        buttonText={t('verify.goToSignIn')}
         buttonHref="/sign-in"
         buttonVariant="outline"
       />
@@ -34,10 +36,10 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
     }
     return (
       <VerifyEmailCard
-        title="Invalid or expired link"
-        description="This verification link is invalid or has already expired."
-        body="Request a new link from your profile page."
-        buttonText="Go to sign in"
+        title={t('verify.invalidTitle')}
+        description={t('verify.invalidDescription')}
+        body={t('verify.invalidBody')}
+        buttonText={t('verify.goToSignIn')}
         buttonHref="/sign-in"
         buttonVariant="outline"
       />
@@ -56,10 +58,10 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
 
     return (
       <VerifyEmailCard
-        title="Email changed!"
-        description="Your email has been updated successfully."
-        body="Sign in again with your new email address."
-        buttonText="Sign in"
+        title={t('verify.changedTitle')}
+        description={t('verify.changedDescription')}
+        body={t('verify.changedBody')}
+        buttonText={t('verify.goToSignIn')}
         buttonHref="/sign-in"
       />
     )
@@ -76,10 +78,10 @@ export default async function VerifyEmailPage({ searchParams }: Props) {
 
   return (
     <VerifyEmailCard
-      title="Email confirmed!"
-      description="Your account has been verified successfully."
-      body="You can now sign in with your email and password."
-      buttonText="Sign in"
+      title={t('verify.confirmedTitle')}
+      description={t('verify.confirmedDescription')}
+      body={t('verify.confirmedBody')}
+      buttonText={t('verify.goToSignIn')}
       buttonHref="/sign-in"
     />
   )

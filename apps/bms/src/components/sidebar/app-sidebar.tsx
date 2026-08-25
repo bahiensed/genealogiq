@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { main, groups } from '@/components/sidebar/menu-items'
 import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@genealogiq/ui/collapsible'
@@ -11,6 +12,7 @@ import { useSidebar, Sidebar, SidebarContent, SidebarFooter, SidebarGroup, Sideb
 export function AppSidebar() {
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
+  const t = useTranslations('Sidebar')
 
   // The mobile sidebar is a Sheet overlaying the page — it does NOT close on its own
   // when a link navigates, so tapping a menu item loads the new page behind a sidebar
@@ -25,7 +27,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b px-8 py-3">
         <Image
           src="/logo/sign-dark.png"
-          alt="Logo"
+          alt="Genealogiq"
           width={160}
           height={40}
           className="dark:hidden"
@@ -33,7 +35,7 @@ export function AppSidebar() {
         />
         <Image
           src="/logo/sign-light.png"
-          alt="Logo"
+          alt="Genealogiq"
           width={160}
           height={40}
           className="hidden dark:block"
@@ -45,11 +47,11 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {main.map((item) => (
-                <SidebarMenuItem key={item.name}>
+                <SidebarMenuItem key={item.labelKey}>
                   <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link href={item.url} onClick={closeOnMobileNav}>
                       <item.icon />
-                      <span>{item.name}</span>
+                      <span>{t(item.labelKey)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -60,11 +62,11 @@ export function AppSidebar() {
 
         {/* Grouped sections */}
         {groups.map((group) => (
-          <Collapsible key={group.label} className="group/collapsible" defaultOpen={group.items.some((item) => pathname.startsWith(item.url))}>
+          <Collapsible key={group.labelKey} className="group/collapsible" defaultOpen={group.items.some((item) => pathname.startsWith(item.url))}>
             <SidebarGroup>
               <SidebarGroupLabel asChild>
                 <CollapsibleTrigger>
-                  {group.label}
+                  {t(group.labelKey)}
                   <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
                 </CollapsibleTrigger>
               </SidebarGroupLabel>
@@ -72,11 +74,11 @@ export function AppSidebar() {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {group.items.map((item) => (
-                      <SidebarMenuItem key={item.name}>
+                      <SidebarMenuItem key={item.labelKey}>
                         <SidebarMenuButton asChild isActive={pathname === item.url}>
                           <Link href={item.url} onClick={closeOnMobileNav}>
                             <item.icon />
-                            <span>{item.name}</span>
+                            <span>{t(item.labelKey)}</span>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

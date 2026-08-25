@@ -98,8 +98,8 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Monthly Revenue</CardTitle>
-            <CardDescription>Last 12 months · active sales only</CardDescription>
+            <CardTitle>{t('charts.monthlyRevenue')}</CardTitle>
+            <CardDescription>{t('charts.last12ActiveSales')}</CardDescription>
           </CardHeader>
           <CardContent>
             <MonthlyRevenueChart data={stats.monthlyRevenueChart} />
@@ -108,8 +108,8 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Revenue by Product</CardTitle>
-            <CardDescription>Last 12 months · active sales only</CardDescription>
+            <CardTitle>{t('charts.revenueByProduct')}</CardTitle>
+            <CardDescription>{t('charts.last12ActiveSales')}</CardDescription>
           </CardHeader>
           <CardContent>
             <RevenueByPackageChart data={stats.revenueByPackageChart} />
@@ -121,8 +121,8 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle><UserPlus className="inline h-5 w-5 mr-2 align-text-bottom" />New Customers</CardTitle>
-            <CardDescription>New tenants per month · last 12 months</CardDescription>
+            <CardTitle><UserPlus className="inline h-5 w-5 mr-2 align-text-bottom" />{t('charts.newCustomers')}</CardTitle>
+            <CardDescription>{t('charts.newCustomersDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <CustomerGrowthChart data={stats.customerGrowthChart} />
@@ -131,8 +131,8 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle><Trophy className="inline h-5 w-5 mr-2 align-text-bottom" />Top Sellers</CardTitle>
-            <CardDescription>By revenue · last 12 months</CardDescription>
+            <CardTitle><Trophy className="inline h-5 w-5 mr-2 align-text-bottom" />{t('charts.topSellers')}</CardTitle>
+            <CardDescription>{t('charts.topSellersDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <TopSellersCard data={stats.topSellersChart} />
@@ -146,14 +146,14 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>
               <Link href="/customers" className="inline-flex items-center gap-1 hover:underline">
-                Customers <ArrowUpRight className="h-4 w-4" />
+                {t('entities.customers')} <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
             <CardAction><Building2 className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.customers}</p>
-            <p className="text-sm text-muted-foreground mt-1">Registered customers</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('entities.customersDesc')}</p>
           </CardContent>
         </Card>
 
@@ -161,14 +161,14 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>
               <Link href="/system/users" className="inline-flex items-center gap-1 hover:underline">
-                System Users <ArrowUpRight className="h-4 w-4" />
+                {t('entities.systemUsers')} <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
             <CardAction><IdCard className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.systemUsers}</p>
-            <p className="text-sm text-muted-foreground mt-1">BMS operators</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('entities.systemUsersDesc')}</p>
           </CardContent>
         </Card>
       </div>
@@ -179,14 +179,14 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>
               <Link href="/subscriptions" className="inline-flex items-center gap-1 hover:underline">
-                Subscriptions (B2C) <ArrowUpRight className="h-4 w-4" />
+                {t('entities.subscriptions')} <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
             <CardAction><Layers className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.subscriptions}</p>
-            <p className="text-sm text-muted-foreground mt-1">Active subscriptions</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('entities.subscriptionsDesc')}</p>
           </CardContent>
         </Card>
 
@@ -194,14 +194,14 @@ export default async function DashboardPage() {
           <CardHeader>
             <CardTitle>
               <Link href="/gencodes" className="inline-flex items-center gap-1 hover:underline">
-                GenCodes (B2B) <ArrowUpRight className="h-4 w-4" />
+                {t('entities.products')} <ArrowUpRight className="h-4 w-4" />
               </Link>
             </CardTitle>
             <CardAction><QrCode className="h-5 w-5 text-muted-foreground" /></CardAction>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">{stats.packages}</p>
-            <p className="text-sm text-muted-foreground mt-1">Active products</p>
+            <p className="text-sm text-muted-foreground mt-1">{t('entities.productsDesc')}</p>
           </CardContent>
         </Card>
       </div>

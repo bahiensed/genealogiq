@@ -1,4 +1,4 @@
-import { getLocale } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { Avatar, AvatarFallback } from '@genealogiq/ui/avatar'
 import { getInitials } from '@/lib/utils'
 
@@ -8,10 +8,11 @@ interface Props {
 
 export async function TopSellersCard({ data }: Props) {
   const locale = await getLocale()
+  const t = await getTranslations('Dashboard')
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
 
   if (data.length === 0) {
-    return <p className="text-sm text-muted-foreground">No sales in the last 12 months.</p>
+    return <p className="text-sm text-muted-foreground">{t('charts.noSalesLast12')}</p>
   }
 
   return (

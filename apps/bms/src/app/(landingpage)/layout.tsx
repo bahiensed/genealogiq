@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 import { auth } from "@/auth"
 import { getCurrentYear } from "@/lib/utils"
 import { Button } from "@genealogiq/ui/button"
@@ -10,6 +11,7 @@ export default async function Layout({
   children: React.ReactNode
 }>) {
   const session = await auth()
+  const t = await getTranslations("Landing")
   const currentYear = getCurrentYear()
 
   return (
@@ -20,12 +22,12 @@ export default async function Layout({
           <ModeToggle />
           {session ? (
             <Button variant="outline" asChild>
-              <Link href="/dashboard">Dashboard</Link>
+              <Link href="/dashboard">{t("dashboard")}</Link>
             </Button>
           ) : (
             <>
               <Button variant="outline" asChild>
-                <Link href="/sign-in">Entrar</Link>
+                <Link href="/sign-in">{t("signIn")}</Link>
               </Button>
             </>
           )}
@@ -39,13 +41,13 @@ export default async function Layout({
       <footer className="border-t flex flex-col gap-2 p-4 text-center text-muted-foreground text-xs">
         <div>
           <Link href="/privacy" className="underline-offset-4 hover:underline">
-            Política de Privacidade
+            {t("privacy")}
           </Link>
 
           {" | "}
 
           <Link href="/terms" className="underline-offset-4 hover:underline">
-            Termos de Uso
+            {t("terms")}
           </Link>
         </div>
 

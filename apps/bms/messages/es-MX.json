@@ -1,4 +1,29 @@
 {
+  "Account": {
+    "changeEmail": {
+      "trigger": "Cambiar correo",
+      "title": "Cambiar correo",
+      "description": "Se enviará un enlace de confirmación a la nueva dirección",
+      "newEmail": "Nuevo correo:",
+      "newEmailPlaceholder": "nuevo@email.com",
+      "submitting": "Cambiando…"
+    },
+    "changePassword": {
+      "trigger": "Cambiar contraseña",
+      "title": "Cambiar contraseña",
+      "description": "Escribe tu contraseña actual y elige una nueva.",
+      "submitting": "Guardando…"
+    },
+    "currentPassword": "Contraseña actual:",
+    "deleteAccount": {
+      "trigger": "Eliminar cuenta",
+      "title": "Eliminar cuenta",
+      "description": "Esta acción es irreversible. Todos tus datos se eliminarán permanentemente.",
+      "submit": "Eliminar mi cuenta",
+      "submitting": "Eliminando…"
+    },
+    "newPassword": "Nueva contraseña:"
+  },
   "Actions": {
     "auth": {
       "accountLocked": "Cuenta bloqueada temporalmente. Vuelve a intentarlo en {minutes} minuto(s).",
@@ -105,13 +130,47 @@
     "description": "Ingresa tu correo y contraseña para acceder a tu cuenta.",
     "email": "Correo:",
     "emailPlaceholder": "tu@correo.com",
+    "forgot": {
+      "title": "¿Olvidaste tu contraseña?",
+      "description": "Escribe tu correo y te enviaremos un enlace para restablecerla.",
+      "submit": "Enviar enlace",
+      "submitting": "Enviando…",
+      "remembered": "¿Recordaste tu contraseña?"
+    },
     "forgotPassword": "¿Olvidaste tu contraseña?",
     "hidePassword": "Ocultar contraseña",
     "password": "Contraseña:",
+    "reset": {
+      "title": "Restablecer contraseña",
+      "description": "Escribe tu nueva contraseña abajo",
+      "submit": "Guardar nueva contraseña",
+      "submitting": "Guardando…"
+    },
+    "sent": {
+      "title": "Correo enviado",
+      "description": "Si este correo está registrado, recibirás un enlace en breve.",
+      "body": "Revisa tu bandeja de entrada. El enlace expira en una hora.",
+      "backToSignIn": "Volver a iniciar sesión"
+    },
     "showPassword": "Mostrar contraseña",
     "signIn": "Iniciar sesión",
     "signingIn": "Iniciando sesión…",
-    "title": "Iniciar sesión"
+    "title": "Iniciar sesión",
+    "verify": {
+      "goToSignIn": "Ir a iniciar sesión",
+      "checkTitle": "Revisa tu correo",
+      "checkDescription": "Correo de confirmación enviado.",
+      "checkBody": "Haz clic en el enlace que te enviamos para confirmar tu correo. El enlace expira en 1 hora.",
+      "invalidTitle": "Enlace inválido o expirado",
+      "invalidDescription": "Este enlace de verificación es inválido o ya expiró.",
+      "invalidBody": "Solicita un nuevo enlace desde tu página de perfil.",
+      "changedTitle": "¡Correo actualizado!",
+      "changedDescription": "Tu correo se actualizó correctamente.",
+      "changedBody": "Inicia sesión de nuevo con tu nueva dirección de correo.",
+      "confirmedTitle": "¡Correo confirmado!",
+      "confirmedDescription": "Tu cuenta se verificó correctamente.",
+      "confirmedBody": "Ya puedes iniciar sesión con tu correo y contraseña."
+    }
   },
   "Common": {
     "address": {
@@ -186,6 +245,15 @@
     "toasts": {
       "updated": "Datos actualizados correctamente."
     }
+  },
+  "Cookies": {
+    "acceptAll": "OK, acepto toda esta palabrería legal",
+    "essential": "Está bien, pero rastréame lo menos posible",
+    "l1": "Ay, no. Aquí vamos otra vez…",
+    "l2": "Otro aviso de consentimiento tedioso, jurídicamente complejo, de cumplimiento dudoso, extravagantemente caro e implacablemente intrusivo.",
+    "l3": "Lo sentimos, pero debemos cumplir con las regulaciones globales de privacidad, formalizar cómo rastreamos tu comportamiento en línea y mantener contentos a nuestros abogados.",
+    "linkTail": "para saber más sobre nuestra Política de Privacidad.",
+    "linkText": "Haz clic aquí"
   },
   "Customers": {
     "actions": {
@@ -270,6 +338,7 @@
       "contactDesc": "Detalles de contacto y categoría",
       "modulesDesc": "Permisos de acceso a Sequoia"
     },
+    "stepsNav": "Pasos del formulario",
     "table": {
       "createdAt": "Creado el",
       "email": "Correo",
@@ -292,6 +361,27 @@
     "allTimeSales": "Ventas históricas",
     "annualRevenue": "Ingresos del año",
     "annualSales": "Ventas del año",
+    "charts": {
+      "monthlyRevenue": "Ingreso mensual",
+      "last12ActiveSales": "Últimos 12 meses · solo ventas activas",
+      "revenueByProduct": "Ingreso por producto",
+      "newCustomers": "Nuevos clientes",
+      "newCustomersDesc": "Nuevos clientes por mes · últimos 12 meses",
+      "topSellers": "Mejores vendedores",
+      "topSellersDesc": "Por ingreso · últimos 12 meses",
+      "noSalesData": "Aún no hay datos de ventas.",
+      "noSalesLast12": "Sin ventas en los últimos 12 meses."
+    },
+    "entities": {
+      "customers": "Clientes",
+      "customersDesc": "Clientes registrados",
+      "systemUsers": "Usuarios del sistema",
+      "systemUsersDesc": "Operadores del BMS",
+      "subscriptions": "Suscripciones (B2C)",
+      "subscriptionsDesc": "Suscripciones activas",
+      "products": "GenCodes (B2B)",
+      "productsDesc": "Productos activos"
+    },
     "monthlyRevenue": "Ingresos del mes",
     "monthlySales": "Ventas del mes",
     "revenueThisMonth": "Ingresos este mes",
@@ -444,6 +534,12 @@
       "feedbackSent": "Comentarios enviados. ¡Gracias!"
     }
   },
+  "Landing": {
+    "dashboard": "Panel",
+    "privacy": "Política de Privacidad",
+    "signIn": "Iniciar sesión",
+    "terms": "Términos de Uso"
+  },
   "Nav": {
     "language": "Idioma",
     "profile": "Perfil",
@@ -513,6 +609,33 @@
       "reactivated": "Producto reactivado."
     },
     "unitPrice": "Precio por unidad"
+  },
+  "Profile": {
+    "changeAvatar": "Cambiar foto",
+    "danger": {
+      "title": "Zona de peligro",
+      "description": "Elimina permanentemente tu cuenta y todos los datos relacionados."
+    },
+    "fields": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "cpf": "CPF",
+      "birthDate": "Fecha de nacimiento",
+      "countryCode": "Código del país",
+      "phone": "Teléfono",
+      "address": "Dirección"
+    },
+    "personal": {
+      "title": "Información personal",
+      "description": "Actualiza tu nombre, documento y datos de contacto."
+    },
+    "security": {
+      "title": "Cuenta y seguridad",
+      "description": "Administra tu correo de acceso y tu contraseña.",
+      "email": "Correo",
+      "emailHint": "Para cambiar tu correo, usa el botón de abajo — se envía un enlace de confirmación a la nueva dirección."
+    },
+    "title": "Perfil"
   },
   "Sales": {
     "actions": {
@@ -617,6 +740,54 @@
     },
     "subtitle": "Dónde terminó realmente cada GenCode que emitimos.",
     "title": "Informes de Ventas"
+  },
+  "Setup": {
+    "back": "← Atrás",
+    "fields": {
+      "legalName": "Razón social:",
+      "tradeName": "Nombre comercial:",
+      "cnpj": "CNPJ:",
+      "stateRegistration": "Registro estatal:",
+      "municipalRegistration": "Registro municipal:",
+      "companyEmail": "Correo de la empresa:",
+      "countryCode": "Código del país:",
+      "phone": "Teléfono:",
+      "firstName": "Nombre:",
+      "lastName": "Apellido:",
+      "adminEmail": "Correo del administrador:",
+      "password": "Contraseña:"
+    },
+    "finish": "Finalizar",
+    "finishing": "Configurando…",
+    "next": "Siguiente →",
+    "skip": "Omitir",
+    "stepOf": "Paso {step} de {total} | {label}",
+    "steps": {
+      "company": "Datos de la empresa",
+      "address": "Dirección de la empresa",
+      "admin": "Datos del administrador",
+      "access": "Acceso al sistema"
+    },
+    "title": "Configuración inicial"
+  },
+  "Sidebar": {
+    "groups": {
+      "system": "Sistema",
+      "products": "Productos",
+      "customers": "Clientes",
+      "sales": "Ventas"
+    },
+    "items": {
+      "dashboard": "Panel",
+      "companyData": "Datos de la Empresa",
+      "systemUsers": "Usuarios del Sistema",
+      "gencodes": "GenCodes (B2B)",
+      "subscriptions": "Suscripciones (B2C)",
+      "extraUnits": "Unidades Extra",
+      "customers": "Clientes",
+      "discountCoupons": "Cupones de Descuento",
+      "manualSales": "Ventas Manuales"
+    }
   },
   "Subscriptions": {
     "actions": {

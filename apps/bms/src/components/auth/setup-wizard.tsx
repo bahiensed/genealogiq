@@ -31,14 +31,11 @@ type AdminFormValues = z.infer<typeof SetupSchema>
 
 const TOTAL_STEPS = 4
 
-const STEP_LABELS = [
-  'Company details',
-  'Company address',
-  'Administrator details',
-  'System access',
-]
+const STEP_KEYS = ['company', 'address', 'admin', 'access'] as const
 
 export function SetupWizard() {
+  const t    = useTranslations('Setup')
+  const ta   = useTranslations('Auth')
   const tErr = useTranslations('Errors')
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [companyData, setCompanyData] = useState<CompanyFormValues | null>(null)
@@ -100,9 +97,9 @@ export function SetupWizard() {
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>Initial setup</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
-          Step {step} of {TOTAL_STEPS} | {STEP_LABELS[step - 1]}
+          {t('stepOf', { step, total: TOTAL_STEPS, label: t(`steps.${STEP_KEYS[step - 1]}`) })}
         </CardDescription>
         <Progress value={(step / TOTAL_STEPS) * 100} className="mt-1" />
       </CardHeader>
@@ -118,7 +115,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Legal Name:</FieldLabel>
+                      <FieldLabel>{t('fields.legalName')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -130,7 +127,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Trade Name:</FieldLabel>
+                      <FieldLabel>{t('fields.tradeName')}</FieldLabel>
                       <Input {...field} autoComplete="off" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -143,7 +140,7 @@ export function SetupWizard() {
                 control={cc}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>CNPJ:</FieldLabel>
+                    <FieldLabel>{t('fields.cnpj')}</FieldLabel>
                     <MaskedInput
                       value={field.value ?? ''}
                       onChange={field.onChange}
@@ -162,7 +159,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>State Registration:</FieldLabel>
+                      <FieldLabel>{t('fields.stateRegistration')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -173,7 +170,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field }) => (
                     <Field>
-                      <FieldLabel>Municipal Registration:</FieldLabel>
+                      <FieldLabel>{t('fields.municipalRegistration')}</FieldLabel>
                       <Input {...field} value={field.value ?? ''} autoComplete="off" />
                     </Field>
                   )}
@@ -185,7 +182,7 @@ export function SetupWizard() {
                 control={cc}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Company email:</FieldLabel>
+                    <FieldLabel>{t('fields.companyEmail')}</FieldLabel>
                     <Input {...field} type="email" autoComplete="off" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -198,7 +195,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field }) => (
                     <Field className="col-span-2">
-                      <FieldLabel>Country code:</FieldLabel>
+                      <FieldLabel>{t('fields.countryCode')}</FieldLabel>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger>
                           <SelectValue />
@@ -218,7 +215,7 @@ export function SetupWizard() {
                   control={cc}
                   render={({ field, fieldState }) => (
                     <Field className="col-span-4" data-invalid={fieldState.invalid}>
-                      <FieldLabel>Phone:</FieldLabel>
+                      <FieldLabel>{t('fields.phone')}</FieldLabel>
                       <MaskedInput
                         value={field.value ?? ''}
                         onChange={field.onChange}
@@ -236,7 +233,7 @@ export function SetupWizard() {
 
           <CardFooter className="mt-12">
             <Button type="button" className="w-full" onClick={handleStep1}>
-              Next →
+              {t('next')}
             </Button>
           </CardFooter>
         </div>
@@ -257,13 +254,13 @@ export function SetupWizard() {
 
           <CardFooter className="mt-12 flex gap-2">
             <Button type="button" variant="outline" onClick={() => setStep(1)}>
-              ← Back
+              {t('back')}
             </Button>
             <Button type="button" variant="ghost" onClick={handleStep2Skip} className="ml-auto">
-              Skip
+              {t('skip')}
             </Button>
             <Button type="button" onClick={handleStep2Next}>
-              Next →
+              {t('next')}
             </Button>
           </CardFooter>
         </div>
@@ -280,7 +277,7 @@ export function SetupWizard() {
                   control={ac}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>First name:</FieldLabel>
+                      <FieldLabel>{t('fields.firstName')}</FieldLabel>
                       <Input {...field} autoComplete="given-name" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -292,7 +289,7 @@ export function SetupWizard() {
                   control={ac}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
-                      <FieldLabel>Last name:</FieldLabel>
+                      <FieldLabel>{t('fields.lastName')}</FieldLabel>
                       <Input {...field} autoComplete="family-name" aria-invalid={fieldState.invalid} />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -304,10 +301,10 @@ export function SetupWizard() {
 
           <CardFooter className="mt-12 flex gap-2">
             <Button type="button" variant="outline" onClick={() => setStep(2)}>
-              ← Back
+              {t('back')}
             </Button>
             <Button type="button" className="flex-1" onClick={handleStep3}>
-              Next →
+              {t('next')}
             </Button>
           </CardFooter>
         </div>
@@ -325,7 +322,7 @@ export function SetupWizard() {
                 control={ac}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Administrator email:</FieldLabel>
+                    <FieldLabel>{t('fields.adminEmail')}</FieldLabel>
                     <Input {...field} type="email" autoComplete="email" aria-invalid={fieldState.invalid} />
                     {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                   </Field>
@@ -337,7 +334,7 @@ export function SetupWizard() {
                 control={ac}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel>Password:</FieldLabel>
+                    <FieldLabel>{t('fields.password')}</FieldLabel>
                     <InputGroup aria-invalid={fieldState.invalid}>
                       <InputGroupInput
                         {...field}
@@ -348,7 +345,7 @@ export function SetupWizard() {
                       <InputGroupAddon align="inline-end">
                         <InputGroupButton
                           onClick={() => setShowPassword((v) => !v)}
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                          aria-label={showPassword ? ta('hidePassword') : ta('showPassword')}
                         >
                           {showPassword ? <EyeOff /> : <Eye />}
                         </InputGroupButton>
@@ -363,10 +360,10 @@ export function SetupWizard() {
 
           <CardFooter className="mt-12 flex gap-2">
             <Button type="button" variant="outline" onClick={() => setStep(3)} disabled={isSubmitting}>
-              ← Back
+              {t('back')}
             </Button>
             <Button type="submit" className="flex-1" disabled={isSubmitting}>
-              {isSubmitting ? 'Setting up…' : 'Finish'}
+              {isSubmitting ? t('finishing') : t('finish')}
             </Button>
           </CardFooter>
         </form>

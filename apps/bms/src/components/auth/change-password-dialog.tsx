@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useActionState } from 'react'
+import { useTranslations } from 'next-intl'
 import { Eye, EyeOff } from 'lucide-react'
 import { Button } from '@genealogiq/ui/button'
 import { Label } from '@genealogiq/ui/label'
@@ -25,17 +26,19 @@ export function ChangePasswordDialog() {
   const [state, dispatch, isPending] = useActionState(changePassword, undefined)
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
+  const t  = useTranslations('Account')
+  const ta = useTranslations('Auth')
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">Change password</Button>
+        <Button variant="outline" size="sm">{t('changePassword.trigger')}</Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change password</DialogTitle>
-          <DialogDescription>Enter your current password and choose a new one.</DialogDescription>
+          <DialogTitle>{t('changePassword.title')}</DialogTitle>
+          <DialogDescription>{t('changePassword.description')}</DialogDescription>
         </DialogHeader>
 
         <form action={dispatch} className="flex flex-col gap-4">
@@ -47,7 +50,7 @@ export function ChangePasswordDialog() {
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cp-currentPassword">Current password:</Label>
+            <Label htmlFor="cp-currentPassword">{t('currentPassword')}</Label>
             <InputGroup aria-invalid={!!state?.fieldErrors?.currentPassword}>
               <InputGroupInput
                 id="cp-currentPassword"
@@ -59,7 +62,7 @@ export function ChangePasswordDialog() {
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   onClick={() => setShowCurrent((v) => !v)}
-                  aria-label={showCurrent ? "Hide password" : "Show password"}
+                  aria-label={showCurrent ? ta('hidePassword') : ta('showPassword')}
                 >
                   {showCurrent ? <EyeOff /> : <Eye />}
                 </InputGroupButton>
@@ -71,7 +74,7 @@ export function ChangePasswordDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="cp-newPassword">New password:</Label>
+            <Label htmlFor="cp-newPassword">{t('newPassword')}</Label>
             <InputGroup aria-invalid={!!state?.fieldErrors?.newPassword}>
               <InputGroupInput
                 id="cp-newPassword"
@@ -83,7 +86,7 @@ export function ChangePasswordDialog() {
               <InputGroupAddon align="inline-end">
                 <InputGroupButton
                   onClick={() => setShowNew((v) => !v)}
-                  aria-label={showNew ? "Hide password" : "Show password"}
+                  aria-label={showNew ? ta('hidePassword') : ta('showPassword')}
                 >
                   {showNew ? <EyeOff /> : <Eye />}
                 </InputGroupButton>
@@ -95,7 +98,7 @@ export function ChangePasswordDialog() {
           </div>
 
           <Button type="submit" className="w-full mt-2" disabled={isPending}>
-            {isPending ? "Saving…" : "Change password"}
+            {isPending ? t('changePassword.submitting') : t('changePassword.trigger')}
           </Button>
         </form>
       </DialogContent>
