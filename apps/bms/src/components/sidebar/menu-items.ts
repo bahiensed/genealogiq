@@ -28,7 +28,7 @@ export const system: MenuItem[] = [
 ]
 
 export const products: MenuItem[] = [
-  { labelKey: 'items.gencodes',      url: '/gencodes',          icon: Fingerprint },
+  { labelKey: 'items.partnerPlans',  url: '/plans',             icon: Fingerprint },
   { labelKey: 'items.subscriptions', url: '/subscriptions',     icon: Layers      },
   { labelKey: 'items.extraUnits',    url: '/extra-unit-prices', icon: SquarePlus  },
 ]
@@ -41,7 +41,7 @@ export const customers: MenuItem[] = [
 // queries stay in the tree and go back on this list once the report is ready.
 export const sales: MenuItem[] = [
   { labelKey: 'items.discountCoupons', url: '/sales/discount-coupons', icon: TicketPercent },
-  { labelKey: 'items.manualSales',     url: '/sales/manual-sales',     icon: HandCoinsIcon },
+  { labelKey: 'items.contracts',       url: '/sales/contracts',        icon: HandCoinsIcon },
 ]
 
 export const groups = [

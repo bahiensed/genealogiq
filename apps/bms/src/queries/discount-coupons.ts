@@ -57,31 +57,35 @@ export async function getDiscountCoupon(id: string) {
   return coupon
 }
 
-const PRICE_BY_CURRENCY = { usd: 'priceUsd', brl: 'priceBrl', mxn: 'priceMxn' } as const
-
 /**
- * Products a coupon can be restricted to, priced in the operator's currency.
+ * Plans a coupon can be restricted to, priced in the operator's currency.
  *
- * Restriction is by Stripe PRODUCT, which is one object across all currencies —
- * so a coupon limited to GenCode covers it in every currency it sells in. The
- * price shown here is only a label to help the operator recognise the row.
+ * Restriction is by Stripe PRODUCT, which is one object across every currency —
+ * so a coupon limited to Semente covers it wherever Semente sells. The amount
+ * shown here is only a label to help the operator recognise the row.
  */
-export async function getActivePackagesForSelect(currency: AppCurrency) {
+export async function getActivePlansForSelect(currency: AppCurrency) {
   await verifySession()
 
-  const rows = await prisma.package.findMany({
-    where:   { isActive: true, [PRICE_BY_CURRENCY[currency]]: { gt: 0 } },
-    orderBy: { [PRICE_BY_CURRENCY[currency]]: 'asc' },
-    select:  { id: true, name: true, quantity: true, stripeProductId: true,
-               priceUsd: true, priceBrl: true, priceMxn: true },
+  const rows = await prisma.partnerPlan.findMany({
+    where:   { isActive: true, prices: { some: { isActive: true, effectiveTo: null, currency: currency.toUpperCase() } } },
+    orderBy: { annualAllowance: 'asc' },
+    select:  {
+      id: true, name: true, annualAllowance: true,
+      prices: {
+        where:  { isActive: true, effectiveTo: null, currency: currency.toUpperCase() },
+        select: { annualCashAmount: true, stripeProductId: true },
+        take:   1,
+      },
+    },
   })
 
   return rows.map((r) => ({
     id:              r.id,
     name:            r.name,
-    quantity:        r.quantity,
-    stripeProductId: r.stripeProductId,
-    price:           Number(r[PRICE_BY_CURRENCY[currency]]),
+    quantity:        r.annualAllowance,
+    stripeProductId: r.prices[0]?.stripeProductId ?? null,
+    price:           Number(r.prices[0]?.annualCashAmount ?? 0),
   }))
 }
 
