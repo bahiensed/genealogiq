@@ -95,6 +95,53 @@ enum NotificationType {
   GUARDIAN_REQUEST_REJECTED
 }
 
+enum CreditSource {
+  ANNUAL
+  ROLLOVER
+  FOUNDER_ROLLOVER
+  COMMITTED
+  BONUS
+  TOPUP
+  MIGRATION
+}
+
+enum CreditTransactionType {
+  GRANT
+  RESERVE
+  RELEASE
+  CONSUME
+  EXPIRE
+  ADJUST
+  REVERSE
+}
+
+enum CreditGrantStatus {
+  ACTIVE
+  EXHAUSTED
+  EXPIRED
+}
+
+enum CreditReservationStatus {
+  HELD
+  CONSUMED
+  RELEASED
+  EXPIRED
+}
+
+enum PartnerSubscriptionStatus {
+  PENDING
+  ACTIVE
+  PAST_DUE
+  EXPIRED
+  CANCELLED
+}
+
+enum SubscriptionCycleStatus {
+  ACTIVE
+  CLOSED
+  EXPIRED
+}
+
 // ─── Subscriptions, Packages & Sales ─────────────────────────────────────────
 
 model Subscription {
@@ -104,33 +151,13 @@ model Subscription {
   isActive              Boolean   @default(true) @map("is_active")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
-  // These three are required in both the schema and the DB: migration
-  // 20260607010000_reconcile_schema_drift added the NOT NULL constraints after
-  // verifying zero NULL rows, so the earlier app-vs-DB drift is fully resolved.
+  // How many months one term covers. Feeds every cash Price's interval_count,
+  // and 0 means a non-recurring ("lifetime") plan that cannot be synced.
   termLength            Int       @map("term_length")
-  // Independent per-currency prices — no FX conversion, each admin-set in
-  // BMS. USD is required (the original/canonical currency, always
-  // populated); BRL/MXN are nullable until configured, with callers falling
-  // back to the USD pair when a currency isn't set yet.
-  priceUsd              Decimal   @db.Decimal(10, 2) @map("price_usd")
-  // Explicit monthly price, independent of `price / termLength` — lets a plan
-  // offer a real annual discount (not just an even split) instead of a
-  // proportional derivation. Null = fall back to the derived value (legacy
-  // behavior), used by all pricing math in BMS's Stripe sync and the APP's
-  // subscriptions grid/billing comparison.
-  monthlyPriceUsd       Decimal?  @db.Decimal(10, 2) @map("monthly_price_usd")
-  priceBrl              Decimal?  @db.Decimal(10, 2) @map("price_brl")
-  monthlyPriceBrl       Decimal?  @db.Decimal(10, 2) @map("monthly_price_brl")
-  priceMxn              Decimal?  @db.Decimal(10, 2) @map("price_mxn")
-  monthlyPriceMxn       Decimal?  @db.Decimal(10, 2) @map("monthly_price_mxn")
   code                  String    @unique
-  stripeProductId       String?   @unique @map("stripe_product_id")
-  stripeAnnualPriceIdUsd  String? @unique @map("stripe_annual_price_id_usd")
-  stripeMonthlyPriceIdUsd String? @unique @map("stripe_monthly_price_id_usd")
-  stripeAnnualPriceIdBrl  String? @unique @map("stripe_annual_price_id_brl")
-  stripeMonthlyPriceIdBrl String? @unique @map("stripe_monthly_price_id_brl")
-  stripeAnnualPriceIdMxn  String? @unique @map("stripe_annual_price_id_mxn")
-  stripeMonthlyPriceIdMxn String? @unique @map("stripe_monthly_price_id_mxn")
+  // Prices moved to PlanPrice — the same versioned book the partner plans use.
+  // They lived here as mutable per-currency columns, which meant editing an
+  // amount rewrote what every past sale had been charged. See `prices` below.
   // Quota numbers previously hardcoded in the APP's plan-quotas.ts — moved
   // here so BMS can edit every plan attribute manually, without a code
   // deploy. Defaults mirror the FREE plan's current numbers.
@@ -149,6 +176,9 @@ model Subscription {
   // Free QR codes (own profile + guarded memorials, combined).
   qrCodeMax             Int       @default(1)    @map("qr_code_max")
   appSales              AppSale[]
+  // Versioned price book (see PlanPrice). Coexists with the price_* columns
+  // above during the cutover: the columns are still the ones the APP reads.
+  prices                PlanPrice[]
 
   @@map("subscriptions")
 }
@@ -175,107 +205,9 @@ model DiscountCoupon {
   isActive              Boolean   @default(true) @map("is_active")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
-  appliesTo             Package[] @relation("CouponPackages")
-  sales                 Sale[]
+  appliesTo             PartnerPlan[] @relation("CouponPlans")
 
   @@map("discount_coupons")
-}
-
-model Package {
-  id               String              @id @default(cuid())
-  name             String
-  description      String?
-  /// Months the buyer may activate this batch's GenCodes for. Doubles as the
-  /// annual Price's interval_count, so a 6- or 18-month product needs no
-  /// special case.
-  termLength       Int                 @default(12) @map("term_length")
-  /// One slot per currency per cadence, all optional: a product is sellable in
-  /// the currencies it has a price for and invisible in the rest.
-  ///
-  /// The unprefixed `price*` is the ANNUAL amount; `monthlyPrice*` is the
-  /// instalment. Deliberately independent rather than price/termLength — the
-  /// whole point is a real annual discount (29.90 x 12 against 299.00), not an
-  /// even split. Same naming and same reasoning as Subscription.
-  priceUsd         Decimal?            @map("price_usd") @db.Decimal(10, 2)
-  monthlyPriceUsd  Decimal?            @map("monthly_price_usd") @db.Decimal(10, 2)
-  priceBrl         Decimal?            @map("price_brl") @db.Decimal(10, 2)
-  monthlyPriceBrl  Decimal?            @map("monthly_price_brl") @db.Decimal(10, 2)
-  priceMxn         Decimal?            @map("price_mxn") @db.Decimal(10, 2)
-  monthlyPriceMxn  Decimal?            @map("monthly_price_mxn") @db.Decimal(10, 2)
-  isActive         Boolean             @default(true) @map("is_active")
-  createdAt        DateTime            @default(now()) @map("created_at")
-  updatedAt        DateTime            @updatedAt @map("updated_at")
-  quantity         Int                 @default(1)
-  stripeProductId  String?             @unique @map("stripe_product_id")
-  stripeAnnualPriceIdUsd  String?      @unique @map("stripe_annual_price_id_usd")
-  stripeMonthlyPriceIdUsd String?      @unique @map("stripe_monthly_price_id_usd")
-  stripeAnnualPriceIdBrl  String?      @unique @map("stripe_annual_price_id_brl")
-  stripeMonthlyPriceIdBrl String?      @unique @map("stripe_monthly_price_id_brl")
-  stripeAnnualPriceIdMxn  String?      @unique @map("stripe_annual_price_id_mxn")
-  stripeMonthlyPriceIdMxn String?      @unique @map("stripe_monthly_price_id_mxn")
-  genCodes         GenCode[]
-  sales            Sale[]
-  coupons          DiscountCoupon[]    @relation("CouponPackages")
-
-  @@map("packages")
-}
-
-// A sale is created the moment a payment link is generated and carries no
-// GenCodes until the money lands. Lifecycle, read in this order:
-//   reversedAt -> reversed | paidAt -> active | expiredAt -> link expired
-//   otherwise  -> awaiting payment
-//
-// The amount columns are a snapshot from the Checkout Session, not a
-// derivation. Revenue used to be recomputed as quantity x Package.price, which
-// a discount coupon makes plainly wrong — the discount would exist nowhere in
-// our database.
-model Sale {
-  id                    Int                 @id @default(autoincrement())
-  quantity              Int                 @default(1)
-  packageId             String              @map("package_id")
-  tenantId              String              @map("tenant_id")
-  soldById              String              @map("sold_by_id")
-  createdAt             DateTime            @default(now()) @map("created_at")
-  updatedAt             DateTime            @updatedAt @map("updated_at")
-  paidAt                DateTime?           @map("paid_at")
-  /// Only set when an operator recorded an off-Stripe payment. Null on a sale Stripe settled.
-  paidById              String?             @map("paid_by_id")
-  expiredAt             DateTime?           @map("expired_at")
-  /// An async payment (boleto, Pix, ACH) that completed checkout and then bounced.
-  /// Distinct from expiredAt on purpose: both dead-end the link, but one is the
-  /// customer running out of time and the other is the money not arriving.
-  failedAt              DateTime?           @map("failed_at")
-  reversedAt            DateTime?           @map("reversed_at")
-  checkoutUrl           String?             @map("checkout_url")
-  /// Cents, as Stripe reports them.
-  amountSubtotal        Int?                @map("amount_subtotal")
-  amountTotal           Int?                @map("amount_total")
-  currency              String?
-  discountCouponId      String?             @map("discount_coupon_id")
-  /// 'annual' | 'monthly'. Free text, matching AppSale.cadence's convention.
-  cadence               String?
-  /// Raw Stripe subscription status, stored exactly as reported and never
-  /// interpreted on write. Null for a sale that never involved a subscription.
-  status                String?
-  /// End of the period in which this sale's GenCodes may still be activated.
-  /// Null means no term — which is what keeps a sale made before cadence
-  /// existed redeemable forever. Lives here rather than on GenCode because the
-  /// whole batch moves together: one field, not 200 rows rewritten monthly.
-  accessEndsAt          DateTime?           @map("access_ends_at")
-  stripeSessionId       String?             @unique @map("stripe_session_id")
-  stripeSubscriptionId  String?             @unique @map("stripe_subscription_id")
-  stripePaymentIntentId String?             @map("stripe_payment_intent_id")
-  genCodes              GenCode[]
-  tenant                Tenant              @relation(fields: [tenantId], references: [id], map: "sales_customer_id_fkey")
-  package               Package             @relation(fields: [packageId], references: [id])
-  soldBy                User                @relation("SaleSoldBy", fields: [soldById], references: [id])
-  paidBy                User?               @relation("SalePaidBy", fields: [paidById], references: [id])
-  discountCoupon        DiscountCoupon?     @relation(fields: [discountCouponId], references: [id])
-
-  @@index([tenantId, createdAt(sort: Desc)])
-  @@index([paidById])
-  @@index([discountCouponId])
-  @@map("sales")
 }
 
 model AppSale {
@@ -477,8 +409,6 @@ model User {
   updatedAppUsers     AppUser[]            @relation("app_users_updated_by_idTousers")
   emailTokens         EmailToken[]
   passwordResetTokens PasswordResetToken[]
-  sales               Sale[]               @relation("SaleSoldBy")
-  salesPaid           Sale[]               @relation("SalePaidBy")
   genCodesSold        GenCode[]
   createdSupplierCats SupplierCategory[]   @relation("supplier_categories_created_by_idTousers")
   updatedSupplierCats SupplierCategory[]   @relation("supplier_categories_updated_by_idTousers")
@@ -581,6 +511,7 @@ model AppUser {
   treeNodePositionsAsRoot   TreeNodePosition[] @relation("TreeNodePositionRoot")
   treeNodePositionsAsPerson TreeNodePosition[] @relation("TreeNodePositionPerson")
   extraUnitPurchases  ExtraUnitPurchase[]
+  committedCredits    CreditGrant[]
 
   @@index([tenantId])
   @@index([categoryId])
@@ -925,13 +856,14 @@ model Tenant {
   appUserCats               AppUserCategory[]
   appUsers                  AppUser[]           @relation("AppUserTenant")
   genCodes                  GenCode[]
-  sales                     Sale[]
   supplierCats              SupplierCategory[]  @relation("SupplierCategoryTenant")
   suppliers                 Supplier[]          @relation("SupplierTenant")
   address                   Address?            @relation(fields: [addressId], references: [id], map: "customers_address_id_fkey")
   tenant                    Tenant?             @relation("TenantParent", fields: [tenantId], references: [id], onDelete: Cascade, map: "customers_tenant_id_fkey")
   subTenants                Tenant[]            @relation("TenantParent")
   users                     User[]
+  partnerSubscriptions      PartnerSubscription[]
+  creditGrants              CreditGrant[]
 
   @@map("tenants")
 }
@@ -993,9 +925,14 @@ model GenCode {
   id              String                 @id @default(cuid())
   genCode         String                 @unique @map("gen_code")
   status          GenCodeStatus          @default(AVAILABLE)
-  saleId          Int                    @map("sale_id")
-  packageId       String                 @map("package_id")
   tenantId        String                 @map("tenant_id")
+  /// Which cycle minted this code. Provenance only — it is NEVER the gate.
+  /// The old model gated activation on the originating Sale's window, which is
+  /// precisely what made rollover impossible: a code minted in cycle 1 died
+  /// with cycle 1. Authorisation now comes from the credit ledger.
+  mintedInCycleId String?                @map("minted_in_cycle_id")
+  /// The CONSUME that paid for this activation. Set with activatedAt, never before.
+  creditTransactionId String?            @unique @map("credit_transaction_id")
   appUserId       String?                @unique @map("app_user_id")
   activatedAt     DateTime?              @map("activated_at")
   printedAt       DateTime?              @map("printed_at")
@@ -1011,10 +948,290 @@ model GenCode {
   appUser         AppUser?               @relation("GenCodeMemorial", fields: [appUserId], references: [id])
   soldToAppUser   AppUser?               @relation("GenCodeBuyer", fields: [soldToAppUserId], references: [id])
   soldBy          User?                  @relation(fields: [soldById], references: [id])
-  package         Package                @relation(fields: [packageId], references: [id])
-  sale            Sale                   @relation(fields: [saleId], references: [id])
   tenant          Tenant                 @relation(fields: [tenantId], references: [id])
+  mintedInCycle   SubscriptionCycle?     @relation(fields: [mintedInCycleId], references: [id])
+  creditTransaction CreditTransaction?   @relation("ConsumedBy", fields: [creditTransactionId], references: [id])
+  reservation     CreditReservation?
+  committedGrant  CreditGrant?           @relation("CommittedFor")
 
   @@index([tenantId, status])
   @@map("gencodes")
+}
+
+// ─── Partner plans, cycles & versioned price book ────────────────────────────
+//
+// The B2B product stops being a batch of codes you buy and becomes a yearly
+// contract that grants the RIGHT to activate a number of them. Package/Sale
+// still exist alongside these while the cutover runs; they are retired once
+// checkout and fulfilment point here instead.
+
+/// A commercial plan a partner subscribes to — Semente, Raízes, Árvore, Floresta.
+///
+/// Every knob the founder listed as "must be configurable" lives here as a
+/// column rather than a constant, and `version` lets a plan's terms change
+/// without rewriting the contracts already signed under the old ones: a cycle
+/// snapshots the terms it opened with (see SubscriptionCycle.planSnapshot).
+model PartnerPlan {
+  id                         String   @id @default(cuid())
+  name                       String
+  code                       String   @unique
+  description                String?
+  /// Activations included in one annual cycle.
+  annualAllowance            Int      @map("annual_allowance")
+  /// Share of the RENEWED plan's allowance that unused credits may carry over.
+  /// Floored to whole units at renewal — see the rollover algorithm.
+  rolloverRate               Decimal  @default(0.30) @map("rollover_rate") @db.Decimal(4, 3)
+  rolloverValidityMonths     Int      @default(6)  @map("rollover_validity_months")
+  /// Days after a cycle ends in which paying still renews AND preserves rollover.
+  graceDays                  Int      @default(30) @map("grace_days")
+  /// How long a credit committed to an identified buyer outlives its cycle.
+  /// This is what keeps a family who already paid the funeral home from losing
+  /// the plaque when the partner walks away. 12 months is a starting guess —
+  /// nobody has measured the sale-to-activation lag yet.
+  committedReservationMonths Int      @default(12) @map("committed_reservation_months")
+  /// The B2C trial an activation hands the guardian. 0 = no trial.
+  activationTrialMonths      Int      @default(12) @map("activation_trial_months")
+  /// Which Subscription.code that trial grants. Null = no trial regardless of
+  /// the months above.
+  activationTrialPlanCode    String?  @map("activation_trial_plan_code")
+  isActive                   Boolean  @default(true) @map("is_active")
+  version                    Int      @default(1)
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+  prices                     PlanPrice[]
+  subscriptions              PartnerSubscription[]
+  cycles                     SubscriptionCycle[]
+  coupons                    DiscountCoupon[]      @relation("CouponPlans")
+
+  @@map("partner_plans")
+}
+
+/// One price, for one product, in one currency, valid for one window.
+///
+/// Serves BOTH sides of the business: a PartnerPlan (B2B) or a Subscription
+/// (B2C). Exactly one of the two FKs is set — enforced by a CHECK constraint in
+/// the migration, because the alternative (a polymorphic owner id with no FK)
+/// gives up the integrity that makes a price book worth trusting.
+///
+/// Prices are VERSIONED, never edited in place. `Package.priceBrl` was a mutable
+/// column, so changing a price silently rewrote the revenue history of every
+/// sale that carried no amount snapshot — queries/reports.ts documents that
+/// scar. Here a change closes the current row and opens a new one, so a contract
+/// can always resolve the price that was in force when it was signed.
+model PlanPrice {
+  id                       String    @id @default(cuid())
+  partnerPlanId            String?   @map("partner_plan_id")
+  subscriptionId           String?   @map("subscription_id")
+  currency                 String    @db.VarChar(3)
+  /// ISO-3166-1 alpha-2, or null for "wherever this currency is the fallback".
+  /// Country picks the catalogue a buyer sees; currency picks what Stripe
+  /// charges. Not the same question: MXN is priced for Mexico, while USD is the
+  /// fallback everywhere we have no local book.
+  countryScope             String?   @map("country_scope") @db.VarChar(2)
+  /// The whole annual cycle, paid at once.
+  annualCashAmount         Decimal   @map("annual_cash_amount") @db.Decimal(10, 2)
+  /// Instalments for that same cycle. Both null = cash only. Deliberately NOT
+  /// derived from annualCashAmount: the 12x carries a 20% surcharge, and
+  /// deriving it would erase a commercial decision.
+  installmentCount         Int?      @map("installment_count")
+  installmentAmount        Decimal?  @map("installment_amount") @db.Decimal(10, 2)
+  /// Published "cost per activation" reference. Stored rather than computed,
+  /// because the rounding in it is a commercial choice, not arithmetic.
+  unitReferenceAmount      Decimal?  @map("unit_reference_amount") @db.Decimal(10, 2)
+  effectiveFrom            DateTime  @map("effective_from")
+  /// Null = still in force. Set when a newer version supersedes this row.
+  effectiveTo              DateTime? @map("effective_to")
+  version                  Int       @default(1)
+  isActive                 Boolean   @default(true) @map("is_active")
+  stripeProductId          String?   @map("stripe_product_id")
+  stripeCashPriceId        String?   @unique @map("stripe_cash_price_id")
+  stripeInstallmentPriceId String?   @unique @map("stripe_installment_price_id")
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+  partnerPlan              PartnerPlan?  @relation(fields: [partnerPlanId],  references: [id], onDelete: Cascade)
+  subscription             Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([partnerPlanId, currency, effectiveFrom])
+  @@index([subscriptionId, currency, effectiveFrom])
+  @@map("plan_prices")
+}
+
+/// A partner's standing contract. Owns identity and billing; the franchise and
+/// the dates belong to the CYCLE, because those are what renewal replaces.
+model PartnerSubscription {
+  id                      String                    @id @default(cuid())
+  tenantId                String                    @map("tenant_id")
+  planId                  String                    @map("plan_id")
+  status                  PartnerSubscriptionStatus @default(PENDING)
+  autoRenew               Boolean                   @default(true) @map("auto_renew")
+  /// The launch guarantee: 100% of unused credits carried once, instead of the
+  /// standard cap. `used` is the latch that keeps "once" honest.
+  founderRolloverEligible Boolean                   @default(false) @map("founder_rollover_eligible")
+  founderRolloverUsed     Boolean                   @default(false) @map("founder_rollover_used")
+  currentCycleId          String?                   @unique @map("current_cycle_id")
+  stripeSubscriptionId    String?                   @unique @map("stripe_subscription_id")
+  stripeCustomerId        String?                   @map("stripe_customer_id")
+  createdAt               DateTime                  @default(now()) @map("created_at")
+  updatedAt               DateTime                  @updatedAt @map("updated_at")
+  tenant                  Tenant                    @relation(fields: [tenantId], references: [id])
+  plan                    PartnerPlan               @relation(fields: [planId],  references: [id])
+  currentCycle            SubscriptionCycle?        @relation("CurrentCycle", fields: [currentCycleId], references: [id])
+  cycles                  SubscriptionCycle[]       @relation("SubscriptionCycles")
+  grants                  CreditGrant[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@map("partner_subscriptions")
+}
+
+/// One paid period of a contract. Renewal closes one and opens the next.
+///
+/// The snapshots are the point: a cycle must keep answering "what did this
+/// partner actually agree to" long after the plan's terms and the price book
+/// have moved on (RF-14). Stored as JSON rather than copied columns because
+/// they are read as a unit, never queried field-by-field, and freezing the
+/// whole shape survives later columns being added to PartnerPlan.
+model SubscriptionCycle {
+  id                 String                  @id @default(cuid())
+  subscriptionId     String                  @map("subscription_id")
+  planId             String                  @map("plan_id")
+  planSnapshot       Json                    @map("plan_snapshot")
+  priceSnapshot      Json                    @map("price_snapshot")
+  startAt            DateTime                @map("start_at")
+  endAt              DateTime                @map("end_at")
+  /// endAt + plan.graceDays, frozen so a later change to the plan cannot move
+  /// a deadline a partner is already living under.
+  graceEndAt         DateTime                @map("grace_end_at")
+  status             SubscriptionCycleStatus @default(ACTIVE)
+  /// The cycle this one renewed from. Unique: a cycle can only be renewed once.
+  renewedFromCycleId String?                 @unique @map("renewed_from_cycle_id")
+  /// Stripe invoice that opened this cycle — the idempotency key for renewal.
+  stripeInvoiceId    String?                 @unique @map("stripe_invoice_id")
+  createdAt          DateTime                @default(now()) @map("created_at")
+  updatedAt          DateTime                @updatedAt @map("updated_at")
+  subscription       PartnerSubscription     @relation("SubscriptionCycles", fields: [subscriptionId], references: [id], onDelete: Cascade)
+  plan               PartnerPlan             @relation(fields: [planId], references: [id])
+  renewedFrom        SubscriptionCycle?      @relation("CycleRenewal", fields: [renewedFromCycleId], references: [id])
+  renewedInto        SubscriptionCycle?      @relation("CycleRenewal")
+  currentOf          PartnerSubscription?    @relation("CurrentCycle")
+  genCodes           GenCode[]
+  grants             CreditGrant[]
+
+  @@index([subscriptionId, startAt(sort: Desc)])
+  @@index([endAt])
+  @@map("subscription_cycles")
+}
+
+// ─── Credit ledger ───────────────────────────────────────────────────────────
+//
+// The right to activate, made explicit. A cycle grants credits; selling a code
+// reserves one; activating it consumes one. Nothing else may move a balance.
+//
+// The ledger is the source of truth. `CreditGrant.remainingQty` exists so a
+// balance can be read without folding the whole history every time, but it is a
+// materialisation: if the two ever disagree, the transactions win and the
+// counter is the thing that is wrong.
+
+/// A batch of rights, with one origin and one expiry.
+///
+/// Splitting credits into grants rather than a single counter is what makes
+/// FEFO possible at all: rollover expires in six months and the fresh annual
+/// allowance in twelve, so "which credit did this activation spend" has to have
+/// an answer.
+model CreditGrant {
+  id                 String            @id @default(cuid())
+  tenantId           String            @map("tenant_id")
+  subscriptionId     String?           @map("subscription_id")
+  /// The cycle that opened this grant. Null for COMMITTED grants, which
+  /// deliberately outlive whichever cycle funded them.
+  cycleId            String?           @map("cycle_id")
+  source             CreditSource
+  grantedQty         Int               @map("granted_qty")
+  /// Materialised balance — see the note above. Never read without a lock in a
+  /// path that also writes.
+  remainingQty       Int               @map("remaining_qty")
+  /// Null = no expiry. Only ever true for grants that predate the model.
+  expiresAt          DateTime?         @map("expires_at")
+  /// 0 for a fresh allowance, 1 for credits that have already rolled once.
+  /// A grant with generation > 0 can never roll again — that is the rule that
+  /// stops credits living forever by rolling repeatedly.
+  rolloverGeneration Int               @default(0) @map("rollover_generation")
+  status             CreditGrantStatus @default(ACTIVE)
+  /// Set only on COMMITTED grants: the code and the buyer this unit belongs to.
+  /// A committed unit is out of the general pool and cannot be spent on anything
+  /// else, which is the whole point — the family already paid for it.
+  genCodeId          String?           @unique @map("gen_code_id")
+  buyerId            String?           @map("buyer_id")
+  createdById        String?           @map("created_by_id")
+  reason             String?
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
+  tenant             Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscription       PartnerSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  cycle              SubscriptionCycle?   @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  genCode            GenCode?             @relation("CommittedFor", fields: [genCodeId], references: [id])
+  buyer              AppUser?             @relation(fields: [buyerId], references: [id])
+  transactions       CreditTransaction[]
+  reservations       CreditReservation[]
+
+  // The FEFO index: live grants for one tenant, soonest to expire first.
+  @@index([tenantId, status, expiresAt])
+  @@index([cycleId])
+  @@map("credit_grants")
+}
+
+/// The immutable razão. Every movement of every balance lands here, once.
+///
+/// `idempotencyKey` is what makes "once" true across webhook replays and double
+/// submits: the caller names the operation, and a repeat loses to the unique
+/// index instead of moving the balance twice.
+model CreditTransaction {
+  id             String                @id @default(cuid())
+  grantId        String                @map("grant_id")
+  tenantId       String                @map("tenant_id")
+  type           CreditTransactionType
+  /// Always positive. The type says which direction it moves.
+  quantity       Int
+  /// The grant's remaining balance immediately after this row was written —
+  /// what makes the ledger auditable without replaying it from the beginning.
+  balanceAfter   Int                   @map("balance_after")
+  genCodeId      String?               @map("gen_code_id")
+  reservationId  String?               @map("reservation_id")
+  idempotencyKey String                @unique @map("idempotency_key")
+  occurredAt     DateTime              @default(now()) @map("occurred_at")
+  actorId        String?               @map("actor_id")
+  reason         String?
+  grant          CreditGrant           @relation(fields: [grantId], references: [id], onDelete: Cascade)
+  consumedGenCode GenCode?             @relation("ConsumedBy")
+
+  @@index([tenantId, occurredAt(sort: Desc)])
+  @@index([grantId])
+  @@map("credit_transactions")
+}
+
+/// A credit held for a specific code between the partner selling it and the
+/// family activating it.
+///
+/// Always points at the grant that will actually pay: the origin grant for a
+/// manual write-off, a dedicated COMMITTED grant for a platform sale. That is
+/// the difference the founder decided on — a sale with an identified buyer
+/// survives the cycle expiring, a name typed into a box does not.
+model CreditReservation {
+  id                String                  @id @default(cuid())
+  tenantId          String                  @map("tenant_id")
+  grantId           String                  @map("grant_id")
+  genCodeId         String                  @unique @map("gen_code_id")
+  quantity          Int                     @default(1)
+  status            CreditReservationStatus @default(HELD)
+  /// Mirrors the backing grant's expiry, so the two cannot drift apart.
+  expiresAt         DateTime?               @map("expires_at")
+  externalReference String?                 @map("external_reference")
+  idempotencyKey    String                  @unique @map("idempotency_key")
+  createdAt         DateTime                @default(now()) @map("created_at")
+  updatedAt         DateTime                @updatedAt @map("updated_at")
+  grant             CreditGrant             @relation(fields: [grantId], references: [id], onDelete: Cascade)
+  genCode           GenCode                 @relation(fields: [genCodeId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@map("credit_reservations")
 }
