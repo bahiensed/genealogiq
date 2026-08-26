@@ -737,7 +737,7 @@
       "allowance": "Hasta {count} activaciones por ciclo",
       "cash": "De contado",
       "installments": "En {count} cuotas",
-      "perActivation": "{amount} por activación",
+      "perGenCode": "{amount} por GenCode",
       "perCycle": "por ciclo anual",
       "perMonth": "al mes",
       "redirecting": "Redirigiendo…",
@@ -753,7 +753,6 @@
       "subtitle": "Compre GenCodes para imprimir en sus placas memoriales y revenderlos a sus propios clientes",
       "title": "Comprar GenCodes"
     },
-    "subtitle": "La suscripción concede el derecho de activar hasta la franquicia contratada durante el ciclo anual.",
     "title": "Contratar un plan",
     "toasts": {
       "canceled": "Compra cancelada.",
