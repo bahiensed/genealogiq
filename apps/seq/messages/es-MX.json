@@ -761,21 +761,15 @@
   },
   "Sidebar": {
     "groups": {
-      "system": "Sistema",
-      "records": "Registros",
-      "purchasing": "Compras",
-      "inventory": "Inventario"
+      "system": "Sistema"
     },
     "items": {
       "buyGenCodes": "Contratar un plan",
       "companyData": "Datos de la Empresa",
-      "customerCategories": "Categorías de Clientes",
       "customers": "Clientes",
       "dashboard": "Panel",
       "employees": "Empleados",
-      "myGenCodes": "Mis códigos",
-      "supplierCategories": "Categorías de Proveedores",
-      "suppliers": "Proveedores"
+      "myGenCodes": "Mis códigos"
     }
   },
   "SupplierCategories": {

@@ -761,21 +761,15 @@
   },
   "Sidebar": {
     "groups": {
-      "system": "System",
-      "records": "Records",
-      "purchasing": "Purchasing",
-      "inventory": "Inventory"
+      "system": "System"
     },
     "items": {
       "buyGenCodes": "Subscribe to a plan",
       "companyData": "Company Data",
-      "customerCategories": "Customer Categories",
       "customers": "Customers",
       "dashboard": "Dashboard",
       "employees": "Employees",
-      "myGenCodes": "My codes",
-      "supplierCategories": "Supplier Categories",
-      "suppliers": "Suppliers"
+      "myGenCodes": "My codes"
     }
   },
   "SupplierCategories": {
