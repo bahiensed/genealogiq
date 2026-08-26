@@ -199,17 +199,17 @@
     }
   },
   "Credits": {
-    "available": "Activations available",
+    "available": "GenCodes available",
     "committedNote": "{count} more reserved for families who already bought.",
     "contract": "Contract",
     "cycleEnds": "Cycle ends {date}",
     "memorialsSafe": "Memorials already activated stay online, whatever the contract does.",
     "nextExpiry": "Next expiry",
     "noContract": "No active contract.",
-    "rolloverFounder": "Launch guarantee: {count} activation(s) would carry over, once.",
-    "rolloverProjected": "Renewing today, {count} activation(s) would carry over.",
+    "rolloverFounder": "Launch guarantee: {count} GenCode(s) would carry over, once.",
+    "rolloverProjected": "Renewing today, {count} GenCode(s) would carry over.",
     "sellThrough": "Sell-through",
-    "sellThroughDetail": "{consumed} of {granted} activations used",
+    "sellThroughDetail": "{consumed} of {granted} GenCodes used",
     "source": {
       "ANNUAL": "Cycle allowance",
       "BONUS": "Bonus",
@@ -734,7 +734,7 @@
       "monthlyHint": "{price} a month for {count} months. Your GenCodes are available from the first payment."
     },
     "card": {
-      "allowance": "Up to {count} activations per cycle",
+      "allowance": "Up to {count} GenCodes per cycle",
       "cash": "Cash",
       "installments": "In {count} instalments",
       "perGenCode": "{amount} per GenCode",

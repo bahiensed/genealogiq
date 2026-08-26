@@ -122,7 +122,7 @@ export function getColumns(t: Translator, locale: string): ColumnDef<PartnerPlan
     {
       id: 'unitReference',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t('table.perActivation')} className="justify-end" />
+        <DataTableColumnHeader column={column} title={t('table.perGenCode')} className="justify-end" />
       ),
       cell: ({ row }) => (
         <div className="text-right tabular-nums">

@@ -13,7 +13,7 @@ export function PartnerPlansDataTable({ data }: { data: PartnerPlanRow[] }) {
     annualAllowance: t('table.allowance'),
     prices:          t('table.cash'),
     installments:    t('table.installments'),
-    unitReference:   t('table.perActivation'),
+    unitReference:   t('table.perGenCode'),
     synced:          t('table.stripe'),
     isActive:        t('table.status'),
     contracts:       t('table.contracts'),
