@@ -11,8 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
 import { Separator } from '@genealogiq/ui/separator'
 import { Field, FieldError, FieldLabel } from '@genealogiq/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@genealogiq/ui/select'
+import { SearchableSelect } from '@/components/ui/searchable-select'
 
-export interface LinkTenant { id: string; name: string; tradeName: string }
+export interface LinkTenant { id: string; name: string; tradeName: string; taxId: string }
 export interface LinkPlan {
   id: string; name: string; code: string; annualAllowance: number
   currency: string; annualCashAmount: number
@@ -67,20 +68,30 @@ export function SendPlanLinkForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">{t('link.title')}</CardTitle>
+        <CardTitle className="scroll-m-20 text-2xl font-bold tracking-tight">{t('link.newTitle')}</CardTitle>
       </CardHeader>
       <Separator />
       <CardContent className="flex flex-col gap-6">
         <Field>
           <FieldLabel>{t('link.partner')}</FieldLabel>
-          <Select value={tenantId} onValueChange={setTenantId}>
-            <SelectTrigger><SelectValue placeholder={t('link.pickPartner')} /></SelectTrigger>
-            <SelectContent>
-              {tenants.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.tradeName || c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Typed search rather than a plain select: the customer list grows
+              without bound, and scrolling four hundred funeral homes to find one
+              is not a thing anyone should have to do.
+              The label is `name` — the person's given name or the company's
+              legal name. The tax id rides along underneath, because that is what
+              separates two rows that read alike. Search matches both. */}
+          <SearchableSelect
+            options={tenants.map((c) => ({
+              value: c.id,
+              label: c.name,
+              hint:  c.taxId,
+            }))}
+            value={tenantId}
+            onChange={setTenantId}
+            placeholder={t('link.pickPartner')}
+            searchPlaceholder={t('link.searchPartner')}
+            emptyMessage={t('link.noPartnerFound')}
+          />
         </Field>
 
         <Field>
@@ -90,7 +101,7 @@ export function SendPlanLinkForm({
             <SelectContent>
               {plans.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
-                  {p.name} — {t('link.allowance', { count: p.annualAllowance })} · {money(p.annualCashAmount, p.currency)}
+                  {p.name} | {money(p.annualCashAmount, p.currency)} ({t('link.units', { count: p.annualAllowance })})
                 </SelectItem>
               ))}
             </SelectContent>

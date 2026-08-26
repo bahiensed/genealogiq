@@ -80,8 +80,8 @@ export function ExtraUnitPriceCard({ row, title }: Props) {
 
   const currencyStatus = [
     { code: 'USD', configured: row.priceUsd !== null && row.priceUsd > 0, synced: !!row.stripePriceIdUsd },
-    { code: 'BRL', configured: row.priceBrl !== null && row.priceBrl > 0, synced: !!row.stripePriceIdBrl },
     { code: 'MXN', configured: row.priceMxn !== null && row.priceMxn > 0, synced: !!row.stripePriceIdMxn },
+    { code: 'BRL', configured: row.priceBrl !== null && row.priceBrl > 0, synced: !!row.stripePriceIdBrl },
   ]
 
   return (
@@ -94,8 +94,8 @@ export function ExtraUnitPriceCard({ row, title }: Props) {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <PriceInput control={control} name="priceUsd" label="USD" symbol="$" />
-            <PriceInput control={control} name="priceBrl" label="BRL" symbol="R$" />
             <PriceInput control={control} name="priceMxn" label="MXN" symbol="MX$" />
+            <PriceInput control={control} name="priceBrl" label="BRL" symbol="R$" />
           </div>
 
           <div className="rounded-lg border bg-muted/30 px-4 py-3 flex flex-col gap-3 text-xs">

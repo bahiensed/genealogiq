@@ -2,6 +2,7 @@ import 'server-only'
 
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
+import { byCurrencyDisplayOrder } from '@genealogiq/core'
 
 const subscriptionSelect = {
   id:                   true,
@@ -31,7 +32,6 @@ const subscriptionSelect = {
       version: true, stripeProductId: true,
       stripeCashPriceId: true, stripeInstallmentPriceId: true,
     },
-    orderBy: { currency: 'asc' as const },
   },
 } as const
 
@@ -64,7 +64,10 @@ export async function getSubscription(id: string) {
 
   if (!row) return null
 
-  const by = (code: string) => row.prices.find((p) => p.currency === code)
+  // Display order follows the language switcher; Prisma cannot express a
+  // custom sequence, so it is applied here.
+  const prices = [...row.prices].sort(byCurrencyDisplayOrder)
+  const by = (code: string) => prices.find((p) => p.currency === code)
   const num = (v: unknown) => (v === null || v === undefined ? null : Number(v))
 
   return {
@@ -77,7 +80,7 @@ export async function getSubscription(id: string) {
     monthlyPriceBrl: num(by('BRL')?.installmentAmount),
     priceMxn:        num(by('MXN')?.annualCashAmount),
     monthlyPriceMxn: num(by('MXN')?.installmentAmount),
-    stripeProductId: row.prices.find((p) => p.stripeProductId)?.stripeProductId ?? null,
+    stripeProductId: prices.find((p) => p.stripeProductId)?.stripeProductId ?? null,
     stripeAnnualPriceIdUsd:  by('USD')?.stripeCashPriceId ?? null,
     stripeMonthlyPriceIdUsd: by('USD')?.stripeInstallmentPriceId ?? null,
     stripeAnnualPriceIdBrl:  by('BRL')?.stripeCashPriceId ?? null,

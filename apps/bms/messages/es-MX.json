@@ -290,24 +290,26 @@
       "renewal": "Renovación"
     },
     "link": {
-      "allowance": "{count} activaciones",
       "cadence": "Forma de pago",
       "cash": "De contado — {amount}",
       "coupon": "Cupón (opcional)",
       "expiryNote": "Stripe limita el enlace a 24 horas. Después, genera uno nuevo.",
       "installments": "{count}× de {amount}",
+      "newTitle": "Venta de plan B2B",
       "noCoupon": "Sin cupón",
+      "noPartnerFound": "No se encontró ningún socio.",
       "noPlans": "No hay planes sincronizados en tu moneda. Sincroniza uno antes de enviar el enlace.",
       "partner": "Socio",
       "pickPartner": "Elige el socio",
       "pickPlan": "Elige el plan",
       "plan": "Plan",
+      "searchPartner": "Escribe para buscar…",
       "send": "Enviar enlace",
       "sending": "Enviando…",
       "sent": "Enlace enviado a {email}.",
-      "title": "Enviar enlace de suscripción"
+      "units": "{count} unidades"
     },
-    "newButton": "Enviar enlace de plan",
+    "newButton": "Nueva venta de plan",
     "status": {
       "ACTIVE": "Activo",
       "CANCELLED": "Cancelado",

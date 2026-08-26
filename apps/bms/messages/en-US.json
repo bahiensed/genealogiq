@@ -290,24 +290,26 @@
       "renewal": "Renewal"
     },
     "link": {
-      "allowance": "{count} activations",
       "cadence": "Payment",
       "cash": "Cash — {amount}",
       "coupon": "Coupon (optional)",
       "expiryNote": "Stripe caps the link at 24 hours. After that, generate a new one.",
       "installments": "{count}× {amount}",
+      "newTitle": "B2B plan sale",
       "noCoupon": "No coupon",
+      "noPartnerFound": "No partner found.",
       "noPlans": "No plan is synced in your currency. Sync one before sending a link.",
       "partner": "Partner",
       "pickPartner": "Choose the partner",
       "pickPlan": "Choose the plan",
       "plan": "Plan",
+      "searchPartner": "Type to search…",
       "send": "Send link",
       "sending": "Sending…",
       "sent": "Link sent to {email}.",
-      "title": "Send a subscription link"
+      "units": "{count} units"
     },
-    "newButton": "Send plan link",
+    "newButton": "New plan sale",
     "status": {
       "ACTIVE": "Active",
       "CANCELLED": "Cancelled",

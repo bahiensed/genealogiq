@@ -290,24 +290,26 @@
       "renewal": "Renovação"
     },
     "link": {
-      "allowance": "{count} ativações",
       "cadence": "Forma de pagamento",
       "cash": "À vista — {amount}",
       "coupon": "Cupom (opcional)",
       "expiryNote": "O Stripe limita o link a 24 horas. Depois disso, gere um novo.",
       "installments": "{count}× de {amount}",
+      "newTitle": "Venda de plano B2B",
       "noCoupon": "Sem cupom",
+      "noPartnerFound": "Nenhum parceiro encontrado.",
       "noPlans": "Nenhum plano sincronizado na sua moeda. Sincronize um plano antes de enviar o link.",
       "partner": "Parceiro",
       "pickPartner": "Escolha o parceiro",
       "pickPlan": "Escolha o plano",
       "plan": "Plano",
+      "searchPartner": "Digite para buscar…",
       "send": "Enviar link",
       "sending": "Enviando…",
       "sent": "Link enviado para {email}.",
-      "title": "Enviar link de assinatura"
+      "units": "{count} unidades"
     },
-    "newButton": "Enviar link de plano",
+    "newButton": "Nova venda de plano",
     "status": {
       "ACTIVE": "Ativo",
       "CANCELLED": "Cancelado",
