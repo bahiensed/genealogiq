@@ -6,6 +6,9 @@ const { prismaMock } = vi.hoisted(() => ({
     appUserGuardian: { findMany: vi.fn() },
     appSale:         { findMany: vi.fn(), findFirst: vi.fn() },
     subscription:    { findUnique: vi.fn() },
+    // Plan prices moved out of the Subscription row into the versioned book;
+    // the tier tie-break now ranks by the USD amount found there.
+    planPrice:       { findMany: vi.fn() },
   },
 }))
 
@@ -32,6 +35,7 @@ beforeEach(() => {
   prismaMock.subscription.findUnique.mockResolvedValue(FREE)
   prismaMock.appUserGuardian.findMany.mockResolvedValue([])
   prismaMock.appSale.findMany.mockResolvedValue([])
+  prismaMock.planPrice.findMany.mockResolvedValue([])
   prismaMock.appSale.findFirst.mockResolvedValue(null)
 })
 
@@ -73,7 +77,10 @@ describe("getMemorialFeatures — a redeemed GenCode grants no tier of its own",
     prismaMock.appUser.findUnique.mockResolvedValue(LICENSED_MEMO)
     prismaMock.appUserGuardian.findMany.mockResolvedValue([{ guardianId: "g1" }])
     prismaMock.appSale.findMany.mockResolvedValue([
-      { subscription: { ...PREMIUM, priceUsd: 29.9 } },
+      { subscriptionId: "s-premium", subscription: PREMIUM },
+    ])
+    prismaMock.planPrice.findMany.mockResolvedValue([
+      { subscriptionId: "s-premium", annualCashAmount: 29.9 },
     ])
 
     await expect(getMemorialFeatures("memo-1")).resolves.toMatchObject({ code: "PREMIUM" })
@@ -113,8 +120,13 @@ describe("getMemorialFeatures — plan resolution", () => {
       { guardianId: "g1" }, { guardianId: "g2" },
     ])
     prismaMock.appSale.findMany.mockResolvedValue([
-      { subscription: { ...FREE,    priceUsd: 0 } },
-      { subscription: { ...PREMIUM, priceUsd: 29.9 } },
+      { subscriptionId: "s-free",    subscription: FREE },
+      { subscriptionId: "s-premium", subscription: PREMIUM },
+    ])
+    // FREE carries no price-book row at all, which is exactly why the lookup
+    // falls back to 0 rather than assuming every plan has a price.
+    prismaMock.planPrice.findMany.mockResolvedValue([
+      { subscriptionId: "s-premium", annualCashAmount: 29.9 },
     ])
 
     await expect(getMemorialFeatures("memo-1")).resolves.toMatchObject({ code: "PREMIUM" })

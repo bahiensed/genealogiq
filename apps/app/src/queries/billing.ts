@@ -1,7 +1,8 @@
 import "server-only"
 
 import { prisma } from "@/lib/prisma"
-import { resolveCurrency, pricesForCurrency, type Currency } from "@/lib/currency"
+import { type Currency } from "@/lib/currency"
+import { resolveSubscriptionPrice } from "@genealogiq/services/subscription-price"
 
 export async function getActivePlan(userId: string) {
   const row = await prisma.appSale.findFirst({
@@ -19,14 +20,7 @@ export async function getActivePlan(userId: string) {
       currentPeriodEnd:     true,
       cancelAtPeriodEnd:    true,
       stripeSubscriptionId: true,
-      subscription: {
-        select: {
-          id: true, code: true, name: true, termLength: true,
-          priceUsd: true, monthlyPriceUsd: true,
-          priceBrl: true, monthlyPriceBrl: true,
-          priceMxn: true, monthlyPriceMxn: true,
-        },
-      },
+      subscription: { select: { id: true, code: true, name: true, termLength: true } },
     },
   })
   // currentPeriodEnd / status are nullable in schema (SEQ vendor sales share
@@ -34,18 +28,14 @@ export async function getActivePlan(userId: string) {
   if (!row || !row.currentPeriodEnd || !row.status) return null
 
   // The currency this sale was ACTUALLY charged in (stored, from the real
-  // Stripe Price) — never the viewer's current locale, which may have
-  // changed since they subscribed. Null (pre-multi-currency sales) → USD.
-  const fields = {
-    priceUsd:        Number(row.subscription.priceUsd),
-    monthlyPriceUsd: row.subscription.monthlyPriceUsd ? Number(row.subscription.monthlyPriceUsd) : null,
-    priceBrl:        row.subscription.priceBrl ? Number(row.subscription.priceBrl) : null,
-    monthlyPriceBrl: row.subscription.monthlyPriceBrl ? Number(row.subscription.monthlyPriceBrl) : null,
-    priceMxn:        row.subscription.priceMxn ? Number(row.subscription.priceMxn) : null,
-    monthlyPriceMxn: row.subscription.monthlyPriceMxn ? Number(row.subscription.monthlyPriceMxn) : null,
-  }
-  const currency = resolveCurrency(fields, (row.currency as Currency | null) ?? "USD")
-  const { price, monthlyPrice } = pricesForCurrency(fields, currency)
+  // Stripe Price) — never the viewer's current locale, which may have changed
+  // since they subscribed. Null (pre-multi-currency sales) → USD.
+  const charged = ((row.currency as Currency | null) ?? "USD") as Currency
+  const resolved = await resolveSubscriptionPrice(row.subscription.id, charged)
+
+  const currency     = (resolved?.currency as Currency | undefined) ?? charged
+  const price        = resolved?.annualAmount ?? 0
+  const monthlyPrice = resolved?.monthlyAmount ?? null
 
   return {
     ...row,

@@ -16,6 +16,16 @@ const { prismaMock, txMock, safeParseMock } = vi.hoisted(() => ({
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }))
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
+// Activation now spends a credit inside the same transaction that creates the
+// memorial. Permissive by default; the insufficient-balance path has its own test.
+const { creditsMock } = vi.hoisted(() => ({
+  creditsMock: {
+    canActivate:                vi.fn(async () => true),
+    consumeCreditForActivation: vi.fn(async () => "ctx_1"),
+    InsufficientCreditsError:   class extends Error {},
+  },
+}))
+vi.mock("@genealogiq/services/credits", () => creditsMock)
 // The action localizes its business messages via getTranslations('Actions').
 // Stub it to echo the key so assertions can pin the exact message source.
 vi.mock("next-intl/server", () => ({
@@ -88,29 +98,7 @@ describe("activateGenCode", () => {
   // The window gates ACTIVATION ONLY. These four cases are the whole product
   // decision: unused stock has a shelf life and freezes with the tenant's
   // billing, while a memorial that already redeemed a code is never revisited.
-  it("refuses a code whose batch term has ended", async () => {
-    prismaMock.genCode.findUnique.mockResolvedValue({
-      id: "lic-1", status: "AVAILABLE",
-      sale: { ...OPEN_SALE, accessEndsAt: new Date(Date.now() - 60_000) },
-    })
 
-    const res = await activateGenCode("GENCODE", MEMORIAL)
-
-    expect(res).toEqual({ ok: false, message: "gencode.expired" })
-    expect(prismaMock.$transaction).not.toHaveBeenCalled()
-  })
-
-  it("refuses a code whose tenant is behind on an instalment", async () => {
-    prismaMock.genCode.findUnique.mockResolvedValue({
-      id: "lic-1", status: "AVAILABLE",
-      sale: { ...OPEN_SALE, status: "past_due", accessEndsAt: new Date(Date.now() + 60_000) },
-    })
-
-    const res = await activateGenCode("GENCODE", MEMORIAL)
-
-    expect(res).toEqual({ ok: false, message: "gencode.expired" })
-    expect(prismaMock.$transaction).not.toHaveBeenCalled()
-  })
 
   it("accepts once the tenant is paying again — same row, no intervention", async () => {
     prismaMock.genCode.findUnique.mockResolvedValue({
@@ -144,5 +132,19 @@ describe("activateGenCode", () => {
       ok: false,
       message: "gencode.raceRetry",
     })
+  })
+
+  // Replaces the two old window tests. The reason a code can be refused moved
+  // from "the originating sale's term ended" to "the partner has no credit" —
+  // which is the whole point of decoupling the code from the sale.
+  it("refuses a code the partner has no credit for", async () => {
+    prismaMock.genCode.findUnique.mockResolvedValue({ id: "l1", status: "AVAILABLE", tenantId: "t1" })
+    creditsMock.canActivate.mockResolvedValueOnce(false)
+
+    const result = await activateGenCode("CODE", {})
+
+    expect(result.ok).toBe(false)
+    expect(result.message).toBe("gencode.expired")
+    expect(prismaMock.$transaction).not.toHaveBeenCalled()
   })
 })

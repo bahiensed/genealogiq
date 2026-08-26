@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache"
 import { getTranslations } from "next-intl/server"
-import { ok, fail, isSaleWindowOpen, type ActionResult } from "@genealogiq/core"
+import { ok, fail, type ActionResult } from "@genealogiq/core"
+import { canActivate, consumeCreditForActivation, InsufficientCreditsError } from "@genealogiq/services/credits"
+import { grantActivationTrial } from "@genealogiq/services/activation-trial"
 import { prisma } from "@/lib/prisma"
 import { verifySession } from "@/lib/dal"
 import { getMemorialSchema } from "@/schemas/memorial.schema"
@@ -22,20 +24,27 @@ export async function activateGenCode(
   const license = await prisma.genCode.findUnique({
     where: { genCode },
     select: {
-      id: true, status: true,
-      sale: { select: { paidAt: true, reversedAt: true, status: true, accessEndsAt: true } },
+      id: true, status: true, tenantId: true,
+      tenant: {
+        select: {
+          partnerSubscriptions: {
+            where:   { status: "ACTIVE" },
+            select:  { plan: { select: { activationTrialMonths: true, activationTrialPlanCode: true } } },
+            take:    1,
+          },
+        },
+      },
     },
   })
   if (!license)                       return fail(t("gencode.notFound"))
   // A code can be activated whether it's still in stock (AVAILABLE) or already
   // sold/written-off (SOLD) — only an already-ACTIVATED code is rejected.
   if (license.status === "ACTIVATED") return fail(t("gencode.alreadyActivated"))
-  // The batch this code came from has a term, and may be frozen while the
-  // funeral home is behind on an instalment. This gates ACTIVATION only —
+  // The partner must still have credit for this. This gates ACTIVATION only —
   // a memorial that already redeemed a code is never revisited, because the
-  // family bought a physical plaque and it must not go dark over someone
-  // else's billing.
-  if (!isSaleWindowOpen(license.sale)) return fail(t("gencode.expired"))
+  // family bought a physical plaque and it must not go dark over someone else's
+  // billing.
+  if (!(await canActivate(license.tenantId, license.id))) return fail(t("gencode.expired"))
 
   const parsed = getMemorialSchema(identityTranslator).safeParse(data)
   if (!parsed.success) return fail(parsed.error.issues[0].message)
@@ -62,16 +71,41 @@ export async function activateGenCode(
       await tx.appUserGuardian.create({
         data: { appUserId: memo.id, guardianId: session.user.id },
       })
+      // Spending the credit is part of the SAME transaction that creates the
+      // memorial. A family must never end up with a half-created memorial and a
+      // spent credit, nor with a memorial nobody paid for.
+      const creditTransactionId = await consumeCreditForActivation(tx, {
+        tenantId:  license.tenantId,
+        genCodeId: license.id,
+      })
       await tx.genCode.update({
         where: { id: license.id },
-        data:  { status: "ACTIVATED", appUserId: memo.id, activatedAt: new Date() },
+        data:  { status: "ACTIVATED", appUserId: memo.id, activatedAt: new Date(), creditTransactionId },
       })
+
+      // Closes the B2B2C loop: redeeming a plaque puts the guardian on the
+      // partner plan's trial tier instead of dropping them straight to FREE.
+      // Inside the same transaction, because a memorial that exists without the
+      // trial it was sold with is a support ticket nobody can reconstruct.
+      const trial = license.tenant?.partnerSubscriptions[0]?.plan
+      if (trial) {
+        await grantActivationTrial(tx, {
+          guardianId: session.user.id,
+          tenantId:   license.tenantId,
+          months:     trial.activationTrialMonths,
+          planCode:   trial.activationTrialPlanCode,
+        })
+      }
+
       return memo
     })
 
     revalidatePath(`/profile/${session.user.id}/memorialized`)
     return ok({ id: memorial.id })
   } catch (err: unknown) {
+    // Two families racing for a partner's last unit: one wins, the other is told
+    // there is no credit rather than getting a memorial nobody paid for.
+    if (err instanceof InsufficientCreditsError) return fail(t("gencode.expired"))
     // P2002 on genCode.appUserId unique — race condition
     if (err && typeof err === "object" && "code" in err && err.code === "P2002") {
       return fail(t("gencode.raceRetry"))

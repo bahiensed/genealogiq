@@ -2,7 +2,8 @@ import "server-only"
 
 import { resolveLocale } from "@genealogiq/i18n/server"
 import { prisma } from "@/lib/prisma"
-import { LOCALE_TO_CURRENCY, resolveCurrency, pricesForCurrency } from "@/lib/currency"
+import { LOCALE_TO_CURRENCY, type Currency } from "@/lib/currency"
+import { mapSubscriptionPrices } from "@genealogiq/services/subscription-price"
 
 export async function getActiveSubscriptions() {
   const viewerCurrency = LOCALE_TO_CURRENCY[await resolveLocale()]
@@ -18,12 +19,6 @@ export async function getActiveSubscriptions() {
       name:                  true,
       description:           true,
       termLength:            true,
-      priceUsd:              true,
-      monthlyPriceUsd:       true,
-      priceBrl:              true,
-      monthlyPriceBrl:       true,
-      priceMxn:              true,
-      monthlyPriceMxn:       true,
       treeMaxMembers:        true,
       bioMaxChars:           true,
       mediaMaxImages:        true,
@@ -36,17 +31,19 @@ export async function getActiveSubscriptions() {
     },
   })
 
+  // One query for the whole book rather than one per plan: the grid renders
+  // every tier at once, and the fallback to USD is resolved inside.
+  const prices = await mapSubscriptionPrices(rows.map((r) => r.id), viewerCurrency)
+
   const resolved = rows.map((r) => {
-    const fields = {
-      priceUsd:        Number(r.priceUsd),
-      monthlyPriceUsd: r.monthlyPriceUsd ? Number(r.monthlyPriceUsd) : null,
-      priceBrl:        r.priceBrl ? Number(r.priceBrl) : null,
-      monthlyPriceBrl: r.monthlyPriceBrl ? Number(r.monthlyPriceBrl) : null,
-      priceMxn:        r.priceMxn ? Number(r.priceMxn) : null,
-      monthlyPriceMxn: r.monthlyPriceMxn ? Number(r.monthlyPriceMxn) : null,
-    }
-    const currency = resolveCurrency(fields, viewerCurrency)
-    const { price, monthlyPrice } = pricesForCurrency(fields, currency)
+    const priced = prices.get(r.id)
+    // A plan with no live price is a free tier — FREE has nothing to charge and
+    // deliberately carries no price-book row.
+    const price        = priced?.annualAmount ?? 0
+    const monthlyPrice = priced?.monthlyAmount ?? null
+    // The book stores the code as text; the app narrows it back to the three it
+    // actually supports, with the viewer's own as the fallback for a free tier.
+    const currency     = (priced?.currency as Currency | undefined) ?? viewerCurrency
 
     return {
       id:          r.id,
