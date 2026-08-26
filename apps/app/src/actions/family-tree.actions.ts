@@ -10,6 +10,7 @@ import { verifySession } from "@/lib/dal"
 import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { exceedsQuota } from "@/lib/quota"
 import {
   countTreeMembers,
   getTreeMemberIds,
@@ -112,7 +113,9 @@ export async function addRelation(rootId: string, data: unknown): Promise<Action
     select: { id: true },
   })
   const involvesNew = !relExists && (fromId !== rootId && toId !== rootId)
-  if (involvesNew && memberCount + 1 > features.treeMaxMembers) {
+  // Grandfathered: a tree grown under a richer plan is not frozen solid when
+  // the plan lapses — it just stops growing. See lib/quota.ts.
+  if (involvesNew && exceedsQuota(memberCount + 1, features.treeMaxMembers, memberCount)) {
     return fail(t("familyTree.treeLimitReached", { limit: features.treeMaxMembers }))
   }
 
@@ -259,7 +262,7 @@ export async function addGhostRelative(rootId: string, data: unknown): Promise<A
   // Tier limit (always +1 here).
   const features = await getMemorialFeatures(rootId)
   const memberCount = await countTreeMembers(rootId)
-  if (memberCount + 1 > features.treeMaxMembers) {
+  if (exceedsQuota(memberCount + 1, features.treeMaxMembers, memberCount)) {
     return fail(t("familyTree.treeLimitReached", { limit: features.treeMaxMembers }))
   }
 

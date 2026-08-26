@@ -33,11 +33,23 @@ export function inspectVideo(file: File): Promise<VideoMeta> {
 const APPLE_MIME = new Set(["video/quicktime", "video/x-m4v"])
 const APPLE_EXT = new Set([".mov", ".m4v", ".qt"])
 
+/**
+ * A 1080p MP4 straight off an Android phone used to pass through untouched, up
+ * to the gallery's 100 MB cap — which is where essentially all of the storage
+ * cost lived, since the dimension check never fired for it.
+ *
+ * The size threshold closes that without punishing anyone: a short clip already
+ * small enough skips the ffmpeg round-trip entirely, and only what actually
+ * weighs pays for the transcode.
+ */
+const TRANSCODE_ABOVE_BYTES = 8 * 1024 * 1024
+
 export function needsTranscode(file: File, meta: VideoMeta): boolean {
   if (APPLE_MIME.has(file.type)) return true
   const dot = file.name.lastIndexOf(".")
   if (dot >= 0 && APPLE_EXT.has(file.name.slice(dot).toLowerCase())) return true
   if (meta.width > 1920 || meta.height > 1080) return true
+  if (file.size > TRANSCODE_ABOVE_BYTES) return true
   return false
 }
 

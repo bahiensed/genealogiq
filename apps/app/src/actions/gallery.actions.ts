@@ -10,6 +10,7 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { exceedsQuota } from "@/lib/quota"
 import { getCombinedMediaUsage } from "@/queries/media-usage"
 
 export async function saveGallery(profileId: string, data: unknown): Promise<ActionResult> {
@@ -35,11 +36,15 @@ export async function saveGallery(profileId: string, data: unknown): Promise<Act
     getCombinedMediaUsage(profileId),
     prisma.galleryItem.count({ where: { userId: profileId, kind: "image" } }),
   ])
+  // What the profile holds today, which is the floor a grandfathered save may
+  // not exceed. combined.videos is gallery-only, so it needs no subtraction.
+  const currentVideos = combined.videos
   const otherImages = combined.images - currentGalleryImages
-  if (otherImages + imgCount > features.mediaMaxImages) {
+  // Grandfathered: over the limit is allowed to stay and to shrink, never to grow.
+  if (exceedsQuota(otherImages + imgCount, features.mediaMaxImages, combined.images)) {
     return fail(t("gallery.imageLimit", { max: features.mediaMaxImages }))
   }
-  if (vidCount > features.mediaMaxVideos) {
+  if (exceedsQuota(vidCount, features.mediaMaxVideos, currentVideos)) {
     return fail(t("gallery.videoLimit", { max: features.mediaMaxVideos }))
   }
 

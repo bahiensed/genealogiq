@@ -10,6 +10,7 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { exceedsQuota } from "@/lib/quota"
 import { getCombinedMediaUsage } from "@/queries/media-usage"
 
 export async function saveBio(profileId: string, data: unknown): Promise<ActionResult> {
@@ -26,7 +27,10 @@ export async function saveBio(profileId: string, data: unknown): Promise<ActionR
   const { quote, text, images } = parsed.data
 
   const features = await getMemorialFeatures(profileId)
-  if ((text?.length ?? 0) > features.bioMaxChars) {
+  // Grandfathered: a bio written under a richer plan stays editable after the
+  // plan lapses, as long as it does not grow. See lib/quota.ts.
+  const currentBio = await prisma.bio.findUnique({ where: { userId: profileId }, select: { text: true } })
+  if (exceedsQuota(text?.length ?? 0, features.bioMaxChars, currentBio?.text?.length ?? 0)) {
     return fail(t("bio.charLimit", { max: features.bioMaxChars }))
   }
 
@@ -39,7 +43,9 @@ export async function saveBio(profileId: string, data: unknown): Promise<ActionR
     prisma.bioImage.count({ where: { bio: { userId: profileId } } }),
   ])
   const otherImages = combined.images - currentBioImageCount
-  if (otherImages + images.length > features.mediaMaxImages) {
+  // Grandfathered like the text above: a media pool filled under a richer plan
+  // stays editable after it lapses, it just cannot grow.
+  if (exceedsQuota(otherImages + images.length, features.mediaMaxImages, combined.images)) {
     return fail(t("bio.imageLimit", { max: features.mediaMaxImages }))
   }
 
