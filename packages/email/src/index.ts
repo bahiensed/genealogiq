@@ -335,3 +335,142 @@ export function sendSalePaymentLinkEmail({
     <p>Equipe Genealogiq®️<br/><em>"As pessoas só morrem quando são esquecidas".</em></p>
   `)
 }
+
+// ─── Renewal & trial notifications ───────────────────────────────────────────
+//
+// The eight moments in the founder's spec §13, plus the B2C trial ending.
+//
+// Every one of these has the same trap in it, and it is worth stating once:
+// a partner reading "your allowance expires" will assume the families they
+// already served are at risk. They are not. Whatever else changes in this copy,
+// the sentence saying activated memorials stay online must survive.
+
+function renewalShell(body: string): string {
+  return `${body}
+    <p style="color:#666;font-size:13px">
+      Memoriais já ativados continuam no ar normalmente — nada do que suas famílias
+      receberam depende da renovação.
+    </p>
+    <p>Equipe Genealogiq®️<br/><em>"As pessoas só morrem quando são esquecidas".</em></p>`
+}
+
+const ptDate = (d: Date) =>
+  d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })
+
+export interface RenewalNoticeEmail {
+  to:          string
+  partnerName: string
+  planName:    string
+  /** Unused activations that would be lost if nothing changes. */
+  unused:      number
+  /** What would carry over if they renewed today. */
+  rollover:    number
+  endAt:       Date
+  graceEndAt:  Date
+  url:         string
+}
+
+/**
+ * D-90 / D-60 / D-30 / D-7 — before the cycle ends.
+ *
+ * The rollover figure is the whole point of sending these early. A partner with
+ * 70 unused activations and a 30-credit cap is about to lose 40, and the only
+ * moment that fact is actionable is while they can still sell them.
+ */
+export function sendRenewalReminderEmail({
+  to, partnerName, planName, unused, rollover, endAt, url,
+}: RenewalNoticeEmail & { daysOut: number }): Promise<void> {
+  const losing = Math.max(0, unused - rollover)
+
+  return send(to, `Genealogiq — sua assinatura ${planName} vence em ${ptDate(endAt)}`, renewalShell(`
+    <p>Olá ${escapeHtml(partnerName)},</p>
+    <p>Seu ciclo do plano <strong>${escapeHtml(planName)}</strong> termina em <strong>${ptDate(endAt)}</strong>.</p>
+    <p>
+      Você ainda tem <strong>${unused} ativação(ões)</strong> disponíveis.
+      ${rollover > 0
+        ? `Renovando até o vencimento, <strong>${rollover}</strong> delas são transferidas para o próximo ciclo.`
+        : `Nenhuma delas é transferida automaticamente.`}
+      ${losing > 0 ? `<br/><strong>${losing}</strong> não serão transferidas — ainda dá tempo de usá-las.` : ""}
+    </p>
+    <p><a href="${url}">Renovar agora</a></p>
+  `))
+}
+
+/** D0 — the cycle ended. Balance frozen, still visible, grace running. */
+export function sendPastDueEmail({
+  to, partnerName, planName, unused, graceEndAt, url,
+}: RenewalNoticeEmail): Promise<void> {
+  return send(to, `Genealogiq — o ciclo do plano ${planName} venceu`, renewalShell(`
+    <p>Olá ${escapeHtml(partnerName)},</p>
+    <p>O ciclo do seu plano <strong>${escapeHtml(planName)}</strong> venceu e novas ativações estão pausadas.</p>
+    <p>
+      Suas <strong>${unused} ativação(ões)</strong> continuam registradas e visíveis.
+      Você tem até <strong>${ptDate(graceEndAt)}</strong> para renovar e preservá-las.
+    </p>
+    <p><a href="${url}">Regularizar</a></p>
+  `))
+}
+
+/** D+15 / D+30 — grace is running out. */
+export function sendGraceReminderEmail({
+  to, partnerName, planName, unused, rollover, graceEndAt, url,
+}: RenewalNoticeEmail & { lastCall: boolean }): Promise<void> {
+  return send(
+    to,
+    `Genealogiq — ${"últimos dias"} para preservar suas ativações`,
+    renewalShell(`
+      <p>Olá ${escapeHtml(partnerName)},</p>
+      <p>
+        Você tem até <strong>${ptDate(graceEndAt)}</strong> para renovar o plano
+        <strong>${escapeHtml(planName)}</strong> e manter <strong>${rollover}</strong> das suas
+        ${unused} ativações restantes.
+      </p>
+      <p>Depois dessa data, renovar cria um contrato novo e o saldo anterior não é recuperado.</p>
+      <p><a href="${url}">Renovar</a></p>
+    `),
+  )
+}
+
+/** D+31 — grace is over. Said plainly, because the alternative is a surprise later. */
+export function sendCycleExpiredEmail({
+  to, partnerName, planName, url,
+}: Omit<RenewalNoticeEmail, "unused" | "rollover" | "endAt" | "graceEndAt">): Promise<void> {
+  return send(to, `Genealogiq — o plano ${planName} expirou`, renewalShell(`
+    <p>Olá ${escapeHtml(partnerName)},</p>
+    <p>O prazo para renovar o plano <strong>${escapeHtml(planName)}</strong> terminou, e as ativações que não foram usadas expiraram.</p>
+    <p>Você pode contratar um plano novo quando quiser — ele começa com a franquia cheia.</p>
+    <p><a href="${url}">Ver planos</a></p>
+  `))
+}
+
+/**
+ * D-30 of a B2C trial ending.
+ *
+ * This one carries more weight than it looks. The trial is granted to the
+ * guardian, so they never hit a quota wall during the twelve months — nothing
+ * in the product ever asks them to subscribe. This email IS the conversion
+ * moment, not a reminder of one.
+ */
+export function sendTrialEndingEmail({
+  to, name, planName, endsAt, url,
+}: {
+  to:       string
+  name:     string
+  planName: string
+  endsAt:   Date
+  url:      string
+}): Promise<void> {
+  return send(to, "Genealogiq — seu acesso completo termina em 30 dias", `
+    <p>Olá ${escapeHtml(name)},</p>
+    <p>
+      Seu acesso ao <strong>${escapeHtml(planName)}</strong>, que veio junto com a placa,
+      termina em <strong>${ptDate(endsAt)}</strong>.
+    </p>
+    <p>
+      Nada será apagado. O memorial continua no ar e tudo o que você já criou permanece
+      visível — o que muda são os limites para adicionar coisas novas.
+    </p>
+    <p><a href="${url}">Continuar com o plano completo</a></p>
+    <p>Equipe Genealogiq®️<br/><em>"As pessoas só morrem quando são esquecidas".</em></p>
+  `)
+}
