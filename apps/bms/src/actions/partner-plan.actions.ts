@@ -44,7 +44,7 @@ export async function sendPartnerPlanLink(
 
   const tenant = await prisma.tenant.findUnique({
     where:  { id: tenantId },
-    select: { isActive: true, email: true, name: true, tradeName: true },
+    select: { isActive: true, email: true, name: true },
   })
   if (!tenant) return fail(t('sale.tenantNotFound'))
   if (!tenant.isActive) return fail(t('sale.tenantInactive'))
@@ -81,7 +81,7 @@ export async function sendPartnerPlanLink(
     await sendSalePaymentLinkEmail({
       to:          tenant.email,
       url:         checkout.url,
-      tenantName:  tenant.tradeName || tenant.name,
+      tenantName:  tenant.name,
       productName: checkout.planName,
       quantity:    1,
       amount:      formatAmount(checkout.amountTotal, checkout.currency),

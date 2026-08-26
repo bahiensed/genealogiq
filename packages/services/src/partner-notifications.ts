@@ -83,7 +83,7 @@ export async function runPartnerNotifications(
           id: true, tenantId: true, status: true,
           founderRolloverEligible: true, founderRolloverUsed: true,
           plan:   { select: { name: true, annualAllowance: true, rolloverRate: true } },
-          tenant: { select: { email: true, name: true, tradeName: true } },
+          tenant: { select: { email: true, name: true } },
           currentCycle: { select: { id: true } },
         },
       })
@@ -109,7 +109,7 @@ export async function runPartnerNotifications(
 
       const payload = {
         to:          contract.tenant.email,
-        partnerName: contract.tenant.tradeName || contract.tenant.name,
+        partnerName: contract.tenant.name,
         planName:    contract.plan.name,
         unused:      balance.general,
         rollover:    rollover.quantity,

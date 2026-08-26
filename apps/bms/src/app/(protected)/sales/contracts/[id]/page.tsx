@@ -38,7 +38,7 @@ export default async function ContractDetailPage({ params }: Props) {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
-            {contract.tenant.tradeName || contract.tenant.name}
+            {contract.tenant.name}
           </h1>
           <p className="text-muted-foreground mt-2">
             {contract.plan.name} · {t('table.allowanceValue', { count: contract.plan.annualAllowance })}

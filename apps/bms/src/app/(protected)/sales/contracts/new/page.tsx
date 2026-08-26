@@ -21,7 +21,7 @@ export default async function NewContractPage() {
 
   return (
     <SendPlanLinkForm
-      tenants={tenants.map((c) => ({ id: c.id, name: c.name, tradeName: c.tradeName, taxId: c.taxId }))}
+      tenants={tenants.map((c) => ({ id: c.id, name: c.name, taxId: c.taxId }))}
       plans={plans}
       coupons={coupons}
     />
