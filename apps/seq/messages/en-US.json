@@ -524,27 +524,6 @@
       "confirm": "This will mark the code as available again. Only possible while it has not been activated by the consumer."
     }
   },
-  "Inventory": {
-    "digital": {
-      "availableForSale": "Available for sale",
-      "buy": "Buy digital QR Codes",
-      "empty": "No QR Code activity yet.",
-      "reconcileNote": "Note: the statement below was reconstructed from purchases and sales and may differ slightly from this live total (e.g. reversed sales or manual adjustments).",
-      "reversed": "Reversed",
-      "table": {
-        "balance": "Available",
-        "date": "Date",
-        "description": "Transaction Description",
-        "totalPrice": "Total Price",
-        "unitPrice": "Unit Price",
-        "units": "Units"
-      },
-      "title": "My Digital QR Codes"
-    },
-    "products": {
-      "title": "Product Inventory"
-    }
-  },
   "Licenses": {
     "actions": {
       "copyUrl": "Copy URL",
