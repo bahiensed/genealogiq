@@ -737,7 +737,7 @@
       "allowance": "Up to {count} activations per cycle",
       "cash": "Cash",
       "installments": "In {count} instalments",
-      "perActivation": "{amount} per activation",
+      "perGenCode": "{amount} per GenCode",
       "perCycle": "per annual cycle",
       "perMonth": "per month",
       "redirecting": "Redirecting…",
@@ -753,7 +753,6 @@
       "subtitle": "Purchase GenCodes to print on your memorial plates and resell them to your very own customers",
       "title": "Purchase GenCodes"
     },
-    "subtitle": "A subscription grants the right to activate up to the contracted allowance during the annual cycle.",
     "title": "Subscribe to a plan",
     "toasts": {
       "canceled": "Purchase canceled.",
@@ -762,21 +761,15 @@
   },
   "Sidebar": {
     "groups": {
-      "system": "System",
-      "records": "Records",
-      "purchasing": "Purchasing",
-      "inventory": "Inventory"
+      "system": "System"
     },
     "items": {
       "buyGenCodes": "Subscribe to a plan",
       "companyData": "Company Data",
-      "customerCategories": "Customer Categories",
       "customers": "Customers",
       "dashboard": "Dashboard",
       "employees": "Employees",
-      "myGenCodes": "My codes",
-      "supplierCategories": "Supplier Categories",
-      "suppliers": "Suppliers"
+      "myGenCodes": "My codes"
     }
   },
   "SupplierCategories": {

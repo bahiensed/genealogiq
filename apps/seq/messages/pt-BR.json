@@ -737,7 +737,7 @@
       "allowance": "Até {count} ativações por ciclo",
       "cash": "À vista",
       "installments": "Em {count} parcelas",
-      "perActivation": "{amount} por ativação",
+      "perGenCode": "{amount} por GenCode",
       "perCycle": "por ciclo anual",
       "perMonth": "por mês",
       "redirecting": "Redirecionando…",
@@ -753,7 +753,6 @@
       "subtitle": "Compre GenCodes para imprimir em suas placas memoriais e revendê-los aos seus próprios clientes",
       "title": "Comprar GenCodes"
     },
-    "subtitle": "A assinatura concede o direito de ativar até a franquia contratada durante o ciclo anual.",
     "title": "Assinar um plano",
     "toasts": {
       "canceled": "Compra cancelada.",
@@ -762,21 +761,15 @@
   },
   "Sidebar": {
     "groups": {
-      "system": "Sistema",
-      "records": "Cadastros",
-      "purchasing": "Compras",
-      "inventory": "Estoque"
+      "system": "Sistema"
     },
     "items": {
       "buyGenCodes": "Assinar um plano",
       "companyData": "Dados da Empresa",
-      "customerCategories": "Categorias de Clientes",
       "customers": "Clientes",
       "dashboard": "Painel",
       "employees": "Funcionários",
-      "myGenCodes": "Meus códigos",
-      "supplierCategories": "Categorias de Fornecedores",
-      "suppliers": "Fornecedores"
+      "myGenCodes": "Meus códigos"
     }
   },
   "SupplierCategories": {

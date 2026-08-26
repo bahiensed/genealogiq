@@ -74,7 +74,7 @@ function PlanCard({ plan }: { plan: StorePlan }) {
           <p className="text-sm text-muted-foreground">{t('card.perCycle')}</p>
           {plan.unitReferenceAmount !== null && (
             <p className="text-xs text-muted-foreground mt-1">
-              {t('card.perActivation', { amount: money.format(plan.unitReferenceAmount) })}
+              {t('card.perGenCode', { amount: money.format(plan.unitReferenceAmount) })}
             </p>
           )}
         </div>

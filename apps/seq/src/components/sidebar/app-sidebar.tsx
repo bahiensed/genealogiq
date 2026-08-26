@@ -4,15 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import {
-  main,
-  system,
-  records,
-  purchasing,
-  inventory,
-  type MenuItem,
-  type ModuleKey,
-} from '@/components/sidebar/menu-items'
+import { main, system } from '@/components/sidebar/menu-items'
 import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@genealogiq/ui/collapsible'
 import {
@@ -30,17 +22,7 @@ import {
   useSidebar,
 } from '@genealogiq/ui/sidebar'
 
-type Modules = Record<ModuleKey, boolean>
-
-interface AppSidebarProps {
-  modules: Modules | null
-}
-
-function visibleItems(items: MenuItem[], modules: Modules | null): MenuItem[] {
-  return items.filter((item) => !item.moduleKey || (modules?.[item.moduleKey] ?? false))
-}
-
-export function AppSidebar({ modules }: AppSidebarProps) {
+export function AppSidebar() {
   const pathname = usePathname()
   const { isMobile, setOpenMobile } = useSidebar()
 
@@ -53,16 +35,7 @@ export function AppSidebar({ modules }: AppSidebarProps) {
   }
   const t = useTranslations('Sidebar')
 
-  const recordsItems    = visibleItems(records,    modules)
-  const purchasingItems = visibleItems(purchasing, modules)
-  const inventoryItems  = visibleItems(inventory,  modules)
-
-  const groups = [
-    { labelKey: 'groups.system',     items: system,          show: true                       },
-    { labelKey: 'groups.records',    items: recordsItems,    show: recordsItems.length > 0    },
-    { labelKey: 'groups.purchasing', items: purchasingItems, show: true                       },
-    { labelKey: 'groups.inventory',  items: inventoryItems,  show: true                       },
-  ].filter((g) => g.show)
+  const groups = [{ labelKey: 'groups.system', items: system }]
 
   return (
     <Sidebar>

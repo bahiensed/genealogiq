@@ -14,7 +14,6 @@ export type SupplierRow = {
   id: string
   entityType: string
   name: string
-  tradeName: string
   email: string
   isActive: boolean
   createdAt: Date

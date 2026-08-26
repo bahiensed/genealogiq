@@ -1,4 +1,4 @@
-import { verifyTenantSession, getCustomerModules } from '@/lib/dal'
+import { verifyTenantSession } from '@/lib/dal'
 import { SidebarProvider, SidebarTrigger } from '@genealogiq/ui/sidebar'
 import { SessionProvider } from '@/components/providers/session-provider'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
@@ -13,7 +13,6 @@ export default async function ProtectPagesLayout({
   children: React.ReactNode
 }>) {
   const session = await verifyTenantSession()
-  const modules = await getCustomerModules()
 
   return (
     <SessionProvider>
@@ -24,7 +23,7 @@ export default async function ProtectPagesLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar modules={modules} />
+      <AppSidebar />
       <div className="flex flex-col w-full min-h-screen">
         {/* ⬇️ altura fixa de 60px (igual à área da logo na sidebar) */}
         <header className="sticky top-0 z-30 flex h-[60px] items-center justify-between border-b bg-background/80 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/70">

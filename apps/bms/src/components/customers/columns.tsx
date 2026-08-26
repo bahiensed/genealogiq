@@ -14,7 +14,6 @@ export type CustomerRow = {
   id: string
   entityType: string
   name: string
-  tradeName: string
   email: string
   isActive: boolean
   createdAt: Date
@@ -55,16 +54,9 @@ function ActionsCell({ row, currentUserRole, t }: { row: { original: CustomerRow
 export function getColumns(currentUserRole: string, t: Translator, locale: string): ColumnDef<CustomerRow>[] {
   return [
     {
-      id: 'name',
-      accessorFn: (row) =>
-        row.entityType === 'INDIVIDUAL'
-          ? `${row.name} ${row.tradeName}`
-          : row.name,
+      accessorKey: 'name',
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
-      cell: ({ row }) =>
-        row.original.entityType === 'INDIVIDUAL'
-          ? `${row.original.name} ${row.original.tradeName}`
-          : row.original.name,
+      cell: ({ row }) => row.original.name,
     },
     {
       accessorKey: 'entityType',

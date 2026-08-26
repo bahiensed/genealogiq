@@ -1,20 +1,22 @@
-import { Barcode, BuildingIcon, IdCardIcon, LayoutDashboard, ScanBarcode, StoreIcon, TagIcon, UsersIcon, type LucideIcon } from 'lucide-react'
+import { Barcode, BuildingIcon, IdCardIcon, LayoutDashboard, ScanBarcode, UsersIcon, type LucideIcon } from 'lucide-react'
 
-// Suppliers is the only optional module left. The products/services/finance/
-// inventory family was removed: those pages rendered a title over nothing —
-// there is no Product or Service model in the schema at all — and two of them
-// (/purchasing/products, /purchasing/services) were menu entries with no page
-// behind them, so enabling the flag 404'd the tenant.
-export type ModuleKey =
-  | 'moduleRecordsSuppliers'
-  | 'moduleCategoriesSuppliers'
+// The Cadastros / Compras / Estoque groups were removed: every entry in them was
+// already in the fast menu above, so the sidebar offered the same four
+// destinations twice, one of them behind a collapsible.
+//
+// Three routes lost their only menu entry and are now reachable by URL only —
+// /categories/customers, /categories/suppliers and /suppliers. The pages, their
+// actions and the module gate on the supplier ones are all untouched; if any of
+// them should be navigable again, it belongs in `main`, not in a group of one.
+// That also retired ModuleKey: nothing in the menu is module-gated any more.
+// The two module columns that still matter are read in lib/dal.ts, which gates
+// the supplier pages themselves.
 
 export interface MenuItem {
   /** i18n key under the `Sidebar.items` namespace (translated in app-sidebar). */
   labelKey: string
   url: string
   icon: LucideIcon
-  moduleKey?: ModuleKey
 }
 
 // ─── Main (fast menu — sub-sections separated by a divider) ──────────────────
@@ -37,30 +39,4 @@ export const main: MenuItem[][] = [
 export const system: MenuItem[] = [
   { labelKey: 'items.companyData', url: '/system/company', icon: BuildingIcon },
   { labelKey: 'items.employees',   url: '/system/users',   icon: IdCardIcon   },
-]
-
-// ─── Records ─────────────────────────────────────────────────────────────────
-//
-// One group, not two. Categories used to have a group of its own, but with the
-// suppliers modules off — their default — each group held exactly one item, so
-// the split bought two headings over one entry each. Entities and their
-// categories now sit together, always-on first.
-
-export const records: MenuItem[] = [
-  { labelKey: 'items.customerCategories', url: '/categories/customers', icon: TagIcon   }, // always-on
-  { labelKey: 'items.customers',          url: '/customers',            icon: UsersIcon }, // always-on
-  { labelKey: 'items.supplierCategories', url: '/categories/suppliers', icon: TagIcon,   moduleKey: 'moduleCategoriesSuppliers' },
-  { labelKey: 'items.suppliers',          url: '/suppliers',            icon: StoreIcon, moduleKey: 'moduleRecordsSuppliers'    },
-]
-
-// ─── Purchasing ──────────────────────────────────────────────────────────────
-
-export const purchasing: MenuItem[] = [
-  { labelKey: 'items.buyGenCodes', url: '/purchasing/plans', icon: Barcode },
-]
-
-// ─── Inventory ───────────────────────────────────────────────────────────────
-
-export const inventory: MenuItem[] = [
-  { labelKey: 'items.myGenCodes', url: '/inventory/activations', icon: ScanBarcode },
 ]

@@ -53,7 +53,6 @@ export default async function PurchasingPlansPage() {
       <PurchaseStatusToast />
       <div>
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">{t('title')}</h1>
-        <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
       </div>
       <PlanStore plans={plans} />
     </div>
