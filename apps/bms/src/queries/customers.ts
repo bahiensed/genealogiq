@@ -22,7 +22,6 @@ export async function getCustomers() {
       id:         true,
       entityType: true,
       name:       true,
-      tradeName:  true,
       email:      true,
       isActive:   true,
       createdAt:  true,
