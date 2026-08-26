@@ -33,7 +33,7 @@ export default async function LicensesPage({
         <div className="flex items-center gap-2">
           <LicensesCsvButton licenses={licenses} appUrl={appUrl} />
           <Button asChild>
-            <Link href="/purchasing/gencodes">{t('buy')}</Link>
+            <Link href="/purchasing/plans">{t('buy')}</Link>
           </Button>
         </div>
       </div>

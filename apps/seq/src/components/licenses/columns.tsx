@@ -49,7 +49,7 @@ export function buildLicenseColumns(appUrl: string, t: Translator, locale: strin
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.code')} />,
       cell: ({ row }) => (
         <Link
-          href={`/inventory/gencodes/${row.original.genCode}`}
+          href={`/inventory/activations/${row.original.genCode}`}
           className="font-mono text-sm tracking-wider hover:underline"
         >
           {formatGenCode(row.original.genCode)}

@@ -44,7 +44,7 @@ export default async function GenCodeDetailPage({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <Link href="/inventory/gencodes" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground w-fit">
+        <Link href="/inventory/activations" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground w-fit">
           <ArrowLeft className="h-4 w-4" /> {t('detail.backToInventory')}
         </Link>
         <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">

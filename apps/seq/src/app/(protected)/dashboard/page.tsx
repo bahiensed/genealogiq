@@ -2,15 +2,17 @@ import { getLocale, getTranslations } from 'next-intl/server'
 import { Layers, Users, ShoppingCart, Banknote, TrendingUp, UserPlus, QrCode } from 'lucide-react'
 import { verifyTenantSession } from '@/lib/dal'
 import { getDashboardStats } from '@/queries/dashboard'
+import { getCreditOverview } from '@/queries/credits'
 import { Card, CardContent, CardHeader, CardTitle, CardAction, CardDescription } from '@genealogiq/ui/card'
 import { MonthlyRevenueChart } from '@/components/dashboard/monthly-revenue-chart'
 import { RevenueByChannelChart } from '@/components/dashboard/revenue-by-channel-chart'
 import { CustomerGrowthChart } from '@/components/dashboard/customer-growth-chart'
 import { QrConsumptionChart } from '@/components/dashboard/qr-consumption-chart'
+import { CreditSummary } from '@/components/dashboard/credit-summary'
 
 export default async function DashboardPage() {
   const { customerId } = await verifyTenantSession()
-  const stats = await getDashboardStats(customerId)
+  const [stats, credits] = await Promise.all([getDashboardStats(customerId), getCreditOverview()])
   const t = await getTranslations('Dashboard')
   const locale = await getLocale()
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
@@ -20,6 +22,16 @@ export default async function DashboardPage() {
       <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
         {t('title')}
       </h1>
+
+      {/* The allowance comes first: it is what the partner is actually buying,
+          and what the whole model turns on. Stock is a consequence of it. */}
+      <CreditSummary
+        balance={credits.balance}
+        bySource={credits.bySource}
+        contract={credits.contract}
+        sellThrough={credits.sellThrough}
+        projectedRollover={credits.projectedRollover}
+      />
 
       {/* Row 1 — Inventory + Customers */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

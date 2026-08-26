@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const { prismaMock } = vi.hoisted(() => ({
   prismaMock: {
     genCode: { findFirst: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
+    partnerSubscription: { findFirst: vi.fn() },
     appUser: { findUnique: vi.fn() },
     passwordResetToken: { create: vi.fn() },
     $transaction: vi.fn(),
@@ -25,6 +26,14 @@ vi.mock("@genealogiq/db", () => ({
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/dal", () => ({ verifyTenantSession: vi.fn() }))
 vi.mock("@/lib/email", () => ({ sendAppWelcomeEmail: vi.fn(), sendGenCodeDeliveryEmail: vi.fn() }))
+// The credit ledger is the activation gate now. Stubbed permissive by default;
+// the sale paths under test are about the write-off, not about the balance.
+vi.mock("@genealogiq/services/credits", () => ({
+  canActivate:          vi.fn(async () => true),
+  reserveCreditForSale: vi.fn(async () => undefined),
+  releaseReservation:   vi.fn(async () => undefined),
+  InsufficientCreditsError: class extends Error {},
+}))
 
 import {
   markGenCodePrinted,

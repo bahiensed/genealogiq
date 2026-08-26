@@ -33,7 +33,7 @@ export async function getDashboardStats(customerId: string) {
     customerGrowth,
   ] = await Promise.all([
     // Stock is the count of unsold licences now that the digital counter is
-    // gone — same number the tenant sees on /inventory/gencodes.
+    // gone — same number the tenant sees on /inventory/activations.
     prisma.genCode.count({
       where: { tenantId: customerId, status: 'AVAILABLE' },
     }),
