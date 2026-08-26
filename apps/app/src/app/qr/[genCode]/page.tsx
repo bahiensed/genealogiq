@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
-import { isSaleWindowOpen } from "@genealogiq/core"
+import { canActivate } from "@genealogiq/services/credits"
 import { auth } from "@/auth"
 import { getLicenseByGenCode } from "@/queries/gencode"
 import { GenCodeLanding } from "@/components/qr/gencode-landing"
@@ -27,11 +27,13 @@ export default async function GenCodePage({ params }: Props) {
     redirect(`/profile/${license.appUserId}`)
   }
 
-  // The batch has a term, and may be frozen while the funeral home is behind on
-  // an instalment. Checked here as well as in the action so the buyer gets a
-  // page that explains itself instead of a form that fails on submit — they are
-  // holding a physical plaque and did nothing wrong.
-  if (!isSaleWindowOpen(license.sale)) {
+  // The partner's allowance may have run out, or their subscription may be
+  // frozen while they are behind on an instalment. Checked here as well as in
+  // the action so the family gets a page that explains itself instead of a form
+  // that fails on submit — they are holding a physical plaque and did nothing
+  // wrong. A code sold to an identified buyer carries its own committed credit
+  // and passes this even when the partner's cycle is long gone.
+  if (!(await canActivate(license.tenantId, license.id))) {
     return (
       <div className="min-h-screen relative overflow-x-hidden">
         <AuroraBackdrop variant="page" intensity="bold" />

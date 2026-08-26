@@ -53,14 +53,18 @@ export async function createDiscountCoupon(
   })
   if (dbDup) return fail(t('discountCoupon.codeExists'))
 
-  // Resolve Package ids → Stripe Product ids for Stripe's applies_to (if any specified)
+  // Resolve PartnerPlan ids → Stripe Product ids for Stripe's applies_to.
+  // The product id lives on the plan's price rows (one product per plan, shared
+  // by every currency), so any live row answers it — hence the dedupe.
   let stripeProductIds: string[] = []
   if (input.appliesTo.length > 0) {
-    const pkgs = await prisma.package.findMany({
-      where:  { id: { in: input.appliesTo } },
+    const prices = await prisma.planPrice.findMany({
+      where:  { partnerPlanId: { in: input.appliesTo }, isActive: true, effectiveTo: null },
       select: { stripeProductId: true },
     })
-    stripeProductIds = pkgs.map((p) => p.stripeProductId).filter((id): id is string => !!id)
+    stripeProductIds = [...new Set(
+      prices.map((p) => p.stripeProductId).filter((id): id is string => !!id),
+    )]
   }
 
   // Dynamic import so the action module never forces stripe.ts to load at

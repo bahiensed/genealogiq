@@ -1,11 +1,13 @@
 import { getLocale, getTranslations } from 'next-intl/server'
-import { AlertTriangle, PackageCheck, ShoppingCart, CheckCircle2, Warehouse } from 'lucide-react'
+import { AlertTriangle, PackageCheck, ShoppingCart, CheckCircle2, Warehouse, Timer, Repeat, Sparkles } from 'lucide-react'
 import { verifySession } from '@/lib/dal'
 import {
   getGenCodeFunnel,
   getResellerBreakdown,
   getChannelBreakdown,
-  getRevenueByPackage,
+  getRevenueByPlan,
+  getSellThrough,
+  getTrialConversion,
   STALE_AFTER_DAYS,
 } from '@/queries/reports'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@genealogiq/ui/card'
@@ -22,11 +24,13 @@ export default async function SalesReportsPage() {
   const locale = await getLocale()
   const usd = new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' })
 
-  const [funnel, resellers, channels, packages] = await Promise.all([
+  const [funnel, resellers, channels, packages, sellThrough, trial] = await Promise.all([
     getGenCodeFunnel(),
     getResellerBreakdown(),
     getChannelBreakdown(),
-    getRevenueByPackage(),
+    getRevenueByPlan(),
+    getSellThrough(),
+    getTrialConversion(),
   ])
 
   const cards = [
@@ -34,6 +38,18 @@ export default async function SalesReportsPage() {
     { label: t('funnel.sold'),      value: funnel.sold,      icon: ShoppingCart, cls: 'text-amber-600',   sub: pct(funnel.sold, funnel.issued) },
     { label: t('funnel.activated'), value: funnel.activated, icon: CheckCircle2, cls: 'text-emerald-600', sub: pct(funnel.activated, funnel.sold) },
     { label: t('funnel.available'), value: funnel.available, icon: Warehouse,    cls: 'text-muted-foreground' },
+    // Nobody has ever measured this, and two commercial numbers were guessed
+    // against it: how long a committed reservation outlives its cycle, and how
+    // long the B2C trial runs.
+    { label: t('funnel.lag'), value: funnel.medianLagDays ?? '—', icon: Timer, cls: 'text-muted-foreground',
+      sub: funnel.medianLagDays === null ? undefined : t('funnel.lagUnit') },
+    // The KPI the founder's spec does not have. In a B2B2C business it is
+    // arguably the number that decides everything: the B2B line pays for the
+    // activation, this says whether it ever became recurring consumer revenue.
+    { label: t('funnel.trialConversion'),
+      value: trial.rate === null ? '—' : `${Math.round(trial.rate * 100)}%`,
+      icon: Sparkles, cls: 'text-emerald-600',
+      sub: t('funnel.trialDetail', { converted: trial.converted, trialing: trial.stillTrialing }) },
   ]
 
   return (
@@ -80,6 +96,46 @@ export default async function SalesReportsPage() {
       )}
 
       {/* ── Per reseller ───────────────────────────────────────────────── */}
+      <section className="flex flex-col gap-3">
+        <div>
+          <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
+            <Repeat className="h-5 w-5 text-muted-foreground" />
+            {t('sellThrough.title')}
+          </h2>
+          <p className="text-sm text-muted-foreground">{t('sellThrough.subtitle')}</p>
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('sellThrough.partner')}</TableHead>
+              <TableHead className="text-right">{t('sellThrough.granted')}</TableHead>
+              <TableHead className="text-right">{t('sellThrough.consumed')}</TableHead>
+              <TableHead className="text-right">{t('sellThrough.rate')}</TableHead>
+              <TableHead className="text-right">{t('sellThrough.lag')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sellThrough.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-8">{t('empty')}</TableCell>
+              </TableRow>
+            ) : sellThrough.map((r) => (
+              <TableRow key={r.tenantId}>
+                <TableCell className="font-medium">{r.tenantName}</TableCell>
+                <TableCell className="text-right tabular-nums">{r.granted}</TableCell>
+                <TableCell className="text-right tabular-nums">{r.consumed}</TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {r.rate === null ? '—' : `${Math.round(r.rate * 100)}%`}
+                </TableCell>
+                <TableCell className="text-right tabular-nums text-muted-foreground">
+                  {r.medianLagDays === null ? '—' : `${r.medianLagDays}d`}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </section>
+
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
           <h2 className="text-2xl font-bold tracking-tight">{t('resellers.title')}</h2>
@@ -172,11 +228,11 @@ export default async function SalesReportsPage() {
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-8">{t('empty')}</TableCell>
                 </TableRow>
               ) : packages.map((p) => (
-                <TableRow key={`${p.packageName}-${p.currency}`}>
-                  <TableCell className="font-medium">{p.packageName}</TableCell>
+                <TableRow key={`${p.planName}-${p.currency}`}>
+                  <TableCell className="font-medium">{p.planName}</TableCell>
                   <TableCell className="text-muted-foreground tabular-nums">{p.currency}</TableCell>
-                  <TableCell className="text-right tabular-nums">{p.sales}</TableCell>
-                  <TableCell className="text-right tabular-nums">{p.units}</TableCell>
+                  <TableCell className="text-right tabular-nums">{p.cycles}</TableCell>
+                  <TableCell className="text-right tabular-nums">{p.allowance}</TableCell>
                   <TableCell className="text-right tabular-nums">
                     {new Intl.NumberFormat(locale, { style: 'currency', currency: p.currency }).format(p.revenue)}
                   </TableCell>

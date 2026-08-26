@@ -20,13 +20,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "seed:e2e": "tsx e2e/seed.ts"
+    "seed:e2e": "tsx e2e/seed.ts",
+    "db:reset:transactional": "node --env-file=packages/db/.env scripts/reset-transactional-data.mjs"
   },
   "devDependencies": {
     "@genealogiq/db": "workspace:*",
     "@playwright/test": "^1.62.1",
     "bcryptjs": "^3.0.3",
     "dotenv": "^16.4.7",
+    "pg": "^8.23.0",
     "tsx": "^4.23.12",
     "turbo": "^2.10.11",
     "vitest": "^3.2.7"

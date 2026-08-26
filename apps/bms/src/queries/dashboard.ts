@@ -3,14 +3,16 @@ import 'server-only'
 import { prisma } from '@/lib/prisma'
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-// Revenue counts a sale only once Stripe has settled it. Before payment links
-// a Sale row WAS the payment, so `reversed_at IS NULL` was the whole filter;
-// now an order can sit unpaid for a week and must not be booked as income.
+// Revenue is counted per CYCLE, not per contract: a contract can renew for
+// years, and each renewal is its own income event.
 //
-// The amount is the snapshot Stripe reported, in cents, falling back to
-// quantity x price for rows that predate it. The fallback is what makes a
-// discounted sale honest: recomputing from the current package price would
-// silently bill back the coupon.
+// The amount comes from the cycle's frozen price_snapshot, which is the invoice
+// Stripe actually charged, in cents. Nothing is recomputed from the plan's
+// current price — that was the old model's bug, where editing a price silently
+// rewrote the revenue history of every sale that carried no snapshot.
+//
+// A cycle only exists once an invoice was paid, so there is no "unpaid" state to
+// filter out here: opening the cycle IS the settlement.
 
 
 type SalesTotalsRow = {
@@ -56,42 +58,41 @@ export async function getDashboardStats() {
     customerGrowth,
   ] = await Promise.all([
     prisma.subscription.count({ where: { isActive: true } }),
-    prisma.package.count({ where: { isActive: true } }),
+    prisma.partnerPlan.count({ where: { isActive: true } }),
     prisma.tenant.count(),
     prisma.user.count({ where: { tenantId: null } }),
     prisma.$queryRaw<SalesTotalsRow[]>`
       SELECT
-        COUNT(s.id) FILTER (WHERE s.created_at >= ${startOfMonth})              AS monthly_count,
-        COUNT(s.id) FILTER (WHERE s.created_at >= ${startOfYear})               AS yearly_count,
-        COUNT(s.id)                                                             AS total_count,
-        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)) FILTER (WHERE s.created_at >= ${startOfMonth}), 0) AS monthly_revenue,
-        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)) FILTER (WHERE s.created_at >= ${startOfYear}), 0)  AS yearly_revenue,
-        COALESCE(SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)), 0) AS total_revenue
-      FROM sales s
-      JOIN packages p ON s.package_id = p.id
-      WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
+        COUNT(c.id) FILTER (WHERE c.created_at >= ${startOfMonth}) AS monthly_count,
+        COUNT(c.id) FILTER (WHERE c.created_at >= ${startOfYear})  AS yearly_count,
+        COUNT(c.id)                                                AS total_count,
+        COALESCE(SUM(COALESCE((c.price_snapshot->>'amountPaid')::numeric / 100, 0)) FILTER (WHERE c.created_at >= ${startOfMonth}), 0) AS monthly_revenue,
+        COALESCE(SUM(COALESCE((c.price_snapshot->>'amountPaid')::numeric / 100, 0)) FILTER (WHERE c.created_at >= ${startOfYear}), 0)  AS yearly_revenue,
+        COALESCE(SUM(COALESCE((c.price_snapshot->>'amountPaid')::numeric / 100, 0)), 0)                                                AS total_revenue
+      FROM subscription_cycles c
     `,
     prisma.$queryRaw<ChartRow[]>`
       SELECT
-        DATE_TRUNC('month', s.created_at) AS month,
-        p.name                            AS name,
-        SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)) AS revenue
-      FROM sales s
-      JOIN packages p ON s.package_id = p.id
-      WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
-        AND s.created_at >= ${startOf12Months}
+        DATE_TRUNC('month', c.created_at) AS month,
+        pp.name                           AS name,
+        SUM(COALESCE((c.price_snapshot->>'amountPaid')::numeric / 100, 0))                 AS revenue
+      FROM subscription_cycles c
+      JOIN partner_plans pp ON pp.id = c.plan_id
+      WHERE c.created_at >= ${startOf12Months}
       GROUP BY 1, 2
     `,
+    // "Top sellers" now means top PARTNERS. Nobody sells a contract on a
+    // partner's behalf any more — SEQ's self-serve checkout has no operator —
+    // so ranking by seller would rank an empty column.
     prisma.$queryRaw<TopSellerRow[]>`
       SELECT
-        s.sold_by_id              AS seller_id,
-        COUNT(s.id)               AS count,
-        SUM(COALESCE(s.amount_total::numeric / 100, s.quantity * p.price_usd)) AS revenue
-      FROM sales s
-      JOIN packages p ON s.package_id = p.id
-      WHERE s.reversed_at IS NULL AND s.paid_at IS NOT NULL
-        AND s.created_at >= ${startOf12Months}
-      GROUP BY s.sold_by_id
+        s.tenant_id       AS seller_id,
+        COUNT(c.id)       AS count,
+        SUM(COALESCE((c.price_snapshot->>'amountPaid')::numeric / 100, 0)) AS revenue
+      FROM subscription_cycles c
+      JOIN partner_subscriptions s ON s.id = c.subscription_id
+      WHERE c.created_at >= ${startOf12Months}
+      GROUP BY s.tenant_id
       ORDER BY revenue DESC NULLS LAST
       LIMIT 5
     `,
@@ -139,15 +140,15 @@ export async function getDashboardStats() {
     .map(([name, revenue]) => ({ name, revenue: Math.round(revenue * 100) / 100 }))
     .sort((a, b) => b.revenue - a.revenue)
 
-  // Top sellers — zip seller_id → user name
+  // Top partners — zip tenant_id → trade name
   const sellerIds = topSellers.map((s) => s.seller_id)
   const sellers   = sellerIds.length
-    ? await prisma.user.findMany({
+    ? await prisma.tenant.findMany({
         where:  { id: { in: sellerIds } },
-        select: { id: true, firstName: true, lastName: true },
+        select: { id: true, name: true, tradeName: true },
       })
     : []
-  const sellerMap = new Map(sellers.map((u) => [u.id, `${u.firstName} ${u.lastName}`.trim()]))
+  const sellerMap = new Map(sellers.map((c) => [c.id, c.tradeName || c.name]))
   const topSellersChart = topSellers.map((s) => ({
     name:    sellerMap.get(s.seller_id) ?? 'Unknown',
     count:   Number(s.count ?? 0),

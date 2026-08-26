@@ -9,7 +9,7 @@ const { prismaMock, PrismaKnownError } = vi.hoisted(() => {
     }
   }
   const prismaMock = {
-    sale:    { count: vi.fn() },
+    partnerSubscription: { count: vi.fn() },
     appUser: { count: vi.fn() },
     appSale: { count: vi.fn() },
     tenant:  { delete: vi.fn() },
@@ -38,7 +38,7 @@ import { deleteCustomer } from "./customer.actions"
 
 beforeEach(() => {
   vi.clearAllMocks()
-  prismaMock.sale.count.mockResolvedValue(0)
+  prismaMock.partnerSubscription.count.mockResolvedValue(0)
   prismaMock.appUser.count.mockResolvedValue(0)
   prismaMock.appSale.count.mockResolvedValue(0)
 })
@@ -66,8 +66,8 @@ describe("deleteCustomer — cross-app cascade guard", () => {
     expect(prismaMock.tenant.delete).not.toHaveBeenCalled()
   })
 
-  it("still refuses on existing SEQ sales (original guard preserved)", async () => {
-    prismaMock.sale.count.mockResolvedValue(2)
+  it("still refuses on existing partner contracts (original guard preserved)", async () => {
+    prismaMock.partnerSubscription.count.mockResolvedValue(2)
 
     const res = await deleteCustomer("t1")
 
@@ -75,7 +75,7 @@ describe("deleteCustomer — cross-app cascade guard", () => {
     expect(prismaMock.tenant.delete).not.toHaveBeenCalled()
   })
 
-  it("deletes when the tenant has no sales, memorials, or subscriptions", async () => {
+  it("deletes when the tenant has no contracts, memorials, or subscriptions", async () => {
     prismaMock.tenant.delete.mockResolvedValue({ id: "t1" })
 
     const res = await deleteCustomer("t1")

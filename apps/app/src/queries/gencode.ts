@@ -10,9 +10,9 @@ export async function getLicenseByGenCode(genCode: string) {
       genCode:   true,
       status:    true,
       appUserId: true,
-      sale: {
-        select: { paidAt: true, reversedAt: true, status: true, accessEndsAt: true },
-      },
+      // The partner, not the sale. Whether this code can still be activated is
+      // a question for the credit ledger now — see canActivate.
+      tenantId:  true,
     },
   })
 }

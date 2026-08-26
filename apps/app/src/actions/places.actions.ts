@@ -11,6 +11,7 @@ import { getProfileById } from "@/queries/profile"
 import { canManageProfile } from "@/lib/profile"
 import { deleteBlobs } from "@/lib/blob"
 import { getMemorialFeatures } from "@/lib/subscription"
+import { exceedsQuota } from "@/lib/quota"
 import { getCombinedMediaUsage } from "@/queries/media-usage"
 import { getGuardianGeoPlacesStatus } from "@/lib/geo-quota"
 
@@ -62,7 +63,7 @@ export async function savePlace(
 
     const combined = await getCombinedMediaUsage(profileId)
     const otherImages = combined.images - existing.photos.length
-    if (otherImages + flat.photos.length > features.mediaMaxImages) {
+    if (exceedsQuota(otherImages + flat.photos.length, features.mediaMaxImages, combined.images)) {
       return fail(t("places.imageLimit", { max: features.mediaMaxImages }))
     }
 
@@ -82,7 +83,7 @@ export async function savePlace(
 
     const count = await prisma.geoPlace.count({ where: { userId: profileId } })
     const combined = await getCombinedMediaUsage(profileId)
-    if (combined.images + flat.photos.length > features.mediaMaxImages) {
+    if (exceedsQuota(combined.images + flat.photos.length, features.mediaMaxImages, combined.images)) {
       return fail(t("places.imageLimit", { max: features.mediaMaxImages }))
     }
 

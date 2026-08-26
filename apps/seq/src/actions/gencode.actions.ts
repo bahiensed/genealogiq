@@ -6,7 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { Prisma } from '@genealogiq/db'
 import { prisma } from '@/lib/prisma'
-import { isSaleWindowOpen } from '@genealogiq/core'
+import { canActivate, reserveCreditForSale, releaseReservation, InsufficientCreditsError } from '@genealogiq/services/credits'
 import { verifyTenantSession } from '@/lib/dal'
 import { sendAppWelcomeEmail, sendGenCodeDeliveryEmail } from '@/lib/email'
 import { hashToken, done, fail, type ActionResult } from '@genealogiq/core'
@@ -23,28 +23,29 @@ const buyerContactSchema = z.object({
 })
 
 function paths(genCode: string) {
-  revalidatePath('/inventory/gencodes')
-  revalidatePath(`/inventory/gencodes/${genCode}`)
+  revalidatePath('/inventory/activations')
+  revalidatePath(`/inventory/activations/${genCode}`)
 }
 
 /** Toggle the operator-set "printed" flag. */
 /**
- * Refuses to write off a code whose batch can no longer be activated.
+ * Refuses to write off a code the partner has no credit to back.
  *
- * Selling one would hand a consumer a plaque that fails the moment they scan
- * it — the worst possible place to discover the term ran out or the tenant is
+ * Selling one would hand a family a plaque that fails the moment they scan it —
+ * the worst possible place to discover the allowance ran out or the partner is
  * behind on an instalment. Cheaper to stop here.
  *
- * Deliberately NOT applied to undoGenCodeSale: undoing a sale must keep working
- * whatever the window says, or a mistake made just before a lapse becomes
- * permanent.
+ * Deliberately NOT applied to undoGenCodeSale: undoing a write-off must keep
+ * working whatever the balance says, or a mistake made just before a lapse
+ * becomes permanent.
  */
-async function saleWindowClosed(genCode: string): Promise<boolean> {
-  const row = await prisma.genCode.findUnique({
-    where:  { genCode },
-    select: { sale: { select: { paidAt: true, reversedAt: true, status: true, accessEndsAt: true } } },
+async function noCreditFor(genCode: string, tenantId: string): Promise<boolean> {
+  const row = await prisma.genCode.findFirst({
+    where:  { genCode, tenantId },
+    select: { id: true },
   })
-  return !isSaleWindowOpen(row?.sale)
+  if (!row) return true
+  return !(await canActivate(tenantId, row.id))
 }
 
 export async function markGenCodePrinted(genCode: string, printed: boolean): Promise<ActionResult> {
@@ -83,7 +84,7 @@ export async function sellGenCodeManually(
     soldValue = v.data
   }
 
-  if (await saleWindowClosed(genCode)) return fail(t('gencode.batchClosed'))
+  if (await noCreditFor(genCode, customerId)) return fail(t('gencode.batchClosed'))
 
   // Atomic guard: only an AVAILABLE code can be sold — prevents double-selling.
   const res = await prisma.genCode.updateMany({
@@ -98,6 +99,29 @@ export async function sellGenCodeManually(
     },
   })
   if (res.count === 0) return fail(t('gencode.notAvailable'))
+
+  // A manual write-off records only a typed name, which is trivially forged, so
+  // its credit stays against the grant it came from and dies with that grant.
+  // Committing it would reopen the very hole the committed-reservation rule
+  // closes: writing off the whole stock on paper the day before a cycle ends.
+  const row = await prisma.genCode.findFirst({ where: { genCode, tenantId: customerId }, select: { id: true } })
+  if (row) {
+    try {
+      await reserveCreditForSale({
+        tenantId: customerId, genCodeId: row.id,
+        committed: false, committedMonths: 0, actorId: user.id,
+      })
+    } catch (e) {
+      if (e instanceof InsufficientCreditsError) {
+        await prisma.genCode.updateMany({
+          where: { id: row.id },
+          data:  { status: 'AVAILABLE', soldAt: null, soldVia: null, soldById: null, soldToName: null, soldValue: null },
+        })
+        return fail(t('gencode.batchClosed'))
+      }
+      throw e
+    }
+  }
 
   paths(genCode)
   return done(t('gencode.saleRecorded'))
@@ -134,7 +158,7 @@ export async function sellGenCodeViaPlatform(
     soldValue = v.data
   }
 
-  if (await saleWindowClosed(genCode)) return fail(t('gencode.batchClosed'))
+  if (await noCreditFor(genCode, customerId)) return fail(t('gencode.batchClosed'))
 
   const existing = await prisma.appUser.findUnique({
     where:  { email },
@@ -192,6 +216,31 @@ export async function sellGenCodeViaPlatform(
     return fail(t('gencode.unexpectedError'))
   }
 
+  // The buyer is identified and reachable, so the credit is committed to them:
+  // it leaves the annual grant for one of its own, dated from the sale. That is
+  // what lets the family activate even if the partner never renews.
+  try {
+    const plan = await prisma.partnerSubscription.findFirst({
+      where:   { tenantId: customerId, status: 'ACTIVE' },
+      select:  { plan: { select: { committedReservationMonths: true } } },
+    })
+    const soldRow = await prisma.genCode.findFirst({ where: { genCode, tenantId: customerId }, select: { id: true } })
+    if (soldRow) {
+      await reserveCreditForSale({
+        tenantId:        customerId,
+        genCodeId:       soldRow.id,
+        committed:       true,
+        buyerId:         consumer!.id,
+        committedMonths: plan?.plan.committedReservationMonths ?? 12,
+        actorId:         user.id,
+      })
+    }
+  } catch (e) {
+    // The sale is already written off and the buyer already exists; failing the
+    // whole action here would leave the operator with a code they cannot re-sell.
+    console.error('[seq] committed reservation failed', e)
+  }
+
   try {
     if (needsOnboarding) {
       // Deep-link the welcome email back to this physical code so the buyer lands
@@ -226,6 +275,12 @@ export async function undoGenCodeSale(genCode: string): Promise<ActionResult> {
     },
   })
   if (res.count === 0) return fail(t('gencode.notSold'))
+
+  // Returns the unit to the grant it came from — but only if that grant is still
+  // live. Undoing a write-off after the cycle died must not resurrect credit,
+  // or "undo" becomes a way around expiry.
+  const undone = await prisma.genCode.findFirst({ where: { genCode, tenantId: customerId }, select: { id: true } })
+  if (undone) await releaseReservation(undone.id)
 
   paths(genCode)
   return done(t('gencode.saleUndone'))

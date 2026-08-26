@@ -1252,8 +1252,8 @@
       "svgDownloaded": "SVG descargado."
     },
     "expired": {
-      "body": "El período de uso de este código terminó, o la empresa que lo emitió tiene la suscripción suspendida. Contacta a la empresa donde adquiriste la placa — en cuanto se regularice, el código vuelve a funcionar. Los memoriales ya creados siguen en línea con normalidad.",
-      "title": "Este código ya no es válido"
+      "body": "La empresa que emitió esta placa tiene la suscripción pendiente. Habla con ella: si se regulariza, el código vuelve a funcionar. Si compraste la placa directamente con ella, tu activación quedó reservada — contacta a nuestro soporte y lo resolvemos. Los memoriales ya creados siguen en línea con normalidad.",
+      "title": "Este código aún no se puede activar"
     },
     "landing": {
       "createAccount": "Crear cuenta",

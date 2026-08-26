@@ -9,9 +9,50 @@ import { done, fail, type ActionResult } from '@genealogiq/core'
 import { verifyAdmin } from '@/lib/dal'
 import { getSubscriptionSchema, type SubscriptionFormValues } from '@/schemas/subscription.schema'
 import { identityTranslator } from '@/schemas/i18n'
+import { decidePriceOp } from '@/lib/price-book'
+import { syncSubscriptionPrices } from '@genealogiq/services/plan-sync'
 
-function toDecimalOrNull(value: number): Prisma.Decimal | null {
-  return value > 0 ? new Prisma.Decimal(value) : null
+/**
+ * The consumer plans now share the partner plans' versioned price book.
+ *
+ * They used to keep their own price_usd / monthly_price_brl columns, which
+ * carried exactly the defect plan_prices was built to fix: editing an amount is
+ * an UPDATE, so it rewrites what every past sale was charged. Two ways of
+ * pricing in one system, only one of them honest.
+ *
+ * The reconciliation below is the same `decidePriceOp` the partner plans use.
+ * One rule, one place: a changed amount closes the live row and opens the next
+ * version beside it.
+ */
+const CURRENCIES = [
+  { code: 'USD', country: null, price: 'priceUsd', monthly: 'monthlyPriceUsd' },
+  { code: 'BRL', country: 'BR', price: 'priceBrl', monthly: 'monthlyPriceBrl' },
+  { code: 'MXN', country: 'MX', price: 'priceMxn', monthly: 'monthlyPriceMxn' },
+] as const
+
+/**
+ * One price-book row from the form's per-currency fields.
+ *
+ * The monthly amount is MATERIALISED when the form leaves it empty, because the
+ * old sync derived it as price/termLength and a plan priced annually always
+ * offered a monthly option too. The book reads a null instalment as "not
+ * offered", so carrying the null across would silently remove monthly billing.
+ */
+function priceRowFor(v: SubscriptionFormValues, c: (typeof CURRENCIES)[number]) {
+  const annual = v[c.price]
+  if (annual <= 0) return null
+  const monthly = v[c.monthly]
+  return {
+    currency:          c.code,
+    countryScope:      c.country,
+    annualCashAmount:  annual,
+    installmentCount:  v.termLength > 0 ? v.termLength : null,
+    installmentAmount: monthly > 0
+      ? monthly
+      : v.termLength > 0 ? Math.round((annual / v.termLength) * 100) / 100 : null,
+    unitReferenceAmount: null,
+    effectiveFrom:     new Date(),
+  }
 }
 
 export async function createSubscription(data: SubscriptionFormValues): Promise<ActionResult> {
@@ -21,29 +62,19 @@ export async function createSubscription(data: SubscriptionFormValues): Promise<
   const validated = getSubscriptionSchema(identityTranslator).safeParse(data)
   if (!validated.success) return fail(t('common.invalidData'))
 
-  const { priceUsd, monthlyPriceUsd, priceBrl, monthlyPriceBrl, priceMxn, monthlyPriceMxn, ...rest } = validated.data
-  await prisma.subscription.create({
-    data: {
-      ...rest,
-      priceUsd:        new Prisma.Decimal(priceUsd),
-      monthlyPriceUsd: toDecimalOrNull(monthlyPriceUsd),
-      priceBrl:        toDecimalOrNull(priceBrl),
-      monthlyPriceBrl: toDecimalOrNull(monthlyPriceBrl),
-      priceMxn:        toDecimalOrNull(priceMxn),
-      monthlyPriceMxn: toDecimalOrNull(monthlyPriceMxn),
-    },
+  const v = validated.data
+  const { priceUsd, monthlyPriceUsd, priceBrl, monthlyPriceBrl, priceMxn, monthlyPriceMxn, ...rest } = v
+
+  await prisma.$transaction(async (tx) => {
+    const plan = await tx.subscription.create({ data: rest, select: { id: true } })
+    const rows = CURRENCIES.map((c) => priceRowFor(v, c))
+      .filter((r): r is NonNullable<typeof r> => r !== null)
+      .map((r) => ({ ...r, subscriptionId: plan.id }))
+    if (rows.length) await tx.planPrice.createMany({ data: rows })
   })
 
   revalidatePath('/subscriptions')
   return done(t('subscription.created'))
-}
-
-// A currency's price+termLength changed → its 2 Stripe Price ids (immutable)
-// must be cleared so syncSubscriptionWithStripe mints fresh ones. Each
-// currency is independent: editing BRL must never invalidate USD/MXN.
-function decimalChanged(current: Prisma.Decimal | null, next: Prisma.Decimal | null): boolean {
-  if (current === null) return next !== null
-  return next === null || !current.equals(next)
 }
 
 export async function updateSubscription(id: string, data: SubscriptionFormValues): Promise<ActionResult> {
@@ -53,69 +84,71 @@ export async function updateSubscription(id: string, data: SubscriptionFormValue
   const validated = getSubscriptionSchema(identityTranslator).safeParse(data)
   if (!validated.success) return fail(t('common.invalidData'))
 
-  const { priceUsd, monthlyPriceUsd, priceBrl, monthlyPriceBrl, priceMxn, monthlyPriceMxn, ...rest } = validated.data
-  const newPrices = {
-    priceUsd:        new Prisma.Decimal(priceUsd),
-    monthlyPriceUsd: toDecimalOrNull(monthlyPriceUsd),
-    priceBrl:        toDecimalOrNull(priceBrl),
-    monthlyPriceBrl: toDecimalOrNull(monthlyPriceBrl),
-    priceMxn:        toDecimalOrNull(priceMxn),
-    monthlyPriceMxn: toDecimalOrNull(monthlyPriceMxn),
-  }
+  const v = validated.data
+  const { priceUsd, monthlyPriceUsd, priceBrl, monthlyPriceBrl, priceMxn, monthlyPriceMxn, ...rest } = v
 
   const current = await prisma.subscription.findUnique({
     where:  { id },
-    select: {
-      termLength: true,
-      priceUsd: true, monthlyPriceUsd: true, stripeAnnualPriceIdUsd: true, stripeMonthlyPriceIdUsd: true,
-      priceBrl: true, monthlyPriceBrl: true, stripeAnnualPriceIdBrl: true, stripeMonthlyPriceIdBrl: true,
-      priceMxn: true, monthlyPriceMxn: true, stripeAnnualPriceIdMxn: true, stripeMonthlyPriceIdMxn: true,
-    },
+    select: { termLength: true },
   })
   if (!current) return fail(t('subscription.notFound'))
 
-  // termLength feeds every currency's annual Price math (interval_count) —
-  // changing it invalidates all 3, on top of whichever currency's own price
-  // also changed.
+  const live = await prisma.planPrice.findMany({
+    where:  { subscriptionId: id, isActive: true, effectiveTo: null },
+    select: {
+      id: true, currency: true, version: true,
+      annualCashAmount: true, installmentCount: true, installmentAmount: true, unitReferenceAmount: true,
+      stripeCashPriceId: true, stripeInstallmentPriceId: true,
+    },
+  })
+
+  // termLength feeds every currency's annual Price math (interval_count), so
+  // changing it supersedes all three currencies, not only the one edited.
   const termChanged = current.termLength !== rest.termLength
 
-  const currencyClears: { changed: boolean; oldIds: string[]; clear: Record<string, null> }[] = [
-    {
-      changed: termChanged || decimalChanged(current.priceUsd, newPrices.priceUsd) || decimalChanged(current.monthlyPriceUsd, newPrices.monthlyPriceUsd),
-      oldIds: [current.stripeAnnualPriceIdUsd, current.stripeMonthlyPriceIdUsd].filter((v): v is string => !!v),
-      clear: { stripeAnnualPriceIdUsd: null, stripeMonthlyPriceIdUsd: null },
-    },
-    {
-      changed: termChanged || decimalChanged(current.priceBrl, newPrices.priceBrl) || decimalChanged(current.monthlyPriceBrl, newPrices.monthlyPriceBrl),
-      oldIds: [current.stripeAnnualPriceIdBrl, current.stripeMonthlyPriceIdBrl].filter((v): v is string => !!v),
-      clear: { stripeAnnualPriceIdBrl: null, stripeMonthlyPriceIdBrl: null },
-    },
-    {
-      changed: termChanged || decimalChanged(current.priceMxn, newPrices.priceMxn) || decimalChanged(current.monthlyPriceMxn, newPrices.monthlyPriceMxn),
-      oldIds: [current.stripeAnnualPriceIdMxn, current.stripeMonthlyPriceIdMxn].filter((v): v is string => !!v),
-      clear: { stripeAnnualPriceIdMxn: null, stripeMonthlyPriceIdMxn: null },
-    },
-  ]
-
-  let clearPatch: Record<string, null> = {}
-  let clearedAny = false
-  const staleIds: string[] = []
-  for (const c of currencyClears) {
-    if (c.changed && c.oldIds.length > 0) {
-      clearPatch = { ...clearPatch, ...c.clear }
-      clearedAny = true
-      staleIds.push(...c.oldIds)
-    }
-  }
+  const now = new Date()
+  const superseded: string[] = []
 
   try {
-    await prisma.subscription.update({
-      where: { id },
-      data:  {
-        ...rest,
-        ...newPrices,
-        ...clearPatch,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.subscription.update({ where: { id }, data: rest })
+
+      for (const c of CURRENCIES) {
+        const wanted   = priceRowFor(v, c)
+        const existing = live.find((p) => p.currency === c.code)
+
+        const op = decidePriceOp(
+          existing && {
+            version:             existing.version,
+            annualCashAmount:    Number(existing.annualCashAmount),
+            installmentCount:    existing.installmentCount,
+            installmentAmount:   existing.installmentAmount === null ? null : Number(existing.installmentAmount),
+            unitReferenceAmount: existing.unitReferenceAmount === null ? null : Number(existing.unitReferenceAmount),
+          },
+          wanted,
+        )
+
+        const mustSupersede = op.kind === 'supersede' || (termChanged && op.kind === 'keep' && !!existing)
+        if (op.kind === 'absent') continue
+        if (op.kind === 'keep' && !mustSupersede) continue
+
+        if (existing && (op.kind === 'close' || mustSupersede)) {
+          await tx.planPrice.update({
+            where: { id: existing.id },
+            data:  { effectiveTo: now, isActive: false },
+          })
+          if (existing.stripeCashPriceId)        superseded.push(existing.stripeCashPriceId)
+          if (existing.stripeInstallmentPriceId) superseded.push(existing.stripeInstallmentPriceId)
+        }
+
+        if (op.kind === 'open') {
+          await tx.planPrice.create({ data: { ...wanted!, subscriptionId: id } })
+        } else if (mustSupersede) {
+          await tx.planPrice.create({
+            data: { ...wanted!, subscriptionId: id, version: (existing?.version ?? 0) + 1 },
+          })
+        }
+      }
     })
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
@@ -124,15 +157,15 @@ export async function updateSubscription(id: string, data: SubscriptionFormValue
     throw e
   }
 
-  // Best-effort: archive the superseded Stripe Prices so they stop being
-  // live/purchasable once orphaned from the DB. Never blocks the save —
-  // a Stripe hiccup here shouldn't prevent the price edit from landing.
-  if (staleIds.length > 0) {
-    await Promise.allSettled(staleIds.map((priceId) => stripe.prices.update(priceId, { active: false })))
+  // Best-effort, outside the transaction: a Stripe Price left live after its DB
+  // row closed is purchasable through a link nobody can trace back. A Stripe
+  // hiccup must not undo a price edit that already landed.
+  if (superseded.length > 0) {
+    await Promise.allSettled(superseded.map((priceId) => stripe.prices.update(priceId, { active: false })))
   }
 
   revalidatePath('/subscriptions')
-  return done(clearedAny ? t('subscription.updatedStripeCleared') : t('subscription.updated'))
+  return done(superseded.length ? t('subscription.updatedStripeCleared') : t('subscription.updated'))
 }
 
 export async function deleteSubscription(id: string): Promise<ActionResult> {
@@ -165,112 +198,28 @@ export async function toggleSubscriptionActive(id: string): Promise<ActionResult
   return done()
 }
 
-// Ensures both Stripe Prices (annual + monthly) exist for one currency,
-// creating whichever is missing. Skipped entirely if this currency isn't
-// configured (price null/0) — a plan can be partially synced (e.g. USD live,
-// BRL/MXN not set up yet) without failing the whole sync.
-async function ensureCurrencyPrices(
-  productId:    string,
-  planCode:     string,
-  currency:     'usd' | 'brl' | 'mxn',
-  price:        Prisma.Decimal | null,
-  monthlyPrice: Prisma.Decimal | null,
-  termLength:   number,
-  existingAnnualId:  string | null,
-  existingMonthlyId: string | null,
-): Promise<{ annualId: string | null; monthlyId: string | null }> {
-  if (price === null || Number(price) <= 0) return { annualId: existingAnnualId, monthlyId: existingMonthlyId }
-
-  let annualId = existingAnnualId
-  if (!annualId) {
-    const priceCents = Math.round(Number(price) * 100)
-    const ap = await stripe.prices.create({
-      product:     productId,
-      unit_amount: priceCents,
-      currency,
-      recurring:   { interval: 'month', interval_count: termLength },
-      nickname:    `${planCode} annual ${currency}`,
-    })
-    annualId = ap.id
-  }
-
-  let monthlyId = existingMonthlyId
-  if (!monthlyId) {
-    const monthlyPriceCents = monthlyPrice !== null
-      ? Math.round(Number(monthlyPrice) * 100)
-      : Math.round((Number(price) / termLength) * 100)
-    const mp = await stripe.prices.create({
-      product:     productId,
-      unit_amount: monthlyPriceCents,
-      currency,
-      recurring:   { interval: 'month', interval_count: 1 },
-      nickname:    `${planCode} monthly ${currency}`,
-    })
-    monthlyId = mp.id
-  }
-
-  return { annualId, monthlyId }
-}
-
-// Push the saved plan's data to Stripe: create/update the Product and, for
-// each configured currency, create whichever annual/monthly Prices are
-// missing. Mirrors apps/app/prisma/seed-stripe.ts (USD-only, superseded) but
-// runs on demand from BMS, for all 3 currencies. Stripe Prices are
-// immutable — updateSubscription() clears a currency's Price ids on a
-// price/termLength change, so fresh Prices are minted here on the next sync.
+/**
+ * Pushes the plan's price book to Stripe.
+ *
+ * Delegates to the shared syncer rather than keeping its own copy: consumer and
+ * partner plans now read from one book, and two syncers over one book would be
+ * two chances to mint a Price the other side cannot find.
+ */
 export async function syncSubscriptionWithStripe(id: string): Promise<ActionResult> {
   await verifyAdmin()
   const t = await getTranslations('Actions')
 
   const plan = await prisma.subscription.findUnique({
     where:  { id },
-    select: {
-      id: true, code: true, name: true, description: true, termLength: true,
-      priceUsd: true, monthlyPriceUsd: true, stripeAnnualPriceIdUsd: true, stripeMonthlyPriceIdUsd: true,
-      priceBrl: true, monthlyPriceBrl: true, stripeAnnualPriceIdBrl: true, stripeMonthlyPriceIdBrl: true,
-      priceMxn: true, monthlyPriceMxn: true, stripeAnnualPriceIdMxn: true, stripeMonthlyPriceIdMxn: true,
-      stripeProductId: true,
-    },
+    select: { termLength: true },
   })
   if (!plan) return fail(t('subscription.notFound'))
-
-  if (Number(plan.priceUsd) <= 0) return fail(t('subscription.priceRequired'))
-  // termLength feeds every currency's annual Price math (interval_count) — a
-  // 0 ("lifetime") plan isn't recurring and can't be synced as-is.
+  // termLength is every cash Price's interval_count — a 0 ("lifetime") plan is
+  // not recurring and cannot be synced as-is.
   if (plan.termLength <= 0) return fail(t('subscription.termLengthRequired'))
 
   try {
-    let productId = plan.stripeProductId
-    if (productId) {
-      await stripe.products.update(productId, {
-        name:        plan.name,
-        description: plan.description ?? undefined,
-      })
-    } else {
-      const product = await stripe.products.create({
-        name:        plan.name,
-        description: plan.description ?? undefined,
-        metadata:    { subscriptionId: plan.id, code: plan.code },
-      })
-      productId = product.id
-    }
-
-    const usd = await ensureCurrencyPrices(productId, plan.code, 'usd', plan.priceUsd, plan.monthlyPriceUsd, plan.termLength, plan.stripeAnnualPriceIdUsd, plan.stripeMonthlyPriceIdUsd)
-    const brl = await ensureCurrencyPrices(productId, plan.code, 'brl', plan.priceBrl, plan.monthlyPriceBrl, plan.termLength, plan.stripeAnnualPriceIdBrl, plan.stripeMonthlyPriceIdBrl)
-    const mxn = await ensureCurrencyPrices(productId, plan.code, 'mxn', plan.priceMxn, plan.monthlyPriceMxn, plan.termLength, plan.stripeAnnualPriceIdMxn, plan.stripeMonthlyPriceIdMxn)
-
-    await prisma.subscription.update({
-      where: { id: plan.id },
-      data: {
-        stripeProductId:         productId,
-        stripeAnnualPriceIdUsd:  usd.annualId,
-        stripeMonthlyPriceIdUsd: usd.monthlyId,
-        stripeAnnualPriceIdBrl:  brl.annualId,
-        stripeMonthlyPriceIdBrl: brl.monthlyId,
-        stripeAnnualPriceIdMxn:  mxn.annualId,
-        stripeMonthlyPriceIdMxn: mxn.monthlyId,
-      },
-    })
+    await syncSubscriptionPrices(id)
   } catch (e) {
     const message = e instanceof Error ? e.message : t('subscription.unknownError')
     return fail(t('subscription.stripeSyncFailed', { message }))

@@ -80,23 +80,26 @@ export const getMemorialFeatures = cache(async (profileId: string): Promise<Plan
           status:           { in: ["active", "trialing"] },
           currentPeriodEnd: { gt: new Date() },
         },
-        select: { subscription: { select: { ...QUOTA_SELECT, priceUsd: true } } },
+        select: { subscriptionId: true, subscription: { select: QUOTA_SELECT } },
       })
       if (liveSales.length > 0) {
+        // Guardians on different tiers: the richest plan's quotas win. Price now
+        // comes from the versioned book rather than a column on the plan, and
+        // USD is the yardstick because it is the one currency every plan is
+        // priced in — comparing a BRL amount against a USD one would rank by
+        // exchange rate rather than by tier.
+        const prices = await prisma.planPrice.findMany({
+          where: {
+            subscriptionId: { in: liveSales.map((s) => s.subscriptionId) },
+            currency: "USD", isActive: true, effectiveTo: null,
+          },
+          select: { subscriptionId: true, annualCashAmount: true },
+        })
+        const priceOf = new Map(prices.map((p) => [p.subscriptionId, Number(p.annualCashAmount)]))
+
         const richest = liveSales.reduce((best, s) =>
-          Number(s.subscription.priceUsd) > Number(best.subscription.priceUsd) ? s : best)
-        return {
-          code:                  richest.subscription.code,
-          treeMaxMembers:        richest.subscription.treeMaxMembers,
-          bioMaxChars:           richest.subscription.bioMaxChars,
-          mediaMaxImages:        richest.subscription.mediaMaxImages,
-          mediaMaxVideos:        richest.subscription.mediaMaxVideos,
-          documentsMax:          richest.subscription.documentsMax,
-          geoPlacesMax:          richest.subscription.geoPlacesMax,
-          memorialsMax:          richest.subscription.memorialsMax,
-          petsMax:               richest.subscription.petsMax,
-          qrCodeMax:             richest.subscription.qrCodeMax,
-        }
+          (priceOf.get(s.subscriptionId) ?? 0) > (priceOf.get(best.subscriptionId) ?? 0) ? s : best)
+        return richest.subscription
       }
     }
 

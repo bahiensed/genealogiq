@@ -198,6 +198,35 @@
       "inactive": "Inactive"
     }
   },
+  "Credits": {
+    "available": "Activations available",
+    "committedNote": "{count} more reserved for families who already bought.",
+    "contract": "Contract",
+    "cycleEnds": "Cycle ends {date}",
+    "memorialsSafe": "Memorials already activated stay online, whatever the contract does.",
+    "nextExpiry": "Next expiry",
+    "noContract": "No active contract.",
+    "rolloverFounder": "Launch guarantee: {count} activation(s) would carry over, once.",
+    "rolloverProjected": "Renewing today, {count} activation(s) would carry over.",
+    "sellThrough": "Sell-through",
+    "sellThroughDetail": "{consumed} of {granted} activations used",
+    "source": {
+      "ANNUAL": "Cycle allowance",
+      "BONUS": "Bonus",
+      "COMMITTED": "Reserved",
+      "FOUNDER_ROLLOVER": "Launch guarantee",
+      "MIGRATION": "Migrated",
+      "ROLLOVER": "Carried over",
+      "TOPUP": "Top-up"
+    },
+    "status": {
+      "ACTIVE": "Active",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "PAST_DUE": "Past due",
+      "PENDING": "Awaiting payment"
+    }
+  },
   "CustomerCategories": {
     "actions": {
       "deactivate": "Deactivate",
@@ -432,6 +461,69 @@
       "feedbackSent": "Feedback sent. Thank you!"
     }
   },
+  "GenCode": {
+    "actions": {
+      "manualWriteOff": "Manual write-off (off-platform)",
+      "markNotPrinted": "Mark as not printed",
+      "markPrinted": "Mark as printed",
+      "sellViaPlatform": "Sell via platform",
+      "undoSale": "Undo sale (back to available)"
+    },
+    "detail": {
+      "backToInventory": "Back to inventory",
+      "title": "Physical QR Code"
+    },
+    "fields": {
+      "buyerEmail": "Buyer email",
+      "buyerFirstName": "Buyer first name",
+      "buyerLastName": "Buyer last name",
+      "buyerName": "Buyer name / contact",
+      "saleValue": "Sale value (optional)"
+    },
+    "manualSale": {
+      "description": "Record a sale made outside the platform so this code can't be sold again.",
+      "submit": "Write off",
+      "title": "Manual write-off"
+    },
+    "placeholders": {
+      "buyerName": "Who bought it?"
+    },
+    "platformSale": {
+      "description": "Send this code to the buyer by email. They don't need an account yet — we'll create one and email them access. The code is written off.",
+      "submit": "Sell & send access",
+      "submitting": "Selling…",
+      "title": "Send by email"
+    },
+    "soldVia": {
+      "MANUAL": "Manual",
+      "PLATFORM": "Platform"
+    },
+    "status": {
+      "ACTIVATED": "Activated",
+      "AVAILABLE": "Available",
+      "SOLD": "Sold"
+    },
+    "statusCard": {
+      "title": "QR Code Status"
+    },
+    "timeline": {
+      "activated": "Activated",
+      "created": "Created",
+      "memorial": "memorial: {name}",
+      "printed": "Printed",
+      "sold": "Sold",
+      "soldBy": "by {name}",
+      "soldFor": "for {value}",
+      "soldTo": "to {name}"
+    },
+    "toasts": {
+      "markedNotPrinted": "Marked as not printed.",
+      "markedPrinted": "Marked as printed."
+    },
+    "undo": {
+      "confirm": "This will mark the code as available again. Only possible while it has not been activated by the consumer."
+    }
+  },
   "Inventory": {
     "digital": {
       "availableForSale": "Available for sale",
@@ -597,69 +689,6 @@
     "goHome": "Go home",
     "title": "Page not found"
   },
-  "GenCode": {
-    "actions": {
-      "manualWriteOff": "Manual write-off (off-platform)",
-      "markNotPrinted": "Mark as not printed",
-      "markPrinted": "Mark as printed",
-      "sellViaPlatform": "Sell via platform",
-      "undoSale": "Undo sale (back to available)"
-    },
-    "detail": {
-      "backToInventory": "Back to inventory",
-      "title": "Physical QR Code"
-    },
-    "fields": {
-      "buyerEmail": "Buyer email",
-      "buyerFirstName": "Buyer first name",
-      "buyerLastName": "Buyer last name",
-      "buyerName": "Buyer name / contact",
-      "saleValue": "Sale value (optional)"
-    },
-    "manualSale": {
-      "description": "Record a sale made outside the platform so this code can't be sold again.",
-      "submit": "Write off",
-      "title": "Manual write-off"
-    },
-    "placeholders": {
-      "buyerName": "Who bought it?"
-    },
-    "platformSale": {
-      "description": "Send this code to the buyer by email. They don't need an account yet — we'll create one and email them access. The code is written off.",
-      "submit": "Sell & send access",
-      "submitting": "Selling…",
-      "title": "Send by email"
-    },
-    "soldVia": {
-      "MANUAL": "Manual",
-      "PLATFORM": "Platform"
-    },
-    "status": {
-      "ACTIVATED": "Activated",
-      "AVAILABLE": "Available",
-      "SOLD": "Sold"
-    },
-    "statusCard": {
-      "title": "QR Code Status"
-    },
-    "timeline": {
-      "activated": "Activated",
-      "created": "Created",
-      "memorial": "memorial: {name}",
-      "printed": "Printed",
-      "sold": "Sold",
-      "soldBy": "by {name}",
-      "soldFor": "for {value}",
-      "soldTo": "to {name}"
-    },
-    "toasts": {
-      "markedNotPrinted": "Marked as not printed.",
-      "markedPrinted": "Marked as printed."
-    },
-    "undo": {
-      "confirm": "This will mark the code as available again. Only possible while it has not been activated by the consumer."
-    }
-  },
   "Profile": {
     "actions": {
       "save": "Save changes"
@@ -705,32 +734,27 @@
       "monthlyHint": "{price} a month for {count} months. Your GenCodes are available from the first payment."
     },
     "card": {
-      "amount": "Amount:",
-      "buyDigital": "Start Earning Now",
-      "buyPhysical": "Buy & start reselling",
-      "digitalDescription": "Package with {count} QR {count, plural, one {Code} other {Codes}}",
-      "digitalHeadline": "Boost your margins by up to 500% with this bundle",
-      "digitalPriceUnit": "{count} QR {count, plural, one {Code} other {Codes}} per package",
-      "digitalSubcopy": "Generate {amount}+ in revenue",
-      "physicalDescription": "{count} QR {count, plural, one {code} other {codes}} ready to print",
-      "physicalHeadline": "Print on demand and resell at your own price",
-      "physicalPriceUnit": "{count} print-ready QR {count, plural, one {code} other {codes}}",
-      "physicalSubcopy": "Earn up to {amount}+ reselling them",
-      "priceForAsLittleAs": "For as little as",
-      "priceFrom": "From",
-      "processing": "Processing…"
+      "allowance": "Up to {count} activations per cycle",
+      "cash": "Cash",
+      "installments": "In {count} instalments",
+      "perActivation": "{amount} per activation",
+      "perCycle": "per annual cycle",
+      "perMonth": "per month",
+      "redirecting": "Redirecting…",
+      "subscribe": "Subscribe"
     },
     "digital": {
       "title": "Purchase Digital QR Codes"
     },
     "empty": {
-      "digital": "No packages available at the moment.",
-      "physical": "No physical QR Codes available at the moment."
+      "plans": "No plan is available in your currency right now."
     },
     "physical": {
       "subtitle": "Purchase GenCodes to print on your memorial plates and resell them to your very own customers",
       "title": "Purchase GenCodes"
     },
+    "subtitle": "A subscription grants the right to activate up to the contracted allowance during the annual cycle.",
+    "title": "Subscribe to a plan",
     "toasts": {
       "canceled": "Purchase canceled.",
       "success": "Purchase complete — QR Codes will appear shortly."
@@ -744,15 +768,15 @@
       "inventory": "Inventory"
     },
     "items": {
-      "dashboard": "Dashboard",
-      "buyGenCodes": "Purchase GenCodes",
-      "myGenCodes": "My GenCodes",
-      "customers": "Customers",
+      "buyGenCodes": "Subscribe to a plan",
       "companyData": "Company Data",
+      "customerCategories": "Customer Categories",
+      "customers": "Customers",
+      "dashboard": "Dashboard",
       "employees": "Employees",
-      "suppliers": "Suppliers",
+      "myGenCodes": "My codes",
       "supplierCategories": "Supplier Categories",
-      "customerCategories": "Customer Categories"
+      "suppliers": "Suppliers"
     }
   },
   "SupplierCategories": {

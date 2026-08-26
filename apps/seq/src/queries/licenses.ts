@@ -25,7 +25,7 @@ export async function getLicenses(status?: LicenseStatus) {
       createdAt:   true,
       appUser:       { select: { firstName: true, lastName: true } },
       soldToAppUser: { select: { firstName: true, lastName: true } },
-      sale:          { select: { id: true } },
+      mintedInCycle: { select: { id: true, endAt: true } },
     },
     orderBy: { createdAt: 'desc' },
   })

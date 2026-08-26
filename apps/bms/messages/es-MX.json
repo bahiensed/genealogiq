@@ -137,6 +137,15 @@
       "notFound": "Usuario no encontrado.",
       "passwordAlreadySet": "Este usuario ya estableció su contraseña.",
       "updated": "Usuario actualizado correctamente."
+    },
+    "partnerPlan": {
+      "codeExists": "Ya existe un plan con este código.",
+      "created": "Plan creado correctamente.",
+      "notFound": "Plan no encontrado.",
+      "syncFailed": "Error al sincronizar con Stripe: {message}",
+      "synced": "Sincronizado con Stripe: {created} precio(s) creado(s), {reused} reutilizado(s).",
+      "updated": "Plan actualizado correctamente.",
+      "updatedResync": "Plan actualizado. Los precios modificados abrieron nuevas versiones — sincroniza con Stripe para volver a vender."
     }
   },
   "Auth": {
@@ -258,6 +267,69 @@
     "toasts": {
       "updated": "Datos actualizados correctamente."
     }
+  },
+  "Contracts": {
+    "cadence": {
+      "cash": "de contado",
+      "installment": "en cuotas"
+    },
+    "cycleStatus": {
+      "ACTIVE": "Vigente",
+      "CLOSED": "Cerrado",
+      "EXPIRED": "Expirado"
+    },
+    "detail": {
+      "cycles": "Ciclos",
+      "first": "Primer ciclo",
+      "founder": "Garantía de lanzamiento",
+      "founderAvailable": "Disponible: en la próxima renovación se transfiere el 100% del saldo no usado, una sola vez.",
+      "founderUsed": "Ya utilizada — las próximas renovaciones siguen la regla estándar.",
+      "grace": "Gracia hasta",
+      "origin": "Origen",
+      "period": "Periodo",
+      "renewal": "Renovación"
+    },
+    "link": {
+      "allowance": "{count} activaciones",
+      "cadence": "Forma de pago",
+      "cash": "De contado — {amount}",
+      "coupon": "Cupón (opcional)",
+      "expiryNote": "Stripe limita el enlace a 24 horas. Después, genera uno nuevo.",
+      "installments": "{count}× de {amount}",
+      "noCoupon": "Sin cupón",
+      "noPlans": "No hay planes sincronizados en tu moneda. Sincroniza uno antes de enviar el enlace.",
+      "partner": "Socio",
+      "pickPartner": "Elige el socio",
+      "pickPlan": "Elige el plan",
+      "plan": "Plan",
+      "send": "Enviar enlace",
+      "sending": "Enviando…",
+      "sent": "Enlace enviado a {email}.",
+      "title": "Enviar enlace de suscripción"
+    },
+    "newButton": "Enviar enlace de plan",
+    "status": {
+      "ACTIVE": "Activo",
+      "CANCELLED": "Cancelado",
+      "EXPIRED": "Expirado",
+      "PAST_DUE": "Vencido",
+      "PENDING": "Esperando pago"
+    },
+    "subtitle": "Suscripciones de socios, con el ciclo vigente y cuántas veces han renovado.",
+    "table": {
+      "allowanceValue": "{count} activaciones",
+      "amount": "Último importe",
+      "cycle": "Ciclo vigente",
+      "empty": "Aún no hay contratos.",
+      "graceUntil": "gracia hasta {date}",
+      "noCycle": "Esperando pago",
+      "partner": "Socio",
+      "plan": "Plan",
+      "renewals": "Renovaciones",
+      "since": "Desde",
+      "status": "Estado"
+    },
+    "title": "Contratos"
   },
   "Cookies": {
     "acceptAll": "OK, acepto toda esta palabrería legal",
@@ -485,6 +557,7 @@
   "Errors": {
     "atLeastOneAmount": "Indica al menos un monto",
     "atLeastOnePrice": "Indica al menos un precio",
+    "atMostOne": "Ingresa un valor entre 0 y 1.",
     "codeFormat": "Usa solo letras mayúsculas, números y guiones bajos",
     "countryCodeRequired": "El código de país es obligatorio",
     "couponCodeFormat": "Solo letras mayúsculas, números, guiones y guiones bajos",
@@ -508,6 +581,8 @@
     "retry": "Intentar de nuevo",
     "termLengthMin": "Debe ser 0 (vitalicio) o un número positivo de meses",
     "title": "Algo salió mal",
+    "trialNeedsPlanCode": "Indica el plan de prueba o pon la duración en cero.",
+    "upperSnakeOnly": "Usa solo letras mayúsculas, números y guiones bajos.",
     "wholeNumber": "Debe ser un número entero"
   },
   "ExtraUnitPrices": {
@@ -633,6 +708,83 @@
     },
     "unitPrice": "Precio por unidad"
   },
+  "PartnerPlans": {
+    "actions": {
+      "openMenu": "Abrir menú",
+      "edit": "Editar",
+      "sync": "Sincronizar con Stripe",
+      "deactivate": "Desactivar",
+      "reactivate": "Reactivar"
+    },
+    "form": {
+      "annualAllowance": "Franquicia anual",
+      "cash": "De contado ({currency})",
+      "code": "Código",
+      "committedMonths": "Reserva comprometida (meses)",
+      "committedMonthsHint": "Cuánto sobrevive al ciclo un crédito vendido a un comprador identificado.",
+      "create": "Crear plan",
+      "description": "Descripción",
+      "editTitle": "Editar {name}",
+      "graceDays": "Gracia (días)",
+      "graceDaysHint": "Tras el vencimiento, renovar aún conserva el rollover.",
+      "installment": "Cuota ({currency}, {count}×)",
+      "installmentCount": "Número de cuotas",
+      "installmentCountHint": "Aplica a todas las monedas.",
+      "name": "Nombre",
+      "newTitle": "Nuevo plan de socio",
+      "priceHint": "Cambiar un importe no sobrescribe el precio: cierra la versión vigente y abre la siguiente al lado, para que un contrato anterior siga resolviendo el precio con el que se firmó.",
+      "priceSection": "Price book",
+      "rolloverRate": "Tasa de rollover",
+      "rolloverRateHint": "Fracción de 0 a 1. 0.30 = 30% de la franquicia del plan renovado.",
+      "rolloverValidity": "Vigencia del rollover (meses)",
+      "rolloverValidityHint": "Contada desde el inicio del nuevo ciclo.",
+      "save": "Guardar cambios",
+      "syncAfterCreate": "El plan nace sin precio en Stripe — sincroniza antes de venderlo.",
+      "termsSection": "Términos comerciales",
+      "trialMonths": "Prueba en la activación (meses)",
+      "trialMonthsHint": "0 desactiva la prueba.",
+      "trialPlanCode": "Plan de prueba",
+      "unitRef": "Por activación ({currency}, franquicia {allowance})"
+    },
+    "newButton": "Nuevo plan",
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "stripe": {
+      "hint": "Un importe modificado abre una versión nueva sin precio en Stripe — el plan no se puede vender hasta sincronizar.",
+      "notSynced": "Pendiente",
+      "productId": "Producto:",
+      "syncButton": "Sincronizar con Stripe",
+      "synced": "Sincronizado",
+      "syncing": "Sincronizando…",
+      "title": "Stripe"
+    },
+    "subtitle": "Lo que una funeraria contrata — una franquicia anual de activaciones, no inventario de códigos.",
+    "sync": {
+      "unpriced": "Sin precio",
+      "none": "Sin sincronizar",
+      "partial": "{synced} de {total}",
+      "all": "Sincronizado"
+    },
+    "table": {
+      "name": "Plan",
+      "allowance": "Franquicia",
+      "cash": "De contado",
+      "installments": "En cuotas",
+      "perActivation": "Por activación",
+      "stripe": "Stripe",
+      "status": "Estado",
+      "contracts": "Contratos",
+      "empty": "Aún no hay planes."
+    },
+    "title": "Planes de socio",
+    "toasts": {
+      "synced": "Plan sincronizado con Stripe.",
+      "deactivated": "Plan desactivado.",
+      "reactivated": "Plan reactivado."
+    }
+  },
   "Profile": {
     "changeAvatar": "Cambiar foto",
     "danger": {
@@ -752,10 +904,14 @@
     },
     "empty": "Nada que informar todavía.",
     "funnel": {
-      "issued": "Emitidos",
-      "sold": "Vendidos por las empresas",
       "activated": "Canjeados por los compradores",
-      "available": "En stock de las empresas"
+      "available": "En stock de las empresas",
+      "issued": "Emitidos",
+      "lag": "Venta → activación",
+      "lagUnit": "días (mediana)",
+      "sold": "Vendidos por las empresas",
+      "trialConversion": "Conversión post-prueba",
+      "trialDetail": "{converted} pagando · {trialing} en prueba"
     },
     "resellers": {
       "title": "Por empresa",
@@ -778,6 +934,15 @@
       "total": "Ingreso",
       "caveat": "Cuenta solo ventas con pago confirmado, por el monto que cobró Stripe. Las ventas antiguas sin ese monto usan cantidad × precio ACTUAL del producto — en esas, editar el precio cambia los números retroactivamente. Las ventas revertidas quedan fuera.",
       "currency": "Moneda"
+    },
+    "sellThrough": {
+      "consumed": "Usadas",
+      "granted": "Concedidas",
+      "lag": "Lag mediano",
+      "partner": "Socio",
+      "rate": "Aprovechamiento",
+      "subtitle": "Cuánto de la franquicia concedida se convirtió en activación real.",
+      "title": "Aprovechamiento por socio"
     },
     "stale": {
       "title": "Vendidos y nunca canjeados",
@@ -823,15 +988,15 @@
       "sales": "Ventas"
     },
     "items": {
-      "dashboard": "Panel",
       "companyData": "Datos de la Empresa",
-      "systemUsers": "Usuarios del Sistema",
-      "gencodes": "GenCodes (B2B)",
-      "subscriptions": "Suscripciones (B2C)",
-      "extraUnits": "Unidades Extra",
+      "contracts": "Contratos",
       "customers": "Clientes",
+      "dashboard": "Panel",
       "discountCoupons": "Cupones de Descuento",
-      "manualSales": "Ventas Manuales"
+      "extraUnits": "Unidades Extra",
+      "partnerPlans": "Planes de socio",
+      "subscriptions": "Suscripciones (B2C)",
+      "systemUsers": "Usuarios del Sistema"
     }
   },
   "Subscriptions": {

@@ -2,29 +2,38 @@ import { NextRequest, NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
-import { applySalePayment, applySubscriptionToSale, markSaleUnpayable, BMS_ORIGIN } from '@/lib/billing'
+import { provisionTenantAccess } from '@/lib/billing'
+import {
+  applyPartnerInvoicePaid,
+  linkPartnerSubscription,
+  syncPartnerSubscriptionStatus,
+} from '@genealogiq/services/partner-billing'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// Only the checkout lifecycle of a BMS payment-link sale. Subscription events
-// belong to the APP endpoint; SEQ's self-serve package purchases to SEQ's.
+// A partner contract's whole life, in two events.
 //
-// async_payment_failed is here even though SEQ omits it, and the asymmetry is
-// the point: SEQ creates nothing until the money lands, so a bounced boleto
-// leaves no row to correct. BMS writes the sale when the link is generated, so
-// without this event a bounced boleto strands it in "awaiting payment" forever —
-// and checkout.session.expired never comes to the rescue, because the session
-// already completed and will never expire.
+// `invoice.paid` is the only renewal signal, and it is deliberately NOT branched
+// on `billing_reason`: a 12x plan bills monthly and every one of those twelve
+// invoices says `subscription_cycle`, so trusting Stripe's word would grant a
+// fresh allowance every month. The cycle boundary is ours — applyPartnerInvoicePaid
+// owns that decision.
+//
+// `customer.subscription.*` carries only status. It cannot open a cycle, because
+// a subscription exists before it is paid for.
 const RELEVANT_EVENTS = new Set<Stripe.Event['type']>([
-  'checkout.session.completed',
-  'checkout.session.async_payment_succeeded',
-  'checkout.session.async_payment_failed',
-  'checkout.session.expired',
+  'invoice.paid',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
 ])
+
+function subscriptionIdOf(invoice: Stripe.Invoice): string | null {
+  const raw = (invoice as unknown as { subscription?: string | { id: string } }).subscription
+  if (typeof raw === 'string') return raw
+  return raw?.id ?? null
+}
 
 export async function POST(req: NextRequest) {
   const signature = req.headers.get('stripe-signature')
@@ -49,80 +58,64 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   }
 
-  // GenCode products are sold as subscriptions in both cadences, so the sale's
-  // state comes from these events and the checkout session is ignored — the
-  // same split the APP webhook already documents. deleted runs the same path as
-  // created/updated: it does not remove anything, it lands `canceled`, which
-  // closes the window on its own.
-  if (event.type.startsWith('customer.subscription.')) {
-    const sub = event.data.object as Stripe.Subscription
-    if ((sub.metadata ?? {}).origin !== BMS_ORIGIN) {
-      return NextResponse.json({ received: true, ignored: 'not a bms subscription' })
-    }
+  if (event.type === 'invoice.paid') {
+    const invoice = event.data.object as Stripe.Invoice
+    const subId = subscriptionIdOf(invoice)
+    if (!subId) return NextResponse.json({ received: true, ignored: 'invoice without subscription' })
+
     try {
-      // Ledger and apply in ONE transaction, the ordering the APP uses for
-      // subscriptions: a duplicate delivery hits the PK and a failed apply rolls
-      // the ledger row back so Stripe's retry can reprocess.
-      await prisma.$transaction(async (tx) => {
-        await tx.stripeEvent.create({ data: { id: event.id, type: event.type } })
-        await applySubscriptionToSale(sub)
-      })
-    } catch (err: unknown) {
-      if ((err as { code?: string }).code === 'P2002') {
-        return NextResponse.json({ received: true, duplicate: true })
+      // Retrieved rather than read off the invoice: the contract id lives in the
+      // SUBSCRIPTION's metadata, and Stripe does not guarantee that
+      // customer.subscription.created arrives first. An invoice landing ahead of
+      // it would otherwise find an unbound contract and be ignored in silence —
+      // a paid cycle that never opened.
+      const sub = await stripe.subscriptions.retrieve(subId)
+      if (!sub.metadata?.partnerSubscriptionId) {
+        return NextResponse.json({ received: true, ignored: 'not a partner subscription' })
       }
-      console.error('[bms-stripe-webhook] applySubscriptionToSale failed', err)
+      await linkPartnerSubscription(sub)
+      const applied = await applyPartnerInvoicePaid(invoice)
+
+      // Outside the cycle transaction: this sends an email, and an email cannot
+      // be rolled back. Only the first cycle can grant access; a renewal finds
+      // the owner already active and leaves them alone.
+      if (applied.outcome === 'first-cycle' && applied.subscriptionId) {
+        const contract = await prisma.partnerSubscription.findUnique({
+          where:  { id: applied.subscriptionId },
+          select: { tenantId: true },
+        })
+        if (contract) await provisionTenantAccess(contract.tenantId)
+      }
+
+      return NextResponse.json({ received: true, outcome: applied.outcome })
+    } catch (err) {
+      console.error('[bms-stripe-webhook] applyPartnerInvoicePaid failed', err)
       return NextResponse.json({ error: 'internal' }, { status: 500 })
     }
-    return NextResponse.json({ received: true })
   }
 
-  const session = event.data.object as Stripe.Checkout.Session
+  const sub = event.data.object as Stripe.Subscription
 
   // Stripe fans every subscribed event out to EVERY endpoint on the account, so
-  // this route also sees SEQ's and APP's sessions. Ours are the ones we stamped.
-  if ((session.metadata ?? {}).origin !== BMS_ORIGIN) {
-    return NextResponse.json({ received: true, ignored: 'not a bms session' })
+  // this route also sees SEQ's and the APP's subscriptions. Ours are the ones we
+  // stamped with a contract id.
+  if (!sub.metadata?.partnerSubscriptionId) {
+    return NextResponse.json({ received: true, ignored: 'not a partner subscription' })
   }
-
-  // A dead link needs no ledger entry: marking it is idempotent on its own, and
-  // recording the event would only make a later genuine payment on a retried
-  // session look like a duplicate.
-  if (event.type === 'checkout.session.expired') {
-    await markSaleUnpayable(session.id, 'expired')
-    return NextResponse.json({ received: true })
-  }
-  if (event.type === 'checkout.session.async_payment_failed') {
-    await markSaleUnpayable(session.id, 'failed')
-    return NextResponse.json({ received: true })
-  }
-
-  // A subscription checkout also emits completed; its state is owned by the
-  // customer.subscription.* branch above and must not be settled twice here.
-  if (session.mode === 'subscription') {
-    return NextResponse.json({ received: true, ignored: 'subscription mode' })
-  }
-
-  if (session.payment_status !== 'paid') {
-    // checkout.session.completed fires before an async payment (boleto, Pix,
-    // ACH) settles; wait for async_payment_succeeded.
-    return NextResponse.json({ received: true, ignored: 'unpaid' })
-  }
-
-  // Fast-path idempotency: skip events already fully processed.
-  const seen = await prisma.stripeEvent.findUnique({ where: { id: event.id }, select: { id: true } })
-  if (seen) return NextResponse.json({ received: true, duplicate: true })
 
   try {
-    // Process FIRST, then record — the same order SEQ uses for one-time
-    // payments. applySalePayment is idempotent on Sale.paidAt, so a retry after
-    // a crash between the two settles nothing twice.
-    await applySalePayment(session)
-    await prisma.stripeEvent.create({ data: { id: event.id, type: event.type } }).catch((err: unknown) => {
-      if ((err as { code?: string }).code !== 'P2002') throw err
+    // Ledger and apply in ONE transaction: a duplicate delivery hits the PK and
+    // a failed apply rolls the ledger row back so Stripe's retry can reprocess.
+    await prisma.$transaction(async (tx) => {
+      await tx.stripeEvent.create({ data: { id: event.id, type: event.type } })
+      await linkPartnerSubscription(sub)
+      await syncPartnerSubscriptionStatus(sub)
     })
   } catch (err: unknown) {
-    console.error('[bms-stripe-webhook] applySalePayment failed', err)
+    if ((err as { code?: string }).code === 'P2002') {
+      return NextResponse.json({ received: true, duplicate: true })
+    }
+    console.error('[bms-stripe-webhook] partner subscription sync failed', err)
     return NextResponse.json({ error: 'internal' }, { status: 500 })
   }
 

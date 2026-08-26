@@ -24,8 +24,8 @@ export const main: MenuItem[][] = [
     { labelKey: 'items.dashboard', url: '/dashboard', icon: LayoutDashboard },
   ],
   [
-    { labelKey: 'items.buyGenCodes', url: '/purchasing/gencodes', icon: Barcode },
-    { labelKey: 'items.myGenCodes',  url: '/inventory/gencodes',  icon: ScanBarcode },
+    { labelKey: 'items.buyGenCodes', url: '/purchasing/plans', icon: Barcode },
+    { labelKey: 'items.myGenCodes',  url: '/inventory/activations',  icon: ScanBarcode },
   ],
   [
     { labelKey: 'items.customers', url: '/customers', icon: UsersIcon },
@@ -56,11 +56,11 @@ export const records: MenuItem[] = [
 // ─── Purchasing ──────────────────────────────────────────────────────────────
 
 export const purchasing: MenuItem[] = [
-  { labelKey: 'items.buyGenCodes', url: '/purchasing/gencodes', icon: Barcode },
+  { labelKey: 'items.buyGenCodes', url: '/purchasing/plans', icon: Barcode },
 ]
 
 // ─── Inventory ───────────────────────────────────────────────────────────────
 
 export const inventory: MenuItem[] = [
-  { labelKey: 'items.myGenCodes', url: '/inventory/gencodes', icon: ScanBarcode },
+  { labelKey: 'items.myGenCodes', url: '/inventory/activations', icon: ScanBarcode },
 ]

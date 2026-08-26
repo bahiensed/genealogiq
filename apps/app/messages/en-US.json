@@ -1252,8 +1252,8 @@
       "svgDownloaded": "SVG downloaded."
     },
     "expired": {
-      "body": "This code's usage period has ended, or the company that issued it has a suspended subscription. Please contact the company you bought the plaque from — once it is sorted out, the code works again. Memorials already created stay online as normal.",
-      "title": "This code is no longer valid"
+      "body": "The company that issued this plaque has a subscription pending. Talk to them: if it is settled, the code starts working again. If you bought the plaque directly from them, your activation was reserved for you — contact our support and we will sort it out. Memorials already created stay online as normal.",
+      "title": "This code cannot be activated yet"
     },
     "landing": {
       "createAccount": "Create account",

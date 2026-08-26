@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
 
 // Prisma + stripe mocks must be hoisted so they exist when the vi.mock factories run.
-const { prismaMock, stripeMock } = vi.hoisted(() => ({
+const { prismaMock, stripeMock, priceMock } = vi.hoisted(() => ({
+  priceMock: vi.fn(),
   prismaMock: {
     subscription: { findUnique: vi.fn() },
     appSale: { findFirst: vi.fn() },
+    planPrice: { findMany: vi.fn() },
   },
   stripeMock: {
     checkout: { sessions: { create: vi.fn() } },
@@ -22,17 +24,38 @@ vi.mock("@genealogiq/i18n/server", () => ({ resolveLocale: vi.fn().mockResolvedV
 vi.mock("@/lib/prisma", () => ({ prisma: prismaMock }))
 vi.mock("@/lib/stripe", () => ({ stripe: stripeMock }))
 vi.mock("@/lib/dal", () => ({ verifySession: vi.fn() }))
-// compareTier is a pure helper — keep the real upgrade/downgrade math; stub the I/O ones.
+// Prices moved out of the Subscription row into the shared versioned book.
+// compareTier stays REAL — it is pure, and it is what decides whether a plan
+// change is charged today or at period end.
+vi.mock("@genealogiq/services/subscription-price", async () => {
+  const actual = await vi.importActual<typeof import("@genealogiq/services/subscription-price")>(
+    "@genealogiq/services/subscription-price",
+  )
+  return { ...actual, resolveSubscriptionPrice: priceMock }
+})
 vi.mock("@/lib/billing", () => ({
   ensureStripeCustomer: vi.fn(),
   upsertSaleFromSubscription: vi.fn(),
-  compareTier: (a: { price: number; termLength: number }, b: { price: number; termLength: number }) =>
-    a.price / Math.max(a.termLength, 1) - b.price / Math.max(b.termLength, 1),
 }))
 
 import { createCheckoutSession, changeSubscription } from "./billing.actions"
 import { verifySession } from "@/lib/dal"
 import { ensureStripeCustomer, upsertSaleFromSubscription } from "@/lib/billing"
+
+/** A live price-book row, in the shape resolveSubscriptionPrice returns. */
+const bookPrice = (over: Partial<{
+  annualAmount: number; monthlyAmount: number | null; termMonths: number | null
+  stripeAnnualPriceId: string | null; stripeMonthlyPriceId: string | null
+}> = {}) => ({
+  planPriceId: "pp-1",
+  currency: "USD",
+  annualAmount: 10,
+  monthlyAmount: null,
+  termMonths: 1,
+  stripeAnnualPriceId: "price_annual",
+  stripeMonthlyPriceId: "price_monthly",
+  ...over,
+})
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -52,14 +75,8 @@ describe("createCheckoutSession", () => {
 
   it("fails with planNotWiredSeed when the selected cadence has no Stripe priceId", async () => {
     // Plan exists but the requested cadence (annual) was never wired to a Stripe price.
-    prismaMock.subscription.findUnique.mockResolvedValue({
-      id: "sub-1",
-      name: "Pro",
-      priceBrl: null,
-      priceMxn: null,
-      stripeAnnualPriceIdUsd: null,
-      stripeMonthlyPriceIdUsd: "price_monthly",
-    })
+    prismaMock.subscription.findUnique.mockResolvedValue({ id: "sub-1", name: "Pro" })
+    priceMock.mockResolvedValue(bookPrice({ stripeAnnualPriceId: null }))
 
     const res = await createCheckoutSession("sub-1", "annual")
 
@@ -68,14 +85,8 @@ describe("createCheckoutSession", () => {
   })
 
   it("returns ok({ url }) on the happy path", async () => {
-    prismaMock.subscription.findUnique.mockResolvedValue({
-      id: "sub-1",
-      name: "Pro",
-      priceBrl: null,
-      priceMxn: null,
-      stripeAnnualPriceIdUsd: "price_annual",
-      stripeMonthlyPriceIdUsd: "price_monthly",
-    })
+    prismaMock.subscription.findUnique.mockResolvedValue({ id: "sub-1", name: "Pro" })
+    priceMock.mockResolvedValue(bookPrice({ stripeAnnualPriceId: "price_annual" }))
     stripeMock.checkout.sessions.create.mockResolvedValue({ url: "https://checkout.stripe.test/abc" })
 
     const res = await createCheckoutSession("sub-1", "monthly")
@@ -93,14 +104,8 @@ describe("createCheckoutSession", () => {
   })
 
   it("fails with noCheckoutUrl when Stripe returns a session without a url", async () => {
-    prismaMock.subscription.findUnique.mockResolvedValue({
-      id: "sub-1",
-      name: "Pro",
-      priceBrl: null,
-      priceMxn: null,
-      stripeAnnualPriceIdUsd: "price_annual",
-      stripeMonthlyPriceIdUsd: "price_monthly",
-    })
+    prismaMock.subscription.findUnique.mockResolvedValue({ id: "sub-1", name: "Pro" })
+    priceMock.mockResolvedValue(bookPrice({ stripeAnnualPriceId: "price_annual" }))
     stripeMock.checkout.sessions.create.mockResolvedValue({ url: null })
 
     const res = await createCheckoutSession("sub-1", "monthly")
@@ -123,17 +128,13 @@ describe("changeSubscription", () => {
     prismaMock.appSale.findFirst.mockResolvedValue({
       stripeSubscriptionId: "stripe_sub_1",
       currency: "USD",
-      subscription: { priceUsd: 10, termLength: 1 },
+      subscription: { id: "sub-active" },  // active plan priced at 10 in the book below
     })
-    prismaMock.subscription.findUnique.mockResolvedValue({
-      id: "sub-2",
-      priceUsd: 20,
-      priceBrl: null,
-      priceMxn: null,
-      termLength: 1,
-      stripeAnnualPriceIdUsd: null, // requested cadence "annual" not wired
-      stripeMonthlyPriceIdUsd: "price_monthly",
-    })
+    prismaMock.subscription.findUnique.mockResolvedValue({ id: "sub-2" })
+    // changeSubscription resolves the TARGET first, then the ACTIVE plan.
+    priceMock
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 20, stripeAnnualPriceId: null }))
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 10 }))
 
     const res = await changeSubscription("sub-2", "annual")
 
@@ -144,17 +145,13 @@ describe("changeSubscription", () => {
     prismaMock.appSale.findFirst.mockResolvedValue({
       stripeSubscriptionId: "stripe_sub_1",
       currency: "USD",
-      subscription: { priceUsd: 10, termLength: 1 }, // cheaper current plan
+      subscription: { id: "sub-active" },  // active plan priced at 10 in the book below
     })
-    prismaMock.subscription.findUnique.mockResolvedValue({
-      id: "sub-2",
-      priceUsd: 20, // pricier target → compareTier >= 0 → immediate upgrade branch
-      priceBrl: null,
-      priceMxn: null,
-      termLength: 1,
-      stripeAnnualPriceIdUsd: "price_annual",
-      stripeMonthlyPriceIdUsd: "price_monthly",
-    })
+    prismaMock.subscription.findUnique.mockResolvedValue({ id: "sub-2" })
+    // changeSubscription resolves the TARGET first, then the ACTIVE plan.
+    priceMock
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 20, stripeAnnualPriceId: "price_annual" }))
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 10 }))
     stripeMock.subscriptions.retrieve.mockResolvedValue({ items: { data: [{ id: "si_1" }] } })
     stripeMock.subscriptions.update.mockResolvedValue({ id: "stripe_sub_1" })
 
@@ -174,17 +171,13 @@ describe("changeSubscription", () => {
     prismaMock.appSale.findFirst.mockResolvedValue({
       stripeSubscriptionId: "stripe_sub_1",
       currency: "USD",
-      subscription: { priceUsd: 30, termLength: 1 }, // pricier current plan
+      subscription: { id: "sub-active" },  // active plan priced at 30 in the book below
     })
-    prismaMock.subscription.findUnique.mockResolvedValue({
-      id: "sub-2",
-      priceUsd: 10, // cheaper target → compareTier < 0 → deferred downgrade branch
-      priceBrl: null,
-      priceMxn: null,
-      termLength: 1,
-      stripeAnnualPriceIdUsd: "price_annual",
-      stripeMonthlyPriceIdUsd: "price_monthly",
-    })
+    prismaMock.subscription.findUnique.mockResolvedValue({ id: "sub-2" })
+    // changeSubscription resolves the TARGET first, then the ACTIVE plan.
+    priceMock
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 10, stripeAnnualPriceId: "price_annual" }))
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 30 }))
     stripeMock.subscriptions.retrieve.mockResolvedValue({ schedule: null })
     stripeMock.subscriptionSchedules.create.mockResolvedValue({
       id: "sched_1",
@@ -204,17 +197,13 @@ describe("changeSubscription", () => {
     prismaMock.appSale.findFirst.mockResolvedValue({
       stripeSubscriptionId: "stripe_sub_1",
       currency: "USD",
-      subscription: { priceUsd: 30, termLength: 1 },
+      subscription: { id: "sub-active" },  // active plan priced at 30 in the book below
     })
-    prismaMock.subscription.findUnique.mockResolvedValue({
-      id: "sub-2",
-      priceUsd: 10,
-      priceBrl: null,
-      priceMxn: null,
-      termLength: 1,
-      stripeAnnualPriceIdUsd: "price_annual",
-      stripeMonthlyPriceIdUsd: "price_monthly",
-    })
+    prismaMock.subscription.findUnique.mockResolvedValue({ id: "sub-2" })
+    // changeSubscription resolves the TARGET first, then the ACTIVE plan.
+    priceMock
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 10, stripeAnnualPriceId: "price_annual" }))
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 30 }))
     stripeMock.subscriptions.retrieve.mockResolvedValue({ schedule: "sub_sched_existing" })
 
     const res = await changeSubscription("sub-2", "monthly")
@@ -227,17 +216,13 @@ describe("changeSubscription", () => {
     prismaMock.appSale.findFirst.mockResolvedValue({
       stripeSubscriptionId: "stripe_sub_1",
       currency: "USD",
-      subscription: { priceUsd: 10, termLength: 1 },
+      subscription: { id: "sub-active" },  // active plan priced at 10 in the book below
     })
-    prismaMock.subscription.findUnique.mockResolvedValue({
-      id: "sub-2",
-      priceUsd: 20,
-      priceBrl: null,
-      priceMxn: null,
-      termLength: 1,
-      stripeAnnualPriceIdUsd: "price_annual",
-      stripeMonthlyPriceIdUsd: "price_monthly",
-    })
+    prismaMock.subscription.findUnique.mockResolvedValue({ id: "sub-2" })
+    // changeSubscription resolves the TARGET first, then the ACTIVE plan.
+    priceMock
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 20, stripeAnnualPriceId: "price_annual" }))
+      .mockResolvedValueOnce(bookPrice({ annualAmount: 10 }))
     stripeMock.subscriptions.retrieve.mockRejectedValue(new Error("stripe is down"))
 
     const res = await changeSubscription("sub-2", "monthly")
