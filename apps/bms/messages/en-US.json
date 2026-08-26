@@ -137,6 +137,15 @@
       "notFound": "User not found.",
       "passwordAlreadySet": "This user has already set their password.",
       "updated": "User updated successfully."
+    },
+    "partnerPlan": {
+      "codeExists": "A plan with this code already exists.",
+      "created": "Plan created successfully.",
+      "notFound": "Plan not found.",
+      "syncFailed": "Stripe sync failed: {message}",
+      "synced": "Synced with Stripe: {created} price(s) created, {reused} reused.",
+      "updated": "Plan updated successfully.",
+      "updatedResync": "Plan updated. Changed prices opened new versions — sync with Stripe to sell again."
     }
   },
   "Auth": {
@@ -258,6 +267,69 @@
     "toasts": {
       "updated": "Data updated successfully."
     }
+  },
+  "Contracts": {
+    "cadence": {
+      "cash": "cash",
+      "installment": "instalments"
+    },
+    "cycleStatus": {
+      "ACTIVE": "Current",
+      "CLOSED": "Closed",
+      "EXPIRED": "Expired"
+    },
+    "detail": {
+      "cycles": "Cycles",
+      "first": "First cycle",
+      "founder": "Launch guarantee",
+      "founderAvailable": "Available: on the next renewal, 100% of the unused balance carries over, once.",
+      "founderUsed": "Already used — later renewals follow the standard rule.",
+      "grace": "Grace until",
+      "origin": "Origin",
+      "period": "Period",
+      "renewal": "Renewal"
+    },
+    "link": {
+      "allowance": "{count} activations",
+      "cadence": "Payment",
+      "cash": "Cash — {amount}",
+      "coupon": "Coupon (optional)",
+      "expiryNote": "Stripe caps the link at 24 hours. After that, generate a new one.",
+      "installments": "{count}× {amount}",
+      "noCoupon": "No coupon",
+      "noPlans": "No plan is synced in your currency. Sync one before sending a link.",
+      "partner": "Partner",
+      "pickPartner": "Choose the partner",
+      "pickPlan": "Choose the plan",
+      "plan": "Plan",
+      "send": "Send link",
+      "sending": "Sending…",
+      "sent": "Link sent to {email}.",
+      "title": "Send a subscription link"
+    },
+    "newButton": "Send plan link",
+    "status": {
+      "ACTIVE": "Active",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired",
+      "PAST_DUE": "Past due",
+      "PENDING": "Awaiting payment"
+    },
+    "subtitle": "Partner subscriptions, with the current cycle and how many times they have renewed.",
+    "table": {
+      "allowanceValue": "{count} activations",
+      "amount": "Last amount",
+      "cycle": "Current cycle",
+      "empty": "No contracts yet.",
+      "graceUntil": "grace until {date}",
+      "noCycle": "Awaiting payment",
+      "partner": "Partner",
+      "plan": "Plan",
+      "renewals": "Renewals",
+      "since": "Since",
+      "status": "Status"
+    },
+    "title": "Contracts"
   },
   "Cookies": {
     "acceptAll": "OK, I accept all this legal nonsense",
@@ -485,6 +557,7 @@
   "Errors": {
     "atLeastOneAmount": "Set at least one amount",
     "atLeastOnePrice": "Set at least one price",
+    "atMostOne": "Enter a value between 0 and 1.",
     "codeFormat": "Use uppercase letters, numbers and underscores only",
     "countryCodeRequired": "Country code is required",
     "couponCodeFormat": "Only uppercase letters, numbers, hyphens and underscores",
@@ -508,6 +581,8 @@
     "retry": "Try again",
     "termLengthMin": "Must be 0 (lifetime) or a positive number of months",
     "title": "Something went wrong",
+    "trialNeedsPlanCode": "Set the trial plan or zero the duration.",
+    "upperSnakeOnly": "Use uppercase letters, numbers and underscores only.",
     "wholeNumber": "Must be a whole number"
   },
   "ExtraUnitPrices": {
@@ -633,6 +708,83 @@
     },
     "unitPrice": "Price per unit"
   },
+  "PartnerPlans": {
+    "actions": {
+      "openMenu": "Open menu",
+      "edit": "Edit",
+      "sync": "Sync with Stripe",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate"
+    },
+    "form": {
+      "annualAllowance": "Annual allowance",
+      "cash": "Cash ({currency})",
+      "code": "Code",
+      "committedMonths": "Committed reservation (months)",
+      "committedMonthsHint": "How long a credit sold to an identified buyer outlives its cycle.",
+      "create": "Create plan",
+      "description": "Description",
+      "editTitle": "Edit {name}",
+      "graceDays": "Grace (days)",
+      "graceDaysHint": "After expiry, renewing still preserves rollover.",
+      "installment": "Instalment ({currency}, {count}×)",
+      "installmentCount": "Number of instalments",
+      "installmentCountHint": "Applies to every currency.",
+      "name": "Name",
+      "newTitle": "New partner plan",
+      "priceHint": "Changing an amount does not overwrite the price: it closes the live version and opens the next one beside it, so an older contract can still resolve the price it was signed under.",
+      "priceSection": "Price book",
+      "rolloverRate": "Rollover rate",
+      "rolloverRateHint": "A fraction from 0 to 1. 0.30 = 30% of the renewed plan’s allowance.",
+      "rolloverValidity": "Rollover validity (months)",
+      "rolloverValidityHint": "Counted from the start of the new cycle.",
+      "save": "Save changes",
+      "syncAfterCreate": "A new plan has no Stripe Price yet — sync before selling it.",
+      "termsSection": "Commercial terms",
+      "trialMonths": "Activation trial (months)",
+      "trialMonthsHint": "0 disables the trial.",
+      "trialPlanCode": "Trial plan",
+      "unitRef": "Per activation ({currency}, allowance {allowance})"
+    },
+    "newButton": "New plan",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "stripe": {
+      "hint": "A changed amount opens a new version with no Stripe Price — the plan is unsellable until you sync.",
+      "notSynced": "Pending",
+      "productId": "Product:",
+      "syncButton": "Sync with Stripe",
+      "synced": "Synced",
+      "syncing": "Syncing…",
+      "title": "Stripe"
+    },
+    "subtitle": "What a funeral home subscribes to — an annual activation allowance, not a stock of codes.",
+    "sync": {
+      "unpriced": "Unpriced",
+      "none": "Not synced",
+      "partial": "{synced} of {total}",
+      "all": "Synced"
+    },
+    "table": {
+      "name": "Plan",
+      "allowance": "Allowance",
+      "cash": "Cash",
+      "installments": "Instalments",
+      "perActivation": "Per activation",
+      "stripe": "Stripe",
+      "status": "Status",
+      "contracts": "Contracts",
+      "empty": "No plans yet."
+    },
+    "title": "Partner plans",
+    "toasts": {
+      "synced": "Plan synced with Stripe.",
+      "deactivated": "Plan deactivated.",
+      "reactivated": "Plan reactivated."
+    }
+  },
   "Profile": {
     "changeAvatar": "Change avatar",
     "danger": {
@@ -752,10 +904,14 @@
     },
     "empty": "Nothing to report yet.",
     "funnel": {
-      "issued": "Issued",
-      "sold": "Sold by resellers",
       "activated": "Redeemed by buyers",
-      "available": "In reseller stock"
+      "available": "In reseller stock",
+      "issued": "Issued",
+      "lag": "Sale → activation",
+      "lagUnit": "days (median)",
+      "sold": "Sold by resellers",
+      "trialConversion": "Post-trial conversion",
+      "trialDetail": "{converted} paying · {trialing} on trial"
     },
     "resellers": {
       "title": "By reseller",
@@ -778,6 +934,15 @@
       "total": "Revenue",
       "caveat": "Counts only settled sales, at the amount Stripe charged. Older sales with no recorded amount fall back to quantity × the product's CURRENT price — for those, editing the price rewrites the numbers retroactively. Reversed sales are excluded.",
       "currency": "Currency"
+    },
+    "sellThrough": {
+      "consumed": "Used",
+      "granted": "Granted",
+      "lag": "Median lag",
+      "partner": "Partner",
+      "rate": "Sell-through",
+      "subtitle": "How much of the allowance granted became a real activation.",
+      "title": "Sell-through by partner"
     },
     "stale": {
       "title": "Sold but never redeemed",
@@ -823,15 +988,15 @@
       "sales": "Sales"
     },
     "items": {
-      "dashboard": "Dashboard",
       "companyData": "Company Data",
-      "systemUsers": "System Users",
-      "gencodes": "GenCodes (B2B)",
-      "subscriptions": "Subscriptions (B2C)",
-      "extraUnits": "Extra Units",
+      "contracts": "Contracts",
       "customers": "Customers",
+      "dashboard": "Dashboard",
       "discountCoupons": "Discount Coupons",
-      "manualSales": "Manual Sales"
+      "extraUnits": "Extra Units",
+      "partnerPlans": "Partner plans",
+      "subscriptions": "Subscriptions (B2C)",
+      "systemUsers": "System Users"
     }
   },
   "Subscriptions": {

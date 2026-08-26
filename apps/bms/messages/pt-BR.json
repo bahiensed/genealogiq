@@ -137,6 +137,15 @@
       "notFound": "Usuário não encontrado.",
       "passwordAlreadySet": "Este usuário já definiu a sua senha.",
       "updated": "Usuário atualizado com sucesso."
+    },
+    "partnerPlan": {
+      "codeExists": "Já existe um plano com este código.",
+      "created": "Plano criado com sucesso.",
+      "notFound": "Plano não encontrado.",
+      "syncFailed": "Falha na sincronização com o Stripe: {message}",
+      "synced": "Sincronizado com o Stripe: {created} preço(s) criado(s), {reused} reaproveitado(s).",
+      "updated": "Plano atualizado com sucesso.",
+      "updatedResync": "Plano atualizado. Os preços alterados criaram novas versões — sincronize com o Stripe para voltar a vender."
     }
   },
   "Auth": {
@@ -258,6 +267,69 @@
     "toasts": {
       "updated": "Dados atualizados com sucesso."
     }
+  },
+  "Contracts": {
+    "cadence": {
+      "cash": "à vista",
+      "installment": "parcelado"
+    },
+    "cycleStatus": {
+      "ACTIVE": "Vigente",
+      "CLOSED": "Encerrado",
+      "EXPIRED": "Expirado"
+    },
+    "detail": {
+      "cycles": "Ciclos",
+      "first": "Primeiro ciclo",
+      "founder": "Garantia de lançamento",
+      "founderAvailable": "Disponível: na próxima renovação, 100% do saldo não usado é transferido, uma única vez.",
+      "founderUsed": "Já utilizada — as próximas renovações seguem a regra padrão.",
+      "grace": "Carência até",
+      "origin": "Origem",
+      "period": "Período",
+      "renewal": "Renovação"
+    },
+    "link": {
+      "allowance": "{count} ativações",
+      "cadence": "Forma de pagamento",
+      "cash": "À vista — {amount}",
+      "coupon": "Cupom (opcional)",
+      "expiryNote": "O Stripe limita o link a 24 horas. Depois disso, gere um novo.",
+      "installments": "{count}× de {amount}",
+      "noCoupon": "Sem cupom",
+      "noPlans": "Nenhum plano sincronizado na sua moeda. Sincronize um plano antes de enviar o link.",
+      "partner": "Parceiro",
+      "pickPartner": "Escolha o parceiro",
+      "pickPlan": "Escolha o plano",
+      "plan": "Plano",
+      "send": "Enviar link",
+      "sending": "Enviando…",
+      "sent": "Link enviado para {email}.",
+      "title": "Enviar link de assinatura"
+    },
+    "newButton": "Enviar link de plano",
+    "status": {
+      "ACTIVE": "Ativo",
+      "CANCELLED": "Cancelado",
+      "EXPIRED": "Expirado",
+      "PAST_DUE": "Vencido",
+      "PENDING": "Aguardando pagamento"
+    },
+    "subtitle": "Assinaturas de parceiros, com o ciclo vigente e quantas vezes já renovaram.",
+    "table": {
+      "allowanceValue": "{count} ativações",
+      "amount": "Último valor",
+      "cycle": "Ciclo vigente",
+      "empty": "Nenhum contrato ainda.",
+      "graceUntil": "carência até {date}",
+      "noCycle": "Aguardando pagamento",
+      "partner": "Parceiro",
+      "plan": "Plano",
+      "renewals": "Renovações",
+      "since": "Desde",
+      "status": "Situação"
+    },
+    "title": "Contratos"
   },
   "Cookies": {
     "acceptAll": "OK, aceito todo esse juridiquês",
@@ -485,6 +557,7 @@
   "Errors": {
     "atLeastOneAmount": "Informe ao menos um valor",
     "atLeastOnePrice": "Informe ao menos um preço",
+    "atMostOne": "Informe um valor entre 0 e 1.",
     "codeFormat": "Use apenas letras maiúsculas, números e sublinhados",
     "countryCodeRequired": "O código do país é obrigatório",
     "couponCodeFormat": "Apenas letras maiúsculas, números, hifens e sublinhados",
@@ -508,6 +581,8 @@
     "retry": "Tentar de novo",
     "termLengthMin": "Deve ser 0 (vitalício) ou um número positivo de meses",
     "title": "Algo deu errado",
+    "trialNeedsPlanCode": "Informe o plano do trial ou zere a duração.",
+    "upperSnakeOnly": "Use apenas letras maiúsculas, números e underscore.",
     "wholeNumber": "Deve ser um número inteiro"
   },
   "ExtraUnitPrices": {
@@ -633,6 +708,83 @@
     },
     "unitPrice": "Preço por unidade"
   },
+  "PartnerPlans": {
+    "actions": {
+      "openMenu": "Abrir menu",
+      "edit": "Editar",
+      "sync": "Sincronizar com Stripe",
+      "deactivate": "Desativar",
+      "reactivate": "Reativar"
+    },
+    "form": {
+      "annualAllowance": "Franquia anual",
+      "cash": "À vista ({currency})",
+      "code": "Código",
+      "committedMonths": "Reserva comprometida (meses)",
+      "committedMonthsHint": "Quanto um crédito vendido a comprador identificado sobrevive ao ciclo.",
+      "create": "Criar plano",
+      "description": "Descrição",
+      "editTitle": "Editar {name}",
+      "graceDays": "Carência (dias)",
+      "graceDaysHint": "Após o vencimento, renovar ainda preserva o rollover.",
+      "installment": "Parcela ({currency}, {count}×)",
+      "installmentCount": "Número de parcelas",
+      "installmentCountHint": "Vale para todas as moedas.",
+      "name": "Nome",
+      "newTitle": "Novo plano de parceiro",
+      "priceHint": "Alterar um valor não sobrescreve o preço: fecha a versão vigente e abre a próxima ao lado, para que um contrato antigo ainda resolva o preço sob o qual foi assinado.",
+      "priceSection": "Price book",
+      "rolloverRate": "Taxa de rollover",
+      "rolloverRateHint": "Fração de 0 a 1. 0,30 = 30% da franquia do plano renovado.",
+      "rolloverValidity": "Validade do rollover (meses)",
+      "rolloverValidityHint": "Contada do início do novo ciclo.",
+      "save": "Salvar alterações",
+      "syncAfterCreate": "O plano nasce sem preço no Stripe — sincronize antes de vender.",
+      "termsSection": "Termos comerciais",
+      "trialMonths": "Trial na ativação (meses)",
+      "trialMonthsHint": "0 desliga o trial.",
+      "trialPlanCode": "Plano do trial",
+      "unitRef": "Por ativação ({currency}, franquia {allowance})"
+    },
+    "newButton": "Novo plano",
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "stripe": {
+      "hint": "Um valor alterado abre uma versão nova sem preço no Stripe — o plano fica invendável até sincronizar.",
+      "notSynced": "Pendente",
+      "productId": "Produto:",
+      "syncButton": "Sincronizar com Stripe",
+      "synced": "Sincronizado",
+      "syncing": "Sincronizando…",
+      "title": "Stripe"
+    },
+    "subtitle": "O que uma funerária assina — franquia anual de ativações, não estoque de códigos.",
+    "sync": {
+      "unpriced": "Sem preço",
+      "none": "Não sincronizado",
+      "partial": "{synced} de {total}",
+      "all": "Sincronizado"
+    },
+    "table": {
+      "name": "Plano",
+      "allowance": "Franquia",
+      "cash": "À vista",
+      "installments": "Parcelado",
+      "perActivation": "Por ativação",
+      "stripe": "Stripe",
+      "status": "Situação",
+      "contracts": "Contratos",
+      "empty": "Nenhum plano cadastrado."
+    },
+    "title": "Planos de parceiro",
+    "toasts": {
+      "synced": "Plano sincronizado com o Stripe.",
+      "deactivated": "Plano desativado.",
+      "reactivated": "Plano reativado."
+    }
+  },
   "Profile": {
     "changeAvatar": "Alterar foto",
     "danger": {
@@ -752,10 +904,14 @@
     },
     "empty": "Nada a relatar ainda.",
     "funnel": {
-      "issued": "Emitidos",
-      "sold": "Vendidos pelas empresas",
       "activated": "Resgatados pelos compradores",
-      "available": "Em estoque das empresas"
+      "available": "Em estoque das empresas",
+      "issued": "Emitidos",
+      "lag": "Venda → ativação",
+      "lagUnit": "dias (mediana)",
+      "sold": "Vendidos pelas empresas",
+      "trialConversion": "Conversão pós-trial",
+      "trialDetail": "{converted} pagantes · {trialing} em trial"
     },
     "resellers": {
       "title": "Por empresa",
@@ -778,6 +934,15 @@
       "total": "Receita",
       "caveat": "Conta apenas vendas com pagamento confirmado, pelo valor que o Stripe cobrou. Vendas antigas, sem esse valor gravado, usam quantidade × preço ATUAL do produto — nessas, editar o preço muda os números retroativamente. Vendas estornadas ficam de fora.",
       "currency": "Moeda"
+    },
+    "sellThrough": {
+      "consumed": "Usadas",
+      "granted": "Concedidas",
+      "lag": "Lag mediano",
+      "partner": "Parceiro",
+      "rate": "Aproveitamento",
+      "subtitle": "Quanto da franquia concedida virou ativação de verdade.",
+      "title": "Aproveitamento por parceiro"
     },
     "stale": {
       "title": "Vendidos e nunca resgatados",
@@ -823,15 +988,15 @@
       "sales": "Vendas"
     },
     "items": {
-      "dashboard": "Painel",
       "companyData": "Dados da Empresa",
-      "systemUsers": "Usuários do Sistema",
-      "gencodes": "GenCodes (B2B)",
-      "subscriptions": "Assinaturas (B2C)",
-      "extraUnits": "Unidades Extras",
+      "contracts": "Contratos",
       "customers": "Clientes",
+      "dashboard": "Painel",
       "discountCoupons": "Cupons de Desconto",
-      "manualSales": "Vendas Manuais"
+      "extraUnits": "Unidades Extras",
+      "partnerPlans": "Planos de parceiro",
+      "subscriptions": "Assinaturas (B2C)",
+      "systemUsers": "Usuários do Sistema"
     }
   },
   "Subscriptions": {
