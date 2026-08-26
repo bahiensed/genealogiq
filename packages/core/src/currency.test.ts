@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest"
+import { LOCALE_DISPLAY_ORDER } from "@genealogiq/i18n"
+import { CURRENCY_DISPLAY_ORDER, CURRENCY_CODE_ORDER, byCurrencyDisplayOrder } from "./currency"
 import { currencyForLocale, currencyCode, APP_CURRENCIES } from "./currency"
 
 describe("currencyForLocale", () => {
@@ -34,5 +36,29 @@ describe("currencyForLocale", () => {
 describe("currencyCode", () => {
   it("uppercases for Intl and Stripe", () => {
     expect(currencyCode("brl")).toBe("BRL")
+  })
+})
+
+describe("currency display order", () => {
+  // The rule the founder set: money follows the interface. If someone reorders
+  // the language switcher and this stops matching, that is the bug — not this
+  // test being fussy.
+  it("follows the language switcher exactly", () => {
+    expect(CURRENCY_DISPLAY_ORDER).toEqual(LOCALE_DISPLAY_ORDER.map(currencyForLocale))
+  })
+
+  it("reads United States, Mexico, Brazil today", () => {
+    expect(CURRENCY_CODE_ORDER).toEqual(["USD", "MXN", "BRL"])
+  })
+
+  it("sorts rows into that order whatever order they arrive in", () => {
+    const rows = [{ currency: "BRL" }, { currency: "USD" }, { currency: "MXN" }]
+    expect(rows.sort(byCurrencyDisplayOrder).map((r) => r.currency)).toEqual(["USD", "MXN", "BRL"])
+  })
+
+  // A row priced in something we do not sell must not lead the list it is in.
+  it("sorts an unknown currency last", () => {
+    const rows = [{ currency: "EUR" }, { currency: "BRL" }, { currency: "USD" }]
+    expect(rows.sort(byCurrencyDisplayOrder).map((r) => r.currency)).toEqual(["USD", "BRL", "EUR"])
   })
 })
