@@ -290,24 +290,26 @@
       "renewal": "Renewal"
     },
     "link": {
-      "allowance": "{count} activations",
       "cadence": "Payment",
       "cash": "Cash — {amount}",
       "coupon": "Coupon (optional)",
       "expiryNote": "Stripe caps the link at 24 hours. After that, generate a new one.",
       "installments": "{count}× {amount}",
+      "newTitle": "B2B plan sale",
       "noCoupon": "No coupon",
+      "noPartnerFound": "No partner found.",
       "noPlans": "No plan is synced in your currency. Sync one before sending a link.",
       "partner": "Partner",
       "pickPartner": "Choose the partner",
       "pickPlan": "Choose the plan",
       "plan": "Plan",
+      "searchPartner": "Type to search…",
       "send": "Send link",
       "sending": "Sending…",
       "sent": "Link sent to {email}.",
-      "title": "Send a subscription link"
+      "units": "{count} units"
     },
-    "newButton": "Send plan link",
+    "newButton": "New plan sale",
     "status": {
       "ACTIVE": "Active",
       "CANCELLED": "Cancelled",
@@ -315,7 +317,6 @@
       "PAST_DUE": "Past due",
       "PENDING": "Awaiting payment"
     },
-    "subtitle": "Partner subscriptions, with the current cycle and how many times they have renewed.",
     "table": {
       "allowanceValue": "{count} activations",
       "amount": "Last amount",
@@ -329,7 +330,7 @@
       "since": "Since",
       "status": "Status"
     },
-    "title": "Contracts"
+    "title": "B2B plan sales"
   },
   "Cookies": {
     "acceptAll": "OK, I accept all this legal nonsense",
@@ -760,7 +761,6 @@
       "syncing": "Syncing…",
       "title": "Stripe"
     },
-    "subtitle": "What a funeral home subscribes to — an annual activation allowance, not a stock of codes.",
     "sync": {
       "unpriced": "Unpriced",
       "none": "Not synced",
@@ -778,7 +778,7 @@
       "contracts": "Contracts",
       "empty": "No plans yet."
     },
-    "title": "Partner plans",
+    "title": "B2B plans",
     "toasts": {
       "synced": "Plan synced with Stripe.",
       "deactivated": "Plan deactivated.",
@@ -989,13 +989,13 @@
     },
     "items": {
       "companyData": "Company Data",
-      "contracts": "Contracts",
+      "contracts": "B2B plan sales",
       "customers": "Customers",
       "dashboard": "Dashboard",
       "discountCoupons": "Discount Coupons",
       "extraUnits": "Extra Units",
-      "partnerPlans": "Partner plans",
-      "subscriptions": "Subscriptions (B2C)",
+      "partnerPlans": "B2B plans",
+      "subscriptions": "B2C subscriptions",
       "systemUsers": "System Users"
     }
   },
@@ -1079,7 +1079,7 @@
       "status": "Status",
       "term": "Term"
     },
-    "title": "Subscriptions (B2C)",
+    "title": "B2C subscriptions",
     "toasts": {
       "deactivated": "Subscription deactivated.",
       "deleteConfirm": "The subscription \"{name}\" will be permanently deleted.",

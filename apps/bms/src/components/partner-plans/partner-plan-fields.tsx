@@ -2,6 +2,7 @@
 
 import { Controller, useWatch, type Control } from 'react-hook-form'
 import { useTranslations } from 'next-intl'
+import { CURRENCY_CODE_ORDER } from '@genealogiq/core'
 import type { PartnerPlanFormValues } from '@/schemas/partner-plan.schema'
 import { Input } from '@genealogiq/ui/input'
 import { Textarea } from '@genealogiq/ui/textarea'
@@ -218,7 +219,8 @@ export function PartnerPlanFields({ control }: { control: Control<PartnerPlanFor
           hint={t('form.installmentCountHint')}
         />
 
-        {(['USD', 'BRL', 'MXN'] as const).map((code) => {
+        {/* Same order as the language switcher — see CURRENCY_DISPLAY_ORDER. */}
+        {CURRENCY_CODE_ORDER.map((code: string) => {
           const suffix = code === 'USD' ? 'Usd' : code === 'BRL' ? 'Brl' : 'Mxn'
           return (
             <div key={code} className="grid gap-4 sm:grid-cols-3">

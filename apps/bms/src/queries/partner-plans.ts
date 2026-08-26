@@ -2,7 +2,7 @@ import 'server-only'
 
 import { prisma } from '@/lib/prisma'
 import { verifySession } from '@/lib/dal'
-import type { AppCurrency } from '@genealogiq/core'
+import { byCurrencyDisplayOrder, type AppCurrency } from '@genealogiq/core'
 
 /**
  * The live row of the price book: active, and not yet superseded by a newer
@@ -54,7 +54,7 @@ export async function getPartnerPlans() {
       graceDays: true, committedReservationMonths: true,
       activationTrialMonths: true, activationTrialPlanCode: true,
       isActive: true, version: true, createdAt: true,
-      prices:   { where: LIVE_PRICE, select: PRICE_SELECT, orderBy: { currency: 'asc' } },
+      prices:   { where: LIVE_PRICE, select: PRICE_SELECT },
       _count:   { select: { subscriptions: true } },
     },
     orderBy: { annualAllowance: 'asc' },
@@ -63,7 +63,9 @@ export async function getPartnerPlans() {
   return rows.map((r) => ({
     ...r,
     rolloverRate: Number(r.rolloverRate),
-    prices:       r.prices.map(serialisePrice),
+    // Display order follows the language switcher, not the alphabet. Prisma
+    // cannot express a custom sequence, so it is applied here.
+    prices:       r.prices.map(serialisePrice).sort(byCurrencyDisplayOrder),
   }))
 }
 
@@ -78,12 +80,16 @@ export async function getPartnerPlan(id: string) {
       graceDays: true, committedReservationMonths: true,
       activationTrialMonths: true, activationTrialPlanCode: true,
       isActive: true, version: true,
-      prices: { where: LIVE_PRICE, select: PRICE_SELECT, orderBy: { currency: 'asc' } },
+      prices: { where: LIVE_PRICE, select: PRICE_SELECT },
     },
   })
   if (!row) return null
 
-  return { ...row, rolloverRate: Number(row.rolloverRate), prices: row.prices.map(serialisePrice) }
+  return {
+    ...row,
+    rolloverRate: Number(row.rolloverRate),
+    prices: row.prices.map(serialisePrice).sort(byCurrencyDisplayOrder),
+  }
 }
 
 /**

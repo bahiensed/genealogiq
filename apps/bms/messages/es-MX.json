@@ -290,24 +290,26 @@
       "renewal": "Renovación"
     },
     "link": {
-      "allowance": "{count} activaciones",
       "cadence": "Forma de pago",
       "cash": "De contado — {amount}",
       "coupon": "Cupón (opcional)",
       "expiryNote": "Stripe limita el enlace a 24 horas. Después, genera uno nuevo.",
       "installments": "{count}× de {amount}",
+      "newTitle": "Venta de plan B2B",
       "noCoupon": "Sin cupón",
+      "noPartnerFound": "No se encontró ningún socio.",
       "noPlans": "No hay planes sincronizados en tu moneda. Sincroniza uno antes de enviar el enlace.",
       "partner": "Socio",
       "pickPartner": "Elige el socio",
       "pickPlan": "Elige el plan",
       "plan": "Plan",
+      "searchPartner": "Escribe para buscar…",
       "send": "Enviar enlace",
       "sending": "Enviando…",
       "sent": "Enlace enviado a {email}.",
-      "title": "Enviar enlace de suscripción"
+      "units": "{count} unidades"
     },
-    "newButton": "Enviar enlace de plan",
+    "newButton": "Nueva venta de plan",
     "status": {
       "ACTIVE": "Activo",
       "CANCELLED": "Cancelado",
@@ -315,7 +317,6 @@
       "PAST_DUE": "Vencido",
       "PENDING": "Esperando pago"
     },
-    "subtitle": "Suscripciones de socios, con el ciclo vigente y cuántas veces han renovado.",
     "table": {
       "allowanceValue": "{count} activaciones",
       "amount": "Último importe",
@@ -329,7 +330,7 @@
       "since": "Desde",
       "status": "Estado"
     },
-    "title": "Contratos"
+    "title": "Ventas de planes B2B"
   },
   "Cookies": {
     "acceptAll": "OK, acepto toda esta palabrería legal",
@@ -760,7 +761,6 @@
       "syncing": "Sincronizando…",
       "title": "Stripe"
     },
-    "subtitle": "Lo que una funeraria contrata — una franquicia anual de activaciones, no inventario de códigos.",
     "sync": {
       "unpriced": "Sin precio",
       "none": "Sin sincronizar",
@@ -778,7 +778,7 @@
       "contracts": "Contratos",
       "empty": "Aún no hay planes."
     },
-    "title": "Planes de socio",
+    "title": "Planes B2B",
     "toasts": {
       "synced": "Plan sincronizado con Stripe.",
       "deactivated": "Plan desactivado.",
@@ -989,13 +989,13 @@
     },
     "items": {
       "companyData": "Datos de la Empresa",
-      "contracts": "Contratos",
+      "contracts": "Ventas de planes B2B",
       "customers": "Clientes",
       "dashboard": "Panel",
       "discountCoupons": "Cupones de Descuento",
       "extraUnits": "Unidades Extra",
-      "partnerPlans": "Planes de socio",
-      "subscriptions": "Suscripciones (B2C)",
+      "partnerPlans": "Planes B2B",
+      "subscriptions": "Suscripciones B2C",
       "systemUsers": "Usuarios del Sistema"
     }
   },
@@ -1079,7 +1079,7 @@
       "status": "Estado",
       "term": "Duración"
     },
-    "title": "Suscripciones (B2C)",
+    "title": "Suscripciones B2C",
     "toasts": {
       "deactivated": "Suscripción desactivada.",
       "deleteConfirm": "La suscripción \"{name}\" se eliminará permanentemente.",

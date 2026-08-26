@@ -1,3 +1,5 @@
+import { LOCALE_DISPLAY_ORDER } from "@genealogiq/i18n"
+
 /**
  * The catalogue is priced in three currencies and the active locale picks one.
  *
@@ -27,4 +29,32 @@ export function currencyForLocale(locale: string): AppCurrency {
 /** Uppercase ISO code, as Intl.NumberFormat and Stripe's dashboard want it. */
 export function currencyCode(currency: AppCurrency): string {
   return currency.toUpperCase()
+}
+
+/**
+ * The order the three currencies are shown in, anywhere they appear together.
+ *
+ * DERIVED from the language switcher's own order rather than written out again:
+ * the rule is that money follows the interface, so a second hand-kept list
+ * would be free to drift from the one users actually see. Change
+ * LOCALE_DISPLAY_ORDER and this follows.
+ *
+ * Today that reads United States, Mexico, Brazil — USD, MXN, BRL.
+ */
+export const CURRENCY_DISPLAY_ORDER: readonly AppCurrency[] =
+  LOCALE_DISPLAY_ORDER.map(currencyForLocale)
+
+/** Uppercase codes, for the rows and columns that carry ISO strings. */
+export const CURRENCY_CODE_ORDER: readonly string[] =
+  CURRENCY_DISPLAY_ORDER.map((c) => c.toUpperCase())
+
+/** Sorts anything carrying an uppercase ISO currency code into display order. */
+export function byCurrencyDisplayOrder<T extends { currency: string }>(a: T, b: T): number {
+  const rank = (code: string) => {
+    const i = CURRENCY_CODE_ORDER.indexOf(code.toUpperCase())
+    // An unknown currency sorts last rather than first: a row we do not price
+    // in should never lead the list it appears in.
+    return i === -1 ? CURRENCY_CODE_ORDER.length : i
+  }
+  return rank(a.currency) - rank(b.currency)
 }

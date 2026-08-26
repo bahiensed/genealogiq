@@ -175,8 +175,8 @@ export function SubscriptionForm({
   // synced (USD live, BRL/MXN not set up yet) without that being an error.
   const currencyStatus = [
     { code: 'USD', configured: (defaultValues?.priceUsd ?? 0) > 0, synced: !!stripeAnnualPriceIdUsd && !!stripeMonthlyPriceIdUsd },
-    { code: 'BRL', configured: (defaultValues?.priceBrl ?? 0) > 0, synced: !!stripeAnnualPriceIdBrl && !!stripeMonthlyPriceIdBrl },
     { code: 'MXN', configured: (defaultValues?.priceMxn ?? 0) > 0, synced: !!stripeAnnualPriceIdMxn && !!stripeMonthlyPriceIdMxn },
+    { code: 'BRL', configured: (defaultValues?.priceBrl ?? 0) > 0, synced: !!stripeAnnualPriceIdBrl && !!stripeMonthlyPriceIdBrl },
   ]
 
   async function onSubmit(data: SubscriptionFormValues) {

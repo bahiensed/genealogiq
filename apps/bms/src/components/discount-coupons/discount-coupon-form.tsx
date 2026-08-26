@@ -142,8 +142,8 @@ export function DiscountCouponForm({ packages }: DiscountCouponFormProps) {
         {discountType === 'amount' && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <AmountField control={control} name="amountOffUsd" label="USD" symbol="$" />
-            <AmountField control={control} name="amountOffBrl" label="BRL" symbol="R$" />
             <AmountField control={control} name="amountOffMxn" label="MXN" symbol="MX$" />
+            <AmountField control={control} name="amountOffBrl" label="BRL" symbol="R$" />
           </div>
         )}
 
