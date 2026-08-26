@@ -18,7 +18,6 @@ export default async function PartnerPlansPage() {
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">
             {t('title')}
           </h1>
-          <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
         </div>
         <Button asChild><Link href="/plans/new">{t('newButton')}</Link></Button>
       </div>

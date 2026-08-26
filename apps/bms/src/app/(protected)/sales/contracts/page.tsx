@@ -17,7 +17,6 @@ export default async function ContractsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">{t('title')}</h1>
-          <p className="text-muted-foreground mt-2">{t('subtitle')}</p>
         </div>
         <Button asChild><Link href="/sales/contracts/new">{t('newButton')}</Link></Button>
       </div>

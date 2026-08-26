@@ -315,7 +315,6 @@
       "PAST_DUE": "Vencido",
       "PENDING": "Aguardando pagamento"
     },
-    "subtitle": "Assinaturas de parceiros, com o ciclo vigente e quantas vezes já renovaram.",
     "table": {
       "allowanceValue": "{count} ativações",
       "amount": "Último valor",
@@ -329,7 +328,7 @@
       "since": "Desde",
       "status": "Situação"
     },
-    "title": "Contratos"
+    "title": "Vendas de Planos B2B"
   },
   "Cookies": {
     "acceptAll": "OK, aceito todo esse juridiquês",
@@ -760,7 +759,6 @@
       "syncing": "Sincronizando…",
       "title": "Stripe"
     },
-    "subtitle": "O que uma funerária assina — franquia anual de ativações, não estoque de códigos.",
     "sync": {
       "unpriced": "Sem preço",
       "none": "Não sincronizado",
@@ -778,7 +776,7 @@
       "contracts": "Contratos",
       "empty": "Nenhum plano cadastrado."
     },
-    "title": "Planos de parceiro",
+    "title": "Planos B2B",
     "toasts": {
       "synced": "Plano sincronizado com o Stripe.",
       "deactivated": "Plano desativado.",
@@ -989,13 +987,13 @@
     },
     "items": {
       "companyData": "Dados da Empresa",
-      "contracts": "Contratos",
+      "contracts": "Vendas de Planos B2B",
       "customers": "Clientes",
       "dashboard": "Painel",
       "discountCoupons": "Cupons de Desconto",
       "extraUnits": "Unidades Extras",
-      "partnerPlans": "Planos de parceiro",
-      "subscriptions": "Assinaturas (B2C)",
+      "partnerPlans": "Planos B2B",
+      "subscriptions": "Assinaturas B2C",
       "systemUsers": "Usuários do Sistema"
     }
   },
@@ -1079,7 +1077,7 @@
       "status": "Status",
       "term": "Duração"
     },
-    "title": "Assinaturas (B2C)",
+    "title": "Assinaturas B2C",
     "toasts": {
       "deactivated": "Assinatura desativada.",
       "deleteConfirm": "A assinatura \"{name}\" será excluída permanentemente.",
