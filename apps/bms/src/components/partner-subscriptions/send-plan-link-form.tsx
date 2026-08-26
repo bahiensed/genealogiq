@@ -13,7 +13,7 @@ import { Field, FieldError, FieldLabel } from '@genealogiq/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@genealogiq/ui/select'
 import { SearchableSelect } from '@/components/ui/searchable-select'
 
-export interface LinkTenant { id: string; name: string; tradeName: string; taxId: string }
+export interface LinkTenant { id: string; name: string; taxId: string }
 export interface LinkPlan {
   id: string; name: string; code: string; annualAllowance: number
   currency: string; annualCashAmount: number

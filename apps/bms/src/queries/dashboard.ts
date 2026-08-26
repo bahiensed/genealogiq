@@ -145,10 +145,10 @@ export async function getDashboardStats() {
   const sellers   = sellerIds.length
     ? await prisma.tenant.findMany({
         where:  { id: { in: sellerIds } },
-        select: { id: true, name: true, tradeName: true },
+        select: { id: true, name: true },
       })
     : []
-  const sellerMap = new Map(sellers.map((c) => [c.id, c.tradeName || c.name]))
+  const sellerMap = new Map(sellers.map((c) => [c.id, c.name]))
   const topSellersChart = topSellers.map((s) => ({
     name:    sellerMap.get(s.seller_id) ?? 'Unknown',
     count:   Number(s.count ?? 0),

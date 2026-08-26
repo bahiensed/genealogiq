@@ -135,7 +135,7 @@ export async function getResellerBreakdown(): Promise<ResellerRow[]> {
   }[]>`
     SELECT
       t.id                                                          AS tenant_id,
-      t.trade_name                                                  AS tenant_name,
+      t.name                                                        AS tenant_name,
       COUNT(g.id)                                                   AS issued,
       COUNT(*) FILTER (WHERE g.sold_at IS NOT NULL)                 AS sold,
       COUNT(*) FILTER (WHERE g.status = 'ACTIVATED')                AS activated,
@@ -146,8 +146,8 @@ export async function getResellerBreakdown(): Promise<ResellerRow[]> {
                          AND g.sold_value IS NULL)                  AS value_missing
     FROM gencodes g
     JOIN tenants  t ON g.tenant_id = t.id
-    GROUP BY t.id, t.trade_name
-    ORDER BY COUNT(g.id) DESC, t.trade_name ASC
+    GROUP BY t.id, t.name
+    ORDER BY COUNT(g.id) DESC, t.name ASC
   `
 
   return rows.map((r) => ({
@@ -257,7 +257,7 @@ export async function getSellThrough(): Promise<SellThroughRow[]> {
   }[]>`
     SELECT
       t.id                                                                 AS tenant_id,
-      t.trade_name                                                         AS tenant_name,
+      t.name                                                               AS tenant_name,
       COALESCE(SUM(x.quantity) FILTER (WHERE x.type = 'GRANT'), 0)         AS granted,
       COALESCE(SUM(x.quantity) FILTER (WHERE x.type = 'CONSUME'), 0)       AS consumed,
       (SELECT PERCENTILE_CONT(0.5) WITHIN GROUP (
@@ -267,7 +267,7 @@ export async function getSellThrough(): Promise<SellThroughRow[]> {
       )                                                                    AS median_lag
     FROM tenants t
     LEFT JOIN credit_transactions x ON x.tenant_id = t.id
-    GROUP BY t.id, t.trade_name
+    GROUP BY t.id, t.name
     HAVING COALESCE(SUM(x.quantity) FILTER (WHERE x.type = 'GRANT'), 0) > 0
     ORDER BY 3 DESC
   `

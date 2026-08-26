@@ -108,10 +108,10 @@ async function checkLedgerAgainstCounters(findings: Finding[]): Promise<void> {
  */
 async function checkStockAgainstBalance(findings: Finding[]): Promise<void> {
   const rows = await prisma.$queryRaw<{
-    tenant_id: string; trade_name: string; stock: number; balance: number
+    tenant_id: string; name: string; stock: number; balance: number
   }[]>`
     SELECT t.id AS tenant_id,
-           t.trade_name,
+           t.name,
            (SELECT COUNT(*) FROM gencodes g
              WHERE g.tenant_id = t.id AND g.status IN ('AVAILABLE','SOLD'))          AS stock,
            (SELECT COALESCE(SUM(cg.remaining_qty), 0) FROM credit_grants cg
@@ -125,7 +125,7 @@ async function checkStockAgainstBalance(findings: Finding[]): Promise<void> {
       findings.push({
         check:    'stock-exceeds-balance',
         severity: 'critical',
-        subject:  row.trade_name,
+        subject:  row.name,
         detail:   `${row.stock} unactivated codes against ${row.balance} credits — ${Number(row.stock) - Number(row.balance)} plaque(s) cannot be activated.`,
       })
     }

@@ -19,7 +19,7 @@ export async function getPartnerSubscriptions() {
       id: true, status: true, autoRenew: true, createdAt: true,
       founderRolloverEligible: true, founderRolloverUsed: true,
       stripeSubscriptionId: true,
-      tenant: { select: { id: true, name: true, tradeName: true } },
+      tenant: { select: { id: true, name: true } },
       plan:   { select: { id: true, name: true, code: true, annualAllowance: true } },
       currentCycle: {
         select: { id: true, startAt: true, endAt: true, graceEndAt: true, status: true, priceSnapshot: true },
@@ -55,7 +55,7 @@ export async function getPartnerSubscription(id: string) {
       id: true, status: true, autoRenew: true, createdAt: true,
       founderRolloverEligible: true, founderRolloverUsed: true,
       stripeSubscriptionId: true, stripeCustomerId: true,
-      tenant: { select: { id: true, name: true, tradeName: true, email: true } },
+      tenant: { select: { id: true, name: true, email: true } },
       plan:   { select: { id: true, name: true, code: true, annualAllowance: true } },
       cycles: {
         select: {

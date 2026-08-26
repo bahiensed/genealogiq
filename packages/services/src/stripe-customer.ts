@@ -23,7 +23,7 @@ import { stripe } from './stripe'
 export async function ensureTenantStripeCustomer(tenantId: string): Promise<string> {
   const tenant = await prisma.tenant.findUnique({
     where:  { id: tenantId },
-    select: { stripeCustomerId: true, email: true, tradeName: true, name: true },
+    select: { stripeCustomerId: true, email: true, name: true },
   })
   if (!tenant) throw new Error('Tenant not found')
 
@@ -33,7 +33,7 @@ export async function ensureTenantStripeCustomer(tenantId: string): Promise<stri
 
   const customer = await stripe.customers.create({
     email:    tenant.email,
-    name:     tenant.tradeName || tenant.name,
+    name:     tenant.name,
     metadata: { tenantId },
   })
 

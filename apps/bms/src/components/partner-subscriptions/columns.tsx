@@ -15,7 +15,7 @@ export interface ContractRow {
   amountPaid: number | null
   currency: string | null
   cadence: string | null
-  tenant: { id: string; name: string; tradeName: string }
+  tenant: { id: string; name: string }
   plan: { id: string; name: string; code: string; annualAllowance: number }
   currentCycle: { id: string; startAt: Date; endAt: Date; graceEndAt: Date; status: string } | null
   _count: { cycles: number }
@@ -32,11 +32,11 @@ export function getColumns(t: Translator, locale: string): ColumnDef<ContractRow
   return [
     {
       id: 'tenant',
-      accessorFn: (r) => r.tenant.tradeName || r.tenant.name,
+      accessorFn: (r) => r.tenant.name,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.partner')} />,
       cell: ({ row }) => (
         <Link href={`/sales/contracts/${row.original.id}`} className="underline-offset-4 hover:underline">
-          {row.original.tenant.tradeName || row.original.tenant.name}
+          {row.original.tenant.name}
         </Link>
       ),
     },
