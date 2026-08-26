@@ -307,7 +307,7 @@
       "send": "Enviar link",
       "sending": "Enviando…",
       "sent": "Link enviado para {email}.",
-      "units": "{count} unidades"
+      "units": "{count} GenCodes"
     },
     "newButton": "Nova venda de plano",
     "status": {
@@ -318,7 +318,7 @@
       "PENDING": "Aguardando pagamento"
     },
     "table": {
-      "allowanceValue": "{count} ativações",
+      "allowanceValue": "{count} GenCodes",
       "amount": "Último valor",
       "cycle": "Ciclo vigente",
       "empty": "Nenhum contrato ainda.",
@@ -745,7 +745,7 @@
       "trialMonths": "Trial na ativação (meses)",
       "trialMonthsHint": "0 desliga o trial.",
       "trialPlanCode": "Plano do trial",
-      "unitRef": "Por ativação ({currency}, franquia {allowance})"
+      "unitRef": "Por GenCode ({currency}, franquia {allowance})"
     },
     "newButton": "Novo plano",
     "status": {
@@ -772,7 +772,7 @@
       "allowance": "Franquia",
       "cash": "À vista",
       "installments": "Parcelado",
-      "perActivation": "Por ativação",
+      "perGenCode": "Por GenCode",
       "stripe": "Stripe",
       "status": "Situação",
       "contracts": "Contratos",

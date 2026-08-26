@@ -199,17 +199,17 @@
     }
   },
   "Credits": {
-    "available": "Ativações disponíveis",
+    "available": "GenCodes disponíveis",
     "committedNote": "Mais {count} reservada(s) para famílias que já compraram.",
     "contract": "Contrato",
     "cycleEnds": "Ciclo termina em {date}",
     "memorialsSafe": "Memoriais já ativados continuam no ar, independentemente do contrato.",
     "nextExpiry": "Próxima expiração",
     "noContract": "Nenhum contrato ativo.",
-    "rolloverFounder": "Garantia de lançamento: {count} ativação(ões) seriam transferidas, uma única vez.",
-    "rolloverProjected": "Renovando hoje, {count} ativação(ões) seriam transferidas.",
+    "rolloverFounder": "Garantia de lançamento: {count} GenCode(s) seriam transferidos, uma única vez.",
+    "rolloverProjected": "Renovando hoje, {count} GenCode(s) seriam transferidos.",
     "sellThrough": "Aproveitamento",
-    "sellThroughDetail": "{consumed} de {granted} ativações usadas",
+    "sellThroughDetail": "{consumed} de {granted} GenCodes usados",
     "source": {
       "ANNUAL": "Franquia do ciclo",
       "BONUS": "Bônus",
@@ -734,7 +734,7 @@
       "monthlyHint": "{price} por mês, por {count} meses. Os GenCodes ficam disponíveis já no primeiro pagamento."
     },
     "card": {
-      "allowance": "Até {count} ativações por ciclo",
+      "allowance": "Até {count} GenCodes por ciclo",
       "cash": "À vista",
       "installments": "Em {count} parcelas",
       "perGenCode": "{amount} por GenCode",
