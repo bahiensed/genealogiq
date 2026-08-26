@@ -3,10 +3,20 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./gencode-fulfilment": "./src/gencode-fulfilment.ts",
+    "./activation-trial": "./src/activation-trial.ts",
+    "./credits": "./src/credits.ts",
+    "./partner-billing": "./src/partner-billing.ts",
+    "./partner-checkout": "./src/partner-checkout.ts",
+    "./partner-lifecycle": "./src/partner-lifecycle.ts",
+    "./partner-notifications": "./src/partner-notifications.ts",
+    "./plan-sync": "./src/plan-sync.ts",
     "./rate-limit": "./src/rate-limit.ts",
+    "./reconciliation": "./src/reconciliation.ts",
+    "./rollover": "./src/rollover.ts",
+    "./storage-usage": "./src/storage-usage.ts",
     "./stripe": "./src/stripe.ts",
-    "./stripe-customer": "./src/stripe-customer.ts"
+    "./stripe-customer": "./src/stripe-customer.ts",
+    "./subscription-price": "./src/subscription-price.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
@@ -15,7 +25,9 @@
     "@genealogiq/core": "workspace:*",
     "@genealogiq/db": "workspace:*",
     "server-only": "^0.0.1",
-    "stripe": "^22.5.0"
+    "stripe": "^22.5.0",
+    "@genealogiq/email": "workspace:*",
+    "@vercel/blob": "^2.8.0"
   },
   "peerDependencies": {
     "next": "16.3.1"
