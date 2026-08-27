@@ -14,7 +14,6 @@ export function CustomersDataTable({ data }: CustomersDataTableProps) {
 
   const columnLabels: Record<string, string> = {
     name:      t('table.name'),
-    category:  t('table.category'),
     email:     t('table.email'),
     isActive:  t('table.status'),
     createdAt: t('table.createdAt'),

@@ -379,7 +379,6 @@
     },
     "stepsLabel": "Pasos del formulario",
     "table": {
-      "category": "Categoría",
       "createdAt": "Creado el",
       "email": "Correo electrónico",
       "empty": "No se encontraron clientes",

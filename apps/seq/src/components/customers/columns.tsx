@@ -17,7 +17,6 @@ export type CustomerRow = {
   email: string | null
   isActive: boolean
   createdAt: Date
-  category: { id: string; name: string } | null
 }
 
 function ActionsCell({ row, t }: { row: { original: CustomerRow }; t: Translator }) {
@@ -63,12 +62,6 @@ export function getColumns(t: Translator, locale: string): ColumnDef<CustomerRow
       accessorFn: (row) => `${row.firstName} ${row.lastName}`,
       header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.name')} />,
       cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
-    },
-    {
-      id: 'category',
-      accessorFn: (row) => row.category?.name ?? '',
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t('table.category')} />,
-      cell: ({ row }) => row.original.category?.name ?? '—',
     },
     {
       accessorKey: 'email',

@@ -379,7 +379,6 @@
     },
     "stepsLabel": "Form steps",
     "table": {
-      "category": "Category",
       "createdAt": "Created at",
       "email": "E-mail",
       "empty": "No customers found",
