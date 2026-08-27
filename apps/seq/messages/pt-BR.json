@@ -335,10 +335,10 @@
       "addressOptional": "O endereço é opcional e pode ser preenchido depois."
     },
     "memorialized": {
-      "acquiredQrCodesLabel": "QR Codes adquiridos\npor esse cliente",
-      "availableProfilesLabel": "Perfis memorializados\nainda disponíveis",
-      "createdProfilesLabel": "Perfis memorializados\njá criados pelo cliente",
-      "title": "Perfis memorializados"
+      "acquiredQrCodesLabel": "GenCodes adquiridos\npor esse cliente",
+      "availableProfilesLabel": "Memoriais\nainda disponíveis",
+      "createdProfilesLabel": "Memoriais\njá criados por esse cliente",
+      "title": "Memoriais"
     },
     "new": "Novo cliente",
     "placeholders": {

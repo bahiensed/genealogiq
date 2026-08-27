@@ -335,10 +335,10 @@
       "addressOptional": "Address is optional and can be filled in later."
     },
     "memorialized": {
-      "acquiredQrCodesLabel": "QR Codes acquired\nby this customer",
-      "availableProfilesLabel": "Memorialized profiles\nstill available",
-      "createdProfilesLabel": "Memorialized profiles\nalready created by the customer",
-      "title": "Memorialized Profiles"
+      "acquiredQrCodesLabel": "GenCodes acquired\nby this customer",
+      "availableProfilesLabel": "Memorials\nstill available",
+      "createdProfilesLabel": "Memorials\nalready created by this customer",
+      "title": "Memorials"
     },
     "new": "New customer",
     "placeholders": {
