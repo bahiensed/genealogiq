@@ -26,9 +26,8 @@ export async function getCustomers() {
       email:     true,
       isActive:  true,
       createdAt: true,
-      category:  { select: { id: true, name: true } },
     },
-    orderBy: { createdAt: 'asc' },
+    orderBy: [{ firstName: 'asc' }, { lastName: 'asc' }],
   })
 }
 

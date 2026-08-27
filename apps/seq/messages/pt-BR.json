@@ -379,7 +379,6 @@
     },
     "stepsLabel": "Etapas do formulário",
     "table": {
-      "category": "Categoria",
       "createdAt": "Criado em",
       "email": "E-mail",
       "empty": "Nenhum cliente encontrado",
@@ -738,7 +737,7 @@
         "requestedAt": "Solicitado em",
         "status": "Status"
       },
-      "title": "Pedidos de compras"
+      "title": "Histórico de aquisições"
     },
     "physical": {
       "subtitle": "Compre GenCodes para imprimir em suas placas memoriais e revendê-los aos seus próprios clientes",
