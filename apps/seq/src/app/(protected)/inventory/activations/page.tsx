@@ -1,10 +1,7 @@
-import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { getLicenses, getLicenseSummary } from '@/queries/licenses'
 import { LicensesDataTable } from '@/components/licenses/licenses-data-table'
-import { LicensesCsvButton } from '@/components/licenses/licenses-csv-button'
 import { StatCard } from '@/components/ui/stat-card'
-import { Button } from '@genealogiq/ui/button'
 import { Separator } from '@genealogiq/ui/separator'
 
 export default async function LicensesPage({
@@ -21,21 +18,14 @@ export default async function LicensesPage({
     getLicenseSummary(),
   ])
 
-  const appUrl = process.env.APP_URL ?? 'https://genealogiq.app'
   const t = await getTranslations('Licenses')
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div>
         <h1 className="scroll-m-20 text-4xl font-semibold tracking-tight text-balance">
           {t('title')}
         </h1>
-        <div className="flex items-center gap-2">
-          <LicensesCsvButton licenses={licenses} appUrl={appUrl} />
-          <Button asChild>
-            <Link href="/purchasing/plans">{t('buy')}</Link>
-          </Button>
-        </div>
       </div>
 
       {/* Summary */}
@@ -48,7 +38,7 @@ export default async function LicensesPage({
       <Separator />
 
       {/* Licenses (one row per printable QR code) */}
-      <LicensesDataTable data={licenses} appUrl={appUrl} />
+      <LicensesDataTable data={licenses} />
     </div>
   )
 }

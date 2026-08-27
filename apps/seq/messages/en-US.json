@@ -525,11 +525,6 @@
     }
   },
   "Licenses": {
-    "actions": {
-      "copyUrl": "Copy URL",
-      "exportCsv": "Export CSV"
-    },
-    "buy": "Buy physical QR Codes",
     "soldVia": {
       "MANUAL": "Manual",
       "PLATFORM": "Platform"
@@ -550,8 +545,7 @@
       "empty": "No QR Codes found",
       "memorial": "Memorial",
       "soldTo": "Sold to",
-      "status": "Status",
-      "url": "URL"
+      "status": "Status"
     },
     "title": "My GenCodes"
   },
@@ -766,7 +760,7 @@
       "customers": "Customers",
       "dashboard": "Dashboard",
       "employees": "Employees",
-      "myGenCodes": "My codes"
+      "myGenCodes": "My GenCodes"
     }
   },
   "SupplierCategories": {
