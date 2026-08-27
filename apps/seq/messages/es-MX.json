@@ -530,6 +530,19 @@
       "exportCsv": "Exportar CSV"
     },
     "buy": "Comprar QR Codes físicos",
+    "pendingOrders": {
+      "allowance": "Hasta {count} GenCodes por ciclo",
+      "status": {
+        "expired": "Enlace de pago vencido",
+        "pending": "Esperando pago"
+      },
+      "table": {
+        "plan": "Plan",
+        "since": "Solicitado el",
+        "status": "Estado"
+      },
+      "title": "Pedidos de compra pendientes"
+    },
     "soldVia": {
       "MANUAL": "Manual",
       "PLATFORM": "Plataforma"
@@ -540,16 +553,15 @@
       "SOLD": "Vendido"
     },
     "summary": {
-      "activated": "QR Codes ya activados\npor el consumidor final",
-      "available": "QR Codes disponibles\npara impresión",
-      "printed": "QR Codes ya impresos",
-      "sold": "QR Codes vendidos"
+      "activated": "GenCodes ya activados\npor el consumidor final",
+      "available": "GenCodes disponibles\npara venta B2C",
+      "sold": "GenCodes ya vendidos\nal consumidor final"
     },
     "table": {
+      "activated": "Activado",
       "code": "Código",
       "empty": "No se encontraron QR Codes",
       "memorial": "Memorial",
-      "printed": "Impreso",
       "soldTo": "Vendido a",
       "status": "Estado",
       "url": "URL"
