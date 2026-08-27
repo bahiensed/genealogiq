@@ -2,8 +2,11 @@ import { getLocale, getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import { verifyTenantSession } from '@/lib/dal'
 import { currencyForLocale } from '@genealogiq/core'
+import { getPlanOrders } from '@/queries/purchasing'
 import { PlanStore, type StorePlan } from '@/components/purchasing/plan-store'
+import { PlanOrdersTable } from '@/components/purchasing/plan-orders-table'
 import { PurchaseStatusToast } from '@/components/purchasing/purchase-status-toast'
+import { Separator } from '@genealogiq/ui/separator'
 
 export default async function PurchasingPlansPage() {
   await verifyTenantSession()
@@ -14,24 +17,27 @@ export default async function PurchasingPlansPage() {
   // charge for would fail at checkout with nothing to bill.
   const currency = currencyForLocale(await getLocale()).toUpperCase()
 
-  const rows = await prisma.partnerPlan.findMany({
-    where: {
-      isActive: true,
-      prices: { some: { isActive: true, effectiveTo: null, currency, stripeCashPriceId: { not: null } } },
-    },
-    select: {
-      id: true, name: true, code: true, annualAllowance: true,
-      prices: {
-        where:  { isActive: true, effectiveTo: null, currency },
-        select: {
-          currency: true, annualCashAmount: true, unitReferenceAmount: true,
-          installmentCount: true, installmentAmount: true, stripeInstallmentPriceId: true,
-        },
-        take: 1,
+  const [rows, orders] = await Promise.all([
+    prisma.partnerPlan.findMany({
+      where: {
+        isActive: true,
+        prices: { some: { isActive: true, effectiveTo: null, currency, stripeCashPriceId: { not: null } } },
       },
-    },
-    orderBy: { annualAllowance: 'asc' },
-  })
+      select: {
+        id: true, name: true, code: true, annualAllowance: true,
+        prices: {
+          where:  { isActive: true, effectiveTo: null, currency },
+          select: {
+            currency: true, annualCashAmount: true, unitReferenceAmount: true,
+            installmentCount: true, installmentAmount: true, stripeInstallmentPriceId: true,
+          },
+          take: 1,
+        },
+      },
+      orderBy: { annualAllowance: 'asc' },
+    }),
+    getPlanOrders(),
+  ])
 
   const plans: StorePlan[] = rows.flatMap((r) => {
     const p = r.prices[0]
@@ -55,6 +61,13 @@ export default async function PurchasingPlansPage() {
         <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">{t('title')}</h1>
       </div>
       <PlanStore plans={plans} />
+
+      <Separator />
+
+      <div>
+        <h2 className="scroll-m-20 text-4xl font-extrabold tracking-tight text-balance">{t('ordersTable.title')}</h2>
+      </div>
+      <PlanOrdersTable orders={orders} />
     </div>
   )
 }

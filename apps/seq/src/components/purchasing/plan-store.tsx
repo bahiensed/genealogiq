@@ -43,7 +43,10 @@ function PlanCard({ plan }: { plan: StorePlan }) {
   const router = useRouter()
   const t = useTranslations('Purchasing')
   const locale = useLocale()
-  const [cadence, setCadence] = useState<'cash' | 'installment'>('cash')
+  const offersInstalments = plan.installmentCount != null && plan.installmentAmount != null
+  // Instalments lead by default — it is the lower-commitment option, and the
+  // cash price is called out as the cheaper one right on its own button.
+  const [cadence, setCadence] = useState<'cash' | 'installment'>(offersInstalments ? 'installment' : 'cash')
   const [isPending, startTransition] = useTransition()
 
   // Formatted in the plan's OWN currency, never a fixed one. The price book is
@@ -51,7 +54,6 @@ function PlanCard({ plan }: { plan: StorePlan }) {
   // previous store hardcoded dollars, which showed a Brazilian partner a
   // dollar sign over an amount in reais.
   const money = new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency })
-  const offersInstalments = plan.installmentCount != null && plan.installmentAmount != null
 
   function handleBuy() {
     startTransition(async () => {
@@ -70,12 +72,22 @@ function PlanCard({ plan }: { plan: StorePlan }) {
 
       <CardContent className="flex flex-1 flex-col gap-4">
         <div>
-          <p className="text-3xl font-bold">{money.format(plan.annualCashAmount)}</p>
-          <p className="text-sm text-muted-foreground">{t('card.perCycle')}</p>
-          {plan.unitReferenceAmount !== null && (
-            <p className="text-xs text-muted-foreground mt-1">
-              {t('card.perGenCode', { amount: money.format(plan.unitReferenceAmount) })}
+          {cadence === 'installment' && offersInstalments ? (
+            <p className="text-3xl font-bold">
+              {t('card.installmentPrice', {
+                count:  plan.installmentCount!,
+                amount: money.format(plan.installmentAmount!),
+              })}
             </p>
+          ) : (
+            <>
+              <p className="text-3xl font-bold">{money.format(plan.annualCashAmount)}</p>
+              {plan.unitReferenceAmount !== null && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('card.perGenCode', { amount: money.format(plan.unitReferenceAmount) })}
+                </p>
+              )}
+            </>
           )}
         </div>
 
@@ -83,14 +95,6 @@ function PlanCard({ plan }: { plan: StorePlan }) {
 
         {offersInstalments && (
           <div className="flex flex-col gap-2 mt-auto">
-            <button
-              type="button"
-              onClick={() => setCadence('cash')}
-              className={`rounded-md border px-3 py-2 text-left text-sm ${cadence === 'cash' ? 'border-primary bg-primary/5' : ''}`}
-            >
-              <span className="font-medium">{t('card.cash')}</span>
-              <span className="block text-muted-foreground">{money.format(plan.annualCashAmount)}</span>
-            </button>
             <button
               type="button"
               onClick={() => setCadence('installment')}
@@ -102,6 +106,15 @@ function PlanCard({ plan }: { plan: StorePlan }) {
               <span className="block text-muted-foreground">
                 {money.format(plan.installmentAmount!)} {t('card.perMonth')}
               </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCadence('cash')}
+              className={`rounded-md border px-3 py-2 text-left text-sm ${cadence === 'cash' ? 'border-primary bg-primary/5' : ''}`}
+            >
+              <span className="font-medium">{t('card.cash')}</span>
+              <span className="block text-muted-foreground">{money.format(plan.annualCashAmount)}</span>
+              <span className="block text-xs text-muted-foreground">{t('card.bestValue')}</span>
             </button>
           </div>
         )}
