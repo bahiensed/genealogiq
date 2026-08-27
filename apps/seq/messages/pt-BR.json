@@ -530,19 +530,6 @@
       "exportCsv": "Exportar CSV"
     },
     "buy": "Comprar QR Codes físicos",
-    "pendingOrders": {
-      "allowance": "Até {count} GenCodes por ciclo",
-      "status": {
-        "expired": "Link de pagamento expirado",
-        "pending": "Aguardando pagamento"
-      },
-      "table": {
-        "plan": "Plano",
-        "since": "Solicitado em",
-        "status": "Status"
-      },
-      "title": "Pedidos de compra pendentes"
-    },
     "soldVia": {
       "MANUAL": "Manual",
       "PLATFORM": "Plataforma"
@@ -740,6 +727,24 @@
     },
     "empty": {
       "plans": "Nenhum plano disponível na sua moeda no momento."
+    },
+    "ordersTable": {
+      "empty": "Nenhum pedido de compra ainda.",
+      "status": {
+        "active": "Ativo em {date}",
+        "cancelled": "Cancelado",
+        "expired": "Expirado",
+        "linkExpired": "Link de pagamento expirado",
+        "pastDue": "Vencido",
+        "pending": "Aguardando pagamento"
+      },
+      "table": {
+        "dueDate": "Vencimento",
+        "plan": "Plano",
+        "requestedAt": "Solicitado em",
+        "status": "Status"
+      },
+      "title": "Pedidos de compras"
     },
     "physical": {
       "subtitle": "Compre GenCodes para imprimir em suas placas memoriais e revendê-los aos seus próprios clientes",

@@ -530,19 +530,6 @@
       "exportCsv": "Export CSV"
     },
     "buy": "Buy physical QR Codes",
-    "pendingOrders": {
-      "allowance": "Up to {count} GenCodes per cycle",
-      "status": {
-        "expired": "Payment link expired",
-        "pending": "Awaiting payment"
-      },
-      "table": {
-        "plan": "Plan",
-        "since": "Requested on",
-        "status": "Status"
-      },
-      "title": "Pending purchase orders"
-    },
     "soldVia": {
       "MANUAL": "Manual",
       "PLATFORM": "Platform"
@@ -740,6 +727,24 @@
     },
     "empty": {
       "plans": "No plan is available in your currency right now."
+    },
+    "ordersTable": {
+      "empty": "No purchase orders yet.",
+      "status": {
+        "active": "Active since {date}",
+        "cancelled": "Cancelled",
+        "expired": "Expired",
+        "linkExpired": "Payment link expired",
+        "pastDue": "Past due",
+        "pending": "Awaiting payment"
+      },
+      "table": {
+        "dueDate": "Due date",
+        "plan": "Plan",
+        "requestedAt": "Requested on",
+        "status": "Status"
+      },
+      "title": "Purchase orders"
     },
     "physical": {
       "subtitle": "Purchase GenCodes to print on your memorial plates and resell them to your very own customers",
