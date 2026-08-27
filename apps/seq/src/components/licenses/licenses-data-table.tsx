@@ -6,17 +6,15 @@ import { buildLicenseColumns } from './columns'
 import type { LicenseRow } from '@/queries/licenses'
 
 interface LicensesDataTableProps {
-  data:   LicenseRow[]
-  appUrl: string
+  data: LicenseRow[]
 }
 
-export function LicensesDataTable({ data, appUrl }: LicensesDataTableProps) {
+export function LicensesDataTable({ data }: LicensesDataTableProps) {
   const t = useTranslations('Licenses')
   const locale = useLocale()
 
   const columnLabels: Record<string, string> = {
     genCode:   t('table.code'),
-    url:       t('table.url'),
     status:    t('table.status'),
     soldTo:    t('table.soldTo'),
     activated: t('table.activated'),
@@ -25,7 +23,7 @@ export function LicensesDataTable({ data, appUrl }: LicensesDataTableProps) {
 
   return (
     <DataTable
-      columns={buildLicenseColumns(appUrl, t, locale)}
+      columns={buildLicenseColumns(t, locale)}
       data={data}
       filterColumn="genCode"
       emptyMessage={t('table.empty')}
