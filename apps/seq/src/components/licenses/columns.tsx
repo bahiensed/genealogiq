@@ -78,18 +78,6 @@ export function buildLicenseColumns(appUrl: string, t: Translator, locale: strin
       },
     },
     {
-      id: 'printed',
-      header: () => t('table.printed'),
-      cell: ({ row }) =>
-        row.original.printedAt ? (
-          <span className="inline-flex items-center gap-1 text-blue-600">
-            <Check className="h-3.5 w-3.5" /> {formatDate(row.original.printedAt, locale)}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        ),
-    },
-    {
       id: 'soldTo',
       header: () => t('table.soldTo'),
       cell: ({ row }) => {
@@ -103,6 +91,18 @@ export function buildLicenseColumns(appUrl: string, t: Translator, locale: strin
           </span>
         )
       },
+    },
+    {
+      id: 'activated',
+      header: () => t('table.activated'),
+      cell: ({ row }) =>
+        row.original.activatedAt ? (
+          <span className="inline-flex items-center gap-1 text-green-600">
+            <Check className="h-3.5 w-3.5" /> {formatDate(row.original.activatedAt, locale)}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
     },
     {
       id: 'memorial',

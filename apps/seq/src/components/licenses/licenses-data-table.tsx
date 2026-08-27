@@ -15,12 +15,12 @@ export function LicensesDataTable({ data, appUrl }: LicensesDataTableProps) {
   const locale = useLocale()
 
   const columnLabels: Record<string, string> = {
-    genCode:  t('table.code'),
-    url:      t('table.url'),
-    status:   t('table.status'),
-    printed:  t('table.printed'),
-    soldTo:   t('table.soldTo'),
-    memorial: t('table.memorial'),
+    genCode:   t('table.code'),
+    url:       t('table.url'),
+    status:    t('table.status'),
+    soldTo:    t('table.soldTo'),
+    activated: t('table.activated'),
+    memorial:  t('table.memorial'),
   }
 
   return (
