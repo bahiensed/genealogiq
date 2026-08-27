@@ -80,15 +80,19 @@ function PlanCard({ plan }: { plan: StorePlan }) {
               })}
             </p>
           ) : (
-            <>
-              <p className="text-3xl font-bold">{money.format(plan.annualCashAmount)}</p>
-              {plan.unitReferenceAmount !== null && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t('card.perGenCode', { amount: money.format(plan.unitReferenceAmount) })}
-                </p>
-              )}
-            </>
+            <p className="text-3xl font-bold">{money.format(plan.annualCashAmount)}</p>
           )}
+          {/* Reserves the line's height even when hidden, so switching cadence
+              never resizes the card — invisible rather than unmounted. */}
+          <p
+            className={`text-xs text-muted-foreground mt-1 ${
+              cadence === 'cash' && plan.unitReferenceAmount !== null ? '' : 'invisible'
+            }`}
+          >
+            {plan.unitReferenceAmount !== null
+              ? t('card.perGenCode', { amount: money.format(plan.unitReferenceAmount) })
+              : ' '}
+          </p>
         </div>
 
         <Separator />
