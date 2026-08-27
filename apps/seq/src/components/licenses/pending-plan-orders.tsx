@@ -11,22 +11,22 @@ import type { PendingPlanOrder } from '@/queries/licenses'
 export async function PendingPlanOrders({ orders }: { orders: PendingPlanOrder[] }) {
   if (orders.length === 0) return null
 
-  const t = await getTranslations('Licenses.pendingOrders')
+  const t = await getTranslations('Licenses')
   const locale = await getLocale()
   const date = (d: Date) => new Intl.DateTimeFormat(locale, { dateStyle: 'short' }).format(d)
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
+        <CardTitle>{t('pendingOrders.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('table.plan')}</TableHead>
-              <TableHead>{t('table.since')}</TableHead>
-              <TableHead>{t('table.status')}</TableHead>
+              <TableHead>{t('pendingOrders.table.plan')}</TableHead>
+              <TableHead>{t('pendingOrders.table.since')}</TableHead>
+              <TableHead>{t('pendingOrders.table.status')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -35,16 +35,16 @@ export async function PendingPlanOrders({ orders }: { orders: PendingPlanOrder[]
                 <TableCell>
                   <div>{order.plan.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {t('allowance', { count: order.plan.annualAllowance })}
+                    {t('pendingOrders.allowance', { count: order.plan.annualAllowance })}
                   </div>
                 </TableCell>
                 <TableCell className="tabular-nums">{date(order.createdAt)}</TableCell>
                 <TableCell>
                   {order.linkExpired ? (
-                    <Badge variant="destructive">{t('status.expired')}</Badge>
+                    <Badge variant="destructive">{t('pendingOrders.status.expired')}</Badge>
                   ) : (
                     <Badge className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
-                      {t('status.pending')}
+                      {t('pendingOrders.status.pending')}
                     </Badge>
                   )}
                 </TableCell>
