@@ -725,11 +725,12 @@
       "monthlyHint": "{price} a month for {count} months. Your GenCodes are available from the first payment."
     },
     "card": {
-      "allowance": "Up to {count} GenCodes per cycle",
+      "allowance": "Up to {count} GenCodes",
+      "bestValue": "Best value",
       "cash": "Cash",
+      "installmentPrice": "{count}x {amount}",
       "installments": "In {count} instalments",
       "perGenCode": "{amount} per GenCode",
-      "perCycle": "per annual cycle",
       "perMonth": "per month",
       "redirecting": "Redirecting…",
       "subscribe": "Subscribe"
