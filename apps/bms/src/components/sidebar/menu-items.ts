@@ -16,6 +16,8 @@ export interface MenuItem {
   labelKey: string
   url: string
   icon: LucideIcon
+  /** Renders a <SidebarSeparator /> right after this item. */
+  separatorAfter?: boolean
 }
 
 export const main: MenuItem[] = [
@@ -28,7 +30,7 @@ export const system: MenuItem[] = [
 ]
 
 export const products: MenuItem[] = [
-  { labelKey: 'items.partnerPlans',  url: '/plans',             icon: Fingerprint },
+  { labelKey: 'items.partnerPlans',  url: '/plans',             icon: Fingerprint, separatorAfter: true },
   { labelKey: 'items.subscriptions', url: '/subscriptions',     icon: Layers      },
   { labelKey: 'items.extraUnits',    url: '/extra-unit-prices', icon: SquarePlus  },
 ]

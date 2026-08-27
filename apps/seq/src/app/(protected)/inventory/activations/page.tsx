@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
-import { getLicenses, getLicenseSummary } from '@/queries/licenses'
+import { getLicenses, getLicenseSummary, getPendingPlanOrders } from '@/queries/licenses'
 import { LicensesDataTable } from '@/components/licenses/licenses-data-table'
 import { LicensesCsvButton } from '@/components/licenses/licenses-csv-button'
+import { PendingPlanOrders } from '@/components/licenses/pending-plan-orders'
 import { StatCard } from '@/components/ui/stat-card'
 import { Button } from '@genealogiq/ui/button'
 import { Separator } from '@genealogiq/ui/separator'
@@ -16,9 +17,10 @@ export default async function LicensesPage({
   const validStatus =
     status === 'AVAILABLE' || status === 'SOLD' || status === 'ACTIVATED' ? status : undefined
 
-  const [licenses, summary] = await Promise.all([
+  const [licenses, summary, pendingOrders] = await Promise.all([
     getLicenses(validStatus),
     getLicenseSummary(),
+    getPendingPlanOrders(),
   ])
 
   const appUrl = process.env.APP_URL ?? 'https://genealogiq.app'
@@ -38,10 +40,11 @@ export default async function LicensesPage({
         </div>
       </div>
 
+      <PendingPlanOrders orders={pendingOrders} />
+
       {/* Summary */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-4xl">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:max-w-3xl">
         <StatCard label={t('summary.available')} value={summary.available} />
-        <StatCard label={t('summary.printed')} value={summary.printed} valueClassName="text-blue-600" />
         <StatCard label={t('summary.sold')} value={summary.sold} valueClassName="text-amber-600" />
         <StatCard label={t('summary.activated')} value={summary.activated} valueClassName="text-green-600" />
       </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { Fragment } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -7,7 +8,7 @@ import { useTranslations } from 'next-intl'
 import { main, groups } from '@/components/sidebar/menu-items'
 import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@genealogiq/ui/collapsible'
-import { useSidebar, Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@genealogiq/ui/sidebar'
+import { useSidebar, Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarSeparator } from '@genealogiq/ui/sidebar'
 
 export function AppSidebar() {
   const pathname = usePathname()
@@ -74,14 +75,17 @@ export function AppSidebar() {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {group.items.map((item) => (
-                      <SidebarMenuItem key={item.labelKey}>
-                        <SidebarMenuButton asChild isActive={pathname === item.url}>
-                          <Link href={item.url} onClick={closeOnMobileNav}>
-                            <item.icon />
-                            <span>{t(item.labelKey)}</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
+                      <Fragment key={item.labelKey}>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton asChild isActive={pathname === item.url}>
+                            <Link href={item.url} onClick={closeOnMobileNav}>
+                              <item.icon />
+                              <span>{t(item.labelKey)}</span>
+                            </Link>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        {item.separatorAfter && <SidebarSeparator className="my-1" />}
+                      </Fragment>
                     ))}
                   </SidebarMenu>
                 </SidebarGroupContent>

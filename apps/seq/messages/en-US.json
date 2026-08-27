@@ -335,10 +335,10 @@
       "addressOptional": "Address is optional and can be filled in later."
     },
     "memorialized": {
-      "acquiredQrCodesLabel": "QR Codes acquired\nby this customer",
-      "availableProfilesLabel": "Memorialized profiles\nstill available",
-      "createdProfilesLabel": "Memorialized profiles\nalready created by the customer",
-      "title": "Memorialized Profiles"
+      "acquiredQrCodesLabel": "GenCodes acquired\nby this customer",
+      "availableProfilesLabel": "Memorials\nstill available",
+      "createdProfilesLabel": "Memorials\nalready created by this customer",
+      "title": "Memorials"
     },
     "new": "New customer",
     "placeholders": {
@@ -530,6 +530,19 @@
       "exportCsv": "Export CSV"
     },
     "buy": "Buy physical QR Codes",
+    "pendingOrders": {
+      "allowance": "Up to {count} GenCodes per cycle",
+      "status": {
+        "expired": "Payment link expired",
+        "pending": "Awaiting payment"
+      },
+      "table": {
+        "plan": "Plan",
+        "since": "Requested on",
+        "status": "Status"
+      },
+      "title": "Pending purchase orders"
+    },
     "soldVia": {
       "MANUAL": "Manual",
       "PLATFORM": "Platform"
@@ -540,16 +553,15 @@
       "SOLD": "Sold"
     },
     "summary": {
-      "activated": "QR Codes already activated\nby the end consumer",
-      "available": "QR Codes available\nfor printing",
-      "printed": "QR Codes already printed",
-      "sold": "QR Codes sold"
+      "activated": "GenCodes already activated\nby the end consumer",
+      "available": "GenCodes available\nfor B2C sale",
+      "sold": "GenCodes already sold\nto the end consumer"
     },
     "table": {
+      "activated": "Activated",
       "code": "Code",
       "empty": "No QR Codes found",
       "memorial": "Memorial",
-      "printed": "Printed",
       "soldTo": "Sold to",
       "status": "Status",
       "url": "URL"
