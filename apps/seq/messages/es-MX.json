@@ -738,7 +738,7 @@
         "requestedAt": "Solicitado el",
         "status": "Estado"
       },
-      "title": "Pedidos de compra"
+      "title": "Historial de adquisiciones"
     },
     "physical": {
       "subtitle": "Compre GenCodes para imprimir en sus placas memoriales y revenderlos a sus propios clientes",
